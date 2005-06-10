@@ -1,0 +1,35 @@
+(2176|2396)  11:13:18.640000 Repo main
+
+!!! TAO_DDS_DCPSDataWriter_i::update_incompatible_qos () :
+	1 new incompatible DataReaders 1  total
+	Last incompatible QOS policy was 11
+	Policy - 11	count - 1
+
+TAO_DDS_DCPSDataWriter_i::add_associations () :
+	Writer 2 Adding association to 1 readers:
+	Association - 0
+	 reader id - 3
+	 transport_id - -842150451
+
+TAO_DDS_DCPSDataReader_i::add_associations () :
+	Reader 3 Adding association to 1 writers:
+	Association - 0
+	 writer id - 2
+	 transport_id - -842150451
+
+
+!!! TAO_DDS_DCPSDataReader_i::update_incompatible_qos () :
+	1 new incompatible DataWriters 1  total
+	Last incompatible QOS policy was 11
+	Policy - 11	count - 1
+
+TAO_DDS_DCPSDataReader_i::remove_associations () :
+	Removing association to 1 writers:
+	Association - 0
+	 InstanceHandle_t - 2
+
+TAO_DDS_DCPSDataWriter_i::remove_associations () :
+	Removing association to 1 readers:
+	Association - 0
+	 InstanceHandle_t - 3
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.

@@ -1,0 +1,146 @@
+..\..\..\dds\InfoRepo\.\DCPSInfoRepo.EXE -NOBITS -o C:\projects\dds\ACE_wrappers\TAO\DDS\tests\DCPS\LivelinessTest\repo.ior
+.\.\subscriber.EXE -u 0 -w 1 -m 0 -l 3 -i 2  -p localhost:16701 -t 0 
+.\.\publisher.EXE -u 0 -w 1 -m 0 -l 3 -i 2  -p localhost:29803
+(3092|3008)  11:16:10.140000 Repo main
+(3012|2968)  11:16:11.156000 subscriber main
+(3088|3112)  11:16:11.187000 publisher main
+(3012|2968) DataReaderListenerImpl::DataReaderListenerImpl
+(3012|2968) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(3012|2984) DataReaderListenerImpl::on_subscription_match 
+(3012|2968)  11:16:11.234000 waiting for publisher to be ready
+ 11:16:13.234000 (3012|2984) DataReaderListenerImpl::on_liveliness_changed 1
+(3012|2968)  11:16:13.234000 Publisher is ready
+(3012|2968)  11:16:13.234000 waiting for publisher to finish
+(3088|3112) Writer::svc begins.
+ 11:16:13.468000 (3088|3112) Writer::svc starting to write pass 0
+ 11:16:13.468000 (3012|464) DataReaderListenerImpl::on_liveliness_changed 2
+ 11:16:13.468000 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340973 468750000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:13.468000 read foo[0]: x = 1.000000 y = 0.000000, key = 101010
+ 11:16:13.468000 (3088|3112) Writer::svc done writing.
+(3088|3112) Writer::svc finished.
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340973 468750000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:15.468000 (3012|2984) DataReaderListenerImpl::on_liveliness_changed 3
+(3088|3112) Writer::svc begins.
+ 11:16:19.468000 (3088|3112) Writer::svc starting to write pass 1
+ 11:16:19.468000 (3012|464) DataReaderListenerImpl::on_liveliness_changed 4
+ 11:16:19.468000 read foo[0]: x = 0.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340979 468750000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:19.468000 read foo[0]: x = 1.000000 y = -1.000000, key = 101010
+ 11:16:19.468000 (3088|3112) Writer::svc done writing.
+(3088|3112) Writer::svc finished.
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340979 468750000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:21.468000 (3012|2984) DataReaderListenerImpl::on_liveliness_changed 5
+(3088|3112) Writer::svc begins.
+ 11:16:25.468000 (3088|3112) Writer::svc starting to write pass 2
+ 11:16:25.468000 (3012|464) DataReaderListenerImpl::on_liveliness_changed 6
+ 11:16:25.468000 read foo[0]: x = 0.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340985 468750000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:25.484000 read foo[0]: x = 1.000000 y = -2.000000, key = 101010
+ 11:16:25.484000 (3088|3112) Writer::svc done writing.
+(3088|3112) Writer::svc finished.
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340985 484375000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:27.484000 (3012|2984) DataReaderListenerImpl::on_liveliness_changed 7
+(3088|3112) Writer::svc begins.
+ 11:16:31.484000 (3088|3112) Writer::svc starting to write pass 3
+ 11:16:31.484000 (3012|464) DataReaderListenerImpl::on_liveliness_changed 8
+ 11:16:31.484000 read foo[0]: x = 0.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340991 484375000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:16:31.484000 read foo[0]: x = 1.000000 y = -3.000000, key = 101010
+ 11:16:31.484000 (3088|3112) Writer::svc done writing.
+(3088|3112) Writer::svc finished.
+(3088|3112)  11:16:31.484000 waiting for writers to finish
+(3088|3112)  11:16:31.734000 Writers are finished
+(3088|3112)  11:16:31.734000 waiting for readers to finish
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340991 484375000
+  instance_handle: 13c53c8
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(3012|2968)  11:16:31.750000 publisher is finish - cleanup subscriber
+(3012|464) Peer has disconnected.
+**********
+drl_servant.liveliness_changed_count() = 8
+drl_servant.no_writers_generation_count() = 3
+********** use_take=0
+(3012|2968) DataReaderListenerImpl::~DataReaderListenerImpl
+(3088|3112)  11:16:31.984000 Readers are finished
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.
+test PASSED.

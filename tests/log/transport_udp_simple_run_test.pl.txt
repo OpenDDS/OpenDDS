@@ -1,0 +1,9 @@
+.\.\simple_subscriber.EXE -p 1:localhost:10091 -s 2:localhost:10092 
+.\.\simple_publisher.EXE -p 1:localhost:10091 -s 2:localhost:10092 
+(1264|2100) Data has been received:
+(1264|2100) Message: [Hello World!]
+(2508|2584) The transport has confirmed that a sample has been delivered.
+(2508|2584) Transport has detached from SimplePublisher.
+(2508|2584) The transport has been lost.
+(1264|2316) Transport has detached from SimpleSubscriber.
+(1264|2316) The transport has been lost.
