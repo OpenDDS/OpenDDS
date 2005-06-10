@@ -1,0 +1,11 @@
+// -*- MPC -*-
+// $Id$
+
+project : orbsvcslib, dcps_ts_defaults {
+  libs        += TAO_DdsDcps
+  after       += DdsDcps
+
+  includes    += $(DDS_ROOT)
+  idlflags    += -Gdcps -I $(DDS_ROOT)
+  tagchecks   += Dcps
+}
