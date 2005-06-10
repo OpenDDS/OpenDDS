@@ -1,2 +1,0 @@
-ERROR: Cannot Spawn: <.\.\idl_test3.EXE> not found
-ERROR: idl_test1 returned -1
