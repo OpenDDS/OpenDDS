@@ -1,0 +1,517 @@
+.\.\FooTest4.EXE -r 1 -t 0 -m 0 -i 10 
+(2880|2876)  11:14:23.359000 Repo main
+TAO (2880|2876) Loaded default protocol <IIOP_Factory>
+DCPS_IR_Domain::init_built_in_topics()  Initializing Built In Topics for domain 411
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 1228D10 id: 1
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 12596C0
+DCPS_IR_Topic_Description::add_topic Successfully added topic 12597E0
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 12597E0 id: 1
+DCPS_IR_Domain::add_topic Successfully added topic 12597E0 id: 1
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 125AFF8
+DCPS_IR_Topic_Description::add_topic Successfully added topic 125B0C8
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 125B0C8 id: 2
+DCPS_IR_Domain::add_topic Successfully added topic 125B0C8 id: 2
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 125C8E8
+DCPS_IR_Topic_Description::add_topic Successfully added topic 125C980
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 125C980 id: 3
+DCPS_IR_Domain::add_topic Successfully added topic 125C980 id: 3
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 125E1E8
+DCPS_IR_Topic_Description::add_topic Successfully added topic 125E280
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 125E280 id: 4
+DCPS_IR_Domain::add_topic Successfully added topic 125E280 id: 4
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 12597E0 id: 1
+DCPS_IR_Participant::add_publication Participant id 1 added publication 125AB90 id: 1
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 125AB90
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 125B0C8 id: 2
+DCPS_IR_Participant::add_publication Participant id 1 added publication 1262060 id: 2
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 1262060
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 125C980 id: 3
+DCPS_IR_Participant::add_publication Participant id 1 added publication 1264850 id: 3
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 1264850
+DCPS_IR_Domain::find_participant Domain 411 located participant 1228D10 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 125E280 id: 4
+DCPS_IR_Participant::add_publication Participant id 1 added publication 1267080 id: 4
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 1267080
+TAO_DDS_DCPSInfo_i::load_domains Successfully loaded domain 1223FA8 id: 411
+TAO (2880|2876) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (2880|2876) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1900> on 384
+TAO (2880|2876) - Transport_Cache_Manager::bind_i, 0x12e958 -> 0x1267768 Transport[384]
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 126B490 id: 2
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 1277978
+DCPS_IR_Topic_Description::add_topic Successfully added topic 1277AE0
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 1277AE0 id: 5
+DCPS_IR_Domain::add_topic Successfully added topic 1277AE0 id: 5
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 1277AE0 id: 5
+DCPS_IR_Participant::add_subscription Successfully added subscription 12787A0 id: 5
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 12787A0
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 12787A0
+DCPS_IR_Participant::remove_subscription Removed subscription id: 5
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 1277AE0 id: 5
+DCPS_IR_Participant::add_subscription Successfully added subscription 1278480 id: 6
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 1278480
+(2864|2932) Writer::start 
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 6 is not associated with writer 1
+(2864|2932) Reader::start 
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 1278480
+DCPS_IR_Participant::remove_subscription Removed subscription id: 6
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 1277AE0 id: 5
+DCPS_IR_Participant::add_subscription Successfully added subscription 1278738 id: 7
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 1278738
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 390625000
+  instance_handle: 1338b70
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(2864|2932) Writer::start 
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 7 is not associated with writer 1
+(2864|2932) Reader::start1 
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 1278738
+DCPS_IR_Participant::remove_subscription Removed subscription id: 7
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 1277AE0 id: 5
+DCPS_IR_Participant::add_subscription Successfully added subscription 12786D0 id: 8
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 12786D0
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 8
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 7
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 6
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 5
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 4
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 3
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 2
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 1
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 1341fc0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(2864|2932) Writer::start 
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) DataReaderImpl::writer_activity reader 8 is not associated with writer 1
+(2864|2932) Reader::start2 
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 12786D0
+DCPS_IR_Participant::remove_subscription Removed subscription id: 8
+DCPS_IR_Domain::find_participant Domain 411 located participant 126B490 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 1277AE0 id: 5
+DCPS_IR_Topic_Description::remove_topic Removed topic 1277AE0
+DCPS_IR_Domain::remove_topic_description Domain 411 Removed Topic Description 1277978
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 1277AE0 id: 5
+DCPS_IR_Domain::remove_participant Domain 411 removed participant 126B490 id: 2
+"writing" foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+"writing" foo.x = 1.000000 foo.y = 1.000000, foo.key = 101010
+"writing" foo.x = 2.000000 foo.y = 2.000000, foo.key = 101010
+"writing" foo.x = 3.000000 foo.y = 3.000000, foo.key = 101010
+"writing" foo.x = 4.000000 foo.y = 4.000000, foo.key = 101010
+"writing" foo.x = 5.000000 foo.y = 5.000000, foo.key = 101010
+"writing" foo.x = 6.000000 foo.y = 6.000000, foo.key = 101010
+"writing" foo.x = 7.000000 foo.y = 7.000000, foo.key = 101010
+"writing" foo.x = 8.000000 foo.y = 8.000000, foo.key = 101010
+"writing" foo.x = 9.000000 foo.y = 9.000000, foo.key = 101010
+read foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+read foo.x = 1.000000 foo.y = 1.000000, foo.key = 101010
+read foo.x = 2.000000 foo.y = 2.000000, foo.key = 101010
+read foo.x = 3.000000 foo.y = 3.000000, foo.key = 101010
+read foo.x = 4.000000 foo.y = 4.000000, foo.key = 101010
+read foo.x = 5.000000 foo.y = 5.000000, foo.key = 101010
+read foo.x = 6.000000 foo.y = 6.000000, foo.key = 101010
+read foo.x = 7.000000 foo.y = 7.000000, foo.key = 101010
+read foo.x = 8.000000 foo.y = 8.000000, foo.key = 101010
+read foo.x = 9.000000 foo.y = 9.000000, foo.key = 101010
+"writing" foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+"writing" foo.x = 1.000000 foo.y = 1.000000, foo.key = 101010
+"writing" foo.x = 2.000000 foo.y = 2.000000, foo.key = 101010
+"writing" foo.x = 3.000000 foo.y = 3.000000, foo.key = 101010
+"writing" foo.x = 4.000000 foo.y = 4.000000, foo.key = 101010
+"writing" foo.x = 5.000000 foo.y = 5.000000, foo.key = 101010
+"writing" foo.x = 6.000000 foo.y = 6.000000, foo.key = 101010
+"writing" foo.x = 7.000000 foo.y = 7.000000, foo.key = 101010
+"writing" foo.x = 8.000000 foo.y = 8.000000, foo.key = 101010
+"writing" foo.x = 9.000000 foo.y = 9.000000, foo.key = 101010
+read_instance foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+get_key_value: handle = 20193216 foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+read_instance foo.x = 1.000000 foo.y = 1.000000, foo.key = 101010
+read_instance foo.x = 2.000000 foo.y = 2.000000, foo.key = 101010
+read_instance foo.x = 3.000000 foo.y = 3.000000, foo.key = 101010
+read_instance foo.x = 4.000000 foo.y = 4.000000, foo.key = 101010
+read_instance foo.x = 5.000000 foo.y = 5.000000, foo.key = 101010
+read_instance foo.x = 6.000000 foo.y = 6.000000, foo.key = 101010
+read_instance foo.x = 7.000000 foo.y = 7.000000, foo.key = 101010
+read_instance foo.x = 8.000000 foo.y = 8.000000, foo.key = 101010
+read_instance foo.x = 9.000000 foo.y = 9.000000, foo.key = 101010
+"writing" foo.x = 0.000000 foo.y = 0.000000, foo.key = 101010
+"writing" foo.x = 1.000000 foo.y = 1.000000, foo.key = 101010
+"writing" foo.x = 2.000000 foo.y = 2.000000, foo.key = 101010
+"writing" foo.x = 3.000000 foo.y = 3.000000, foo.key = 101010
+"writing" foo.x = 4.000000 foo.y = 4.000000, foo.key = 101010
+"writing" foo.x = 5.000000 foo.y = 5.000000, foo.key = 101010
+"writing" foo.x = 6.000000 foo.y = 6.000000, foo.key = 101010
+"writing" foo.x = 7.000000 foo.y = 7.000000, foo.key = 101010
+"writing" foo.x = 8.000000 foo.y = 8.000000, foo.key = 101010
+"writing" foo.x = 9.000000 foo.y = 9.000000, foo.key = 101010
+foo[0]: x = 0.000000 y = 0.000000, key = 101010
+foo[1]: x = 1.000000 y = 1.000000, key = 101010
+foo[2]: x = 2.000000 y = 2.000000, key = 101010
+foo[3]: x = 3.000000 y = 3.000000, key = 101010
+foo[4]: x = 4.000000 y = 4.000000, key = 101010
+foo[5]: x = 5.000000 y = 5.000000, key = 101010
+foo[6]: x = 6.000000 y = 6.000000, key = 101010
+foo[7]: x = 7.000000 y = 7.000000, key = 101010
+foo[8]: x = 8.000000 y = 8.000000, key = 101010
+foo[9]: x = 9.000000 y = 9.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 9
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 8
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 7
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 6
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 5
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 4
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 3
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 2
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 1
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340864 406250000
+  instance_handle: 134b3e0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+TAO (2880|2876) - Connection_Handler[384]::close_connection_eh, purging entry from cache
+TAO (2880|2876) - Connection_Handler[384]::close_connection_eh, removing from the reactor
+TAO (2880|2876) - Connection_Handler[384]::close_connection_eh, cancel all timers
+TAO (2880|2876) - Connection_Handler[384]::close_connection_eh
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.
