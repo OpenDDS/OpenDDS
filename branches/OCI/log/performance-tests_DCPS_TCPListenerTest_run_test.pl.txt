@@ -1,0 +1,18 @@
+..\..\..\dds\InfoRepo\.\DCPSInfoRepo.EXE -NOBITS -o C:\projects\dds\ACE_wrappers\TAO\DDS\performance-tests\DCPS\TCPListenerTest\repo.ior -d C:\projects\dds\ACE_wrappers\TAO\DDS\performance-tests\DCPS\TCPListenerTest\domain_ids
+.\.\subscriber.EXE -p 1 -i 10 -n 5000 -d 13 -msi 5000 -mxs 5000
+.\.\publisher.EXE -p 1 -n 5000 -d 13 -msi 1000 -mxs 1000
+(2980|2984)  10:26:59.312000 Repo main
+ 2988|2992  10:27:00.421000 publisher main
+ 2996|3000  10:27:00.421000 subscriber main
+(2996|3000) DataReaderListenerImpl::DataReaderListenerImpl
+(2996|3000) DataReaderListenerImpl 0 of 5000 samples received
+ 2988|2992 Writer::start 
+ 2988|3044 Writer::svc begins samples with 8192 floats.
+(2996|3000) DataReaderListenerImpl 0 of 5000 samples received
+ 10:27:03.484000 (2988|3044) Writer::svc starting to write.
+(2996|3000) DataReaderListenerImpl 2700 of 5000 samples received
+(2996|3000) DataReaderListenerImpl 5000 of 5000 samples received
+(2996|3000) Results: [1:5000:5000:5000:13:8192:32776:1765625.000000:353.125000]
+(2996|3028) Peer has disconnected.
+ 2988|3044 Writer::svc finished.
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.

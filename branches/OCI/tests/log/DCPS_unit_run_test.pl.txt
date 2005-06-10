@@ -1,0 +1,2 @@
+(3888|3632)  11:16:51.687000 Repo main
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.
