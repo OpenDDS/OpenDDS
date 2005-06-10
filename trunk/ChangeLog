@@ -1,0 +1,48 @@
+Fri Jun 10 14:40:43 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/Compiler/idl_test1_main/run_test.pl:
+        * tests/DCPS/Compiler/idl_test3_main/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/DcpsIntegration/test.log:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/DCPS/unit/test.log:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          Changed tests to not depend on being under TAO_ROOT.
+          They still depend on ACE_ROOT being defined to locate
+          the PERLACE package.
+
