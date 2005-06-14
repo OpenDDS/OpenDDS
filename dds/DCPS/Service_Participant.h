@@ -12,7 +12,13 @@
 #include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "tao/TAO_Singleton.h"
+
+#if defined TAO_OCI_REV
 #include  "tao/PortableServer/POA.h"
+#else
+#include  "tao/PortableServer/Root_POA.h"
+#endif
+
 #include  "ace/Task.h"
 #include  "ace/Auto_Ptr.h"
 

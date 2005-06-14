@@ -11,6 +11,8 @@
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include  "tao/ORB_Core.h"
 #include  "ace/Arg_Shifter.h"
+#include  "ace/Reactor.h"
+
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"

@@ -1,3 +1,26 @@
+Tue Jun 14 16:31:47 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DdsDcps_pch.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/InfoRepo/DcpsInfo_pch.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/unit/Main.cpp:
+
+          Changed includes to work with the DOC repo.
+
+        * tests/DCPS/DcpsIntegration/test.log:
+        * tests/DCPS/FooTest3_1/pub_id.txt:
+        * tests/DCPS/unit/test.log:
+
+          Removed some log files that got checked in accidently.
+
 Fri Jun 10 14:40:43 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
