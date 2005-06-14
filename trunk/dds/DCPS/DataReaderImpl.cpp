@@ -13,7 +13,8 @@
 #include  "TopicImpl.h"
 #include  "SubscriberImpl.h"
 #include  "BuiltInTopicUtils.h"
-  
+#include  "ace/Reactor.h"
+
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
 #endif /* ! __ACE_INLINE__ */

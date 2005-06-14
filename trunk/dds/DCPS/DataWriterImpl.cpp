@@ -17,6 +17,7 @@
 #include "BuiltInTopicUtils.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
+#include  "ace/Reactor.h"
 
 namespace TAO
 {
