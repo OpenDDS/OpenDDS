@@ -1,3 +1,11 @@
+Wed Jun 15 11:28:42 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Added include of tao/Version.h so can distinguish between DOC
+          and OCI's repos.  This will need to be removed after the DOC's
+          POA changes come into the OCI repo.
+
 Tue Jun 14 16:31:47 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/auto_run_tests.pl:

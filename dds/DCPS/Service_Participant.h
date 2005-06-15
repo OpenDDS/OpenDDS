@@ -13,6 +13,7 @@
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "tao/TAO_Singleton.h"
 
+#include "tao/Version.h"
 #if defined TAO_OCI_REV
 #include  "tao/PortableServer/POA.h"
 #else
