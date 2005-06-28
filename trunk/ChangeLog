@@ -1,3 +1,9 @@
+Tue Jun 28 10:50:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_realease_notes.txt:
+        
+          Add release notes to the repository.
+
 Wed Jun 15 11:28:42 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
