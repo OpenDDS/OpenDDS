@@ -282,6 +282,7 @@ namespace TAO
         
           delete dw_info;
 
+          dw_servant->remove_all_associations();
           dw_servant->cleanup ();
         }
 
