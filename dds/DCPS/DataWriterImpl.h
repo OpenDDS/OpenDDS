@@ -400,6 +400,8 @@ namespace TAO
     virtual int handle_close (ACE_HANDLE,
                               ACE_Reactor_Mask);
 
+    void remove_all_associations();
+
     /// Statistics counter.
     int         data_dropped_count_;
     int         data_delivered_count_;
@@ -487,6 +489,7 @@ namespace TAO
       ACE_Recursive_Thread_Mutex                lock_;
       /// The list of active subscriptions.
       ::DDS::InstanceHandleSeq        subscription_handles_;
+      ReaderIdSeq                     readers_;
 
       /// Status conditions.
       ::DDS::LivelinessLostStatus         liveliness_lost_status_ ;

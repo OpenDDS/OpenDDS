@@ -299,6 +299,10 @@ namespace TAO
           datareader_set_.erase(dr_servant) ;
         }
 
+
+        // Clean up any remaining associations
+        dr_servant->remove_all_associations();
+
         delete dr_info;
 
         dr_servant->cleanup ();

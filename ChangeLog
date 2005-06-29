@@ -1,3 +1,23 @@
+Wed Jun 29 11:16:05 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+          Changed ACE_Message_Block allocator to use an ACE_Thread_Lock
+          The message block's duplicate method was using the same
+          allocator in different threads at the same time.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+          Changed to remove all the associations when
+          DataReader/DataWriter is deleted.
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+          Changed to not send remove assocations call back.
+
 Tue Jun 28 10:50:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_realease_notes.txt:
