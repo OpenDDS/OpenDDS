@@ -1,3 +1,9 @@
+Tue Jun 29 13:54:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_realease_notes.txt:
+        
+          Update test section per fixes and split out of DDS from ocitao repository.
+
 Wed Jun 29 11:16:05 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Definitions.h:

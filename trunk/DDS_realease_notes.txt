@@ -301,7 +301,7 @@ of samples.
 =========================================================================
 === Test Failures =====
 Note: A list of test that are run in the nightly automated build/test
-      can be found in $ACE_ROOT/bin/tao_other_tests.lst
+      can be found in $DDS_ROOT/bin/dcps_tests.lst
       The nightly automated build/test is run on a Windows XP with 
       VC++ 7.1, Red Hat Linux v9 with gcc and Solaris/x86 with gcc.
 
@@ -316,15 +316,6 @@ Note: A list of test that are run in the nightly automated build/test
   Occasionally cores while shutingdown on Solaris box 
   but passes on Linux and Windows.
 
-* TAO\orbsvcs\performance-tests\DDS\DCPS\TCPListenerTest
-
-  Occasionally the subscriber does not get the expected number
-  of samples and subscriber does not complete.
-  This test is run on Red Hat v9 Linux.
-  
-  It shows up when the samples size is large (8192 floats)
-  or it the four publishers to one subscriber topology.
-  
 
 
 
