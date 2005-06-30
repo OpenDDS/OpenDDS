@@ -73,7 +73,7 @@ class TestStats
                  expected_packets_,
                  expected_packets_,
                  data_size_,
-                 1 << data_size_,
+                 data_size_,
                  num_bytes_per_packet_,
                  total_time,
                  packet_time));
