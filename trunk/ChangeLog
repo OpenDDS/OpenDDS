@@ -1,3 +1,9 @@
+Wed Jun 29 20:55:22 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+          Adding identifier option to the publisher.
+
 Wed Jun 29 17:09:02 MST 2005 Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleE2ETest/TestStats.h:
