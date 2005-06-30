@@ -1,3 +1,12 @@
+Wed Jun 29 22:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Fixed array indexing.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+          Fixed issues with the data size.
+
 Wed Jun 29 20:55:22 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/common.h:
