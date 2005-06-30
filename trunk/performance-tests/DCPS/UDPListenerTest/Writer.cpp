@@ -134,7 +134,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
-              1 << data_size_));
+              data_size_));
 
   ACE_TRY_NEW_ENV
   {
@@ -147,7 +147,7 @@ Writer::svc ()
         num_connected_subs = handles.length();
       }
 
-    switch ( 1 << data_size_ )
+    switch ( data_size_ )
     {
 
     case 128:

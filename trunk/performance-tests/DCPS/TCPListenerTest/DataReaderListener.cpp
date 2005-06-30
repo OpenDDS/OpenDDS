@@ -14,7 +14,7 @@
 
 
 template<class Tseq, class R, class R_ptr, class Rimpl>
-::DDS::ReturnCode_t read (::DDS::DataReader_ptr reader)
+int read (::DDS::DataReader_ptr reader)
 {
   R_ptr pt_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
@@ -242,8 +242,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Mine::Pt128DataReader,
                       ::Mine::Pt128DataReader_ptr,
                       ::Mine::Pt128DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -253,8 +252,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Mine::Pt512DataReader,
                       ::Mine::Pt512DataReader_ptr,
                       ::Mine::Pt512DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -264,8 +262,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Mine::Pt2048DataReader,
                       ::Mine::Pt2048DataReader_ptr,
                       ::Mine::Pt2048DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -275,8 +272,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Mine::Pt8192DataReader,
                       ::Mine::Pt8192DataReader_ptr,
                       ::Mine::Pt8192DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 

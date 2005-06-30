@@ -1,3 +1,24 @@
+Wed Jun 29 17:09:02 MST 2005 Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleE2ETest/TestStats.h:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/TestStats.h:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/TestStats.h:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+
+          Changed to shift the data size when first passed in.  This
+          fixes an issue with the tests not sending the correct amount of data.
+
 Tue Jun 29 13:54:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_realease_notes.txt:
