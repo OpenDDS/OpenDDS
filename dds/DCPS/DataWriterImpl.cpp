@@ -374,7 +374,7 @@ namespace TAO
                     // move last element to this position.
                     if (orig_idx < num_orig_readers - 1)
                       {
-                        readers_[orig_idx] = readers_[orig_idx - 1];
+                        readers_[orig_idx] = readers_[num_orig_readers - 1];
                       }
                     num_orig_readers --;
                     readers_.length (num_orig_readers);
