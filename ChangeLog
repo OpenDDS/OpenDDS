@@ -1,3 +1,15 @@
+Mon Jul 11 13:38:21 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Set the library path correctly
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Change default values to account for correct memory usage.
+
 Wed Jun 29 22:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
