@@ -61,7 +61,7 @@ namespace TAO
     // which a release will occur.
 
     /// Allocators used for transport receiving logic.
-    enum { RECEIVE_DATA_BUFFER_SIZE = 4096 } ;
+    enum { RECEIVE_DATA_BUFFER_SIZE = 12288 } ;
 
     typedef Cached_Allocator_With_Overflow<ACE_Message_Block, RECEIVE_SYNCH>
                                               TransportMessageBlockAllocator ;
@@ -79,7 +79,7 @@ namespace TAO
       {
         DEFAULT_CONFIG_QUEUE_LINKS_PER_POOL   = 10,
         DEFAULT_CONFIG_QUEUE_INITIAL_POOLS    = 5,
-        DEFAULT_CONFIG_MAX_PACKET_SIZE        = 65535,
+        DEFAULT_CONFIG_MAX_PACKET_SIZE        = 63487,
         DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET = 10,
         DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE    = 4096
       };

@@ -787,9 +787,10 @@ namespace TAO
         }
 
 
+      // The transport does a duplication of the messages for the pkt_chain_
       if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
         {
-          n_chunks_ = qos_.resource_limits.max_samples;
+          n_chunks_ = 2 * qos_.resource_limits.max_samples;
         }
 
       // enable the type specific part of this DataWriter

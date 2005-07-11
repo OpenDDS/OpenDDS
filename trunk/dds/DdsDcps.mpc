@@ -2,6 +2,9 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
   sharedname = TAO_DdsDcps
   tagchecks += Dcps
 
+  // override the orbsvcslib default library output directory
+  libout      = $(DDS_ROOT)/lib
+
   includes    += $(DDS_ROOT) $(DDS_ROOT)/dds
   idlflags    += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=DCPS/dcps_export.h -I $(DDS_ROOT)
   dynamicflags = TAO_DDSDCPS_BUILD_DLL
