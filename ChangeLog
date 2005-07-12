@@ -1,3 +1,10 @@
+Tue Jul 12 14:33:53 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Increased the receive buffer size and corrected a comment.
+
 Mon Jul 11 13:38:21 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dcps.mpb:
