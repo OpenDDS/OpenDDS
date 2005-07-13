@@ -63,6 +63,8 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
                        -1);
     }
 
+  set_buffer_size();
+
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
   // message it sends to the socket.  This is a one-way connection
@@ -151,5 +153,48 @@ TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 
   this->peer().close();
   return 0;
+}
+
+void
+TAO::DCPS::SimpleTcpConnection::set_buffer_size ()
+{
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  ACE_SOCK sock = ACE_static_cast(ACE_SOCK, this->peer() );
+#if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+
+ if (sock.set_option (SOL_SOCKET,
+                          SO_SNDBUF,
+                          (void *) &snd_size,
+                          sizeof (snd_size)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the send buffer size to %d errno %m\n",
+      snd_size));
+    return;
+  }
+
+  if (sock.set_option (SOL_SOCKET,
+                          SO_RCVBUF,
+                          (void *) &rcv_size,
+                          sizeof (int)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the receive buffer size to %d errno %m \n",
+      rcv_size));
+    return;
+  }
+#else
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_LACKS_SOCKET_BUFSIZ */
+
+#else 
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 

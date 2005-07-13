@@ -52,6 +52,7 @@ namespace TAO
         virtual int close(u_long);
         virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
+        void set_buffer_size ();
 
       private:
 
