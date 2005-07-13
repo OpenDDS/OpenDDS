@@ -14,7 +14,6 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 }
 
 
-
 ACE_INLINE int
 TAO::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
@@ -31,6 +30,8 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
                         "(%P|%t) ERROR: Failed to connect.\n"),
                        -1);
     }
+
+  set_buffer_size();
 
   // In order to complete the connection establishment from the active
   // side, we need to tell the remote side about our local_address.
