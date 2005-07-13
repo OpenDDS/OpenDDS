@@ -1,3 +1,22 @@
+Wed Jul 13 10:28:48 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.h:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.h:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.h:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp/sub_main.cpp:
+
+          Modified the publisher to take a size parameter (-c ).
+
 Tue Jul 12 14:33:53 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.inl:

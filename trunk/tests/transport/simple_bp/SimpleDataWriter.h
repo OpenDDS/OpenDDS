@@ -18,7 +18,7 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
     ~SimpleDataWriter();
 
     void init(TAO::DCPS::RepoId pub_id);
-    int  run(SimplePublisher* publisher, unsigned num_messages);
+    int  run(SimplePublisher* publisher, unsigned num_messages, unsigned msg_size);
 
     // This means that the TransportImpl has been shutdown, making the
     // transport_interface sent to the run() method no longer valid.

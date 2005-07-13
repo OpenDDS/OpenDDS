@@ -45,6 +45,7 @@ class PubDriver
     ACE_INET_Addr     sub_addr_;
 
     unsigned num_msgs_;
+    unsigned msg_size_;
 };
 
 #endif
