@@ -1,3 +1,10 @@
+Wed Jul 13 14:03:47 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Removing checks for the Dcps in the TAO_ORBSVCS list.
+
 Wed Jul 13 10:48:01 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * dds/DCPS/Service_Participant.h:
 

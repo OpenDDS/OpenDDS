@@ -1,6 +1,5 @@
 project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
   sharedname = TAO_DdsDcps
-  tagchecks += Dcps
 
   // override the orbsvcslib default library output directory
   libout      = $(DDS_ROOT)/lib
