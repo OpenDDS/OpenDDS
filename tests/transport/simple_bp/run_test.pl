@@ -89,7 +89,7 @@ $publisher->Spawn() ;
 # Wait for the test to finish, or kill the processes.
 #
 die "*** ERROR: Subscriber timed out - $!" if $subscriber->WaitKill( $testTime) ;
-die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( 5) ;
+die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( $testTime) ;
 
 unlink $subreadyfile;
 
