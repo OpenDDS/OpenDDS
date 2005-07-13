@@ -1,3 +1,8 @@
+Wed Jul 13 10:48:01 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+        * dds/DCPS/Service_Participant.h:
+
+          Changed to new Root_POA.h for all builds.
+
 Wed Jul 13 10:28:48 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/transport/simple_bp/PubDriver.cpp:
