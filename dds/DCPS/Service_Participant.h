@@ -309,13 +309,19 @@ namespace TAO
         }
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-      // Use the ServantBase_var so that the servant's reference 
-      // count will not be changed by this operation.
-      PortableServer::ServantBase_var servant 
-        = poa->reference_to_servant (p ACE_ENV_ARG_PARAMETER);
+
+      // Thu Jul  7 06:50:34 2005  Chad Elliott  <elliott_c@ociweb.com>
+      // made it so poa->reference_to_servant did not increment the ref count.
+      //// Use the ServantBase_var so that the servant's reference 
+      //// count will not be changed by this operation.
+      //PortableServer::ServantBase_var servant 
+      //  = poa->reference_to_servant (p ACE_ENV_ARG_PARAMETER);
 
       ACE_CHECK_RETURN (0);
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*, servant.in ());
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*, 
+           poa->reference_to_servant (
+              p ACE_ENV_ARG_PARAMETER) );
+
       
       return the_servant;
     }
