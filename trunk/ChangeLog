@@ -1,3 +1,12 @@
+Thu Jul 14 12:39:15 MST 2005  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Changed reference_to_servant template to not remove
+          a reference to the servant because POA::reference_to_servant
+          changed in TAO 1.4a (and 1.4.x) to not increment
+          the reference count.
+
 Wed Jul 13 14:03:47 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dcps.mpb:
