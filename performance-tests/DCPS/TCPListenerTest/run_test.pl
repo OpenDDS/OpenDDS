@@ -15,11 +15,14 @@ PerlACE::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
-$num_messages=5000;
+$num_messages=800000;
 $data_size=13;
 $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=10;
+# need $num_msgs_btwn_rec unread samples plus 20 for good measure 
+# (possibly allocated by not yet queue by the transport because of greedy read).
+$num_samples=$num_msgs_btwn_rec + 20;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
@@ -37,7 +40,7 @@ $sub_parameters = "-p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
-              . " -msi $num_messages -mxs $num_messages";
+              . " -msi $num_samples -mxs $num_samples";
 #use -msi $num_messages to avoid rejected samples
 #use -mxs $num_messages to avoid using the heap 
 #   (could be less than $num_messages but I am not sure of the limit).
@@ -45,6 +48,7 @@ $sub_parameters = "-p $num_writers"
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
+#NOTE: above 1000 queue samples does not give any better performance.
 $pub_parameters = "-p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size" 

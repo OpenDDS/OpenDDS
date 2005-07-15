@@ -1728,14 +1728,14 @@ void
     
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
-    if (this->qos_.resource_limits.max_samples_per_instance != 
-        ::DDS::LENGTH_UNLIMITED)
+    if ((this->qos_.resource_limits.max_samples_per_instance != 
+          ::DDS::LENGTH_UNLIMITED) &&
+       (instance_ptr->rcvd_sample_.size_ >= 
+        this->qos_.resource_limits.max_samples_per_instance))
     {
-      if (instance_ptr->rcvd_sample_.size_ >= 
-             this->qos_.resource_limits.max_samples_per_instance &&
-          instance_ptr->rcvd_sample_.head_->sample_state_ 
-             == ::DDS::NOT_READ_SAMPLE_STATE)
-      {
+      if  (instance_ptr->rcvd_sample_.head_->sample_state_ 
+            == ::DDS::NOT_READ_SAMPLE_STATE)
+        {
         // for now the implemented QoS means that if the head sample
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
@@ -1758,6 +1758,27 @@ void
         data_allocator_->free(instance_data) ;
 
         return ::DDS::RETCODE_OK ; //OK?
+       }
+       else
+       {
+         // Discard the oldest previously-read sample
+         ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
+         instance_ptr->rcvd_sample_.remove(item) ;
+         
+  //        ACE_DES_FREE (item->registered_data_,
+  //                   data_allocator_.free,
+  //                   ::Xyz::Pt8192);
+         // gets a syntax error because Xyz::Pt819 does not have a destructor
+        //ptr->~::Xyz::Pt8192()
+        // this changes the subscriber process from leaking the sequence
+        // but we need to have a Pt8192 destructor that does it so we can use ACE_DES_FREE
+        // and not have to know which fields of the 
+//        ::Xyz::Pt8192* ptr = static_cast<::Xyz::Pt8192*>(item->registered_data_);
+//        ptr->values.replace(0,0,0,0); // free the sequence
+// It would be nice to replace this free with the ACE_DES_FREE above
+
+         data_allocator_->free(item->registered_data_) ;
+         rd_allocator_->free(item) ;
       }
     }
     
