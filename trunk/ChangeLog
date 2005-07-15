@@ -1,3 +1,20 @@
+Fri Jul 15 16:01:19 MST 2005  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Added Paul C's changes to free read elements in the subscriber
+          side instance queue that are being replaced by the recieved
+          samples.  It still leaks the if the sample contains a type
+          that requires freeing the fields individiually (like sequences).
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        
+          Changed this test to just have MAX_SAMPLES and 
+          MAX_SAMPLES_PER_INSTANCE set to the number that will be in
+          the instance queue plus some for good measure.
+          Previously it would set MAX_SAMPLES and PER_INSTANCE to
+          the number of expected samples.
+
 Thu Jul 14 12:39:15 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
