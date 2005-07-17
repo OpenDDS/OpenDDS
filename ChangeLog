@@ -1,3 +1,20 @@
+Sat Jul 16 17:51:05 MST 2005  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Make samples replaced in the subscriber's instance queue delete as
+          well as free the sample.
+          
+        * dds/DCPS/ReceivedDataElementList.inl:
+        
+          Added a comment about the ReceivedDataElement destructor
+          needing to destroy its InstanceState. But it currently 
+          causes troubles.
+          
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        
+          Change the number of samples from 80,000 to 20,000.
+
 Fri Jul 15 16:01:19 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

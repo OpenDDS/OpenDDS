@@ -15,7 +15,7 @@ PerlACE::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
-$num_messages=800000;
+$num_messages=20000;
 $data_size=13;
 $num_writers=1;
 $num_readers=1;
