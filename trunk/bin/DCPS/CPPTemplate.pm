@@ -1765,20 +1765,14 @@ void
          ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
          instance_ptr->rcvd_sample_.remove(item) ;
          
-  //        ACE_DES_FREE (item->registered_data_,
-  //                   data_allocator_.free,
-  //                   ::Xyz::Pt8192);
-         // gets a syntax error because Xyz::Pt819 does not have a destructor
-        //ptr->~::Xyz::Pt8192()
-        // this changes the subscriber process from leaking the sequence
-        // but we need to have a Pt8192 destructor that does it so we can use ACE_DES_FREE
-        // and not have to know which fields of the 
-//        ::Xyz::Pt8192* ptr = static_cast<::Xyz::Pt8192*>(item->registered_data_);
-//        ptr->values.replace(0,0,0,0); // free the sequence
-// It would be nice to replace this free with the ACE_DES_FREE above
+         ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+         ACE_DES_FREE (ptr,
+                       data_allocator_->free,
+                       <%TYPE%> );
 
-         data_allocator_->free(item->registered_data_) ;
-         rd_allocator_->free(item) ;
+         ACE_DES_FREE (item,
+                       rd_allocator_->free,
+                       ReceivedDataElement);
       }
     }
     
