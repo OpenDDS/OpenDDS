@@ -338,6 +338,7 @@ namespace TAO
 
       void liveliness_lost() ;
 
+      void remove_all_associations();
     protected:
 
       // type specific DataReader's part of enable.

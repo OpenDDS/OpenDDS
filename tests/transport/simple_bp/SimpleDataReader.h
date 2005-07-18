@@ -26,12 +26,15 @@ class SimpleDataReader : public TAO::DCPS::TransportReceiveListener
     /// the TransportReceiveListeners have been told of the data_received().
     int received_test_message() const;
 
+    void print_time();
 
   private:
 
     TAO::DCPS::RepoId sub_id_;
     int num_messages_expected_;
     int num_messages_received_;
+    ACE_Time_Value begin_recvd_;
+    ACE_Time_Value finished_recvd_;
 };
 
 #endif  /* SIMPLEDATAREADER_H */

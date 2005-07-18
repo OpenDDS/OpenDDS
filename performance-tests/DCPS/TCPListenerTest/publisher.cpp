@@ -44,6 +44,7 @@ int parse_args (int argc, char *argv[])
     // options:
     // -p  <num data writers>
     // -r  <num data readers>
+    // -i  <data writer id>
     // -n  <num packets>
     // -d  <data size>
     // -a  <transport address>
@@ -67,8 +68,9 @@ int parse_args (int argc, char *argv[])
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
     {
-      DATA_SIZE = ACE_OS::atoi (currentArg);
+      int shift_bits = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
+      DATA_SIZE = 1 << shift_bits;
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
     {
@@ -93,6 +95,11 @@ int parse_args (int argc, char *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter("-mxi")) != 0) 
     {
       MAX_INSTANCES = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    {
+      id = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0) 
@@ -149,7 +156,7 @@ int main (int argc, char *argv[])
       }
 
       // Register the type supports
-      switch (1 << DATA_SIZE)
+      switch (DATA_SIZE)
       {
       case 128:
         {
@@ -352,7 +359,7 @@ int main (int argc, char *argv[])
                                 NUM_SAMPLES,
                                 DATA_SIZE,
                                 num_datareaders,
-                                p); 
+                                id + p); 
         writers[p]->start ();
       }
 

@@ -13,7 +13,8 @@
 #include  "TopicImpl.h"
 #include  "SubscriberImpl.h"
 #include  "BuiltInTopicUtils.h"
-  
+#include  "ace/Reactor.h"
+
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
 #endif /* ! __ACE_INLINE__ */
@@ -480,6 +481,40 @@ namespace TAO
         this->subscriber_servant_->remove_associations(writers);
 
       }
+
+
+    void DataReaderImpl::remove_all_associations ()
+      {
+
+        TAO::DCPS::WriterIdSeq writers;
+
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+
+        int size = writers_.current_size();
+        writers.length(size);
+        WriterMapType::iterator curr_writer = writers_.begin();
+        WriterMapType::iterator end_writer = writers_.end();
+
+        int i = 0;
+        while (curr_writer != end_writer)
+          {
+            writers[i++] = (*curr_writer).ext_id_;
+            curr_writer.advance();
+          }
+
+        ACE_TRY_NEW_ENV
+          {
+            if (0 < size)
+              {
+                remove_associations(writers ACE_ENV_ARG_PARAMETER);
+              }
+          }
+        ACE_CATCHANY
+          {
+          }
+        ACE_ENDTRY;
+      }
+
 
     void DataReaderImpl::update_incompatible_qos (
         const TAO::DCPS::IncompatibleQosStatus & status

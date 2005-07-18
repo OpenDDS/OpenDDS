@@ -25,6 +25,7 @@
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 
+#include "ace/Reactor.h"
 
 using namespace ::DDS;
 using namespace ::TAO::DCPS;

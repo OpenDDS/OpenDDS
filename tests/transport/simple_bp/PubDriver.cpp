@@ -12,7 +12,8 @@
 
 
 PubDriver::PubDriver()
-  : num_msgs_(10000)
+  : num_msgs_(10000),
+    msg_size_(128)
 {
 }
 
@@ -39,12 +40,14 @@ PubDriver::parse_args(int& argc, char* argv[])
   // -p <pub_id:pub_port>
   // -s <sub_id:sub_host:sub_port>
   // -n num_messages
+  // -c message_size
   //
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   bool got_n = false;
   bool got_p = false;
   bool got_s = false;
+  bool got_c = false;
 
   const char* current_arg = 0;
 
@@ -73,7 +76,7 @@ PubDriver::parse_args(int& argc, char* argv[])
     }
 
     // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
       if (got_p) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -p allowed on command-line.\n"));
@@ -109,6 +112,27 @@ PubDriver::parse_args(int& argc, char* argv[])
       }
 
       got_s = true;
+    }
+    // The '-c' option
+    else if ((current_arg = arg_shifter.get_the_parameter("-c"))) {
+      if (got_c) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Only one -c allowed on command-line.\n"));
+        throw TestException();
+      }
+
+      int value = ACE_OS::atoi(current_arg);
+      arg_shifter.consume_arg();
+
+      if (value <= 0) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Value following -c option must be > 0.\n"));
+        throw TestException();
+      }
+
+      this->msg_size_ = value;
+
+      got_n = true;
     }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
@@ -184,7 +208,7 @@ PubDriver::run()
                         1,               /* size of subscriptions array */
                         subscriptions);
 
-  this->publisher_.run(this->num_msgs_);
+  this->publisher_.run(this->num_msgs_, this->msg_size_);
 
   while (this->publisher_.delivered_test_message() == 0)
     {

@@ -477,7 +477,6 @@ int main (int argc, char *argv[])
         {
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
         }
-      ACE_OS::fclose (writers_completed);
 
       // Wait for the subscriber to finish.
       FILE* readers_completed = 0;
