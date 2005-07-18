@@ -1,3 +1,20 @@
+Mon Jul 18 13:18:45 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DDS/Messenger/Messenger.idl:
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DDS/Messenger/Writer.h:
+        * DevGuideExamples/DDS/Messenger/Writer.cpp:
+        * DevGuideExamples/DDS/Messenger/domain_ids:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+
+          Update and merge the devguide example.  I put it here
+          because it proved difficult to integrate into the TAO
+          DevGuideExamples directory.
+
 Mon Jul 18 06:43:11 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
@@ -8,32 +25,32 @@ Mon Jul 18 06:43:11 MST 2005  Scott Harris <harris_s@ociweb.com>
 Sat Jul 16 17:51:05 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-        
+
           Make samples replaced in the subscriber's instance queue delete as
           well as free the sample.
-          
+
         * dds/DCPS/ReceivedDataElementList.inl:
-        
+
           Added a comment about the ReceivedDataElement destructor
-          needing to destroy its InstanceState. But it currently 
+          needing to destroy its InstanceState. But it currently
           causes troubles.
-          
+
         * performance-tests/DCPS/TCPListenerTest/run_test.pl:
-        
+
           Change the number of samples from 80,000 to 20,000.
 
 Fri Jul 15 16:01:19 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-        
+
           Added Paul C's changes to free read elements in the subscriber
           side instance queue that are being replaced by the recieved
           samples.  It still leaks the if the sample contains a type
           that requires freeing the fields individiually (like sequences).
 
         * performance-tests/DCPS/TCPListenerTest/run_test.pl:
-        
-          Changed this test to just have MAX_SAMPLES and 
+
+          Changed this test to just have MAX_SAMPLES and
           MAX_SAMPLES_PER_INSTANCE set to the number that will be in
           the instance queue plus some for good measure.
           Previously it would set MAX_SAMPLES and PER_INSTANCE to
@@ -137,7 +154,7 @@ Wed Jun 29 17:09:02 MST 2005 Trevor Fields  <fields_t@ociweb.com>
 Tue Jun 29 13:54:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_realease_notes.txt:
-        
+
           Update test section per fixes and split out of DDS from ocitao repository.
 
 Wed Jun 29 11:16:05 MST 2005  Trevor Fields  <fields_t@ociweb.com>
@@ -163,7 +180,7 @@ Wed Jun 29 11:16:05 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 Tue Jun 28 10:50:47 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_realease_notes.txt:
-        
+
           Add release notes to the repository.
 
 Wed Jun 15 11:28:42 MST 2005  Trevor Fields  <fields_t@ociweb.com>
