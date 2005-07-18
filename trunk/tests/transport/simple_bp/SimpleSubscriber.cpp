@@ -111,5 +111,5 @@ SimpleSubscriber::received_test_message() const
 void
 SimpleSubscriber::print_time()
 {
-  return this->reader_.print_time();
+  this->reader_.print_time();
 }
