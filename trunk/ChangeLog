@@ -1,3 +1,9 @@
+Mon Jul 18 13:30:13 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Remove extra fclose() that was causing failures.
+
 Mon Jul 18 13:18:45 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
