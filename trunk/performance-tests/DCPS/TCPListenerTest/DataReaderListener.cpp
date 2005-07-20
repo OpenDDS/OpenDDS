@@ -13,12 +13,16 @@
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
 
-template<class Tseq, class R, class R_ptr, class Rimpl>
+template<class Tseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader)
 {
-  R_ptr pt_dr 
+  // TWF: There is an optimization to the test by
+  // using a pointer to the known servant and 
+  // static_casting it to the servant
+  R_var var_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
 
+  R_ptr pt_dr = var_dr.ptr();
   Rimpl* dr_servant =
       reference_to_servant< Rimpl, R_ptr>
               (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -241,6 +245,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt128Seq,
                       ::Mine::Pt128DataReader,
                       ::Mine::Pt128DataReader_ptr,
+                      ::Mine::Pt128DataReader_var,
                       ::Mine::Pt128DataReaderImpl>
                         (reader);
     }
@@ -251,6 +256,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt512Seq,
                       ::Mine::Pt512DataReader,
                       ::Mine::Pt512DataReader_ptr,
+                      ::Mine::Pt512DataReader_var,
                       ::Mine::Pt512DataReaderImpl>
                         (reader);
     }
@@ -261,6 +267,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt2048Seq,
                       ::Mine::Pt2048DataReader,
                       ::Mine::Pt2048DataReader_ptr,
+                      ::Mine::Pt2048DataReader_var,
                       ::Mine::Pt2048DataReaderImpl>
                         (reader);
     }
@@ -271,6 +278,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt8192Seq,
                       ::Mine::Pt8192DataReader,
                       ::Mine::Pt8192DataReader_ptr,
+                      ::Mine::Pt8192DataReader_var,
                       ::Mine::Pt8192DataReaderImpl>
                         (reader);
     }
