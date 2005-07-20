@@ -1,3 +1,15 @@
+Wed Jul 20 14:22:59 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/ReceivedDataElementList.inl:
+
+          Corrected comment about why the instance state is not 
+          deleted in the destructor.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added delete of queue in destructor.  It was new'd in
+          the constructor.
+
 Wed Jul 20 12:11:14 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
