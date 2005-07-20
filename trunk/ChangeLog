@@ -1,3 +1,10 @@
+Wed Jul 20 15:59:55 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/RcObject_T.h:
+
+          Added appropriate ACE_DES_FREEs for allocator frees.
+
 Wed Jul 20 15:40:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/ReceivedDataElementList.inl:

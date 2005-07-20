@@ -671,9 +671,14 @@ void
           ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
             
           ptr->rcvd_sample_.remove(head_ptr) ;
-
-          data_allocator_->free(head_ptr->registered_data_) ;
-          rd_allocator_->free(head_ptr) ;
+          
+         ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (head_ptr,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
         }
 
       delete ptr ;
@@ -986,9 +991,13 @@ DDS::ReturnCode_t
 
                   ptr->rcvd_sample_.remove(item) ;
 
-                  data_allocator_->free(item->registered_data_) ;
-                  rd_allocator_->free(item) ;
-          
+                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+                  ACE_DES_FREE (delete_ptr,
+                                data_allocator_->free,
+                                <%TYPE%> );
+                  ACE_DES_FREE (item,
+                                rd_allocator_->free,
+                                ReceivedDataElement);         
                   item = next ;
                 }
 
@@ -1016,8 +1025,13 @@ DDS::ReturnCode_t
             
             ptr->rcvd_sample_.remove(tail) ;
 
-            data_allocator_->free(tail->registered_data_) ;
-            rd_allocator_->free(tail) ;
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+            ACE_DES_FREE (delete_ptr,
+                          data_allocator_->free,
+                          <%TYPE%> );
+            ACE_DES_FREE (tail,
+                          rd_allocator_->free,
+                          ReceivedDataElement);         
           }
         else
           {
@@ -1433,8 +1447,13 @@ DDS::ReturnCode_t
 
           ptr->rcvd_sample_.remove(item) ;
 
-          data_allocator_->free(item->registered_data_) ;
-          rd_allocator_->free(item) ;
+          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (item,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
 
           item = next ;
         }
@@ -1462,8 +1481,13 @@ DDS::ReturnCode_t
             
       ptr->rcvd_sample_.remove(tail) ;
 
-      data_allocator_->free(tail->registered_data_) ;
-      rd_allocator_->free(tail) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (tail,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
     else
     {
@@ -1755,7 +1779,9 @@ void
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
 
-        data_allocator_->free(instance_data) ;
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      <%TYPE%> );
 
         return ::DDS::RETCODE_OK ; //OK?
        }
@@ -1819,8 +1845,13 @@ void
         }
       }
 
-      data_allocator_->free(head_ptr->registered_data_) ;
-      rd_allocator_->free(head_ptr) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (head_ptr,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
 
     SubscriberImpl* sub = get_subscriber_servant () ;
@@ -1846,7 +1877,9 @@ void
     SubscriptionInstance *instance_ptr = 
          reinterpret_cast<SubscriptionInstance *> (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
-    data_allocator_->free(instance_data) ;
+    ACE_DES_FREE (instance_data,
+                  data_allocator_->free,
+                  <%TYPE%> );
   }
 
   return ::DDS::RETCODE_OK;
@@ -1886,7 +1919,9 @@ void
               ACE_TEXT("The instance is not registered.\n")));
   }
       
-  data_allocator_->free(data) ;
+  ACE_DES_FREE (data,
+                data_allocator_->free,
+                <%TYPE%> );
 }
 
 //TAO::DCPS::DataReaderRemote_ptr
