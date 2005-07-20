@@ -1,3 +1,8 @@
+Wed Jul 20 12:11:14 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+          Changed ptr in read to var to not leak memory.
+
 Wed Jul 20 13:10:23 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
