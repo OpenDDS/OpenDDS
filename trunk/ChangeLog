@@ -1,3 +1,9 @@
+Wed Jul 20 13:10:23 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Fix -a option so it overrides the address properly.
+
 Mon Jul 18 17:27:29 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/transport/simple_bp/SimpleSubscriber.cpp:
