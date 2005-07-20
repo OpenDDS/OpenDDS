@@ -16,10 +16,8 @@ ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
 ACE_INLINE
 ReceivedDataElementList::~ReceivedDataElementList()
 {
-  // this causes problem in Pt8192DataReaderImpl::~Pt8192DataReaderImpl
-  // when the SubscriptionInstance *ptr is deleted
-  // but I think it is a leak to leave it out. SHH  7-16-05
-  // delete instance_state_;
+  // The memory pointed to by instance_state_ is owned by
+  // another object.
 }
    
 ACE_INLINE

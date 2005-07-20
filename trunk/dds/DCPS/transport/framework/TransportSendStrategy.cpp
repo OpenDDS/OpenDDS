@@ -26,6 +26,9 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 //MJM: Or should this be release to be more general?  To let the synch
 //MJM: thingie manage itself the way it sees fit.
     }
+
+    delete [] this->delayed_delivered_notification_queue_;
+
 }
 
 
