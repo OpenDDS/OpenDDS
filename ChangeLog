@@ -1,3 +1,14 @@
+Thu Jul 21 18:38:54 CDT 2005  Scott Harris <harris_s@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.hi:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Added -sd <msec> option to allow the subscriber to sleep for
+          <msec> milliseconds for every read call.
+          This was added to see what would happend if there was a slow
+          subscriber.
+
 Wed Jul 20 15:59:55 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

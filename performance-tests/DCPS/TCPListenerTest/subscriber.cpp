@@ -93,6 +93,11 @@ int parse_args (int argc, char *argv[])
       MAX_INSTANCES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter("-sd")) != 0) 
+    {
+      subscriber_delay_msec = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
     else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
