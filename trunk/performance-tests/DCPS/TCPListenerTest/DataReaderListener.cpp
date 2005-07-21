@@ -12,6 +12,7 @@
 #include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
+extern long subscriber_delay_msec; // from common.h
 
 template<class Tseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader)
@@ -26,6 +27,13 @@ int read (::DDS::DataReader_ptr reader)
   Rimpl* dr_servant =
       reference_to_servant< Rimpl, R_ptr>
               (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+
+  if (subscriber_delay_msec)
+    {
+      ACE_Time_Value delay ( subscriber_delay_msec / 1000, 
+                            (subscriber_delay_msec % 1000) * 1000);
+      ACE_OS::sleep (delay);
+    }
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
