@@ -1,3 +1,12 @@
+Fri Jul 22 08:40:18 MST 2005  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+
+          Make SimpleTcpSendStrategy::send_bytes log the iovec array when
+          sendv returns an unexpected errno in hopes of getting it to
+          core when the sendv fails for AAC.  Hopefully this will shed
+          some light on the problem.
+
 Thu Jul 21 18:38:54 CDT 2005  Scott Harris <harris_s@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
