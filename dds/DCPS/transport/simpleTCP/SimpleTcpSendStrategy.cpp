@@ -47,6 +47,14 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
         {
           ACE_ERROR((LM_ERROR, "SimpleTcpSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
             "sendv", n));
+
+          // try to get the application to core when "Bad Address" is returned
+          // by looking at the iovec
+          for (int ii = 0; ii < n; ii++) 
+            {
+              ACE_ERROR((LM_ERROR, "send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
+                ii, iov[ii].iov_len, iov[ii].iov_base ));
+            }
         }
     }
 
