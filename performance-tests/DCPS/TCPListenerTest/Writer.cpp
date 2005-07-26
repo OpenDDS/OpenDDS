@@ -71,7 +71,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                int data_size, 
                int num_readers,
                int writer_id)
-: writer_ (writer),
+               : writer_ (::DDS::DataWriter::_duplicate (writer)),
   num_messages_ (num_messages),
   data_size_ (data_size),
   num_floats_per_sample_ (data_size),

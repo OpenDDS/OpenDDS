@@ -1,3 +1,17 @@
+Tue Jul 26 15:38:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.h:
+
+          Correctly applied the _var and _ptr.
+          
+        * tests/DCPS/FooTest3_0/pub_id.txt:
+
+          Removed intermedia file that is used to synchronize 
+          publisher and subscriber.
+          
 Fri Jul 22 08:40:18 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
