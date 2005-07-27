@@ -1,3 +1,15 @@
+Tue Jul 26 22:33:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        
+          Fixed PublisherImpl and Subscriber memory leak.
+          
+        * tests/DCPS/FooTest3_2/pub_id.txt:
+        
+          Removed test generated file.
+          
 Tue Jul 26 15:38:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
@@ -9,8 +21,7 @@ Tue Jul 26 15:38:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
           
         * tests/DCPS/FooTest3_0/pub_id.txt:
 
-          Removed intermedia file that is used to synchronize 
-          publisher and subscriber.
+          Removed test generated file.
           
 Fri Jul 22 08:40:18 MST 2005  Scott Harris <harris_s@ociweb.com>
 

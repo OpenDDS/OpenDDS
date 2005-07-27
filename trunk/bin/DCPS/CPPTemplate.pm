@@ -87,6 +87,8 @@ DDS::ReturnCode_t
               (WriterImplmpl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
 
+    WriterImplmpl->_remove_ref ();
+
     return writer_obj;
 }
 
@@ -111,6 +113,8 @@ DDS::ReturnCode_t
               (reader_impl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
 
+    reader_impl->_remove_ref ();
+    
     return reader_obj;
 }
 

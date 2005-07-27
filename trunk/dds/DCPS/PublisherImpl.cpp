@@ -280,6 +280,7 @@ namespace TAO
 
           publication_map_.erase (publication_id);
         
+          dw_info->local_writer_->_remove_ref ();
           delete dw_info;
 
           dw_servant->remove_all_associations();
