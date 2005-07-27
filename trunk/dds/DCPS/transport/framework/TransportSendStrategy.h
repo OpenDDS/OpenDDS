@@ -238,6 +238,20 @@ namespace TAO
         /// This lock will protect critical sections of code that play a
         /// role in the sending of data.
         LockType lock_;
+
+
+
+//remove these are only for debugging: DUMP_FOR_PACKET_INFO
+        protected:
+    ACE_Message_Block*    dup_pkt_chain;
+    ACE_Message_Block*    act_pkt_chain_ptr;
+    void* act_elems_head_ptr;
+    ACE_Message_Block*    dup_elems_msg;
+    ACE_Message_Block*    act_elems_msg_ptr;
+    TransportHeader       dup_presend_header;
+    const char * called_from;
+    const char * completely_filled;
+
     };
 
   }  /* namespace DCPS */

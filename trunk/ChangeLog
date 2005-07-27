@@ -1,3 +1,19 @@
+Wed Jul 27 11:03:25 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Added additional code to give more information when the send_bytes
+          fails.  This code is marked with "//remove" and
+          "DUMP_FOR_PACKET_INFO"
+
+          This code should be removed when the problem has been fixed.
+
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+
+          Fixed error with data size.
+
 Tue Jul 26 22:33:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

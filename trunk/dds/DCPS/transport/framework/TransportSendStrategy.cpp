@@ -124,9 +124,13 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Packet has been prepared from packet elems_.\n"));
+//remove DUMP_FOR_PACKET_INFO
+completely_filled = "true";
       }
     else
       {
+//remove DUMP_FOR_PACKET_INFO
+completely_filled = "false";
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "We have a current packet that still has unsent bytes.\n"));
       }
@@ -134,6 +138,16 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Attempt to send the current packet.\n"));
 
+
+//remove the below debug assignments DUMP_FOR_PACKET_INFO
+    dup_pkt_chain = this->pkt_chain_->clone();
+    act_pkt_chain_ptr = this->pkt_chain_;
+    act_elems_head_ptr = elems_.peek();
+    act_elems_msg_ptr = 
+      const_cast <ACE_Message_Block*> (reinterpret_cast <TransportQueueElement*>(act_elems_head_ptr)->msg());
+    dup_elems_msg = act_elems_msg_ptr->clone();
+    dup_presend_header = this->header_;
+    called_from = "perform_work";
 
     // Now we can attempt to send the current packet - whether it is
     // a "partially sent" packet or one that we just built-up using elements
@@ -483,8 +497,17 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                      "Advance the rd_ptr() of the front block (of pkt_chain_) "
                      "by the num_bytes_left (%d).\n", num_bytes_left));
 
+//remove DUMP_FOR_PACKET_INFO
+char* curr_rd_ptr = this->pkt_chain_->rd_ptr();
           // Only part of the current block was sent.
           this->pkt_chain_->rd_ptr(num_bytes_left);
+
+//remove DUMP_FOR_PACKET_INFO
+ACE_ERROR((LM_ERROR,
+          "(%P|%t) adjust_packet_after_send original ptr %X adjusted %d bytes to %X\n",
+          curr_rd_ptr,
+          this->pkt_chain_->rd_ptr()
+          ));
 
           if (this->header_complete_ == 1)
             {
