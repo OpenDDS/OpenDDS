@@ -506,6 +506,7 @@ char* curr_rd_ptr = this->pkt_chain_->rd_ptr();
 ACE_ERROR((LM_ERROR,
           "(%P|%t) adjust_packet_after_send original ptr %X adjusted %d bytes to %X\n",
           curr_rd_ptr,
+          num_bytes_left,
           this->pkt_chain_->rd_ptr()
           ));
 
