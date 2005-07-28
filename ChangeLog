@@ -1,3 +1,10 @@
+Thu Jul 28 13:43:58 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Fixed the memory leak of the Pt*TypeSupportImpl servant.
+
 Thu Jul 28 13:17:03 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
