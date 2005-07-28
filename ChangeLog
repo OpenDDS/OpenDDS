@@ -1,3 +1,16 @@
+Thu Jul 28 10:41:07 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataBlockLockPool.cpp:
+        * dds/DCPS/DataBlockLockPool.h:
+
+          Changes to compile on unix systems.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Removed the debugging code from
+          Wed Jul 27 11:03:25 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
 Wed Jul 27 17:37:13 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DdsDcps.mpc:

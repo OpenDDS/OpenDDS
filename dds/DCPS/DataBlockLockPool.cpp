@@ -10,23 +10,10 @@ DataBlockLockPool::DataBlockLockPool(size_t size)
   pool_(size),
   iterator_(0)
 {
-/*
-  // Initialize the pointers
-  for (ssize_t cnt = 0; cnt < size_; cnt++)
-    {
-      pool_[cnt] = new DataBlockLock();
-    }
-*/
 }
 
 DataBlockLockPool::~DataBlockLockPool()
 {
-/*
-  for (size_t cnt = 0; cnt < size_; cnt++)
-    {
-      delete pool_[cnt];
-    }
-*/
 }
 
 
@@ -45,6 +32,7 @@ DataBlockLockPool::get_lock ()
 void
 DataBlockLockPool::return_lock (DataBlockLockPool::DataBlockLock * lock)
 {
+  ACE_UNUSED_ARG(lock);
   // Do Nothing.
 }
 

@@ -570,17 +570,6 @@ TAO::DCPS::TransportSendStrategy::direct_send()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Now attempt to send the packet.\n"));
 
-//remove the below debug assignments DUMP_FOR_PACKET_INFO
-    dup_pkt_chain = this->pkt_chain_->clone();
-    act_pkt_chain_ptr = this->pkt_chain_;
-    act_elems_head_ptr = elems_.peek();
-    act_elems_msg_ptr = 
-      const_cast <ACE_Message_Block*> (reinterpret_cast <TransportQueueElement*>(act_elems_head_ptr)->msg());
-    dup_elems_msg = act_elems_msg_ptr->clone();
-    dup_presend_header = this->header_;
-    called_from = "direct_send";
-    completely_filled = "true";
-
   // Attempt to send the packet
   SendPacketOutcome outcome = this->send_packet(NOTIFY_IMMEADIATELY);
 
@@ -824,82 +813,6 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
                  "Since backpressure flag is false, return "
                  "OUTCOME_SEND_ERROR.\n"));
 
-//remove below DUMP_FOR_PACKET_INFO
-
-      ACE_ERROR((LM_ERROR, "\n"));
-
-
-      ACE_ERROR((LM_ERROR, "Called from: %s completely filled: %s\n",
-        called_from, completely_filled));
-
-      ACE_ERROR((LM_ERROR,
-        "Actual pkt_chain_ %X saved %X\n",
-        this->pkt_chain_, act_pkt_chain_ptr));
-
-      ACE_Message_Block*    pkt_chain_ptr = this->pkt_chain_;
-      ACE_ERROR((LM_ERROR, "Actual packet chain:\n"));
-      while (0 != pkt_chain_ptr)
-        {
-          ACE_ERROR((LM_ERROR, "actual length = %d rd_ptr %X\n",
-            pkt_chain_ptr->length(),
-            pkt_chain_ptr->rd_ptr()));
-          pkt_chain_ptr = pkt_chain_ptr->cont();
-        }
-
-      ACE_Message_Block*    dup_pkt_chain_ptr = dup_pkt_chain;
-      ACE_ERROR((LM_ERROR, "Duplicate packet chain:\n"));
-      while (0 != dup_pkt_chain_ptr)
-        {
-          ACE_ERROR((LM_ERROR, "duplicate length = %d rd_ptr %X\n",
-            dup_pkt_chain_ptr->length(),
-            dup_pkt_chain_ptr->rd_ptr()));
-          dup_pkt_chain_ptr = dup_pkt_chain_ptr->cont();
-        }
-
-      TransportQueueElement* curr_elems_head_ptr = this->elems_.peek();
-
-      ACE_ERROR((LM_ERROR,
-          "Actual first element from elems_ %X saved %X\n",
-          curr_elems_head_ptr, act_elems_head_ptr));
-
-      const ACE_Message_Block*    cur_elems_msg_ptr = curr_elems_head_ptr->msg();
-
-      ACE_ERROR((LM_ERROR, "Actual elems_ msg :\n"));
-      while (0 != cur_elems_msg_ptr)
-        {
-          ACE_ERROR((LM_ERROR, "actual length = %d rd_ptr %X\n",
-            cur_elems_msg_ptr->length(),
-            cur_elems_msg_ptr->rd_ptr()));
-          cur_elems_msg_ptr = cur_elems_msg_ptr->cont();
-        }
-
-      ACE_Message_Block*    dup_elems_msg_ptr = dup_elems_msg;
-
-      ACE_ERROR((LM_ERROR, "Duplicate elems_ msg :\n"));
-      while (0 != dup_elems_msg_ptr)
-        {
-          ACE_ERROR((LM_ERROR, "duplicate length = %d rd_ptr %X\n",
-            dup_elems_msg_ptr->length(),
-            dup_elems_msg_ptr->rd_ptr()));
-          dup_elems_msg_ptr = dup_elems_msg_ptr->cont();
-        }
-
-      ACE_ERROR((LM_ERROR, "header has been sent = %s\n",
-        header_complete_ ? "true" : "false"));
-      ACE_ERROR((LM_ERROR,
-        "Current header length %d\n   packet id %d\n",
-        header_.length_,
-        header_.packet_id_));
-
-
-      ACE_ERROR((LM_ERROR,
-        "Duplicate header length %d\n   packet id %d\n",
-        dup_presend_header.length_,
-        dup_presend_header.packet_id_));
-
-
-
-//remove above DUMP_FOR_PACKET_INFO
 
       // Not backpressure - it's a real error.
       // Note: moved thisto send_bytes so the errno msg could be written.
@@ -910,12 +823,6 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
       return OUTCOME_SEND_ERROR;
     }
 
-
-//remove DUMP_FOR_PACKET_INFO
-if (dup_pkt_chain)
-  dup_pkt_chain->release();
-if (dup_elems_msg)
-  dup_elems_msg->release();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Since num_bytes_sent > 0, adjust the packet to account for "
