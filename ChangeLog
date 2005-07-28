@@ -1,3 +1,11 @@
+Thu Jul 28 14:08:44 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        
+          Fixed memory leak.
+          - Removed an extra get_name() call on topic which duplicates 
+            the string.
+
 Thu Jul 28 13:43:58 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:

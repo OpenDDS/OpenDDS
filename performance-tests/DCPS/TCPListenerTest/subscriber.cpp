@@ -106,8 +106,8 @@ int parse_args (int argc, char *argv[])
     else 
     {
       ACE_ERROR((LM_ERROR,"(%P|%t) unexpected parameter %s\n", arg_shifter.get_current()));
-      return 3;
       arg_shifter.ignore_arg ();
+      return 3;
     }
   }
   // Indicates sucessful parsing of the command line
