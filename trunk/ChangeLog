@@ -1,3 +1,21 @@
+Wed Jul 27 17:37:13 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/DCPS/DataBlockLockPool.cpp:
+        * dds/DCPS/DataBlockLockPool.h:
+
+          Created a class to give out ACE_Thread_Mutex lock adapters.
+          This just cycles through an array giving out the next lock.
+          It does not currently require the returning of the locks.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Changed to use a DataBlockLockPool for providing locks to the
+          ACE_Data_Blocks.  The blocks need to be locked to prevent the
+          simultaneous access by multiple threads from deforming the
+          reference count. 
+
 Wed Jul 27 17:20:16 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

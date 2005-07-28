@@ -102,6 +102,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/ReceivedDataElementList.cpp
     DCPS/Transient_Kludge.cpp
     DCPS/BuiltInTopicUtils.cpp
+    DCPS/DataBlockLockPool.cpp
 
     // Built-In Topic Support
     ParticipantBuiltinTopicDataTypeSupportImpl.cpp
