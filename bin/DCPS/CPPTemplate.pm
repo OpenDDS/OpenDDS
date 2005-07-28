@@ -123,7 +123,8 @@ DDS::ReturnCode_t
 : marshaled_size_ (0),
   data_allocator_ (0),
   mb_allocator_ (0),
-  db_allocator_ (0)
+  db_allocator_ (0),
+  db_lock_pool_(0)
 {
 }
 
@@ -133,6 +134,7 @@ DDS::ReturnCode_t
   delete data_allocator_;
   delete mb_allocator_;
   delete db_allocator_;
+  delete db_lock_pool_;
 }
 
 DDS::InstanceHandle_t
@@ -472,7 +474,10 @@ void
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
           db_allocator_, n_chunks_));
     }
+    
 
+  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
+  
   return ::DDS::RETCODE_OK;
 }
 
@@ -497,7 +502,7 @@ ACE_Message_Block*
                                0, //cont
                                0, //data
                                data_allocator_, //allocator_strategy
-                               0, //locking_strategy
+                               db_lock_pool_->get_lock(), //data block locking_strategy
                                ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                ACE_Time_Value::zero,
                                ACE_Time_Value::max_time,
