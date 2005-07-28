@@ -338,6 +338,9 @@ int main (int argc, char *argv[])
                                    NUM_SAMPLES,
                                    DATA_SIZE,
                                    RECVS_BTWN_READS);
+
+      PortableServer::ServantBase_var safe_servant = dr_listener_impl;
+
       ::DDS::DataReaderListener_var dr_listener = 
         TAO::DCPS::servant_to_reference< ::DDS::DataReaderListener,
                                         DataReaderListenerImpl, 

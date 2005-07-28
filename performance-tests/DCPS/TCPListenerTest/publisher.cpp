@@ -350,7 +350,6 @@ int main (int argc, char *argv[])
         }
       }
 
-
       Writer** writers = new Writer* [num_datawriters] ;
 
       for (int p = 0; p < num_datawriters; p ++)
@@ -384,6 +383,12 @@ int main (int argc, char *argv[])
       pub->delete_contained_entities() ;
 
       delete [] dws;
+
+      for (int p = 0; p < num_datawriters; p ++)
+      {
+        delete writers[p];
+      }
+
       delete [] writers;
 
       dp->delete_publisher(pub.in()  ACE_ENV_ARG_PARAMETER);

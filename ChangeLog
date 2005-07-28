@@ -1,3 +1,35 @@
+Thu Jul 28 13:17:03 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Fixed memory leak of DataReaderRemote object references. 
+          - Made the get_dr_obj_ref () assign to a DataReader_var
+            since the accessor duplicates object reference count. 
+          
+        * dds/DCPS/Marked_Default_Qos.cpp:
+        
+          Fixed memory leak of DomainParticipantFactory object reference.
+          - Made TheParticipantFactory assign to 
+            DomainParticipantFactory_var since the TheParticipantFactory 
+            duplicates the object reference count.
+          
+        * dds/DCPS/WriteDataContainer.cpp:
+        
+          Fixed memory leak of the registered sample data and the 
+          PublicationInstance object.
+          - Made the unregister_all() delete all PublicationInstance 
+            objects in the instance handle list.
+          
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        
+          Fixed memory leak of the DataWriter object reference.
+          - Delete every Writer object after test is done.
+          
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Fixed the memory leak of the listener servant.
+          - Made the servant assign to PortableServer::ServantBase_var.
+
 Thu Jul 28 10:41:07 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataBlockLockPool.cpp:
