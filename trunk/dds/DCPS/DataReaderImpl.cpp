@@ -144,7 +144,7 @@ namespace TAO
             participant_servant_->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_CHECK;
       
-      topic_desc_ = participant_servant_->lookup_topicdescription(topic_servant_->get_name()) ;
+      topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
 
       subscriber_servant_ = subscriber ;
       subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
