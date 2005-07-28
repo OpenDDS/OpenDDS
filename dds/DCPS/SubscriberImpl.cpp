@@ -303,8 +303,6 @@ namespace TAO
         // Clean up any remaining associations
         dr_servant->remove_all_associations();
 
-        dr_info->local_reader_->_remove_ref ();
-        
         delete dr_info;
 
         dr_servant->cleanup ();

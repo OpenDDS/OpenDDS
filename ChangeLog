@@ -1,3 +1,14 @@
+Wed Jul 27 17:20:16 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Rolled back previous version and found the memory 
+          leak is in the reference_to_servant function 
+          of Service_Participant. 
+
 Wed Jul 27 11:03:25 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

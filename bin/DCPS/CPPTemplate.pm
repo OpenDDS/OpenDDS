@@ -74,8 +74,8 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-    <%TYPE%>DataWriterImpl* WriterImplmpl;
-    ACE_NEW_RETURN(WriterImplmpl, 
+    <%TYPE%>DataWriterImpl* writer_impl;
+    ACE_NEW_RETURN(writer_impl, 
                    <%TYPE%>DataWriterImpl(), 
                    ::TAO::DCPS::DataWriterRemote::_nil());
 
@@ -84,10 +84,8 @@ DDS::ReturnCode_t
         = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataWriterRemote, 
                                             <%TYPE%>DataWriterImpl, 
                                             TAO::DCPS::DataWriterRemote_ptr> 
-              (WriterImplmpl ACE_ENV_ARG_PARAMETER);
+              (writer_impl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
-
-    WriterImplmpl->_remove_ref ();
 
     return writer_obj;
 }
@@ -113,8 +111,6 @@ DDS::ReturnCode_t
               (reader_impl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
 
-    reader_impl->_remove_ref ();
-    
     return reader_obj;
 }
 

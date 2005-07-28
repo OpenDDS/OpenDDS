@@ -310,20 +310,15 @@ namespace TAO
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
-      // Use the ServantBase_var so that the servant's reference 
-      // count will not be changed by this operation.
-// comment this line out if using 1.3a_p3 or DOC group around then
-// actually it is better to just get another verions of TAO that
-// is not broken.
-      PortableServer::ServantBase_var servant 
-        = poa->reference_to_servant (p ACE_ENV_ARG_PARAMETER);
-
-      ACE_CHECK_RETURN (0);
       T_impl* the_servant = ACE_dynamic_cast (T_impl*, 
            poa->reference_to_servant (
               p ACE_ENV_ARG_PARAMETER) );
+      ACE_CHECK_RETURN (0);
 
-      
+      // Use the ServantBase_var so that the servant's reference 
+      // count will not be changed by this operation.
+      PortableServer::ServantBase_var servant = the_servant;
+
       return the_servant;
     }
 
