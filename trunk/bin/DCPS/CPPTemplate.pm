@@ -1780,7 +1780,8 @@ void
 
         if (listener != 0)
         {
-          listener->on_sample_rejected(get_dr_obj_ref(),
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
 
@@ -1846,7 +1847,8 @@ void
 
         if (listener)
         {
-          listener->on_sample_lost(get_dr_obj_ref(), sample_lost_status_);
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
       }
 
@@ -1873,7 +1875,8 @@ void
         
       if (listener != 0)
       {
-        listener->on_data_available(get_dr_obj_ref());
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
+        listener->on_data_available(dr.in ());
       }
     }
   }
