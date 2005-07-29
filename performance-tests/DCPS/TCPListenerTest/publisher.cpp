@@ -392,9 +392,9 @@ int main (int argc, char *argv[])
 
       delete [] dws;
 
-      for (int p = 0; p < num_datawriters; p ++)
+      for (int q = 0; q < num_datawriters; q ++)
       {
-        delete writers[p];
+        delete writers[q];
       }
 
       delete [] writers;
