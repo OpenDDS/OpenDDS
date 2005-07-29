@@ -1,3 +1,17 @@
+Fri Jul 29 12:48:42 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated the release notes (and renamed them).
+
+        * VERSION:
+
+          Added a version file.
+
+        * DDS_realease_notes.txt:
+
+          Removed this file.
+
 Fri Jul 29 12:35:25 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataBlockLockPool.h:

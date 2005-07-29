@@ -1,27 +1,40 @@
+
+This is version 0.5 of TAO DDS.
+
+New to this verion are the following changes:
+  - Many memory leaks have been removed.
+  - A memory allocation bug has been corrected.
+  - The -a option of DCPSInfoRepo now works as documented.
+
+=========================================================================
+
 This is the first release of a Data Distribution Service (DDS).
 
 Point of contact: Scott Harris     harris_s@ociweb.com
-                  Paul Calabrese	calabrese_p@ociweb.com
+                  Paul Calabrese   calabrese_p@ociweb.com
 
 See the User's Guide for an user introduction to the service.
 
 TAO's DDS implementation consists of the following:
 * Implementation of the interfaces in the DDS spec and 
-      $TAO_ROOT/orbsvcs/orbsvcs/DDS
+  $DDS_ROOT/dds/DCPS
 
-* A service repository driver in $TAO_ROOT/orbsvcs/DDS
+* A service repository driver in $DDS_ROOT/dds/InfoRepo
 
-* Type support generator, dcps_ts.pl, is in $ACE_ROOT/bin
-  and its templates are in $ACE_ROOT/bin/DCPS.
+* Type support generator, dcps_ts.pl, is in $DDS_ROOT/bin
+  and its templates are in $DDS_ROOT/bin/DCPS.
 
-* The TAO_IDL compiler has code to support DDS type
-  definition using the -Gdcps option.
+* You must use DDS with a version of TAO that has had its 
+  TAO_IDL compiler modified to support DDS type definition 
+  using the -Gdcps option.  Any OCI version later than 
+  TAO 1.4a P4 or DOC group version later than 1.4.6 should
+  work.
 
-* An example in $TAO_ROOT/DevGuideExamples/DDS
+* An example in $DDS_ROOT/DevGuideExamples/DDS
 
-* Functional tests in $TAO_ROOT/orbsvcs/tests/DDS
+* Functional tests in $DDS_ROOT/tests
 
-* Performance tests in $TAO_ROOT/orbsvcs/performance-tests/DDS
+* Performance tests in $DDS_ROOT/performance-tests
 
 =========================================================================
 
