@@ -40,7 +40,7 @@ public:
   void return_lock (DataBlockLock * lock);
 
 private:
-  typedef ACE_Array<DataBlockLockPool::DataBlockLock> Pool;
+  typedef ACE_Array<DataBlockLock> Pool;
 
   Pool   pool_;
   size_t size_;

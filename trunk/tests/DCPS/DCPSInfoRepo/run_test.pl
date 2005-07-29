@@ -29,11 +29,15 @@ $SUBSCRIBER = new PerlACE::Process ("subscriber",
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();
-sleep 5;
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+    print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
+    $REPO->Kill (); $REPO->TimedWait (1);
+    exit 1;
+} 
 
 print $PUBLISHER->CommandLine() . "\n" if $debug ;
 $PUBLISHER->Spawn ();
-sleep 5;
+sleep 2;
 
 print $SUBSCRIBER->CommandLine() . "\n" if $debug ;
 $SUBSCRIBER->Spawn ();
