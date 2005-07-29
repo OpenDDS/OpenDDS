@@ -1,3 +1,9 @@
+Fri Jul 29 14:14:16 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+
+          Fix a variable scoping issue for VC6.
+
 Fri Jul 29 12:48:42 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DDS_release_notes.txt:
