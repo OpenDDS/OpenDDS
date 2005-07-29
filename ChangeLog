@@ -1,9 +1,19 @@
+Fri Jul 29 12:35:25 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataBlockLockPool.h:
+
+          Remove explicit scope that was causing problems for VC6.
+
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Clean up this test a little.
+
 Thu Jul 28 14:08:44 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
-        
+
           Fixed memory leak.
-          - Removed an extra get_name() call on topic which duplicates 
+          - Removed an extra get_name() call on topic which duplicates
             the string.
 
 Thu Jul 28 13:43:58 USMST 2005  Yan Dai  <dai_y@ociweb.com>
@@ -16,30 +26,30 @@ Thu Jul 28 13:43:58 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 Thu Jul 28 13:17:03 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-        
-          Fixed memory leak of DataReaderRemote object references. 
+
+          Fixed memory leak of DataReaderRemote object references.
           - Made the get_dr_obj_ref () assign to a DataReader_var
-            since the accessor duplicates object reference count. 
-          
+            since the accessor duplicates object reference count.
+
         * dds/DCPS/Marked_Default_Qos.cpp:
-        
+
           Fixed memory leak of DomainParticipantFactory object reference.
-          - Made TheParticipantFactory assign to 
-            DomainParticipantFactory_var since the TheParticipantFactory 
+          - Made TheParticipantFactory assign to
+            DomainParticipantFactory_var since the TheParticipantFactory
             duplicates the object reference count.
-          
+
         * dds/DCPS/WriteDataContainer.cpp:
-        
-          Fixed memory leak of the registered sample data and the 
+
+          Fixed memory leak of the registered sample data and the
           PublicationInstance object.
-          - Made the unregister_all() delete all PublicationInstance 
+          - Made the unregister_all() delete all PublicationInstance
             objects in the instance handle list.
-          
+
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
-        
+
           Fixed memory leak of the DataWriter object reference.
           - Delete every Writer object after test is done.
-          
+
         * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
 
           Fixed the memory leak of the listener servant.
@@ -74,7 +84,7 @@ Wed Jul 27 17:37:13 MST 2005  Trevor Fields  <fields_t@ociweb.com>
           Changed to use a DataBlockLockPool for providing locks to the
           ACE_Data_Blocks.  The blocks need to be locked to prevent the
           simultaneous access by multiple threads from deforming the
-          reference count. 
+          reference count.
 
 Wed Jul 27 17:20:16 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
@@ -83,9 +93,9 @@ Wed Jul 27 17:20:16 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/SubscriberImpl.cpp:
         * dds/DCPS/Service_Participant.h:
 
-          Rolled back previous version and found the memory 
-          leak is in the reference_to_servant function 
-          of Service_Participant. 
+          Rolled back previous version and found the memory
+          leak is in the reference_to_servant function
+          of Service_Participant.
 
 Wed Jul 27 11:03:25 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
@@ -108,13 +118,13 @@ Tue Jul 26 22:33:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
-        
+
           Fixed PublisherImpl and Subscriber memory leak.
-          
+
         * tests/DCPS/FooTest3_2/pub_id.txt:
-        
+
           Removed test generated file.
-          
+
 Tue Jul 26 15:38:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
@@ -123,11 +133,11 @@ Tue Jul 26 15:38:24 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * performance-tests/DCPS/TCPListenerTest/Writer.h:
 
           Correctly applied the _var and _ptr.
-          
+
         * tests/DCPS/FooTest3_0/pub_id.txt:
 
           Removed test generated file.
-          
+
 Fri Jul 22 08:40:18 MST 2005  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
@@ -159,7 +169,7 @@ Wed Jul 20 15:40:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/ReceivedDataElementList.inl:
 
-          Corrected comment about why the instance state is not 
+          Corrected comment about why the instance state is not
           deleted in the destructor.
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
