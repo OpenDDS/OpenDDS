@@ -1,0 +1,18 @@
+//
+// $Id$
+//
+/// Put the interfaces in a module, to avoid global namespace pollution
+module Test
+{
+  
+  interface TestPubDriver
+  {
+    /// A method to shutdown the PubDriver
+    /**
+     * This method is used to simplify the test shutdown process
+     */
+    oneway void shutdown ();
+    void add_new_subscription (in long            reader_id,
+                               in string          sub_addr);
+  };
+};
