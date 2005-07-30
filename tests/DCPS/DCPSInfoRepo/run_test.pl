@@ -5,7 +5,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use lib '../../../../../bin';
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 $status = 0;
@@ -28,11 +29,15 @@ $SUBSCRIBER = new PerlACE::Process ("subscriber",
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();
-sleep 5;
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+    print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
+    $REPO->Kill (); $REPO->TimedWait (1);
+    exit 1;
+} 
 
 print $PUBLISHER->CommandLine() . "\n" if $debug ;
 $PUBLISHER->Spawn ();
-sleep 5;
+sleep 2;
 
 print $SUBSCRIBER->CommandLine() . "\n" if $debug ;
 $SUBSCRIBER->Spawn ();

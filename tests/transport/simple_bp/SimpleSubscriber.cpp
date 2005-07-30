@@ -106,3 +106,10 @@ SimpleSubscriber::received_test_message() const
 {
   return this->reader_.received_test_message();
 }
+
+
+void
+SimpleSubscriber::print_time()
+{
+  this->reader_.print_time();
+}

@@ -58,8 +58,9 @@ int parse_args (int argc, char *argv[])
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
     {
-      DATA_SIZE = ACE_OS::atoi (currentArg);
+      int shift_bits = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
+      DATA_SIZE = 1 << shift_bits;
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
     {
@@ -99,11 +100,11 @@ int parse_args (int argc, char *argv[])
     else 
     {
       ACE_ERROR((LM_ERROR,"(%P|%t) unexpected parameter %s\n", arg_shifter.get_current()));
-      return 3;
       arg_shifter.ignore_arg ();
+      return 3;
+
     }
   }
-
   if (0 == ACE_OS::strcmp("default", reader_address_str) )
     {
       ACE_ERROR((LM_ERROR,
@@ -136,13 +137,13 @@ int main (int argc, char *argv[])
         return status;
 
 
-      ::DDS::DomainParticipant_ptr dp = 
+      ::DDS::DomainParticipant_var dp = 
         dpf->create_participant(TEST_DOMAIN, 
                                 PARTICIPANT_QOS_DEFAULT, 
                                 ::DDS::DomainParticipantListener::_nil() 
                                 ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (dp))
+      if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT(" %P|%t ERROR: create_participant failed.\n")));
@@ -150,18 +151,20 @@ int main (int argc, char *argv[])
       }
 
       // Register the type supports
-      switch (1 << DATA_SIZE)
+      switch (DATA_SIZE)
       {
       case 128:
         {
           ::Mine::Pt128TypeSupportImpl* pt128ts_servant = new ::Mine::Pt128TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt128ts_servant;
+
           ::Mine::Pt128TypeSupport_var pt128ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt128TypeSupport,
                                             ::Mine::Pt128TypeSupportImpl, 
                                             ::Mine::Pt128TypeSupport_ptr >(pt128ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt128ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport."))); 
@@ -173,13 +176,15 @@ int main (int argc, char *argv[])
       case 512:
         {
           ::Mine::Pt512TypeSupportImpl* pt512ts_servant = new ::Mine::Pt512TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt512ts_servant;
+
           ::Mine::Pt512TypeSupport_var pt512ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt512TypeSupport,
                                             ::Mine::Pt512TypeSupportImpl, 
                                             ::Mine::Pt512TypeSupport_ptr >(pt512ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt512ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR:Failed to register the Pt512TypeSupport."))); 
@@ -191,13 +196,15 @@ int main (int argc, char *argv[])
       case 2048:
         {
           ::Mine::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Mine::Pt2048TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
+
           ::Mine::Pt2048TypeSupport_var pt2048ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt2048TypeSupport,
                                             ::Mine::Pt2048TypeSupportImpl, 
                                             ::Mine::Pt2048TypeSupport_ptr >(pt2048ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt2048ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport."))); 
@@ -209,13 +216,15 @@ int main (int argc, char *argv[])
       case 8192:
         {
           ::Mine::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Mine::Pt8192TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
+
           ::Mine::Pt8192TypeSupport_var pt8192ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt8192TypeSupport,
                                             ::Mine::Pt8192TypeSupportImpl, 
                                             ::Mine::Pt8192TypeSupport_ptr >(pt8192ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt8192ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport."))); 
@@ -236,22 +245,22 @@ int main (int argc, char *argv[])
 
       topic_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-      ::DDS::Topic_ptr topic = 
+      ::DDS::Topic_var topic = 
         dp->create_topic (TEST_TOPIC, 
                           TEST_TYPE, 
                           topic_qos, 
                           ::DDS::TopicListener::_nil()
                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (topic))
+      if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
-      ::DDS::TopicDescription_ptr description =
+      ::DDS::TopicDescription_var description =
         dp->lookup_topicdescription(TEST_TOPIC ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (description))
+      if (CORBA::is_nil (description.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT(" %P|%t ERROR: lookup_topicdescription failed.\n")),
@@ -260,12 +269,12 @@ int main (int argc, char *argv[])
 
 
       // Create the subscriber
-      ::DDS::Subscriber_ptr sub =
+      ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                              ::DDS::SubscriberListener::_nil()
                              ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (sub))
+      if (CORBA::is_nil (sub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT(" %P|%t ERROR: create_subscriber failed.\n")),
@@ -284,7 +293,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl 
         = reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                 ::DDS::Subscriber_ptr>
-                              (sub ACE_ENV_SINGLE_ARG_PARAMETER);
+                              (sub.in() ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
       if (0 == sub_impl)
@@ -336,6 +345,9 @@ int main (int argc, char *argv[])
                                    NUM_SAMPLES,
                                    DATA_SIZE,
                                    RECVS_BTWN_READS);
+
+      PortableServer::ServantBase_var safe_servant = dr_listener_impl;
+
       ::DDS::DataReaderListener_var dr_listener = 
         TAO::DCPS::servant_to_reference< ::DDS::DataReaderListener,
                                         DataReaderListenerImpl, 
@@ -348,14 +360,14 @@ int main (int argc, char *argv[])
                           1);
       }
 
-      ::DDS::DataReader_ptr  the_dr 
-               = sub->create_datareader(description,
+      ::DDS::DataReader_var  the_dr 
+               = sub->create_datareader(description.in() ,
                                         dr_qos,
                                         dr_listener.in()
                                         ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
-      if (CORBA::is_nil (the_dr))
+      if (CORBA::is_nil (the_dr.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT(" %P|%t ERROR: create_datareader failed.\n")),
@@ -373,10 +385,10 @@ int main (int argc, char *argv[])
       // clean up subscriber objects
       sub->delete_contained_entities() ;
 
-      dp->delete_subscriber(sub ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in() ACE_ENV_ARG_PARAMETER);
 
-      dp->delete_topic(topic ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
+      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown (); 

@@ -7,7 +7,7 @@ int
 main(int argc, char* argv[])
 {
   ACE_LOG_MSG->priority_mask(LM_TRACE     |
-                             LM_DEBUG     |
+//                             LM_DEBUG     |
                              LM_INFO      |
                              LM_NOTICE    |
                              LM_WARNING   |

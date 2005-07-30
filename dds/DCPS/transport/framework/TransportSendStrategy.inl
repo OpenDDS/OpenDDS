@@ -813,6 +813,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
                  "Since backpressure flag is false, return "
                  "OUTCOME_SEND_ERROR.\n"));
 
+
       // Not backpressure - it's a real error.
       // Note: moved thisto send_bytes so the errno msg could be written.
       //ACE_ERROR((LM_ERROR,
@@ -821,6 +822,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 
       return OUTCOME_SEND_ERROR;
     }
+
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Since num_bytes_sent > 0, adjust the packet to account for "

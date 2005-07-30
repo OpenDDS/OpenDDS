@@ -29,7 +29,7 @@ const char * writer_address_str = "default";
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
 int NUM_SAMPLES = 128;
-int DATA_SIZE = 7;
+int DATA_SIZE = 128;
 int RECVS_BTWN_READS = 10;
 CORBA::ULong max_mili_sec_blocking = 5000;
 

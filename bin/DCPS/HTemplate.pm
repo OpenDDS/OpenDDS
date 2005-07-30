@@ -31,6 +31,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "dds/DCPS/DataBlockLockPool.h"
 
 #include <vector>
 
@@ -291,6 +292,9 @@ private:
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
+   // The lock pool will be thread safe because
+   // only one write call is allowed at a time.
+   DataBlockLockPool*  db_lock_pool_;
    DataAllocator* data_allocator_;
    ::TAO::DCPS::MessageBlockAllocator* mb_allocator_;
    ::TAO::DCPS::DataBlockAllocator*    db_allocator_;

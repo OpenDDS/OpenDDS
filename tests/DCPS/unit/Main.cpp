@@ -14,6 +14,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/Reactor.h"
 
 const long  MY_DOMAIN   = 911;
 const char* MY_TOPIC    = "foo";
