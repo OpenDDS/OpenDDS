@@ -1,3 +1,11 @@
+Fri Jul 29 17:10:56 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+
+          Fixed memory leaks.
+          - Use _var instead of _ptr.
+
 Fri Jul 29 14:14:16 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
