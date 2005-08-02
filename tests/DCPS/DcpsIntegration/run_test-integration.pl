@@ -30,7 +30,11 @@ open(SAVEERR, ">&STDERR");
 open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 $DCPSREPO->Spawn ();
-sleep 5;
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+    print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
+    $REPO->Kill (); $REPO->TimedWait (1);
+    exit 1;
+}
 
 $TestResult = $Test->SpawnWaitKill (60);
 
