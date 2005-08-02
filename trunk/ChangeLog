@@ -1,3 +1,18 @@
+Tue Aug  2 16:24:58 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Change the default IOR file written from dcps_ir.ior to repo.ior.
+          This makes it match the default that the service participant is
+          looking for.
+
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+
+          Clean these tests up by substituting a timed wait for the repo.ior
+          file instead of a sleep(5).
+
 Tue Aug  2 15:39:50 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/BuiltInTopic/common.cpp:

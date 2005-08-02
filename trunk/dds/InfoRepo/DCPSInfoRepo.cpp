@@ -11,7 +11,7 @@
 #include "ace/Arg_Shifter.h"
 
 
-static const char * ior_file = "dcps_ir.ior";
+static const char * ior_file = "repo.ior";
 static const char * domain_file = "domain_ids";
 static const char * listen_address_str = "localhost:2839"; // = 0xB17
 static int listen_address_given = 0;
