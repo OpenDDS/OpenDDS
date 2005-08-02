@@ -16,8 +16,8 @@
 const long  TEST_DOMAIN   = 911;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
-const char * reader_address_str = "127.0.0.1:2222";
-const char * writer_address_str = "127.0.0.1:3333";
+const char * reader_address_str = "";
+const char * writer_address_str = "";
 int default_key = 101010;
 int num_writes = 1;
 
