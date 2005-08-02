@@ -1,3 +1,16 @@
+Tue Aug  2 15:39:50 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+
+          Let the host/port default on this test.
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Fix some string problems caused by VC6's inability to pick the
+          correct overloaded function.
+
 Fri Jul 29 17:10:56 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
