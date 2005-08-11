@@ -1,3 +1,9 @@
+Thu Aug 11 11:24:15 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Fix some more function overloading issues with VC6.
+
 Thu Aug 11 11:18:35 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:
