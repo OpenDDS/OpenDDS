@@ -1,3 +1,19 @@
+Thu Aug 11 11:18:35 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          Increase the sample and packet lengths to be 32 bit integers
+          so we can support larger samples (greater than 64 KB).
+
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.inl:
+
+          Limit the simple UDP transport to about 64 KB samples
+          because of its lack of fragmentation and the MTU.
+
 Tue Aug  2 16:24:58 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:

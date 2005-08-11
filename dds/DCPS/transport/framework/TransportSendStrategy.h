@@ -170,10 +170,10 @@ namespace TAO
         size_t max_samples_;
 
         /// Configuration - optimum transport packet size (bytes)
-        ACE_UINT16 optimum_size_;
+        ACE_UINT32 optimum_size_;
 
         /// Configuration - max transport packet size (bytes)
-        ACE_UINT16 max_size_;
+        ACE_UINT32 max_size_;
 
         /// Used during backpressure situations to hold samples that have
         /// not yet been made to be part of a transport packet, and are

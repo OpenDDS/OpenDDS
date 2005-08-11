@@ -71,13 +71,13 @@ namespace TAO
         unsigned queue_initial_pools_;
 
         /// Max size (in bytes) of a packet (packet header + sample(s))
-        ACE_UINT16 max_packet_size_;
+        ACE_UINT32 max_packet_size_;
 
         /// Max number of samples that should ever be in a single packet.
         size_t max_samples_per_packet_;
 
         /// Optimum size (in bytes) of a packet (packet header + sample(s)).
-        ACE_UINT16 optimum_packet_size_;
+        ACE_UINT32 optimum_packet_size_;
 
 
       protected:
