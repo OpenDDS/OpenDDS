@@ -1,5 +1,16 @@
 
-This is version 0.5 of TAO DDS.
+Version 0.6 of TAO DDS.
+
+New to this verion are the following changes:
+  - Changed the default ior file name for DCPSInfoRepo from dcps_ir.ior
+    to repo.ior.
+  - Changed the packet and sample length fields to 32 bit integers so
+    we can support samples larger than 64 KB.
+  - Improved support for MS VC6
+
+=========================================================================
+
+Version 0.5 of TAO DDS.
 
 New to this verion are the following changes:
   - Many memory leaks have been removed.
