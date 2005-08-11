@@ -162,7 +162,7 @@ Reader::Reader(::DDS::Subscriber_ptr subscriber,
   num_publishers_(num_publishers),
   num_samples_ (num_samples),
   data_size_ (data_size),
-  num_floats_per_sample_ (1 << data_size),
+  num_floats_per_sample_ (data_size),
   finished_sending_ (false)
 {
 }

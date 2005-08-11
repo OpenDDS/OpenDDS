@@ -155,11 +155,11 @@ int main (int argc, char *argv[])
   }
   { //=====================================================================
     Xyz::StructOfArrayOfString val;
-    val.f[0] = "I";
-    val.f[1] = "hope";
-    val.f[2] = "this";
-    val.f[3] = "works";
-    val.f[4] = "";
+    val.f[0] = CORBA::string_dup("I");
+    val.f[1] = CORBA::string_dup("hope");
+    val.f[2] = CORBA::string_dup("this");
+    val.f[3] = CORBA::string_dup("works");
+    val.f[4] = CORBA::string_dup("");
     Xyz::StructOfArrayOfString val_out;
     if (try_marshaling<Xyz::StructOfArrayOfString>(val, val_out, 
                             DONT_CHECK_MS, ARRAY_LEN*4+14, "Xyz::StructOfArrayOfString"))
@@ -317,11 +317,11 @@ int main (int argc, char *argv[])
   { //=====================================================================
     Xyz::SeqOfString val;
     val.length (SEQ_LEN);
-    val[0] = "I";
-    val[1] = "hope";
-    val[2] = "this";
-    val[3] = "works";
-    val[4] = "";
+    val[0] = CORBA::string_dup("I");
+    val[1] = CORBA::string_dup("hope");
+    val[2] = CORBA::string_dup("this");
+    val[3] = CORBA::string_dup("works");
+    val[4] = CORBA::string_dup("");
     Xyz::SeqOfString val_out;
     if (try_marshaling<Xyz::SeqOfString>(val, val_out, 
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*4+14, "Xyz::SeqOfString"))
@@ -493,7 +493,7 @@ int main (int argc, char *argv[])
   { //=====================================================================
     Xyz::StructAUnion val;
     val.sau_f1._d(Xyz::redx);
-    val.sau_f1.rv("joe");
+    val.sau_f1.rv(CORBA::string_dup("joe"));
     // size = union descr/4 + string length/4 + string contents/3
     Xyz::StructAUnion val_out;
     if (try_marshaling<Xyz::StructAUnion>(val, val_out, 
@@ -511,8 +511,8 @@ int main (int argc, char *argv[])
   { //=====================================================================
     Xyz::SeqOfString val;
     val.length(2); //4 for seq length
-    val[0] = "four"; //4+4 strlen & string
-    val[1] = "five5"; //4+5 strlen + string
+    val[0] = CORBA::string_dup("four"); //4+4 strlen & string
+    val[1] = CORBA::string_dup("five5"); //4+5 strlen + string
     Xyz::SeqOfString val_out;
     if (try_marshaling<Xyz::SeqOfString>(val, val_out, 
                             DONT_CHECK_MS, 21, "Xyz::SeqOfString"))
@@ -541,7 +541,7 @@ int main (int argc, char *argv[])
   my_foo.ooo[0] = 0xff; //+3 > 20
   my_foo.ooo[1] = 0x80;
   my_foo.ooo[2] = 0x3d;
-  my_foo.theString = "four";
+  my_foo.theString = CORBA::string_dup("four");
   //  ACE_DEBUG((LM_DEBUG, "thestruct.f60.length() = %d\n",
   //           my_foo.thestruct.f60.length()));
   my_foo.theUnion._d(Xyz::bluex); // !!!! Unions are invalid unless set!!!
@@ -552,7 +552,7 @@ int main (int argc, char *argv[])
   my_foo.theUnion.bv(asol);// !!!! Unions are invalid unless set!!!
   my_foo.theSeqOfUnion.length(2);
   my_foo.theSeqOfUnion[0]._d(Xyz::redx);
-  my_foo.theSeqOfUnion[0].rv("Berkley");
+  my_foo.theSeqOfUnion[0].rv(CORBA::string_dup("Berkley"));
   my_foo.theSeqOfUnion[1]._d(Xyz::greenx);
   Xyz::AStruct as;
   as.f2 = 3.14F;
@@ -575,7 +575,7 @@ int main (int argc, char *argv[])
   foo2.ooo[0] = 0xff;
   foo2.ooo[1] = 0x80;
   foo2.ooo[2] = 0x3d;
-  foo2.theString = "four";
+  foo2.theString = CORBA::string_dup("four");
 
 
   std::map<Xyz::Foo, Xyz::Foo*, FooKeyLessThan> foomap;

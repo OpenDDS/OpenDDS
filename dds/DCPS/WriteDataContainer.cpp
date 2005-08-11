@@ -765,6 +765,11 @@ namespace TAO
                           *it));
             }    
 
+          PublicationInstance* instance = 
+               reinterpret_cast<PublicationInstance*>(*it);
+
+          delete instance;
+
           // Get the next iterator before erase the instance handle.      
           PublicationInstances::iterator it_next = it;
           it_next ++;

@@ -12,7 +12,9 @@
 #include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "tao/TAO_Singleton.h"
-#include  "tao/PortableServer/POA.h"
+
+#include  "tao/PortableServer/Root_POA.h"
+
 #include  "ace/Task.h"
 #include  "ace/Auto_Ptr.h"
 
@@ -307,14 +309,16 @@ namespace TAO
         }
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*, 
+           poa->reference_to_servant (
+              p ACE_ENV_ARG_PARAMETER) );
+      ACE_CHECK_RETURN (0);
+
       // Use the ServantBase_var so that the servant's reference 
       // count will not be changed by this operation.
-      PortableServer::ServantBase_var servant 
-        = poa->reference_to_servant (p ACE_ENV_ARG_PARAMETER);
+      PortableServer::ServantBase_var servant = the_servant;
 
-      ACE_CHECK_RETURN (0);
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*, servant.in ());
-      
       return the_servant;
     }
 

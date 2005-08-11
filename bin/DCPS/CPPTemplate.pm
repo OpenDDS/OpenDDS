@@ -74,8 +74,8 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-    <%TYPE%>DataWriterImpl* WriterImplmpl;
-    ACE_NEW_RETURN(WriterImplmpl, 
+    <%TYPE%>DataWriterImpl* writer_impl;
+    ACE_NEW_RETURN(writer_impl, 
                    <%TYPE%>DataWriterImpl(), 
                    ::TAO::DCPS::DataWriterRemote::_nil());
 
@@ -84,7 +84,7 @@ DDS::ReturnCode_t
         = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataWriterRemote, 
                                             <%TYPE%>DataWriterImpl, 
                                             TAO::DCPS::DataWriterRemote_ptr> 
-              (WriterImplmpl ACE_ENV_ARG_PARAMETER);
+              (writer_impl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
 
     return writer_obj;
@@ -123,7 +123,8 @@ DDS::ReturnCode_t
 : marshaled_size_ (0),
   data_allocator_ (0),
   mb_allocator_ (0),
-  db_allocator_ (0)
+  db_allocator_ (0),
+  db_lock_pool_(0)
 {
 }
 
@@ -133,6 +134,7 @@ DDS::ReturnCode_t
   delete data_allocator_;
   delete mb_allocator_;
   delete db_allocator_;
+  delete db_lock_pool_;
 }
 
 DDS::InstanceHandle_t
@@ -472,7 +474,10 @@ void
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
           db_allocator_, n_chunks_));
     }
+    
 
+  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
+  
   return ::DDS::RETCODE_OK;
 }
 
@@ -497,7 +502,7 @@ ACE_Message_Block*
                                0, //cont
                                0, //data
                                data_allocator_, //allocator_strategy
-                               0, //locking_strategy
+                               db_lock_pool_->get_lock(), //data block locking_strategy
                                ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                ACE_Time_Value::zero,
                                ACE_Time_Value::max_time,
@@ -671,9 +676,14 @@ void
           ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
             
           ptr->rcvd_sample_.remove(head_ptr) ;
-
-          data_allocator_->free(head_ptr->registered_data_) ;
-          rd_allocator_->free(head_ptr) ;
+          
+         ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (head_ptr,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
         }
 
       delete ptr ;
@@ -986,9 +996,13 @@ DDS::ReturnCode_t
 
                   ptr->rcvd_sample_.remove(item) ;
 
-                  data_allocator_->free(item->registered_data_) ;
-                  rd_allocator_->free(item) ;
-          
+                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+                  ACE_DES_FREE (delete_ptr,
+                                data_allocator_->free,
+                                <%TYPE%> );
+                  ACE_DES_FREE (item,
+                                rd_allocator_->free,
+                                ReceivedDataElement);         
                   item = next ;
                 }
 
@@ -1016,8 +1030,13 @@ DDS::ReturnCode_t
             
             ptr->rcvd_sample_.remove(tail) ;
 
-            data_allocator_->free(tail->registered_data_) ;
-            rd_allocator_->free(tail) ;
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+            ACE_DES_FREE (delete_ptr,
+                          data_allocator_->free,
+                          <%TYPE%> );
+            ACE_DES_FREE (tail,
+                          rd_allocator_->free,
+                          ReceivedDataElement);         
           }
         else
           {
@@ -1433,8 +1452,13 @@ DDS::ReturnCode_t
 
           ptr->rcvd_sample_.remove(item) ;
 
-          data_allocator_->free(item->registered_data_) ;
-          rd_allocator_->free(item) ;
+          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (item,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
 
           item = next ;
         }
@@ -1462,8 +1486,13 @@ DDS::ReturnCode_t
             
       ptr->rcvd_sample_.remove(tail) ;
 
-      data_allocator_->free(tail->registered_data_) ;
-      rd_allocator_->free(tail) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (tail,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
     else
     {
@@ -1728,14 +1757,14 @@ void
     
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
-    if (this->qos_.resource_limits.max_samples_per_instance != 
-        ::DDS::LENGTH_UNLIMITED)
+    if ((this->qos_.resource_limits.max_samples_per_instance != 
+          ::DDS::LENGTH_UNLIMITED) &&
+       (instance_ptr->rcvd_sample_.size_ >= 
+        this->qos_.resource_limits.max_samples_per_instance))
     {
-      if (instance_ptr->rcvd_sample_.size_ >= 
-             this->qos_.resource_limits.max_samples_per_instance &&
-          instance_ptr->rcvd_sample_.head_->sample_state_ 
-             == ::DDS::NOT_READ_SAMPLE_STATE)
-      {
+      if  (instance_ptr->rcvd_sample_.head_->sample_state_ 
+            == ::DDS::NOT_READ_SAMPLE_STATE)
+        {
         // for now the implemented QoS means that if the head sample
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
@@ -1751,13 +1780,31 @@ void
 
         if (listener != 0)
         {
-          listener->on_sample_rejected(get_dr_obj_ref(),
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
 
-        data_allocator_->free(instance_data) ;
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      <%TYPE%> );
 
         return ::DDS::RETCODE_OK ; //OK?
+       }
+       else
+       {
+         // Discard the oldest previously-read sample
+         ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
+         instance_ptr->rcvd_sample_.remove(item) ;
+         
+         ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+         ACE_DES_FREE (ptr,
+                       data_allocator_->free,
+                       <%TYPE%> );
+
+         ACE_DES_FREE (item,
+                       rd_allocator_->free,
+                       ReceivedDataElement);
       }
     }
     
@@ -1800,12 +1847,18 @@ void
 
         if (listener)
         {
-          listener->on_sample_lost(get_dr_obj_ref(), sample_lost_status_);
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
       }
 
-      data_allocator_->free(head_ptr->registered_data_) ;
-      rd_allocator_->free(head_ptr) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (head_ptr,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
 
     SubscriberImpl* sub = get_subscriber_servant () ;
@@ -1822,7 +1875,8 @@ void
         
       if (listener != 0)
       {
-        listener->on_data_available(get_dr_obj_ref());
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
+        listener->on_data_available(dr.in ());
       }
     }
   }
@@ -1831,7 +1885,9 @@ void
     SubscriptionInstance *instance_ptr = 
          reinterpret_cast<SubscriptionInstance *> (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
-    data_allocator_->free(instance_data) ;
+    ACE_DES_FREE (instance_data,
+                  data_allocator_->free,
+                  <%TYPE%> );
   }
 
   return ::DDS::RETCODE_OK;
@@ -1871,7 +1927,9 @@ void
               ACE_TEXT("The instance is not registered.\n")));
   }
       
-  data_allocator_->free(data) ;
+  ACE_DES_FREE (data,
+                data_allocator_->free,
+                <%TYPE%> );
 }
 
 //TAO::DCPS::DataReaderRemote_ptr

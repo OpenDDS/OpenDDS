@@ -44,6 +44,7 @@ int parse_args (int argc, char *argv[])
     // options:
     // -p  <num data writers>
     // -r  <num data readers>
+    // -i  <data writer id>
     // -n  <num packets>
     // -d  <data size>
     // -a  <transport address>
@@ -67,8 +68,9 @@ int parse_args (int argc, char *argv[])
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
     {
-      DATA_SIZE = ACE_OS::atoi (currentArg);
+      int shift_bits = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
+      DATA_SIZE = 1 << shift_bits;
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
     {
@@ -95,6 +97,11 @@ int parse_args (int argc, char *argv[])
       MAX_INSTANCES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    {
+      id = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
     else if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0) 
     {
       max_mili_sec_blocking = ACE_OS::atoi (currentArg);
@@ -108,8 +115,8 @@ int parse_args (int argc, char *argv[])
     else 
     {
       ACE_ERROR((LM_ERROR,"(%P|%t) unexpected parameter %s\n", arg_shifter.get_current()));
-      return 3;
       arg_shifter.ignore_arg ();
+      return 3;
     }
   }
   // Indicates sucessful parsing of the command line
@@ -135,13 +142,13 @@ int main (int argc, char *argv[])
       if (status) 
         return status;
 
-      ::DDS::DomainParticipant_ptr dp = 
+      ::DDS::DomainParticipant_var dp = 
         dpf->create_participant(TEST_DOMAIN, 
                                 PARTICIPANT_QOS_DEFAULT, 
                                 ::DDS::DomainParticipantListener::_nil() 
                                 ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (dp))
+      if (CORBA::is_nil (dp.in() ))
       {
         ACE_ERROR ((LM_ERROR,
                    ACE_TEXT(" %P|%t ERROR: create_participant failed.\n")));
@@ -149,18 +156,20 @@ int main (int argc, char *argv[])
       }
 
       // Register the type supports
-      switch (1 << DATA_SIZE)
+      switch (DATA_SIZE)
       {
       case 128:
         {
           ::Mine::Pt128TypeSupportImpl* pt128ts_servant = new ::Mine::Pt128TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt128ts_servant;
+
           ::Mine::Pt128TypeSupport_var pt128ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt128TypeSupport,
                                             ::Mine::Pt128TypeSupportImpl, 
                                             ::Mine::Pt128TypeSupport_ptr >(pt128ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt128ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in() , TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport."))); 
@@ -172,13 +181,15 @@ int main (int argc, char *argv[])
       case 512:
         {
           ::Mine::Pt512TypeSupportImpl* pt512ts_servant = new ::Mine::Pt512TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt512ts_servant;
+
           ::Mine::Pt512TypeSupport_var pt512ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt512TypeSupport,
                                             ::Mine::Pt512TypeSupportImpl, 
                                             ::Mine::Pt512TypeSupport_ptr >(pt512ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt512ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in() , TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt512TypeSupport."))); 
@@ -190,13 +201,15 @@ int main (int argc, char *argv[])
       case 2048:
         {
           ::Mine::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Mine::Pt2048TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
+
           ::Mine::Pt2048TypeSupport_var pt2048ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt2048TypeSupport,
                                             ::Mine::Pt2048TypeSupportImpl, 
                                             ::Mine::Pt2048TypeSupport_ptr >(pt2048ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt2048ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in() , TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport."))); 
@@ -208,13 +221,15 @@ int main (int argc, char *argv[])
       case 8192:
         {
           ::Mine::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Mine::Pt8192TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
+
           ::Mine::Pt8192TypeSupport_var pt8192ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt8192TypeSupport,
                                             ::Mine::Pt8192TypeSupportImpl, 
                                             ::Mine::Pt8192TypeSupport_ptr >(pt8192ts_servant);
           ACE_TRY_CHECK;
 
-          if (::DDS::RETCODE_OK != pt8192ts->register_type(dp, TEST_TYPE))
+          if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in() , TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport."))); 
@@ -240,25 +255,25 @@ int main (int argc, char *argv[])
                                    (max_mili_sec_blocking % 1000) * 1000*1000;
       topic_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-      ::DDS::Topic_ptr topic = 
+      ::DDS::Topic_var topic = 
         dp->create_topic (TEST_TOPIC, 
                           TEST_TYPE, 
                           topic_qos, 
                           ::DDS::TopicListener::_nil()
                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (topic))
+      if (CORBA::is_nil (topic.in() ))
       {
         return 1 ;
       }
 
       // Create the publisher
-      ::DDS::Publisher_ptr pub =
+      ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
                              ::DDS::PublisherListener::_nil()
                              ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      if (CORBA::is_nil (pub))
+      if (CORBA::is_nil (pub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT(" %P|%t ERROR: create_publisher failed.\n")),
@@ -277,7 +292,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::PublisherImpl* pub_impl 
         = reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                 ::DDS::Publisher_ptr>
-                              (pub ACE_ENV_SINGLE_ARG_PARAMETER);
+                              (pub.in()  ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
       if (0 == pub_impl)
@@ -323,19 +338,19 @@ int main (int argc, char *argv[])
       pub->get_default_datawriter_qos (dw_qos);
       pub->copy_from_topic_qos (dw_qos, topic_qos);
 
-      ::DDS::DataWriter_ptr * dws = new ::DDS::DataWriter_ptr[num_datawriters];
+      ::DDS::DataWriter_var * dws = new ::DDS::DataWriter_var[num_datawriters];
 
       // Create one or multiple datawriters belonging to the same 
       // publisher.
       for (int k = 0; k < num_datawriters; k ++)
       {
-        dws[k] = pub->create_datawriter(topic,
+        dws[k] = pub->create_datawriter(topic.in() ,
                                         dw_qos,
                                         ::DDS::DataWriterListener::_nil()
                                         ACE_ENV_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
-        if (CORBA::is_nil (dws[k]))
+        if (CORBA::is_nil (dws[k].in ()))
         {
           ACE_ERROR ((LM_ERROR,
                      ACE_TEXT(" %P|%t ERROR: create_datawriter failed.\n")));
@@ -343,16 +358,15 @@ int main (int argc, char *argv[])
         }
       }
 
-
       Writer** writers = new Writer* [num_datawriters] ;
 
       for (int p = 0; p < num_datawriters; p ++)
       {
-        writers[p] = new Writer(dws[p], 
+        writers[p] = new Writer(dws[p].in (), 
                                 NUM_SAMPLES,
                                 DATA_SIZE,
                                 num_datareaders,
-                                p); 
+                                id + p); 
         writers[p]->start ();
       }
 
@@ -377,12 +391,18 @@ int main (int argc, char *argv[])
       pub->delete_contained_entities() ;
 
       delete [] dws;
+
+      for (int q = 0; q < num_datawriters; q ++)
+      {
+        delete writers[q];
+      }
+
       delete [] writers;
 
-      dp->delete_publisher(pub ACE_ENV_ARG_PARAMETER);
+      dp->delete_publisher(pub.in()  ACE_ENV_ARG_PARAMETER);
 
-      dp->delete_topic(topic ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in()  ACE_ENV_ARG_PARAMETER);
+      dpf->delete_participant(dp.in()  ACE_ENV_ARG_PARAMETER);
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown (); 

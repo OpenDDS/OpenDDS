@@ -16,7 +16,8 @@ namespace TAO
     Marked_Default_Qos::marked_default_DomainParticipantQos ()
     {
       ::DDS::DomainParticipantQos qos;
-      TheParticipantFactory->get_default_participant_qos(qos);
+      ::DDS::DomainParticipantFactory_var factory = TheParticipantFactory;
+      factory->get_default_participant_qos(qos);
       return qos;
     }
 

@@ -170,13 +170,9 @@ int DCPS_IR_Subscription::remove_associations ()
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
 
   if (0 < numAssociations)
     {
-      TAO::DCPS::WriterIdSeq idSeq(numAssociations);
-      idSeq.length(numAssociations);
-
       DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
       DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
 
@@ -187,29 +183,6 @@ int DCPS_IR_Subscription::remove_associations ()
 
           pub->remove_associated_subscription (this, send);
           remove_associated_publication (pub, dontSend);
-
-          idSeq[count] = pub->get_id();
-          ++count;
-        }
-
-      if (participant_->is_alive())
-        {
-          ACE_TRY_NEW_ENV
-            {
-              reader_->remove_associations(idSeq);
-              ACE_TRY_CHECK;
-            }
-          ACE_CATCHANY
-            {
-              if (TAO_debug_level > 0)
-                {
-                  ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                    "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
-                }
-              participant_->mark_dead();
-              status = -1;
-            }
-          ACE_ENDTRY;
         }
     }
 

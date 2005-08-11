@@ -22,7 +22,7 @@ class SimplePublisher : public TAO::DCPS::TransportInterface
               ssize_t                             num_subscriptions,
               const TAO::DCPS::AssociationData*   subscriptions);
 
-    int run(unsigned num_messages);
+    int run(unsigned num_messages, unsigned size);
 
     void send_samples(const TAO::DCPS::DataSampleList& samples);
 

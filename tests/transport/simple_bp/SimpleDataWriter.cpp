@@ -33,7 +33,9 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 
 
 int
-SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
+SimpleDataWriter::run(SimplePublisher* publisher,
+                      unsigned num_messages,
+                      unsigned msg_size)
 {
   this->num_messages_delivered_ = 0;
   this->num_messages_sent_      = num_messages;
@@ -46,7 +48,11 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
   samples.size_ = num_messages;
 
   // This is what goes in the "Data Block".
-  std::string data = "Hello World!";
+  std::string data;
+  for (unsigned j = 1; j <= msg_size; ++j)
+    {
+      data += char (1 + (j % 255));
+    }
 
   // Now we can create the DataSampleHeader struct and set its fields.
   TAO::DCPS::DataSampleHeader header;
@@ -59,7 +65,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
     {
       // This is what goes in the "Data Block".
       std::ostringstream ostr;
-      ostr << data << " [" << i << "]";
+      ostr << data;
 
       std::string data_str = ostr.str();
 
@@ -100,6 +106,8 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
     }
 
   publisher->send_samples(samples);
+
+  ACE_OS::sleep(15);
 
   return 0;
 }
