@@ -15,6 +15,8 @@ my $debug = 0 ;
 $domains_file = PerlACE::LocalFile ("domainids.txt");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
 
+unlink $dcpsrepo_ior;
+
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                             "-o $dcpsrepo_ior"
@@ -64,5 +66,7 @@ if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
 }
+
+unlink $dcpsrepo_ior;
 
 exit $status;

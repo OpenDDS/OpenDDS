@@ -1,3 +1,12 @@
+Wed Aug 17 09:10:10 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+
+          Enhance these scripts so they properly delete existing ior files
+          at the beginning and the end of the test.
+
 Thu Aug 11 13:56:18 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
           DDS 0.6 released.
