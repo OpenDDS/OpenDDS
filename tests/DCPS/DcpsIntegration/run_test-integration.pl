@@ -15,6 +15,8 @@ $status = 0;
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
 
+unlink $dcpsrepo_ior;
+
 PerlACE::add_lib_path('../FooType');
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
@@ -54,5 +56,7 @@ if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
 }
+
+unlink $dcpsrepo_ior;
 
 exit $status;
