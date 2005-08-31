@@ -1,3 +1,10 @@
+Wed Aug 31 06:39:06 2005  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Removed extra semicolon's on the closing curly braces for
+          namespaces.
+
 Wed Aug 17 09:10:10 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/run_test.pl:
