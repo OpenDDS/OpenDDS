@@ -1,3 +1,11 @@
+Tue Sep  6 11:57:09 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          Make sure the Built-In Topic IDL files use the -Gdcps IDL
+          compiler option.  This was causing compilation problems with
+          SunCC 5.6.
+
 Wed Aug 31 06:39:06 2005  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

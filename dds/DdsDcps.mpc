@@ -21,6 +21,12 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     // Reduce generated code size by not using -Gdcps with other IDL files.
     idlflags    += -Gdcps
     DdsDcpsInfrastructure.idl
+
+    // Built-In Topic Support
+    ParticipantBuiltinTopicDataTypeSupport.idl
+    PublicationBuiltinTopicDataTypeSupport.idl
+    SubscriptionBuiltinTopicDataTypeSupport.idl
+    TopicBuiltinTopicDataTypeSupport.idl
   }
 
   IDL_Files {
@@ -34,12 +40,6 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DdsDcpsDataWriterRemote.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportTao.idl
-
-    // Built-In Topic Support
-    ParticipantBuiltinTopicDataTypeSupport.idl
-    PublicationBuiltinTopicDataTypeSupport.idl
-    SubscriptionBuiltinTopicDataTypeSupport.idl
-    TopicBuiltinTopicDataTypeSupport.idl
   }
 
   Header_Files {
