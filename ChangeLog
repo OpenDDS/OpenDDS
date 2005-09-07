@@ -1,3 +1,12 @@
+Wed Sep  7 08:47:48 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/all_tests.pl:
+
+          Finally added the all_tests.pl script to the repo.  This
+          is a script that automatically runs all the run_*.pl scripts
+          it can find under a directory.  It can also loop on the tests
+          for a set number of iterations or until a failure is encountered.
+
 Tue Sep  6 11:57:09 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DdsDcps.mpc:
