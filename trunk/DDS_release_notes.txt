@@ -321,6 +321,11 @@ of samples.
   DDS specification, ptc/05-03-10 that has various improvements and 
   clarifications. 
      
+-------------------------------------------------------------------------------
+) We currently allocate buffers that are too large for the Application data
+  on the subscriber side.  This means that our memory usage is greater
+  than it should be for some data types, especially those containing
+  large strings, arrays, or structures.
 
 =========================================================================
 === Test Failures =====

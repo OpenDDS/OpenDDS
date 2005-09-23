@@ -17,7 +17,8 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 ACE_INLINE int
 TAO::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
-                                     const ACE_INET_Addr& local_address)
+                                     const ACE_INET_Addr& local_address,
+                                     SimpleTcpConfiguration* tcp_config)
 {
   DBG_ENTRY("SimpleTcpConnection","active_establishment");
 
@@ -31,7 +32,7 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
                        -1);
     }
 
-  set_buffer_size();
+  set_sock_options(tcp_config);
 
   // In order to complete the connection establishment from the active
   // side, we need to tell the remote side about our local_address.

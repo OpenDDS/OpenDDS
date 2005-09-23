@@ -26,3 +26,8 @@ TAO::DCPS::SimpleTcpAcceptor::~SimpleTcpAcceptor()
   DBG_ENTRY("SimpleTcpAcceptor","~SimpleTcpAcceptor");
 }
 
+SimpleTcpConfiguration*
+TAO::DCPS::SimpleTcpAcceptor::get_configuration()
+{
+  return this->transport_->get_configuration();
+}

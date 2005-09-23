@@ -15,6 +15,8 @@ namespace TAO
   namespace DCPS
   {
 
+    class SimpleTcpConfiguration;
+
     class SimpleTcpAcceptor : public ACE_Acceptor<SimpleTcpConnection,
                                                   ACE_SOCK_ACCEPTOR>
     {
@@ -30,6 +32,7 @@ namespace TAO
         // SimpleTcpTransport object.
         void transport_shutdown();
 
+        SimpleTcpConfiguration* get_configuration();
 
       private:
 
