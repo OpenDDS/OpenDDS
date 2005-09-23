@@ -18,6 +18,8 @@ namespace TAO
   namespace DCPS
   {
 
+    class SimpleTcpConfiguration;
+
     class SimpleTcpConnection
                     : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>,
                       public RcObject<ACE_SYNCH_MUTEX>
@@ -31,7 +33,8 @@ namespace TAO
         /// The local address is sent to the remote (passive) side to
         /// identify ourselves to the remote side.
         int active_establishment(const ACE_INET_Addr& remote_address,
-                                 const ACE_INET_Addr& local_address);
+                                 const ACE_INET_Addr& local_address,
+                                 SimpleTcpConfiguration* tcp_config);
 
         /// This will be called by the DataLink (that "owns" us) when
         /// the SimpleTcpTransport has been told to shutdown(), or when
@@ -52,7 +55,7 @@ namespace TAO
         virtual int close(u_long);
         virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-        void set_buffer_size ();
+        void set_sock_options (SimpleTcpConfiguration* tcp_config);
 
       private:
 

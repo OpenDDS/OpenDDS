@@ -210,14 +210,14 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   unsigned short port = address.get_port_number ();
 
   // update this acceptor's copy.
-  tcp_config_->local_address_.set_port_number (port);
+  this->tcp_config_->local_address_.set_port_number (port);
 
   // update the caller's copy.
   // This is redundant because the local and caller's copy point
   // to the same place but just in case that changes. ;)
   if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
     {
-      tcp_config->local_address_ = tcp_config_->local_address_;
+      tcp_config->local_address_ = this->tcp_config_->local_address_;
     }
   tcp_config->local_address_.set_port_number (port);
 
@@ -326,5 +326,12 @@ TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
                  "release and it.\n"));
     }
+}
+
+
+SimpleTcpConfiguration*
+TAO::DCPS::SimpleTcpTransport::get_configuration()
+{
+  return this->tcp_config_.in();
 }
 

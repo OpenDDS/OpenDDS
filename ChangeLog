@@ -1,3 +1,28 @@
+Fri Sep 23 15:31:37 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Add limitation to release notes describing excess memory
+          usage of DDS because of application object bufferes being
+          oversized.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Add a new configuration option for Nagle's algorithm
+          (TCP_NODELAY).  The default is to disable Nagle's algorithm.
+          This was uncovered by some latency testing.  Some 
+          performance tests with small sample sizes may benefit 
+          from enabling this algorithm.
+
 Wed Sep  7 08:47:48 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/all_tests.pl:
