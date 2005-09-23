@@ -6,8 +6,8 @@
 #include "DataBlockLockPool.h"
 
 DataBlockLockPool::DataBlockLockPool(size_t size)
-: size_(size),
-  pool_(size),
+: pool_(size),
+  size_(size),
   iterator_(0)
 {
 }

@@ -121,10 +121,10 @@ DDS::ReturnCode_t
 // Implementation skeleton constructor
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl (void)
 : marshaled_size_ (0),
+  db_lock_pool_(0),
   data_allocator_ (0),
   mb_allocator_ (0),
-  db_allocator_ (0),
-  db_lock_pool_(0)
+  db_allocator_ (0)
 {
 }
 
