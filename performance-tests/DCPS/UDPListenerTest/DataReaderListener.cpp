@@ -84,24 +84,21 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
 
 
 
-
-
-
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,
                                                 int read_interval)
 :
-  num_publishers_(num_publishers),
-  num_samples_ (num_samples),
-  data_size_ (data_size),
-  read_interval_ (read_interval),
-  num_floats_per_sample_ (data_size),
   samples_lost_count_(0),
   samples_rejected_count_(0),
   samples_received_count_(0),
-  total_samples_count_(0)
+  total_samples_count_(0),
+  read_interval_ (read_interval),
+  num_publishers_(num_publishers),
+  num_samples_ (num_samples),
+  data_size_ (data_size),
+  num_floats_per_sample_ (data_size)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
@@ -239,7 +236,7 @@ void DataReaderListenerImpl::on_data_available(
     if (0 == total_samples_count_ % read_interval_)
     {
       // perform the read
-      int samples_read = read_samples(reader);
+    //  int samples_read = read_samples(reader);
     //ACE_DEBUG((LM_DEBUG,
     //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
     //  samples_read));

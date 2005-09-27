@@ -39,6 +39,8 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
 void
 SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
 {
+  ACE_UNUSED_ARG(sample);
+
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
 //  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: \"%s\"\n", sample.sample_->rd_ptr()));
 
@@ -55,7 +57,6 @@ SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
     }
 
   int nap_for = 10;
-  int nap_every = 500;
   int nap_secs = 1;
 
 #if 0
@@ -71,6 +72,7 @@ SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
 #endif
 
   int nap_on = this->num_messages_expected_ + 1;
+//  int nap_every = 500;
 //  int nap_on = this->num_messages_received_ % nap_every;
 
   if (nap_on < nap_for)

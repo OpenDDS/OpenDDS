@@ -276,7 +276,7 @@ int main (int argc, char *argv[])
         for (CORBA::ULong jj =0; jj < AofA_LEN; jj++)
           for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++)
             {
-            if (val_out.f[jj][ii] != ii+jj*ARRAY_LEN)
+            if (val_out.f[jj][ii] != CORBA::Long(ii+jj*ARRAY_LEN))
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("Xyz::ArrayOfArrayOfLong: marshaling comparison failure\n")));
@@ -394,7 +394,7 @@ int main (int argc, char *argv[])
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != ii)
+            if (val_out[ii] != CORBA::Long(ii))
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("Xyz::SeqOfLong: marshaling comparison failure\n")));
@@ -445,7 +445,7 @@ int main (int argc, char *argv[])
         for (CORBA::ULong jj =0; jj < AofS_LEN; jj++)
           for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++)
             {
-            if (val_out.f[jj][ii] != ii+jj*ARRAY_LEN)
+            if (val_out.f[jj][ii] != CORBA::Long(ii+jj*ARRAY_LEN))
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("Xyz::ArrayOfSeqOfLong: marshaling comparison failure\n")));
@@ -456,16 +456,16 @@ int main (int argc, char *argv[])
   }
 
   // SEQUENCE OF SEQUENCES
-  const CORBA::Long SofS_LEN = 4;
+  const CORBA::ULong SofS_LEN = 4;
   { //=====================================================================
     Xyz::SeqOfSeqOfLong val;
     val.length(SofS_LEN);
-    for (CORBA::Long jj =0; jj < SofS_LEN; jj++)
+    for (CORBA::ULong jj =0; jj < SofS_LEN; jj++)
       {
         val[jj].length (SEQ_LEN);
-        for (CORBA::Long ii =0; ii < SEQ_LEN; ii++)
+        for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
             {
-              val[jj][ii] = ii+jj*ARRAY_LEN;
+              val[jj][ii] = CORBA::Long(ii+jj*ARRAY_LEN);
             }
       }
     Xyz::SeqOfSeqOfLong val_out;
@@ -475,10 +475,10 @@ int main (int argc, char *argv[])
                             4*SEQ_LEN*SofS_LEN + 4*SofS_LEN + 4, 
                             "Xyz::SeqOfSeqOfLong"))
       {
-        for (CORBA::Long jj =0; jj < SofS_LEN; jj++)
-          for (CORBA::Long ii =0; ii < ARRAY_LEN; ii++)
+        for (CORBA::ULong jj =0; jj < SofS_LEN; jj++)
+          for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++)
             {
-            if (val_out[jj][ii] != ii+jj*ARRAY_LEN)
+            if (val_out[jj][ii] != CORBA::Long(ii+jj*ARRAY_LEN))
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("Xyz::SeqOfSeqOfLong: marshaling comparison failure\n")));

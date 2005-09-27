@@ -70,5 +70,4 @@ void DataWriterListenerImpl::on_publication_match (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
-  
+
