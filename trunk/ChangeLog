@@ -1,3 +1,18 @@
+Tue Sep 27 10:31:34 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/TestStats.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/TestStats.h:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+
+          Clean up the remaining gcc warnings.
+
 Fri Sep 23 16:18:49 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
