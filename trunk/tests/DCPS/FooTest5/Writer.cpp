@@ -9,11 +9,18 @@
 #include "tests/DCPS/common/TestSupport.h"
 #include "ace/OS_NS_unistd.h"
 
+// Added unused arguments with default value to work around with vc6 
+// bug on template function instantiation.
 template<class DT, class DW, class DW_var>
 ::DDS::ReturnCode_t write (int writer_id,
                            ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> & timeout_writes,
-                           ::DDS::DataWriter_ptr writer)
+                           ::DDS::DataWriter_ptr writer,
+                           DT* dt = 0, DW* dw = 0, DW_var* dw_var = 0)
 {
+  ACE_UNUSED_ARG (dt);
+  ACE_UNUSED_ARG (dw);
+  ACE_UNUSED_ARG (dw_var);
+
   ACE_TRY_NEW_ENV
   {
     DT foo;

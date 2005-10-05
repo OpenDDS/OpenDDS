@@ -22,6 +22,7 @@
 
 
 #include  "ace/String_Base.h"
+#include  "ace/Unbounded_Set.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -96,7 +97,7 @@ namespace TAO
     {
     public:
 
-      typedef std::set< ::DDS::InstanceHandle_t > SubscriptionInstances;
+      typedef ACE_Unbounded_Set< ::DDS::InstanceHandle_t > SubscriptionInstances;
       
       //Constructor 
       DataReaderImpl (void);
@@ -359,7 +360,7 @@ namespace TAO
       void set_sample_rejected_status(
               const ::DDS::SampleRejectedStatus& status) ;
 
-      SubscriptionInstances           instances_ ;
+      mutable SubscriptionInstances           instances_ ;
 
       ReceivedDataAllocator          *rd_allocator_ ;
       ::DDS::DataReaderQos            qos_;
