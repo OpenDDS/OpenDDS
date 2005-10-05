@@ -974,7 +974,7 @@ namespace TAO
               this->writer_activity(sample.header_.publication_id_);
 
               // tell all instances they got a liveliness message
-              for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+              for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
                   pos != instances_.end() ;
                   ++pos)
                 {
@@ -1023,7 +1023,7 @@ namespace TAO
       {
         //!!! caller should have acquired sample_lock_
 
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
@@ -1046,7 +1046,7 @@ namespace TAO
             ::DDS::ViewStateMask view_states) const 
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
@@ -1065,7 +1065,7 @@ namespace TAO
             ::DDS::InstanceStateMask instance_states) const
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
@@ -1145,7 +1145,7 @@ namespace TAO
       {
         //!!! caller should have acquired sample_lock_
         CORBA::Long count(0) ;
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
@@ -1410,7 +1410,7 @@ namespace TAO
 
 
       //loop through all instances telling them this writer is dead
-      for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+      for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
            pos != instances_.end() ;
            ++pos)
         {

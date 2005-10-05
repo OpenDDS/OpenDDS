@@ -17,12 +17,12 @@ const int default_key = 101010;
 Reader::Reader(::DDS::DataReader_ptr reader, 
                int use_take,
                int num_reads_per_thread, 
-               int multiple_instances_,
+               int multiple_instances,
                int reader_id)
 : reader_ (::DDS::DataReader::_duplicate (reader)),
   use_take_ (use_take),
   num_reads_per_thread_ (num_reads_per_thread),
-  multiple_instances_ (multiple_instances_),
+  multiple_instances_ (multiple_instances),
   reader_id_ (reader_id)
 {
 }

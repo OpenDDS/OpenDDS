@@ -1721,10 +1721,9 @@ void
 
     handle = (::DDS::InstanceHandle_t)instance;
     
-    std::pair<SubscriptionInstances::iterator, bool> pair
-        = instances_.insert(handle);
+    int ret = instances_.insert(handle);
 
-    if (pair.second == false)
+    if (ret == -1)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) "
