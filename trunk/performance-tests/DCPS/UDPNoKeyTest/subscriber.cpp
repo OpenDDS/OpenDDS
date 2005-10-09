@@ -149,6 +149,8 @@ int main (int argc, char *argv[])
       case 128:
         {
           ::Mine::Pt128TypeSupportImpl* pt128ts_servant = new ::Mine::Pt128TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt128ts_servant;
+
           ::Mine::Pt128TypeSupport_var pt128ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt128TypeSupport,
                                             ::Mine::Pt128TypeSupportImpl, 
@@ -167,6 +169,8 @@ int main (int argc, char *argv[])
       case 512:
         {
           ::Mine::Pt512TypeSupportImpl* pt512ts_servant = new ::Mine::Pt512TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt512ts_servant;
+
           ::Mine::Pt512TypeSupport_var pt512ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt512TypeSupport,
                                             ::Mine::Pt512TypeSupportImpl, 
@@ -185,6 +189,8 @@ int main (int argc, char *argv[])
       case 2048:
         {
           ::Mine::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Mine::Pt2048TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
+
           ::Mine::Pt2048TypeSupport_var pt2048ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt2048TypeSupport,
                                             ::Mine::Pt2048TypeSupportImpl, 
@@ -203,6 +209,8 @@ int main (int argc, char *argv[])
       case 8192:
         {
           ::Mine::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Mine::Pt8192TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
+
           ::Mine::Pt8192TypeSupport_var pt8192ts = 
             TAO::DCPS::servant_to_reference< ::Mine::Pt8192TypeSupport,
                                             ::Mine::Pt8192TypeSupportImpl, 

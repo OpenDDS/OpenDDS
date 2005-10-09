@@ -193,6 +193,8 @@ int main (int argc, char *argv[])
 
 
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       ::Mine::FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
