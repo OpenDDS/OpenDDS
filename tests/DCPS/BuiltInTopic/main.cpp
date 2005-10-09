@@ -95,6 +95,8 @@ int init (int argc, ACE_TCHAR *argv[])
   ACE_OS::sleep (10);
 
       ::Mine::FooTypeSupportImpl* ts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = ts_servant;
+
       ::Mine::FooTypeSupport_var ts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -474,7 +476,9 @@ void shutdown ()
        "shutdown: participant delete_contained_entities failed\n"));
   }
 
-  if (TheParticipantFactory->delete_participant (participant.in () ACE_ENV_ARG_PARAMETER) 
+  ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  
+  if (dpf->delete_participant (participant.in () ACE_ENV_ARG_PARAMETER) 
     != ::DDS::RETCODE_OK)
   {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: shutdown: "

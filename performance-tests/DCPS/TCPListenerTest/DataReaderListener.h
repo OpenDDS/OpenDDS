@@ -14,7 +14,9 @@
 
 
 //Class DataReaderListenerImpl
-class DataReaderListenerImpl : public virtual POA_DDS::DataReaderListener
+class DataReaderListenerImpl 
+: public virtual POA_DDS::DataReaderListener,
+  public virtual PortableServer::RefCountServantBase
 {
 public:
   //Constructor 

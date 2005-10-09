@@ -75,6 +75,7 @@ main (int argc, char *argv[])
 
 
       TAO_DCPS_DomainParticipantListener_i* dpListenerImpl = new TAO_DCPS_DomainParticipantListener_i;
+      PortableServer::ServantBase_var safe_dpListenerImpl = dpListenerImpl;
 
       ::DDS::DomainParticipantListener_var dpListener =
         ::TAO::DCPS::servant_to_reference < ::DDS::DomainParticipantListener,
@@ -105,6 +106,8 @@ main (int argc, char *argv[])
 
       // Intialize the type support
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_fts_servant = fts_servant;
+
       FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
       ACE_TRY_CHECK;
@@ -274,6 +277,8 @@ main (int argc, char *argv[])
       ::DDS::InconsistentTopicStatus inconsistentStatus =
           topic->get_inconsistent_topic_status(ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_TRY_CHECK;
+     
+      ACE_UNUSED_ARG (inconsistentStatus);
 
       ::DDS::DomainParticipant_var topicParticipant;
       topicParticipant = topic->get_participant(ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -288,7 +293,8 @@ main (int argc, char *argv[])
       // A check for same participant could be added by getting the servant.
 
 
-      char* topicTypeName = topic->get_type_name(ACE_ENV_SINGLE_ARG_PARAMETER);
+      CORBA::String_var topicTypeName 
+        = topic->get_type_name(ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if ( ACE_OS::strcmp(topicTypeName, TEST_TYPE_NAME) != 0)
         {
@@ -309,6 +315,7 @@ main (int argc, char *argv[])
 
 
       TAO_DCPS_TopicListener_i* topicListenerImpl = new TAO_DCPS_TopicListener_i;
+      PortableServer::ServantBase_var safe_topicListenerImpl = topicListenerImpl;
 
       ::DDS::TopicListener_var topicListener =
         ::TAO::DCPS::servant_to_reference < ::DDS::TopicListener,

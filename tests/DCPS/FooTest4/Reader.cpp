@@ -53,11 +53,11 @@ Reader::start ()
     char action[5] ;
     if (use_take_)
     {
-      ACE_OS::strcpy(action, "take") ;
+      ACE_OS::strcpy(action, (const char*)"take") ;
     }
     else
     {
-      ACE_OS::strcpy(action, "read") ;
+      ACE_OS::strcpy(action, (const char*)"read") ;
     }
     for (int i = 0; i< num_reads_per_thread_; i ++)
     {

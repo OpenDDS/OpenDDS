@@ -144,6 +144,8 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   TEST_CHECK (domain_id == MY_DOMAIN);
 
   MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
+  PortableServer::ServantBase_var safe_servant = fts_servant;
+
 
   MyTypeSupport_var fts = 
     TAO::DCPS::servant_to_reference<MyTypeSupport, MyTypeSupportImpl, MyTypeSupport_ptr>(fts_servant);

@@ -23,8 +23,8 @@
 
 
 const long  MY_DOMAIN   = 411;
-const char* MY_TOPIC    = "foo";
-const char* MY_TYPE     = "foo";
+const char* MY_TOPIC    = (const char*) "foo";
+const char* MY_TYPE     = (const char*) "foo";
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
 int use_take = 0;
@@ -106,6 +106,8 @@ int main (int argc, char *argv[])
 
 
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       ::Mine::FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -397,6 +399,21 @@ int main (int argc, char *argv[])
       }
   }
        
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
 //---------------------------------------------------------------------
 //
 // read/take_instance
@@ -447,6 +464,21 @@ int main (int argc, char *argv[])
       }
   }
       
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
 //---------------------------------------------------------------------
 //
 // loan (via read)/return_loan
@@ -478,7 +510,25 @@ int main (int argc, char *argv[])
   }
 
       delete [] drs;
+  
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+   
       delete [] writers;
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
+
       delete [] readers;
 
       sub->delete_contained_entities() ;

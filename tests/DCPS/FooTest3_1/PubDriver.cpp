@@ -49,6 +49,11 @@ PubDriver::PubDriver()
 PubDriver::~PubDriver()
 {
   delete [] datawriters_;
+  for (int i = 0; i < num_datawriters_; i ++)
+  {
+    delete writers_[i];
+  }
+      
   delete [] writers_;
 }
 
@@ -265,6 +270,8 @@ PubDriver::init(int& argc, char *argv[])
   writers_ = new Writer* [num_datawriters_];  
 
   ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+   PortableServer::ServantBase_var safe_servant = fts_servant;
+
   ::Mine::FooTypeSupport_var fts = 
     ::TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                       ::Mine::FooTypeSupportImpl, 
@@ -378,7 +385,9 @@ PubDriver::end()
   participant_->delete_publisher(publisher_.in () ACE_ENV_ARG_PARAMETER);
 
   participant_->delete_topic(topic_.in () ACE_ENV_ARG_PARAMETER);
-  TheParticipantFactory->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
+
+  ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  dpf->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
 
   TheServiceParticipant->shutdown (); 
   // Tear-down the entire Transport Framework.

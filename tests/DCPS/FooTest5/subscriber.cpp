@@ -287,6 +287,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooNoKeyTypeSupportImpl* nokey_fts_servant 
             = new ::Mine::FooNoKeyTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = nokey_fts_servant;
+
           if (::DDS::RETCODE_OK != nokey_fts_servant->register_type(participant.in (), MY_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
@@ -298,6 +300,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooTypeSupportImpl* fts_servant 
             = new ::Mine::FooTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE))
             {
               ACE_ERROR ((LM_ERROR, 
@@ -310,6 +314,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooTypeSupportImpl* fts_servant 
             = new ::Mine::FooTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));

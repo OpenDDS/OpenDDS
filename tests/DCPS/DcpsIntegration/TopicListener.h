@@ -33,7 +33,9 @@
 
 
 //Class TAO_DCPS_TopicListener_i
-class TAO_DCPS_TopicListener_i : public virtual POA_DDS::TopicListener
+class TAO_DCPS_TopicListener_i 
+: public virtual POA_DDS::TopicListener,
+  public virtual PortableServer::RefCountServantBase
 {
 public:
   //Constructor 

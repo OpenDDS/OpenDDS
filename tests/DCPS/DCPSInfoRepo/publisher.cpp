@@ -204,6 +204,7 @@ main (int argc, char *argv[])
       CORBA::Long dpIdAlmost;
       CORBA::Long topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
+      PortableServer::ServantBase_var safe_servant = dwiAlmost;
       TAO::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
       CORBA::Long pubIdAlmost;
