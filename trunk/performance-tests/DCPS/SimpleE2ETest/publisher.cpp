@@ -373,9 +373,9 @@ int main (int argc, char *argv[])
 
       delete [] dws;
       
-      for (p = 0; p < num_datawriters; p ++)
+      for (int i = 0; i < num_datawriters; i ++)
         {
-          delete writers[p];
+          delete writers[i];
         }
 
       delete [] writers;
