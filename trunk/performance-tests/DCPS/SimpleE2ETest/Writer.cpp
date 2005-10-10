@@ -19,11 +19,14 @@
 
 
 
+// Added unused arguments with default value to work around with vc6 
+// bug on template function instantiation.
 template<class T, class W, class W_var, class W_ptr, class Wimpl>
 void write (long id,
             int size,
             int num_messages,
-            ::DDS::DataWriter_ptr writer)
+            ::DDS::DataWriter_ptr writer,
+            T* t = 0)
 {
   T data;
   data.data_source = id;

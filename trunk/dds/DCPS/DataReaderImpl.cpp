@@ -95,6 +95,8 @@ namespace TAO
       if (liveliness_timer_id_ != -1)
         {
           int num_handlers = reactor_->cancel_timer (this);
+          this->_remove_ref ();
+
           ACE_UNUSED_ARG (num_handlers);
         }
                
@@ -1173,8 +1175,7 @@ namespace TAO
       if (liveliness_timer_id_ != -1)
         {
           this->_remove_ref();
-
-
+      
           if (arg == this)
             {
 
@@ -1443,7 +1444,7 @@ namespace TAO
     DataReaderImpl::handle_close (ACE_HANDLE,
                                   ACE_Reactor_Mask)
     {
-      this->_remove_ref ();
+      //this->_remove_ref ();
       return 0;
     }
 

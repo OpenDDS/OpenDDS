@@ -244,7 +244,6 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
 int main (int argc, char *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf;
-  Writer* writers = 0;
   ::DDS::DomainParticipant_var participant;
 
   int status = 0;
@@ -500,8 +499,12 @@ int main (int argc, char *argv[])
         for (int i = 0; i < num_datawriters; i ++)
           {
             writers[i]->end ();
+            delete writers[i];
           }
       }
+
+      delete []dw;
+      delete [] writers;
     }
   ACE_CATCH (TestException,ex)
     {
@@ -517,10 +520,6 @@ int main (int argc, char *argv[])
     }
   ACE_ENDTRY;
 
-  if (writers != 0)
-    {
-      delete [] writers;
-    }
 
   ACE_TRY_NEW_ENV
     {
