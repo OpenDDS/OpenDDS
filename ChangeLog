@@ -1,3 +1,14 @@
+Mon Oct 10 15:35:45 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+		  Fixed memory leaks.
+
 Sun Oct  9 13:17:37 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:

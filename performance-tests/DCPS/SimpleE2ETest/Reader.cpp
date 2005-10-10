@@ -16,11 +16,13 @@
 #include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
-
+// Added unused arguments with default value to work around with vc6 
+// bug on template function instantiation.
 template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 ::DDS::ReturnCode_t read (TestStats* stats,
                           ::DDS::Subscriber_ptr subscriber,
-                          ::DDS::DataReader_ptr reader)
+                          ::DDS::DataReader_ptr reader,
+                          R* rd = 0)
 {
   R_var pt_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);

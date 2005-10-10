@@ -372,7 +372,14 @@ int main (int argc, char *argv[])
       pub->delete_contained_entities() ;
 
       delete [] dws;
+      
+      for (p = 0; p < num_datawriters; p ++)
+        {
+          delete writers[p];
+        }
+
       delete [] writers;
+
 
       dp->delete_publisher(pub.in () ACE_ENV_ARG_PARAMETER);
 

@@ -251,7 +251,6 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 int main (int argc, char *argv[])
 {
 
-  ::DDS::DataReader_var* drs = 0;
   ::DDS::DomainParticipantFactory_var dpf;
   ::DDS::DomainParticipant_var participant;
 
@@ -558,7 +557,9 @@ int main (int argc, char *argv[])
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) Verify received samples - not passed \n")));
           status = 1;
-        }      
+        } 
+      
+      delete [] drs;
     }
   ACE_CATCH (TestException,ex)
     {
@@ -573,12 +574,6 @@ int main (int argc, char *argv[])
       status = 1;
     }
   ACE_ENDTRY;
-
-  
-  if (drs != 0)
-    {
-      delete [] drs;
-    }
 
   ACE_TRY_NEW_ENV
     {
