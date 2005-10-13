@@ -1,9 +1,19 @@
+Thu Oct 13 15:13:22 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+
+          Clean up some gcc warnings, all of which are unused args,
+          unused vars, or uninitialized vars.
+
 Mon Oct 10 15:59:48 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
 
           Fixed compilation error on vc71.
-          
+
 Mon Oct 10 15:35:45 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -12,7 +22,7 @@ Mon Oct 10 15:35:45 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
         * tests/DCPS/FooTest5/publisher.cpp:
         * tests/DCPS/FooTest5/subscriber.cpp:
-          
+
           Fixed memory leaks.
 
 Sun Oct  9 13:17:37 USMST 2005  Yan Dai  <dai_y@ociweb.com>
@@ -51,7 +61,7 @@ Sun Oct  9 13:17:37 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/MultiTopicTest/subscriber.cpp:
         * tests/DCPS/SimpleFooTest/main.cpp:
         * tests/DCPS/unit/Main.cpp:
- 
+
           Fixed memory leaks and some string problems caused by VC6's inability
           to pick the correct overloaded function.
 
@@ -60,27 +70,27 @@ Wed Oct  5 14:28:18 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataReaderImpl.h:
-        
+
           Declared the instance handle collection in DataReaderImpl class
           as ACE_Unbounded_Set instead of std::set. This would fix some
           tests on vc6 build.
-          
+
         * tests/DCPS/FooTest5/DataReaderListener.cpp:
         * tests/DCPS/FooTest5/Writer.cpp:
-        
+
           Added unused arguments with the template parameter types.
           This is a work arround to fix tests on vc6 builds that failed
           due to the vc6 bug on template function instantiation.
-        
+
         * tests/DCPS/FooTest3_2/run_test.pl:
-          
+
           Extended the timeout to fix test.
 
         * tests/DCPS/FooTest4/Reader.cpp:
         * tests/DCPS/FooTest4/Writer.cpp:
-        
+
           Fixed incorrect data member initialization.
-          
+
 Tue Sep 27 10:31:34 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:

@@ -28,6 +28,7 @@ void write (long id,
             ::DDS::DataWriter_ptr writer,
             T* t = 0)
 {
+  ACE_UNUSED_ARG(t);
   T data;
   data.data_source = id;
   data.values.length(size);

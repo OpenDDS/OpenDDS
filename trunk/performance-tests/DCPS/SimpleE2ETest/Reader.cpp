@@ -24,6 +24,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
                           ::DDS::DataReader_ptr reader,
                           R* rd = 0)
 {
+  ACE_UNUSED_ARG(rd);
   R_var pt_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
   if (CORBA::is_nil (pt_dr.in ()))
