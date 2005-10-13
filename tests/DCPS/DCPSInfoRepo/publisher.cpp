@@ -201,13 +201,13 @@ main (int argc, char *argv[])
 
 
       // Set up the incompatible qos test
-      CORBA::Long dpIdAlmost;
+      CORBA::Long dpIdAlmost = 0;
       CORBA::Long topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
       PortableServer::ServantBase_var safe_servant = dwiAlmost;
       TAO::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
-      CORBA::Long pubIdAlmost;
+      CORBA::Long pubIdAlmost = 0;
 
       if (qos_tests)
       {
