@@ -539,7 +539,7 @@ ACE_Message_Block*
   if (it != instance_map_.end()) 
   {
     handle = it->second;
-    PublicationInstance* instance = reinterpret_cast<PublicationInstance*>(handle);
+    PublicationInstance* instance = DataWriterImpl::get_handle_instance(handle);
     if (instance->unregistered_ == false)
     { 
       is_new = 0;
@@ -669,7 +669,7 @@ void
     {
       ::DDS::InstanceHandle_t handle = it->second;
       SubscriptionInstance *ptr =
-          reinterpret_cast<SubscriptionInstance *> (handle) ;
+          DataReaderImpl::get_handle_instance (handle) ;
 
       while (ptr->rcvd_sample_.size_)
         {
@@ -763,7 +763,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -853,7 +853,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -964,7 +964,7 @@ DDS::ReturnCode_t
       ::CORBA::Long start_samples_in_instance(count) ;
       ::CORBA::Long samples_in_instance_count(0) ;
       ::DDS::InstanceHandle_t handle = it->second;
-      SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
       ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
@@ -1097,7 +1097,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -1325,7 +1325,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
   
   SubscriptionInstance * ptr = 
-      reinterpret_cast<SubscriptionInstance *> (a_handle) ;
+      DataReaderImpl::get_handle_instance (a_handle) ;
 
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
@@ -1421,7 +1421,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
   
   SubscriptionInstance * ptr = 
-    reinterpret_cast<SubscriptionInstance *> (a_handle) ;
+    DataReaderImpl::get_handle_instance (a_handle) ;
 
   ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
@@ -1715,15 +1715,15 @@ void
   if (it == instance_map_.end()) 
   {
     SubscriptionInstance* instance;
+    handle = DataReaderImpl::get_next_handle ();
     ACE_NEW_RETURN (instance,
-                    SubscriptionInstance(this),
+                    SubscriptionInstance(this, handle),
                     ::DDS::RETCODE_ERROR);
 
-    handle = (::DDS::InstanceHandle_t)instance;
-    
-    int ret = instances_.insert(handle);
+    instance->instance_handle_ = handle;
+    int ret = instances_.bind(handle, instance);
 
-    if (ret == -1)
+    if (ret != 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) "
@@ -1752,7 +1752,7 @@ void
 
   if (header.message_id_ != INSTANCE_REGISTRATION)
   {
-    SubscriptionInstance* instance_ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance* instance_ptr = DataReaderImpl::get_handle_instance (handle) ;
     
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
@@ -1882,7 +1882,7 @@ void
   else
   {
     SubscriptionInstance *instance_ptr = 
-         reinterpret_cast<SubscriptionInstance *> (handle) ;
+         DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
     ACE_DES_FREE (instance_data,
                   data_allocator_->free,
@@ -1915,7 +1915,7 @@ void
   {
     handle = it->second;
     SubscriptionInstance* instance_ptr = 
-          reinterpret_cast<SubscriptionInstance *> (handle) ;
+          DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
   else

@@ -8,6 +8,7 @@
 #include  "dds/DdsDcpsInfrastructureC.h"
 #include  "DataSampleList.h"
 #include  "ace/Synch_T.h"
+#include  "ace/Hash_Map_Manager.h"
 
 #include  <set>
 
@@ -22,10 +23,13 @@ namespace TAO
   namespace DCPS
   {
     class DataWriterImpl;
-    /// The instance handle internally is the pointer to the 
-    /// PublicationInstance object.
-    /// Use the pointer as the InstanceHandle is to avoid lookups.
-    typedef std::set< ::DDS::InstanceHandle_t >  PublicationInstances;
+
+    typedef ACE_Hash_Map_Manager_Ex<::DDS::InstanceHandle_t,
+                                    PublicationInstance*,
+                                    ACE_Hash<::DDS::InstanceHandle_t>,
+                                    ACE_Equal_To<::DDS::InstanceHandle_t>,
+                                    ACE_Null_Mutex>        PublicationInstanceMapType;
+
 
     /**
     * @class DataWriterImpl
@@ -252,6 +256,10 @@ namespace TAO
       */
       void unregister_all (DataWriterImpl* writer);
 
+//remove document this!
+      PublicationInstance* get_handle_instance (
+          ::DDS::InstanceHandle_t handle);
+
     private:
       
       /**
@@ -269,6 +277,13 @@ namespace TAO
         DataSampleList& instance_list, 
         bool& released);
 
+      /**
+      * Get an instance handle for a new instance.
+      * This method should be called under the protection of a lock
+      * to ensure that the handle is unique for the container.
+      */
+      ::DDS::InstanceHandle_t get_next_handle ();
+
       /// List of data that has not been sent yet.
       DataSampleList   unsent_data_ ;
 
@@ -284,7 +299,7 @@ namespace TAO
 
       /// The individual instance queue threads in the
       /// data.
-      PublicationInstances   instances_ ;
+      PublicationInstanceMapType instances_;
 
       /// The publication Id from repo.
       PublicationId    publication_id_ ;
@@ -332,6 +347,9 @@ namespace TAO
 
       /// The flag indicates the datawriter will be destroyed.
       bool  shutdown_;
+
+      /// The instance handle for the next new instance.
+      ::DDS::InstanceHandle_t next_handle_;
     } ;
 
   } /// namespace TAO

@@ -1208,8 +1208,17 @@ namespace TAO
           const ::DDS::Time_t& source_timestamp)
       {
         PublicationInstance* instance = 
-            reinterpret_cast<PublicationInstance*>(instance_handle);
-        
+            data_container_->get_handle_instance(instance_handle);
+
+        if (0 == instance)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) DataWriterImpl::create_sample_data_message ")
+            ACE_TEXT("failed to find instance for handle %d\n"),
+            instance_handle),
+            ::DDS::RETCODE_ERROR);
+        }
+
         DataSampleHeader header_data; 
         header_data.message_id_ = SAMPLE_DATA;
         //header_data.last_sample_
@@ -1408,6 +1417,21 @@ namespace TAO
           last_liveliness_activity_time_ = now;
         }
     }
+
+
+    PublicationInstance*
+    DataWriterImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+      PublicationInstance* instance = 0;
+      if (0 != data_container_)
+        {
+          instance = data_container_->get_handle_instance(handle);
+        }
+
+      return instance;
+    }
+
+
 
   } // namespace DCPS
 } // namespace TAO

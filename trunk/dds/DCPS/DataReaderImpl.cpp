@@ -40,7 +40,8 @@ namespace TAO
         liveliness_lease_duration_ (ACE_Time_Value::zero),
         liveliness_timer_id_(-1),
         is_bit_ (false),
-        initialized_ (false)
+        initialized_ (false),
+        next_handle_(0)
       {
         CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
         reactor_ = orb->orb_core()->reactor();
@@ -976,13 +977,11 @@ namespace TAO
               this->writer_activity(sample.header_.publication_id_);
 
               // tell all instances they got a liveliness message
-              for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+              for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
                   pos != instances_.end() ;
                   ++pos)
                 {
-                  ::DDS::InstanceHandle_t handle = *pos ;
-                  SubscriptionInstance *ptr = 
-                      reinterpret_cast<SubscriptionInstance *> (handle);
+                  SubscriptionInstance *ptr = (*pos).int_id_;
 
                   ptr->instance_state_.lively (sample.header_.publication_id_);
                 }
@@ -1025,13 +1024,12 @@ namespace TAO
       {
         //!!! caller should have acquired sample_lock_
 
-        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
                item != 0 ; item = item->next_data_sample_)
           {
@@ -1048,13 +1046,12 @@ namespace TAO
             ::DDS::ViewStateMask view_states) const 
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           if (ptr->instance_state_.view_state() & view_states)
           {
             return true ;
@@ -1067,13 +1064,12 @@ namespace TAO
             ::DDS::InstanceStateMask instance_states) const
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           if (ptr->instance_state_.instance_state() & instance_states)
           {
             return true ;
@@ -1147,13 +1143,11 @@ namespace TAO
       {
         //!!! caller should have acquired sample_lock_
         CORBA::Long count(0) ;
-        for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
 
           count += ptr->rcvd_sample_.size_ ;
         }
@@ -1411,13 +1405,11 @@ namespace TAO
 
 
       //loop through all instances telling them this writer is dead
-      for (SubscriptionInstances::ITERATOR pos = instances_.begin() ;
+      for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
            pos != instances_.end() ;
            ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle);
+          SubscriptionInstance *ptr = (*pos).int_id_;
 
           ptr->instance_state_.writer_became_dead (
                    writer_id, liveliness_changed_status_.active_count, when);
@@ -1476,8 +1468,31 @@ namespace TAO
     {
       ACE_UNUSED_ARG(sample) ;
     }
- 
-    
+
+
+    SubscriptionInstance*
+    DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+      SubscriptionInstance* instance = 0;
+      if (0 != instances_.find(handle, instance))
+        {
+          ACE_ERROR ((LM_ERROR, 
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataReaderImpl::get_handle_instance, ")
+                      ACE_TEXT("lookup for %d failed\n"), 
+                      handle));
+        } // if (0 != instances_.find(handle, instance))
+      return instance;
+    }
+
+
+    ::DDS::InstanceHandle_t
+    DataReaderImpl::get_next_handle ()
+    {
+      return next_handle_++;
+    }
+
+
   } // namespace DCPS
 } // namespace TAO
 

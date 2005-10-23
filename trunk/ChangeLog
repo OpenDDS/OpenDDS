@@ -1,3 +1,20 @@
+Sun Oct 23 16:19:14 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Removed using instance handles as pointers.  Maps of 
+          handle to pointer were added.
+
 Thu Oct 20 16:09:20 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * LICENSE:

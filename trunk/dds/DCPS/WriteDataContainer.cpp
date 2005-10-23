@@ -27,7 +27,8 @@ namespace TAO
       condition_ (lock_),
       n_chunks_ (n_chunks),
       sample_list_element_allocator_(n_chunks_),
-      shutdown_ (false)
+      shutdown_ (false),
+      next_handle_(1)
     {
     }
 
@@ -50,9 +51,9 @@ namespace TAO
         DataSampleListElement* sample,
         ::DDS::InstanceHandle_t       instance_handle)
     {
-      // Cast to the PublicationInstance pointer from InstanceHandle_t.
-      PublicationInstance* instance = 
-            reinterpret_cast<PublicationInstance*>(instance_handle);
+      // Get the PublicationInstance pointer from InstanceHandle_t.
+      PublicationInstance* instance =
+            get_handle_instance (instance_handle);
       // Extract the instance queue.
       DataSampleList& instance_list = instance->samples_;        
 
@@ -113,10 +114,11 @@ namespace TAO
                           PublicationInstance (registered_sample),
                           ::DDS::RETCODE_ERROR);
 
-          std::pair<PublicationInstances::iterator, bool> pair 
-            = instances_.insert(PublicationInstances::value_type(instance));
+          instance_handle = get_next_handle();
 
-          if (pair.second == false)
+          int insert_attempt = instances_.bind(instance_handle, instance);
+
+          if (0 != insert_attempt)
             {
               ACE_ERROR_RETURN ((LM_ERROR, 
                                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -124,17 +126,15 @@ namespace TAO
                                  ACE_TEXT("failed to insert instance handle=%X\n"), 
                                  instance),
                                  ::DDS::RETCODE_ERROR);
-            }
 
-          instance_handle = (::DDS::InstanceHandle_t)instance;
+            } // if (0 != insert_attempt)
+          instance->instance_handle_ = instance_handle;
         }
       else
         {
-          // find a previously unregistered instance.
-          PublicationInstances::iterator it = instances_.find (instance_handle);
-          // don't need this - the PublicationInstances already has a sample.
-          registered_sample->release ();
-          if (it == instances_.end ())
+          int find_attempt = instances_.find(instance_handle, instance);
+
+          if (0 != find_attempt)
             {
               ACE_ERROR_RETURN ((LM_ERROR, 
                                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -142,10 +142,12 @@ namespace TAO
                                  ACE_TEXT("The provided instance handle=%X is not a valid"
                                  "handle.\n"), instance_handle),
                                  ::DDS::RETCODE_ERROR);
-            }
-          instance = ACE_reinterpret_cast (PublicationInstance*, 
-                                           instance_handle);
-         instance->unregistered_ = false;
+            } // if (0 != insert_attempt)
+
+          // don't need this - the PublicationInstances already has a sample.
+          registered_sample->release ();
+
+          instance->unregistered_ = false;
         }
 
       // The registered_sample is shallow copied.
@@ -164,11 +166,11 @@ namespace TAO
         CORBA::SystemException
       ))
     {
-      PublicationInstance* instance = 
-               reinterpret_cast<PublicationInstance*>(instance_handle);
+      PublicationInstance* instance = 0;
 
-      PublicationInstances::iterator it = instances_.find (instance_handle);
-      if (it == instances_.end ())
+      int find_attempt = instances_.find(instance_handle, instance);
+
+      if (0 != find_attempt)
         {
           ACE_ERROR_RETURN ((LM_ERROR, 
                              ACE_TEXT("(%P|%t) ERROR: ")
@@ -176,16 +178,14 @@ namespace TAO
                              ACE_TEXT("The instance(handle=%X) is not registered yet.\n"),
                              instance_handle),
                              ::DDS::RETCODE_PRECONDITION_NOT_MET);
-        }
-      else
-        {
-          instance->unregistered_ = true;
+        } // if (0 != insert_attempt)
 
-          if (dup_registered_sample)
-            {
-              // The registered_sample is shallow copied.
-              registered_sample = instance->registered_sample_->duplicate ();
-            }
+      instance->unregistered_ = true;
+
+      if (dup_registered_sample)
+        {
+          // The registered_sample is shallow copied.
+          registered_sample = instance->registered_sample_->duplicate ();
         }
 
       // Unregister the instance with typed DataWriter.
@@ -203,10 +203,11 @@ namespace TAO
         CORBA::SystemException
       ))
     {
-      PublicationInstance* instance = 
-               reinterpret_cast<PublicationInstance*>(instance_handle);
-      PublicationInstances::iterator it = instances_.find (instance_handle);
-      if (it == instances_.end ())
+      PublicationInstance* instance = 0;
+
+      int find_attempt = instances_.find(instance_handle, instance);
+
+      if (0 != find_attempt)
         {
           ACE_ERROR_RETURN ((LM_ERROR, 
                              ACE_TEXT("(%P|%t) ERROR: ")
@@ -215,13 +216,11 @@ namespace TAO
                              instance_handle),
                              ::DDS::RETCODE_PRECONDITION_NOT_MET);
         }
-      else
+
+      if (dup_registered_sample)
         {
-          if (dup_registered_sample)
-            {
-              // The registered_sample is shallow copied.
-              registered_sample = instance->registered_sample_->duplicate ();
-            }
+          // The registered_sample is shallow copied.
+          registered_sample = instance->registered_sample_->duplicate ();
         }
 
       // Note: The DDS specification is unclear as to if samples in the process
@@ -261,11 +260,11 @@ namespace TAO
                         guard, 
                         this->lock_, 
                         ::DDS::RETCODE_ERROR);
-      PublicationInstance* instance = 
-              reinterpret_cast<PublicationInstance*>(handle);
-      //TBD this doulbe check will slow things down but is safer
-      PublicationInstances::iterator it = instances_.find (handle);
-      if (it == instances_.end ())
+      PublicationInstance* instance = 0;
+
+      int find_attempt = instances_.find(handle, instance);
+
+      if (0 != find_attempt)
         {
           return ::DDS::RETCODE_ERROR;
         }
@@ -363,7 +362,7 @@ namespace TAO
                      ACE_TEXT("The dropped sample is not in sending_data_ and ")
                      ACE_TEXT("released_data_ list.\n")));
         }          
-
+//remove fix this one
       PublicationInstance* instance = sample->handle_;
       
       if (instance->waiting_list_.head_ != 0)
@@ -579,9 +578,8 @@ namespace TAO
         ::DDS::InstanceHandle_t handle,
         DataWriterImpl*         writer)
     {
-      // The handle actually is the pointer to the PublicationInstance.
       PublicationInstance* instance = 
-                 reinterpret_cast<PublicationInstance*>(handle);
+            get_handle_instance (handle);
 
       ACE_NEW_MALLOC_RETURN (element,
                              static_cast<DataSampleListElement*> (
@@ -739,46 +737,73 @@ namespace TAO
 
       ::DDS::ReturnCode_t ret;
       DataSample* registered_sample;
-      PublicationInstances::iterator it = instances_.begin ();
+      PublicationInstanceMapType::iterator it = instances_.begin ();
    
       while (it != instances_.end ())
         {
           // Release the instance data.
-          ret = dispose (*it, registered_sample, false); 
+          ret = dispose ((*it).ext_id_, registered_sample, false); 
           if (ret != ::DDS::RETCODE_OK)
             {
               ACE_ERROR((LM_ERROR, 
                          ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("WriteDataContainer::unregister_all, ")
                          ACE_TEXT("dispose instance %X failed\n"), 
-                         *it));
+                         (*it).ext_id_));
             }
 
           // Mark the instance unregistered.
-          ret = unregister (*it, registered_sample, writer, false);
+          ret = unregister ((*it).ext_id_, registered_sample, writer, false);
           if (ret != ::DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("WriteDataContainer::unregister_all, ")
                           ACE_TEXT("unregister instance %X failed\n"), 
-                          *it));
+                          (*it).ext_id_));
             }    
 
-          PublicationInstance* instance = 
-               reinterpret_cast<PublicationInstance*>(*it);
+          PublicationInstance* instance = (*it).int_id_;
 
           delete instance;
 
           // Get the next iterator before erase the instance handle.      
-          PublicationInstances::iterator it_next = it;
+          PublicationInstanceMapType::iterator it_next = it;
           it_next ++;
           // Remove the instance from the instance list.
-          instances_.erase (it);
+          instances_.unbind ((*it).ext_id_);
           it = it_next;
         }
       
       ACE_UNUSED_ARG (registered_sample);
+    }
+
+
+    PublicationInstance*
+    WriteDataContainer::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+        PublicationInstance* instance = 0;
+        if (0 != instances_.find(handle, instance))
+          {
+            ACE_ERROR ((LM_ERROR, 
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("WriteDataContainer::get_handle_instance, ")
+                        ACE_TEXT("lookup for %d failed\n"), 
+                        handle));
+          }
+
+        return instance;
+    }
+
+
+    ::DDS::InstanceHandle_t
+    WriteDataContainer::get_next_handle ()
+    {
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
+                        guard, 
+                        this->lock_,
+                        0);
+      return next_handle_++;
     }
 
   } // namespace TAO
