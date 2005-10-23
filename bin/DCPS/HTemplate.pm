@@ -52,8 +52,6 @@ using namespace ::TAO::DCPS;
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  *
- * @note: InstanceHandle_t is a long but it holds a PublicationInstance* 
- *     for code supporting Publishers & DataWriters.
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl 
   : public virtual <%POA%><%TYPE%>TypeSupport, 
@@ -310,8 +308,6 @@ private:
  * @note zero-copy methods are specific to TAO but this is allowed by
  *       the DDS specification.
  *
- * @note: InstanceHandle_t is a long but it holds a SubscriptionInstance* 
- *     for code supporting Subcriber & DataReaders.
  */
 class <%EXPORT%> <%TYPE%>DataReaderImpl 
   : public virtual <%POA%><%TYPE%>DataReader, 

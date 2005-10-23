@@ -32,7 +32,8 @@ namespace TAO
         : sequence_ (),
           group_id_ (0),
           registered_sample_ (registered_sample),
-          unregistered_ (false)
+          unregistered_ (false),
+          instance_handle_(0)
       {
       }
 
@@ -61,6 +62,9 @@ namespace TAO
 
       /// The flag to indicate whether the instance is unregistered.
       bool             unregistered_;
+
+      /// The instance handle for the registered object
+      ::DDS::InstanceHandle_t instance_handle_;
     } ;
 
   }

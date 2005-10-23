@@ -79,7 +79,7 @@ namespace TAO
       DataSampleListElement (PublicationId           publication_id,
                              TransportSendListener*  send_listner,
                              PublicationInstance*    handle);
-
+//remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
       /// Message being sent which includes the DataSampleHeader message block

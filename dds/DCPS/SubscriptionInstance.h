@@ -27,9 +27,12 @@ namespace TAO
       class SubscriptionInstance
       {
       public:
-        SubscriptionInstance(DataReaderImpl *reader) :
-            instance_state_(reader, (::DDS::InstanceHandle_t)this),
-            last_sequence_(0), rcvd_sample_(&instance_state_)
+        SubscriptionInstance(DataReaderImpl          *reader,
+                             ::DDS::InstanceHandle_t handle) :
+            instance_state_(reader, handle),
+            last_sequence_(0),
+            rcvd_sample_(&instance_state_),
+            instance_handle_(handle)
         {
         }
 
@@ -41,6 +44,9 @@ namespace TAO
 
         /// Data sample(s) in this instance
         ReceivedDataElementList rcvd_sample_ ;
+
+        /// The instance handle for the registered object
+        ::DDS::InstanceHandle_t instance_handle_;
       } ;
   }
 }

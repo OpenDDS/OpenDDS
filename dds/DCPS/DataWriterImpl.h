@@ -422,8 +422,12 @@ namespace TAO
       /// The number of chunks for the cached allocator.
       size_t                     n_chunks_;
 
-    private:
-     
+//remove document this!
+      PublicationInstance* get_handle_instance (
+          ::DDS::InstanceHandle_t handle);
+
+  private:
+
       /** This method create a header message block and chain with 
       * the registered sample. The header contains the information 
       * needed. e.g. message id, length of whole message...
