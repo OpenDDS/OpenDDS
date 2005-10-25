@@ -24,7 +24,7 @@ namespace TAO
   {
 
     /// Identifier type for DataLink objects.
-    typedef ACE_UINT32 DataLinkIdType;
+    typedef ACE_UINT64  DataLinkIdType;
 
     /// Return code type for send_control() operations.
     enum SendControlStatus

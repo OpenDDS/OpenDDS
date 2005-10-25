@@ -16,6 +16,7 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 
   impl->_add_ref();
   this->impl_ = impl;
+  id_ = DataLink::get_next_datalink_id();
 }
 
 ACE_INLINE void
@@ -83,7 +84,7 @@ ACE_INLINE TAO::DCPS::DataLinkIdType
 TAO::DCPS::DataLink::id() const
 {
   DBG_ENTRY("DataLink","id");
-  return (DataLinkIdType)this;
+  return id_;
 }
 
 

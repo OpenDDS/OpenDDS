@@ -877,8 +877,10 @@ namespace TAO
             // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
             // value that is for all intents and purposes unlimited
             // and we can use it for comparisons.
+            // use 2147483647L because that is the greatest value a signed
+            // CORBA::Long can have.
             // WARNING: The client risks running out of memory in this case.
-            depth_ = LONG_MAX;
+            depth_ = 2147483647L;
           }
 
         if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)

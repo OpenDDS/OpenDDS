@@ -396,3 +396,27 @@ TAO::DCPS::DataLink::release_remote_publisher
     }
 }
 
+
+// static
+ACE_UINT64
+TAO::DCPS::DataLink::get_next_datalink_id ()
+{
+  static ACE_UINT64 next_id = 0;
+  static LockType lock;
+
+  DBG_ENTRY("DataLink","get_next_datalink_id");
+
+  ACE_UINT64 id;
+  {
+    GuardType guard(lock);
+    id = next_id++;
+    if (0 == next_id)
+    {
+      ACE_ERROR((LM_ERROR, 
+                 ACE_TEXT("ERROR: DataLink::get_next_datalink_id has rolled over and is reusing ids!\n") ));
+    }
+  }
+
+  return id;
+}
+
