@@ -1,3 +1,24 @@
+Tue Oct 25 15:22:28 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Removed using the pointer as the DataLink id.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Can not use LONG_MAX for CORBA::Long because on some 
+          architectures the long is 8 bytes while a CORBA::Long
+          is always 4 bytes.
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Fixed issue with using a long double as a
+          character array all the time.
+
 Tue Oct 25 13:18:31 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
