@@ -24,10 +24,10 @@ namespace TAO
   {
     class DataWriterImpl;
 
-    typedef ACE_Hash_Map_Manager_Ex<::DDS::InstanceHandle_t,
+    typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
                                     PublicationInstance*,
-                                    ACE_Hash<::DDS::InstanceHandle_t>,
-                                    ACE_Equal_To<::DDS::InstanceHandle_t>,
+                                    ACE_Hash< ::DDS::InstanceHandle_t>,
+                                    ACE_Equal_To< ::DDS::InstanceHandle_t>,
                                     ACE_Null_Mutex>        PublicationInstanceMapType;
 
 

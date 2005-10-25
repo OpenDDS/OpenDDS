@@ -98,10 +98,10 @@ namespace TAO
     {
     public:
 
-      typedef ACE_Hash_Map_Manager_Ex<::DDS::InstanceHandle_t,
+      typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
                                       SubscriptionInstance*,
-                                      ACE_Hash<::DDS::InstanceHandle_t>,
-                                      ACE_Equal_To<::DDS::InstanceHandle_t>,
+                                      ACE_Hash< ::DDS::InstanceHandle_t>,
+                                      ACE_Equal_To< ::DDS::InstanceHandle_t>,
                                       ACE_Null_Mutex>        SubscriptionInstanceMapType;
  
       //Constructor 
