@@ -27,6 +27,7 @@ namespace TAO
     DataReaderImpl::DataReaderImpl (void) :
         rd_allocator_(0),
         qos_ (TheServiceParticipant->initial_DataReaderQos ()),
+        next_handle_(0),
         topic_servant_ (0),
         topic_desc_(0),
         listener_mask_(DEFAULT_STATUS_KIND_MASK),
@@ -40,8 +41,7 @@ namespace TAO
         liveliness_lease_duration_ (ACE_Time_Value::zero),
         liveliness_timer_id_(-1),
         is_bit_ (false),
-        initialized_ (false),
-        next_handle_(0)
+        initialized_ (false)
       {
         CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
         reactor_ = orb->orb_core()->reactor();
