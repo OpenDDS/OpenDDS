@@ -1,3 +1,15 @@
+Tue Oct 25 17:26:38 MST 2005   Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.h:
+
+          Moved SimpleTcpTransport rch include and added SimpleTcpTransport
+          to properly instantiate the templates on gcc on solaris. 
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.inl:
+
+          Moved inline methods into cpp.
+
 Tue Oct 25 15:22:28 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
