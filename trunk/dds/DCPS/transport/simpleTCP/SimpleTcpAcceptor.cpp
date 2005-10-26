@@ -3,11 +3,9 @@
 // $Id$
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpAcceptor.h"
+#include  "SimpleTcpTransport.h"
+#include  "dds/DCPS/transport/framework/EntryExit.h"
 
-
-#if !defined (__ACE_INLINE__)
-#include "SimpleTcpAcceptor.inl"
-#endif /* __ACE_INLINE__ */
 
 // This can not be inlined since it needs to have the internals of the
 // SimpleTcpTransport available in order to call add_ref(), and that
@@ -31,3 +29,25 @@ TAO::DCPS::SimpleTcpAcceptor::get_configuration()
 {
   return this->transport_->get_configuration();
 }
+
+
+TAO::DCPS::SimpleTcpTransport*
+TAO::DCPS::SimpleTcpAcceptor::transport()
+{
+  DBG_ENTRY("SimpleTcpAcceptor","transport");
+  // Return a new reference to the caller (the caller is responsible for
+  // the reference).
+  SimpleTcpTransport_rch tmp = this->transport_;
+  return tmp._retn();
+}
+
+
+void
+TAO::DCPS::SimpleTcpAcceptor::transport_shutdown()
+{
+  DBG_ENTRY("SimpleTcpAcceptor","transport_shutdown");
+
+  // Drop the reference to the SimpleTcpTransport object.
+  this->transport_ = 0;
+}
+
