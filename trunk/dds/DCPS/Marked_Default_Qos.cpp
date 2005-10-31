@@ -26,7 +26,7 @@ namespace TAO
     {
       ::DDS::TopicQos qos = TheServiceParticipant->initial_TopicQos();
       qos.liveliness.kind 
-        = ACE_static_cast(::DDS::LivelinessQosPolicyKind, 
+        = static_cast< ::DDS::LivelinessQosPolicyKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -36,7 +36,7 @@ namespace TAO
     {
       ::DDS::DataWriterQos qos = TheServiceParticipant->initial_DataWriterQos();
       qos.liveliness.kind 
-        = ACE_static_cast(::DDS::LivelinessQosPolicyKind, 
+        = static_cast< ::DDS::LivelinessQosPolicyKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -46,7 +46,7 @@ namespace TAO
     {
       ::DDS::PublisherQos qos = TheServiceParticipant->initial_PublisherQos();
       qos.presentation.access_scope 
-        = ACE_static_cast(::DDS::PresentationQosPolicyAccessScopeKind, 
+        = static_cast< ::DDS::PresentationQosPolicyAccessScopeKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -56,7 +56,7 @@ namespace TAO
     {
       ::DDS::DataReaderQos qos = TheServiceParticipant->initial_DataReaderQos();
       qos.liveliness.kind 
-        = ACE_static_cast(::DDS::LivelinessQosPolicyKind, 
+        = static_cast< ::DDS::LivelinessQosPolicyKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -66,7 +66,7 @@ namespace TAO
     {
       ::DDS::SubscriberQos qos = TheServiceParticipant->initial_SubscriberQos();
       qos.presentation.access_scope 
-        = ACE_static_cast(::DDS::PresentationQosPolicyAccessScopeKind, 
+        = static_cast< ::DDS::PresentationQosPolicyAccessScopeKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -76,7 +76,7 @@ namespace TAO
     {
       ::DDS::DataWriterQos qos = TheServiceParticipant->initial_DataWriterQos();
       qos.durability.kind 
-        = ACE_static_cast(::DDS::DurabilityQosPolicyKind, 
+        = static_cast< ::DDS::DurabilityQosPolicyKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
@@ -86,7 +86,7 @@ namespace TAO
     {
       ::DDS::DataReaderQos qos = TheServiceParticipant->initial_DataReaderQos();
       qos.durability.kind 
-        = ACE_static_cast(::DDS::DurabilityQosPolicyKind, 
+        = static_cast< ::DDS::DurabilityQosPolicyKind>(
                           INVALID_ENUM_VALUE);
       return qos;
     }
