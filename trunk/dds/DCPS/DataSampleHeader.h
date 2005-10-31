@@ -22,7 +22,7 @@ namespace TAO
       DATAWRITER_LIVELINESS,
       INSTANCE_REGISTRATION,
       UNREGISTER_INSTANCE,
-      DISPOSE_INSTANCE,
+      DISPOSE_INSTANCE
     };
 
     /// The header message of a data sample.
