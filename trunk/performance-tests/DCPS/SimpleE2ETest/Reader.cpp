@@ -16,6 +16,10 @@
 #include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
+
+// Only for Microsoft VC6
+#if defined ((_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300))
+
 // Added unused arguments with default value to work around with vc6 
 // bug on template function instantiation.
 template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
@@ -25,6 +29,16 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
                           R* rd = 0)
 {
   ACE_UNUSED_ARG(rd);
+
+#else
+
+template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
+::DDS::ReturnCode_t read (TestStats* stats,
+                          ::DDS::Subscriber_ptr subscriber,
+                          ::DDS::DataReader_ptr reader)
+{
+#endif
+
   R_var pt_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
   if (CORBA::is_nil (pt_dr.in ()))

@@ -1,3 +1,24 @@
+Thu Nov 10 16:35:32 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+          Solaris compilers failed when the method declaration was
+          extern and the definition was inline.  Added a macro
+          to assign the extern when the code is not inlined.
+
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+
+          Set the VC6 necessary extra unused parameters into
+          a typedef'd function declaration.  Solaris compilers
+          were choking on the extra parameter in the templated
+          method.
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.inl:
+        * dds/DCPS/transport/framework/NullSynchStrategy.inl:
+          Removed unused files.
+
 Mon Oct 31 16:43:52 2005  Byron Harris  <harris_b@ociweb.com>
 
         * dds/DCPS/Marked_Default_Qos.cpp:

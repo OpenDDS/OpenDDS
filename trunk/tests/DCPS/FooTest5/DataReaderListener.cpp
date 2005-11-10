@@ -10,6 +10,9 @@
 #include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
 
+// Only for Microsoft VC6
+#if defined ((_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300))
+
 // Added unused arguments with default value to work around with vc6 
 // bug on template function instantiation.
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
@@ -22,6 +25,14 @@ int read (::DDS::DataReader_ptr reader,
   ACE_UNUSED_ARG (dr_var);
   ACE_UNUSED_ARG (dr_impl);
   
+#else
+
+template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
+int read (::DDS::DataReader_ptr reader)
+{
+
+#endif
+
   ACE_TRY_NEW_ENV
   {
     DR_var foo_dr 
