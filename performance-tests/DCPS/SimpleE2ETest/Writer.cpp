@@ -15,9 +15,8 @@
 #include "ace/OS_NS_unistd.h"
 
 
-
-
-
+// Only for Microsoft VC6
+#if defined ((_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300))
 
 // Added unused arguments with default value to work around with vc6 
 // bug on template function instantiation.
@@ -29,6 +28,17 @@ void write (long id,
             T* t = 0)
 {
   ACE_UNUSED_ARG(t);
+
+#else
+
+template<class T, class W, class W_var, class W_ptr, class Wimpl>
+void write (long id,
+            int size,
+            int num_messages,
+            ::DDS::DataWriter_ptr writer)
+{
+#endif
+
   T data;
   data.data_source = id;
   data.values.length(size);
