@@ -18,7 +18,7 @@
 
 
 // Only for Microsoft VC6
-#if defined ((_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300))
+#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
 
 // Added unused arguments with default value to work around with vc6 
 // bug on template function instantiation.
