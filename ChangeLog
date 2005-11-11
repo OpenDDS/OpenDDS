@@ -1,3 +1,13 @@
+Fri Nov 11 11:06:19 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+
+          Removed extra parenthesis in the "#if defined" statement.
+          The should fix the compilation problem on Solaris builds.
+          
 Thu Nov 10 16:35:32 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
