@@ -10,6 +10,13 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+// Define a macro since we should NOT declare methods as extern and
+// then define them as inline
+#if defined(__ACE_INLINE__)
+# define EXTERN_OR_INLINE_HELPER_METHOD ACE_INLINE
+#else
+# define EXTERN_OR_INLINE_HELPER_METHOD extern
+#endif
 
 namespace TAO
 {
@@ -17,136 +24,136 @@ namespace TAO
   {
     class Service_Participant;
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export 
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export 
     ACE_Time_Value time_to_time_value (const ::DDS::Time_t& t);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     ::DDS::Time_t time_value_to_time (const ACE_Time_Value& tv);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export 
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export 
     ACE_Time_Value duration_to_time_value (const ::DDS::Duration_t& t);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     ::DDS::Duration_t time_value_to_duration (const ACE_Time_Value& tv);
 
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export 
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export 
     bool operator== (const ::DDS::Duration_t& t1, 
                     const ::DDS::Duration_t& t2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator < (const ::DDS::Duration_t& t1, 
                      const ::DDS::Duration_t& t2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator <= (const ::DDS::Duration_t& t1, 
                       const ::DDS::Duration_t& t2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::UserDataQosPolicy& qos1, 
                       const ::DDS::UserDataQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::TopicDataQosPolicy & qos1, 
                       const ::DDS::TopicDataQosPolicy & qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::GroupDataQosPolicy& qos1, 
                       const ::DDS::GroupDataQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::TransportPriorityQosPolicy& qos1, 
                       const ::DDS::TransportPriorityQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::LifespanQosPolicy& qos1, 
                       const ::DDS::LifespanQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::DurabilityQosPolicy& qos1,
                       const ::DDS::DurabilityQosPolicy& qos2);    
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::PresentationQosPolicy& qos1,
                       const ::DDS::PresentationQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::DeadlineQosPolicy& qos1,
                       const ::DDS::DeadlineQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::LatencyBudgetQosPolicy& qos1,
                       const ::DDS::LatencyBudgetQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::OwnershipQosPolicy& qos1,
                       const ::DDS::OwnershipQosPolicy& qos2);
       
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::OwnershipStrengthQosPolicy& qos1,
                       const ::DDS::OwnershipStrengthQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::LivelinessQosPolicy& qos1,
                       const ::DDS::LivelinessQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::TimeBasedFilterQosPolicy& qos1,
                       const ::DDS::TimeBasedFilterQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::PartitionQosPolicy& qos1,
                       const ::DDS::PartitionQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::ReliabilityQosPolicy& qos1,
                       const ::DDS::ReliabilityQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::DestinationOrderQosPolicy& qos1,
                       const ::DDS::DestinationOrderQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::HistoryQosPolicy& qos1,
                       const ::DDS::HistoryQosPolicy& qos2);
              
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::ResourceLimitsQosPolicy& qos1,
                       const ::DDS::ResourceLimitsQosPolicy& qos2);
        
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::EntityFactoryQosPolicy& qos1,
                       const ::DDS::EntityFactoryQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
                       const ::DDS::WriterDataLifecycleQosPolicy& qos2);   
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
                       const ::DDS::ReaderDataLifecycleQosPolicy& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator ==  (const ::DDS::DomainParticipantQos& qos1,
                       const ::DDS::DomainParticipantQos& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::TopicQos& qos1,
                       const ::DDS::TopicQos& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::DataWriterQos& qos1,
                       const ::DDS::DataWriterQos& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::PublisherQos& qos1,
                       const ::DDS::PublisherQos& qos2);
         
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::DataReaderQos& qos1,
                       const ::DDS::DataReaderQos& qos2);
 
-    ACE_NAMESPACE_INLINE_FUNCTION TAO_DdsDcps_Export
+    EXTERN_OR_INLINE_HELPER_METHOD TAO_DdsDcps_Export
     bool operator == (const ::DDS::SubscriberQos& qos1,
                       const ::DDS::SubscriberQos& qos2);
 

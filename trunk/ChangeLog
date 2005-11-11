@@ -1,3 +1,12 @@
+Fri Nov 11 14:58:33 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+
+          Restored previous version that uses the 
+          EXTERN_OR_INLINE_HELPER_METHOD  macro, but changed the
+          macro to be defined as ACE_INLINE instead of nothing if 
+          __ACE_INLINE__ is defined.
+
 Fri Nov 11 12:51:09 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
