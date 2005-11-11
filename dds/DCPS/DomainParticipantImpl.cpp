@@ -1906,7 +1906,7 @@ namespace TAO
         if (status != TAO::DCPS::ATTACH_OK)
           {
             // We failed to attach to the transport for some reason.
-            char* status_str = "" ;
+            const char* status_str = "" ;
 
             switch (status)
               {
