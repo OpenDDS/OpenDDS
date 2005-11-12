@@ -1,3 +1,15 @@
+Fri Nov 11 17:18:09 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        
+          Fixed warnings on string (char*) initialization.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+
+          Work arround with the compilation errors on Solaris due to the 
+          compiler can not resolve operator in a namespace.
+
 Fri Nov 11 14:58:33 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:

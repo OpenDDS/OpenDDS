@@ -60,7 +60,7 @@ void
 PubDriver::run(int& argc, char* argv[])
 {
   parse_args(argc, argv);
-  init(argc, argv);
+  initialize(argc, argv);
 
   run();
 
@@ -196,7 +196,7 @@ PubDriver::parse_args(int& argc, char* argv[])
 
 
 void
-PubDriver::init(int& argc, char *argv[])
+PubDriver::initialize(int& argc, char *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   ACE_CHECK;
@@ -263,7 +263,9 @@ PubDriver::init(int& argc, char *argv[])
   ::DDS::TopicQos new_topic_qos = default_topic_qos;
   new_topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
 
-  TEST_CHECK (! (new_topic_qos == default_topic_qos));
+  //The SunOS compiler had problem resolving operator in a namespace. 
+  //To resolve the compilation errors, the operator is called explicitly.
+  TEST_CHECK (! ::TAO::DCPS::operator==(new_topic_qos, default_topic_qos));
 
   participant_->set_default_topic_qos(new_topic_qos ACE_ENV_ARG_PARAMETER);
 
@@ -293,13 +295,13 @@ PubDriver::init(int& argc, char *argv[])
   participant_->get_default_publisher_qos (default_pub_qos 
                                            ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
-  TEST_CHECK (pub_qos_got == default_pub_qos);
+  TEST_CHECK (::TAO::DCPS::operator==(pub_qos_got, default_pub_qos));
 
   ::DDS::PublisherQos new_pub_qos = pub_qos_got;
   // This qos is not supported, so it's invalid qos.
   new_pub_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
-  TEST_CHECK (! (new_pub_qos == default_pub_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator==(new_pub_qos, default_pub_qos));
   
   ret = publisher_->set_qos (new_pub_qos ACE_ENV_ARG_PARAMETER);
   TEST_CHECK (ret == ::DDS::RETCODE_INCONSISTENT_POLICY);
@@ -317,7 +319,7 @@ PubDriver::init(int& argc, char *argv[])
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos; 
   new_default_dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
   
-  TEST_CHECK (! (new_default_dw_qos == default_dw_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator== (new_default_dw_qos, default_dw_qos));
   TEST_CHECK (publisher_->set_default_datawriter_qos (new_default_dw_qos)
               == ::DDS::RETCODE_OK);
   
@@ -339,7 +341,7 @@ PubDriver::init(int& argc, char *argv[])
   ACE_CHECK;
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
  
-  TEST_CHECK (dw_qos_use_topic_qos == copied_from_topic);
+  TEST_CHECK (::TAO::DCPS::operator== (dw_qos_use_topic_qos, copied_from_topic));
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in () ACE_ENV_ARG_PARAMETER);
@@ -381,7 +383,7 @@ PubDriver::init(int& argc, char *argv[])
   datawriter_->get_qos (dw_qos_got ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
-  TEST_CHECK (dw_qos_got == new_default_dw_qos);
+  TEST_CHECK (::TAO::DCPS::operator== (dw_qos_got, new_default_dw_qos));
 
   ::DDS::DataWriterQos new_dw_qos = dw_qos_got;
  
@@ -389,7 +391,7 @@ PubDriver::init(int& argc, char *argv[])
   new_dw_qos.resource_limits.max_samples_per_instance = 2;
   new_dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-  TEST_CHECK (! (dw_qos_got == new_dw_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator== (dw_qos_got, new_dw_qos));
 
   ret = datawriter_->set_qos (new_dw_qos ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
