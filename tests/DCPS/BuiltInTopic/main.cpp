@@ -311,16 +311,18 @@ void test_bit_topic ()
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].type_name.in (), TEST_TOPIC_TYPE) == 0);
 
-      TEST_CHECK (topic_data[0].durability         ==  topic_qos.durability);
-      TEST_CHECK (topic_data[0].deadline           ==  topic_qos.deadline);
-      TEST_CHECK (topic_data[0].latency_budget     ==  topic_qos.latency_budget);
-      TEST_CHECK (topic_data[0].liveliness         ==  topic_qos.liveliness);
-      TEST_CHECK (topic_data[0].reliability        ==  topic_qos.reliability);
-      TEST_CHECK (topic_data[0].transport_priority ==  topic_qos.transport_priority);
-      TEST_CHECK (topic_data[0].lifespan           ==  topic_qos.lifespan);
-      TEST_CHECK (topic_data[0].destination_order  ==  topic_qos.destination_order);
-      TEST_CHECK (topic_data[0].ownership          ==  topic_qos.ownership);
-      TEST_CHECK (topic_data[0].topic_data         ==  topic_qos.topic_data);
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].durability, topic_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].deadline, topic_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].latency_budget, topic_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].liveliness, topic_qos.liveliness));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].reliability, topic_qos.reliability));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].transport_priority, topic_qos.transport_priority));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].lifespan, topic_qos.lifespan));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].destination_order, topic_qos.destination_order));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].ownership, topic_qos.ownership));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].topic_data, topic_qos.topic_data));
     }
   ACE_CATCHALL
     {
@@ -377,14 +379,16 @@ void test_bit_publication ()
       
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
-
-      TEST_CHECK (the_pub_data.durability == dw_qos.durability);
-      TEST_CHECK (the_pub_data.deadline == dw_qos.deadline);
-      TEST_CHECK (the_pub_data.latency_budget == dw_qos.latency_budget);
-      TEST_CHECK (the_pub_data.liveliness == dw_qos.liveliness);
-      //rmACE_ASSERT (the_pub_data.lifespan == dw_qos.lifespan);
-      TEST_CHECK (the_pub_data.user_data == dw_qos.user_data);
-      TEST_CHECK (the_pub_data.ownership_strength == dw_qos.ownership_strength);
+  
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.durability, dw_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.deadline, dw_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.latency_budget, dw_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.liveliness, dw_qos.liveliness));
+      //TEST_CHECK (::TAO::DCPS::operator== the_pub_data.lifespan, dw_qos.lifespan));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.user_data, dw_qos.user_data));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.ownership_strength, dw_qos.ownership_strength));
       //the_pub_data.presentation 
       //the_pub_data.partition 
       //the_pub_data.topic_data
@@ -446,14 +450,17 @@ void test_bit_subscription ()
       
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
-      TEST_CHECK (the_sub_data.durability == dr_qos.durability);
-      TEST_CHECK (the_sub_data.deadline == dr_qos.deadline);
-      TEST_CHECK (the_sub_data.latency_budget == dr_qos.latency_budget);
-      TEST_CHECK (the_sub_data.liveliness == dr_qos.liveliness);
-      TEST_CHECK (the_sub_data.reliability == dr_qos.reliability);
-      TEST_CHECK (the_sub_data.destination_order == dr_qos.destination_order);
-      TEST_CHECK (the_sub_data.user_data == dr_qos.user_data);
-      TEST_CHECK (the_sub_data.time_based_filter == dr_qos.time_based_filter);
+
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.durability, dr_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.deadline, dr_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.latency_budget, dr_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.liveliness, dr_qos.liveliness));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.reliability, dr_qos.reliability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.destination_order, dr_qos.destination_order));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.user_data, dr_qos.user_data));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.time_based_filter, dr_qos.time_based_filter));
       //the_sub_data.presentation
       //the_sub_data.partition 
       //the_sub_data.topic_data 

@@ -1,3 +1,15 @@
+Sat Nov 12 13:24:25 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+        
+        * tests/DCPS/BuiltInTopic/common.h:
+         
+          Resolved a warnings.
+          
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Work arround with the compilation errors on Solaris due to the 
+          compiler can not resolve operator in a namespace.
+
 Fri Nov 11 17:18:09 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:

@@ -181,7 +181,10 @@ int main (int argc, char *argv[])
                                       ACE_ENV_ARG_PARAMETER);
 
       ACE_CHECK;
-      if (!(sub_qos_got == default_sub_qos))
+
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      if (!(::TAO::DCPS::operator== (sub_qos_got, default_sub_qos)))
       {
         ACE_ERROR ((LM_ERROR,
                    ACE_TEXT("(%P|%t) Subscriber get_default_qos failed.\n")));
@@ -266,7 +269,9 @@ int main (int argc, char *argv[])
         return 1 ;
       }
   
-      if (!(dr_qos_use_topic_qos == copied_from_topic))
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      if (!(::TAO::DCPS::operator== (dr_qos_use_topic_qos, copied_from_topic)))
       {
         ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Subscriber copy_from_topic_qos failed.\n")));
