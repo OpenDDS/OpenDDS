@@ -29,7 +29,7 @@
     ::Mine::Foo2DataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::Foo2DataReaderImpl,
                               ::Mine::Foo2DataReader_ptr>
-            (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+            (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     ::Mine::Foo2Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

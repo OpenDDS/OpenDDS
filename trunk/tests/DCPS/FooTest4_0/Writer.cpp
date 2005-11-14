@@ -46,7 +46,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   ::TAO::DCPS::PublisherImpl* pub_impl 
       = reference_to_servant< ::TAO::DCPS::PublisherImpl,
                               ::DDS::Publisher_ptr>
-                              (pub_ ACE_ENV_SINGLE_ARG_PARAMETER);
+                              (pub_.in () ACE_ENV_SINGLE_ARG_PARAMETER);
   ACE_TRY_CHECK;
 
   if (0 == pub_impl)
@@ -80,7 +80,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   ::Mine::FooDataWriter_var foo_dw = ::Mine::FooDataWriter::_narrow(
-      dw_ ACE_ENV_ARG_PARAMETER);
+      dw_.in () ACE_ENV_ARG_PARAMETER);
   if (CORBA::is_nil (foo_dw.in ()))
   {
     ACE_ERROR ((LM_ERROR,

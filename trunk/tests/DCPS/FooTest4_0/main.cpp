@@ -381,11 +381,11 @@ int main (int argc, char *argv[])
 
 //---------------------------------------------------------------------
         
-      reader = new Reader(dp, 1, 1) ;
+      reader = new Reader(dp.in (), 1, 1) ;
      
       ACE_OS::sleep(5) ; // why???
 
-      writer = new Writer(dp, topic, history_depth, max_samples_per_instance) ;
+      writer = new Writer(dp.in (), topic, history_depth, max_samples_per_instance) ;
      
       ACE_OS::sleep(5) ; // why???
 

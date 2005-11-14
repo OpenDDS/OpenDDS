@@ -392,7 +392,7 @@ int main (int argc, char *argv[])
       // Create the subscriber and attach to the corresponding
       // transport.
       ::DDS::Subscriber_var sub 
-        = create_subscriber(participant, attach_to_udp);
+        = create_subscriber(participant.in (), attach_to_udp);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR, 
@@ -405,7 +405,7 @@ int main (int argc, char *argv[])
         {
           // Create the subscriber with a different transport from previous
           // subscriber.
-          sub1 = create_subscriber(participant, ! attach_to_udp);
+          sub1 = create_subscriber(participant.in (), ! attach_to_udp);
           if (CORBA::is_nil (sub1.in ()))
             {
               ACE_ERROR ((LM_ERROR, 

@@ -113,7 +113,7 @@ int init (int argc, ACE_TCHAR *argv[])
       participant_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DomainParticipantImpl, 
                                               ::DDS::DomainParticipant_ptr>
-          (participant ACE_ENV_ARG_PARAMETER); 
+          (participant.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       topic = participant->create_topic (TEST_TOPIC, 
@@ -126,7 +126,7 @@ int init (int argc, ACE_TCHAR *argv[])
       topic_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::TopicImpl, 
                                               ::DDS::Topic_ptr>
-          (topic ACE_ENV_ARG_PARAMETER); 
+          (topic.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       subscriber 
@@ -138,7 +138,7 @@ int init (int argc, ACE_TCHAR *argv[])
       subscriber_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl, 
                                               ::DDS::Subscriber_ptr>
-          (subscriber ACE_ENV_ARG_PARAMETER); 
+          (subscriber.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       // Attach the subscriber to transport
@@ -164,7 +164,7 @@ int init (int argc, ACE_TCHAR *argv[])
       publisher_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, 
                                               ::DDS::Publisher_ptr>
-          (publisher ACE_ENV_ARG_PARAMETER); 
+          (publisher.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       // Attach the publisher to transport
@@ -192,7 +192,7 @@ int init (int argc, ACE_TCHAR *argv[])
       datareader_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataReaderImpl, 
                                               ::DDS::DataReader_ptr>
-          (datareader ACE_ENV_ARG_PARAMETER); 
+          (datareader.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       datawriter
@@ -205,7 +205,7 @@ int init (int argc, ACE_TCHAR *argv[])
       datawriter_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataWriterImpl, 
                                               ::DDS::DataWriter_ptr>
-          (datawriter ACE_ENV_ARG_PARAMETER); 
+          (datawriter.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
   }
   ACE_CATCHALL
@@ -280,7 +280,7 @@ void test_bit_topic ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_dr 
-        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::TopicBuiltinTopicDataSeq topic_data;
@@ -343,7 +343,7 @@ void test_bit_publication ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_dr 
-        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::PublicationBuiltinTopicDataSeq pub_data;
@@ -414,7 +414,7 @@ void test_bit_subscription ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_dr 
-        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::SubscriptionBuiltinTopicDataSeq sub_data;

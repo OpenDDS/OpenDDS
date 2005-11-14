@@ -226,7 +226,7 @@ int main (int argc, char *argv[])
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::Mine::FooDataReader_var foo_dr 
-        = ::Mine::FooDataReader::_narrow(dr ACE_ENV_ARG_PARAMETER);
+        = ::Mine::FooDataReader::_narrow(dr.in () ACE_ENV_ARG_PARAMETER);
       TEST_CHECK (! CORBA::is_nil (foo_dr.in ()));
 
       int num_samples 

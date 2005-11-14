@@ -47,7 +47,7 @@ int read (::DDS::DataReader_ptr reader)
     DR_impl* dr_servant =
         reference_to_servant< DR_impl,
                               DR_ptr>
-                (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[5] ;
     if (use_take)

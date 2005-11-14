@@ -411,7 +411,7 @@ PubDriver::run()
   {
     ::Mine::FooDataWriterImpl* datawriter_servant 
       = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
-      (datawriters_[i]);
+      (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
     // Write the publication id to a file.
@@ -448,7 +448,7 @@ PubDriver::run()
   // Attach the Publisher with the TransportImpl.
   ::TAO::DCPS::PublisherImpl* pub_servant 
     = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_ ACE_ENV_ARG_PARAMETER);
+      (publisher_.in () ACE_ENV_ARG_PARAMETER);
 
   ACE_CHECK;
   TEST_CHECK (pub_servant != 0);
@@ -504,11 +504,11 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::TAO::DCPS::DataWriterRemote_var dw_remote 
-      = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i]);
+      = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i].in ());
 
     ::Mine::FooDataWriterImpl* datawriter_servant 
       = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
-      (datawriters_[i]);
+      (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
     dw_remote->add_associations (pub_id, associations);
@@ -526,7 +526,7 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     writers_[i] = new Writer(this,
-                             datawriters_[i], 
+                             datawriters_[i].in (), 
                              num_threads_to_write_, 
                              num_writes_per_thread_, 
                              multiple_instances_,

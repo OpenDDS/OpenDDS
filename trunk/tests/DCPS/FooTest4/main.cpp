@@ -364,7 +364,7 @@ int main (int argc, char *argv[])
       // Do the "writes"
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 multiple_instances,
                                 i + 1); 
@@ -375,7 +375,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 use_take, 
                                 num_reads_per_thread, 
                                 multiple_instances,
@@ -428,7 +428,7 @@ int main (int argc, char *argv[])
       // write again
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 multiple_instances,
                                 i + 1); 
@@ -440,7 +440,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 use_take, 
                                 num_reads_per_thread, 
                                 multiple_instances,
@@ -493,7 +493,7 @@ int main (int argc, char *argv[])
       // write again
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 0,
                                 i + 1); 
@@ -505,7 +505,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 0, 
                                 num_reads_per_thread, 
                                 0,
