@@ -21,7 +21,7 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

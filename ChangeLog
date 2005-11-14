@@ -1,3 +1,14 @@
+Mon Nov 14 14:46:22 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+
+          VC6 needs the classes exported.
+
 Mon Nov 14 09:15:27 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/LivelinessTest/Writer.h:

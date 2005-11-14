@@ -17,7 +17,7 @@ namespace TAO
     class TransportReactorTask;
 
 
-    class TransportImplFactory : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export TransportImplFactory : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

@@ -20,7 +20,7 @@ namespace TAO
     class DataLink;
 
 
-    class DataLinkSetMap
+    class TAO_DdsDcps_Export DataLinkSetMap
     {
       public:
 

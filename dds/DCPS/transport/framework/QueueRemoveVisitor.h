@@ -17,7 +17,7 @@ namespace TAO
 
     class TransportQueueElement;
 
-    class QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
+    class TAO_DdsDcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
     {
       public:
 
