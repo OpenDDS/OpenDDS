@@ -64,7 +64,7 @@ enum TransportInstanceId
   SUB_TRAFFIC_TCP,
   SUB_TRAFFIC_UDP,
   PUB_TRAFFIC_TCP,
-  PUB_TRAFFIC_UDP,
+  PUB_TRAFFIC_UDP
 };
 
 
