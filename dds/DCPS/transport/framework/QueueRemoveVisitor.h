@@ -33,6 +33,10 @@ namespace TAO
 
         virtual ~QueueRemoveVisitor();
 
+        // The using declaration is added to resolve the "hides virtual functions"
+        // compilation warnings on Solaris.
+        using BasicQueueVisitor<TransportQueueElement>::visit_element;
+
         /// The BasicQueue<T>::accept_remove_visitor() method will call
         /// this visit_element() method for each element in the queue.
         virtual int visit_element(TransportQueueElement* element,
