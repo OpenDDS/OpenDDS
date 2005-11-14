@@ -173,7 +173,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
       ::TAO::DCPS::PublisherImpl* pub_impl 
         = reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                 ::DDS::Publisher_ptr>
-                              (pub ACE_ENV_SINGLE_ARG_PARAMETER);
+                              (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
       if (0 == pub_impl)
@@ -353,7 +353,7 @@ int main (int argc, char *argv[])
       
       int attach_to_udp = using_udp;
       // Create the default publisher
-      ::DDS::Publisher_var pub = create_publisher(participant, attach_to_udp);
+      ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -366,7 +366,7 @@ int main (int argc, char *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant, ! attach_to_udp);
+          pub1 = create_publisher(participant.in (), ! attach_to_udp);
 
           if (CORBA::is_nil (pub1.in ()))
             {

@@ -62,7 +62,7 @@ Writer::svc (int pass)
     foo.key = default_key;
     
     ::Mine::FooDataWriter_var foo_dw 
-      = ::Mine::FooDataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,

@@ -512,7 +512,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 
@@ -528,7 +528,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 
@@ -544,7 +544,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 /*

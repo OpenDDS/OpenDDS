@@ -162,7 +162,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -177,7 +177,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -192,7 +192,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -207,7 +207,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 

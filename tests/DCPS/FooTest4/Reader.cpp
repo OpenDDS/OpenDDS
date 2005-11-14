@@ -37,7 +37,7 @@ Reader::start ()
   {
     
     ::Mine::FooDataReader_var foo_dr 
-      = ::Mine::FooDataReader::_narrow(reader_ ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataReader::_narrow(reader_.in () ACE_ENV_ARG_PARAMETER);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -48,7 +48,7 @@ Reader::start ()
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                              ::Mine::FooDataReader_ptr>
-                (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[5] ;
     if (use_take_)
@@ -142,7 +142,7 @@ Reader::start1 ()
   {
     
     ::Mine::FooDataReader_var foo_dr 
-      = ::Mine::FooDataReader::_narrow(reader_ ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataReader::_narrow(reader_.in () ACE_ENV_ARG_PARAMETER);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -153,7 +153,7 @@ Reader::start1 ()
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                              ::Mine::FooDataReader_ptr>
-                (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[14] ;
     if (use_take_)
@@ -386,7 +386,7 @@ Reader::start2 ()
   {
     
     ::Mine::FooDataReader_var foo_dr 
-      = ::Mine::FooDataReader::_narrow(reader_ ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataReader::_narrow(reader_.in () ACE_ENV_ARG_PARAMETER);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -397,7 +397,7 @@ Reader::start2 ()
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                              ::Mine::FooDataReader_ptr>
-                (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     ::Mine::FooSeq foo;
     ::DDS::SampleInfoSeq si ;

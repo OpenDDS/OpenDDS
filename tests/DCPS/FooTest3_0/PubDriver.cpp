@@ -286,7 +286,7 @@ PubDriver::initialize(int& argc, char *argv[])
 
   publisher_servant_ 
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_);
+      (publisher_.in ());
 
   ::DDS::PublisherQos pub_qos_got;
   publisher_->get_qos (pub_qos_got ACE_ENV_ARG_PARAMETER);
@@ -424,7 +424,7 @@ PubDriver::initialize(int& argc, char *argv[])
 
   datawriter_servant_ 
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (datawriter_);
+    (datawriter_.in ());
 
   foo_datawriter_     
     = ::Mine::FooDataWriter::_narrow(datawriter_.in () ACE_ENV_ARG_PARAMETER);
@@ -855,7 +855,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dpl_got.in ()));
 
-  participant_->set_listener (dpl, DEFAULT_STATUS_KIND_MASK ACE_ENV_ARG_PARAMETER);
+  participant_->set_listener (dpl.in (), DEFAULT_STATUS_KIND_MASK ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   dpl_got = participant_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -869,7 +869,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (pl_got.in ()));
 
-  publisher_->set_listener (pl, 0 ACE_ENV_ARG_PARAMETER);
+  publisher_->set_listener (pl.in (), 0 ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   pl_got = publisher_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -883,7 +883,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
-  foo_datawriter_->set_listener (dwl, 0 ACE_ENV_ARG_PARAMETER);
+  foo_datawriter_->set_listener (dwl.in (), 0 ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   dwl_got = foo_datawriter_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -928,7 +928,7 @@ PubDriver::listener_test ()
     TEST_CHECK (incomp_status_got.in ().policies[i].count == incomp_status.policies[i].count);
   }
 
-  publisher_->set_listener (pl, 
+  publisher_->set_listener (pl.in (), 
                             ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS 
                             ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
@@ -944,7 +944,7 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_pub == 1);
   TEST_CHECK (offered_incompatible_qos_called_on_dw == 0);
 
-  foo_datawriter_->set_listener (dwl, 
+  foo_datawriter_->set_listener (dwl.in (), 
                                  ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS
                                  ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;

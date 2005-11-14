@@ -135,7 +135,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -149,7 +149,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -163,7 +163,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -177,7 +177,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
