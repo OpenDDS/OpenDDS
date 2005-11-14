@@ -45,7 +45,7 @@ namespace TAO
      * The TransportConfiguration object is supplied to the
      * TransportImpl::configure() method.
      */
-    class TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
