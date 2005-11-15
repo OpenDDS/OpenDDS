@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_PACKETREMOVEVISTOR_H
 #define TAO_DCPS_PACKETREMOVEVISTOR_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "BasicQueueVisitor_T.h"
 #include  "TransportDefs.h"
 

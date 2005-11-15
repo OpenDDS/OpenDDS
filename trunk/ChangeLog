@@ -1,3 +1,14 @@
+Tue Nov 15 10:24:52 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+
+          Added includes to the dcps_export header file for the exports.
+
 Mon Nov 14 14:46:22 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.h:
