@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTCONFIGURATION_H
 #define TAO_DCPS_TRANSPORTCONFIGURATION_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/Synch.h"
 

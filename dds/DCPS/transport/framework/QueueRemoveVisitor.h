@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_QUEUEREMOVEVISITOR_H
 #define TAO_DCPS_QUEUEREMOVEVISITOR_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "BasicQueueVisitor_T.h"
 #include  "TransportDefs.h"
 #include  "ace/Message_Block.h"
