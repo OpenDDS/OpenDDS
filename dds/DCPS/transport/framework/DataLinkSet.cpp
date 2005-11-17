@@ -5,6 +5,7 @@
 #include  "DataLinkSet.h"
 
 #include  "dds/DCPS/DataSampleList.h"
+#include  "TransportImpl.h"
 #include  "TransportSendListener.h"
 
 #include "EntryExit.h"
