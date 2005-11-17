@@ -1,3 +1,13 @@
+Tue Nov 16 18:39:52 MST 2005  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet_rch.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Make DDS build with the DOC group version of TAO.
+          See RT4088.
+
 Tue Nov 15 10:24:52 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.h:

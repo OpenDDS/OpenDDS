@@ -329,7 +329,7 @@ TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 }
 
 
-SimpleTcpConfiguration*
+TAO::DCPS::SimpleTcpConfiguration*
 TAO::DCPS::SimpleTcpTransport::get_configuration()
 {
   return this->tcp_config_.in();
