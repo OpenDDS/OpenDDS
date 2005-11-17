@@ -5,6 +5,7 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpConnection.h"
 #include  "SimpleTcpTransport.h"
+#include  "SimpleTcpConfiguration.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -162,7 +163,7 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
   int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
-  ACE_SOCK sock = ACE_static_cast(ACE_SOCK, this->peer() );
+  //ACE_SOCK_Stream sock = ACE_static_cast(ACE_SOCK_Stream, this->peer() );
 #if !defined (ACE_LACKS_SOCKET_BUFSIZ)
 
   // A little screwy double negative logic: disabling nagle involves
@@ -172,7 +173,7 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
     ACE_ERROR((LM_ERROR, "Failed to set TCP_NODELAY\n"));
   }
 
- if (sock.set_option (SOL_SOCKET,
+ if (this->peer().set_option (SOL_SOCKET,
                           SO_SNDBUF,
                           (void *) &snd_size,
                           sizeof (snd_size)) == -1
@@ -184,7 +185,7 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
     return;
   }
 
-  if (sock.set_option (SOL_SOCKET,
+  if (this->peer().set_option (SOL_SOCKET,
                           SO_RCVBUF,
                           (void *) &rcv_size,
                           sizeof (int)) == -1
