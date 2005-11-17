@@ -88,48 +88,6 @@ TAO::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 }
 
 
-ACE_INLINE void
-TAO::DCPS::TransportImpl::shutdown()
-{
-  DBG_ENTRY("TransportImpl","shutdown");
-
-  {
-    GuardType guard(this->lock_);
-
-    if (this->config_.is_nil())
-      {
-        // This TransportImpl is already shutdown.
-//MJM: So, I read here that config_i() actually "starts" us?
-        return;
-      }
-
-    InterfaceMapType::ENTRY* entry;
-
-    for (InterfaceMapType::ITERATOR itr(this->interfaces_);
-         itr.next(entry);
-         itr.advance())
-      {
-        entry->int_id_->transport_detached();
-      }
-
-    // Clear our collection of TransportInterface pointers.
-    this->interfaces_.unbind_all();
-
-    // Drop our references to the config_ and reactor_task_.
-    this->config_ = 0;
-    this->reactor_task_ = 0;
-
-//MJM: Won't you need to ACE_UNUSED_ARG here since you are depending on
-//MJM: side effects here?
-
-    // We can release our lock_ now.
-  }
-
-  // Tell our subclass about the "shutdown event".
-  this->shutdown_i();
-}
-
-
 /// The DataLink itself calls this when it has determined that, due
 /// to some remove_associations() call being handled by a TransportInterface
 /// object, the DataLink has lost all of its associations, and is not needed
