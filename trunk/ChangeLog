@@ -1,3 +1,15 @@
+Thu Nov 17 06:23:48 MST 2005  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Moved some inlined functions to .cpp files to
+          avoid a problem recursive include problem when
+          building against DOC TAO and using gcc.
+
 Tue Nov 16 18:39:52 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet_rch.h:
@@ -6,7 +18,7 @@ Tue Nov 16 18:39:52 MST 2005  Scott Harris  <harris_s@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
           Make DDS build with the DOC group version of TAO.
-          See RT4088.
+          See RT8044.
 
 Tue Nov 15 10:24:52 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
