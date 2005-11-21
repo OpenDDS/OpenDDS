@@ -1,3 +1,13 @@
+Mon Nov 21 13:57:01 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/Writer.h:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+
+          Renamed svc() function to be run_test() and removed the inheritance
+          of ACE_Task_Base for class Writer. This was intended to fix build
+          problem on Solaris platform.
+
 Thu Nov 17 10:17:48 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
