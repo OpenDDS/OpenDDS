@@ -1,3 +1,13 @@
+Mon Nov 21 15:18:01 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          DDS 0.7 released.
+
+        * DDS_release_notes.txt:
+        * README:
+        * VERSION:
+
+          Changes related to the 0.7 release.
+
 Mon Nov 21 13:57:01 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/LivelinessTest/Writer.h:
@@ -13,7 +23,7 @@ Thu Nov 17 10:17:48 MST 2005  Scott Harris  <harris_s@ociweb.com>
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
 
           Make it build with TAO 1.3a (almost p6).
-          
+
 Thu Nov 17 06:23:48 MST 2005  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
@@ -64,7 +74,7 @@ Mon Nov 14 09:15:27 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/FooTest5/common.h:
 
           Fixed warnings on Solaris builds.
-          
+
 Sun Nov 13 23:51:43 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
@@ -98,7 +108,7 @@ Sun Nov 13 23:51:43 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/FooType/Foo_Singleton_Transport.h:
 
           Fixed warnings because of passing _var as _ptr argument.
-          
+
 Sun Nov 13 15:57:35 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/BuildChainVisitor.h:
@@ -106,51 +116,51 @@ Sun Nov 13 15:57:35 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
           Added using declaration to resolve the "hides virtual functions"
           compilation warnings on Solaris.
-          
+
 Sat Nov 12 13:24:25 USMST 2005  Yan Dai  <dai_y@ociweb.com>
-        
+
         * tests/DCPS/BuiltInTopic/common.h:
-         
+
           Resolved a warnings.
-          
+
         * tests/DCPS/BuiltInTopic/main.cpp:
         * tests/DCPS/FooTest4/main.cpp:
 
-          Work arround with the compilation errors on Solaris due to the 
+          Work arround with the compilation errors on Solaris due to the
           compiler can not resolve operator in a namespace.
 
 Fri Nov 11 17:18:09 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
-        
+
           Fixed warnings on string (char*) initialization.
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.h:
 
-          Work arround with the compilation errors on Solaris due to the 
+          Work arround with the compilation errors on Solaris due to the
           compiler can not resolve operator in a namespace.
 
 Fri Nov 11 14:58:33 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
 
-          Restored previous version that uses the 
+          Restored previous version that uses the
           EXTERN_OR_INLINE_HELPER_METHOD  macro, but changed the
-          macro to be defined as ACE_INLINE instead of nothing if 
+          macro to be defined as ACE_INLINE instead of nothing if
           __ACE_INLINE__ is defined.
 
 Fri Nov 11 12:51:09 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
-        
+
           Fixed warnings on string (char*) initialization.
-          
+
         * dds/DCPS/Qos_Helper.h:
 
-          Used ACE_NAMESPACE_INLINE_FUNCTION for inline functions 
+          Used ACE_NAMESPACE_INLINE_FUNCTION for inline functions
           declare to fix warnings on Solaris.
-          
+
 Fri Nov 11 11:06:19 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest5/DataReaderListener.cpp:
@@ -160,7 +170,7 @@ Fri Nov 11 11:06:19 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
           Removed extra parenthesis in the "#if defined" statement.
           The should fix the compilation problem on Solaris builds.
-          
+
 Thu Nov 10 16:35:32 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:

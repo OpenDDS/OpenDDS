@@ -1,4 +1,16 @@
 
+Version 0.7 of TAO DDS.
+
+New to this verion are the following changes:
+  - Added a configuration parameter to control the use of the Nagle
+    algorithm for the SimpleTCP protocol.  By default, the Nagle 
+    algorithm is now disabled.
+  - Improved VC6 support.
+  - Fixed some memory leaks.
+  - Added support for 64 bit architectures.
+
+=========================================================================
+
 Version 0.6 of TAO DDS.
 
 New to this verion are the following changes:
