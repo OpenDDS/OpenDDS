@@ -20,35 +20,11 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 {
 }
 
-void 
-Writer::start ()
-{
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) Writer::start \n")));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1) 
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
-    throw TestException ();
-  }
-}
-
-void 
-Writer::end () 
-{
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
-  wait ();
-}
-
-
 int 
-Writer::svc (int pass)
+Writer::run_test (int pass)
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
+              ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
 
   ACE_TRY_NEW_ENV
   {
@@ -66,7 +42,7 @@ Writer::svc (int pass)
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write pass %d\n"),
+              ACE_TEXT("%T (%P|%t) Writer::run_test starting to write pass %d\n"),
               pass));
 
     ::DDS::InstanceHandle_t handle 
@@ -85,20 +61,20 @@ Writer::svc (int pass)
     }
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc done writing.\n")));
+              ACE_TEXT("%T (%P|%t) Writer::run_test done writing.\n")));
 
   }
   ACE_CATCHANY
   {
     ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+      "Exception caught in run_test:");
   }
   ACE_ENDTRY;
 
   finished_sending_ = true;
 
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
+              ACE_TEXT("(%P|%t) Writer::run_test finished.\n")));
   return 0;
 }
 
