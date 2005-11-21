@@ -14,6 +14,9 @@ BUILDING DDS
   1 Build ACE and TAO.
 
     Don't forget to build the PortableServer library.
+    See the instructions in ACE_wrappers/ACE-INSTALL.html and
+    ACE_wrappers/TAO/TAO-INSTALL.html or the relevant sections
+    in OCI's TAO Developer's Guide.
 
   2 Set the environment variables.
 
@@ -25,7 +28,8 @@ BUILDING DDS
     Add $DDS_ROOT/lib to the LD_LIBRARY_PATH (or %DDS_ROOT%\lib to
     the PATH for windows)
 
-    Make sure that MPC_ROOT is defined.
+    Make sure that MPC_ROOT and the other normal ACE/TAO environment
+    variables are defined.
 
   3 Generate the makefiles.
 
@@ -50,7 +54,7 @@ BUILDING DDS
     build all.
 
 
+  5 Test
 
-
-
-
+    cd $DDS_ROOT/tests
+    $DDS_ROOT/bin/all_tests.pl
