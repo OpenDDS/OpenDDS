@@ -1,0 +1,337 @@
+// -*- C++ -*-
+//
+// $Id$
+
+#include  "DCPS/DdsDcps_pch.h"
+#include  "SimpleTcpTransport.h"
+
+#if !defined (__ACE_INLINE__)
+#include "SimpleTcpTransport.inl"
+#endif /* __ACE_INLINE__ */
+
+
+TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
+{
+  DBG_ENTRY("SimpleTcpTransport","~SimpleTcpTransport");
+}
+
+
+/// This is called from the base class (TransportImpl) as a result of
+/// and add_publications() or add_subscriptions() call on a
+/// TransportInterface object.  The TransportInterface object calls
+/// reserve_datalink() on the TransportImpl, and the TransportImpl calls
+/// find_or_create_datalink() on us (a concrete subclass of TransportImpl).
+///
+/// The connect_as_publisher will be set to 0 if this method was called
+/// due to an add_publications() call on a TransportInterface object.
+/// This means false (0).  It is *not* connecting as a publisher.
+///
+/// The connect_as_publisher will be set to 1 if this method was called
+/// due to an add_subscriptions() call on a TransportInterface object.
+/// This means true (1).  It *is* connecting as a publisher.
+TAO::DCPS::DataLink*
+TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
+                         (const TransportInterfaceInfo& remote_info,
+                          int                           connect_as_publisher)
+{
+  DBG_ENTRY("SimpleTcpTransport","find_or_create_datalink");
+
+  // Get the remote address from the "blob" in the remote_info struct.
+  NetworkAddress* network_order_address =
+                          (NetworkAddress*)(remote_info.data.get_buffer());
+
+  ACE_INET_Addr remote_address;
+  network_order_address->to_addr(remote_address);
+
+  // First, we have to try to find an existing (connected) DataLink
+  // that suits the caller's needs.
+  GuardType guard(this->links_lock_);
+
+  SimpleTcpDataLink_rch link;
+
+  if (this->links_.find(remote_address,link) == 0)
+    {
+      // This means we found a suitable (and already connected) DataLink.
+      // We can return it now since we are done.
+      return link._retn();
+    }
+
+  // The "find" part of the find_or_create_datalink has been attempted, and
+  // we failed to find a suitable DataLink.  This means we need to move on
+  // and attempt the "create" part of "find_or_create_datalink".
+
+  // Here is where we actually create the DataLink.
+  link = new SimpleTcpDataLink(remote_address, this);
+
+  // Attempt to bind the SimpleTcpDataLink to our links_ map.
+  if (this->links_.bind(remote_address,link) != 0)
+    {
+      // We failed to bind the new DataLink into our links_ map.
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to bind new SimpleTcpDataLink to "
+                 "SimpleTcpTransport in links_ map.\n"));
+
+      // On error, we return a NULL pointer.
+      return 0;
+    }
+
+  // Now we need to attempt to establish a connection for the DataLink.
+  int result;
+
+  // Active or passive connection establishment is based upon the value
+  // on the connect_as_publisher argument.
+  if (connect_as_publisher == 1)
+    {
+      result = this->make_active_connection(remote_address, link.in());
+
+      if (result != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Failed to make active connection.\n"));
+        }
+    }
+  else
+    {
+      result = this->make_passive_connection(remote_address, link.in());
+
+      if (result != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Failed to make passive connection.\n"));
+        }
+    }
+
+  if (result != 0)
+    {
+      // Make sure that we unbind the link (that failed to establish a
+      // connection) from our links_ map.  We intentionally ignore the
+      // return code from the unbind() call since we know that we just
+      // did the bind() moments ago - and with the links_lock_ acquired
+      // the whole time.
+      this->links_.unbind(remote_address);
+
+      // On error, return a NULL pointer.
+      return 0;
+    }
+
+  // That worked.  Return a reference to the DataLink that the caller will
+  // be responsible for.
+  return link._retn();
+}
+
+
+int
+TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
+{
+  DBG_ENTRY("SimpleTcpTransport","configure_i");
+
+  // Downcast the config argument to a SimpleTcpConfiguration*
+  SimpleTcpConfiguration* tcp_config = ACE_static_cast(SimpleTcpConfiguration*,
+                                                       config);
+
+  if (tcp_config == 0)
+    {
+      // The downcast failed.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Failed downcast from TransportConfiguration "
+                        "to SimpleTcpConfiguration.\n"),
+                       -1);
+    }
+
+  // Ask our base class for a "copy" of the reference to the reactor task.
+  this->reactor_task_ = reactor_task();
+
+  if (this->reactor_task_.is_nil())
+    {
+      // It looks like our base class has either been shutdown, or it has
+      // erroneously never been supplied with the reactor task.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: SimpleTcpTransport requires a reactor in "
+                        "order to open its acceptor_.\n"),
+                       -1);
+    }
+
+  // Make a "copy" of the reference for ourselves.
+  tcp_config->_add_ref();
+  this->tcp_config_ = tcp_config;
+
+  
+  // If the IP address in the INET_Addr is the INADDR_ANY address,
+  // then force the actual IP address to be used by initializing a new
+  // INET_Addr with the hostname from the original one.  If that fails
+  // then something is seriously wrong with the systems networking
+  // setup.
+  if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
+    {
+      ACE_INET_Addr new_addr;
+      int result = new_addr.set (
+                   tcp_config->local_address_.get_port_number (),
+                   tcp_config->local_address_.get_host_name ());
+
+      if (result != 0)
+        ACE_ERROR_RETURN((LM_ERROR,
+                  "(%P|%t) ERROR: SimpleTcpTransport::configure_i"
+                  " could not get host name!!\n"),
+                 -1);
+
+      const char *tmp = 0; // just to help debugging
+      tmp = new_addr.get_host_addr ();
+
+      this->tcp_config_->local_address_ = new_addr;
+    }
+
+  // Open our acceptor object so that we can accept passive connections
+  // on our this->tcp_config_->local_address_.
+
+  if (this->acceptor_.open(this->tcp_config_->local_address_,
+                           this->reactor_task_->get_reactor()) != 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
+                        this->tcp_config_->local_address_.get_host_addr (), 
+                        this->tcp_config_->local_address_.get_port_number (),
+                        "open"),
+                       -1);
+      // Remember to drop our reference to the tcp_config_ object since
+      // we are about to return -1 here, which means we are supposed to
+      // keep a copy after all.
+      SimpleTcpConfiguration_rch cfg = this->tcp_config_._retn();
+    }
+
+  // update the port number (incase port zero was given).
+  ACE_INET_Addr address;
+  if (this->acceptor_.acceptor ().get_local_addr (address) != 0)
+    {
+        ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("(%P|%t) ERROR: SimpleTcpTransport::configure_i ")
+                    ACE_TEXT ("- %p"),
+                    ACE_TEXT ("cannot get local addr\n")));
+    }
+  unsigned short port = address.get_port_number ();
+
+  // update this acceptor's copy.
+  this->tcp_config_->local_address_.set_port_number (port);
+
+  // update the caller's copy.
+  // This is redundant because the local and caller's copy point
+  // to the same place but just in case that changes. ;)
+  if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
+    {
+      tcp_config->local_address_ = this->tcp_config_->local_address_;
+    }
+  tcp_config->local_address_.set_port_number (port);
+
+  // Ahhh...  The sweet smell of success!
+  return 0;
+}
+
+
+void
+TAO::DCPS::SimpleTcpTransport::shutdown_i()
+{
+  DBG_ENTRY("SimpleTcpTransport","shutdown_i");
+
+  // Don't accept any more connections.
+  this->acceptor_.close();
+
+  {
+    GuardType guard(this->connections_lock_);
+
+    this->connections_.unbind_all();
+
+    // TBD SOON - Need to set some flag to tell those threads waiting on
+    //            the connections_updated_ condition that there is no hope
+    //            of ever getting the connection that they seek - they should
+    //            give up rather than continue to wait.
+
+    // We need to signal all of the threads that may be stuck wait()'ing
+    // on the connections_updated_ condition.
+    this->connections_updated_.broadcast();
+  }
+
+  // Disconnect all of our DataLinks, and clear our links_ collection.
+  {
+    GuardType guard(this->links_lock_);
+
+    AddrLinkMap::ENTRY* entry;
+
+    for (AddrLinkMap::ITERATOR itr(this->links_);
+         itr.next(entry);
+         itr.advance())
+      {
+        entry->int_id_->transport_shutdown();
+      }
+
+    this->links_.unbind_all();
+  }
+
+  // Drop our reference to the SimpleTcpConfiguration object.
+  this->tcp_config_ = 0;
+
+  // Drop our reference to the TransportReactorTask
+  this->reactor_task_ = 0;
+
+  // Tell our acceptor about this event so that it can drop its reference
+  // it holds to this SimpleTcpTransport object (via smart-pointer).
+  this->acceptor_.transport_shutdown();
+}
+
+
+int
+TAO::DCPS::SimpleTcpTransport::connection_info_i
+                                   (TransportInterfaceInfo& local_info) const
+{
+  DBG_ENTRY("SimpleTcpTransport","connection_info_i");
+
+  NetworkAddress network_order_address(this->tcp_config_->local_address_);
+
+  // Allow DCPSInfo to check compatibility of transport implemenations.
+  local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
+  local_info.data = TAO::DCPS::TransportInterfaceBLOB
+                                    (sizeof(NetworkAddress),
+                                     sizeof(NetworkAddress),
+                                     (CORBA::Octet*)(&network_order_address));
+
+  return 0;
+}
+
+
+void
+TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
+{
+  DBG_ENTRY("SimpleTcpTransport","release_datalink_i");
+
+  SimpleTcpDataLink* tcp_link = ACE_static_cast(SimpleTcpDataLink*,link);
+
+  if (tcp_link == 0)
+    {
+      // Really an assertion failure
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) INTERNAL ERROR - Failed to downcast DataLink to "
+                 "SimpleTcpDataLink.\n"));
+      return;
+    }
+
+  // Get the remote address from the SimpleTcpDataLink to be used as a key.
+  ACE_INET_Addr remote_address = tcp_link->remote_address();
+
+  SimpleTcpDataLink_rch released_link;
+
+  GuardType guard(this->links_lock_);
+
+  // Attempt to remove the SimpleTcpDataLink from our links_ map.
+  if (this->links_.unbind(remote_address, released_link) != 0)
+    {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to locate DataLink in order to "
+                 "release and it.\n"));
+    }
+}
+
+
+TAO::DCPS::SimpleTcpConfiguration*
+TAO::DCPS::SimpleTcpTransport::get_configuration()
+{
+  return this->tcp_config_.in();
+}
+
