@@ -238,6 +238,8 @@ int main (int argc, char *argv[])
 
 
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       ::Mine::FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -412,13 +414,13 @@ int main (int argc, char *argv[])
 
       for (int i = 0 ; i < num_unlively_periods ; i++)
         { 
-          writer->svc (i);
+          writer->run_test (i);
 
           // 3 ensures that we will detect when an DataReader detects
           // liveliness lost on an already unliveliy DataReader.
           ACE_OS::sleep (3 * LEASE_DURATION_SEC);
         }
-      writer->svc (num_unlively_periods);
+      writer->run_test (num_unlively_periods);
       
       rc.resume() ;
 

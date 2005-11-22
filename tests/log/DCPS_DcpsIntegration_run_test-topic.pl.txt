@@ -1,2 +1,0 @@
-(2416|2468)  11:13:49.250000 Repo main
-INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.

@@ -115,6 +115,8 @@ namespace TAO
         /// transport_shutdown() method to handle this case.
         virtual void stop_i() = 0;
 
+        /// Used to provide unique Ids to all DataLink methods.
+        static ACE_UINT64 get_next_datalink_id ();
 
       private:
 
@@ -161,6 +163,9 @@ namespace TAO
 
         /// The transport receive strategy object for this DataLink.
         TransportReceiveStrategy_rch receive_strategy_;
+
+        /// The id for this DataLink
+        ACE_UINT64 id_;
     };
 
   }  /* namespace DCPS */

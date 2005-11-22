@@ -226,6 +226,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::Foo1TypeSupportImpl *fts_servant =
               new ::Mine::Foo1TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           fts1 = 
               TAO::DCPS::servant_to_reference< ::Mine::Foo1TypeSupport,
                                                ::Mine::Foo1TypeSupportImpl, 
@@ -238,6 +240,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::Foo2TypeSupportImpl *fts_servant =
               new ::Mine::Foo2TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           fts2 = 
               TAO::DCPS::servant_to_reference< ::Mine::Foo2TypeSupport,
                                                ::Mine::Foo2TypeSupportImpl, 
@@ -250,6 +254,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::Foo3TypeSupportImpl *fts_servant =
               new ::Mine::Foo3TypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           fts3 = 
               TAO::DCPS::servant_to_reference< ::Mine::Foo3TypeSupport,
                                                ::Mine::Foo3TypeSupportImpl, 
@@ -506,7 +512,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 
@@ -522,7 +528,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 
@@ -538,7 +544,7 @@ int main (int argc, char *argv[])
           ACE_CHECK;
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
-                                  drl
+                                  drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
         }
 /*

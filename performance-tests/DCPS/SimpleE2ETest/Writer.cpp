@@ -15,9 +15,21 @@
 #include "ace/OS_NS_unistd.h"
 
 
+// Only for Microsoft VC6
+#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
 
+// Added unused arguments with default value to work around with vc6 
+// bug on template function instantiation.
+template<class T, class W, class W_var, class W_ptr, class Wimpl>
+void write (long id,
+            int size,
+            int num_messages,
+            ::DDS::DataWriter_ptr writer,
+            T* t = 0)
+{
+  ACE_UNUSED_ARG(t);
 
-
+#else
 
 template<class T, class W, class W_var, class W_ptr, class Wimpl>
 void write (long id,
@@ -25,6 +37,8 @@ void write (long id,
             int num_messages,
             ::DDS::DataWriter_ptr writer)
 {
+#endif
+
   T data;
   data.data_source = id;
   data.values.length(size);
@@ -115,12 +129,12 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
-              1 << data_size_));
+                data_size_));
 
   ACE_TRY_NEW_ENV
   {
 
-    switch ( 1 << data_size_ )
+    switch ( data_size_ )
     {
 
     case 128:

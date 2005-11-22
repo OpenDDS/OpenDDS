@@ -88,7 +88,6 @@ void write (long id,
 
 
 
-
 Writer::Writer(::DDS::DataWriter_ptr writer, 
                int num_messages,
                int data_size, 
@@ -100,8 +99,8 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   data_size_ (data_size),
   num_floats_per_sample_ (1 << data_size),
   writer_id_ (writer_id),
-  finished_sending_ (false),
   num_readers_ (num_readers),
+  finished_sending_ (false),
   throttle_factor_(throttle_factor)
 {
 }
@@ -134,7 +133,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
-              1 << data_size_));
+              data_size_));
 
   ACE_TRY_NEW_ENV
   {
@@ -147,7 +146,7 @@ Writer::svc ()
         num_connected_subs = handles.length();
       }
 
-    switch ( 1 << data_size_ )
+    switch ( data_size_ )
     {
 
     case 128:

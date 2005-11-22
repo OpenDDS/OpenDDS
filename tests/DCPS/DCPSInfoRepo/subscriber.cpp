@@ -92,14 +92,14 @@ main (int argc, char *argv[])
         }
 
       CORBA::Long topicId;
-      CORBA::String_var tname = "MYtopic";
-      CORBA::String_var dname = "MYdataname";
+      const char* tname = "MYtopic";
+      const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
       TAO::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
                                                            domainId,
                                                            dpId,
-                                                           tname.in(),
-                                                           dname.in(),
+                                                           tname,
+                                                           dname,
                                                            topicQos.in()
                                                            ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;

@@ -173,7 +173,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
       ::TAO::DCPS::PublisherImpl* pub_impl 
         = reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                 ::DDS::Publisher_ptr>
-                              (pub ACE_ENV_SINGLE_ARG_PARAMETER);
+                              (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
       if (0 == pub_impl)
@@ -244,7 +244,6 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
 int main (int argc, char *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf;
-  Writer* writers = 0;
   ::DDS::DomainParticipant_var participant;
 
   int status = 0;
@@ -277,6 +276,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooNoKeyTypeSupportImpl* nokey_fts_servant 
             = new ::Mine::FooNoKeyTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = nokey_fts_servant;
+
           if (::DDS::RETCODE_OK != nokey_fts_servant->register_type(participant.in (), MY_TYPE))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
@@ -287,6 +288,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooTypeSupportImpl* fts_servant 
             = new ::Mine::FooTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
@@ -298,6 +301,8 @@ int main (int argc, char *argv[])
         {
           ::Mine::FooTypeSupportImpl* fts_servant 
             = new ::Mine::FooTypeSupportImpl();
+          PortableServer::ServantBase_var safe_servant = fts_servant;
+
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
@@ -348,7 +353,7 @@ int main (int argc, char *argv[])
       
       int attach_to_udp = using_udp;
       // Create the default publisher
-      ::DDS::Publisher_var pub = create_publisher(participant, attach_to_udp);
+      ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -361,7 +366,7 @@ int main (int argc, char *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant, ! attach_to_udp);
+          pub1 = create_publisher(participant.in (), ! attach_to_udp);
 
           if (CORBA::is_nil (pub1.in ()))
             {
@@ -477,7 +482,6 @@ int main (int argc, char *argv[])
         {
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
         }
-      ACE_OS::fclose (writers_completed);
 
       // Wait for the subscriber to finish.
       FILE* readers_completed = 0;
@@ -495,8 +499,12 @@ int main (int argc, char *argv[])
         for (int i = 0; i < num_datawriters; i ++)
           {
             writers[i]->end ();
+            delete writers[i];
           }
       }
+
+      delete []dw;
+      delete [] writers;
     }
   ACE_CATCH (TestException,ex)
     {
@@ -512,10 +520,6 @@ int main (int argc, char *argv[])
     }
   ACE_ENDTRY;
 
-  if (writers != 0)
-    {
-      delete [] writers;
-    }
 
   ACE_TRY_NEW_ENV
     {

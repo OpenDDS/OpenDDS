@@ -104,14 +104,14 @@ main (int argc, char *argv[])
 
       // add a topic
       CORBA::Long topicId;
-      CORBA::String_var tname = "MYtopic";
-      CORBA::String_var dname = "MYdataname";
+      const char* tname = "MYtopic";
+      const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
       TAO::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
                                                            domainId,
                                                            dpId,
-                                                           tname.in(),
-                                                           dname.in(),
+                                                           tname,
+                                                           dname,
                                                            topicQos.in()
                                                            ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -155,14 +155,14 @@ main (int argc, char *argv[])
 
       // add an inconsistent topic
       CORBA::Long topicId2;
-      CORBA::String_var tname2 = "MYtopic";
-      CORBA::String_var dname2 = "MYnewdataname";
+      const char* tname2 = "MYtopic";
+      const char* dname2 = "MYnewdataname";
       ::DDS::TopicQos_var topicQos2 = new ::DDS::TopicQos;
       TAO::DCPS::TopicStatus topicStatus2 = info->assert_topic(topicId2,
                                                             domainId,
                                                             dpId,
-                                                            tname2.in(),
-                                                            dname2.in(),
+                                                            tname2,
+                                                            dname2,
                                                             topicQos2.in()
                                                             ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -201,12 +201,13 @@ main (int argc, char *argv[])
 
 
       // Set up the incompatible qos test
-      CORBA::Long dpIdAlmost;
+      CORBA::Long dpIdAlmost = 0;
       CORBA::Long topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
+      PortableServer::ServantBase_var safe_servant = dwiAlmost;
       TAO::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
-      CORBA::Long pubIdAlmost;
+      CORBA::Long pubIdAlmost = 0;
 
       if (qos_tests)
       {
@@ -222,8 +223,8 @@ main (int argc, char *argv[])
         topicStatus = info->assert_topic(topicIdAlmost,
                                          domainId,
                                          dpIdAlmost,
-                                         tname.in(),
-                                         dname.in(),
+                                         tname,
+                                         dname,
                                          topicQos.in()
                                          ACE_ENV_ARG_PARAMETER);
         ACE_TRY_CHECK;

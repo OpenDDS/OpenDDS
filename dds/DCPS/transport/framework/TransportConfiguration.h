@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTCONFIGURATION_H
 #define TAO_DCPS_TRANSPORTCONFIGURATION_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/Synch.h"
 
@@ -45,7 +46,7 @@ namespace TAO
      * The TransportConfiguration object is supplied to the
      * TransportImpl::configure() method.
      */
-    class TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -71,13 +72,13 @@ namespace TAO
         unsigned queue_initial_pools_;
 
         /// Max size (in bytes) of a packet (packet header + sample(s))
-        ACE_UINT16 max_packet_size_;
+        ACE_UINT32 max_packet_size_;
 
         /// Max number of samples that should ever be in a single packet.
         size_t max_samples_per_packet_;
 
         /// Optimum size (in bytes) of a packet (packet header + sample(s)).
-        ACE_UINT16 optimum_packet_size_;
+        ACE_UINT32 optimum_packet_size_;
 
 
       protected:

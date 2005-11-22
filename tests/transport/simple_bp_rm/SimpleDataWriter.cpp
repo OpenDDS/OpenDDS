@@ -99,6 +99,7 @@ void
 SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 {
   unsigned num_delivered = this->release_element(sample);
+  ACE_UNUSED_ARG(num_delivered);
 
   VDBG((LM_DEBUG,
              "(%P|%t) Got our data_delivered() for %d sample.\n",
@@ -110,6 +111,7 @@ void
 SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample)
 {
   unsigned num_delivered = this->release_element(sample);
+  ACE_UNUSED_ARG(num_delivered);
 
   VDBG((LM_DEBUG,
              "(%P|%t) Got our data_dropped() for %d sample.\n",

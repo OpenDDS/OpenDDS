@@ -11,7 +11,7 @@
 #include "ace/Arg_Shifter.h"
 
 
-static const char * ior_file = "dcps_ir.ior";
+static const char * ior_file = "repo.ior";
 static const char * domain_file = "domain_ids";
 static const char * listen_address_str = "localhost:2839"; // = 0xB17
 static int listen_address_given = 0;
@@ -47,7 +47,7 @@ parse_args (int argc,
       if ( (current_arg = arg_shifter.get_the_parameter("-a")) != 0)
         {
           ::listen_address_str = current_arg;
-          listen_address_given = 0;
+          listen_address_given = 1;
           arg_shifter.consume_arg();
         }
       else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0) 

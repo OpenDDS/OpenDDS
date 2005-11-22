@@ -15,7 +15,7 @@ int main (int argc, char *argv[])
   {
   Xyz::StructAUnion sau;
   sau.sau_f1._d(Xyz::redx);
-  sau.sau_f1.rsv("joe");
+  sau.sau_f1.rsv((const char*) "joe");
   // size = union descr/4 + string length/4 + string contents/3
   if (_dcps_find_size(sau) != 4+4+3)
     {
@@ -28,8 +28,8 @@ int main (int argc, char *argv[])
   {
   Xyz::AStringSeq ass;
   ass.length(2); //4 for seq length
-  ass[0] = "four"; //4+4 strlen & string
-  ass[1] = "five5"; //4+5 strlen + string
+  ass[0] = CORBA::string_dup ("four"); //4+4 strlen & string
+  ass[1] = CORBA::string_dup ("five5"); //4+5 strlen + string
   size_t size_ass = _dcps_find_size(ass);
   if (size_ass != 21)
     {
@@ -174,7 +174,7 @@ int main (int argc, char *argv[])
   my_foo.ushrtseq.length(2); //+4+2*2 >> 28
   my_foo.ushrtseq[0] = 7;
   my_foo.ushrtseq[1] = 11;
-  my_foo.theString = "four";
+  my_foo.theString = CORBA::string_dup ("four");
 
   // seq lenghts theStruct +4+4 theStructSeq +4 theString +4 + structArray3*8 = 40
   // theUnion defaults to short so +4+2 = 6
@@ -196,7 +196,7 @@ int main (int argc, char *argv[])
   foo2.ushrtseq.length(2);
   foo2.ushrtseq[0] = 7;
   foo2.ushrtseq[1] = 11;
-  foo2.theString = "four";
+  foo2.theString = CORBA::string_dup ("four");
 
   std::map<Xyz::Foo, Xyz::Foo*, FooKeyLessThan> foomap;
 

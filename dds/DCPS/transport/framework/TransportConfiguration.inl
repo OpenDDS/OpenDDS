@@ -29,7 +29,7 @@ TAO::DCPS::TransportConfiguration::TransportConfiguration()
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
 
   // Ensure that the number of samples put into the packet does
-  // not exceed the packet size.
+  // not exceed the allowed number of io vectors to be sent by the OS.
   if ((2 * max_samples_per_packet_ + 1) > MAX_SEND_BLOCKS)
   {
     max_samples_per_packet_ = (MAX_SEND_BLOCKS + 1) / 2 - 1;

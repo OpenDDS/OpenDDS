@@ -5,7 +5,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use lib '../../../../../bin';
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 # Set the library path for the client to be able to load
@@ -55,7 +56,8 @@ elsif ($ARGV[0] eq 'bp_remove') {
   $write_dalay_msec=0;  
   $check_data_dropped=1;
   $receive_dalay_msec=100;
-  $publisher_running_sec=60;
+  $publisher_running_sec=120;
+  $subscriber_running_sec=120;
 }
 elsif ($ARGV[0] eq 'b') {
   # test of blocking write

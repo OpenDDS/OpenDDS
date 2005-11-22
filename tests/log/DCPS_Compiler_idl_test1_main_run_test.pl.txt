@@ -1,4 +1,0 @@
-_max_marshaled_size(my_foo) => 100094
-_tao_is_bounded_size(my_foo) => 0
-_dcps_find_size(my_foo) => 78
-.\.\idl_test1.EXE PASSED

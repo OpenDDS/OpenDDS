@@ -17,6 +17,7 @@
 #include "BuiltInTopicUtils.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
+#include  "ace/Reactor.h"
 
 namespace TAO
 {
@@ -187,6 +188,15 @@ namespace TAO
         this->publisher_servant_->add_associations( readers, this, qos_) ;
       }
 
+
+      CORBA::ULong readers_old_length = readers_.length();
+      CORBA::ULong num_new_readers = readers.length();
+      readers_.length(readers_old_length + num_new_readers);
+      for (CORBA::ULong reader_cnt = 0; reader_cnt < readers.length(); reader_cnt++)
+        {
+          readers_[reader_cnt+readers_old_length] = readers[reader_cnt].readerId;
+        }
+
       ::DDS::InstanceHandleSeq handles;
 
       if (! is_bit_)
@@ -349,6 +359,31 @@ namespace TAO
               }
           }
 
+
+        CORBA::ULong num_orig_readers = readers_.length();
+        CORBA::ULong num_removed_readers = readers.length();
+
+        for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; rm_idx++)
+          {
+            for (CORBA::ULong orig_idx = 0; 
+              orig_idx < num_orig_readers; 
+              orig_idx++)
+              {
+                if (readers_[orig_idx] == readers[rm_idx])
+                  {
+                    // move last element to this position.
+                    if (orig_idx < num_orig_readers - 1)
+                      {
+                        readers_[orig_idx] = readers_[num_orig_readers - 1];
+                      }
+                    num_orig_readers --;
+                    readers_.length (num_orig_readers);
+                    break;
+                  }
+              }
+          }
+
+
         CORBA::ULong subed_len = subscription_handles_.length();
         CORBA::ULong rd_len = handles.length ();
         for (CORBA::ULong rd_index = 0; rd_index < rd_len; rd_index++)
@@ -375,6 +410,34 @@ namespace TAO
       this->publisher_servant_->remove_associations (readers);
     }
       
+
+    void DataWriterImpl::remove_all_associations ()
+      {
+
+        TAO::DCPS::ReaderIdSeq readers;
+
+        CORBA::ULong size = readers_.length();
+        readers.length(size);
+
+        for (CORBA::ULong i = 0; i < size; i++)
+          {
+            readers[i] = readers_[i];
+          }
+
+        ACE_TRY_NEW_ENV
+          {
+            if (0 < size)
+              {
+                this->remove_associations(readers ACE_ENV_ARG_PARAMETER);
+              }
+          }
+        ACE_CATCHANY
+          {
+          }
+        ACE_ENDTRY;
+      }
+
+
     void 
     DataWriterImpl::update_incompatible_qos (
         const TAO::DCPS::IncompatibleQosStatus & status
@@ -719,14 +782,17 @@ namespace TAO
           // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
           // value that is for all intents and purposes unlimited
           // and we can use it for comparisons.
+          // use 2147483647L because that is the greatest value a signed
+          // CORBA::Long can have.
           // WARNING: The client risks running out of memory in this case.
-          depth = LONG_MAX;
+          depth = 2147483647L;
         }
 
 
+      // The transport does a duplication of the messages for the pkt_chain_
       if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
         {
-          n_chunks_ = qos_.resource_limits.max_samples;
+          n_chunks_ = 2 * qos_.resource_limits.max_samples;
         }
 
       // enable the type specific part of this DataWriter
@@ -1144,8 +1210,17 @@ namespace TAO
           const ::DDS::Time_t& source_timestamp)
       {
         PublicationInstance* instance = 
-            reinterpret_cast<PublicationInstance*>(instance_handle);
-        
+            data_container_->get_handle_instance(instance_handle);
+
+        if (0 == instance)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) DataWriterImpl::create_sample_data_message ")
+            ACE_TEXT("failed to find instance for handle %d\n"),
+            instance_handle),
+            ::DDS::RETCODE_ERROR);
+        }
+
         DataSampleHeader header_data; 
         header_data.message_id_ = SAMPLE_DATA;
         //header_data.last_sample_
@@ -1344,6 +1419,21 @@ namespace TAO
           last_liveliness_activity_time_ = now;
         }
     }
+
+
+    PublicationInstance*
+    DataWriterImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+      PublicationInstance* instance = 0;
+      if (0 != data_container_)
+        {
+          instance = data_container_->get_handle_instance(handle);
+        }
+
+      return instance;
+    }
+
+
 
   } // namespace DCPS
 } // namespace TAO

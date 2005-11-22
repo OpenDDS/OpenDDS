@@ -23,8 +23,8 @@
 
 
 const long  MY_DOMAIN   = 411;
-const char* MY_TOPIC    = "foo";
-const char* MY_TYPE     = "foo";
+const char* MY_TOPIC    = (const char*) "foo";
+const char* MY_TYPE     = (const char*) "foo";
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
 int use_take = 0;
@@ -106,6 +106,8 @@ int main (int argc, char *argv[])
 
 
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       ::Mine::FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -179,7 +181,10 @@ int main (int argc, char *argv[])
                                       ACE_ENV_ARG_PARAMETER);
 
       ACE_CHECK;
-      if (!(sub_qos_got == default_sub_qos))
+
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      if (!(::TAO::DCPS::operator== (sub_qos_got, default_sub_qos)))
       {
         ACE_ERROR ((LM_ERROR,
                    ACE_TEXT("(%P|%t) Subscriber get_default_qos failed.\n")));
@@ -264,7 +269,9 @@ int main (int argc, char *argv[])
         return 1 ;
       }
   
-      if (!(dr_qos_use_topic_qos == copied_from_topic))
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      if (!(::TAO::DCPS::operator== (dr_qos_use_topic_qos, copied_from_topic)))
       {
         ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Subscriber copy_from_topic_qos failed.\n")));
@@ -357,7 +364,7 @@ int main (int argc, char *argv[])
       // Do the "writes"
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 multiple_instances,
                                 i + 1); 
@@ -368,7 +375,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 use_take, 
                                 num_reads_per_thread, 
                                 multiple_instances,
@@ -397,6 +404,21 @@ int main (int argc, char *argv[])
       }
   }
        
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
 //---------------------------------------------------------------------
 //
 // read/take_instance
@@ -406,7 +428,7 @@ int main (int argc, char *argv[])
       // write again
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 multiple_instances,
                                 i + 1); 
@@ -418,7 +440,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 use_take, 
                                 num_reads_per_thread, 
                                 multiple_instances,
@@ -447,6 +469,21 @@ int main (int argc, char *argv[])
       }
   }
       
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
 //---------------------------------------------------------------------
 //
 // loan (via read)/return_loan
@@ -456,7 +493,7 @@ int main (int argc, char *argv[])
       // write again
       for (int i = 0; i < num_datareaders; i ++)
       {
-        writers[i] = new Writer(drs[i], 
+        writers[i] = new Writer(drs[i].in (), 
                                 num_reads_per_thread, 
                                 0,
                                 i + 1); 
@@ -468,7 +505,7 @@ int main (int argc, char *argv[])
       // now - do the reads
       for (int i = 0; i < num_datareaders; i ++)
       {
-        readers[i] = new Reader(drs[i], 
+        readers[i] = new Reader(drs[i].in (), 
                                 0, 
                                 num_reads_per_thread, 
                                 0,
@@ -478,7 +515,25 @@ int main (int argc, char *argv[])
   }
 
       delete [] drs;
+  
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete writers[i];
+      }
+
+  }
+   
       delete [] writers;
+
+  {
+      for (int i = 0; i < num_datareaders; i ++)
+      {
+        delete readers[i];
+      }
+
+  }
+
       delete [] readers;
 
       sub->delete_contained_entities() ;

@@ -14,6 +14,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/Reactor.h"
 
 const long  MY_DOMAIN   = 911;
 const char* MY_TOPIC    = "foo";
@@ -143,6 +144,8 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   TEST_CHECK (domain_id == MY_DOMAIN);
 
   MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
+  PortableServer::ServantBase_var safe_servant = fts_servant;
+
 
   MyTypeSupport_var fts = 
     TAO::DCPS::servant_to_reference<MyTypeSupport, MyTypeSupportImpl, MyTypeSupport_ptr>(fts_servant);
@@ -265,7 +268,7 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   timer.elapsed_microseconds(elapsedTime);
   elapsedTime += 10000; // some systems can be short by up to 10 milliseconds
   TEST_CHECK (CORBA::is_nil(found_topic.in ()) 
-    && elapsedTime >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
+    && long(elapsedTime) >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
 
   // delete the existent participant
   ret = dpf->delete_participant(new_dp.in () ACE_ENV_ARG_PARAMETER);
