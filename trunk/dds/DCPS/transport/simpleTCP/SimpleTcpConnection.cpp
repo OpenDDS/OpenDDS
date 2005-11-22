@@ -6,7 +6,7 @@
 #include  "SimpleTcpConnection.h"
 #include  "SimpleTcpTransport.h"
 #include  "SimpleTcpConfiguration.h"
-
+#include  "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
