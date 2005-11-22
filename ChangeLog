@@ -1,4 +1,4 @@
-Mon Nov 21 15:18:01 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+Tue Nov 22 08:55:53 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
           DDS 0.7 released.
 
@@ -7,6 +7,13 @@ Mon Nov 21 15:18:01 2005  Paul Calabrese  <calabrese_p@ociweb.com>
         * VERSION:
 
           Changes related to the 0.7 release.
+
+Tue Nov 22 08:54:53 2005  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Added #include "ace/os_include/netinet/os_tcp.h" for builds with
+          inlining turned off.
 
 Mon Nov 21 13:57:01 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
