@@ -1,3 +1,12 @@
+Sat Nov 26 17:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        
+          Constructor did not correctly use and save the rounded up size
+           for allocating!  This resulted in invalid pointer locations
+           used for small object sizes on the 64 bit OS.
+
 Tue Nov 22 08:55:53 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
           DDS 0.7 released.
