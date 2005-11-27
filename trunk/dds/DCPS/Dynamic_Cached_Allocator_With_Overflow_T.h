@@ -44,7 +44,7 @@ namespace TAO
         free_list_ (ACE_PURE_FREE_LIST),
         chunk_size_(chunk_size)
       {
-        chunk_size = ACE_MALLOC_ROUNDUP (chunk_size, ACE_MALLOC_ALIGN);
+        chunk_size_ = ACE_MALLOC_ROUNDUP (chunk_size, ACE_MALLOC_ALIGN);
         ACE_NEW (this->pool_, char[n_chunks * chunk_size_]);
 
         for (size_t c = 0;
@@ -59,7 +59,7 @@ namespace TAO
         // allocation in the above <new>.
                   
         // Remember end of the pool.
-        last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size);
+        last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size_);
       }
 
       /// Clear things up.
