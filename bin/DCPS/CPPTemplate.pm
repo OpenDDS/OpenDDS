@@ -1167,72 +1167,64 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-#ifdef PUBLISHER_TEST
-  ACE_UNUSED_ARG (received_data);
-  ACE_UNUSED_ARG (sample_info);
 
-  FILE* fp =
-    ACE_OS::fopen ("<%TYPE%>.txt", ACE_LIB_TEXT("r"));
-  if (fp == 0)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, 
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample, ")
-                        ACE_TEXT("Unable to open <%TYPE%>.txt for reading: %p\n"),
-                        "fopen"),
-                        ::DDS::RETCODE_ERROR);
-  }
+  bool found_data = false;
 
-  if( ACE_OS::fsetpos( fp, &pos_ ) != 0 )
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, 
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample, ")
-                        ACE_TEXT("Unable to open <%TYPE%>.txt for reading: %p\n"),
-                        "fsetpos"),
-                        ::DDS::RETCODE_ERROR);
-  }
-
-  fscanf (fp, "%d %d %d %d\n", &received_data.a_long_value, 
-                            &received_data.handle_value, 
-                            &received_data.sample_sequence,
-                            &received_data.writer_id);
-  fgetpos( fp, &pos_ );
-  ACE_OS::fclose (fp);
-
-  return ::DDS::RETCODE_OK;
-
-#else
-
-  ::<%MODULE%><%TYPE%>Seq received_data_seq(1) ;
-  ::DDS::SampleInfoSeq info_seq(1) ;
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
   
-  DDS::ReturnCode_t status ;
-  status = this->read(received_data_seq, info_seq,
-                    1,
-                    ::DDS::NOT_READ_SAMPLE_STATE,
-                    ::DDS::ANY_VIEW_STATE,
-                    ::DDS::ANY_INSTANCE_STATE) ;
-
-  if (status != ::DDS::RETCODE_OK)
+  InstanceMap::iterator it;
+  for (it = instance_map_.begin ();
+       it != instance_map_.end ();
+       it ++)
   {
-    if (status != ::DDS::RETCODE_NO_DATA)
+    ::DDS::InstanceHandle_t handle = it->second;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+
+    if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
+        (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
-      ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ")
-                 ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample ")
-                 ACE_TEXT("failed,  error=%d.\n"),
-                 status));
+      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+           item != 0 ; item = item->next_data_sample_)
+      {
+        if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
+        {
+          received_data =
+              *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          ptr->instance_state_.sample_info(sample_info, item) ;
+      
+          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+
+          ptr->instance_state_.accessed() ;
+          found_data = true ;
+        }
+        if (found_data)
+        {
+          break ;
+        }
+      }
+    }
+
+    if (found_data)
+    {
+      //
+      // Get the sample_ranks, generation_ranks, and
+      // absolute_generation_ranks for this info_seq
+      //
+      this->sample_info(sample_info, ptr->rcvd_sample_.tail_) ;
+
+      break ;
     }
   }
-  else
-  {
-    received_data = received_data_seq[0] ;
-    sample_info = info_seq[0] ;
-  }
 
-  return status ;
-#endif
+  if (found_data)
+    { 
+      return ::DDS::RETCODE_OK;
+    }
+
+  return ::DDS::RETCODE_NO_DATA ;
 }
 
 DDS::ReturnCode_t
@@ -1245,34 +1237,110 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  ::<%MODULE%><%TYPE%>Seq received_data_seq(1) ;
-  ::DDS::SampleInfoSeq info_seq(1) ;
+  bool found_data = false;
+
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
   
-  DDS::ReturnCode_t status ;
-  status = this->take(received_data_seq, info_seq,
-                    1,
-                    ::DDS::NOT_READ_SAMPLE_STATE,
-                    ::DDS::ANY_VIEW_STATE,
-                    ::DDS::ANY_INSTANCE_STATE) ;
-
-  if (status != ::DDS::RETCODE_OK)
-  {
-    if (status != ::DDS::RETCODE_NO_DATA)
+  InstanceMap::iterator it;
+  for (it = instance_map_.begin ();
+       it != instance_map_.end ();
+       it ++)
     {
-      ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ")
-               ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample ")
-               ACE_TEXT("faile,  error=%d.\n"),
-               status));
-    }
-  }
-  else
-  {
-    received_data = received_data_seq[0] ;
-    sample_info = info_seq[0] ;
-  }
+      ::DDS::InstanceHandle_t handle = it->second;
+      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
-  return status ;
+      ReceivedDataElement *tail = 0 ;
+      if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
+          (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
+      {
+        ReceivedDataElement *next ;
+        tail = 0 ;
+        ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        while (item)
+        {
+          if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
+            {
+              received_data =
+                  *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+              ptr->instance_state_.sample_info(sample_info, item) ;
+      
+              item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+
+              ptr->instance_state_.accessed() ;
+
+              if (item == ptr->rcvd_sample_.tail_)
+                {
+                  tail = ptr->rcvd_sample_.tail_ ;
+                  item = item->next_data_sample_ ;
+                }
+              else
+                {
+                  next = item->next_data_sample_ ;
+
+                  ptr->rcvd_sample_.remove(item) ;
+
+                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+                  ACE_DES_FREE (delete_ptr,
+                                data_allocator_->free,
+                                <%TYPE%> );
+                  ACE_DES_FREE (item,
+                                rd_allocator_->free,
+                                ReceivedDataElement);         
+                  item = next ;
+                }
+
+              found_data = true;
+            }
+          if (found_data)
+            {
+              break ;
+            }
+        }
+      }
+
+    if (found_data)
+      {
+        //
+        // Get the sample_ranks, generation_ranks, and
+        // absolute_generation_ranks for this info_seq
+        //
+        if (tail)
+          {
+            this->sample_info(sample_info, tail) ;
+            
+            ptr->rcvd_sample_.remove(tail) ;
+
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+            ACE_DES_FREE (delete_ptr,
+                          data_allocator_->free,
+                          <%TYPE%> );
+            ACE_DES_FREE (tail,
+                          rd_allocator_->free,
+                          ReceivedDataElement);         
+          }
+        else
+          {
+            this->sample_info(sample_info, ptr->rcvd_sample_.tail_) ;
+          }
+
+          break ;
+        }
+    }
+
+
+
+  if (found_data)
+    { 
+      return ::DDS::RETCODE_OK;
+    }
+    else
+    {
+      return ::DDS::RETCODE_NO_DATA ;
+    }
 }
 
 DDS::ReturnCode_t

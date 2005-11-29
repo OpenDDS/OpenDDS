@@ -1141,6 +1141,36 @@ namespace TAO
         }
       }
 
+//REMOVE TBD check that this still behaves correctly.
+      void DataReaderImpl::sample_info(::DDS::SampleInfo & sample_info,
+                                       ReceivedDataElement *ptr)
+      {
+
+        sample_info.sample_rank = 0 ;
+
+        // generation_rank =
+        //    (MRSIC.disposed_generation_count + 
+        //     MRSIC.no_writers_generation_count)
+        //  - (S.disposed_generation_count + 
+        //     S.no_writers_generation_count)
+        //
+        sample_info.generation_rank =
+            (sample_info.disposed_generation_count +
+              sample_info.no_writers_generation_count) -
+            sample_info.generation_rank ;
+
+        // absolute_generation_rank =
+        //     (MRS.disposed_generation_count + 
+        //      MRS.no_writers_generation_count)
+        //   - (S.disposed_generation_count + 
+        //      S.no_writers_generation_count)
+        //
+        sample_info.absolute_generation_rank =
+            (ptr->disposed_generation_count_ +
+              ptr->no_writers_generation_count_) -
+            sample_info.absolute_generation_rank ;
+      }
+
       CORBA::Long DataReaderImpl::total_samples() const
       {
         //!!! caller should have acquired sample_lock_
