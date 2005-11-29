@@ -854,47 +854,8 @@ namespace TAO
         {
           // Do LATENCY_BUDGET processing here.
           // Do coherency processing here.
-    #ifndef PUBLISHER_TEST
           // tell the transport to send the data sample(s).
           this->send(list) ;
-    #else
-      #ifdef WIN32
-      #pragma message ("building PUBLISHER_TEST version - not with Transport")
-      #endif
-          struct Foo 
-          {
-            long  long_value;  // It might be the instance key
-            long  handle_value;
-            long  sample_sequence;
-            long  writer_id;
-          };
-
-          FILE* fp = ACE_OS::fopen ("Foo.txt", ACE_LIB_TEXT("a+"));
-          if (fp == 0)
-          {
-              ACE_ERROR_RETURN ((LM_ERROR,
-                                ACE_LIB_TEXT("Unable to open Foo.txt for writing:(%u) %p\n"),
-                                errno, 
-                                ACE_LIB_TEXT("PublisherImpl::data_available")), 
-                                ::DDS::RETCODE_ERROR);
-          }
-
-          DataSampleListElement* current = list.head_;
-          for (ssize_t i = 0; 
-            i < list.size_; 
-            i ++)
-          {
-            writer->data_delivered(current) ;
-            ACE_Message_Block* data = current->sample_->cont ();
-            Foo* foo = (Foo*)(data->rd_ptr ());
-            ACE_OS::fprintf (fp, "%d %d %d %d\n", foo->long_value, 
-                                                  foo->handle_value, 
-                                                  foo->sample_sequence, 
-                                                  foo->writer_id);
-            current = current->next_send_sample_;
-          }
-          fclose (fp);
-      #endif
         }
         return ::DDS::RETCODE_OK;
       }

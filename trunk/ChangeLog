@@ -1,5 +1,20 @@
-Sat Nov 26 17:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+Tue Nov 29 13:30:35 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
+        * bin/DCPS/CPPTemplate.pm:
+          Changed the read_next_sample and take_next_sample that
+          only take a single sample to handle the read and take,
+          not allocate arrays and call the array version.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_1/README:
+        
+          Removed the unneeded PUBLISHER_TEST macro and code.
+
+Sat Nov 26 17:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
         

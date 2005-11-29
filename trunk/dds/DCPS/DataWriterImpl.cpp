@@ -897,7 +897,6 @@ namespace TAO
                             ret);
         }
 
-  #ifndef PUBLISHER_TEST  
       // Add header with the registration sample data.
       ACE_Message_Block* registered_sample 
         = this->create_control_message(INSTANCE_REGISTRATION, 
@@ -920,10 +919,9 @@ namespace TAO
                               ACE_TEXT(" send_control failed. \n")),
                               ::DDS::RETCODE_ERROR);
         }
-#endif
 
-        return ret;
-      }
+      return ret;
+    }
 
 
     ::DDS::ReturnCode_t 
@@ -968,7 +966,6 @@ namespace TAO
                                         unregistered_sample_data, 
                                         source_timestamp) ;
 
-#ifndef PUBLISHER_TEST       
       SendControlStatus status;
       {
         ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
@@ -985,7 +982,6 @@ namespace TAO
                               ACE_TEXT(" send_control failed. \n")),
                               ::DDS::RETCODE_ERROR);
         }
-#endif
 
       return ret;
     }
@@ -1088,7 +1084,6 @@ namespace TAO
                                ret);
           }
 
-#ifndef PUBLISHER_TEST       
         ACE_Message_Block* message 
           = this->create_control_message(DISPOSE_INSTANCE, 
                                          registered_sample_data, 
@@ -1110,7 +1105,7 @@ namespace TAO
                                ACE_TEXT(" send_control failed. \n")),
                                ::DDS::RETCODE_ERROR);
           }
-#endif
+
         return ret;
       }
 

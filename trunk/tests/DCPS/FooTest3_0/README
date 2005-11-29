@@ -1,6 +1,5 @@
 This test tests the publisher and datawriter's basic functionalities with the
 SimpleTCPTransport available. 
-The DdsDcps lib needs build with the PUBLISHER_TEST not defined.
 
 
 Manually run test:

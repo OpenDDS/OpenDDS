@@ -359,6 +359,9 @@ namespace TAO
                        size_t start_idx, size_t count,
                        ReceivedDataElement *ptr) ;
 
+      void sample_info(::DDS::SampleInfo & sample_info,
+                       ReceivedDataElement *ptr) ;
+
       CORBA::Long total_samples() const ;
       
       void set_sample_lost_status(const ::DDS::SampleLostStatus& status) ;
