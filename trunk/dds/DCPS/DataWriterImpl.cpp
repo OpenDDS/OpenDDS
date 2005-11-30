@@ -1178,7 +1178,10 @@ namespace TAO
       ACE_Message_Block* message;
       size_t max_marshaled_size = header_data.max_marshaled_size ();
 
-      ACE_NEW_RETURN (message,
+      ACE_NEW_MALLOC_RETURN (message,
+        static_cast<ACE_Message_Block*>(
+        mb_allocator_->malloc (
+        sizeof (ACE_Message_Block))),
         ACE_Message_Block(max_marshaled_size,
         ACE_Message_Block::MB_DATA,
         data, //cont

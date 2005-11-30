@@ -1,3 +1,10 @@
+Wed Nov 30 10:00:19 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed the allocation of the message block in
+          create_control_message to properly use the allocator.
+
 Tue Nov 29 13:30:35 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
