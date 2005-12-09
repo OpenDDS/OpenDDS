@@ -128,9 +128,19 @@ namespace TAO
       /// option, or by n_chunks() setter.
       size_t   n_chunks () const;
       
-      /// set the value returned by n_chunks() accessor. 
+      /// set the value returned by n_chunks() accessor.
       /// See accessor description.
       void     n_chunks (size_t chunks);
+
+      /// This accessor is to provide the multiplier for allocators
+      /// that have resources used on a per association basis. 
+      /// Has a default, can be set by the -DCPSChunkAssociationMutltiplier 
+      /// option, or by n_association_chunk_multiplier() setter.
+      size_t   association_chunk_multiplier () const;
+      
+      /// set the value returned by n_association_chunk_multiplier() accessor.
+      /// See accessor description.
+      void     association_chunk_multiplier (size_t multiplier);
 
       /// Set the Liveliness propagation delay factor.
       /// @param factor % of lease period before sending a liveliness message.
@@ -262,7 +272,10 @@ namespace TAO
       /// The configurable value of the number chunks that the DataWriter's
       /// cached allocator can allocate.
       size_t                                 n_chunks_;
-
+      /// The configurable value of maximum number of expected associations
+      /// for publishers and subscribers.  This is used to pre allocate enough
+      /// memory and reduce heap allocations.
+      size_t                                 association_chunk_multiplier_;
       /// The propagation delay factor.
       int                                    liveliness_factor_;
 

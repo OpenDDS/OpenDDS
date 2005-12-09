@@ -33,6 +33,7 @@ namespace TAO
         control_dropped_count_ (0),
         control_delivered_count_ (0),
         n_chunks_ (TheServiceParticipant->n_chunks ()),
+        association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier ()),
         topic_id_ (0),
         topic_servant_ (0),
         qos_ (TheServiceParticipant->initial_DataWriterQos ()),
@@ -789,12 +790,6 @@ namespace TAO
         }
 
 
-      // The transport does a duplication of the messages for the pkt_chain_
-      if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
-        {
-          n_chunks_ = 2 * qos_.resource_limits.max_samples;
-        }
-
       // enable the type specific part of this DataWriter
       this->enable_specific ();
 
@@ -808,7 +803,7 @@ namespace TAO
       
       // +1 because we might allocate one before releasing another
       // TBD - see if this +1 can be removed.
-      mb_allocator_ = new MessageBlockAllocator (n_chunks_+1); 
+      mb_allocator_ = new MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_); 
       db_allocator_ = new DataBlockAllocator (n_chunks_+1); 
       header_allocator_ = new DataSampleHeaderAllocator (n_chunks_+1);
       if (DCPS_debug_level >= 2) 

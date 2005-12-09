@@ -226,6 +226,20 @@ namespace TAO
     }
 
     ACE_INLINE
+    size_t   
+    Service_Participant::association_chunk_multiplier () const
+    {
+      return association_chunk_multiplier_;
+    }
+  
+    ACE_INLINE
+    void 
+    Service_Participant::association_chunk_multiplier (size_t multiplier)
+    {
+      association_chunk_multiplier_ = multiplier;
+    }
+
+    ACE_INLINE
     void 
     Service_Participant::liveliness_factor (int factor)
     {
