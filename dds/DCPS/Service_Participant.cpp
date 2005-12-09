@@ -29,6 +29,8 @@ namespace TAO
 
     const size_t DEFAULT_NUM_CHUNKS = 20;
 
+    const size_t DEFAULT_CHUNK_MULTIPLIER = 10;
+
     const int BIT_LOOKUP_DURATION_SEC = 2;
 
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
@@ -39,6 +41,7 @@ namespace TAO
     : orb_ (CORBA::ORB::_nil ()), 
       orb_from_user_(0),
       n_chunks_ (DEFAULT_NUM_CHUNKS),
+      association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (false),
@@ -302,6 +305,11 @@ namespace TAO
           if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+            }
+          if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
+            {
+              association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
             }
           else 

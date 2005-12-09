@@ -421,8 +421,12 @@ namespace TAO
 
       /// The number of chunks for the cached allocator.
       size_t                     n_chunks_;
+      /// The multiplier for allocators affected by associations
+      size_t                     association_chunk_multiplier_;
 
-//remove document this!
+      /**
+      *  Attempt to locate an existing instance for the given handle.
+      */
       PublicationInstance* get_handle_instance (
           ::DDS::InstanceHandle_t handle);
 

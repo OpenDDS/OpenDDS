@@ -1,3 +1,22 @@
+Fri Dec 09 15:22:38 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+
+          Changed Allocators to log an error message when more
+          memory is freed to the heap than is allocated.
+          
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+
+          Expanded the amount of memory that is allocated for
+          Message Blocks that are duplicated on a per-association
+          basis.
+
 Wed Nov 30 10:00:19 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

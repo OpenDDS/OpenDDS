@@ -462,7 +462,8 @@ void
           " is unbounded data - allocate from heap\n"));
   }
   
-  mb_allocator_ = new ::TAO::DCPS::MessageBlockAllocator (n_chunks_);
+  mb_allocator_ =
+   new ::TAO::DCPS::MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_);
   db_allocator_ = new ::TAO::DCPS::DataBlockAllocator (n_chunks_);
   
   if (::TAO::DCPS::DCPS_debug_level >= 2)

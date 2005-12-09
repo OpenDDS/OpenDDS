@@ -165,13 +165,27 @@ namespace TAO
             char* tmp = ACE_reinterpret_cast (char *, ptr);
             delete []tmp;
             frees_to_heap_++;
+            if (frees_to_heap_ > allocs_from_heap_)
+              {
+                ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR Cached_Allocator_With_Overflow::free %x"
+                        " more deletes %d than allocs %d to the heap\n",
+                        this,
+                        this->frees_to_heap_,
+                        this->allocs_from_heap_));
+              }
+
             if (DCPS_debug_level >= 6)
-              if (frees_to_heap_ % 500 == 0)
-                ACE_DEBUG((LM_DEBUG,
-                "(%P|%t) Cached_Allocator_With_Overflow::free %x"
-                         " %d heap allocs with %d outstanding\n",
-                         this, this->allocs_from_heap_,
-                         this->allocs_from_heap_ - this->frees_to_heap_));
+              {
+                if (frees_to_heap_ % 500 == 0)
+                  {
+                    ACE_DEBUG((LM_DEBUG,
+                    "(%P|%t) Cached_Allocator_With_Overflow::free %x"
+                            " %d heap allocs with %d outstanding\n",
+                            this, this->allocs_from_heap_,
+                            this->allocs_from_heap_ - this->frees_to_heap_));
+                  }
+              }
             return;
           }
         else if (ptr != 0)
