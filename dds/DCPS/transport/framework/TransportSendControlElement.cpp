@@ -38,6 +38,11 @@ TAO::DCPS::TransportSendControlElement::release_element()
     {
       this->listener_->control_delivered(this->msg_);
     }
+    
+  if (allocator_)
+    {
+      allocator_->free (this);
+    }
 }
 
 

@@ -7,6 +7,7 @@
 #include  "dds/DCPS/dcps_export.h"
 #include  "BasicQueueVisitor_T.h"
 #include  "TransportDefs.h"
+#include  "TransportReplacedElement.h"
 
 class ACE_Message_Block;
 
@@ -17,7 +18,6 @@ namespace TAO
   namespace DCPS
   {
 
-    class TransportQueueElement;
 
 
     class TAO_DdsDcps_Export PacketRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
@@ -71,6 +71,9 @@ namespace TAO
         /// This is the message block in the chain that has its cont() set
         /// to the current_block_.
         ACE_Message_Block* previous_block_;
+
+        /// Cached allocator for TransportReplaceElement.
+        TransportReplacedElementAllocator replaced_element_allocator_;
     };
 
   }

@@ -57,8 +57,18 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
   }
 
   Source_Files {
+    DdsDcpsC.cpp
+    DdsDcpsS.cpp
+    DdsDcpsDataReaderRemoteC.cpp
+    DdsDcpsDataReaderRemoteS.cpp
+    DdsDcpsDataWriterRemoteC.cpp
+    DdsDcpsDataWriterRemoteS.cpp
     DdsDcpsDomainC.cpp
     DdsDcpsDomainS.cpp
+    DdsDcpsInfoC.cpp
+    DdsDcpsInfoS.cpp
+    DdsDcpsInfoUtilsC.cpp
+    DdsDcpsInfoUtilsS.cpp
     DdsDcpsInfrastructureC.cpp
     DdsDcpsInfrastructureS.cpp
     DdsDcpsPublicationC.cpp
@@ -67,42 +77,32 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DdsDcpsSubscriptionS.cpp
     DdsDcpsTopicC.cpp
     DdsDcpsTopicS.cpp
-    DdsDcpsC.cpp
-    DdsDcpsS.cpp
-    DdsDcpsInfoC.cpp
-    DdsDcpsInfoS.cpp
-    DdsDcpsDataReaderRemoteC.cpp
-    DdsDcpsDataReaderRemoteS.cpp
-    DdsDcpsDataWriterRemoteC.cpp
-    DdsDcpsDataWriterRemoteS.cpp
-    DdsDcpsInfoUtilsC.cpp
-    DdsDcpsInfoUtilsS.cpp
     DdsDcpsTypeSupportTaoC.cpp
     DdsDcpsTypeSupportTaoS.cpp
 
-    DCPS/debug.cpp
+    DCPS/BuiltInTopicUtils.cpp
+    DCPS/DataBlockLockPool.cpp
     DCPS/DataReaderImpl.cpp
-    DCPS/WriteDataContainer.cpp
+    DCPS/DataSampleHeader.cpp
+    DCPS/DataSampleList.cpp
     DCPS/DataWriterImpl.cpp
+    DCPS/debug.cpp
     DCPS/DomainParticipantFactoryImpl.cpp
     DCPS/DomainParticipantImpl.cpp
     DCPS/EntityImpl.cpp
+    DCPS/InstanceState.cpp
+    DCPS/Marked_Default_Qos.cpp
     DCPS/PublisherImpl.cpp
+    DCPS/Qos_Helper.cpp
+    DCPS/ReceivedDataElementList.cpp
+    DCPS/Registered_Data_Types.cpp
+    DCPS/Serializer.cpp
+    DCPS/Service_Participant.cpp  
     DCPS/SubscriberImpl.cpp
     DCPS/TopicDescriptionImpl.cpp
     DCPS/TopicImpl.cpp
-    DCPS/Service_Participant.cpp  
-    DCPS/Qos_Helper.cpp
-    DCPS/Marked_Default_Qos.cpp
-    DCPS/Registered_Data_Types.cpp
-    DCPS/DataSampleList.cpp
-    DCPS/Serializer.cpp
-    DCPS/DataSampleHeader.cpp
-    DCPS/InstanceState.cpp
-    DCPS/ReceivedDataElementList.cpp
     DCPS/Transient_Kludge.cpp
-    DCPS/BuiltInTopicUtils.cpp
-    DCPS/DataBlockLockPool.cpp
+    DCPS/WriteDataContainer.cpp
 
     // Built-In Topic Support
     ParticipantBuiltinTopicDataTypeSupportImpl.cpp
@@ -125,7 +125,6 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/DataLink.cpp
     DCPS/transport/framework/DataLinkSet.cpp
     DCPS/transport/framework/DataLinkSetMap.cpp
-    DCPS/transport/framework/TransportDebug.cpp
     DCPS/transport/framework/NetworkAddress.cpp
     DCPS/transport/framework/NullSynch.cpp
     DCPS/transport/framework/NullSynchStrategy.cpp
@@ -146,6 +145,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/ThreadSynchStrategy.cpp
     DCPS/transport/framework/ThreadSynchWorker.cpp
     DCPS/transport/framework/TransportConfiguration.cpp
+    DCPS/transport/framework/TransportDebug.cpp
     DCPS/transport/framework/TransportFactory.cpp
     DCPS/transport/framework/TransportHeader.cpp
     DCPS/transport/framework/TransportImpl.cpp
@@ -191,5 +191,17 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     TopicBuiltinTopicDataTypeSupportC.inl
     TopicBuiltinTopicDataTypeSupportS.inl
   }
-
+  
+  Template_Files {
+    DCPS/Cached_Allocator_With_Overflow_T.h
+    DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h
+    DCPS/RcHandle_T.h
+    DCPS/RcObject_T.h
+    DCPS/transport/framework/BasicQueue_T.h
+    DCPS/transport/framework/BasicQueueLink_T.h
+    DCPS/transport/framework/BasicQueueLinkAllocator_T.h
+    DCPS/transport/framework/BasicQueueLinkChunk_T.h
+    DCPS/transport/framework/BasicQueueLinkPool_T.h
+    DCPS/transport/framework/BasicQueueVisitor_T.h
+  }
 }

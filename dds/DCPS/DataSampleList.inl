@@ -7,7 +7,8 @@ namespace TAO
     DataSampleListElement::DataSampleListElement (
       PublicationId           publication_id,
       TransportSendListener*  send_listner,
-      PublicationInstance*    handle)
+      PublicationInstance*    handle,
+      TransportSendElementAllocator* allocator)
       : sample_ (0),
         publication_id_ (publication_id), 
         group_id_ (0),
@@ -17,7 +18,8 @@ namespace TAO
         next_send_sample_ (0),
         send_listener_ (send_listner),
         space_available_ (false),
-        handle_(handle)
+        handle_(handle),
+        transport_send_element_allocator_(allocator)
     {
     }
 

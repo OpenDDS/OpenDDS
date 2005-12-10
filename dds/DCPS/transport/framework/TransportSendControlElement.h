@@ -17,6 +17,10 @@ namespace TAO
 
     class TransportSendListener;
 
+    class TransportSendControlElement;
+
+    typedef Cached_Allocator_With_Overflow<TransportSendControlElement, ACE_SYNCH_NULL_MUTEX> 
+                                             TransportSendControlElementAllocator;
 
     class TAO_DdsDcps_Export TransportSendControlElement : public TransportQueueElement
     {
@@ -25,7 +29,8 @@ namespace TAO
         TransportSendControlElement(int                    initial_count,
                                     RepoId                 publisher_id,
                                     TransportSendListener* listener,
-                                    ACE_Message_Block*     msg_block);
+                                    ACE_Message_Block*     msg_block,
+                                    TransportSendControlElementAllocator* allocator = 0);
 
         virtual ~TransportSendControlElement();
 
@@ -57,6 +62,10 @@ namespace TAO
 
         /// The control message.
         ACE_Message_Block* msg_;
+
+        /// Reference to the TransportSendControlElement 
+        /// allocator.
+        TransportSendControlElementAllocator* allocator_;
     };
 
   }

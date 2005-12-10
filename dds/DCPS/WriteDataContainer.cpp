@@ -7,6 +7,7 @@
 #include  "DataSampleList.h"
 #include  "DataWriterImpl.h"
 #include  "PublicationInstance.h"
+#include  "dds/DCPS/transport/framework/TransportSendElement.h"
 #include  "tao/debug.h"
 
 
@@ -27,6 +28,7 @@ namespace TAO
       condition_ (lock_),
       n_chunks_ (n_chunks),
       sample_list_element_allocator_(n_chunks_),
+      transport_send_element_allocator_(n_chunks_, sizeof (TAO::DCPS::TransportSendElement)),
       shutdown_ (false),
       next_handle_(1)
     {
@@ -587,7 +589,8 @@ namespace TAO
                              sizeof (DataSampleListElement))),
                              DataSampleListElement (publication_id_,
                                                     writer,
-                                                    instance),
+                                                    instance,
+                                                    &transport_send_element_allocator_),
                              ::DDS::RETCODE_ERROR);
 
 
