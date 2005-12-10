@@ -26,6 +26,11 @@ TAO::DCPS::TransportReplacedElement::release_element()
       this->msg_->release();
       this->msg_ = 0;
     }
+
+  if (allocator_)
+    {
+      allocator_->free (this);
+    }
 }
 
 

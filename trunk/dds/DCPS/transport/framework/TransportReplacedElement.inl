@@ -5,8 +5,10 @@
 
 ACE_INLINE
 TAO::DCPS::TransportReplacedElement::TransportReplacedElement
-                                           (TransportQueueElement* orig_elem)
-  : TransportQueueElement(1)
+                                           (TransportQueueElement* orig_elem,
+                                            TransportReplacedElementAllocator* allocator)
+  : TransportQueueElement(1),
+    allocator_(allocator)
 {
   DBG_ENTRY("TransportReplacedElement","TransportReplacedElement");
 

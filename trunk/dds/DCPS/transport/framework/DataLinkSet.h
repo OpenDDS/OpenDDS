@@ -8,7 +8,9 @@
 #include  "dds/DCPS/RcObject_T.h"
 #include  "DataLink_rch.h"
 #include  "TransportDefs.h"
-#include  "ace/Hash_Map_Manager.h"
+#include  "TransportSendControlElement.h"
+
+#include  "ace/Hash_Map_With_Allocator_T.h"
 #include  "ace/Synch.h"
 
 namespace TAO
@@ -73,13 +75,19 @@ namespace TAO
 
       private:
 
-        typedef ACE_Hash_Map_Manager_Ex<DataLinkIdType,
-                                        DataLink_rch,
-                                        ACE_Hash<DataLinkIdType>,
-                                        ACE_Equal_To<DataLinkIdType>,
-                                        ACE_Null_Mutex>               MapType;
-
+        typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
+                                            DataLink_rch>            MapType;
+        typedef Cached_Allocator_With_Overflow<MapType::ENTRY,
+                                               ACE_Null_Mutex>       MapEntryAllocator ;
+        
+        /// Allocator for MapType::ENTRY.
+        MapEntryAllocator map_entry_allocator_;
+        
+        /// Hash map for DataLinks.
         MapType  map_;
+        
+        /// Allocator for TransportSendControlElement.
+        TransportSendControlElementAllocator send_control_element_allocator_;
     };
 
   }  /* namespace DCPS */

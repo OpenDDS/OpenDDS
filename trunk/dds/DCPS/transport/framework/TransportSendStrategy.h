@@ -232,6 +232,12 @@ namespace TAO
         TransportQueueElement** delayed_delivered_notification_queue_;
         size_t num_delayed_notifications_;
 
+        /// Allocator for header data block.
+        TransportMessageBlockAllocator header_db_allocator_;
+        
+        /// Allocator for header message block.
+        TransportDataBlockAllocator header_mb_allocator_;
+
         /// The thread synch object.
         ThreadSynch* synch_;
 

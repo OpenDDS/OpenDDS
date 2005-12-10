@@ -3,7 +3,6 @@
 // $Id$
 #include  "DCPS/DdsDcps_pch.h"
 #include  "TransportSendElement.h"
-#include  "dds/DCPS/DataSampleList.h"
 #include  "TransportSendListener.h"
 
 #if !defined (__ACE_INLINE__)
@@ -30,6 +29,11 @@ TAO::DCPS::TransportSendElement::release_element()
   else
     {
       this->element_->send_listener_->data_delivered(this->element_);
+    }
+
+  if (allocator_)
+    {
+      allocator_->free (this);
     }
 }
 

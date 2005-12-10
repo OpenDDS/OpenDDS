@@ -2,18 +2,9 @@
 //
 // $Id$
 
+#include  "EntryExit.h"
 #include  "DataLink.h"
 #include  "TransportSendElement.h"
-#include  "TransportSendControlElement.h"
-#include  "EntryExit.h"
-
-ACE_INLINE
-TAO::DCPS::DataLinkSet::DataLinkSet()
-{
-  DBG_ENTRY("DataLinkSet","DataLinkSet");
-}
-
-
 
 ACE_INLINE int
 TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
@@ -22,7 +13,7 @@ TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
   link->_add_ref();
   DataLink_rch mylink = link;
 
-  return this->map_.bind(mylink->id(), mylink);
+  return this->map_.bind(mylink->id(), mylink, &map_entry_allocator_);
 }
 
 
@@ -42,7 +33,7 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
     {
       DataLinkIdType link_id = entry->ext_id_;
 
-      if (this->map_.unbind(link_id) != 0)
+      if (this->map_.unbind(link_id, &map_entry_allocator_) != 0)
         {
 //MJM: This is an excellent candidate location for a level driven
 //MJM: diagnostic (ORBDebugLevel 4).
@@ -67,7 +58,7 @@ TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
   // the release_reservations operation upon itself.
   MapType::ENTRY* entry;
 
-  for (DataLinkSet::MapType::ITERATOR itr(map_);
+  for (MapType::ITERATOR itr(map_);
        itr.next(entry);
        itr.advance())
     {
@@ -79,14 +70,14 @@ ACE_INLINE void
 TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
   DBG_ENTRY("DataLinkSet","send");
-  TransportSendElement* send_element =
-                          new TransportSendElement(this->map_.current_size(),
-                                                   sample);
-//MJM: We probably want to use a cached allocator for these.  Of the
-//MJM: overflow variety of course.  I guess they can't be on the stack
-//MJM: since they can be queued, right?  So ownership must pass to the
-//MJM: called DataLink and another thread can cause the actual release
-//MJM: to eventually occur.
+  TransportSendElement* send_element = 0;
+  //Optimized - use cached allocator.
+  ACE_NEW_MALLOC(send_element,
+                 (TransportSendElement*)sample->transport_send_element_allocator_->malloc(),
+                 TransportSendElement(this->map_.current_size(),
+                                      sample,
+                                      sample->transport_send_element_allocator_));
+                        
 
   MapType::ENTRY* entry;
 
@@ -106,34 +97,19 @@ TAO::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
                                      ACE_Message_Block*     msg)
 {
   DBG_ENTRY("DataLinkSet","send_control");
+  //Optimized - use cached allocator.
+  TransportSendControlElement* send_element = 0;
 
-  TransportSendControlElement* send_element =
-                                new TransportSendControlElement
-                                                 (this->map_.current_size(),
-                                                  pub_id,
-                                                  listener,
-                                                  msg);
-// TBD - Huh?
-//MJM: Ibid.
+  ACE_NEW_MALLOC_RETURN(send_element,
+                        (TransportSendControlElement*)send_control_element_allocator_.malloc(),
+                        TransportSendControlElement(this->map_.current_size(),
+                                                    pub_id,
+                                                    listener,
+                                                    msg,
+                                                    &send_control_element_allocator_),
+                                                    SEND_CONTROL_ERROR);
 
-// Mike's comments pulled from below
-#if 0
-  for (MapType::ITERATOR itr(this->map_);
-       itr.next(entry);
-       itr.advance())
-    {
-      // Tell the DataLink to send it.
-      entry->int_id_->send_start();
-//MJM: Um.  Is this going to release any pent up aggregating bunch of
-//MJM: data that is waiting to be sent (and possibly not complete)?
-      entry->int_id_->send(send_element);
-      entry->int_id_->send_stop();
-//MJM: Um.  And is this going to disable sending when it wasn't disabled
-//MJM: previously?
-    }
-//MJM: There is a very real possibility that I just don't understand the
-//MJM: semantics of the start/stop thingies.
-#endif
+
 
   MapType::ENTRY* entry;
 
@@ -211,7 +187,7 @@ TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
        itr.advance())
     {
       // Attempt to add the current DataLink to this set.
-      int result = this->map_.bind(entry->ext_id_,entry->int_id_);
+      int result = this->map_.bind(entry->ext_id_,entry->int_id_, &map_entry_allocator_);
 
       if (result == 0)
         {

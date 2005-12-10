@@ -13,6 +13,9 @@
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
 
+// I think 2 chunks for the header message block is enough
+// - one for the original copy and one for duplicate which 
+// occurs every packet and is released after packet is sent.
 ACE_INLINE
 TAO::DCPS::TransportSendStrategy::TransportSendStrategy
                                      (TransportConfiguration* config,
@@ -26,7 +29,9 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     header_complete_(0),
     start_counter_(0),
     mode_(MODE_DIRECT),
-    num_delayed_notifications_(0)
+    num_delayed_notifications_(0),
+    header_mb_allocator_(2),
+    header_db_allocator_(2)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
 
@@ -40,9 +45,20 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
 
   // Create the header_block_ that is used to hold the marshalled
   // transport packet header bytes.
-  this->header_block_ = new ACE_Message_Block(this->max_header_size_);
-//MJM: See header for comment on this.  This should be a member, not
-//MJM: allocated.  Maybe.
+  ACE_NEW_MALLOC (this->header_block_,
+                  (ACE_Message_Block*)header_mb_allocator_.malloc (),
+                  ACE_Message_Block(this->max_header_size_,
+                  ACE_Message_Block::MB_DATA,
+                  0,
+                  0,
+                  0,
+                  0,
+                  ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                  ACE_Time_Value::zero,
+                  ACE_Time_Value::max_time,
+                  &header_db_allocator_,
+                  &header_mb_allocator_));
+
 
   this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
 }
