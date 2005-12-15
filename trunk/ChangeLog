@@ -27,8 +27,11 @@ Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/WriteDataContainer.cpp:
         
           Made obtain_buffer() and register_instance() release memory it allocates 
-          if the methods return error.
-          
+          if the methods return error. 
+          Made the number of chunks for data allocator to be the 
+          max_samples of resource_limits in qos if that value is not 
+          LENGTH_UNLIMITED.
+                    
         * dds/DCPS/Service_Participant.cpp:
           
           Fixed a bug in parse_args() that causes crash when passing multiple 
