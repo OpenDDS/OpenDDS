@@ -788,8 +788,13 @@ namespace TAO
           // WARNING: The client risks running out of memory in this case.
           depth = 2147483647L;
         }
-
-
+      
+      if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
+          {
+            n_chunks_ = qos_.resource_limits.max_samples;
+          }
+        //else using value from Service_Participant
+  
       // enable the type specific part of this DataWriter
       this->enable_specific ();
 
@@ -946,7 +951,7 @@ namespace TAO
                                             unregistered_sample_data,
                                             this
                                             ACE_ENV_ARG_PARAMETER) ;
-      ACE_CHECK;
+      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1030,7 +1035,7 @@ namespace TAO
       ret = this->data_container_->enqueue( element, 
                                             handle 
                                             ACE_ENV_ARG_PARAMETER) ;
-      ACE_CHECK;
+      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1068,7 +1073,7 @@ namespace TAO
           = this->data_container_->dispose(handle, 
                                            registered_sample_data 
                                            ACE_ENV_ARG_PARAMETER) ;
-        ACE_CHECK;
+        ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
         if (ret != ::DDS::RETCODE_OK)
           {

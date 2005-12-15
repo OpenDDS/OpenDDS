@@ -40,6 +40,7 @@ namespace TAO
       : allocs_from_heap_ (0),
         allocs_from_pool_ (0),
         frees_to_heap_ (0),
+        frees_to_pool_ (0),
         pool_ (0),
         free_list_ (ACE_PURE_FREE_LIST),
         chunk_size_(chunk_size)
@@ -115,8 +116,9 @@ namespace TAO
               if (allocs_from_pool_ % 500 == 0)
                 ACE_DEBUG((LM_DEBUG,
                 "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
-                         " %d pool allocs with %d available\n",
+                         " %d pool allocs %d pool free with %d available\n",
                          this, this->allocs_from_pool_,
+                         this->frees_to_pool_,
                          this->available ()));
           }
         return rtn;
@@ -181,13 +183,24 @@ namespace TAO
           }
         else if (ptr != 0)
           {
+            this->frees_to_pool_ ++;
+            if (frees_to_pool_ > allocs_from_pool_)
+              {
+                ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR Dynamic_Cached_Allocator_With_Overflow::free %x"
+                        " more deletes %d than allocs %d from the pool\n",
+                        this,
+                        this->frees_to_pool_,
+                        this->allocs_from_pool_));
+              }
+
             this->free_list_.add ((ACE_Cached_Mem_Pool_Node<char> *) ptr) ;
             if (DCPS_debug_level >= 6)
               if (this->available () % 500 == 0)
                 ACE_DEBUG((LM_DEBUG,
                 "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
-                         " %d pool allocs with %d available\n",
-                         this, this->allocs_from_pool_,
+                         " %d pool allocs %d pool frees with %d available\n",
+                         this, this->allocs_from_pool_, this->frees_to_pool_,
                          this->available ()));
           }
       }
@@ -210,7 +223,8 @@ namespace TAO
       u_long allocs_from_pool_;
       /// number of frees returned to the heap
       u_long frees_to_heap_ ;
-
+      /// number of frees returned to the pool
+      u_long frees_to_pool_;
     private:
       /// Remember how we allocate the memory in the first place so
       /// we can clear things up later.

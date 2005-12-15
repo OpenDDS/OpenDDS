@@ -122,13 +122,13 @@ namespace TAO
 
           if (0 != insert_attempt)
             {
-              ACE_ERROR_RETURN ((LM_ERROR, 
+              ACE_ERROR ((LM_ERROR, 
                                  ACE_TEXT("(%P|%t) ERROR: ")
                                  ACE_TEXT("WriteDataContainer::register_instance, ")
                                  ACE_TEXT("failed to insert instance handle=%X\n"), 
-                                 instance),
-                                 ::DDS::RETCODE_ERROR);
-
+                                 instance));
+              delete instance;
+              return ::DDS::RETCODE_ERROR;
             } // if (0 != insert_attempt)
           instance->instance_handle_ = instance_handle;
         }
@@ -138,12 +138,13 @@ namespace TAO
 
           if (0 != find_attempt)
             {
-              ACE_ERROR_RETURN ((LM_ERROR, 
-                                 ACE_TEXT("(%P|%t) ERROR: ")
-                                 ACE_TEXT("WriteDataContainer::register_instance, ")
-                                 ACE_TEXT("The provided instance handle=%X is not a valid"
-                                 "handle.\n"), instance_handle),
-                                 ::DDS::RETCODE_ERROR);
+              ACE_ERROR ((LM_ERROR, 
+                          ACE_TEXT("(%P|%t) ERROR: ")
+                          ACE_TEXT("WriteDataContainer::register_instance, ")
+                          ACE_TEXT("The provided instance handle=%X is not a valid"
+                          "handle.\n"), instance_handle));
+              delete instance;
+              return ::DDS::RETCODE_ERROR;
             } // if (0 != insert_attempt)
 
           // don't need this - the PublicationInstances already has a sample.
@@ -604,23 +605,24 @@ namespace TAO
       // the sample list.
       if (instance_list.size_ > depth_)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                             ACE_TEXT("(%P|%t) ERROR: ")
-                             ACE_TEXT("WriteDataContainer::obtain_buffer, ")
-                             ACE_TEXT("The instance list size %d exceeds depth %d\n"),
-                             instance_list.size_ > depth_),
-                             ::DDS::RETCODE_ERROR);
+          ACE_ERROR ((LM_ERROR, 
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("WriteDataContainer::obtain_buffer, ")
+                      ACE_TEXT("The instance list size %d exceeds depth %d\n"),
+                      instance_list.size_, depth_));
+          ret = ::DDS::RETCODE_ERROR;
         }
-
-      if (instance_list.size_ == depth_)
+      else if (instance_list.size_ == depth_)
         {
           // The remove_oldest_sample removes the oldest sample from 
           // instance list and removes it from the internal lists.
           ret = remove_oldest_sample (instance_list, oldest_released);
-          if (ret != ::DDS::RETCODE_OK)
-            {
-              return ret;
-            }
+        }
+
+      if ( ret != ::DDS::RETCODE_OK)
+        {
+          release_buffer (element);
+          return ret;
         }
 
       // Each write/enqueue just writes one element and hence the number 
@@ -698,11 +700,11 @@ namespace TAO
             }
         }
 
-        // Cleanup
-        if ( ret != ::DDS::RETCODE_OK)
-          {
-            release_buffer (element);
-          }
+      // Cleanup
+      if ( ret != ::DDS::RETCODE_OK)
+        {
+          release_buffer (element);
+        }
       return ret;
     }
 
