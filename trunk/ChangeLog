@@ -15,6 +15,7 @@ Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
           duplicate() increases the ref count of data block.
           
         * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
         
           Added free_to_pool_ count to help debugging.
           
