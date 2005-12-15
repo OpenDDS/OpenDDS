@@ -16,6 +16,8 @@
 // I think 2 chunks for the header message block is enough
 // - one for the original copy and one for duplicate which 
 // occurs every packet and is released after packet is sent.
+// The data block only needs 1 chunk since the duplicate()
+// just increases the ref count.
 ACE_INLINE
 TAO::DCPS::TransportSendStrategy::TransportSendStrategy
                                      (TransportConfiguration* config,
@@ -31,7 +33,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     mode_(MODE_DIRECT),
     num_delayed_notifications_(0),
     header_mb_allocator_(2),
-    header_db_allocator_(2)
+    header_db_allocator_(1)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
 

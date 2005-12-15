@@ -84,7 +84,7 @@ namespace TAO
         MapEntryAllocator map_entry_allocator_;
         
         /// Hash map for DataLinks.
-        MapType  map_;
+        MapType*  map_;
         
         /// Allocator for TransportSendControlElement.
         TransportSendControlElementAllocator send_control_element_allocator_;

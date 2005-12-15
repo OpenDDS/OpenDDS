@@ -211,12 +211,12 @@ void DataReaderListenerImpl::on_data_available(
     total_samples_count_++;
 
     if (0 == total_samples_count_ % read_interval_)
-    {
+    {  
       // perform the read
-    //  int samples_read = read_samples(reader);
-    //ACE_DEBUG((LM_DEBUG,
-    //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
-    //  samples_read));
+      int samples_read = read_samples(reader);
+      //ACE_DEBUG((LM_DEBUG,
+      //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
+      //  samples_read));
     }
   }
 

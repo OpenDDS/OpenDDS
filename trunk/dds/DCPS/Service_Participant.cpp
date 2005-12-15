@@ -297,17 +297,17 @@ namespace TAO
               DCPS_debug_level = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
             }
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
             {
               ior = currentArg;
               arg_shifter.consume_arg ();
             }
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
             }
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
             {
               association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();

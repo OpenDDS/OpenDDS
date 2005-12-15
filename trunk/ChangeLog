@@ -1,3 +1,47 @@
+Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+   
+          Corrected the number of chunks for map_entry_allocator_. It should be
+          the number of datalinks. The map_ is also changed to be a pointer of 
+          hash map so we can appropiately delete the hash map with current 
+          implementation of ACE_Hash_Map_Manager_Ex and ACE_Hash_Map_With_Allocator.
+                              
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+       
+          Made number of chunks in header data block to be 1 instead of 2 since the
+          duplicate() increases the ref count of data block.
+          
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        
+          Added free_to_pool_ count to help debugging.
+          
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Replaced ACE_CHECK with ACE_CHECK_RETURN in some methods with a return
+          type.
+          
+        * dds/DCPS/WriteDataContainer.cpp:
+        
+          Made obtain_buffer() and register_instance() release memory it allocates 
+          if the methods return error.
+          
+        * dds/DCPS/Service_Participant.cpp:
+          
+          Fixed a bug in parse_args() that causes crash when passing multiple 
+          -DCPS options.
+          
+        * bin/DCPS/CPPTemplate.pm:
+          
+          Made write_w_timestamp() release marshalled data sample if write fails.
+
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+          Uncommented the read_samples() which might be accidently checked in previously.
+          
 Thu Dec 15  8:35:17 USMST 2005 2005  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet_rch.h
