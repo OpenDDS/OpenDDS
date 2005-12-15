@@ -5,6 +5,8 @@
 #define TAO_DCPS_DATALINKSET_RCH_H
 
 #include  "dds/DCPS/RcHandle_T.h"
+#include "ace/version.h"
+
 // this #if may not work for ACE version < 5.0.0
 // but DDS will only build with 5.4.x or greater so that is OK.
 #if ( (ACE_MAJOR_VERSION == 5) && (ACE_MINOR_VERSION == 4) && \

@@ -1,3 +1,14 @@
+Thu Dec 15  8:35:17 USMST 2005 2005  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet_rch.h
+        
+          Get the DdsDcps project to build against TAO v 1.4.7.
+          Needed to explicitly include the ACE version header so that
+          conditional complication that makes DDS build with both the DOC 
+          and OCI versions of TAO worked.
+          Strangely, this is not needed for the latest DOC TAO from CVS
+          or when building with gcc/GNUmakefile but is needed for VC71.
+
 Fri Dec  9 16:57:17 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
