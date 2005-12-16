@@ -1,3 +1,12 @@
+Fri Dec 16 00:50:26 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+
+          Moved the ACE_INLINE method to the inl file.  Not having it
+          in the inl file results in an undefined reference when linking
+          with the dll
+
 Thu Dec 15 22:31:13 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet_rch.h:
