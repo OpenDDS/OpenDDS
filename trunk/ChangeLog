@@ -1,3 +1,11 @@
+Fri Dec 16 01:03:41 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+
+          Moved the method back to cpp and removed the ACE_INLINE
+          declaration.  The method needed a define in the cpp file.
+
 Fri Dec 16 00:50:26 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
