@@ -1,3 +1,9 @@
+Thu Dec 15 22:31:13 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet_rch.h:
+
+          Corrected capitalization of header include.
+
 Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
