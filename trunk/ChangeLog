@@ -1,3 +1,18 @@
+Mon Dec 19 09:43:03 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Changed order of code to actually execute code that was 
+          after a return.
+
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+
+          Changed tests to use an allocator.
+
 Fri Dec 16 01:03:41 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
