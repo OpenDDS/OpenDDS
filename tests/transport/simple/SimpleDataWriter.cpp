@@ -71,8 +71,15 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   header_block->cont(data_block);
 
   // Create the DataSampleListElement now.
-  TAO::DCPS::DataSampleListElement* element =
-                   new TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0);
+  DataSampleListElementAllocator allocator(3);
+  TransportSendElementAllocator trans_allocator(3, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::DataSampleListElement* element;
+
+  ACE_NEW_MALLOC_RETURN(element,
+           static_cast<DataSampleListElement*> (allocator.malloc(sizeof (DataSampleListElement))),
+           DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+           1);
+
 
   // The Sample Element will hold on to the chain of blocks (header + data).
   element->sample_ = header_block;

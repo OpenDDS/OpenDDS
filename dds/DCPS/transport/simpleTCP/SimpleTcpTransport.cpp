@@ -186,16 +186,17 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   if (this->acceptor_.open(this->tcp_config_->local_address_,
                            this->reactor_task_->get_reactor()) != 0)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
-                        this->tcp_config_->local_address_.get_host_addr (), 
-                        this->tcp_config_->local_address_.get_port_number (),
-                        "open"),
-                       -1);
       // Remember to drop our reference to the tcp_config_ object since
       // we are about to return -1 here, which means we are supposed to
       // keep a copy after all.
       SimpleTcpConfiguration_rch cfg = this->tcp_config_._retn();
+
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
+                        cfg->local_address_.get_host_addr (), 
+                        cfg->local_address_.get_port_number (),
+                        "open"),
+                       -1);
     }
 
   // update the port number (incase port zero was given).
