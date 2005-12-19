@@ -295,15 +295,14 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
     
   ACE_Message_Block* marshalled = 0;
-  ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
-  
+
   if (handle == ::DDS::HANDLE_NIL)
   {
     ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL; 
-     
-    ret = this->get_or_create_instance_handle(registered_handle, 
-                                              instance_data, 
-                                              source_timestamp);
+    ::DDS::ReturnCode_t ret 
+      = this->get_or_create_instance_handle(registered_handle, 
+                                            instance_data, 
+                                            source_timestamp);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN ((LM_ERROR, 
@@ -317,13 +316,7 @@ DDS::ReturnCode_t
   }
   
   marshalled = marshal (instance_data); // FOR_WRITE - using cached allocators
-  ret = DataWriterImpl::write(marshalled, handle, source_timestamp);
-  
-  if (ret != ::DDS::RETCODE_OK)
-    {
-      marshalled->release ();
-    }
-  return ret;
+  return DataWriterImpl::write(marshalled, handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -570,7 +563,6 @@ ACE_Message_Block*
           = instance_map_.insert(InstanceMap::value_type(instance_data, handle));
       if (pair.second == false)
         {
-          marshalled->release ();
           ACE_ERROR_RETURN ((LM_ERROR, 
                               ACE_TEXT("(%P|%t) "
                               "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")

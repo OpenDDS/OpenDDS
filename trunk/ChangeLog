@@ -1,3 +1,12 @@
+Mon Dec 19 14:42:52 USMST 2005  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Rolled back the changes that made on 
+          "Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>"
+          that intended to cleanup memory when the write/register fail.
+          The changes need more investigation.
+                   
 Mon Dec 19 09:43:03 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
