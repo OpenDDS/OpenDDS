@@ -237,6 +237,7 @@ void DataReaderListenerImpl::on_data_available(
     {
       // perform the read
       int samples_read = read_samples(reader);
+      ACE_UNUSED_ARG(samples_read);
       //ACE_DEBUG((LM_DEBUG,
       //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
       //  samples_read));
