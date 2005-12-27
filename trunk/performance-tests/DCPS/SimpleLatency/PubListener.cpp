@@ -58,11 +58,11 @@ init_stats (
     strncpy ((char *)stats.name, name, 19);
     stats.name[19] = '\0';
     stats.count    = 0;
-    stats.average  = 0.0;
-    stats.min      = 0.0;
-    stats.max      = 0.0;
-    stats.sum      = 0.0;
-    stats.sum2     = 0.0;
+    stats.average  = ACE_hrtime_t(0.0);
+    stats.min      = ACE_hrtime_t(0.0);
+    stats.max      = ACE_hrtime_t(0.0);
+    stats.sum      = ACE_hrtime_t(0.0);
+    stats.sum2     = ACE_hrtime_t(0.0);
 }
 
 static double
@@ -133,7 +133,7 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
 }
 
 
-void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
+void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {
     static DDSPerfTest::AckMessage message;

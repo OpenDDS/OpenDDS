@@ -32,8 +32,8 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     start_counter_(0),
     mode_(MODE_DIRECT),
     num_delayed_notifications_(0),
-    header_mb_allocator_(2),
-    header_db_allocator_(1)
+    header_db_allocator_(1),
+    header_mb_allocator_(2)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
 

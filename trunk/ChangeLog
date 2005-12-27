@@ -1,17 +1,27 @@
+Tue Dec 27 12:26:47 2005  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+
+          Fix some GCC 3.4.2 warnings (ununsed vars and member
+          initialization order).  Avoided commenting out random code.
+
 Mon Dec 19 14:42:52 USMST 2005  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
-          Rolled back the changes that made on 
+          Rolled back the changes that made on
           "Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>"
           that intended to cleanup memory when the write/register fail.
           The changes need more investigation.
-                   
+
 Mon Dec 19 09:43:03 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
-          Changed order of code to actually execute code that was 
+          Changed order of code to actually execute code that was
           after a return.
 
         * tests/transport/simple/SimpleDataWriter.cpp:
@@ -50,56 +60,56 @@ Thu Dec 15 10:08:28 USMST 2005  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
         * dds/DCPS/transport/framework/DataLinkSet.inl:
         * dds/DCPS/transport/framework/DataLinkSet.h:
-   
+
           Corrected the number of chunks for map_entry_allocator_. It should be
-          the number of datalinks. The map_ is also changed to be a pointer of 
-          hash map so we can appropiately delete the hash map with current 
+          the number of datalinks. The map_ is also changed to be a pointer of
+          hash map so we can appropiately delete the hash map with current
           implementation of ACE_Hash_Map_Manager_Ex and ACE_Hash_Map_With_Allocator.
-                              
+
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-       
+
           Made number of chunks in header data block to be 1 instead of 2 since the
           duplicate() increases the ref count of data block.
-          
+
         * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
         * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
-        
+
           Added free_to_pool_ count to help debugging.
-          
+
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Replaced ACE_CHECK with ACE_CHECK_RETURN in some methods with a return
           type.
-          
+
         * dds/DCPS/WriteDataContainer.cpp:
-        
-          Made obtain_buffer() and register_instance() release memory it allocates 
-          if the methods return error. 
-          Made the number of chunks for data allocator to be the 
-          max_samples of resource_limits in qos if that value is not 
+
+          Made obtain_buffer() and register_instance() release memory it allocates
+          if the methods return error.
+          Made the number of chunks for data allocator to be the
+          max_samples of resource_limits in qos if that value is not
           LENGTH_UNLIMITED.
-                    
+
         * dds/DCPS/Service_Participant.cpp:
-          
-          Fixed a bug in parse_args() that causes crash when passing multiple 
+
+          Fixed a bug in parse_args() that causes crash when passing multiple
           -DCPS options.
-          
+
         * bin/DCPS/CPPTemplate.pm:
-          
+
           Made write_w_timestamp() release marshalled data sample if write fails.
 
         * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
         * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
 
           Uncommented the read_samples() which might be accidently checked in previously.
-          
+
 Thu Dec 15  8:35:17 USMST 2005 2005  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet_rch.h
-        
+
           Get the DdsDcps project to build against TAO v 1.4.7.
           Needed to explicitly include the ACE version header so that
-          conditional complication that makes DDS build with both the DOC 
+          conditional complication that makes DDS build with both the DOC
           and OCI versions of TAO worked.
           Strangely, this is not needed for the latest DOC TAO from CVS
           or when building with gcc/GNUmakefile but is needed for VC71.
@@ -132,11 +142,11 @@ Fri Dec  9 16:57:17 USMST 2005  Yan Dai  <dai_y@ociweb.com>
           Replaced the TransportSendControlElement, TransportSendElement,
           TransportReplacedElement and TransportSendStrategy header message
           block allocation from heap with the cached allocator.
-          
+
         * dds/DdsDcps.mpc:
-        
+
           Listed the files in same directory in alphabet order.
-          
+
 Fri Dec 09 15:31:23 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/DDSPerfTest.idl:
@@ -151,7 +161,7 @@ Fri Dec 09 15:31:23 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
         * performance-tests/DCPS/SimpleLatency/SubListener.h:
 
-          Added a simple latency test.  This test is a modified 
+          Added a simple latency test.  This test is a modified
           version of the one created by Ming Xiong of the DOC group.
 
 Fri Dec 09 15:22:38 MST 2005  Trevor Fields  <fields_t@ociweb.com>
@@ -161,7 +171,7 @@ Fri Dec 09 15:22:38 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
           Changed Allocators to log an error message when more
           memory is freed to the heap than is allocated.
-          
+
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
@@ -193,13 +203,13 @@ Tue Nov 29 13:30:35 MST 2005  Trevor Fields  <fields_t@ociweb.com>
         * dds/DCPS/PublisherImpl.cpp:
         * tests/DCPS/FooTest3_0/README:
         * tests/DCPS/FooTest3_1/README:
-        
+
           Removed the unneeded PUBLISHER_TEST macro and code.
 
 Sat Nov 26 17:35:29 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
-        
+
           Constructor did not correctly use and save the rounded up size
            for allocating!  This resulted in invalid pointer locations
            used for small object sizes on the 64 bit OS.
