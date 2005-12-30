@@ -61,8 +61,8 @@ SimpleDataWriter::run(SimplePublisher* publisher,
 
   TAO::DCPS::DataSampleListElement* prev_element = 0;
 
-  DataSampleListElementAllocator allocator(num_messages);
-  TransportSendElementAllocator trans_allocator(num_messages, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (TAO::DCPS::TransportSendElement));
 
   for (unsigned i = 1; i <= num_messages; ++i)
     {
