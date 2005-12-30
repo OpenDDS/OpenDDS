@@ -1,3 +1,10 @@
+Fri Dec 30 16:37:49 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.h:
+
+          Fixed access violation from missing allocator.
+
 Fri Dec 30 13:54:44 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/dcps_tests.lst:
