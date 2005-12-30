@@ -36,7 +36,7 @@ tests/DCPS/FooTest3_2/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest3_2/run_test.pl mw: !DCPS_MIN
 tests/DCPS/FooTest3_2/run_test.pl bp_remove: !DCPS_MIN
 tests/DCPS/FooTest3_2/run_test.pl b: !DCPS_MIN
-tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
+
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN

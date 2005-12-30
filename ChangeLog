@@ -1,3 +1,9 @@
+Fri Dec 30 13:54:44 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed duplicate BuiltInTopic line.
+
 Fri Dec 30 11:00:34 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/unit/Main.cpp:
