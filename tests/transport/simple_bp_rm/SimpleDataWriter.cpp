@@ -18,14 +18,16 @@ SimpleDataWriter::SimpleDataWriter()
     num_to_send_(0),
     num_delivered_(0),
     element_(0),
-    condition_(this->lock_)
+    condition_(this->lock_),
+    allocator_(0),
+    trans_allocator_(0)
 {
 }
 
 
 SimpleDataWriter::~SimpleDataWriter()
 {
-  delete this->element_;
+  allocator_->free(this->element_);
 }
 
 
@@ -34,8 +36,13 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   this->pub_id_ = pub_id;
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
-  this->element_ = new TAO::DCPS::DataSampleListElement(this->pub_id_,this,0, &trans_allocator);
+  allocator_ = new TAO::DCPS::DataSampleListElementAllocator(this->num_to_send_);
+  trans_allocator_ = new TAO::DCPS::TransportSendElementAllocator (this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
+
+  ACE_NEW_MALLOC(this->element_,
+           static_cast<TAO::DCPS::DataSampleListElement*> (allocator_->malloc(sizeof (TAO::DCPS::DataSampleListElement))),
+           TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_)
+           );
 }
 
 
