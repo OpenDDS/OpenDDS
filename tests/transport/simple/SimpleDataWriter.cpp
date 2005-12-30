@@ -77,8 +77,8 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   TAO::DCPS::DataSampleListElement* element;
 
   ACE_NEW_MALLOC_RETURN(element,
-           static_cast<DataSampleListElement*> (allocator.malloc(sizeof (DataSampleListElement))),
-           DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+           static_cast<TAO::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (TAO::DCPS::DataSampleListElement))),
+           TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
            1);
 
 
