@@ -1,3 +1,16 @@
+Fri Dec 30 11:00:34 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+
+          Fixed scoping of variables added for transport allocators.
+
 Thu Dec 29 16:31:52 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:

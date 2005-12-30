@@ -33,7 +33,7 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   this->pub_id_ = pub_id;
-  TransportSendElementAllocator trans_allocator(this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
   this->element_ = new TAO::DCPS::DataSampleListElement(this->pub_id_,this,0, &trans_allocator);
 }
 

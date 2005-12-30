@@ -1,5 +1,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicImpl.h"
@@ -294,7 +295,7 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
 
-  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
@@ -355,7 +356,7 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
-  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
@@ -423,7 +424,7 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
-  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < size; i ++)
   {
