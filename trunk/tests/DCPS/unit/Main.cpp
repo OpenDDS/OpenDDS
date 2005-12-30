@@ -293,12 +293,14 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
-  
+
+  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -353,10 +355,12 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
+  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
 
@@ -364,7 +368,7 @@ void run_next_send_sample_test (ssize_t size)
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -419,10 +423,12 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
+  TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   for (ssize_t i = 0; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
