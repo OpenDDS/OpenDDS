@@ -1,3 +1,18 @@
+Thu Dec 29 16:31:52 MST 2005  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+          Force the creation of a DataSampleListElement to give
+          the allocator.
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+
+          Added missing transport allocators.
+
+
 Tue Dec 27 12:26:47 2005  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:

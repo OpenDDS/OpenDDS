@@ -33,7 +33,8 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   this->pub_id_ = pub_id;
-  this->element_ = new TAO::DCPS::DataSampleListElement(this->pub_id_,this,0);
+  TransportSendElementAllocator trans_allocator(this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
+  this->element_ = new TAO::DCPS::DataSampleListElement(this->pub_id_,this,0, &trans_allocator);
 }
 
 
@@ -71,6 +72,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
 
       this->element_->sample_ = new ACE_Message_Block
                                                 (header.max_marshaled_size());
+
       this->element_->sample_ << header;
 
       this->element_->sample_->cont

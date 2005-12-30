@@ -83,7 +83,7 @@ namespace TAO
       DataSampleListElement (PublicationId           publication_id,
                              TransportSendListener*  send_listner,
                              PublicationInstance*    handle,
-                             TransportSendElementAllocator* allocator = 0);
+                             TransportSendElementAllocator* allocator);
 //remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
