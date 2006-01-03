@@ -535,20 +535,24 @@ ACE_Message_Block*
   handle = ::TAO::DCPS::HANDLE_NIL;
   InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
-  int is_new = 1;
+  int needs_creation = 1;
+  int needs_registration = 1;
 
   if (it != instance_map_.end()) 
   {
+    needs_creation = 0;
+
     handle = it->second;
     PublicationInstance* instance = DataWriterImpl::get_handle_instance(handle);
+
     if (instance->unregistered_ == false)
     { 
-      is_new = 0;
+      needs_registration = 0;
     }
     // else: The instance is unregistered and now register again.
   }
 
-  if (is_new) 
+  if (needs_registration)
   {
     // don't use fast allocator for registration.
     ACE_Message_Block* marshalled = this->marshal(instance_data, 0); //NOT_FOR_WRITE
@@ -557,25 +561,27 @@ ACE_Message_Block*
     ::DDS::ReturnCode_t ret = register_instance(handle, marshalled, source_timestamp);
     // note: the WriteDataContainer/PublicationInstance maintains ownership 
     // of the marshalled sample.
-    if (ret == ::DDS::RETCODE_OK)
-    {
-      std::pair<InstanceMap::iterator, bool> pair 
-          = instance_map_.insert(InstanceMap::value_type(instance_data, handle));
-      if (pair.second == false)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                              ACE_TEXT("(%P|%t) "
-                              "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
-                              ACE_TEXT("insert <%SCOPE%><%TYPE%> failed. \n")),
-                              ::DDS::RETCODE_ERROR);
-        }
-    }
-    else
+    
+    if (ret != ::DDS::RETCODE_OK)
     {
       marshalled->release ();
       return ret;
     }
-  }
+
+    if (needs_creation)
+    {
+      std::pair<InstanceMap::iterator, bool> pair 
+          = instance_map_.insert(InstanceMap::value_type(instance_data, handle));
+      if (pair.second == false)
+      {
+        ACE_ERROR_RETURN ((LM_ERROR, 
+                            ACE_TEXT("(%P|%t) "
+                            "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
+                            ACE_TEXT("insert <%SCOPE%><%TYPE%> failed. \n")),
+                            ::DDS::RETCODE_ERROR);
+      }
+    } // end of if (needs_creation)
+  } // end of if (needs_registration)
 
   return ::DDS::RETCODE_OK;
 }

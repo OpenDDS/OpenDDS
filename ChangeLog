@@ -1,3 +1,11 @@
+Tue Jan 03 16:15:07 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed issue when reregistering an instance.
+          The instance only needs to be registered not inserted
+          into the list.
+
 Fri Dec 30 16:37:49 MST 2005  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
