@@ -71,10 +71,10 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                int data_size, 
                int num_readers,
                int writer_id)
-: writer_ (writer),
+               : writer_ (::DDS::DataWriter::_duplicate (writer)),
   num_messages_ (num_messages),
   data_size_ (data_size),
-  num_floats_per_sample_ (1 << data_size),
+  num_floats_per_sample_ (data_size),
   num_readers_(num_readers),
   writer_id_ (writer_id),
   finished_sending_ (false)
@@ -109,7 +109,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
-              1 << data_size_));
+              data_size_));
 
   ACE_TRY_NEW_ENV
   {
@@ -122,7 +122,7 @@ Writer::svc ()
         num_connected_subs = handles.length();
       }
 
-    switch ( 1 << data_size_ )
+    switch ( data_size_ )
     {
 
     case 128:
@@ -135,7 +135,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -149,7 +149,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -163,7 +163,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -177,7 +177,7 @@ Writer::svc ()
                  (writer_id_,
                   data_size_,
                   num_messages_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 

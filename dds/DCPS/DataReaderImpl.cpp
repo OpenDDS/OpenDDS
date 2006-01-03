@@ -13,7 +13,8 @@
 #include  "TopicImpl.h"
 #include  "SubscriberImpl.h"
 #include  "BuiltInTopicUtils.h"
-  
+#include  "ace/Reactor.h"
+
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
 #endif /* ! __ACE_INLINE__ */
@@ -26,6 +27,7 @@ namespace TAO
     DataReaderImpl::DataReaderImpl (void) :
         rd_allocator_(0),
         qos_ (TheServiceParticipant->initial_DataReaderQos ()),
+        next_handle_(0),
         topic_servant_ (0),
         topic_desc_(0),
         listener_mask_(DEFAULT_STATUS_KIND_MASK),
@@ -94,6 +96,8 @@ namespace TAO
       if (liveliness_timer_id_ != -1)
         {
           int num_handlers = reactor_->cancel_timer (this);
+          this->_remove_ref ();
+
           ACE_UNUSED_ARG (num_handlers);
         }
                
@@ -143,7 +147,7 @@ namespace TAO
             participant_servant_->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_CHECK;
       
-      topic_desc_ = participant_servant_->lookup_topicdescription(topic_servant_->get_name()) ;
+      topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
 
       subscriber_servant_ = subscriber ;
       subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
@@ -480,6 +484,40 @@ namespace TAO
         this->subscriber_servant_->remove_associations(writers);
 
       }
+
+
+    void DataReaderImpl::remove_all_associations ()
+      {
+
+        TAO::DCPS::WriterIdSeq writers;
+
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+
+        int size = writers_.current_size();
+        writers.length(size);
+        WriterMapType::iterator curr_writer = writers_.begin();
+        WriterMapType::iterator end_writer = writers_.end();
+
+        int i = 0;
+        while (curr_writer != end_writer)
+          {
+            writers[i++] = (*curr_writer).ext_id_;
+            curr_writer.advance();
+          }
+
+        ACE_TRY_NEW_ENV
+          {
+            if (0 < size)
+              {
+                remove_associations(writers ACE_ENV_ARG_PARAMETER);
+              }
+          }
+        ACE_CATCHANY
+          {
+          }
+        ACE_ENDTRY;
+      }
+
 
     void DataReaderImpl::update_incompatible_qos (
         const TAO::DCPS::IncompatibleQosStatus & status
@@ -839,8 +877,10 @@ namespace TAO
             // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
             // value that is for all intents and purposes unlimited
             // and we can use it for comparisons.
+            // use 2147483647L because that is the greatest value a signed
+            // CORBA::Long can have.
             // WARNING: The client risks running out of memory in this case.
-            depth_ = LONG_MAX;
+            depth_ = 2147483647L;
           }
 
         if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
@@ -939,13 +979,11 @@ namespace TAO
               this->writer_activity(sample.header_.publication_id_);
 
               // tell all instances they got a liveliness message
-              for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+              for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
                   pos != instances_.end() ;
                   ++pos)
                 {
-                  ::DDS::InstanceHandle_t handle = *pos ;
-                  SubscriptionInstance *ptr = 
-                      reinterpret_cast<SubscriptionInstance *> (handle);
+                  SubscriptionInstance *ptr = (*pos).int_id_;
 
                   ptr->instance_state_.lively (sample.header_.publication_id_);
                 }
@@ -988,13 +1026,12 @@ namespace TAO
       {
         //!!! caller should have acquired sample_lock_
 
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
                item != 0 ; item = item->next_data_sample_)
           {
@@ -1011,13 +1048,12 @@ namespace TAO
             ::DDS::ViewStateMask view_states) const 
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           if (ptr->instance_state_.view_state() & view_states)
           {
             return true ;
@@ -1030,13 +1066,12 @@ namespace TAO
             ::DDS::InstanceStateMask instance_states) const
       {
         //!!! caller should have acquired sample_lock_
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
+
           if (ptr->instance_state_.instance_state() & instance_states)
           {
             return true ;
@@ -1106,17 +1141,45 @@ namespace TAO
         }
       }
 
+//REMOVE TBD check that this still behaves correctly.
+      void DataReaderImpl::sample_info(::DDS::SampleInfo & sample_info,
+                                       ReceivedDataElement *ptr)
+      {
+
+        sample_info.sample_rank = 0 ;
+
+        // generation_rank =
+        //    (MRSIC.disposed_generation_count + 
+        //     MRSIC.no_writers_generation_count)
+        //  - (S.disposed_generation_count + 
+        //     S.no_writers_generation_count)
+        //
+        sample_info.generation_rank =
+            (sample_info.disposed_generation_count +
+              sample_info.no_writers_generation_count) -
+            sample_info.generation_rank ;
+
+        // absolute_generation_rank =
+        //     (MRS.disposed_generation_count + 
+        //      MRS.no_writers_generation_count)
+        //   - (S.disposed_generation_count + 
+        //      S.no_writers_generation_count)
+        //
+        sample_info.absolute_generation_rank =
+            (ptr->disposed_generation_count_ +
+              ptr->no_writers_generation_count_) -
+            sample_info.absolute_generation_rank ;
+      }
+
       CORBA::Long DataReaderImpl::total_samples() const
       {
         //!!! caller should have acquired sample_lock_
         CORBA::Long count(0) ;
-        for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+        for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
              pos != instances_.end() ;
              ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle) ;
+          SubscriptionInstance *ptr = (*pos).int_id_;
 
           count += ptr->rcvd_sample_.size_ ;
         }
@@ -1138,8 +1201,7 @@ namespace TAO
       if (liveliness_timer_id_ != -1)
         {
           this->_remove_ref();
-
-
+      
           if (arg == this)
             {
 
@@ -1375,13 +1437,11 @@ namespace TAO
 
 
       //loop through all instances telling them this writer is dead
-      for (SubscriptionInstances::const_iterator pos = instances_.begin() ;
+      for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
            pos != instances_.end() ;
            ++pos)
         {
-          ::DDS::InstanceHandle_t handle = *pos ;
-          SubscriptionInstance *ptr = 
-              reinterpret_cast<SubscriptionInstance *> (handle);
+          SubscriptionInstance *ptr = (*pos).int_id_;
 
           ptr->instance_state_.writer_became_dead (
                    writer_id, liveliness_changed_status_.active_count, when);
@@ -1408,7 +1468,7 @@ namespace TAO
     DataReaderImpl::handle_close (ACE_HANDLE,
                                   ACE_Reactor_Mask)
     {
-      this->_remove_ref ();
+      //this->_remove_ref ();
       return 0;
     }
 
@@ -1440,8 +1500,31 @@ namespace TAO
     {
       ACE_UNUSED_ARG(sample) ;
     }
- 
-    
+
+
+    SubscriptionInstance*
+    DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+      SubscriptionInstance* instance = 0;
+      if (0 != instances_.find(handle, instance))
+        {
+          ACE_ERROR ((LM_ERROR, 
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataReaderImpl::get_handle_instance, ")
+                      ACE_TEXT("lookup for %d failed\n"), 
+                      handle));
+        } // if (0 != instances_.find(handle, instance))
+      return instance;
+    }
+
+
+    ::DDS::InstanceHandle_t
+    DataReaderImpl::get_next_handle ()
+    {
+      return next_handle_++;
+    }
+
+
   } // namespace DCPS
 } // namespace TAO
 

@@ -12,7 +12,9 @@
 #include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "tao/TAO_Singleton.h"
-#include  "tao/PortableServer/POA.h"
+
+#include  "tao/PortableServer/Root_POA.h"
+
 #include  "ace/Task.h"
 #include  "ace/Auto_Ptr.h"
 
@@ -126,9 +128,19 @@ namespace TAO
       /// option, or by n_chunks() setter.
       size_t   n_chunks () const;
       
-      /// set the value returned by n_chunks() accessor. 
+      /// set the value returned by n_chunks() accessor.
       /// See accessor description.
       void     n_chunks (size_t chunks);
+
+      /// This accessor is to provide the multiplier for allocators
+      /// that have resources used on a per association basis. 
+      /// Has a default, can be set by the -DCPSChunkAssociationMutltiplier 
+      /// option, or by n_association_chunk_multiplier() setter.
+      size_t   association_chunk_multiplier () const;
+      
+      /// set the value returned by n_association_chunk_multiplier() accessor.
+      /// See accessor description.
+      void     association_chunk_multiplier (size_t multiplier);
 
       /// Set the Liveliness propagation delay factor.
       /// @param factor % of lease period before sending a liveliness message.
@@ -260,7 +272,10 @@ namespace TAO
       /// The configurable value of the number chunks that the DataWriter's
       /// cached allocator can allocate.
       size_t                                 n_chunks_;
-
+      /// The configurable value of maximum number of expected associations
+      /// for publishers and subscribers.  This is used to pre allocate enough
+      /// memory and reduce heap allocations.
+      size_t                                 association_chunk_multiplier_;
       /// The propagation delay factor.
       int                                    liveliness_factor_;
 
@@ -307,14 +322,16 @@ namespace TAO
         }
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*, 
+           poa->reference_to_servant (
+              p ACE_ENV_ARG_PARAMETER) );
+      ACE_CHECK_RETURN (0);
+
       // Use the ServantBase_var so that the servant's reference 
       // count will not be changed by this operation.
-      PortableServer::ServantBase_var servant 
-        = poa->reference_to_servant (p ACE_ENV_ARG_PARAMETER);
+      PortableServer::ServantBase_var servant = the_servant;
 
-      ACE_CHECK_RETURN (0);
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*, servant.in ());
-      
       return the_servant;
     }
 

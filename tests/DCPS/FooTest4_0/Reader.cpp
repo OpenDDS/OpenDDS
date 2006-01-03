@@ -45,7 +45,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   ::TAO::DCPS::SubscriberImpl* sub_impl 
           = reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                   ::DDS::Subscriber_ptr>
-                          (sub_ ACE_ENV_SINGLE_ARG_PARAMETER);
+                          (sub_.in () ACE_ENV_SINGLE_ARG_PARAMETER);
   ACE_TRY_CHECK;
 
   if (0 == sub_impl)
@@ -89,7 +89,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),
                                 dr_qos,
 //                                ::DDS::DataReaderListener::_nil()
-                                drl
+                                drl.in ()
                                 ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
 
@@ -167,7 +167,7 @@ Reader::read (const SampleInfoMap& si_map,
       ::Mine::FooDataReaderImpl* dr_servant =
           reference_to_servant< ::Mine::FooDataReaderImpl,
                                 ::Mine::FooDataReader_ptr>
-              (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+              (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,

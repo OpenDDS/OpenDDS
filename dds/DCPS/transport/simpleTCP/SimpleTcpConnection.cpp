@@ -5,7 +5,8 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpConnection.h"
 #include  "SimpleTcpTransport.h"
-
+#include  "SimpleTcpConfiguration.h"
+#include  "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
@@ -62,6 +63,9 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
                         "(%P|%t) ERROR: Acceptor's transport is nil.\n"),
                        -1);
     }
+
+  SimpleTcpConfiguration* tcp_config = acceptor->get_configuration();
+  set_sock_options(tcp_config);
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
@@ -151,5 +155,55 @@ TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 
   this->peer().close();
   return 0;
+}
+
+void
+TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_config)
+{
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  //ACE_SOCK_Stream sock = ACE_static_cast(ACE_SOCK_Stream, this->peer() );
+#if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+
+  // A little screwy double negative logic: disabling nagle involves
+  // enabling TCP_NODELAY
+  int opt = (tcp_config->enable_nagle_algorithm_ == false);
+  if (this->peer().set_option (IPPROTO_TCP, TCP_NODELAY, &opt, sizeof (opt)) == -1) {
+    ACE_ERROR((LM_ERROR, "Failed to set TCP_NODELAY\n"));
+  }
+
+ if (this->peer().set_option (SOL_SOCKET,
+                          SO_SNDBUF,
+                          (void *) &snd_size,
+                          sizeof (snd_size)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the send buffer size to %d errno %m\n",
+      snd_size));
+    return;
+  }
+
+  if (this->peer().set_option (SOL_SOCKET,
+                          SO_RCVBUF,
+                          (void *) &rcv_size,
+                          sizeof (int)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the receive buffer size to %d errno %m \n",
+      rcv_size));
+    return;
+  }
+#else
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_LACKS_SOCKET_BUFSIZ */
+
+#else 
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 

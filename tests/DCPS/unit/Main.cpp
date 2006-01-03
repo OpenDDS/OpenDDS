@@ -1,5 +1,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicImpl.h"
@@ -14,6 +15,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/Reactor.h"
 
 const long  MY_DOMAIN   = 911;
 const char* MY_TOPIC    = "foo";
@@ -143,6 +145,8 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   TEST_CHECK (domain_id == MY_DOMAIN);
 
   MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
+  PortableServer::ServantBase_var safe_servant = fts_servant;
+
 
   MyTypeSupport_var fts = 
     TAO::DCPS::servant_to_reference<MyTypeSupport, MyTypeSupportImpl, MyTypeSupport_ptr>(fts_servant);
@@ -265,7 +269,7 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   timer.elapsed_microseconds(elapsedTime);
   elapsedTime += 10000; // some systems can be short by up to 10 milliseconds
   TEST_CHECK (CORBA::is_nil(found_topic.in ()) 
-    && elapsedTime >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
+    && long(elapsedTime) >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
 
   // delete the existent participant
   ret = dpf->delete_participant(new_dp.in () ACE_ENV_ARG_PARAMETER);
@@ -290,12 +294,14 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
-  
+
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -350,10 +356,12 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
 
@@ -361,7 +369,7 @@ void run_next_send_sample_test (ssize_t size)
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -416,10 +424,12 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
   
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+
   for (ssize_t i = 0; i < size; i ++)
   {
     DataSampleListElement* sample 
-      = new DataSampleListElement (i, 0, 0);
+      = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;

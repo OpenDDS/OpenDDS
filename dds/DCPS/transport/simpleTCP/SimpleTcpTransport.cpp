@@ -186,16 +186,17 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   if (this->acceptor_.open(this->tcp_config_->local_address_,
                            this->reactor_task_->get_reactor()) != 0)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
-                        this->tcp_config_->local_address_.get_host_addr (), 
-                        this->tcp_config_->local_address_.get_port_number (),
-                        "open"),
-                       -1);
       // Remember to drop our reference to the tcp_config_ object since
       // we are about to return -1 here, which means we are supposed to
       // keep a copy after all.
       SimpleTcpConfiguration_rch cfg = this->tcp_config_._retn();
+
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
+                        cfg->local_address_.get_host_addr (), 
+                        cfg->local_address_.get_port_number (),
+                        "open"),
+                       -1);
     }
 
   // update the port number (incase port zero was given).
@@ -210,14 +211,14 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   unsigned short port = address.get_port_number ();
 
   // update this acceptor's copy.
-  tcp_config_->local_address_.set_port_number (port);
+  this->tcp_config_->local_address_.set_port_number (port);
 
   // update the caller's copy.
   // This is redundant because the local and caller's copy point
   // to the same place but just in case that changes. ;)
   if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
     {
-      tcp_config->local_address_ = tcp_config_->local_address_;
+      tcp_config->local_address_ = this->tcp_config_->local_address_;
     }
   tcp_config->local_address_.set_port_number (port);
 
@@ -326,5 +327,12 @@ TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
                  "(%P|%t) ERROR: Unable to locate DataLink in order to "
                  "release and it.\n"));
     }
+}
+
+
+TAO::DCPS::SimpleTcpConfiguration*
+TAO::DCPS::SimpleTcpTransport::get_configuration()
+{
+  return this->tcp_config_.in();
 }
 

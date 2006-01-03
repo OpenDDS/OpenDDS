@@ -89,7 +89,6 @@ void write (long id,
 
 
 
-
 Writer::Writer(::DDS::DataWriter_ptr writer, 
                int num_messages,
                int data_size, 
@@ -101,8 +100,8 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   data_size_ (data_size),
   num_floats_per_sample_ (1 << data_size),
   writer_id_ (writer_id),
-  finished_sending_ (false),
   num_readers_ (num_readers),
+  finished_sending_ (false),
   throttle_factor_(throttle_factor)
 {
 }
@@ -163,7 +162,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -178,7 +177,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -193,7 +192,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 
@@ -208,7 +207,7 @@ Writer::svc ()
                   data_size_,
                   num_messages_,
                   throttle_factor_,
-                  writer_);
+                  writer_.in ());
       }
       break;
 

@@ -4,10 +4,13 @@
 #ifndef TAO_DCPS_DATALINKSET_H
 #define TAO_DCPS_DATALINKSET_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "DataLink_rch.h"
 #include  "TransportDefs.h"
-#include  "ace/Hash_Map_Manager.h"
+#include  "TransportSendControlElement.h"
+
+#include  "ace/Hash_Map_With_Allocator_T.h"
 #include  "ace/Synch.h"
 
 namespace TAO
@@ -21,7 +24,7 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -72,13 +75,19 @@ namespace TAO
 
       private:
 
-        typedef ACE_Hash_Map_Manager_Ex<DataLinkIdType,
-                                        DataLink_rch,
-                                        ACE_Hash<DataLinkIdType>,
-                                        ACE_Equal_To<DataLinkIdType>,
-                                        ACE_Null_Mutex>               MapType;
-
-        MapType  map_;
+        typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
+                                            DataLink_rch>            MapType;
+        typedef Cached_Allocator_With_Overflow<MapType::ENTRY,
+                                               ACE_Null_Mutex>       MapEntryAllocator ;
+        
+        /// Allocator for MapType::ENTRY.
+        MapEntryAllocator map_entry_allocator_;
+        
+        /// Hash map for DataLinks.
+        MapType*  map_;
+        
+        /// Allocator for TransportSendControlElement.
+        TransportSendControlElementAllocator send_control_element_allocator_;
     };
 
   }  /* namespace DCPS */

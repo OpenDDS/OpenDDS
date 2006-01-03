@@ -330,7 +330,7 @@ namespace TAO {
 
     };
 
-  }; // End of namespace DCPS
-}; // End of namespace TAO
+  } // End of namespace DCPS
+} // End of namespace TAO
 
 #endif /* BUILTINTOPICUTILS_H  */

@@ -79,7 +79,7 @@ Writer::svc ()
         foo.key = ACE_OS::thr_self ();
     
         ::Mine::Foo1DataWriter_var foo_dw 
-            = ::Mine::Foo1DataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+            = ::Mine::Foo1DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -110,7 +110,7 @@ Writer::svc ()
         foo.key = ACE_OS::thr_self ();
     
         ::Mine::Foo2DataWriter_var foo_dw 
-            = ::Mine::Foo2DataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+            = ::Mine::Foo2DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -143,7 +143,7 @@ Writer::svc ()
         foo.key = ACE_OS::thr_self ();
     
         ::Mine::Foo3DataWriter_var foo_dw 
-            = ::Mine::Foo3DataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+            = ::Mine::Foo3DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;

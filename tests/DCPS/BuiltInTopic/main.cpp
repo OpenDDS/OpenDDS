@@ -25,6 +25,7 @@
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 
+#include "ace/Reactor.h"
 
 using namespace ::DDS;
 using namespace ::TAO::DCPS;
@@ -94,6 +95,8 @@ int init (int argc, ACE_TCHAR *argv[])
   ACE_OS::sleep (10);
 
       ::Mine::FooTypeSupportImpl* ts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = ts_servant;
+
       ::Mine::FooTypeSupport_var ts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -110,7 +113,7 @@ int init (int argc, ACE_TCHAR *argv[])
       participant_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DomainParticipantImpl, 
                                               ::DDS::DomainParticipant_ptr>
-          (participant ACE_ENV_ARG_PARAMETER); 
+          (participant.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       topic = participant->create_topic (TEST_TOPIC, 
@@ -123,7 +126,7 @@ int init (int argc, ACE_TCHAR *argv[])
       topic_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::TopicImpl, 
                                               ::DDS::Topic_ptr>
-          (topic ACE_ENV_ARG_PARAMETER); 
+          (topic.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       subscriber 
@@ -135,7 +138,7 @@ int init (int argc, ACE_TCHAR *argv[])
       subscriber_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl, 
                                               ::DDS::Subscriber_ptr>
-          (subscriber ACE_ENV_ARG_PARAMETER); 
+          (subscriber.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       // Attach the subscriber to transport
@@ -161,7 +164,7 @@ int init (int argc, ACE_TCHAR *argv[])
       publisher_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, 
                                               ::DDS::Publisher_ptr>
-          (publisher ACE_ENV_ARG_PARAMETER); 
+          (publisher.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       // Attach the publisher to transport
@@ -189,7 +192,7 @@ int init (int argc, ACE_TCHAR *argv[])
       datareader_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataReaderImpl, 
                                               ::DDS::DataReader_ptr>
-          (datareader ACE_ENV_ARG_PARAMETER); 
+          (datareader.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
 
       datawriter
@@ -202,7 +205,7 @@ int init (int argc, ACE_TCHAR *argv[])
       datawriter_servant 
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataWriterImpl, 
                                               ::DDS::DataWriter_ptr>
-          (datawriter ACE_ENV_ARG_PARAMETER); 
+          (datawriter.in () ACE_ENV_ARG_PARAMETER); 
       ACE_TRY_CHECK;
   }
   ACE_CATCHALL
@@ -277,7 +280,7 @@ void test_bit_topic ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_dr 
-        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::TopicBuiltinTopicDataSeq topic_data;
@@ -308,16 +311,18 @@ void test_bit_topic ()
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].type_name.in (), TEST_TOPIC_TYPE) == 0);
 
-      TEST_CHECK (topic_data[0].durability         ==  topic_qos.durability);
-      TEST_CHECK (topic_data[0].deadline           ==  topic_qos.deadline);
-      TEST_CHECK (topic_data[0].latency_budget     ==  topic_qos.latency_budget);
-      TEST_CHECK (topic_data[0].liveliness         ==  topic_qos.liveliness);
-      TEST_CHECK (topic_data[0].reliability        ==  topic_qos.reliability);
-      TEST_CHECK (topic_data[0].transport_priority ==  topic_qos.transport_priority);
-      TEST_CHECK (topic_data[0].lifespan           ==  topic_qos.lifespan);
-      TEST_CHECK (topic_data[0].destination_order  ==  topic_qos.destination_order);
-      TEST_CHECK (topic_data[0].ownership          ==  topic_qos.ownership);
-      TEST_CHECK (topic_data[0].topic_data         ==  topic_qos.topic_data);
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].durability, topic_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].deadline, topic_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].latency_budget, topic_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].liveliness, topic_qos.liveliness));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].reliability, topic_qos.reliability));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].transport_priority, topic_qos.transport_priority));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].lifespan, topic_qos.lifespan));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].destination_order, topic_qos.destination_order));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].ownership, topic_qos.ownership));
+      TEST_CHECK (::TAO::DCPS::operator== (topic_data[0].topic_data, topic_qos.topic_data));
     }
   ACE_CATCHALL
     {
@@ -338,7 +343,7 @@ void test_bit_publication ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_dr 
-        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::PublicationBuiltinTopicDataSeq pub_data;
@@ -374,14 +379,16 @@ void test_bit_publication ()
       
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
-
-      TEST_CHECK (the_pub_data.durability == dw_qos.durability);
-      TEST_CHECK (the_pub_data.deadline == dw_qos.deadline);
-      TEST_CHECK (the_pub_data.latency_budget == dw_qos.latency_budget);
-      TEST_CHECK (the_pub_data.liveliness == dw_qos.liveliness);
-      //rmACE_ASSERT (the_pub_data.lifespan == dw_qos.lifespan);
-      TEST_CHECK (the_pub_data.user_data == dw_qos.user_data);
-      TEST_CHECK (the_pub_data.ownership_strength == dw_qos.ownership_strength);
+  
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.durability, dw_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.deadline, dw_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.latency_budget, dw_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.liveliness, dw_qos.liveliness));
+      //TEST_CHECK (::TAO::DCPS::operator== the_pub_data.lifespan, dw_qos.lifespan));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.user_data, dw_qos.user_data));
+      TEST_CHECK (::TAO::DCPS::operator== (the_pub_data.ownership_strength, dw_qos.ownership_strength));
       //the_pub_data.presentation 
       //the_pub_data.partition 
       //the_pub_data.topic_data
@@ -407,7 +414,7 @@ void test_bit_subscription ()
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_dr 
-        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr); 
+        = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ()); 
       ACE_TRY_CHECK;
      
       ::DDS::SubscriptionBuiltinTopicDataSeq sub_data;
@@ -443,14 +450,17 @@ void test_bit_subscription ()
       
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
-      TEST_CHECK (the_sub_data.durability == dr_qos.durability);
-      TEST_CHECK (the_sub_data.deadline == dr_qos.deadline);
-      TEST_CHECK (the_sub_data.latency_budget == dr_qos.latency_budget);
-      TEST_CHECK (the_sub_data.liveliness == dr_qos.liveliness);
-      TEST_CHECK (the_sub_data.reliability == dr_qos.reliability);
-      TEST_CHECK (the_sub_data.destination_order == dr_qos.destination_order);
-      TEST_CHECK (the_sub_data.user_data == dr_qos.user_data);
-      TEST_CHECK (the_sub_data.time_based_filter == dr_qos.time_based_filter);
+
+      //The SunOS compiler had problem resolving operator in a namespace. 
+      //To resolve the compilation errors, the operator is called explicitly.
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.durability, dr_qos.durability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.deadline, dr_qos.deadline));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.latency_budget, dr_qos.latency_budget));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.liveliness, dr_qos.liveliness));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.reliability, dr_qos.reliability));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.destination_order, dr_qos.destination_order));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.user_data, dr_qos.user_data));
+      TEST_CHECK (::TAO::DCPS::operator== (the_sub_data.time_based_filter, dr_qos.time_based_filter));
       //the_sub_data.presentation
       //the_sub_data.partition 
       //the_sub_data.topic_data 
@@ -473,7 +483,9 @@ void shutdown ()
        "shutdown: participant delete_contained_entities failed\n"));
   }
 
-  if (TheParticipantFactory->delete_participant (participant.in () ACE_ENV_ARG_PARAMETER) 
+  ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  
+  if (dpf->delete_participant (participant.in () ACE_ENV_ARG_PARAMETER) 
     != ::DDS::RETCODE_OK)
   {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: shutdown: "

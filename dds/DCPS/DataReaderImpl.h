@@ -22,6 +22,8 @@
 
 
 #include  "ace/String_Base.h"
+//#include  "ace/Unbounded_Set.h"
+#include  "ace/Hash_Map_Manager.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -96,8 +98,12 @@ namespace TAO
     {
     public:
 
-      typedef std::set< ::DDS::InstanceHandle_t > SubscriptionInstances;
-      
+      typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
+                                      SubscriptionInstance*,
+                                      ACE_Hash< ::DDS::InstanceHandle_t>,
+                                      ACE_Equal_To< ::DDS::InstanceHandle_t>,
+                                      ACE_Null_Mutex>        SubscriptionInstanceMapType;
+ 
       //Constructor 
       DataReaderImpl (void);
       
@@ -338,6 +344,7 @@ namespace TAO
 
       void liveliness_lost() ;
 
+      void remove_all_associations();
     protected:
 
       // type specific DataReader's part of enable.
@@ -352,13 +359,28 @@ namespace TAO
                        size_t start_idx, size_t count,
                        ReceivedDataElement *ptr) ;
 
+      void sample_info(::DDS::SampleInfo & sample_info,
+                       ReceivedDataElement *ptr) ;
+
       CORBA::Long total_samples() const ;
       
       void set_sample_lost_status(const ::DDS::SampleLostStatus& status) ;
       void set_sample_rejected_status(
               const ::DDS::SampleRejectedStatus& status) ;
 
-      SubscriptionInstances           instances_ ;
+//remove document this!
+      SubscriptionInstance* get_handle_instance (
+          ::DDS::InstanceHandle_t handle);
+
+      /**
+      * Get an instance handle for a new instance.
+      * This method should be called under the protection of a lock
+      * to ensure that the handle is unique for the container.
+      */
+      ::DDS::InstanceHandle_t get_next_handle ();
+
+
+      mutable SubscriptionInstanceMapType           instances_ ;
 
       ReceivedDataAllocator          *rd_allocator_ ;
       ::DDS::DataReaderQos            qos_;
@@ -369,6 +391,8 @@ namespace TAO
       /// lock protecting sample container as well as statuses.
       ACE_Recursive_Thread_Mutex                sample_lock_;
 
+      /// The instance handle for the next new instance.
+      ::DDS::InstanceHandle_t         next_handle_;
     private:
       friend class WriterInfo;
 

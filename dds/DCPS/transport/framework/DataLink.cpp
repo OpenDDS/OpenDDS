@@ -10,6 +10,7 @@
 #include  "DataLinkSetMap.h"
 #include  "ReceivedDataSample.h"
 
+#include  "TransportImpl.h"
 #include  "TransportConfiguration.h"
 
 #include "EntryExit.h"
@@ -17,6 +18,16 @@
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
 #endif /* __ACE_INLINE__ */
+
+/// Only called by our TransportImpl object.
+TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
+{
+  DBG_ENTRY("DataLink","DataLink");
+
+  impl->_add_ref();
+  this->impl_ = impl;
+  id_ = DataLink::get_next_datalink_id();
+}
 
 TAO::DCPS::DataLink::~DataLink()
 {
@@ -394,5 +405,29 @@ TAO::DCPS::DataLink::release_remote_publisher
           released_subscribers.insert_link(subscriber_id,this);
         }
     }
+}
+
+
+// static
+ACE_UINT64
+TAO::DCPS::DataLink::get_next_datalink_id ()
+{
+  static ACE_UINT64 next_id = 0;
+  static LockType lock;
+
+  DBG_ENTRY("DataLink","get_next_datalink_id");
+
+  ACE_UINT64 id;
+  {
+    GuardType guard(lock);
+    id = next_id++;
+    if (0 == next_id)
+    {
+      ACE_ERROR((LM_ERROR, 
+                 ACE_TEXT("ERROR: DataLink::get_next_datalink_id has rolled over and is reusing ids!\n") ));
+    }
+  }
+
+  return id;
 }
 

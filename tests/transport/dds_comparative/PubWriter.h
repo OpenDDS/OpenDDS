@@ -7,6 +7,8 @@
 #include  "dds/DCPS/transport/framework/TransportSendListener.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 #include  "dds/DCPS/Definitions.h"
+#include  "dds/DCPS/DataSampleList.h"
+#include  "dds/DCPS/transport/framework/TransportSendElement.h"
 #include  "ace/Synch.h"
 #include  "ace/Condition_T.h"
 
@@ -82,6 +84,8 @@ class PubWriter : public TAO::DCPS::TransportSendListener
     unsigned num_sent_;
     unsigned num_delivered_;
     unsigned num_dropped_;
+
+    TAO::DCPS::TransportSendElementAllocator trans_allocator;
 };
 
 #endif  /* PUBWRITER_H */

@@ -59,6 +59,7 @@ InstanceState::writer_became_dead (PublicationId         writer_id,
   // the CURRENT implementation just assumes that all writers are
   // writing to all instances.
   ACE_UNUSED_ARG(writer_id);
+  ACE_UNUSED_ARG(when);
 
 
   if(num_alive_writers == 0 && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)

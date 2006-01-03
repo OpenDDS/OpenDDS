@@ -4,8 +4,6 @@
 
 #include  "DCPS/DdsDcps_pch.h"
 #include  "PacketRemoveVisitor.h"
-#include  "TransportQueueElement.h"
-#include  "TransportReplacedElement.h"
 #include  "dds/DCPS/DataSampleList.h"
 #include  "ace/Message_Block.h"
 
@@ -13,6 +11,46 @@
 #if !defined (__ACE_INLINE__)
 #include "PacketRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
+
+//TBD: The number of chunks of the replace element allocator
+//     is hard coded for now. This will be configurable when
+//     we implement the dds configurations. This value should
+//     be the number of marshalled DataSampleHeader that a 
+//     packet could contain.
+#define NUM_REPLACED_ELEMENT_CHUNKS 20
+
+TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
+                              (const ACE_Message_Block* sample,
+                               ACE_Message_Block*&      unsent_head_block,
+                               ACE_Message_Block*       header_block)
+  : sample_(sample),
+    pub_id_(0),
+    head_(unsent_head_block),
+    header_block_(header_block),
+    status_(0),
+    current_block_(0),
+    previous_block_(0),
+    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
+{
+  DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
+}
+
+
+TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
+                                    (RepoId              pub_id,
+                                     ACE_Message_Block*& unsent_head_block,
+                                     ACE_Message_Block*  header_block)
+  : sample_(0),
+    pub_id_(pub_id),
+    head_(unsent_head_block),
+    header_block_(header_block),
+    status_(0),
+    current_block_(0),
+    previous_block_(0),
+    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
+{
+  DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
+}
 
 
 TAO::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
@@ -336,7 +374,24 @@ TAO::DCPS::PacketRemoveVisitor::visit_element_ref
             orig_elem));
 
       // Create the replacement element for the original element.
-      element = new TransportReplacedElement(orig_elem);
+      // Optimize - use cached allocator 
+      // This is really a copy of ACE_NEW_MALLOC_RETURN, but I can 
+      // not simply use the ACE_NEW_MALLOC_RETURN macro because I have to 
+      // set the status that indicates the error.
+      element = (TransportQueueElement*)replaced_element_allocator_.malloc();
+      if (element == 0) 
+        { 
+          errno = ENOMEM;
+          // Set the status to indicate a fatal error occurred.
+          this->status_ = -1;
+          // Stop vistation now.
+          return 0;    
+        }
+      else 
+        { 
+          (void) new (element) TransportReplacedElement(orig_elem,
+                                                        &replaced_element_allocator_); 
+        } 
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "The new TransportReplacedElement is [%0x]\n",

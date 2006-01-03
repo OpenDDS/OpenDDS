@@ -29,6 +29,7 @@ class SimpleSubscriber : public TAO::DCPS::TransportInterface
     /// the TransportReceiveListeners have been told of the data_received().
     int received_test_message() const;
 
+    void print_time();
 
   protected:
 

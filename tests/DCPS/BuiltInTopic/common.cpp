@@ -16,8 +16,8 @@
 const long  TEST_DOMAIN   = 911;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
-const char * reader_address_str = "127.0.0.1:2222";
-const char * writer_address_str = "127.0.0.1:3333";
+const char * reader_address_str = "";
+const char * writer_address_str = "";
 int default_key = 101010;
 int num_writes = 1;
 
@@ -384,7 +384,7 @@ int write ()
     foo.key = default_key;
     
     ::Mine::FooDataWriter_var foo_dw 
-      = ::Mine::FooDataWriter::_narrow(datawriter ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataWriter::_narrow(datawriter.in () ACE_ENV_ARG_PARAMETER);
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ::DDS::InstanceHandle_t handle 
@@ -421,7 +421,7 @@ int read (int expect_success)
   ACE_TRY_NEW_ENV
   {
     ::Mine::FooDataReader_var foo_dr 
-      = ::Mine::FooDataReader::_narrow(datareader ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataReader::_narrow(datareader.in () ACE_ENV_ARG_PARAMETER);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -432,7 +432,7 @@ int read (int expect_success)
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                              ::Mine::FooDataReader_ptr>
-                (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     int num_reads = 0;
     int num_received = 0;

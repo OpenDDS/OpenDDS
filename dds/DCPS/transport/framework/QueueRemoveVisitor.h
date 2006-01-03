@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_QUEUEREMOVEVISITOR_H
 #define TAO_DCPS_QUEUEREMOVEVISITOR_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "BasicQueueVisitor_T.h"
 #include  "TransportDefs.h"
 #include  "ace/Message_Block.h"
@@ -17,7 +18,7 @@ namespace TAO
 
     class TransportQueueElement;
 
-    class QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
+    class TAO_DdsDcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
     {
       public:
 
@@ -32,6 +33,10 @@ namespace TAO
         QueueRemoveVisitor(RepoId pub_id);
 
         virtual ~QueueRemoveVisitor();
+
+        // The using declaration is added to resolve the "hides virtual functions"
+        // compilation warnings on Solaris.
+        using BasicQueueVisitor<TransportQueueElement>::visit_element;
 
         /// The BasicQueue<T>::accept_remove_visitor() method will call
         /// this visit_element() method for each element in the queue.

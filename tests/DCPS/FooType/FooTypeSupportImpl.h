@@ -26,7 +26,9 @@
  * @brief An implementation of a TypeSupport
  *
  */
-class FooType_Export FooTypeSupportImpl : public virtual POA_FooTypeSupport
+class FooType_Export FooTypeSupportImpl 
+: public virtual POA_FooTypeSupport,
+  public virtual PortableServer::RefCountServantBase
 {
 public:
   //Constructor 

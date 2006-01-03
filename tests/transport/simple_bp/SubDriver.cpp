@@ -226,6 +226,7 @@ SubDriver::run()
       ACE_OS::sleep(1);
     }
 
+    this->subscriber_.print_time();
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
 }

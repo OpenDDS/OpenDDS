@@ -21,10 +21,10 @@
 
 
 const long  TEST_DOMAIN   = 411;
-const char* TEST_TOPIC    = "PerfTest";
-const char* TEST_TYPE     = "PerfTestType";
-const char * reader_address_str = "default";
-const char * writer_address_str = "default";
+const char* TEST_TOPIC    = (const char* ) "PerfTest";
+const char* TEST_TYPE     = (const char* ) "PerfTestType";
+const char * reader_address_str = (const char* ) "default";
+const char * writer_address_str = (const char* ) "default";
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 

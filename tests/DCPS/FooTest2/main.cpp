@@ -151,6 +151,8 @@ int main (int argc, char *argv[])
       ACE_TRY_CHECK;
 
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
       ACE_TRY_CHECK;

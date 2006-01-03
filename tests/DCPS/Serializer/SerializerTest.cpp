@@ -418,7 +418,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                       ACE_UINT64_LITERAL(0xcdef0123456789ab),
                       0.1,
                       0.2,
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+                      0x89abcdef01234567,
+#else
                       {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff},
+#endif
                       0x1a,
                       0xb2,
                       string,

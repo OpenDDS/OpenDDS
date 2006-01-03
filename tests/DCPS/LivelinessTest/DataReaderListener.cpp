@@ -171,7 +171,7 @@ void DataReaderListenerImpl::on_subscription_match (
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                               ::Mine::FooDataReader_ptr>
-            (foo_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+            (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     ::Mine::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

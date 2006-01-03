@@ -66,7 +66,8 @@ TAO::DCPS::SimpleTcpTransport::make_active_connection
 
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_establishment(remote_address,
-                                       this->tcp_config_->local_address_) != 0)
+                                       this->tcp_config_->local_address_,
+                                       this->tcp_config_.in()) != 0)
     {
       return -1;
     }

@@ -60,7 +60,7 @@ void
 PubDriver::run(int& argc, char* argv[])
 {
   parse_args(argc, argv);
-  init(argc, argv);
+  initialize(argc, argv);
 
   run();
 
@@ -196,7 +196,7 @@ PubDriver::parse_args(int& argc, char* argv[])
 
 
 void
-PubDriver::init(int& argc, char *argv[])
+PubDriver::initialize(int& argc, char *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   ACE_CHECK;
@@ -233,6 +233,8 @@ PubDriver::init(int& argc, char *argv[])
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
   ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+   PortableServer::ServantBase_var safe_servant = fts_servant;
+
   ::Mine::FooTypeSupport_var fts = 
     ::TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                       ::Mine::FooTypeSupportImpl, 
@@ -261,7 +263,9 @@ PubDriver::init(int& argc, char *argv[])
   ::DDS::TopicQos new_topic_qos = default_topic_qos;
   new_topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
 
-  TEST_CHECK (! (new_topic_qos == default_topic_qos));
+  //The SunOS compiler had problem resolving operator in a namespace. 
+  //To resolve the compilation errors, the operator is called explicitly.
+  TEST_CHECK (! ::TAO::DCPS::operator==(new_topic_qos, default_topic_qos));
 
   participant_->set_default_topic_qos(new_topic_qos ACE_ENV_ARG_PARAMETER);
 
@@ -282,7 +286,7 @@ PubDriver::init(int& argc, char *argv[])
 
   publisher_servant_ 
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_);
+      (publisher_.in ());
 
   ::DDS::PublisherQos pub_qos_got;
   publisher_->get_qos (pub_qos_got ACE_ENV_ARG_PARAMETER);
@@ -291,13 +295,13 @@ PubDriver::init(int& argc, char *argv[])
   participant_->get_default_publisher_qos (default_pub_qos 
                                            ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
-  TEST_CHECK (pub_qos_got == default_pub_qos);
+  TEST_CHECK (::TAO::DCPS::operator==(pub_qos_got, default_pub_qos));
 
   ::DDS::PublisherQos new_pub_qos = pub_qos_got;
   // This qos is not supported, so it's invalid qos.
   new_pub_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
-  TEST_CHECK (! (new_pub_qos == default_pub_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator==(new_pub_qos, default_pub_qos));
   
   ret = publisher_->set_qos (new_pub_qos ACE_ENV_ARG_PARAMETER);
   TEST_CHECK (ret == ::DDS::RETCODE_INCONSISTENT_POLICY);
@@ -315,7 +319,7 @@ PubDriver::init(int& argc, char *argv[])
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos; 
   new_default_dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
   
-  TEST_CHECK (! (new_default_dw_qos == default_dw_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator== (new_default_dw_qos, default_dw_qos));
   TEST_CHECK (publisher_->set_default_datawriter_qos (new_default_dw_qos)
               == ::DDS::RETCODE_OK);
   
@@ -337,7 +341,7 @@ PubDriver::init(int& argc, char *argv[])
   ACE_CHECK;
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
  
-  TEST_CHECK (dw_qos_use_topic_qos == copied_from_topic);
+  TEST_CHECK (::TAO::DCPS::operator== (dw_qos_use_topic_qos, copied_from_topic));
 
   // Delete the datawriter.
   publisher_->delete_datawriter (datawriter_.in () ACE_ENV_ARG_PARAMETER);
@@ -379,7 +383,7 @@ PubDriver::init(int& argc, char *argv[])
   datawriter_->get_qos (dw_qos_got ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
-  TEST_CHECK (dw_qos_got == new_default_dw_qos);
+  TEST_CHECK (::TAO::DCPS::operator== (dw_qos_got, new_default_dw_qos));
 
   ::DDS::DataWriterQos new_dw_qos = dw_qos_got;
  
@@ -387,7 +391,7 @@ PubDriver::init(int& argc, char *argv[])
   new_dw_qos.resource_limits.max_samples_per_instance = 2;
   new_dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-  TEST_CHECK (! (dw_qos_got == new_dw_qos));
+  TEST_CHECK (! ::TAO::DCPS::operator== (dw_qos_got, new_dw_qos));
 
   ret = datawriter_->set_qos (new_dw_qos ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
@@ -420,7 +424,7 @@ PubDriver::init(int& argc, char *argv[])
 
   datawriter_servant_ 
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (datawriter_);
+    (datawriter_.in ());
 
   foo_datawriter_     
     = ::Mine::FooDataWriter::_narrow(datawriter_.in () ACE_ENV_ARG_PARAMETER);
@@ -463,7 +467,8 @@ PubDriver::end()
   participant_->delete_topic(topic_.in () ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
-  TheParticipantFactory->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
+  ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  dpf->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   TheServiceParticipant->shutdown (); 
@@ -850,7 +855,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dpl_got.in ()));
 
-  participant_->set_listener (dpl, DEFAULT_STATUS_KIND_MASK ACE_ENV_ARG_PARAMETER);
+  participant_->set_listener (dpl.in (), DEFAULT_STATUS_KIND_MASK ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   dpl_got = participant_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -864,7 +869,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (pl_got.in ()));
 
-  publisher_->set_listener (pl, 0 ACE_ENV_ARG_PARAMETER);
+  publisher_->set_listener (pl.in (), 0 ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   pl_got = publisher_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -878,7 +883,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
-  foo_datawriter_->set_listener (dwl, 0 ACE_ENV_ARG_PARAMETER);
+  foo_datawriter_->set_listener (dwl.in (), 0 ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   dwl_got = foo_datawriter_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -923,7 +928,7 @@ PubDriver::listener_test ()
     TEST_CHECK (incomp_status_got.in ().policies[i].count == incomp_status.policies[i].count);
   }
 
-  publisher_->set_listener (pl, 
+  publisher_->set_listener (pl.in (), 
                             ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS 
                             ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
@@ -939,7 +944,7 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_pub == 1);
   TEST_CHECK (offered_incompatible_qos_called_on_dw == 0);
 
-  foo_datawriter_->set_listener (dwl, 
+  foo_datawriter_->set_listener (dwl.in (), 
                                  ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS
                                  ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;

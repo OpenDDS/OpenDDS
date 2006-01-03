@@ -61,11 +61,9 @@ TAO::DCPS::TransportQueueElement::decision_made()
       return;
     }
 
+  // The queue elements are released to its cached allocator
+  // in release_element() call.
   this->release_element();
-
-// TBD - Solve this with allocator
-//MJM: I think we may want to do the allocator thing here.
-  delete this;
 }
 
 

@@ -12,16 +12,28 @@
 #include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
+extern long subscriber_delay_msec; // from common.h
 
-template<class Tseq, class R, class R_ptr, class Rimpl>
-::DDS::ReturnCode_t read (::DDS::DataReader_ptr reader)
+template<class Tseq, class R, class R_ptr, class R_var, class Rimpl>
+int read (::DDS::DataReader_ptr reader)
 {
-  R_ptr pt_dr 
+  // TWF: There is an optimization to the test by
+  // using a pointer to the known servant and 
+  // static_casting it to the servant
+  R_var var_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
 
+  R_ptr pt_dr = var_dr.ptr();
   Rimpl* dr_servant =
       reference_to_servant< Rimpl, R_ptr>
               (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+
+  if (subscriber_delay_msec)
+    {
+      ACE_Time_Value delay ( subscriber_delay_msec / 1000, 
+                            (subscriber_delay_msec % 1000) * 1000);
+      ACE_OS::sleep (delay);
+    }
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
@@ -67,22 +79,21 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
 
 
 
-
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,
                                                 int read_interval)
 :
-  num_publishers_(num_publishers),
-  num_samples_ (num_samples),
-  data_size_ (data_size),
-  read_interval_ (read_interval),
-  num_floats_per_sample_ (1 << data_size),
   samples_lost_count_(0),
   samples_rejected_count_(0),
   samples_received_count_(0),
-  total_samples_count_(0)
+  total_samples_count_(0),
+  read_interval_ (read_interval),
+  num_publishers_(num_publishers),
+  num_samples_ (num_samples),
+  data_size_ (data_size),
+  num_floats_per_sample_ (data_size)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
@@ -200,12 +211,13 @@ void DataReaderListenerImpl::on_data_available(
     total_samples_count_++;
 
     if (0 == total_samples_count_ % read_interval_)
-    {
+    {  
       // perform the read
       int samples_read = read_samples(reader);
-    //ACE_DEBUG((LM_DEBUG,
-    //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
-    //  samples_read));
+      ACE_UNUSED_ARG(samples_read);
+      //ACE_DEBUG((LM_DEBUG,
+      //  ACE_TEXT("(%P|%t) DataReaderListenerImpl read %d samples\n"),
+      //  samples_read));
     }
   }
 
@@ -241,9 +253,9 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt128Seq,
                       ::Mine::Pt128DataReader,
                       ::Mine::Pt128DataReader_ptr,
+                      ::Mine::Pt128DataReader_var,
                       ::Mine::Pt128DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -252,9 +264,9 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt512Seq,
                       ::Mine::Pt512DataReader,
                       ::Mine::Pt512DataReader_ptr,
+                      ::Mine::Pt512DataReader_var,
                       ::Mine::Pt512DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -263,9 +275,9 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt2048Seq,
                       ::Mine::Pt2048DataReader,
                       ::Mine::Pt2048DataReader_ptr,
+                      ::Mine::Pt2048DataReader_var,
                       ::Mine::Pt2048DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 
@@ -274,9 +286,9 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Mine::Pt8192Seq,
                       ::Mine::Pt8192DataReader,
                       ::Mine::Pt8192DataReader_ptr,
+                      ::Mine::Pt8192DataReader_var,
                       ::Mine::Pt8192DataReaderImpl>
-                        (
-                        reader);
+                        (reader);
     }
     break;
 

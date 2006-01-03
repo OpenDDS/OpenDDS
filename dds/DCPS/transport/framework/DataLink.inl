@@ -2,21 +2,10 @@
 //
 // $Id$
 
-#include  "TransportImpl.h"
 #include  "TransportSendStrategy.h"
 #include  "TransportReceiveStrategy.h"
 #include  "EntryExit.h"
 
-
-/// Only called by our TransportImpl object.
-ACE_INLINE
-TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
-{
-  DBG_ENTRY("DataLink","DataLink");
-
-  impl->_add_ref();
-  this->impl_ = impl;
-}
 
 ACE_INLINE void
 TAO::DCPS::DataLink::send_start()
@@ -83,7 +72,7 @@ ACE_INLINE TAO::DCPS::DataLinkIdType
 TAO::DCPS::DataLink::id() const
 {
   DBG_ENTRY("DataLink","id");
-  return (DataLinkIdType)this;
+  return id_;
 }
 
 

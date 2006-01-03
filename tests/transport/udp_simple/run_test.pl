@@ -5,7 +5,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use lib '../../../../../bin';
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 #

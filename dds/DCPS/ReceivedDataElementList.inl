@@ -16,6 +16,8 @@ ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
 ACE_INLINE
 ReceivedDataElementList::~ReceivedDataElementList()
 {
+  // The memory pointed to by instance_state_ is owned by
+  // another object.
 }
    
 ACE_INLINE

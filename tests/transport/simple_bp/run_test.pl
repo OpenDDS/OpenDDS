@@ -5,7 +5,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use lib '../../../../../bin';
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
@@ -88,7 +89,7 @@ $publisher->Spawn() ;
 # Wait for the test to finish, or kill the processes.
 #
 die "*** ERROR: Subscriber timed out - $!" if $subscriber->WaitKill( $testTime) ;
-die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( 5) ;
+die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( $testTime) ;
 
 unlink $subreadyfile;
 

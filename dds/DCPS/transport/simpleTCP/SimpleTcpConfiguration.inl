@@ -6,6 +6,7 @@
 
 ACE_INLINE
 TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
+  : enable_nagle_algorithm_(false)
 {
   DBG_ENTRY("SimpleTcpConfiguration","SimpleTcpConfiguration");
 

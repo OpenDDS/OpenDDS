@@ -14,7 +14,8 @@ PubWriter::PubWriter()
     condition_(this->lock_),
     num_sent_(0),
     num_delivered_(0),
-    num_dropped_(0)
+    num_dropped_(0),
+    trans_allocator(20, sizeof (TAO::DCPS::TransportSendElement))
 {
 }
 
@@ -175,7 +176,8 @@ PubWriter::get_element(TAO::DCPS::DataSampleHeader& header)
   TAO::DCPS::DataSampleListElement* elem =
                          new TAO::DCPS::DataSampleListElement(this->pub_id_,
                                                               this,
-                                                              0);
+                                                              0,
+                                                              &trans_allocator);
 
   // TBD SOON - Use an allocator
   elem->sample_ = new ACE_Message_Block(header.max_marshaled_size());
