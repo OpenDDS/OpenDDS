@@ -1,3 +1,11 @@
+Wed Jan 04 14:51:42 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Changed to properly initialize the array variables. The 
+          properly initialized variables compare correctly on 64 bit
+          systems.
+
 Tue Jan 03 16:15:07 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

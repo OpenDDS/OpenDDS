@@ -435,9 +435,25 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   ArrayValues observedArray ;
   ArrayValues observedArray_swapped ;
 
-  char* loader = reinterpret_cast<char*>(&expectedArray) ;
-  for( size_t i = 0 ; i < sizeof(expectedArray) ; ++i) {
-    *(loader+i) = (0xff&i) ;
+  // Initialize the array
+  for( size_t i = 0 ; i < ARRAYSIZE ; ++i) {
+    expectedArray.octetValue[i] = (0xff&i);
+    expectedArray.shortValue[i] = (0xffff&i);
+    expectedArray.longValue[i] = (0x0f0f0f0f|i);
+    expectedArray.longlongValue[i] = ACE_INT64_LITERAL(0x0123456789abcdef);
+    expectedArray.ushortValue[i] = (0xffff|i);
+    expectedArray.ulongValue[i] = (0xf0f0f0f0|i);
+    expectedArray.ulonglongValue[i] = ACE_UINT64_LITERAL(0xcdef0123456789ab);
+    expectedArray.floatValue[i] = (float) 1.0 / (float) i;
+    expectedArray.doubleValue[i] = (double) 3.0 / (double) i;
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+    expectedArray.longdoubleValue[i] = 0x89abcdef01234567;
+#else
+    ACE_CDR::LongDouble ldarray = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+    expectedArray.longdoubleValue[i] = ldarray;
+#endif
+    expectedArray.charValue[i] = (0xff&i);
+    expectedArray.wcharValue[i] = (0xff&i);
   }
 
   std::cout << "Size of Values: " << sizeof(Values) << std::endl ;
