@@ -181,8 +181,9 @@ namespace TAO
 
       {
         // I am not sure this guard is necessary for 
-        // publisher_servant_->add_associationsbut better safe than sorry.
-        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+        // publisher_servant_->add_associations but better safe than sorry.
+        // 1/11/06 SHH can cause deadlock so avoid getting the lock.
+        //ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
         // add associations to the transport before using
         // Built-In Topic support and telling the listener.
@@ -190,13 +191,17 @@ namespace TAO
       }
 
 
-      CORBA::ULong readers_old_length = readers_.length();
-      CORBA::ULong num_new_readers = readers.length();
-      readers_.length(readers_old_length + num_new_readers);
-      for (CORBA::ULong reader_cnt = 0; reader_cnt < readers.length(); reader_cnt++)
-        {
-          readers_[reader_cnt+readers_old_length] = readers[reader_cnt].readerId;
-        }
+      {
+        // protect readers_
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+        CORBA::ULong readers_old_length = readers_.length();
+        CORBA::ULong num_new_readers = readers.length();
+        readers_.length(readers_old_length + num_new_readers);
+        for (CORBA::ULong reader_cnt = 0; reader_cnt < readers.length(); reader_cnt++)
+          {
+            readers_[reader_cnt+readers_old_length] = readers[reader_cnt].readerId;
+          }
+      }
 
       ::DDS::InstanceHandleSeq handles;
 
@@ -905,7 +910,7 @@ namespace TAO
 
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_,
                                                         this, 
@@ -968,7 +973,7 @@ namespace TAO
 
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_, 
                                                         this, 
@@ -1091,7 +1096,7 @@ namespace TAO
 
         SendControlStatus status;
         {
-          ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+          ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
           status  = this->publisher_servant_->send_control(publication_id_, 
                                                            this, 
@@ -1399,7 +1404,7 @@ namespace TAO
 
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_, 
                                                         this, 

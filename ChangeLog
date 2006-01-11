@@ -1,3 +1,22 @@
+Wed Jan 11 23:47:37 UTC 2006  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed locks before calling TransportInterface::add_pub/sub 
+          methods to avoid deadlocking.
+          Thanks to Don Busch for providing a the StockQuoter example
+          that would deadlock if the subscriber started before the publisher.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+
+          Renamed some locks to make it easier to tell which lock_
+          is being used.
+
 Fri Jan  6 13:14:23 2006  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dcps_ts_defaults.mpb:
