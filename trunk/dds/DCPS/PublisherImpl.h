@@ -220,9 +220,9 @@ namespace TAO
       ));
 
     ACE_INLINE
-    ACE_Recursive_Thread_Mutex&      get_lock ()
+    ACE_Recursive_Thread_Mutex&      get_pi_lock ()
     {
-      return lock_;
+      return pi_lock_;
     }
 
     /** This method is not defined in the IDL and is defined for
@@ -324,7 +324,7 @@ namespace TAO
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when
       /// calling any TransportInterface method).
-      mutable ACE_Recursive_Thread_Mutex    lock_;
+      mutable ACE_Recursive_Thread_Mutex    pi_lock_;
 
       /// The catched available data while suspending.
       DataSampleList                available_data_list_ ;

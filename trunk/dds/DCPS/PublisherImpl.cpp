@@ -235,7 +235,7 @@ namespace TAO
         {
           ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                             guard, 
-                            this->lock_, 
+                            this->pi_lock_, 
                             ::DDS::RETCODE_ERROR);
 
           publication_id = dw_servant->get_publication_id ();
@@ -339,7 +339,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::DataWriter::_nil ());
 
         // If multiple entries whose key is "topic_name" then which one is 
@@ -386,7 +386,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
 
         for (it = datawriter_map_.begin (); it != datawriter_map_.end (); )
@@ -508,7 +508,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
         suspend_depth_count_ ++;
         return ::DDS::RETCODE_OK;
@@ -531,7 +531,7 @@ namespace TAO
         
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
 
         suspend_depth_count_ --;
@@ -681,7 +681,7 @@ namespace TAO
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_,
+                          this->pi_lock_,
                           -1);
         return datawriter_map_.empty () && publication_map_.empty ();
       }
@@ -784,7 +784,7 @@ namespace TAO
         {
           ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                             guard, 
-                            this->lock_,
+                            this->pi_lock_,
                             ::DDS::RETCODE_ERROR);
           DataWriterMap::iterator it
             = datawriter_map_.insert(DataWriterMap::value_type(topic_name, info));
@@ -836,7 +836,7 @@ namespace TAO
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_,
+                          this->pi_lock_,
                           ::DDS::RETCODE_ERROR);
 
         DataSampleList list = writer->get_unsent_data() ;

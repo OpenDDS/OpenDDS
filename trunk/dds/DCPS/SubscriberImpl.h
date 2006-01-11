@@ -267,7 +267,7 @@ namespace TAO
       /// this lock protects the data structures in this class.
       /// It also projects the TransportInterface (it must be held when
       /// calling any TransportInterface method).
-      ACE_Recursive_Thread_Mutex    lock_;
+      ACE_Recursive_Thread_Mutex    si_lock_;
     };
 
   } // namespace DCPS
