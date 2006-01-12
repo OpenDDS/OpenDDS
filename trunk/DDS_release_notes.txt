@@ -1,3 +1,22 @@
+!! not yet released !!!
+Version 0.8 of TAO DDS.
+
+New to this verion are the following changes:
+  - Added configuration of DCPS and transports via configuration files.
+    This also simplified the code related to creating and configuring
+    transports.
+  - fixed a possible deadlock.
+    The senario it was found in was:
+    * Start a subscriber with two readers.
+    * start a publisher with two corresponding writers.
+    * the subscriber would deadlock between the ORB and transport 
+      threads.
+    * If the publisher started first, it would not deadlock.
+  - changed some heap allocations to cached allocator allocations.
+    No heap allocations are in the write -> read code path for 
+    value types containing scalars (no arrays, sequences or strings).
+
+=========================================================================
 
 Version 0.7 of TAO DDS.
 
