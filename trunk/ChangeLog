@@ -1,3 +1,24 @@
+Thu Jan 12 20:40:18 UTC 2006  Scott Harris <harris_s@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+
+          Fix compile error using VC++ v6.0.
+          Thanks to Chad Elliott for the recommended fix.
+
+        * performance-tests/DCPS/SimpleLatency/DDSPerfTest.idl:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/README:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/SimpleLatency/domain_ids:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        
+          Remove double spacing (extra ^M) by using unix2dos.
+
 Wed Jan 11 23:47:37 UTC 2006  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
