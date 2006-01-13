@@ -74,7 +74,8 @@ std_dev (stats_type& stats)
 {
   if (stats.count >=2)
   {
-    return sqrt ((static_cast<double>(stats.count) * stats.sum2 - stats.sum * stats.sum) / 
+    return sqrt ((static_cast<double>(stats.count) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum2) -
+                  ACE_UINT64_DBLCAST_ADAPTER (stats.sum) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum)) / 
                 (static_cast<double>(stats.count) * static_cast<double>(stats.count - 1)));
   }
   return 0.0;
@@ -186,11 +187,11 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       std::cout << " "
                 << round_trip.count
                 << "        "
-                << round_trip.average
+                << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (round_trip.average))
                 << "     "
-                << round_trip.min
+                << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (round_trip.min))
                 << "      "
-                << round_trip.max
+                << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (round_trip.max))
                 << "      "
                 << std_dev (round_trip)
                 << std::endl;

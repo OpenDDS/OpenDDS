@@ -385,7 +385,7 @@ int main (int argc, char *argv[])
      
       ACE_OS::sleep(5) ; // why???
 
-      writer = new Writer(dp.in (), topic, history_depth, max_samples_per_instance) ;
+      writer = new Writer(dp.in (), topic.in (), history_depth, max_samples_per_instance) ;
      
       ACE_OS::sleep(5) ; // why???
 
