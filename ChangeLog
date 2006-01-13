@@ -1345,6 +1345,14 @@ Fri Jun 10 14:40:43 MST 2005  Trevor Fields  <fields_t@ociweb.com>
           They still depend on ACE_ROOT being defined to locate
           the PERLACE package.
 
+Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
+
+          Moved files from a branch off of TAO 1.4a to this separate
+          repository.
+          All files in ACE_wrappers\TAO\orbsvcs\DDS and 
+                       ACE_wrappers\TAO\orbsvcs\orbsvcs\DDS and
+                       ACE_wrappers\bin\DCPS
+          were moved over.
 
           See the ACE_wrappers\TAO\Changeklog_dds_branch
           on the AAC-DDS-1_4_3_branch branch 
