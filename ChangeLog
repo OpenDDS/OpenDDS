@@ -1345,3 +1345,8 @@ Fri Jun 10 14:40:43 MST 2005  Trevor Fields  <fields_t@ociweb.com>
           They still depend on ACE_ROOT being defined to locate
           the PERLACE package.
 
+
+          See the ACE_wrappers\TAO\Changeklog_dds_branch
+          on the AAC-DDS-1_4_3_branch branch 
+          in cvs.ociweb.com:/cvs for the original 
+	  developement history.
