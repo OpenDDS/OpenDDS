@@ -1,3 +1,14 @@
+Fri Jan 13 11:47:29 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+
+          Fixed a few other compile errors related to casting ACE_hrtime_t
+          to a double with VC++ 6.0.
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+
+          Avoid a g++ warning about choosing the right pointer type.
+
 Thu Jan 12 20:40:18 UTC 2006  Scott Harris <harris_s@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
@@ -16,7 +27,7 @@ Thu Jan 12 20:40:18 UTC 2006  Scott Harris <harris_s@ociweb.com>
         * performance-tests/DCPS/SimpleLatency/run_test.pl:
         * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
         * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
-        
+
           Remove double spacing (extra ^M) by using unix2dos.
 
 Wed Jan 11 23:47:37 UTC 2006  Scott Harris <harris_s@ociweb.com>
@@ -24,7 +35,7 @@ Wed Jan 11 23:47:37 UTC 2006  Scott Harris <harris_s@ociweb.com>
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
 
-          Removed locks before calling TransportInterface::add_pub/sub 
+          Removed locks before calling TransportInterface::add_pub/sub
           methods to avoid deadlocking.
           Thanks to Don Busch for providing a the StockQuoter example
           that would deadlock if the subscriber started before the publisher.
