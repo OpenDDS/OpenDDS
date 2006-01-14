@@ -117,6 +117,17 @@ namespace TAO
       return CORBA::ORB::_duplicate (orb_.in ());
     }
 
+    PortableServer::POA_ptr 
+    Service_Participant::the_poa() 
+    {
+      if (CORBA::is_nil (root_poa_.in ()))
+        {
+          CORBA::Object_var obj = orb_->resolve_initial_references( "RootPOA" );
+          root_poa_ = PortableServer::POA::_narrow( obj.in() );
+        }
+      return PortableServer::POA::_duplicate (root_poa_.in ());
+    }
+
     void 
     Service_Participant::shutdown ()
     {
