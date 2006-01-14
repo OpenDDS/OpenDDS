@@ -76,32 +76,6 @@ TAO::DCPS::DataLink::id() const
 }
 
 
-ACE_INLINE void
-TAO::DCPS::DataLink::transport_shutdown()
-{
-  DBG_ENTRY("DataLink","transport_shutdown");
-
-  // Stop the TransportSendStrategy and the TransportReceiveStrategy.
-  if (!this->send_strategy_.is_nil())
-    {
-      this->send_strategy_->stop();
-      this->send_strategy_ = 0;
-    }
-
-  if (!this->receive_strategy_.is_nil())
-    {
-      this->receive_strategy_->stop();
-      this->receive_strategy_ = 0;
-    }
-
-  // Tell our subclass about the "stop" event.
-  this->stop_i();
-
-  // Drop our reference to the TransportImpl object
-  this->impl_ = 0;
-}
-
-
 ACE_INLINE int
 TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
                            TransportReceiveStrategy* receive_strategy)

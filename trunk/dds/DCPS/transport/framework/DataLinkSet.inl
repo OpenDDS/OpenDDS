@@ -6,66 +6,6 @@
 #include  "DataLink.h"
 #include  "TransportSendElement.h"
 
-ACE_INLINE int
-TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
-{
-  DBG_ENTRY("DataLinkSet","insert_link");
-  link->_add_ref();
-  DataLink_rch mylink = link;
-
-  return this->map_->bind(mylink->id(), mylink, &map_entry_allocator_);
-}
-
-
-// Perform "set subtraction" logic.  Subtract the released_set from
-// *this* set.  When complete, return the (new) size of the set.
-ACE_INLINE ssize_t
-TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
-{
-  DBG_ENTRY("DataLinkSet","remove_links");
-  MapType::ENTRY* entry;
-
-  // Attempt to unbind each of the DataLinks in the released_set's
-  // internal map from *this* object's internal map.
-  for (DataLinkSet::MapType::ITERATOR itr(*(released_set->map_));
-       itr.next(entry);
-       itr.advance())
-    {
-      DataLinkIdType link_id = entry->ext_id_;
-
-      if (this->map_->unbind(link_id, &map_entry_allocator_) != 0)
-        {
-//MJM: This is an excellent candidate location for a level driven
-//MJM: diagnostic (ORBDebugLevel 4).
-          // Just report to the log that we tried.
-          VDBG((LM_DEBUG,
-                     "(%P|%t) link_id (%d) not found in map_->\n",
-                     link_id));
-        }
-    }
-
-  // Return the current size of our map following all attempts to unbind().
-  return this->map_->current_size();
-}
-
-
-ACE_INLINE void
-TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
-                                             DataLinkSetMap& released_locals)
-{
-  DBG_ENTRY("DataLinkSet","release_reservations");
-  // Simply iterate over our set of DataLinks, and ask each one to perform
-  // the release_reservations operation upon itself.
-  MapType::ENTRY* entry;
-
-  for (MapType::ITERATOR itr(*map_);
-       itr.next(entry);
-       itr.advance())
-    {
-      entry->int_id_->release_reservations(remote_id, released_locals);
-    }
-}
-
 ACE_INLINE void
 TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {

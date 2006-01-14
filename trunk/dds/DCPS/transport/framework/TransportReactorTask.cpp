@@ -10,6 +10,16 @@
 #endif /* __ACE_INLINE__ */
 
 
+TAO::DCPS::TransportReactorTask::TransportReactorTask()
+  : state_ (STATE_NOT_RUNNING),
+    condition_(this->lock_)
+{
+  DBG_ENTRY("TransportReactorTask","TransportReactorTask");
+  // Set our reactor pointer to a new reactor object.
+  this->reactor_ = new ACE_Reactor();
+}
+
+
 TAO::DCPS::TransportReactorTask::~TransportReactorTask()
 {
   DBG_ENTRY("TransportReactorTask","~TransportReactorTask");
@@ -131,4 +141,27 @@ TAO::DCPS::TransportReactorTask::close(u_long flags)
   this->_remove_ref();
   return 0;
 }
+
+
+void
+TAO::DCPS::TransportReactorTask::stop()
+{
+  DBG_ENTRY("TransportReactorTask","stop");
+  {
+    GuardType guard(this->lock_);
+    if (this->state_ == STATE_NOT_RUNNING)
+      {
+        // We are already "stopped".  Just return.
+        return;
+      }
+    this->state_ = STATE_NOT_RUNNING;
+  }
+
+  this->reactor_->end_reactor_event_loop ();
+
+  // Let's wait for the reactor task's thread to complete before we
+  // leave this stop method.
+  this->wait();
+}
+
 

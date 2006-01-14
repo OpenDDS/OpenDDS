@@ -13,59 +13,6 @@
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
 
-// I think 2 chunks for the header message block is enough
-// - one for the original copy and one for duplicate which 
-// occurs every packet and is released after packet is sent.
-// The data block only needs 1 chunk since the duplicate()
-// just increases the ref count.
-ACE_INLINE
-TAO::DCPS::TransportSendStrategy::TransportSendStrategy
-                                     (TransportConfiguration* config,
-                                      ThreadSynchResource*    synch_resource)
-  : max_samples_(config->max_samples_per_packet_),
-    optimum_size_(config->optimum_packet_size_),
-    max_size_(config->max_packet_size_),
-    queue_(config->queue_links_per_pool_,config->queue_initial_pools_),
-    elems_(1,config->max_samples_per_packet_),
-    pkt_chain_(0),
-    header_complete_(0),
-    start_counter_(0),
-    mode_(MODE_DIRECT),
-    num_delayed_notifications_(0),
-    header_db_allocator_(1),
-    header_mb_allocator_(2)
-{
-  DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
-
-  // Create a ThreadSynch object just for us.
-  this->synch_ = config->send_thread_strategy()->create_synch_object
-                                                         (synch_resource);
-
-  // We cache this value in data member since it doesn't change, and we
-  // don't want to keep asking for it over and over.
-  this->max_header_size_ = this->header_.max_marshaled_size();
-
-  // Create the header_block_ that is used to hold the marshalled
-  // transport packet header bytes.
-  ACE_NEW_MALLOC (this->header_block_,
-                  (ACE_Message_Block*)header_mb_allocator_.malloc (),
-                  ACE_Message_Block(this->max_header_size_,
-                  ACE_Message_Block::MB_DATA,
-                  0,
-                  0,
-                  0,
-                  0,
-                  ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                  ACE_Time_Value::zero,
-                  ACE_Time_Value::max_time,
-                  &header_db_allocator_,
-                  &header_mb_allocator_));
-
-
-  this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
-}
-
-
 
 ACE_INLINE int
 TAO::DCPS::TransportSendStrategy::start()

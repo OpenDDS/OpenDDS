@@ -1,3 +1,47 @@
+Sat Jan 14 15:22:43 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * dds/DCPS/ReceivedDataElementList.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReceiveListener.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.inl:
+
+          Uninlined some unnecessary inlines.  This was done to
+          reduce the footprint of DDS. 
+
 Fri Jan 13 11:47:29 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
