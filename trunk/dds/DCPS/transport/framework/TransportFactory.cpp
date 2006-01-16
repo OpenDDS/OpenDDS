@@ -148,7 +148,7 @@ TAO::DCPS::TransportFactory::create(IdType impl_id, IdType type_id)
 /// and pass in a "new SomeTransportImplFactory()" object without having
 /// to deal with holding/owning its own reference to the impl factory.
 /// It's this (non-standard) way because of the expected use pattern.
-ACE_INLINE void
+void
 TAO::DCPS::TransportFactory::register_type(IdType                type_id,
                                            TransportImplFactory* impl_factory)
 {
