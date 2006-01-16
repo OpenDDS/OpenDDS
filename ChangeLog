@@ -1,3 +1,9 @@
+Mon Jan 16 10:35:06 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Fix missed ACE_INLINE in code that was un-inlined.
+
 Sat Jan 14 15:22:43 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataSampleList.cpp:
