@@ -3,18 +3,6 @@ namespace TAO
   namespace DCPS
   {
     ACE_INLINE
-    PortableServer::POA_ptr 
-    Service_Participant::the_poa() 
-    {
-      if (CORBA::is_nil (root_poa_.in ()))
-        {
-          CORBA::Object_var obj = orb_->resolve_initial_references( "RootPOA" );
-          root_poa_ = PortableServer::POA::_narrow( obj.in() );
-        }
-      return PortableServer::POA::_duplicate (root_poa_.in ());
-    }
-
-    ACE_INLINE
     DCPSInfo_ptr 
     Service_Participant::get_repository() const
     {
@@ -223,6 +211,20 @@ namespace TAO
     Service_Participant::n_chunks (size_t chunks)
     {
       n_chunks_ = chunks;
+    }
+
+    ACE_INLINE
+    size_t   
+    Service_Participant::association_chunk_multiplier () const
+    {
+      return association_chunk_multiplier_;
+    }
+  
+    ACE_INLINE
+    void 
+    Service_Participant::association_chunk_multiplier (size_t multiplier)
+    {
+      association_chunk_multiplier_ = multiplier;
     }
 
     ACE_INLINE

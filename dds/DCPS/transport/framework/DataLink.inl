@@ -2,21 +2,10 @@
 //
 // $Id$
 
-#include  "TransportImpl.h"
 #include  "TransportSendStrategy.h"
 #include  "TransportReceiveStrategy.h"
 #include  "EntryExit.h"
 
-
-/// Only called by our TransportImpl object.
-ACE_INLINE
-TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
-{
-  DBG_ENTRY("DataLink","DataLink");
-
-  impl->_add_ref();
-  this->impl_ = impl;
-}
 
 ACE_INLINE void
 TAO::DCPS::DataLink::send_start()
@@ -83,33 +72,7 @@ ACE_INLINE TAO::DCPS::DataLinkIdType
 TAO::DCPS::DataLink::id() const
 {
   DBG_ENTRY("DataLink","id");
-  return (DataLinkIdType)this;
-}
-
-
-ACE_INLINE void
-TAO::DCPS::DataLink::transport_shutdown()
-{
-  DBG_ENTRY("DataLink","transport_shutdown");
-
-  // Stop the TransportSendStrategy and the TransportReceiveStrategy.
-  if (!this->send_strategy_.is_nil())
-    {
-      this->send_strategy_->stop();
-      this->send_strategy_ = 0;
-    }
-
-  if (!this->receive_strategy_.is_nil())
-    {
-      this->receive_strategy_->stop();
-      this->receive_strategy_ = 0;
-    }
-
-  // Tell our subclass about the "stop" event.
-  this->stop_i();
-
-  // Drop our reference to the TransportImpl object
-  this->impl_ = 0;
+  return id_;
 }
 
 

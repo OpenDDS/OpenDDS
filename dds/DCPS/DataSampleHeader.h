@@ -22,7 +22,7 @@ namespace TAO
       DATAWRITER_LIVELINESS,
       INSTANCE_REGISTRATION,
       UNREGISTER_INSTANCE,
-      DISPOSE_INSTANCE,
+      DISPOSE_INSTANCE
     };
 
     /// The header message of a data sample.
@@ -49,7 +49,7 @@ namespace TAO
       bool reserved_6   : 1;
 
       //The size of the message including the entire header.
-      ACE_UINT16 message_length_;
+      ACE_UINT32 message_length_;
       
       /// The sequence number is obtained from the Publisher 
       /// associated with the DataWriter based on the PRESENTATION 

@@ -6,6 +6,7 @@
 #include  "SimplePublisher.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 #include  "dds/DCPS/DataSampleList.h"
+#include  "dds/DCPS/transport/framework/TransportSendElement.h"
 #include  "ace/OS.h"
 #include  <sstream>
 
@@ -17,14 +18,16 @@ SimpleDataWriter::SimpleDataWriter()
     num_to_send_(0),
     num_delivered_(0),
     element_(0),
-    condition_(this->lock_)
+    condition_(this->lock_),
+    allocator_(0),
+    trans_allocator_(0)
 {
 }
 
 
 SimpleDataWriter::~SimpleDataWriter()
 {
-  delete this->element_;
+  allocator_->free(this->element_);
 }
 
 
@@ -33,7 +36,13 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   this->pub_id_ = pub_id;
-  this->element_ = new TAO::DCPS::DataSampleListElement(this->pub_id_,this,0);
+  allocator_ = new TAO::DCPS::DataSampleListElementAllocator(this->num_to_send_);
+  trans_allocator_ = new TAO::DCPS::TransportSendElementAllocator (this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
+
+  ACE_NEW_MALLOC(this->element_,
+           static_cast<TAO::DCPS::DataSampleListElement*> (allocator_->malloc(sizeof (TAO::DCPS::DataSampleListElement))),
+           TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_)
+           );
 }
 
 
@@ -71,6 +80,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
 
       this->element_->sample_ = new ACE_Message_Block
                                                 (header.max_marshaled_size());
+
       this->element_->sample_ << header;
 
       this->element_->sample_->cont
@@ -99,6 +109,7 @@ void
 SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 {
   unsigned num_delivered = this->release_element(sample);
+  ACE_UNUSED_ARG(num_delivered);
 
   VDBG((LM_DEBUG,
              "(%P|%t) Got our data_delivered() for %d sample.\n",
@@ -110,6 +121,7 @@ void
 SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample)
 {
   unsigned num_delivered = this->release_element(sample);
+  ACE_UNUSED_ARG(num_delivered);
 
   VDBG((LM_DEBUG,
              "(%P|%t) Got our data_dropped() for %d sample.\n",

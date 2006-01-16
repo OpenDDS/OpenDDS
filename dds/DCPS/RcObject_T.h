@@ -45,7 +45,9 @@ namespace TAO
 
                 if (allocator)
                   {
-                    allocator->free(this);
+                    ACE_DES_FREE (this,
+                                  allocator->free,
+                                  RcObject<T> );
                   }
                 else
                   {

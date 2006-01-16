@@ -6,6 +6,7 @@
 #include  "SimplePublisher.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 #include  "dds/DCPS/DataSampleList.h"
+#include  "dds/DCPS/transport/framework/TransportSendElement.h"
 #include  "ace/OS.h"
 #include  <sstream>
 
@@ -33,7 +34,9 @@ SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
 
 
 int
-SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
+SimpleDataWriter::run(SimplePublisher* publisher,
+                      unsigned num_messages,
+                      unsigned msg_size)
 {
   this->num_messages_delivered_ = 0;
   this->num_messages_sent_      = num_messages;
@@ -46,7 +49,11 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
   samples.size_ = num_messages;
 
   // This is what goes in the "Data Block".
-  std::string data = "Hello World!";
+  std::string data;
+  for (unsigned j = 1; j <= msg_size; ++j)
+    {
+      data += char (1 + (j % 255));
+    }
 
   // Now we can create the DataSampleHeader struct and set its fields.
   TAO::DCPS::DataSampleHeader header;
@@ -55,11 +62,14 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
 
   TAO::DCPS::DataSampleListElement* prev_element = 0;
 
+  TAO::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  TAO::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (TAO::DCPS::TransportSendElement));
+
   for (unsigned i = 1; i <= num_messages; ++i)
     {
       // This is what goes in the "Data Block".
       std::ostringstream ostr;
-      ostr << data << " [" << i << "]";
+      ostr << data;
 
       std::string data_str = ostr.str();
 
@@ -80,8 +90,12 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
       header_block->cont(data_block);
 
       // Create the DataSampleListElement now.
-      TAO::DCPS::DataSampleListElement* element =
-                   new TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0);
+      TAO::DCPS::DataSampleListElement* element;
+
+      ACE_NEW_MALLOC_RETURN(element,
+              static_cast<TAO::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (TAO::DCPS::DataSampleListElement))),
+              TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+              1);
 
       // The Sample Element will hold the chain of blocks (header + data).
       element->sample_ = header_block;
@@ -100,6 +114,8 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
     }
 
   publisher->send_samples(samples);
+
+  ACE_OS::sleep(15);
 
   return 0;
 }

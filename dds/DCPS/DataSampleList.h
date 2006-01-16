@@ -6,13 +6,17 @@
 
 #include  "dds/DdsDcpsInfoUtilsC.h"
 #include  "Definitions.h"
+#include  "Dynamic_Cached_Allocator_With_Overflow_T.h"
 
 namespace TAO
 {
 
   namespace DCPS
   {
-  
+    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
+                                              TransportSendElementAllocator;
+
+
     class TransportSendListener;
     struct PublicationInstance;
 
@@ -78,8 +82,9 @@ namespace TAO
     {
       DataSampleListElement (PublicationId           publication_id,
                              TransportSendListener*  send_listner,
-                             PublicationInstance*    handle);
-
+                             PublicationInstance*    handle,
+                             TransportSendElementAllocator* allocator);
+//remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
       /// Message being sent which includes the DataSampleHeader message block
@@ -118,6 +123,9 @@ namespace TAO
       /// and data sample list.
       /// The client holds this as an InstanceHandle_t.
       PublicationInstance*   handle_;
+
+      /// Allocator for the TransportSendElement. 
+      TransportSendElementAllocator* transport_send_element_allocator_;
     };
 
     /**

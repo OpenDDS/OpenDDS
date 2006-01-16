@@ -6,9 +6,11 @@
 ACE_INLINE
 TAO::DCPS::TransportSendElement::TransportSendElement
                                      (int                    initial_count,
-                                      DataSampleListElement* sample)
+                                      DataSampleListElement* sample,
+                                      TransportSendElementAllocator* allocator)
   : TransportQueueElement(initial_count),
-    element_(sample)
+    element_(sample),
+    allocator_(allocator)
 {
   DBG_ENTRY("TransportSendElement","TransportSendElement");
 }

@@ -5,7 +5,8 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpConnection.h"
 #include  "SimpleTcpTransport.h"
-
+#include  "SimpleTcpConfiguration.h"
+#include  "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
@@ -62,6 +63,9 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
                         "(%P|%t) ERROR: Acceptor's transport is nil.\n"),
                        -1);
     }
+
+  SimpleTcpConfiguration* tcp_config = acceptor->get_configuration();
+  set_sock_options(tcp_config);
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
@@ -152,4 +156,106 @@ TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   this->peer().close();
   return 0;
 }
+
+void
+TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_config)
+{
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  //ACE_SOCK_Stream sock = ACE_static_cast(ACE_SOCK_Stream, this->peer() );
+#if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+
+  // A little screwy double negative logic: disabling nagle involves
+  // enabling TCP_NODELAY
+  int opt = (tcp_config->enable_nagle_algorithm_ == false);
+  if (this->peer().set_option (IPPROTO_TCP, TCP_NODELAY, &opt, sizeof (opt)) == -1) {
+    ACE_ERROR((LM_ERROR, "Failed to set TCP_NODELAY\n"));
+  }
+
+ if (this->peer().set_option (SOL_SOCKET,
+                          SO_SNDBUF,
+                          (void *) &snd_size,
+                          sizeof (snd_size)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the send buffer size to %d errno %m\n",
+      snd_size));
+    return;
+  }
+
+  if (this->peer().set_option (SOL_SOCKET,
+                          SO_RCVBUF,
+                          (void *) &rcv_size,
+                          sizeof (int)) == -1
+      && errno != ENOTSUP)
+  {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SimpleTcpConnection failed to set the receive buffer size to %d errno %m \n",
+      rcv_size));
+    return;
+  }
+#else
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_LACKS_SOCKET_BUFSIZ */
+
+#else 
+   ACE_UNUSED_ARG (snd_size);
+   ACE_UNUSED_ARG (rcv_size);
+#endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
+}
+
+
+int
+TAO::DCPS::SimpleTcpConnection::active_establishment
+                                    (const ACE_INET_Addr& remote_address,
+                                     const ACE_INET_Addr& local_address,
+                                     SimpleTcpConfiguration* tcp_config)
+{
+  DBG_ENTRY("SimpleTcpConnection","active_establishment");
+
+  // Now use a connector object to establish the connection.
+  ACE_SOCK_Connector connector;
+
+  if (connector.connect(this->peer(), remote_address) != 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Failed to connect.\n"),
+                       -1);
+    }
+
+  set_sock_options(tcp_config);
+
+  // In order to complete the connection establishment from the active
+  // side, we need to tell the remote side about our local_address.
+  // It will use that as an "identifier" of sorts.  To the other
+  // (passive) side, our local_address that we send here will be known
+  // as the remote_address.
+  NetworkAddress network_order_address(local_address);
+
+  if (this->peer().send_n((char*)(&network_order_address),
+                          sizeof(network_order_address)) == -1)
+    {
+      // TBD later - Anything we are supposed to do to close the connection.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to send our local_address_ to "
+                        "the passive side to complete the active connection "
+                        "establishment.\n"),
+                       -1);
+    }
+
+//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
+
+//MJM: Add code to receive a response from the other side that the
+//MJM: connection is ready to receive at this point.  Block until it is
+//MJM: received.  Then call the method in the TransportInterface that
+//MJM: the add_associations() call is wait()ing on.
+
+//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
+
+  return 0;
+}
+
 

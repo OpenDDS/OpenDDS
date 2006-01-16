@@ -299,6 +299,10 @@ namespace TAO
           datareader_set_.erase(dr_servant) ;
         }
 
+
+        // Clean up any remaining associations
+        dr_servant->remove_all_associations();
+
         delete dr_info;
 
         dr_servant->cleanup ();
@@ -322,7 +326,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                           guard,
-                          this->lock_,
+                          this->si_lock_,
                           ::DDS::RETCODE_ERROR);
 
         if (enabled_ == false)
@@ -384,7 +388,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                           guard,
-                          this->lock_,
+                          this->si_lock_,
                           ::DDS::DataReader::_nil ());
 
       // If multiple entries whose key is "topic_name" then which one is 
@@ -423,7 +427,7 @@ namespace TAO
     {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                           guard,
-                          this->lock_,
+                          this->si_lock_,
                           ::DDS::RETCODE_ERROR);
 
       int count(0) ;
@@ -454,7 +458,7 @@ namespace TAO
     {
       ACE_GUARD (ACE_Recursive_Thread_Mutex,
         guard,
-        this->lock_);
+        this->si_lock_);
 
       DataReaderMap::iterator it;
 
@@ -715,7 +719,7 @@ namespace TAO
     {
       ACE_GUARD (ACE_Recursive_Thread_Mutex,
                  guard,
-                 this->lock_);
+                 this->si_lock_);
 
       datareader_set_.insert(reader) ;
     }
@@ -754,9 +758,11 @@ namespace TAO
           associations[i].remote_data_ = writers[i].writerTransInfo;
         }
 
-      ACE_GUARD (ACE_Recursive_Thread_Mutex,
-                 guard,
-                 this->lock_);
+      // 1/11/06 SHH - this lock is not required.
+      // it also causes deadlock in some cases.
+      //ACE_GUARD (ACE_Recursive_Thread_Mutex,
+      //           guard,
+      //           this->si_lock_);
 
       // TBD - pass the priority as part of the associations data
       //       because there is a priority per remote publication.
@@ -779,9 +785,10 @@ namespace TAO
     {
       /// Delegate to the (inherited) TransportInterface version.
 
-      ACE_GUARD (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->lock_);
+      // 1/11/06 SHH - this lock is not required.
+      //ACE_GUARD (ACE_Recursive_Thread_Mutex,
+      //  guard,
+      //  this->si_lock_);
 
       // TMB - I don't know why I need to call it this way, but gcc complains
       //       under linux otherwise.

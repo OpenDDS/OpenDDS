@@ -29,6 +29,8 @@ namespace TAO
         SimpleTcpTransport();
         virtual ~SimpleTcpTransport();
 
+        SimpleTcpConfiguration* get_configuration();
+
 
       protected:
 
@@ -48,7 +50,6 @@ namespace TAO
 
         /// Called by the DataLink to release itself.
         virtual void release_datalink_i(DataLink* link);
-
 
       private:
 

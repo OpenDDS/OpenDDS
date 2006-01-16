@@ -74,8 +74,8 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-    <%TYPE%>DataWriterImpl* WriterImplmpl;
-    ACE_NEW_RETURN(WriterImplmpl, 
+    <%TYPE%>DataWriterImpl* writer_impl;
+    ACE_NEW_RETURN(writer_impl, 
                    <%TYPE%>DataWriterImpl(), 
                    ::TAO::DCPS::DataWriterRemote::_nil());
 
@@ -84,7 +84,7 @@ DDS::ReturnCode_t
         = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataWriterRemote, 
                                             <%TYPE%>DataWriterImpl, 
                                             TAO::DCPS::DataWriterRemote_ptr> 
-              (WriterImplmpl ACE_ENV_ARG_PARAMETER);
+              (writer_impl ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
 
     return writer_obj;
@@ -121,6 +121,7 @@ DDS::ReturnCode_t
 // Implementation skeleton constructor
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl (void)
 : marshaled_size_ (0),
+  db_lock_pool_(0),
   data_allocator_ (0),
   mb_allocator_ (0),
   db_allocator_ (0)
@@ -133,6 +134,7 @@ DDS::ReturnCode_t
   delete data_allocator_;
   delete mb_allocator_;
   delete db_allocator_;
+  delete db_lock_pool_;
 }
 
 DDS::InstanceHandle_t
@@ -303,11 +305,11 @@ DDS::ReturnCode_t
                                             source_timestamp);
     if (ret != ::DDS::RETCODE_OK)
     {
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR, 
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("<%TYPE%>DataWriterImpl::write, ")
                   ACE_TEXT("register failed err=%d.\n"),
-                  ret));
+                  ret), ret);
     }
    
     handle = registered_handle; 
@@ -460,7 +462,8 @@ void
           " is unbounded data - allocate from heap\n"));
   }
   
-  mb_allocator_ = new ::TAO::DCPS::MessageBlockAllocator (n_chunks_);
+  mb_allocator_ =
+   new ::TAO::DCPS::MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_);
   db_allocator_ = new ::TAO::DCPS::DataBlockAllocator (n_chunks_);
   
   if (::TAO::DCPS::DCPS_debug_level >= 2)
@@ -472,7 +475,10 @@ void
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
           db_allocator_, n_chunks_));
     }
+    
 
+  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
+  
   return ::DDS::RETCODE_OK;
 }
 
@@ -497,7 +503,7 @@ ACE_Message_Block*
                                0, //cont
                                0, //data
                                data_allocator_, //allocator_strategy
-                               0, //locking_strategy
+                               db_lock_pool_->get_lock(), //data block locking_strategy
                                ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                ACE_Time_Value::zero,
                                ACE_Time_Value::max_time,
@@ -529,20 +535,24 @@ ACE_Message_Block*
   handle = ::TAO::DCPS::HANDLE_NIL;
   InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
-  int is_new = 1;
+  int needs_creation = 1;
+  int needs_registration = 1;
 
   if (it != instance_map_.end()) 
   {
+    needs_creation = 0;
+
     handle = it->second;
-    PublicationInstance* instance = reinterpret_cast<PublicationInstance*>(handle);
+    PublicationInstance* instance = DataWriterImpl::get_handle_instance(handle);
+
     if (instance->unregistered_ == false)
     { 
-      is_new = 0;
+      needs_registration = 0;
     }
     // else: The instance is unregistered and now register again.
   }
 
-  if (is_new) 
+  if (needs_registration)
   {
     // don't use fast allocator for registration.
     ACE_Message_Block* marshalled = this->marshal(instance_data, 0); //NOT_FOR_WRITE
@@ -551,25 +561,27 @@ ACE_Message_Block*
     ::DDS::ReturnCode_t ret = register_instance(handle, marshalled, source_timestamp);
     // note: the WriteDataContainer/PublicationInstance maintains ownership 
     // of the marshalled sample.
-    if (ret == ::DDS::RETCODE_OK)
-    {
-      std::pair<InstanceMap::iterator, bool> pair 
-          = instance_map_.insert(InstanceMap::value_type(instance_data, handle));
-      if (pair.second == false)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                              ACE_TEXT("(%P|%t) "
-                              "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
-                              ACE_TEXT("insert <%SCOPE%><%TYPE%> failed. \n")),
-                              ::DDS::RETCODE_ERROR);
-        }
-    }
-    else
+    
+    if (ret != ::DDS::RETCODE_OK)
     {
       marshalled->release ();
       return ret;
     }
-  }
+
+    if (needs_creation)
+    {
+      std::pair<InstanceMap::iterator, bool> pair 
+          = instance_map_.insert(InstanceMap::value_type(instance_data, handle));
+      if (pair.second == false)
+      {
+        ACE_ERROR_RETURN ((LM_ERROR, 
+                            ACE_TEXT("(%P|%t) "
+                            "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
+                            ACE_TEXT("insert <%SCOPE%><%TYPE%> failed. \n")),
+                            ::DDS::RETCODE_ERROR);
+      }
+    } // end of if (needs_creation)
+  } // end of if (needs_registration)
 
   return ::DDS::RETCODE_OK;
 }
@@ -664,16 +676,21 @@ void
     {
       ::DDS::InstanceHandle_t handle = it->second;
       SubscriptionInstance *ptr =
-          reinterpret_cast<SubscriptionInstance *> (handle) ;
+          DataReaderImpl::get_handle_instance (handle) ;
 
       while (ptr->rcvd_sample_.size_)
         {
           ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
             
           ptr->rcvd_sample_.remove(head_ptr) ;
-
-          data_allocator_->free(head_ptr->registered_data_) ;
-          rd_allocator_->free(head_ptr) ;
+          
+         ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (head_ptr,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
         }
 
       delete ptr ;
@@ -753,7 +770,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -843,7 +860,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -954,7 +971,7 @@ DDS::ReturnCode_t
       ::CORBA::Long start_samples_in_instance(count) ;
       ::CORBA::Long samples_in_instance_count(0) ;
       ::DDS::InstanceHandle_t handle = it->second;
-      SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
       ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
@@ -986,9 +1003,13 @@ DDS::ReturnCode_t
 
                   ptr->rcvd_sample_.remove(item) ;
 
-                  data_allocator_->free(item->registered_data_) ;
-                  rd_allocator_->free(item) ;
-          
+                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+                  ACE_DES_FREE (delete_ptr,
+                                data_allocator_->free,
+                                <%TYPE%> );
+                  ACE_DES_FREE (item,
+                                rd_allocator_->free,
+                                ReceivedDataElement);         
                   item = next ;
                 }
 
@@ -1016,8 +1037,13 @@ DDS::ReturnCode_t
             
             ptr->rcvd_sample_.remove(tail) ;
 
-            data_allocator_->free(tail->registered_data_) ;
-            rd_allocator_->free(tail) ;
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+            ACE_DES_FREE (delete_ptr,
+                          data_allocator_->free,
+                          <%TYPE%> );
+            ACE_DES_FREE (tail,
+                          rd_allocator_->free,
+                          ReceivedDataElement);         
           }
         else
           {
@@ -1078,7 +1104,7 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -1148,72 +1174,64 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-#ifdef PUBLISHER_TEST
-  ACE_UNUSED_ARG (received_data);
-  ACE_UNUSED_ARG (sample_info);
 
-  FILE* fp =
-    ACE_OS::fopen ("<%TYPE%>.txt", ACE_LIB_TEXT("r"));
-  if (fp == 0)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, 
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample, ")
-                        ACE_TEXT("Unable to open <%TYPE%>.txt for reading: %p\n"),
-                        "fopen"),
-                        ::DDS::RETCODE_ERROR);
-  }
+  bool found_data = false;
 
-  if( ACE_OS::fsetpos( fp, &pos_ ) != 0 )
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, 
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample, ")
-                        ACE_TEXT("Unable to open <%TYPE%>.txt for reading: %p\n"),
-                        "fsetpos"),
-                        ::DDS::RETCODE_ERROR);
-  }
-
-  fscanf (fp, "%d %d %d %d\n", &received_data.a_long_value, 
-                            &received_data.handle_value, 
-                            &received_data.sample_sequence,
-                            &received_data.writer_id);
-  fgetpos( fp, &pos_ );
-  ACE_OS::fclose (fp);
-
-  return ::DDS::RETCODE_OK;
-
-#else
-
-  ::<%MODULE%><%TYPE%>Seq received_data_seq(1) ;
-  ::DDS::SampleInfoSeq info_seq(1) ;
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
   
-  DDS::ReturnCode_t status ;
-  status = this->read(received_data_seq, info_seq,
-                    1,
-                    ::DDS::NOT_READ_SAMPLE_STATE,
-                    ::DDS::ANY_VIEW_STATE,
-                    ::DDS::ANY_INSTANCE_STATE) ;
-
-  if (status != ::DDS::RETCODE_OK)
+  InstanceMap::iterator it;
+  for (it = instance_map_.begin ();
+       it != instance_map_.end ();
+       it ++)
   {
-    if (status != ::DDS::RETCODE_NO_DATA)
+    ::DDS::InstanceHandle_t handle = it->second;
+    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+
+    if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
+        (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
-      ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ")
-                 ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample ")
-                 ACE_TEXT("failed,  error=%d.\n"),
-                 status));
+      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+           item != 0 ; item = item->next_data_sample_)
+      {
+        if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
+        {
+          received_data =
+              *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          ptr->instance_state_.sample_info(sample_info, item) ;
+      
+          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+
+          ptr->instance_state_.accessed() ;
+          found_data = true ;
+        }
+        if (found_data)
+        {
+          break ;
+        }
+      }
+    }
+
+    if (found_data)
+    {
+      //
+      // Get the sample_ranks, generation_ranks, and
+      // absolute_generation_ranks for this info_seq
+      //
+      this->sample_info(sample_info, ptr->rcvd_sample_.tail_) ;
+
+      break ;
     }
   }
-  else
-  {
-    received_data = received_data_seq[0] ;
-    sample_info = info_seq[0] ;
-  }
 
-  return status ;
-#endif
+  if (found_data)
+    { 
+      return ::DDS::RETCODE_OK;
+    }
+
+  return ::DDS::RETCODE_NO_DATA ;
 }
 
 DDS::ReturnCode_t
@@ -1226,34 +1244,110 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  ::<%MODULE%><%TYPE%>Seq received_data_seq(1) ;
-  ::DDS::SampleInfoSeq info_seq(1) ;
+  bool found_data = false;
+
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
   
-  DDS::ReturnCode_t status ;
-  status = this->take(received_data_seq, info_seq,
-                    1,
-                    ::DDS::NOT_READ_SAMPLE_STATE,
-                    ::DDS::ANY_VIEW_STATE,
-                    ::DDS::ANY_INSTANCE_STATE) ;
-
-  if (status != ::DDS::RETCODE_OK)
-  {
-    if (status != ::DDS::RETCODE_NO_DATA)
+  InstanceMap::iterator it;
+  for (it = instance_map_.begin ();
+       it != instance_map_.end ();
+       it ++)
     {
-      ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ")
-               ACE_TEXT("<%TYPE%>DataReaderImpl::read_next_sample ")
-               ACE_TEXT("faile,  error=%d.\n"),
-               status));
-    }
-  }
-  else
-  {
-    received_data = received_data_seq[0] ;
-    sample_info = info_seq[0] ;
-  }
+      ::DDS::InstanceHandle_t handle = it->second;
+      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
-  return status ;
+      ReceivedDataElement *tail = 0 ;
+      if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
+          (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
+      {
+        ReceivedDataElement *next ;
+        tail = 0 ;
+        ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        while (item)
+        {
+          if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
+            {
+              received_data =
+                  *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+              ptr->instance_state_.sample_info(sample_info, item) ;
+      
+              item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+
+              ptr->instance_state_.accessed() ;
+
+              if (item == ptr->rcvd_sample_.tail_)
+                {
+                  tail = ptr->rcvd_sample_.tail_ ;
+                  item = item->next_data_sample_ ;
+                }
+              else
+                {
+                  next = item->next_data_sample_ ;
+
+                  ptr->rcvd_sample_.remove(item) ;
+
+                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+                  ACE_DES_FREE (delete_ptr,
+                                data_allocator_->free,
+                                <%TYPE%> );
+                  ACE_DES_FREE (item,
+                                rd_allocator_->free,
+                                ReceivedDataElement);         
+                  item = next ;
+                }
+
+              found_data = true;
+            }
+          if (found_data)
+            {
+              break ;
+            }
+        }
+      }
+
+    if (found_data)
+      {
+        //
+        // Get the sample_ranks, generation_ranks, and
+        // absolute_generation_ranks for this info_seq
+        //
+        if (tail)
+          {
+            this->sample_info(sample_info, tail) ;
+            
+            ptr->rcvd_sample_.remove(tail) ;
+
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+            ACE_DES_FREE (delete_ptr,
+                          data_allocator_->free,
+                          <%TYPE%> );
+            ACE_DES_FREE (tail,
+                          rd_allocator_->free,
+                          ReceivedDataElement);         
+          }
+        else
+          {
+            this->sample_info(sample_info, ptr->rcvd_sample_.tail_) ;
+          }
+
+          break ;
+        }
+    }
+
+
+
+  if (found_data)
+    { 
+      return ::DDS::RETCODE_OK;
+    }
+    else
+    {
+      return ::DDS::RETCODE_NO_DATA ;
+    }
 }
 
 DDS::ReturnCode_t
@@ -1306,7 +1400,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
   
   SubscriptionInstance * ptr = 
-      reinterpret_cast<SubscriptionInstance *> (a_handle) ;
+      DataReaderImpl::get_handle_instance (a_handle) ;
 
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
@@ -1402,7 +1496,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
   
   SubscriptionInstance * ptr = 
-    reinterpret_cast<SubscriptionInstance *> (a_handle) ;
+    DataReaderImpl::get_handle_instance (a_handle) ;
 
   ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
@@ -1433,8 +1527,13 @@ DDS::ReturnCode_t
 
           ptr->rcvd_sample_.remove(item) ;
 
-          data_allocator_->free(item->registered_data_) ;
-          rd_allocator_->free(item) ;
+          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (item,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
 
           item = next ;
         }
@@ -1462,8 +1561,13 @@ DDS::ReturnCode_t
             
       ptr->rcvd_sample_.remove(tail) ;
 
-      data_allocator_->free(tail->registered_data_) ;
-      rd_allocator_->free(tail) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (tail,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
     else
     {
@@ -1686,16 +1790,15 @@ void
   if (it == instance_map_.end()) 
   {
     SubscriptionInstance* instance;
+    handle = DataReaderImpl::get_next_handle ();
     ACE_NEW_RETURN (instance,
-                    SubscriptionInstance(this),
+                    SubscriptionInstance(this, handle),
                     ::DDS::RETCODE_ERROR);
 
-    handle = (::DDS::InstanceHandle_t)instance;
-    
-    std::pair<SubscriptionInstances::iterator, bool> pair
-        = instances_.insert(handle);
+    instance->instance_handle_ = handle;
+    int ret = instances_.bind(handle, instance);
 
-    if (pair.second == false)
+    if (ret != 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) "
@@ -1724,18 +1827,18 @@ void
 
   if (header.message_id_ != INSTANCE_REGISTRATION)
   {
-    SubscriptionInstance* instance_ptr = reinterpret_cast<SubscriptionInstance *> (handle) ;
+    SubscriptionInstance* instance_ptr = DataReaderImpl::get_handle_instance (handle) ;
     
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
-    if (this->qos_.resource_limits.max_samples_per_instance != 
-        ::DDS::LENGTH_UNLIMITED)
+    if ((this->qos_.resource_limits.max_samples_per_instance != 
+          ::DDS::LENGTH_UNLIMITED) &&
+       (instance_ptr->rcvd_sample_.size_ >= 
+        this->qos_.resource_limits.max_samples_per_instance))
     {
-      if (instance_ptr->rcvd_sample_.size_ >= 
-             this->qos_.resource_limits.max_samples_per_instance &&
-          instance_ptr->rcvd_sample_.head_->sample_state_ 
-             == ::DDS::NOT_READ_SAMPLE_STATE)
-      {
+      if  (instance_ptr->rcvd_sample_.head_->sample_state_ 
+            == ::DDS::NOT_READ_SAMPLE_STATE)
+        {
         // for now the implemented QoS means that if the head sample
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
@@ -1751,13 +1854,31 @@ void
 
         if (listener != 0)
         {
-          listener->on_sample_rejected(get_dr_obj_ref(),
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
 
-        data_allocator_->free(instance_data) ;
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      <%TYPE%> );
 
         return ::DDS::RETCODE_OK ; //OK?
+       }
+       else
+       {
+         // Discard the oldest previously-read sample
+         ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
+         instance_ptr->rcvd_sample_.remove(item) ;
+         
+         ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+         ACE_DES_FREE (ptr,
+                       data_allocator_->free,
+                       <%TYPE%> );
+
+         ACE_DES_FREE (item,
+                       rd_allocator_->free,
+                       ReceivedDataElement);
       }
     }
     
@@ -1800,12 +1921,18 @@ void
 
         if (listener)
         {
-          listener->on_sample_lost(get_dr_obj_ref(), sample_lost_status_);
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
       }
 
-      data_allocator_->free(head_ptr->registered_data_) ;
-      rd_allocator_->free(head_ptr) ;
+      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+      ACE_DES_FREE (delete_ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+      ACE_DES_FREE (head_ptr,
+                    rd_allocator_->free,
+                    ReceivedDataElement);
     }
 
     SubscriberImpl* sub = get_subscriber_servant () ;
@@ -1822,16 +1949,19 @@ void
         
       if (listener != 0)
       {
-        listener->on_data_available(get_dr_obj_ref());
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
+        listener->on_data_available(dr.in ());
       }
     }
   }
   else
   {
     SubscriptionInstance *instance_ptr = 
-         reinterpret_cast<SubscriptionInstance *> (handle) ;
+         DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
-    data_allocator_->free(instance_data) ;
+    ACE_DES_FREE (instance_data,
+                  data_allocator_->free,
+                  <%TYPE%> );
   }
 
   return ::DDS::RETCODE_OK;
@@ -1860,7 +1990,7 @@ void
   {
     handle = it->second;
     SubscriptionInstance* instance_ptr = 
-          reinterpret_cast<SubscriptionInstance *> (handle) ;
+          DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
   else
@@ -1871,7 +2001,9 @@ void
               ACE_TEXT("The instance is not registered.\n")));
   }
       
-  data_allocator_->free(data) ;
+  ACE_DES_FREE (data,
+                data_allocator_->free,
+                <%TYPE%> );
 }
 
 //TAO::DCPS::DataReaderRemote_ptr

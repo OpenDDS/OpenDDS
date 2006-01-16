@@ -13,12 +13,17 @@ namespace TAO
 
   namespace DCPS
   {
+    class TransportReplacedElement;
+
+    typedef Cached_Allocator_With_Overflow<TransportReplacedElement, ACE_SYNCH_NULL_MUTEX> 
+                                             TransportReplacedElementAllocator;
 
     class TransportReplacedElement : public TransportQueueElement
     {
       public:
 
-        TransportReplacedElement(TransportQueueElement* orig_elem);
+        TransportReplacedElement(TransportQueueElement* orig_elem,
+                                 TransportReplacedElementAllocator* allocator = 0);
         virtual ~TransportReplacedElement();
 
         /// Accessor for the publisher id.
@@ -34,6 +39,9 @@ namespace TAO
 
 
       private:
+
+        /// Reference to TransportReplacedElement allocator.
+        TransportReplacedElementAllocator* allocator_;
 
         /// The publication_id() from the original TransportQueueElement
         RepoId publisher_id_;

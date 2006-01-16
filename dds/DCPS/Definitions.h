@@ -63,7 +63,7 @@ namespace TAO
     } ;
 
 
-    typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Null_Mutex>  
+    typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex>  
       MessageBlockAllocator;
     typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Null_Mutex>  
       DataBlockAllocator;

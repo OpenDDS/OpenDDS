@@ -8,7 +8,7 @@
 #include "ace/Task.h"
 
 
-class Writer : public ACE_Task_Base 
+class Writer 
 {
 public:
 
@@ -20,8 +20,7 @@ public:
 
   void end ();
 
-  /** Lanch a thread to write. **/
-  virtual int svc (int pass);
+  int run_test (int pass);
 
   bool is_finished () const;
 

@@ -6,6 +6,7 @@
 
 #include  "dds/DCPS/transport/framework/TransportSendListener.h"
 #include  "dds/DCPS/Definitions.h"
+#include  "dds/DCPS/DataSampleList.h"
 #include  "ace/Synch.h"
 #include  "ace/Condition_T.h"
 
@@ -49,6 +50,9 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
     TAO::DCPS::DataSampleListElement* element_;
 
     ConditionType condition_;
+
+    TAO::DCPS::DataSampleListElementAllocator* allocator_;
+    TAO::DCPS::TransportSendElementAllocator* trans_allocator_;
 };
 
 #endif  /* SIMPLEDATAWRITER_H */

@@ -2,6 +2,7 @@
 //
 // $Id$
 #include  "DCPS/DdsDcps_pch.h"
+#include  "TransportImpl.h"
 #include  "DataLinkSetMap.h"
 #include  "DataLinkSet.h"
 #include  "DataLink.h"

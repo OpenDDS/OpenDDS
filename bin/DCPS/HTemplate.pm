@@ -31,6 +31,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "dds/DCPS/DataBlockLockPool.h"
 
 #include <vector>
 
@@ -51,8 +52,6 @@ using namespace ::TAO::DCPS;
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  *
- * @note: InstanceHandle_t is a long but it holds a PublicationInstance* 
- *     for code supporting Publishers & DataWriters.
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl 
   : public virtual <%POA%><%TYPE%>TypeSupport, 
@@ -291,6 +290,9 @@ private:
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
+   // The lock pool will be thread safe because
+   // only one write call is allowed at a time.
+   DataBlockLockPool*  db_lock_pool_;
    DataAllocator* data_allocator_;
    ::TAO::DCPS::MessageBlockAllocator* mb_allocator_;
    ::TAO::DCPS::DataBlockAllocator*    db_allocator_;
@@ -306,8 +308,6 @@ private:
  * @note zero-copy methods are specific to TAO but this is allowed by
  *       the DDS specification.
  *
- * @note: InstanceHandle_t is a long but it holds a SubscriptionInstance* 
- *     for code supporting Subcriber & DataReaders.
  */
 class <%EXPORT%> <%TYPE%>DataReaderImpl 
   : public virtual <%POA%><%TYPE%>DataReader, 

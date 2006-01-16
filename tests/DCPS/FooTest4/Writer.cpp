@@ -16,10 +16,10 @@ const int default_key = 101010;
 
 Writer::Writer(::DDS::DataReader_ptr reader,
                int num_writes_per_thread, 
-               int multiple_instances_,
+               int multiple_instances,
                int instance_id)
 : num_writes_per_thread_(num_writes_per_thread),
-  multiple_instances_ (multiple_instances_),
+  multiple_instances_ (multiple_instances),
   instance_id_(instance_id),
   reader_(reader)
 {

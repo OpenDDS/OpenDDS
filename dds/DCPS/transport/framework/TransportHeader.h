@@ -43,7 +43,7 @@ namespace TAO
 
         /// The size of the message following this header, not including the
         /// 8 bytes used by this TransportHeader.
-        ACE_UINT16 length_;
+        ACE_UINT32 length_;
 
         /// Similar to IDL compiler generated methods.
         size_t max_marshaled_size() ;

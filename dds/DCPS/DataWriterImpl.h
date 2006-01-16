@@ -400,6 +400,8 @@ namespace TAO
     virtual int handle_close (ACE_HANDLE,
                               ACE_Reactor_Mask);
 
+    void remove_all_associations();
+
     /// Statistics counter.
     int         data_dropped_count_;
     int         data_delivered_count_;
@@ -419,9 +421,17 @@ namespace TAO
 
       /// The number of chunks for the cached allocator.
       size_t                     n_chunks_;
+      /// The multiplier for allocators affected by associations
+      size_t                     association_chunk_multiplier_;
 
-    private:
-     
+      /**
+      *  Attempt to locate an existing instance for the given handle.
+      */
+      PublicationInstance* get_handle_instance (
+          ::DDS::InstanceHandle_t handle);
+
+  private:
+
       /** This method create a header message block and chain with 
       * the registered sample. The header contains the information 
       * needed. e.g. message id, length of whole message...
@@ -487,6 +497,7 @@ namespace TAO
       ACE_Recursive_Thread_Mutex                lock_;
       /// The list of active subscriptions.
       ::DDS::InstanceHandleSeq        subscription_handles_;
+      ReaderIdSeq                     readers_;
 
       /// Status conditions.
       ::DDS::LivelinessLostStatus         liveliness_lost_status_ ;

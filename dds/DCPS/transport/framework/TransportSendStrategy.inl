@@ -13,41 +13,6 @@
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
 
-ACE_INLINE
-TAO::DCPS::TransportSendStrategy::TransportSendStrategy
-                                     (TransportConfiguration* config,
-                                      ThreadSynchResource*    synch_resource)
-  : max_samples_(config->max_samples_per_packet_),
-    optimum_size_(config->optimum_packet_size_),
-    max_size_(config->max_packet_size_),
-    queue_(config->queue_links_per_pool_,config->queue_initial_pools_),
-    elems_(1,config->max_samples_per_packet_),
-    pkt_chain_(0),
-    header_complete_(0),
-    start_counter_(0),
-    mode_(MODE_DIRECT),
-    num_delayed_notifications_(0)
-{
-  DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
-
-  // Create a ThreadSynch object just for us.
-  this->synch_ = config->send_thread_strategy()->create_synch_object
-                                                         (synch_resource);
-
-  // We cache this value in data member since it doesn't change, and we
-  // don't want to keep asking for it over and over.
-  this->max_header_size_ = this->header_.max_marshaled_size();
-
-  // Create the header_block_ that is used to hold the marshalled
-  // transport packet header bytes.
-  this->header_block_ = new ACE_Message_Block(this->max_header_size_);
-//MJM: See header for comment on this.  This should be a member, not
-//MJM: allocated.  Maybe.
-
-  this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
-}
-
-
 
 ACE_INLINE int
 TAO::DCPS::TransportSendStrategy::start()
@@ -813,6 +778,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
                  "Since backpressure flag is false, return "
                  "OUTCOME_SEND_ERROR.\n"));
 
+
       // Not backpressure - it's a real error.
       // Note: moved thisto send_bytes so the errno msg could be written.
       //ACE_ERROR((LM_ERROR,
@@ -821,6 +787,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 
       return OUTCOME_SEND_ERROR;
     }
+
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Since num_bytes_sent > 0, adjust the packet to account for "

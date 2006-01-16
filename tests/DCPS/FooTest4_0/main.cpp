@@ -82,6 +82,8 @@ int main (int argc, char *argv[])
 
 
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
+      PortableServer::ServantBase_var safe_servant = fts_servant;
+
       ::Mine::FooTypeSupport_var fts = 
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
                                          ::Mine::FooTypeSupportImpl, 
@@ -379,11 +381,11 @@ int main (int argc, char *argv[])
 
 //---------------------------------------------------------------------
         
-      reader = new Reader(dp, 1, 1) ;
+      reader = new Reader(dp.in (), 1, 1) ;
      
       ACE_OS::sleep(5) ; // why???
 
-      writer = new Writer(dp, topic, history_depth, max_samples_per_instance) ;
+      writer = new Writer(dp.in (), topic.in (), history_depth, max_samples_per_instance) ;
      
       ACE_OS::sleep(5) ; // why???
 

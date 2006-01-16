@@ -70,7 +70,7 @@ class PubDriver
     void allocator_test ();
     void liveliness_test ();
     void parse_args(int& argc, char* argv[]);
-    void init(int& argc, char* argv[]);
+    void initialize(int& argc, char* argv[]);
     void run();
     void end();
     void run_test (int test_to_run);

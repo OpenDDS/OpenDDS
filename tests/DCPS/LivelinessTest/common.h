@@ -21,6 +21,7 @@
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
 
+#include "ace/SString.h"
 
 #define MY_DOMAIN 411
 #define MY_TOPIC  "foo"

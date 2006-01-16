@@ -6,6 +6,7 @@
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include  "TestException.h"
 #include  <string>
+#include  "ace/OS_NS_sys_time.h"
 
 
 SimplePublisher::SimplePublisher()
@@ -90,16 +91,24 @@ SimplePublisher::init(TAO::DCPS::TransportFactory::IdType transport_id,
 
 
 int
-SimplePublisher::run(unsigned num_messages)
+SimplePublisher::run(unsigned num_messages, unsigned size)
 {
-  return this->writer_.run(this, num_messages);
+  return this->writer_.run(this, num_messages, size);
 }
 
 
 void
 SimplePublisher::send_samples(const TAO::DCPS::DataSampleList& samples)
 {
+  ACE_Time_Value start = ACE_OS::gettimeofday();
   this->send(samples);
+  ACE_Time_Value finished = ACE_OS::gettimeofday();
+
+  ACE_Time_Value total = finished - start;
+  ACE_ERROR((LM_ERROR,
+    "(%P|%t) Publisher total time required was %d.%d seconds.\n",
+             total.sec(),
+             total.usec() % 1000000));
 }
 
 

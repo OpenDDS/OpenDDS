@@ -37,7 +37,7 @@ Writer::Writer(PubDriver*            pubdriver,
 {
   writer_servant_ 
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (writer_);
+    (writer_.in ());
 }
 
 void 
@@ -90,7 +90,7 @@ Writer::svc ()
     }
     
     ::Mine::FooDataWriter_var foo_dw 
-      = ::Mine::FooDataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+      = ::Mine::FooDataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
     ACE_TRY_CHECK;
 
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));

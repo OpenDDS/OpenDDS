@@ -11,14 +11,14 @@
 #ifndef FOO_SINGLETON_TRANSPORT_H_
 #define FOO_SINGLETON_TRANSPORT_H_
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
 #include "footype_export.h"
 #include "FooTypeC.h"
 
 #include "tao/TAO_Singleton.h"
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 /**
  * @class Singleton_Transport

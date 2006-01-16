@@ -17,6 +17,7 @@
 #include "BuiltInTopicUtils.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
+#include  "ace/Reactor.h"
 
 namespace TAO
 {
@@ -32,6 +33,7 @@ namespace TAO
         control_dropped_count_ (0),
         control_delivered_count_ (0),
         n_chunks_ (TheServiceParticipant->n_chunks ()),
+        association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier ()),
         topic_id_ (0),
         topic_servant_ (0),
         qos_ (TheServiceParticipant->initial_DataWriterQos ()),
@@ -179,12 +181,26 @@ namespace TAO
 
       {
         // I am not sure this guard is necessary for 
-        // publisher_servant_->add_associationsbut better safe than sorry.
-        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+        // publisher_servant_->add_associations but better safe than sorry.
+        // 1/11/06 SHH can cause deadlock so avoid getting the lock.
+        //ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
         // add associations to the transport before using
         // Built-In Topic support and telling the listener.
         this->publisher_servant_->add_associations( readers, this, qos_) ;
+      }
+
+
+      {
+        // protect readers_
+        ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+        CORBA::ULong readers_old_length = readers_.length();
+        CORBA::ULong num_new_readers = readers.length();
+        readers_.length(readers_old_length + num_new_readers);
+        for (CORBA::ULong reader_cnt = 0; reader_cnt < readers.length(); reader_cnt++)
+          {
+            readers_[reader_cnt+readers_old_length] = readers[reader_cnt].readerId;
+          }
       }
 
       ::DDS::InstanceHandleSeq handles;
@@ -349,6 +365,31 @@ namespace TAO
               }
           }
 
+
+        CORBA::ULong num_orig_readers = readers_.length();
+        CORBA::ULong num_removed_readers = readers.length();
+
+        for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; rm_idx++)
+          {
+            for (CORBA::ULong orig_idx = 0; 
+              orig_idx < num_orig_readers; 
+              orig_idx++)
+              {
+                if (readers_[orig_idx] == readers[rm_idx])
+                  {
+                    // move last element to this position.
+                    if (orig_idx < num_orig_readers - 1)
+                      {
+                        readers_[orig_idx] = readers_[num_orig_readers - 1];
+                      }
+                    num_orig_readers --;
+                    readers_.length (num_orig_readers);
+                    break;
+                  }
+              }
+          }
+
+
         CORBA::ULong subed_len = subscription_handles_.length();
         CORBA::ULong rd_len = handles.length ();
         for (CORBA::ULong rd_index = 0; rd_index < rd_len; rd_index++)
@@ -375,6 +416,34 @@ namespace TAO
       this->publisher_servant_->remove_associations (readers);
     }
       
+
+    void DataWriterImpl::remove_all_associations ()
+      {
+
+        TAO::DCPS::ReaderIdSeq readers;
+
+        CORBA::ULong size = readers_.length();
+        readers.length(size);
+
+        for (CORBA::ULong i = 0; i < size; i++)
+          {
+            readers[i] = readers_[i];
+          }
+
+        ACE_TRY_NEW_ENV
+          {
+            if (0 < size)
+              {
+                this->remove_associations(readers ACE_ENV_ARG_PARAMETER);
+              }
+          }
+        ACE_CATCHANY
+          {
+          }
+        ACE_ENDTRY;
+      }
+
+
     void 
     DataWriterImpl::update_incompatible_qos (
         const TAO::DCPS::IncompatibleQosStatus & status
@@ -719,16 +788,18 @@ namespace TAO
           // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
           // value that is for all intents and purposes unlimited
           // and we can use it for comparisons.
+          // use 2147483647L because that is the greatest value a signed
+          // CORBA::Long can have.
           // WARNING: The client risks running out of memory in this case.
-          depth = LONG_MAX;
+          depth = 2147483647L;
         }
-
-
+      
       if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
-        {
-          n_chunks_ = qos_.resource_limits.max_samples;
-        }
-
+          {
+            n_chunks_ = qos_.resource_limits.max_samples;
+          }
+        //else using value from Service_Participant
+  
       // enable the type specific part of this DataWriter
       this->enable_specific ();
 
@@ -742,7 +813,7 @@ namespace TAO
       
       // +1 because we might allocate one before releasing another
       // TBD - see if this +1 can be removed.
-      mb_allocator_ = new MessageBlockAllocator (n_chunks_+1); 
+      mb_allocator_ = new MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_); 
       db_allocator_ = new DataBlockAllocator (n_chunks_+1); 
       header_allocator_ = new DataSampleHeaderAllocator (n_chunks_+1);
       if (DCPS_debug_level >= 2) 
@@ -831,7 +902,6 @@ namespace TAO
                             ret);
         }
 
-  #ifndef PUBLISHER_TEST  
       // Add header with the registration sample data.
       ACE_Message_Block* registered_sample 
         = this->create_control_message(INSTANCE_REGISTRATION, 
@@ -840,7 +910,7 @@ namespace TAO
 
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_,
                                                         this, 
@@ -854,10 +924,9 @@ namespace TAO
                               ACE_TEXT(" send_control failed. \n")),
                               ::DDS::RETCODE_ERROR);
         }
-#endif
 
-        return ret;
-      }
+      return ret;
+    }
 
 
     ::DDS::ReturnCode_t 
@@ -887,7 +956,7 @@ namespace TAO
                                             unregistered_sample_data,
                                             this
                                             ACE_ENV_ARG_PARAMETER) ;
-      ACE_CHECK;
+      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -902,10 +971,9 @@ namespace TAO
                                         unregistered_sample_data, 
                                         source_timestamp) ;
 
-#ifndef PUBLISHER_TEST       
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_, 
                                                         this, 
@@ -919,7 +987,6 @@ namespace TAO
                               ACE_TEXT(" send_control failed. \n")),
                               ::DDS::RETCODE_ERROR);
         }
-#endif
 
       return ret;
     }
@@ -973,7 +1040,7 @@ namespace TAO
       ret = this->data_container_->enqueue( element, 
                                             handle 
                                             ACE_ENV_ARG_PARAMETER) ;
-      ACE_CHECK;
+      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
       if (ret != ::DDS::RETCODE_OK)
         {
@@ -1011,7 +1078,7 @@ namespace TAO
           = this->data_container_->dispose(handle, 
                                            registered_sample_data 
                                            ACE_ENV_ARG_PARAMETER) ;
-        ACE_CHECK;
+        ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
 
         if (ret != ::DDS::RETCODE_OK)
           {
@@ -1022,7 +1089,6 @@ namespace TAO
                                ret);
           }
 
-#ifndef PUBLISHER_TEST       
         ACE_Message_Block* message 
           = this->create_control_message(DISPOSE_INSTANCE, 
                                          registered_sample_data, 
@@ -1030,7 +1096,7 @@ namespace TAO
 
         SendControlStatus status;
         {
-          ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+          ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
           status  = this->publisher_servant_->send_control(publication_id_, 
                                                            this, 
@@ -1044,7 +1110,7 @@ namespace TAO
                                ACE_TEXT(" send_control failed. \n")),
                                ::DDS::RETCODE_ERROR);
           }
-#endif
+
         return ret;
       }
 
@@ -1117,7 +1183,10 @@ namespace TAO
       ACE_Message_Block* message;
       size_t max_marshaled_size = header_data.max_marshaled_size ();
 
-      ACE_NEW_RETURN (message,
+      ACE_NEW_MALLOC_RETURN (message,
+        static_cast<ACE_Message_Block*>(
+        mb_allocator_->malloc (
+        sizeof (ACE_Message_Block))),
         ACE_Message_Block(max_marshaled_size,
         ACE_Message_Block::MB_DATA,
         data, //cont
@@ -1144,8 +1213,17 @@ namespace TAO
           const ::DDS::Time_t& source_timestamp)
       {
         PublicationInstance* instance = 
-            reinterpret_cast<PublicationInstance*>(instance_handle);
-        
+            data_container_->get_handle_instance(instance_handle);
+
+        if (0 == instance)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) DataWriterImpl::create_sample_data_message ")
+            ACE_TEXT("failed to find instance for handle %d\n"),
+            instance_handle),
+            ::DDS::RETCODE_ERROR);
+        }
+
         DataSampleHeader header_data; 
         header_data.message_id_ = SAMPLE_DATA;
         //header_data.last_sample_
@@ -1326,7 +1404,7 @@ namespace TAO
 
       SendControlStatus status;
       {
-        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_lock());
+        ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
         status = this->publisher_servant_->send_control(publication_id_, 
                                                         this, 
@@ -1344,6 +1422,21 @@ namespace TAO
           last_liveliness_activity_time_ = now;
         }
     }
+
+
+    PublicationInstance*
+    DataWriterImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
+    {
+      PublicationInstance* instance = 0;
+      if (0 != data_container_)
+        {
+          instance = data_container_->get_handle_instance(handle);
+        }
+
+      return instance;
+    }
+
+
 
   } // namespace DCPS
 } // namespace TAO

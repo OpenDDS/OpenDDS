@@ -5,22 +5,20 @@
 #define TAO_DCPS_TRANSPORTSENDELEMENT_H
 
 #include  "TransportQueueElement.h"
+#include  "dds/DCPS/DataSampleList.h"
 
 namespace TAO
 {
 
   namespace DCPS
   {
-
-    struct DataSampleListElement;
-
-
     class TransportSendElement : public TransportQueueElement
     {
       public:
 
         TransportSendElement(int                    initial_count,
-                             DataSampleListElement* sample);
+                             DataSampleListElement* sample,
+                             TransportSendElementAllocator* allocator = 0);
         virtual ~TransportSendElement();
 
         /// Accessor for the publisher id.
@@ -40,6 +38,9 @@ namespace TAO
         /// This is the actual element that the transport framework was
         /// asked to send.
         DataSampleListElement* element_;
+
+        /// Reference to TransportSendElement allocator.
+        TransportSendElementAllocator* allocator_;
     };
 
   }

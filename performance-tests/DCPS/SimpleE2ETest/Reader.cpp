@@ -17,11 +17,28 @@
 #include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
 
 
+// Only for Microsoft VC6
+#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
+
+// Added unused arguments with default value to work around with vc6 
+// bug on template function instantiation.
+template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
+::DDS::ReturnCode_t read (TestStats* stats,
+                          ::DDS::Subscriber_ptr subscriber,
+                          ::DDS::DataReader_ptr reader,
+                          R* rd = 0)
+{
+  ACE_UNUSED_ARG(rd);
+
+#else
+
 template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 ::DDS::ReturnCode_t read (TestStats* stats,
                           ::DDS::Subscriber_ptr subscriber,
                           ::DDS::DataReader_ptr reader)
 {
+#endif
+
   R_var pt_dr 
     = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
   if (CORBA::is_nil (pt_dr.in ()))
@@ -162,7 +179,7 @@ Reader::Reader(::DDS::Subscriber_ptr subscriber,
   num_publishers_(num_publishers),
   num_samples_ (num_samples),
   data_size_ (data_size),
-  num_floats_per_sample_ (1 << data_size),
+  num_floats_per_sample_ (data_size),
   finished_sending_ (false)
 {
 }

@@ -5,7 +5,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
-use lib '../../../../../bin';
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 $testoutputfilename = "test.log";
@@ -13,6 +14,8 @@ $status = 0;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+
+unlink $dcpsrepo_ior;
 
 PerlACE::add_lib_path('../FooType');
 
@@ -29,7 +32,11 @@ open(SAVEERR, ">&STDERR");
 open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 $DCPSREPO->Spawn ();
-sleep 5;
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+    print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
+    $REPO->Kill (); $REPO->TimedWait (1);
+    exit 1;
+}
 
 $TestResult = $Test->SpawnWaitKill (60);
 
@@ -49,5 +56,7 @@ if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
 }
+
+unlink $dcpsrepo_ior;
 
 exit $status;

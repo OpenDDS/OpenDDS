@@ -25,6 +25,8 @@ namespace TAO
         /// Describes the local endpoint to be used to accept
         /// passive connections.
         ACE_INET_Addr local_address_;
+
+        bool enable_nagle_algorithm_;
     };
 
   } /* namespace DCPS */

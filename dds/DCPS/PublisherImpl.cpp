@@ -235,7 +235,7 @@ namespace TAO
         {
           ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                             guard, 
-                            this->lock_, 
+                            this->pi_lock_, 
                             ::DDS::RETCODE_ERROR);
 
           publication_id = dw_servant->get_publication_id ();
@@ -282,6 +282,7 @@ namespace TAO
         
           delete dw_info;
 
+          dw_servant->remove_all_associations();
           dw_servant->cleanup ();
         }
 
@@ -338,7 +339,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::DataWriter::_nil ());
 
         // If multiple entries whose key is "topic_name" then which one is 
@@ -385,7 +386,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
 
         for (it = datawriter_map_.begin (); it != datawriter_map_.end (); )
@@ -507,7 +508,7 @@ namespace TAO
 
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
         suspend_depth_count_ ++;
         return ::DDS::RETCODE_OK;
@@ -530,7 +531,7 @@ namespace TAO
         
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_, 
+                          this->pi_lock_, 
                           ::DDS::RETCODE_ERROR);
 
         suspend_depth_count_ --;
@@ -680,7 +681,7 @@ namespace TAO
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_,
+                          this->pi_lock_,
                           -1);
         return datawriter_map_.empty () && publication_map_.empty ();
       }
@@ -783,7 +784,7 @@ namespace TAO
         {
           ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                             guard, 
-                            this->lock_,
+                            this->pi_lock_,
                             ::DDS::RETCODE_ERROR);
           DataWriterMap::iterator it
             = datawriter_map_.insert(DataWriterMap::value_type(topic_name, info));
@@ -835,7 +836,7 @@ namespace TAO
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
                           guard, 
-                          this->lock_,
+                          this->pi_lock_,
                           ::DDS::RETCODE_ERROR);
 
         DataSampleList list = writer->get_unsent_data() ;
@@ -853,47 +854,8 @@ namespace TAO
         {
           // Do LATENCY_BUDGET processing here.
           // Do coherency processing here.
-    #ifndef PUBLISHER_TEST
           // tell the transport to send the data sample(s).
           this->send(list) ;
-    #else
-      #ifdef WIN32
-      #pragma message ("building PUBLISHER_TEST version - not with Transport")
-      #endif
-          struct Foo 
-          {
-            long  long_value;  // It might be the instance key
-            long  handle_value;
-            long  sample_sequence;
-            long  writer_id;
-          };
-
-          FILE* fp = ACE_OS::fopen ("Foo.txt", ACE_LIB_TEXT("a+"));
-          if (fp == 0)
-          {
-              ACE_ERROR_RETURN ((LM_ERROR,
-                                ACE_LIB_TEXT("Unable to open Foo.txt for writing:(%u) %p\n"),
-                                errno, 
-                                ACE_LIB_TEXT("PublisherImpl::data_available")), 
-                                ::DDS::RETCODE_ERROR);
-          }
-
-          DataSampleListElement* current = list.head_;
-          for (ssize_t i = 0; 
-            i < list.size_; 
-            i ++)
-          {
-            writer->data_delivered(current) ;
-            ACE_Message_Block* data = current->sample_->cont ();
-            Foo* foo = (Foo*)(data->rd_ptr ());
-            ACE_OS::fprintf (fp, "%d %d %d %d\n", foo->long_value, 
-                                                  foo->handle_value, 
-                                                  foo->sample_sequence, 
-                                                  foo->writer_id);
-            current = current->next_send_sample_;
-          }
-          fclose (fp);
-      #endif
         }
         return ::DDS::RETCODE_OK;
       }

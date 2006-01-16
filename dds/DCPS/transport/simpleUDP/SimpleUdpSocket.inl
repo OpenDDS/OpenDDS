@@ -38,63 +38,6 @@ TAO::DCPS::SimpleUdpSocket::close_socket()
 }
 
 
-ACE_INLINE int
-TAO::DCPS::SimpleUdpSocket::set_receive_strategy
-                                     (TransportReceiveStrategy* strategy,
-                                      TransportReactorTask*     reactor_task)
-{
-  DBG_ENTRY("SimpleUdpSocket","set_receive_strategy");
-
-  // Keep a "copy" of the reference for ourselves
-  strategy->_add_ref();
-  this->receive_strategy_ = strategy;
-
-  // Keep a "copy" of the reference for ourselves
-  reactor_task->_add_ref();
-  this->task_ = reactor_task;
-
-  // Register with the reactor.
-  if (this->task_->get_reactor()->register_handler
-                                      (this,
-                                       ACE_Event_Handler::READ_MASK) == -1)
-    {
-      // Drop the reference to the receive strategy
-      this->receive_strategy_ = 0;
-
-      // Drop the reference to the reactor task.
-      this->task_ = 0;
-
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleUdpSocket cannot register with "
-                        "reactor\n"),
-                       -1);
-    }
-
-  return 0;
-}
-
-
-ACE_INLINE void
-TAO::DCPS::SimpleUdpSocket::remove_receive_strategy()
-{
-  DBG_ENTRY("SimpleUdpSocket","remove_receive_strategy");
-
-  if (!this->task_.is_nil())
-    {
-      // Unregister from the reactor.
-      this->task_->get_reactor()->remove_handler(this,
-                                                 ACE_Event_Handler::READ_MASK |
-                                                 ACE_Event_Handler::DONT_CALL);
-    }
-
-  // Drop the reference to the receive strategy
-  this->receive_strategy_ = 0;
-
-  // Drop the reference to the reactor task
-  this->task_ = 0;
-}
-
-
 ACE_INLINE ssize_t
 TAO::DCPS::SimpleUdpSocket::send_bytes(const iovec iov[],
                                        int   n,

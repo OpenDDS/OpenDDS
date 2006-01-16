@@ -16,8 +16,8 @@ class TestStats
         expected_packets_(0),
         data_size_(0),
         num_bytes_per_packet_(0),
-        received_first_packet_(false),
-        packet_count_(0)
+        packet_count_(0),
+        received_first_packet_(false)
     {}
 
     void init(unsigned num_publishers,
@@ -83,7 +83,7 @@ class TestStats
                  expected_packets_,
                  packet_count_,
                  data_size_,
-                 1 << data_size_,
+                 data_size_,
                  num_bytes_per_packet_,
                  total_time,
                  packet_time));
@@ -116,7 +116,7 @@ class TestStats
                  expected_packets_,
                  expected_packets_,
                  data_size_,
-                 1 << data_size_,
+                 data_size_,
                  num_bytes_per_packet_,
                  total_time,
                  packet_time));

@@ -170,10 +170,10 @@ namespace TAO
         size_t max_samples_;
 
         /// Configuration - optimum transport packet size (bytes)
-        ACE_UINT16 optimum_size_;
+        ACE_UINT32 optimum_size_;
 
         /// Configuration - max transport packet size (bytes)
-        ACE_UINT16 max_size_;
+        ACE_UINT32 max_size_;
 
         /// Used during backpressure situations to hold samples that have
         /// not yet been made to be part of a transport packet, and are
@@ -232,12 +232,32 @@ namespace TAO
         TransportQueueElement** delayed_delivered_notification_queue_;
         size_t num_delayed_notifications_;
 
+        /// Allocator for header data block.
+        TransportMessageBlockAllocator header_db_allocator_;
+        
+        /// Allocator for header message block.
+        TransportDataBlockAllocator header_mb_allocator_;
+
         /// The thread synch object.
         ThreadSynch* synch_;
 
         /// This lock will protect critical sections of code that play a
         /// role in the sending of data.
         LockType lock_;
+
+
+
+//remove these are only for debugging: DUMP_FOR_PACKET_INFO
+        protected:
+    ACE_Message_Block*    dup_pkt_chain;
+    ACE_Message_Block*    act_pkt_chain_ptr;
+    void* act_elems_head_ptr;
+    ACE_Message_Block*    dup_elems_msg;
+    ACE_Message_Block*    act_elems_msg_ptr;
+    TransportHeader       dup_presend_header;
+    const char * called_from;
+    const char * completely_filled;
+
     };
 
   }  /* namespace DCPS */

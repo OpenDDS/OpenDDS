@@ -21,5 +21,5 @@ namespace TAO {
     const char* BUILT_IN_PUBLICATION_TOPIC_TYPE = "PUBLICATION_BUILT_IN_TOPIC_TYPE";
 
 
-  }; // End of namespace DCPS
+  } // End of namespace DCPS
 }; // End of namespace TAO

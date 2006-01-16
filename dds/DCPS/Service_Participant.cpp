@@ -11,6 +11,8 @@
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include  "tao/ORB_Core.h"
 #include  "ace/Arg_Shifter.h"
+#include  "ace/Reactor.h"
+
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -27,6 +29,8 @@ namespace TAO
 
     const size_t DEFAULT_NUM_CHUNKS = 20;
 
+    const size_t DEFAULT_CHUNK_MULTIPLIER = 10;
+
     const int BIT_LOOKUP_DURATION_SEC = 2;
 
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
@@ -37,6 +41,7 @@ namespace TAO
     : orb_ (CORBA::ORB::_nil ()), 
       orb_from_user_(0),
       n_chunks_ (DEFAULT_NUM_CHUNKS),
+      association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (false),
@@ -110,6 +115,17 @@ namespace TAO
       ACE_ASSERT (! CORBA::is_nil (orb_.in ()));
 
       return CORBA::ORB::_duplicate (orb_.in ());
+    }
+
+    PortableServer::POA_ptr 
+    Service_Participant::the_poa() 
+    {
+      if (CORBA::is_nil (root_poa_.in ()))
+        {
+          CORBA::Object_var obj = orb_->resolve_initial_references( "RootPOA" );
+          root_poa_ = PortableServer::POA::_narrow( obj.in() );
+        }
+      return PortableServer::POA::_duplicate (root_poa_.in ());
     }
 
     void 
@@ -292,14 +308,19 @@ namespace TAO
               DCPS_debug_level = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
             }
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
             {
               ior = currentArg;
               arg_shifter.consume_arg ();
             }
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
+            {
+              association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
             }
           else 
