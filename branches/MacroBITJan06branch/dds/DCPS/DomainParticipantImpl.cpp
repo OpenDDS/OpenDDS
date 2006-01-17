@@ -10,11 +10,14 @@
 #include  "Marked_Default_Qos.h"
 #include  "Registered_Data_Types.h"
 #include  "Transient_Kludge.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include  "BuiltInTopicUtils.h"
 #include  "ParticipantBuiltinTopicDataTypeSupportImpl.h"
 #include  "PublicationBuiltinTopicDataTypeSupportImpl.h"
 #include  "SubscriptionBuiltinTopicDataTypeSupportImpl.h"
 #include  "TopicBuiltinTopicDataTypeSupportImpl.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include  "tao/debug.h"
 
@@ -1026,6 +1029,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -1083,6 +1087,10 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
 
@@ -1095,6 +1103,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -1141,6 +1150,10 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
 
@@ -1153,6 +1166,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -1199,6 +1213,10 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
 
@@ -1211,6 +1229,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -1257,6 +1276,10 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
 
@@ -1407,6 +1430,7 @@ namespace TAO
       
       if (ret == ::DDS::RETCODE_OK && ! TheTransientKludge->is_enabled ())
         {
+#if !defined (DDS_HAS_MINIMUM_BIT)
           if (TheServiceParticipant->get_BIT ())
             {
               return init_bit ();
@@ -1415,6 +1439,9 @@ namespace TAO
             {
               return ::DDS::RETCODE_OK;
             }
+#else
+          return ::DDS::RETCODE_OK;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
         }
       else 
         {
@@ -1575,6 +1602,7 @@ namespace TAO
     ::DDS::ReturnCode_t
     DomainParticipantImpl::init_bit ()
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       ::DDS::ReturnCode_t ret;
 
       if (((ret = init_bit_subscriber ()) == ::DDS::RETCODE_OK)
@@ -1588,12 +1616,16 @@ namespace TAO
         {
           return ret;
         }
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
 
     ::DDS::ReturnCode_t
     DomainParticipantImpl::init_bit_topics ()
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       ACE_TRY_NEW_ENV
       {
         ::DDS::TopicQos topic_qos;
@@ -1770,6 +1802,9 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
     
 
@@ -1803,6 +1838,7 @@ namespace TAO
     ::DDS::ReturnCode_t
     DomainParticipantImpl::init_bit_datareaders ()
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       ACE_TRY_NEW_ENV
         {
           ::DDS::DataReaderQos dr_qos;
@@ -1884,12 +1920,17 @@ namespace TAO
       ACE_ENDTRY;
         
       return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
     
     ::DDS::ReturnCode_t
     DomainParticipantImpl::attach_bit_transport ()
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
        ACE_TRY_NEW_ENV
       {
         // Attach the Subscriber with the TransportImpl.
@@ -1940,6 +1981,9 @@ namespace TAO
       ACE_ENDTRY;
 
       return ::DDS::RETCODE_OK;
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
    } // namespace DCPS

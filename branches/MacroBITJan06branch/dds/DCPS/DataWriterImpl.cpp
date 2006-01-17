@@ -125,10 +125,12 @@ namespace TAO
       topic_name_    = topic_servant_->get_name ();
       topic_id_      = topic_servant_->get_id ();
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
       is_bit_ = ACE_OS::strcmp (topic_name_.in (), BUILT_IN_PARTICIPANT_TOPIC) == 0
                 || ACE_OS::strcmp (topic_name_.in (), BUILT_IN_TOPIC_TOPIC) == 0
                 || ACE_OS::strcmp (topic_name_.in (), BUILT_IN_SUBSCRIPTION_TOPIC) == 0 
                 || ACE_OS::strcmp (topic_name_.in (), BUILT_IN_PUBLICATION_TOPIC) == 0;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
       qos_ = qos;
       //Note: OK to _duplicate(nil).
@@ -221,6 +223,7 @@ namespace TAO
           //      builtin topics.
           if (TheServiceParticipant->get_BIT () == true)
             {
+#if !defined (DDS_HAS_MINIMUM_BIT)
               BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
                             ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                             ::DDS::SubscriptionBuiltinTopicDataSeq,
@@ -239,6 +242,7 @@ namespace TAO
                               ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
                   return;
                 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
             }
           else
             {
@@ -335,6 +339,7 @@ namespace TAO
             //      builtin topics.
             if (TheServiceParticipant->get_BIT () == true)
               {
+#if !defined (DDS_HAS_MINIMUM_BIT)
               BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
                           ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                           ::DDS::SubscriptionBuiltinTopicDataSeq,
@@ -353,6 +358,7 @@ namespace TAO
                               ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
                   return;
                 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
               }
             else
               {
@@ -709,6 +715,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -734,6 +741,10 @@ namespace TAO
         }
 
       return ret;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
     
     ::DDS::ReturnCode_t 
