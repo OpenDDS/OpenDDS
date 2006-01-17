@@ -635,7 +635,9 @@ int TAO_DDS_DCPSInfo_i::load_domains (const char* filename,
 
             if (use_bit)
               {
+#if !defined (DDS_HAS_MINIMUM_BIT)
                 bit_status = domainPtr->init_built_in_topics();
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
               }
 
             if (0 == bit_status)

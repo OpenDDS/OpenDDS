@@ -1,3 +1,26 @@
+Tue Jan 17 13:01:40 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Added DDS_HAS_MINIMUM_BIT macro to build without 
+          Built In Topic support.
+          Defining the macro will NOT build BIT support.
+
+Tue Jan 17 12:58:45 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+
+          Fixed name of template instantiation macro.
+
 Mon Jan 16 10:35:06 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:

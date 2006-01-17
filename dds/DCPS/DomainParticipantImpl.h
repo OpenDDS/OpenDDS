@@ -12,10 +12,14 @@
 #include  "dds/DdsDcpsTopicC.h"
 #include  "dds/DdsDcpsDomainS.h"
 #include  "dds/DdsDcpsInfoC.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include  "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
 #include  "dds/PublicationBuiltinTopicDataTypeSupportC.h"
 #include  "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
 #include  "dds/TopicBuiltinTopicDataTypeSupportC.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 #include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "ace/Hash_Map_Manager.h"
 #include  "ace/Null_Mutex.h"
@@ -441,6 +445,8 @@ namespace TAO
       ::DDS::Topic_var       bit_pub_topic_;
       /// The topic for built in topic subscription.
       ::DDS::Topic_var       bit_sub_topic_;
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.
       ::DDS::ParticipantBuiltinTopicDataDataReader_var  bit_part_dr_;
       /// The datareader for built in topic topic.
@@ -449,6 +455,7 @@ namespace TAO
       ::DDS::PublicationBuiltinTopicDataDataReader_var  bit_pub_dr_;
       /// The datareader for built in topic subscription.
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
     };
 
   } // namespace DCPS
