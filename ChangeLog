@@ -1,3 +1,10 @@
+Fri Jan 20 14:02:53 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/transport/simple_n/DDS_transport_simple_n.mpc:
+
+          Added dependency on SimpleUdp library for this static loading SimpleUdp
+          example.
+          
 Fri Jan 20 13:41:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleUDP/SimpleUdp.cpp:
