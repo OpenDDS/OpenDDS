@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTSENDSTRATEGY_H
 #define TAO_DCPS_TRANSPORTSENDSTRATEGY_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ThreadSynchWorker.h"
 #include  "TransportDefs.h"
@@ -25,8 +26,9 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class TransportSendStrategy : public RcObject<ACE_SYNCH_MUTEX>,
-                                  public ThreadSynchWorker
+    class TAO_DdsDcps_Export TransportSendStrategy 
+      : public RcObject<ACE_SYNCH_MUTEX>,
+        public ThreadSynchWorker
     {
       public:
 

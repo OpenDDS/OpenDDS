@@ -1,8 +1,5 @@
 #include "PubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -130,22 +127,28 @@ PubDriver::init()
   DBG_ENTRY("PubDriver","init");
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Use TheTransportFactory to register a new SimpleTcpFactory "
-             "object with the SIMPLE_TCP type_id (%d).\n", SIMPLE_TCP));
+             "Use TheTransportFactory to create a TransportImpl object "
+             "of SimpleTcp with the ALL_TRAFFIC transport_id (%d).\n",
+             ALL_TRAFFIC));
 
-  TheTransportFactory->register_type(SIMPLE_TCP,
-                                     new TAO::DCPS::SimpleTcpFactory());
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Create a new SimpleTcpConfiguration object.\n"));
+             "Get an existing or create a new SimpleTcpConfiguration object.\n"));
 
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-                                    new TAO::DCPS::SimpleTcpConfiguration();
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
+
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) pub_addr_.\n"));
 
-  config->local_address_ = this->pub_addr_;
+  tcp_config->local_address_ = this->pub_addr_;
 
   // Here are the other config settings that I could change (they have
   // default values if I don't change them here):
@@ -203,14 +206,6 @@ PubDriver::init()
   //
   //        Default ThreadSynchStrategy is a PerConnectionSynchStrategy object.
   //
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Use TheTransportFactory to create a TransportImpl object "
-             "of type_id SIMPLE_TCP with the ALL_TRAFFIC transport_id (%d).\n",
-             ALL_TRAFFIC));
-
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(ALL_TRAFFIC,SIMPLE_TCP);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));

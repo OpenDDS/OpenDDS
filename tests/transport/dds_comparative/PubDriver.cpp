@@ -4,11 +4,8 @@
 
 #include "PubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
 
@@ -98,33 +95,31 @@ PubDriver::parse_args(int& argc, char* argv[])
 void
 PubDriver::init()
 {
-  // Register a new SimpleTcpFactory factory with TheTransportFactory, and
-  // assign the type id, TRANSPORT_TYPE_ID, to this registration.
-  TheTransportFactory->register_type(TRANSPORT_TYPE_ID,
-                                     new TAO::DCPS::SimpleTcpFactory());
-
   // Ask TheTransportFactory to create a TransportImpl using the
-  // TransportImplFactory object that was registered with the type id,
-  // TRANSPORT_TYPE_ID.  We also assign an impl id (aka instance id) to
+  // "SimpleTcp" TransportImplFactory object that was registered as default
+  // SimpleTcp factory. We also assign an impl id (aka instance id) to
   // the TransportImpl object that gets created - the impl id we assign
   // to this TransportImpl object is TRANSPORT_IMPL_ID.  After the
-  // create() has completed, the TRANSPORT_IMPL_ID can be supplied to
-  // TransportImplFactory's obtain() method to retrieve a "copy" of the
-  // cached reference to the TransportImpl object.
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(TRANSPORT_IMPL_ID,
-                                                      TRANSPORT_TYPE_ID);
-
+  // create_transport_impl() has completed, the 
+  // obtain() would give a "copy" of the cached reference to the 
+  // TransportImpl object.
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-                                    new TAO::DCPS::SimpleTcpConfiguration();
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, "SimpleTcp");
+      
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
 
   // We use all of the default configuration settings, except for those
   // that need to be set (ie, the default values are not valid).
 
   // The only setting that falls into this category is the local address,
   // which we have saved in a data member.
-  config->local_address_ = this->local_address_;
+  tcp_config->local_address_ = this->local_address_;
 
   // Supply the config object to the TransportImpl object.
   if (transport_impl->configure(config.in()) != 0)

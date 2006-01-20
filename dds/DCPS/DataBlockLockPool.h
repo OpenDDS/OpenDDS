@@ -15,7 +15,7 @@
 #include "ace/Lock_Adapter_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
-#include "dds/DCPS/dcps_export.h"
+#include "dcps_export.h"
 
 /**
  * @class DataBlockLockPool

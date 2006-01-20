@@ -4,6 +4,7 @@
 #ifndef TAO_DDS_RCOBJECT_T_H
 #define TAO_DDS_RCOBJECT_T_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "ace/Atomic_Op.h"
 #include  "ace/Malloc_Base.h"
 
@@ -18,7 +19,7 @@ namespace TAO
     /// The T type is an ace lock type
     /// (eg, ACE_SYNCH_MUTEX, ACE_NULL_MUTEX, etc...)
     template <typename T>
-    class RcObject
+    class TAO_DdsDcps_Export RcObject
     {
       public:
 

@@ -35,14 +35,14 @@ unlink $subreadyfile;
 # Subscriber command and arguments.
 #
 my $subscriberCmd  = "./simple_subscriber" ;
-my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $subscriberArgs = "-ORBSvcConf udp.conf -p $publisherId:$publisherHost:$publisherPort "
                    . "-s $subscriberId:$subscriberHost:$subscriberPort " ;
 
 #
 # Publisher command and arguments.
 #
 my $publisherCmd  = "./simple_publisher" ;
-my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $publisherArgs = "-ORBSvcConf udp.conf -p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$subscriberHost:$subscriberPort " ;
 
 #

@@ -21,6 +21,8 @@ namespace TAO
 
         SimpleTcpConfiguration();
         virtual ~SimpleTcpConfiguration();
+        virtual int load (const TransportIdType& id, 
+                          ACE_Configuration_Heap& cf);
 
         /// Describes the local endpoint to be used to accept
         /// passive connections.

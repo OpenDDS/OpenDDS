@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_SIMPLEUDPRECEIVESTRATEGY_H
 #define TAO_DCPS_SIMPLEUDPRECEIVESTRATEGY_H
 
+#include  "SimpleUdp_export.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include  "SimpleUdpTransport_rch.h"
 #include  "SimpleUdpSocket_rch.h"
@@ -16,7 +17,8 @@ namespace TAO
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export SimpleUdpReceiveStrategy : public TransportReceiveStrategy
+    class SimpleUdp_Export SimpleUdpReceiveStrategy 
+      : public TransportReceiveStrategy
     {
       public:
 

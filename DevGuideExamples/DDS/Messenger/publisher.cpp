@@ -15,13 +15,11 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #include <ace/streams.h>
 
-const TAO::DCPS::TransportFactory::IdType TCP_TYPE_ID = 1;
-const TAO::DCPS::TransportFactory::IdType TCP_IMPL_ID = 1;
+const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
+
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* pub_finished_filename = "publisher_finished.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
@@ -62,17 +60,8 @@ int main (int argc, char *argv[]) {
       exit(1);
     }
 
-    // Initialize the transport
-    TheTransportFactory->register_type(TCP_TYPE_ID,
-                                       new TAO::DCPS::SimpleTcpFactory());
-    TAO::DCPS::SimpleTcpConfiguration_rch writer_config =
-      new TAO::DCPS::SimpleTcpConfiguration();
     TAO::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create(TCP_IMPL_ID, TCP_TYPE_ID);
-    if (tcp_impl->configure(writer_config.in()) != 0) {
-      cerr << "Failed to configure the transport." << endl;
-      exit(1);
-    }
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, AUTO_CONFIG);
 
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,

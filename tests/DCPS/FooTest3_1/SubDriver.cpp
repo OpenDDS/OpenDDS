@@ -1,8 +1,6 @@
 #include "SubDriver.h"
 #include "TestException.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
@@ -148,45 +146,23 @@ SubDriver::init(int& argc, char* argv[])
                           ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
-  // SIMPLE_TCP is a "type_id".  The register_type() method tells
-  // TheTransportFactory which TransportImplFactory object it should
-  // delegate to when it is asked to create() SIMPLE_TCP TransportImpl
-  // objects.  For this test, this is the only type we register with
-  // TheTransportFactory.
-  TheTransportFactory->register_type(SIMPLE_TCP,
-                                     new TAO::DCPS::SimpleTcpFactory());
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
-  // Now we can ask TheTransportFactory to create a TransportImpl object
-  // using the SIMPLE_TCP type_id.  We also supply an identifier for this
-  // particular TransportImpl object that will be created.  This is known
-  // as the "impl_id", or "the TransportImpl's instance id".  The point is
-  // that we assign the impl_id, and TheTransportFactory caches a reference
-  // to the newly created TransportImpl object using the impl_id (ALL_TRAFFIC
-  // in our case) as a key to the cache map.  Other parts of this client
-  // application code will be able use the obtain() method on
-  // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
-  // a reference to the cached TransportImpl will be returned.
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(ALL_TRAFFIC,SIMPLE_TCP);
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  // Build up the SimpleTcpConfiguration object.  It just has one field
-  // to set - the local_address_ field.  This is the address that will be
-  // used to open an acceptor object to listen for passive connection
-  // requests.  This is the TransportImpl object's (local) "endpoint" address.
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-                                   new TAO::DCPS::SimpleTcpConfiguration(); 
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
 
-  config->local_address_ = this->sub_addr_;
+  tcp_config->local_address_ = this->sub_addr_;
 
-  // Supply the config object to the TranportImpl object via its configure()
-  // method.
   if (transport_impl->configure(config.in ()) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) Failed to configure the transport impl\n"));
       throw TestException();
     }
-
   // And we are done with the init().
 }
 

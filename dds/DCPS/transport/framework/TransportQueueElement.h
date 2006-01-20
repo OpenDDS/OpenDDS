@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTQUEUEELEMENT_H
 #define TAO_DCPS_TRANSPORTQUEUEELEMENT_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "ace/Synch.h"
 
@@ -36,7 +37,7 @@ namespace TAO
      * This wrapper object will "return the loan" when all DataLinks have
      * "returned" their sub-loans.
      */
-    class TransportQueueElement
+    class TAO_DdsDcps_Export TransportQueueElement
     {
       public:
 

@@ -35,13 +35,13 @@ $parameters = "-r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
 
 if ($ARGV[0] eq 'udp') {
-  $parameters .= " -us -s localhost:16701 -up -p localhost:29803";
+  $parameters .= " -ORBSvcConf udp.conf -us -s localhost:16701 -up -p localhost:29803";
 }
 if ($ARGV[0] eq 'give_addrs') {
   $parameters .= " -s localhost:16701 -p localhost:29803";
 }
 elsif ($ARGV[0] eq 'diff_trans') {
-  $parameters .= " -up -p localhost:29803";
+  $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";
 }
 
 $FooTest5 = new PerlACE::Process ("main", $parameters);

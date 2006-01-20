@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_SIMPLEUDPTRANSPORT_H
 #define TAO_DCPS_SIMPLEUDPTRANSPORT_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include  "SimpleUdp_export.h"
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "SimpleUdpConfiguration_rch.h"
 #include  "SimpleUdpDataLink_rch.h"
@@ -26,7 +26,7 @@ namespace TAO
     class ReceivedDataSample;
 
 
-    class TAO_DdsDcps_Export SimpleUdpTransport : public TransportImpl
+    class SimpleUdp_Export SimpleUdpTransport : public TransportImpl
     {
       public:
 

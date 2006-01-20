@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTSENDCONTROLELEMENT_H
 #define TAO_DCPS_TRANSPORTSENDCONTROLELEMENT_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "TransportDefs.h"
 #include  "TransportQueueElement.h"
 

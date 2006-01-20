@@ -147,6 +147,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/TransportConfiguration.cpp
     DCPS/transport/framework/TransportDebug.cpp
     DCPS/transport/framework/TransportFactory.cpp
+    DCPS/transport/framework/TransportGenerator.cpp
     DCPS/transport/framework/TransportHeader.cpp
     DCPS/transport/framework/TransportImpl.cpp
     DCPS/transport/framework/TransportImplFactory.cpp
@@ -160,24 +161,16 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/TransportSendElement.cpp
     DCPS/transport/framework/TransportSendListener.cpp
     DCPS/transport/framework/TransportSendStrategy.cpp
-
     DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp
     DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp
     DCPS/transport/simpleTCP/SimpleTcpConnection.cpp
     DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp
     DCPS/transport/simpleTCP/SimpleTcpFactory.cpp
+    DCPS/transport/simpleTCP/SimpleTcpGenerator.cpp
     DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp
     DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp
     DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp
     DCPS/transport/simpleTCP/SimpleTcpTransport.cpp
-
-    DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp
-    DCPS/transport/simpleUDP/SimpleUdpDataLink.cpp
-    DCPS/transport/simpleUDP/SimpleUdpFactory.cpp
-    DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.cpp
-    DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp
-    DCPS/transport/simpleUDP/SimpleUdpSocket.cpp
-    DCPS/transport/simpleUDP/SimpleUdpTransport.cpp
   }
 
   Inline_Files {  

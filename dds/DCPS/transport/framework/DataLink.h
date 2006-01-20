@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_DATALINK_H
 #define TAO_DCPS_DATALINK_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "TransportDefs.h"
 #include  "ReceiveListenerSetMap.h"
@@ -27,7 +28,7 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class DataLink : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

@@ -1,3 +1,200 @@
+Fri Jan 20 13:21:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        The main changes are adding DDS file configuration feature. The SimpleTcp
+        is still a part of DDSDcps library and other concrete transport libraries
+        such as SimpleUdp can be dynamically or statically loaded.
+        See the projects\DDS\design\configuration_design.txt (from CVS) for
+        various scenarios of using dds configurations:
+
+        * dcpsexe_with_udp.mpb:
+        
+          Added base project for SimpleUdp transport applications.
+          
+        * dds/DdsDcps.mpc:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportExceptions.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportGenerator.cpp:
+        * dds/DCPS/transport/framework/TransportGenerator.h:
+        * dds/DCPS/transport/framework/TransportGenerator_rch.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpGenerator.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpGenerator.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
+
+          These files are changed for the dds configuration feature.
+          
+        * dds/DCPS/DataBlockLockPool.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/BuildChainVisitor.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/NullSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PoolSynch.h:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/ThreadSynch.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.h:
+        
+          These files are changed to add the export macro.
+        
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/udp.conf:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/conf.ini:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/README:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4_0/common.h:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimplePublisher.h:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/simple/SimpleSubscriber.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.h:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.h:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimplePublisher.h:
+        * tests/transport/simple_n/SimpleSubscriber.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.h:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/DDS_transport_udp_simple.mpc:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/README:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimplePublisher.h:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.h:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple/udp.conf:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/run_test.pl:
+        * tests/transport/udp_simple_n/SimplePublisher.cpp:
+        * tests/transport/udp_simple_n/SimplePublisher.h:
+        * tests/transport/udp_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple_n/SimpleSubscriber.h:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple_n/udp.conf:
+        
+          Applied the new TransportFactory interfaces for generating and cofiguring 
+          the TransportImpl object to all DDS tests and made changes on the udp tests
+          to allow the SimpleUdp library statically or dynamically loaded.
+           
 Mon Jan 16 10:35:06 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:

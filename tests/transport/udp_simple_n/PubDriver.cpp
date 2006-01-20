@@ -1,8 +1,5 @@
 #include "PubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -25,6 +22,14 @@ PubDriver::~PubDriver()
 void
 PubDriver::run(int& argc, char* argv[])
 {
+  // Need call the ORB_init to dynamically load the SimpleUdp library via
+  // service configurator.
+  // initialize the orb
+  CORBA::ORB_var orb = CORBA::ORB_init (argc, 
+                                        argv, 
+                                        "TAO_DDS_DCPS" 
+                                        ACE_ENV_ARG_PARAMETER);
+  ACE_CHECK;
   parse_args(argc, argv);
   init();
   run();
@@ -144,16 +149,18 @@ PubDriver::parse_args(int& argc, char* argv[])
 void
 PubDriver::init()
 {
-  TheTransportFactory->register_type(SIMPLE_UDP,
-                                     new TAO::DCPS::SimpleUdpFactory());
 
-  TAO::DCPS::SimpleUdpConfiguration_rch config =
-                                    new TAO::DCPS::SimpleUdpConfiguration();
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+                                                  "SimpleUdp",
+                                                  DONT_AUTO_CONFIG);
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  config->local_address_ = this->pub_addr_;
+  SimpleUdpConfiguration* udp_config 
+    = static_cast <SimpleUdpConfiguration*> (config.in ());
 
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(ALL_TRAFFIC,SIMPLE_UDP);
+  udp_config->local_address_ = this->pub_addr_;
 
   if (transport_impl->configure(config.in()) != 0)
     {

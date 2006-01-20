@@ -10,9 +10,6 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -61,18 +58,19 @@ int init_reader_tranport ()
 {
   int status = 0;
 
-  TheTransportFactory->register_type(SIMPLE_UDP,
-                                     new TAO::DCPS::SimpleUdpFactory());
+  reader_transport_impl 
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
+                                                  "SimpleUdp", 
+                                                  DONT_AUTO_CONFIG);
 
-  TAO::DCPS::SimpleUdpConfiguration_rch reader_config =
-      new TAO::DCPS::SimpleUdpConfiguration();
+  TransportConfiguration_rch reader_config 
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
+
+  SimpleUdpConfiguration* reader_udp_config 
+    = static_cast <SimpleUdpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
-  reader_config->local_address_ = reader_address;
-
-  reader_transport_impl =
-      TheTransportFactory->create(SUB_TRAFFIC,
-                                  SIMPLE_UDP);
+  reader_udp_config->local_address_ = reader_address;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -91,20 +89,22 @@ int init_writer_tranport ()
 {
   int status = 0;
 
-  TheTransportFactory->register_type(SIMPLE_UDP,
-                                     new TAO::DCPS::SimpleUdpFactory());
+  writer_transport_impl 
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+                                                  "SimpleUdp",
+                                                  DONT_AUTO_CONFIG);
 
-  TAO::DCPS::SimpleUdpConfiguration_rch writer_config =
-      new TAO::DCPS::SimpleUdpConfiguration();
+  TransportConfiguration_rch writer_config 
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
 
-  writer_transport_impl =
-      TheTransportFactory->create(PUB_TRAFFIC,
-                                  SIMPLE_UDP);
+  SimpleUdpConfiguration* writer_udp_config 
+    = static_cast <SimpleUdpConfiguration*> (writer_config.in ());
+
 
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);
-      writer_config->local_address_ = writer_address;
+      writer_udp_config->local_address_ = writer_address;
     }
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)

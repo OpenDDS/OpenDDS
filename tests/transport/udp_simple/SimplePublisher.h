@@ -17,7 +17,7 @@ class SimplePublisher : public TAO::DCPS::TransportInterface
     SimplePublisher();
     virtual ~SimplePublisher();
 
-    void init(TAO::DCPS::TransportFactory::IdType transport_id,
+    void init(TAO::DCPS::TransportIdType               transport_id,
               TAO::DCPS::RepoId                   pub_id,
               ssize_t                             num_subscriptions,
               const TAO::DCPS::AssociationData*   subscriptions);

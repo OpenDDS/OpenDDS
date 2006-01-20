@@ -1,8 +1,6 @@
 #include "PubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
+
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -144,16 +142,17 @@ PubDriver::parse_args(int& argc, char* argv[])
 void
 PubDriver::init()
 {
-  TheTransportFactory->register_type(SIMPLE_TCP,
-                                     new TAO::DCPS::SimpleTcpFactory());
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-                                    new TAO::DCPS::SimpleTcpConfiguration();
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
 
-  config->local_address_ = this->pub_addr_;
-
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(ALL_TRAFFIC,SIMPLE_TCP);
+  tcp_config->local_address_ = this->pub_addr_;
 
   if (transport_impl->configure(config.in()) != 0)
     {

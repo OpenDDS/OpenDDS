@@ -41,11 +41,16 @@ static int init_reader_tranport ()
 
   if (using_udp)
     {
-      TheTransportFactory->register_type(SIMPLE_UDP,
-                                     new TAO::DCPS::SimpleUdpFactory());
+      reader_transport_impl =
+          TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
+                                                      "SimpleUdp",
+                                                      DONT_AUTO_CONFIG);
 
-      TAO::DCPS::SimpleUdpConfiguration_rch reader_config =
-          new TAO::DCPS::SimpleUdpConfiguration();
+      TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
+      
+      SimpleUdpConfiguration* reader_udp_config 
+        = static_cast <SimpleUdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -57,11 +62,8 @@ static int init_reader_tranport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      reader_config->local_address_ = reader_address;
+      reader_udp_config->local_address_ = reader_address;
 
-      reader_transport_impl =
-          TheTransportFactory->create(SUB_TRAFFIC,
-                                      SIMPLE_UDP);
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -73,22 +75,23 @@ static int init_reader_tranport ()
     }
   else
     {
-      TheTransportFactory->register_type(SIMPLE_TCP,
-                                         new TAO::DCPS::SimpleTcpFactory());
+      reader_transport_impl =
+          TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
+                                                      "SimpleTcp",
+                                                      DONT_AUTO_CONFIG);
 
-      TAO::DCPS::SimpleTcpConfiguration_rch reader_config =
-          new TAO::DCPS::SimpleTcpConfiguration();
+      TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+      
+      SimpleTcpConfiguration* reader_tcp_config
+        = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
         {
           ACE_INET_Addr reader_address (reader_address_str);
-          reader_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_ = reader_address;
         }
         // else use default address - OS assigned.
-
-      reader_transport_impl =
-          TheTransportFactory->create(SUB_TRAFFIC,
-                                      SIMPLE_TCP);
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {

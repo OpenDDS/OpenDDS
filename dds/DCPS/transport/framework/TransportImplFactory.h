@@ -6,6 +6,7 @@
 
 #include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
+#include  "TransportImpl_rch.h"
 #include  "ace/Synch.h"
 
 
@@ -32,7 +33,6 @@ namespace TAO
         // the default implementation is that the reactor is not required.
         virtual int requires_reactor() const;
 
-
       protected:
 
         TransportImplFactory();
@@ -40,6 +40,11 @@ namespace TAO
         /// This should return 0 (nil) if the create() cannot be done
         /// for any reason.
         virtual TransportImpl* create() = 0;
+
+      private:
+
+        /// Name of the concrete transport.
+        //ACE_CString transport_name_;
     };
 
   } /* namespace DCPS */

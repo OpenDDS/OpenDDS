@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_SIMPLEUDPSOCKET_H
 #define TAO_DCPS_SIMPLEUDPSOCKET_H
 
+#include  "SimpleUdp_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
@@ -19,7 +20,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class SimpleUdpSocket : public RcObject<ACE_SYNCH_MUTEX>,
+    class SimpleUdp_Export SimpleUdpSocket : public RcObject<ACE_SYNCH_MUTEX>, 
                             public ACE_Event_Handler
     {
       public:
@@ -46,7 +47,6 @@ namespace TAO
         ssize_t receive_bytes(iovec iov[],
                               int   n,
                               ACE_INET_Addr& remote_address);
-        
 
       private:
 

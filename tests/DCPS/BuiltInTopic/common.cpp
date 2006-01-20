@@ -4,9 +4,6 @@
 
 #include "common.h"
 #include "tests/DCPS/common/TestSupport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -45,45 +42,45 @@ TAO::DCPS::TransportImpl_rch writer_transport_impl;
 
 int init_transport ()
 {
-  TheTransportFactory->register_type(SIMPLE_TCP,
-                                     new TAO::DCPS::SimpleTcpFactory());
+  reader_transport_impl
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
-  TAO::DCPS::SimpleTcpConfiguration_rch reader_config =
-      new TAO::DCPS::SimpleTcpConfiguration();
+  TransportConfiguration_rch reader_config 
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+
+  SimpleTcpConfiguration* reader_tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
-  reader_config->local_address_ = reader_address;
-
-  reader_transport_impl =
-      TheTransportFactory->create(SUB_TRAFFIC,
-                                  SIMPLE_TCP);
+  reader_tcp_config->local_address_ = reader_address;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ::init_reader_tranport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      return -1;
-    }
+  {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ::init_reader_tranport: ")
+      ACE_TEXT("Failed to configure the transport.\n")));
+    return -1;
+  }
 
-  TAO::DCPS::SimpleTcpConfiguration_rch writer_config =
-      new TAO::DCPS::SimpleTcpConfiguration();
+  writer_transport_impl
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
-  writer_transport_impl =
-      TheTransportFactory->create(PUB_TRAFFIC,
-                                  SIMPLE_TCP);
+  TransportConfiguration_rch writer_config 
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+
+  SimpleTcpConfiguration* writer_tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
-  writer_config->local_address_ = writer_address;
+  writer_tcp_config->local_address_ = writer_address;
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::init_writer_tranport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      return -1;
-    }
-
+  {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ::init_writer_tranport: ")
+      ACE_TEXT("Failed to configure the transport.\n")));
+    return -1;
+  }
   return 0;
 }
 

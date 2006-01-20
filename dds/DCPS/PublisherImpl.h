@@ -29,7 +29,7 @@ namespace TAO
     class DataWriterImpl;
 
     /// Information about a DataWriter
-    struct PublisherDataWriterInfo {
+    struct TAO_DdsDcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
       DataWriterRemote_ptr         remote_writer_ ;
       /// The datawriter servant.

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
+#include  "SimpleUdp_pch.h"
 #include  "SimpleUdpReceiveStrategy.h"
 #include  "SimpleUdpSocket.h"
 #include  "SimpleUdpTransport.h"

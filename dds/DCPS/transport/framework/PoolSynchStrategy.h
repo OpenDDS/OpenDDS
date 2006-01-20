@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_POOLSYNCHSTRATEGY_H
 #define TAO_DCPS_POOLSYNCHSTRATEGY_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "ThreadSynchStrategy.h"
 #include  "ace/Task.h"
 #include  "ace/Synch.h"
@@ -15,7 +16,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class PoolSynchStrategy : public ACE_Task_Base,
+    class TAO_DdsDcps_Export PoolSynchStrategy : public ACE_Task_Base,
                               public ThreadSynchStrategy
     {
       public:

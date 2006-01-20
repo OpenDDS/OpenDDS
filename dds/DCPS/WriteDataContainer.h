@@ -70,7 +70,7 @@ namespace TAO
     *          should be a recursive lock so that: 1) we do not deadlock; and,
     *          2) we incur the cost of obtaining the lock only once.
     */
-    class WriteDataContainer 
+    class TAO_DdsDcps_Export WriteDataContainer 
     {
     public:
 
