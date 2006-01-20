@@ -1,3 +1,15 @@
+Fri Jan 20 13:41:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_export.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_pch.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_pch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.h:
+
+          Added new files that should be checked in in last commit.
+
 Fri Jan 20 13:21:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         The main changes are adding DDS file configuration feature. The SimpleTcp
