@@ -36,15 +36,15 @@ static int init_writer_tranport ()
 
   if (using_udp)
     {
-      TheTransportFactory->register_type(SIMPLE_UDP,
-                                         new TAO::DCPS::SimpleUdpFactory());
-
-      TAO::DCPS::SimpleUdpConfiguration_rch writer_config =
-          new TAO::DCPS::SimpleUdpConfiguration();
-
       writer_transport_impl =
-          TheTransportFactory->create(PUB_TRAFFIC,
-                                      SIMPLE_UDP);
+          TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
+                                                      "SimpleUdp",
+                                                      DONT_AUTO_CONFIG);
+      TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
+      
+      SimpleUdpConfiguration* writer_udp_config 
+        = static_cast <SimpleUdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -55,7 +55,7 @@ static int init_writer_tranport ()
         }
 
       ACE_INET_Addr writer_address (writer_address_str);
-      writer_config->local_address_ = writer_address;
+      writer_udp_config->local_address_ = writer_address;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -67,20 +67,21 @@ static int init_writer_tranport ()
     }
   else
     {
-      TheTransportFactory->register_type(SIMPLE_TCP,
-                                         new TAO::DCPS::SimpleTcpFactory());
-
-      TAO::DCPS::SimpleTcpConfiguration_rch writer_config =
-          new TAO::DCPS::SimpleTcpConfiguration();
-
       writer_transport_impl =
-          TheTransportFactory->create(PUB_TRAFFIC,
-                                      SIMPLE_TCP);
+          TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+                                                      "SimpleTcp",
+                                                      DONT_AUTO_CONFIG);
+
+      TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+      
+      SimpleTcpConfiguration* writer_tcp_config 
+        = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
 
       if (writer_address_given)
         {
           ACE_INET_Addr writer_address (writer_address_str);
-          writer_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_ = writer_address;
         }
         // else use default address - OS assigned.
 
@@ -489,5 +490,9 @@ int main (int argc, char *argv[])
     }
   ACE_ENDTRY;
 
+  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  //       main if the concrete transport libraries are loaded dynamically.
+  //       Otherwise cleanup after main() will encount access vilation.
+  writer_transport_impl = 0;
   return status;
 }

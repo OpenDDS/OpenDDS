@@ -33,7 +33,7 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 
 
 print $DCPSREPO->CommandLine(), "\n";
-$sub_parameters = "-a $sub_addr -p $num_writers"
+$sub_parameters = "-ORBSvcConf udp.conf -a $sub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size"
               . " -msi $num_messages -mxs $num_messages";
@@ -44,7 +44,7 @@ $sub_parameters = "-a $sub_addr -p $num_writers"
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "-a $pub_addr -p $num_writers"
+$pub_parameters = "-ORBSvcConf udp.conf -a $pub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000  -h 2000";

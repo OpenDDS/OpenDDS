@@ -25,7 +25,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::receive_bytes
 {
   DBG_ENTRY("SimpleTcpReceiveStrategy","receive_bytes");
 
-  // We don't do anything to the remote_address for the SimpleTCP case.
+  // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
 
   if (this->connection_.is_nil())
@@ -42,7 +42,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
                                  (ReceivedDataSample&  sample,
                                   const ACE_INET_Addr& remote_address)
 {
-  // We don't do anything to the remote_address for the SimpleTCP case.
+  // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
 
   this->link_->data_received(sample);

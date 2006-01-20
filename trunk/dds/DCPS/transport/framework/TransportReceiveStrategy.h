@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTRECEIVESTRATEGY
 #define TAO_DCPS_TRANSPORTRECEIVESTRATEGY
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "TransportHeader.h"
 #include  "ReceivedDataSample.h"
@@ -17,7 +18,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class TransportReceiveStrategy : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export TransportReceiveStrategy : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

@@ -4,11 +4,8 @@
 
 #include "SubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
 
@@ -96,17 +93,17 @@ SubDriver::parse_args(int& argc, char* argv[])
 void
 SubDriver::init()
 {
-  TheTransportFactory->register_type(TRANSPORT_TYPE_ID,
-                                     new TAO::DCPS::SimpleTcpFactory());
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, "SimpleTcp");
 
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(TRANSPORT_IMPL_ID,
-                                                      TRANSPORT_TYPE_ID);
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
 
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-                                    new TAO::DCPS::SimpleTcpConfiguration();
-
-  config->local_address_ = this->local_address_;
+  tcp_config->local_address_ = this->local_address_;
 
   if (transport_impl->configure(config.in()) != 0)
     {

@@ -4,6 +4,8 @@
 #ifndef TAO_DCPS_THREADSYNCHSTRATEGY_H
 #define TAO_DCPS_THREADSYNCHSTRATEGY_H
 
+#include  "dds/DCPS/dcps_export.h"
+
 namespace TAO
 {
   namespace DCPS
@@ -14,7 +16,7 @@ namespace TAO
 
 
 //MJM: Some class documentation here would be extremely helpful.
-    class ThreadSynchStrategy
+    class TAO_DdsDcps_Export ThreadSynchStrategy
     {
       public:
 

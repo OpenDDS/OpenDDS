@@ -5,11 +5,12 @@
 #define TAO_DCPS_TRANSPORTCONFIGURATION_H
 
 #include  "dds/DCPS/dcps_export.h"
+#include  "TransportDefs.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/Synch.h"
+#include  "ace/Configuration.h"
 
 class ACE_Reactor;
-
 
 namespace TAO
 {
@@ -60,16 +61,21 @@ namespace TAO
         /// Accessor for the "send thread strategy" object.
         ThreadSynchStrategy* send_thread_strategy();
 
+        /// Overwrite the default configurations with the configuration for the 
+        /// give transport_id in ACE_Configuration_Heap object.
+        virtual int  load (const TransportIdType& id, 
+                           ACE_Configuration_Heap& config);
+
         /// Flag used to marshall/demarshall bytes sent/received.
         bool swap_bytes_;
 
         /// Number of pre-created link (list) objects per pool for the
         /// "send queue" of each DataLink.
-        unsigned queue_links_per_pool_;
+        size_t queue_links_per_pool_;
 
         /// Initial number of pre-allocated pools of link (list) objects
         /// for the "send queue" of each DataLink.
-        unsigned queue_initial_pools_;
+        size_t queue_initial_pools_;
 
         /// Max size (in bytes) of a packet (packet header + sample(s))
         ACE_UINT32 max_packet_size_;
@@ -80,6 +86,7 @@ namespace TAO
         /// Optimum size (in bytes) of a packet (packet header + sample(s)).
         ACE_UINT32 optimum_packet_size_;
 
+        ACE_CString transport_type_;
 
       protected:
 
@@ -89,10 +96,14 @@ namespace TAO
 
       private:
 
+        /// Adjust the configuration values which gives warning on adjusted
+        /// value.
+        void adjust_config_value ();
+
         /// Thread strategy used for sending data samples (and incomplete
         /// packets) when a DataLink has encountered "backpressure".
         ThreadSynchStrategy* send_thread_strategy_;
-    };
+   };
 
   }
 

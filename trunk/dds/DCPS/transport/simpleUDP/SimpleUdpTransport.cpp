@@ -2,7 +2,7 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
+#include  "SimpleUdp_pch.h"
 #include  "SimpleUdpTransport.h"
 #include  "SimpleUdpSendStrategy.h"
 #include  "SimpleUdpReceiveStrategy.h"

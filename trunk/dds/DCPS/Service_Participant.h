@@ -170,7 +170,6 @@ namespace TAO
       /// Accessor of the TransportImpl used by the builtin topics.
       TransportImpl_rch bit_transport_impl ();
 
-
       /**
       * Accessor for bit_lookup_duration_sec_.
       * The accessor is used for client application to configure
@@ -194,6 +193,10 @@ namespace TAO
           return bit_enabled_;
         }
 
+      /** Create the TransportImpl for all builtin topics.
+       */
+      int init_bit_transport_impl ();
+
     private:
       
       /** Initalize default qos **/
@@ -204,9 +207,17 @@ namespace TAO
        */
       int parse_args (int &argc, ACE_TCHAR *argv[]);
 
-      /** Create the TransportImpl for all builtin topics.
+      /** Import the configuration file to the ACE_Configuration_Heap object and load 
+       *  common section configuration to the Service_Participant singleton and load
+       *  the factory and transport section configuration to the TransportFactory
+       *  singleton.
        */
-      int init_bit_transport_impl ();
+      int load_configuration ();
+
+      /** Load the common configuration to the Service_Participant singleton.
+       *  Note: The values from command line can overwrite the values in configuration file.
+       */
+      int load_common_configuration ();
 
       /// The orb object reference which can be provided by client or initialized  
       /// by this sigleton.
@@ -289,7 +300,10 @@ namespace TAO
       bool bit_enabled_;
 
       /// The timeout for lookup data from the builtin topic datareader.
-      int                                    bit_lookup_duration_;
+      int                                    bit_lookup_duration_sec_;
+
+      /// The configuration object that imports the configuration file.
+      ACE_Configuration_Heap cf_;
     };
 
    

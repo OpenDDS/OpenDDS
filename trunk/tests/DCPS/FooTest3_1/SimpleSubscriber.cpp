@@ -20,7 +20,7 @@ SimpleSubscriber::~SimpleSubscriber()
 
 
 void
-SimpleSubscriber::init(TAO::DCPS::TransportFactory::IdType transport_id,
+SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
                        TAO::DCPS::RepoId                   sub_id,
                        ssize_t                             num_publications,
                        const TAO::DCPS::AssociationData*   publications,

@@ -16,6 +16,8 @@ namespace TAO
       class Duplicate      : public Exception {};
       class UnableToCreate : public Exception {};
       class MiscProblem    : public Exception {};
+      class NotConfigured  : public Exception {};
+      class ConfigurationConflict  : public Exception {};
     }
 
   }  /* namespace DCPS */

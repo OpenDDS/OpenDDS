@@ -5,6 +5,7 @@
 #ifndef TAO_DDS_DCPS_DATAREADER_H
 #define TAO_DDS_DCPS_DATAREADER_H
 
+#include  "dcps_export.h"
 #include  "EntityImpl.h"
 #include  "dds/DdsDcpsTopicC.h"
 #include  "dds/DdsDcpsSubscriptionS.h"
@@ -41,7 +42,7 @@ namespace TAO
                 ReceivedDataAllocator;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
-    class WriterInfo {
+    class TAO_DdsDcps_Export WriterInfo {
       public:
         WriterInfo (); // needed for Hash_Map_Manager
 

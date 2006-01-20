@@ -22,6 +22,13 @@ TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
 
   GuardType guard(this->lock_);
 
+  if (config == 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: invalid configuration.\n"),
+                        -1);
+    }
+
   if (!this->config_.is_nil())
     {
       // We are rejecting this configuration attempt since this

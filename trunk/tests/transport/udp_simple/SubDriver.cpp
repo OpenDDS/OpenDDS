@@ -1,8 +1,8 @@
 #include "SubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h"
+// Include the SimpleUdp.h to make sure Initializer is created before the Service 
+// Configurator open service configure file.
+#include "dds/DCPS/transport/simpleUDP/SimpleUdp.h"
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -30,6 +30,15 @@ void
 SubDriver::run(int& argc, char* argv[])
 {
   DBG_SUB_ENTRY("SubDriver","run",1);
+  
+  // Need call the ORB_init to dynamically load the SimpleUdp library via
+  // service configurator.
+  // initialize the orb
+  CORBA::ORB_var orb = CORBA::ORB_init (argc, 
+                                        argv, 
+                                        "TAO_DDS_DCPS" 
+                                        ACE_ENV_ARG_PARAMETER);
+  ACE_CHECK;
 
   parse_args(argc, argv);
   init();
@@ -131,24 +140,12 @@ SubDriver::init()
   DBG_ENTRY("SubDriver","init");
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Use TheTransportFactory to register a new SimpleUdpFactory "
-             "object with the SIMPLE_UDP type_id (%d).\n", SIMPLE_UDP));
-
-  // SIMPLE_UDP is a "type_id".  The register_type() method tells
-  // TheTransportFactory which TransportImplFactory object it should
-  // delegate to when it is asked to create() SIMPLE_UDP TransportImpl
-  // objects.  For this test, this is the only type we register with
-  // TheTransportFactory.
-  TheTransportFactory->register_type(SIMPLE_UDP,
-                                     new TAO::DCPS::SimpleUdpFactory());
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Use TheTransportFactory to create a TransportImpl object "
-             "of type_id SIMPLE_UDP with the ALL_TRAFFIC transport_id (%d).\n",
+             "of SimpleUdp with the ALL_TRAFFIC transport_id (%d).\n",
              ALL_TRAFFIC));
 
   // Now we can ask TheTransportFactory to create a TransportImpl object
-  // using the SIMPLE_UDP type_id.  We also supply an identifier for this
+  // using the SimpleUdp factory.  We also supply an identifier for this
   // particular TransportImpl object that will be created.  This is known
   // as the "impl_id", or "the TransportImpl's instance id".  The point is
   // that we assign the impl_id, and TheTransportFactory caches a reference
@@ -157,19 +154,24 @@ SubDriver::init()
   // application code will be able use the obtain() method on
   // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
   // a reference to the cached TransportImpl will be returned.
-  TAO::DCPS::TransportImpl_rch transport_impl =
-                          TheTransportFactory->create(ALL_TRAFFIC,SIMPLE_UDP);
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+                                                  "SimpleUdp",
+                                                  DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create a new SimpleUdpConfiguration object.\n"));
 
-  TAO::DCPS::SimpleUdpConfiguration_rch config =
-                                      new TAO::DCPS::SimpleUdpConfiguration();
+  TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
+
+  SimpleUdpConfiguration* udp_config 
+    = static_cast <SimpleUdpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) sub_addr_.\n"));
 
-  config->local_address_ = this->sub_addr_;
+  udp_config->local_address_ = this->sub_addr_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));

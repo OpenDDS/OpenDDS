@@ -79,6 +79,7 @@ parse_args (int argc,
 
         }
       // Anything else we just skip
+
       else
         {
           arg_shifter.ignore_arg();
@@ -121,13 +122,6 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
-
-      // Check the non-ORB arguments.
-      ::parse_args (argc,
-                    argv
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
-
       TAO_DDS_DCPSInfo_i info;
 
       PortableServer::ObjectId_var oid = root_poa->activate_object(&info);
@@ -146,6 +140,15 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Initialize the DomainParticipantFactory
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+      ACE_TRY_CHECK;
+
+      // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
+      // command line options.
+
+      // Check the non-ORB arguments.
+      ::parse_args (argc,
+                    argv
+                    ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       if (::use_bits) 

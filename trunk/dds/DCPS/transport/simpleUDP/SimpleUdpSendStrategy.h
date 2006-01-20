@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_SIMPLEUDPSENDSTRATEGY_H
 #define TAO_DCPS_SIMPLEUDPSENDSTRATEGY_H
 
+#include  "SimpleUdp_export.h"
 #include  "SimpleUdpSocket_rch.h"
 #include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include  "ace/INET_Addr.h"
@@ -17,7 +18,7 @@ namespace TAO
 
     class SimpleUdpConfiguration;
 
-    class SimpleUdpSendStrategy : public TransportSendStrategy
+    class SimpleUdp_Export SimpleUdpSendStrategy : public TransportSendStrategy
     {
       public:
 

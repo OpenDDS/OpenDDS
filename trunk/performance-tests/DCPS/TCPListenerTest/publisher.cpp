@@ -407,6 +407,7 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown (); 
 
+      writer_transport_impl = 0;
     }
   ACE_CATCHANY
     {

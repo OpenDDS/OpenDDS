@@ -545,7 +545,11 @@ int main (int argc, char *argv[])
 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown (); 
-
+  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  //       main if the concrete transport libraries are loaded dynamically.
+  //       Otherwise cleanup after main() will encount access vilation.
+  writer_tcp_impl = 0;
+  writer_udp_impl = 0;
   return status;
 }
 

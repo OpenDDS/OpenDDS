@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_THREADSYNCH_H
 #define TAO_DCPS_THREADSYNCH_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "ThreadSynchWorker.h"
 
 
@@ -15,7 +16,7 @@ namespace TAO
     class ThreadSynchResource;
 
 
-    class ThreadSynch
+    class TAO_DdsDcps_Export ThreadSynch
     {
       public:
 

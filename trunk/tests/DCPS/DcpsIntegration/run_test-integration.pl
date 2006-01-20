@@ -59,4 +59,9 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 
+if ($status == 0) {
+  print "test PASSED.\n";
+} else {
+  print STDERR "test FAILED.\n";
+}
 exit $status;

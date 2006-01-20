@@ -10,6 +10,8 @@ TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
 {
   DBG_ENTRY("SimpleTcpConfiguration","SimpleTcpConfiguration");
 
+  transport_type_ = "SimpleTcp";
+
   if (local_address_.set (static_cast<unsigned short> (0),
                 static_cast<ACE_UINT32> (INADDR_ANY),
                 1) != 0)

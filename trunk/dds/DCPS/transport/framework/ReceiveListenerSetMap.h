@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_RECEIVELISTENERSETMAP_H
 #define TAO_DCPS_RECEIVELISTENERSETMAP_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "ReceiveListenerSet_rch.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "ace/Hash_Map_Manager.h"
@@ -20,7 +21,7 @@ namespace TAO
     class ReceivedDataSample;
 
 
-    class ReceiveListenerSetMap
+    class TAO_DdsDcps_Export ReceiveListenerSetMap
     {
       public:
 

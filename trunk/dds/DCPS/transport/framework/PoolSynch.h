@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_POOLSYNCH_H
 #define TAO_DCPS_POOLSYNCH_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "ThreadSynch.h"
 
 
@@ -16,7 +17,7 @@ namespace TAO
     class ThreadSynchResource;
 
 
-    class PoolSynch : public ThreadSynch
+    class TAO_DdsDcps_Export PoolSynch : public ThreadSynch
     {
       public:
 

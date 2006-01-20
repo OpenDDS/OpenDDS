@@ -27,13 +27,7 @@ TAO::DCPS::TransportConfiguration::TransportConfiguration()
 {
   DBG_ENTRY("TransportConfiguration","TransportConfiguration");
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
-
-  // Ensure that the number of samples put into the packet does
-  // not exceed the allowed number of io vectors to be sent by the OS.
-  if ((2 * max_samples_per_packet_ + 1) > MAX_SEND_BLOCKS)
-  {
-    max_samples_per_packet_ = (MAX_SEND_BLOCKS + 1) / 2 - 1;
-  }
+  this->adjust_config_value ();
 }
 
 
@@ -61,4 +55,21 @@ TAO::DCPS::TransportConfiguration::send_thread_strategy()
 {
   DBG_SUB_ENTRY("TransportConfiguration","send_thread_strategy",2);
   return this->send_thread_strategy_;
+}
+
+
+ACE_INLINE
+void 
+TAO::DCPS::TransportConfiguration::adjust_config_value ()
+{
+  // Ensure that the number of samples put into the packet does
+  // not exceed the allowed number of io vectors to be sent by the OS.
+  size_t old_value = max_samples_per_packet_;
+  if ((2 * max_samples_per_packet_ + 1) > MAX_SEND_BLOCKS)
+  {
+    max_samples_per_packet_ = (MAX_SEND_BLOCKS + 1) / 2 - 1;
+    ACE_DEBUG ((LM_WARNING,                                                    
+                ACE_TEXT ("(%P|%t)\"max_samples_per_packet\" is changed from %u to %u\n"),    
+                old_value, max_samples_per_packet_));                                               
+  }
 }

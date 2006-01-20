@@ -5,6 +5,7 @@
 #define TAO_DCPS_TRANSPORTREACTORTASK_H
 
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/Condition_T.h"
 #include  "ace/Task.h"
@@ -18,7 +19,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class TransportReactorTask : public virtual ACE_Task_Base,
+    class TAO_DdsDcps_Export TransportReactorTask : public virtual ACE_Task_Base,
                                  public virtual RcObject<ACE_SYNCH_MUTEX>
     {
       public:

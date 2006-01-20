@@ -109,8 +109,12 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 
+if ($use_udp == 1 || $mixed_trans == 1) {
+  $svc_config=" -ORBSvcConf udp.conf ";
+}
+
 # test multiple cases
-$sub_parameters = "-u $use_udp -s $sub_addr -r $num_readers -t $use_take"
+$sub_parameters = "$svc_config -u $use_udp -s $sub_addr -r $num_readers -t $use_take"
               . " -m $num_instances_per_writer -i $num_samples_per_instance"
 	      . " -w $num_writers -z $sequence_length"
               . " -k $no_key -y $read_interval_ms -f $mixed_trans";
@@ -118,7 +122,7 @@ $sub_parameters = "-u $use_udp -s $sub_addr -r $num_readers -t $use_take"
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "-u $use_udp -p $pub_addr -w $num_writers "
+$pub_parameters = "$svc_config -u $use_udp -p $pub_addr -w $num_writers "
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
 	      . " -n $max_samples_per_instance -z $sequence_length"
 	      . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"

@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTSENDELEMENT_H
 #define TAO_DCPS_TRANSPORTSENDELEMENT_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "TransportQueueElement.h"
 #include  "dds/DCPS/DataSampleList.h"
 
@@ -12,7 +13,10 @@ namespace TAO
 
   namespace DCPS
   {
-    class TransportSendElement : public TransportQueueElement
+    //Yan struct DataSampleListElement;
+
+
+    class TAO_DdsDcps_Export TransportSendElement : public TransportQueueElement
     {
       public:
 

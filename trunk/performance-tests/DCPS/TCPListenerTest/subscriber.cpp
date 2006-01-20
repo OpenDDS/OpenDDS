@@ -391,6 +391,8 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown (); 
 
+      reader_transport_impl = 0;
+      //reader_config = 0;
     }
   ACE_CATCHANY
     {

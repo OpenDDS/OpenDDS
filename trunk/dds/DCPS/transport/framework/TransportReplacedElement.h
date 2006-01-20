@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
 #define TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "TransportQueueElement.h"
 #include  "ace/Synch.h"
 
@@ -18,7 +19,7 @@ namespace TAO
     typedef Cached_Allocator_With_Overflow<TransportReplacedElement, ACE_SYNCH_NULL_MUTEX> 
                                              TransportReplacedElementAllocator;
 
-    class TransportReplacedElement : public TransportQueueElement
+    class TAO_DdsDcps_Export TransportReplacedElement : public TransportQueueElement
     {
       public:
 

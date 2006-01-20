@@ -6,13 +6,13 @@
 #include  "Service_Participant.h"
 #include  "BuiltInTopicUtils.h"
 #include  "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include  "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
-#include  "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include  "tao/ORB_Core.h"
 #include  "ace/Arg_Shifter.h"
 #include  "ace/Reactor.h"
-
+#include  "ace/Configuration_Import_Export.h"
+#include  "ace/Service_Config.h"
+#include  "ace/Argv_Type_Converter.h"
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -35,7 +35,19 @@ namespace TAO
 
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
     //     Change it to be from configuration file.
-    static const char* ior = "file://repo.ior";
+    static ACE_CString ior ("file://repo.ior");
+    
+    static ACE_CString config_fname ("");
+
+    static const char COMMON_SECTION_NAME[] = "common";
+
+    static bool got_debug_level = false;
+    static bool got_info = false;
+    static bool got_chunks = false;
+    static bool got_chunk_association_multiplier = false;
+    static bool got_liveliness_factor = false;
+    static bool got_bit_transport_port = false;
+    static bool got_bit_lookup_duration_sec = false;
 
     Service_Participant::Service_Participant ()
     : orb_ (CORBA::ORB::_nil ()), 
@@ -45,7 +57,7 @@ namespace TAO
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (false),
-      bit_lookup_duration_ (BIT_LOOKUP_DURATION_SEC)
+      bit_lookup_duration_sec_ (BIT_LOOKUP_DURATION_SEC)
     {
       initialize();
     }
@@ -185,7 +197,7 @@ namespace TAO
             {
               ACE_DECLARE_NEW_CORBA_ENV;
               ACE_TRY
-                {
+                {   
                   if (CORBA::is_nil (orb_.in ())) 
                     {
                       //TBD: allow user to specify the ORB id
@@ -205,6 +217,37 @@ namespace TAO
                     }
 
                   ACE_ASSERT ( ! CORBA::is_nil (orb_.in ()));
+
+                  if (config_fname == "")
+                    {
+                      ACE_DEBUG ((LM_INFO, 
+                        ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration "
+                        "file specified.\n")));
+                    } 
+                  else
+                    {
+                      // Load configuration only if the configuration file exists.
+                      FILE* in = ACE_OS::fopen (config_fname.c_str(), ACE_LIB_TEXT ("r"));
+                      if (!in)
+                        {
+                          ACE_DEBUG ((LM_INFO,
+                                      ACE_TEXT("(%P|%t)INFO: not using file configuration - "
+                                      "can not open \"%s\" for reading. %p\n"), 
+                                      config_fname.c_str(), "fopen"));
+                        }
+                      else 
+                        {
+                          ACE_OS::fclose (in);
+
+                          if (this->load_configuration () != 0)
+                            {
+                              ACE_ERROR ((LM_ERROR,
+                                          ACE_TEXT("(%P|%t)Service_Participant::get_domain_participant_factory: ")
+                                          ACE_TEXT("load_configuration() failed.\n")));
+                              return ::DDS::DomainParticipantFactory::_nil ();
+                            }
+                        }
+                    }
 
                   CORBA::Object_var poa_object =
                     orb_->resolve_initial_references("RootPOA" ACE_ENV_ARG_PARAMETER);
@@ -246,7 +289,7 @@ namespace TAO
                     }
 
 
-                  CORBA::Object_var obj = orb_->string_to_object (ior ACE_ENV_ARG_PARAMETER);
+                  CORBA::Object_var obj = orb_->string_to_object (ior.c_str() ACE_ENV_ARG_PARAMETER);
                   ACE_TRY_CHECK;
 
                   repo_ = DCPSInfo::_narrow (obj.in () ACE_ENV_ARG_PARAMETER);
@@ -307,21 +350,48 @@ namespace TAO
             {
               DCPS_debug_level = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
+              got_debug_level = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
             {
               ior = currentArg;
               arg_shifter.consume_arg ();
+              got_info = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
+              got_chunks = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
             {
               association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
+              got_chunk_association_multiplier = true;
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSConfigFile")) != 0) 
+            {
+              config_fname = currentArg;
+              arg_shifter.consume_arg ();
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSLivelinessFactor")) != 0) 
+            {
+              liveliness_factor_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+              got_liveliness_factor = true;
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportPort")) != 0) 
+            {
+              bit_transport_port_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+              got_bit_transport_port = true;
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationSec")) != 0) 
+            {
+              bit_lookup_duration_sec_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+              got_bit_lookup_duration_sec = true;
             }
           else 
             {
@@ -447,7 +517,6 @@ namespace TAO
     {
       ior = repo_ior;
     }
-
     int 
     Service_Participant::bit_transport_port () const
     {
@@ -463,20 +532,19 @@ namespace TAO
     int
     Service_Participant::init_bit_transport_impl ()
     {
-      TheTransportFactory->register_type(BIT_SIMPLE_TCP,
-        new SimpleTcpFactory());
+      this->bit_transport_impl_
+        = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
-      SimpleTcpConfiguration_rch config =
-        new SimpleTcpConfiguration();
-
+      TransportConfiguration_rch config 
+        = TheTransportFactory->get_or_create_configuration (BIT_ALL_TRAFFIC, "SimpleTcp");
+      
+      SimpleTcpConfiguration* tcp_config 
+        = static_cast <SimpleTcpConfiguration*> (config.in ());
+      
       // localhost will only work for DCPSInfo on the same machine.
       // Don't specify an address to an OS picked address is used.
-      //config->local_address_ 
-      //  = ACE_INET_Addr (bit_transport_port_, "localhost");
-
-      bit_transport_impl_ =
-        TheTransportFactory->create(BIT_ALL_TRAFFIC,
-                                    BIT_SIMPLE_TCP);
+      tcp_config->local_address_
+        = ACE_INET_Addr (bit_transport_port_, "localhost");
 
       if (bit_transport_impl_->configure(config.in()) != 0)
         {
@@ -506,13 +574,142 @@ namespace TAO
     int 
     Service_Participant::bit_lookup_duration_sec () const
     {
-      return bit_lookup_duration_;
+      return bit_lookup_duration_sec_;
     }
 
     void 
     Service_Participant::bit_lookup_duration_sec (int sec)
     {
-      bit_lookup_duration_ = sec;
+      bit_lookup_duration_sec_ = sec;
+    }
+
+    int 
+    Service_Participant::load_configuration ()
+    {
+      int status = 0;
+      if ((status = this->cf_.open ()) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration open() returned %d\n"),
+                           status),
+                           -1);
+
+      ACE_Ini_ImpExp import (this->cf_);
+      status = import.import_config (config_fname.c_str ());
+
+      if (status != 0) {
+        ACE_ERROR_RETURN ((LM_ERROR, 
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
+                           "import_config () returned %d\n"), 
+                           status),
+                           -1);
+      }
+
+      status = this->load_common_configuration ();
+      if (status != 0) {
+        ACE_ERROR_RETURN ((LM_ERROR, 
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
+                           "load_common_configuration () returned %d\n"), 
+                           status),
+                           -1);
+      } 
+      status = TheTransportFactory->load_transport_configuration (this->cf_);
+      if (status != 0) {
+        ACE_ERROR_RETURN ((LM_ERROR, 
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
+                           "load_transport_configuration () returned %d\n"), 
+                           status),
+                           -1);
+      }
+      return 0;
+    }
+
+    int 
+    Service_Participant::load_common_configuration ()
+    {
+      int status = 0;
+      const ACE_Configuration_Section_Key &root = this->cf_.root_section ();
+      ACE_Configuration_Section_Key sect;
+      if (this->cf_.open_section (root, COMMON_SECTION_NAME, 0, sect) != 0)
+        {
+          if (DCPS_debug_level > 0)
+            {
+              // This is not an error if the configuration file does not have 
+              // a common section. The code default configuration will be used.
+              ACE_DEBUG ((LM_DEBUG, 
+                ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration "
+                          "failed to open section %s\n"),
+                          COMMON_SECTION_NAME));
+            }
+          return 0;
+        }
+      else
+        {
+          if (got_debug_level)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSDebugLevel config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSDebugLevel", DCPS_debug_level, int)
+            }
+          if (got_info)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DcpsInfo config value, use command option.\n")));
+            }
+          else
+            { 
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DcpsInfo", ior)
+            }
+          if (got_chunks)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSChunks config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSChunks", this->n_chunks_, size_t)
+            }
+          if (got_chunk_association_multiplier)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSChunkAssociationMutltiplier config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSChunkAssociationMutltiplier", this->association_chunk_multiplier_, size_t)
+            }
+          if (got_bit_transport_port)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSBitTransportPort config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitTransportPort", this->bit_transport_port_, int)
+            }
+          if (got_liveliness_factor)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSLivelinessFactor config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSLivelinessFactor", this->liveliness_factor_, int)
+            }
+          if (got_bit_lookup_duration_sec)
+            {
+              ACE_DEBUG((LM_DEBUG, 
+                ACE_TEXT("(%P|%t)ignore DCPSBitLookupDurationSec config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationSec", this->bit_lookup_duration_sec_, int)
+            }
+        }
+       
+      return 0;
     }
 
   } // namespace DCPS

@@ -48,7 +48,10 @@ TAO::DCPS::TransportImplFactory::create_impl
                        0);
     }
 
-  // All went well.  Return the transport impl object to the caller.
-  return impl._retn();
+  return impl._retn ();
 }
+
+
+
+
 

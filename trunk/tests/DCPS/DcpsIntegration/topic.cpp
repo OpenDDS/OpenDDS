@@ -8,8 +8,6 @@
 #include "tests/DCPS/FooType/FooTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 
 

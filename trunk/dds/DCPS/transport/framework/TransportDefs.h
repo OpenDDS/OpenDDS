@@ -7,6 +7,8 @@
 #include  "ace/Basic_Types.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
+#include  "dds/DCPS/Definitions.h"
+#include  "dds/DCPS/debug.h"
 
 class ACE_Message_Block ;
 class ACE_Data_Block ;
@@ -17,11 +19,85 @@ class ACE_Data_Block ;
  */
 #define RECEIVE_SYNCH ACE_SYNCH_NULL_MUTEX
 
+/// Macro to get the individual configuration value from ACE_Configuration_Heap and cast to the specific
+/// type from integer.
+#define GET_CONFIG_VALUE(CF, SECT, KEY, VALUE, TYPE)                           \
+{                                                                              \
+  ACE_CString stringvalue;                                                     \
+  if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  KEY));                                                       \
+    }                                                                          \
+  }                                                                            \
+  else  if (stringvalue == "")                                                 \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                KEY));                                                         \
+    }                                                                          \
+  }                                                                            \
+  else                                                                         \
+  {                                                                            \
+    VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str ()));            \
+  }                                                                            \
+}
+
+/// Macro to get the individual configuration value from ACE_Configuration_Heap as string type.
+#define GET_CONFIG_STRING_VALUE(CF, SECT, KEY, VALUE)                          \
+{                                                                              \
+  ACE_CString stringvalue;                                                     \
+  if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  KEY));                                                       \
+    }                                                                          \
+  }                                                                            \
+  else  if (stringvalue == "")                                                 \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                  ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                  KEY));                                                       \
+    }                                                                          \
+  }                                                                            \
+  else                                                                         \
+  {                                                                            \
+    VALUE = stringvalue;                                                       \
+  }                                                                            \
+}
+
+// The factory section name prefix.
+static const char FACTORY_SECTION_NAME_PREFIX[] = "transport_factory_";
+// The factory section name prefix is "transport_factory_" so the length is 18.
+static const size_t FACTORY_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (FACTORY_SECTION_NAME_PREFIX);
+// The transport section name prefix.
+static const char  TRANSPORT_SECTION_NAME_PREFIX[] = "transport_impl_";
+// The transport section name prefix is "transport_impl_" so the length is 15.
+static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX); 
 
 namespace TAO
 {
   namespace DCPS
   {
+    // Values used in TransportFactory::create_transport_impl () call.
+    const bool AUTO_CONFIG = 1;
+    const bool DONT_AUTO_CONFIG = 0;
+
+    /// The TransportImplFactory instance ID type.
+    typedef ACE_CString FactoryIdType;
+
+    /// The TransportImpl instance ID type.
+    typedef ACE_UINT32 TransportIdType;
 
     /// Identifier type for DataLink objects.
     typedef ACE_UINT64  DataLinkIdType;

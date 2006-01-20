@@ -234,6 +234,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
 
   // Don't accept any more connections.
   this->acceptor_.close();
+  this->acceptor_.transport_shutdown ();
 
   {
     GuardType guard(this->connections_lock_);

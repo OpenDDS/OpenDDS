@@ -7,9 +7,6 @@
 
 #include /**/ "DCPSInfo_i.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -683,30 +680,28 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
                                         const ACE_INET_Addr listen)
 {
   int status = 0;
+  
+  TransportImpl_rch trans_impl 
+    = TheTransportFactory->create_transport_impl (TAO::DCPS::BIT_ALL_TRAFFIC, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
 
-  TheTransportFactory->register_type(TAO::DCPS::BIT_SIMPLE_TCP,
-                                     new TAO::DCPS::SimpleTcpFactory());
-
-  TAO::DCPS::SimpleTcpConfiguration_rch config =
-      new TAO::DCPS::SimpleTcpConfiguration();
-
+  TAO::DCPS::TransportConfiguration_rch config 
+    = TheTransportFactory->get_or_create_configuration (TAO::DCPS::BIT_ALL_TRAFFIC, 
+                                                        "SimpleTcp");
+  SimpleTcpConfiguration* tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (config.in ());
+      
   if (listen_address_given)
-    config->local_address_ = listen;
-  //else
-    // defaults to framework/OS assigned address
+    tcp_config->local_address_ = listen;
 
-  TAO::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create(TAO::DCPS::BIT_ALL_TRAFFIC,
-                                  TAO::DCPS::BIT_SIMPLE_TCP);
-
-  if (transport_impl->configure(config.in()) != 0)
+  if (trans_impl->configure(config.in()) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_transport: ")
                  ACE_TEXT("Failed to configure the transport.\n")));
       status = 1;
     }
-
   return status;
 }
 

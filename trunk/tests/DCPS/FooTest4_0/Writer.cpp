@@ -351,15 +351,19 @@ int Writer::init_transport ()
 {
   int status = 0;
 
-  TAO::DCPS::SimpleTcpConfiguration_rch writer_config =
-      new TAO::DCPS::SimpleTcpConfiguration();
+  writer_transport_impl 
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+                                                  "SimpleTcp",
+                                                  DONT_AUTO_CONFIG);
 
-  writer_transport_impl =
-      TheTransportFactory->create(PUB_TRAFFIC,
-                                  SIMPLE_TCP);
+  TransportConfiguration_rch writer_config 
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+
+  SimpleTcpConfiguration* writer_tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
-  writer_config->local_address_ = writer_address;
+  writer_tcp_config->local_address_ = writer_address;
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)
     {

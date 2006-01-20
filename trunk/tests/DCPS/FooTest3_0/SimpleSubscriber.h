@@ -18,7 +18,7 @@ class SimpleSubscriber : public TAO::DCPS::TransportInterface
     SimpleSubscriber();
     virtual ~SimpleSubscriber();
 
-    void init(TAO::DCPS::TransportFactory::IdType transport_id,
+    void init(TAO::DCPS::TransportIdType          transport_id,
               TAO::DCPS::RepoId                   sub_id,
               ssize_t                             num_publications,
               const TAO::DCPS::AssociationData*   publications);

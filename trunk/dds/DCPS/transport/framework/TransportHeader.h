@@ -22,7 +22,7 @@ namespace TAO
      * header, followed by one or more data samples (all belonging to the
      * same transport packet).
      */
-    struct TransportHeader
+    struct TAO_DdsDcps_Export TransportHeader
     {
         /// Default constructor.
         TransportHeader();

@@ -11,6 +11,11 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
+if ($ARGV[0] eq 'udp') {
+  $svc_conf = " -ORBSvcConf udp.conf ";
+}
+
+
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 $subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
@@ -27,8 +32,8 @@ unlink $publisher_ready;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", "");
-$Publisher = new PerlACE::Process ("publisher", "");
+$Subscriber = new PerlACE::Process ("subscriber", "$svc_conf -DCPSConfigFile sub.ini");
+$Publisher = new PerlACE::Process ("publisher", "$svc_conf -DCPSConfigFile pub.ini");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

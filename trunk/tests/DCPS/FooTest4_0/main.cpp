@@ -112,9 +112,6 @@ int main (int argc, char *argv[])
 
       ACE_TRY_CHECK;
 
-      TheTransportFactory->register_type(SIMPLE_TCP,
-                                         new TAO::DCPS::SimpleTcpFactory());
-
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
       

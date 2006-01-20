@@ -227,15 +227,17 @@ int Reader::init_transport ()
 {
   int status = 0;
 
-  TAO::DCPS::SimpleTcpConfiguration_rch reader_config =
-      new TAO::DCPS::SimpleTcpConfiguration();
+  reader_transport_impl 
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
+
+  TransportConfiguration_rch reader_config 
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+
+  SimpleTcpConfiguration* reader_tcp_config 
+    = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
-  reader_config->local_address_ = reader_address;
-
-  reader_transport_impl =
-      TheTransportFactory->create(SUB_TRAFFIC,
-                                  SIMPLE_TCP);
+  reader_tcp_config->local_address_ = reader_address;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {

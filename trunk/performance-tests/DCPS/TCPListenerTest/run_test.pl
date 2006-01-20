@@ -15,11 +15,15 @@ PerlACE::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
-$num_messages=20000;
+$num_messages=10;
 $data_size=13;
 $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=10;
+#These addresss will overwrite the value in configuration file.
+$sub_addr = "localhost:16701";
+$pub_addr = "localhost:29803";
+
 # need $num_msgs_btwn_rec unread samples plus 20 for good measure 
 # (possibly allocated by not yet queue by the transport because of greedy read).
 $num_samples=$num_msgs_btwn_rec + 20;
@@ -31,12 +35,12 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             . " -d $domains_file -DCPSConfigFile \"\"");
 
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$sub_parameters = "-p $num_writers"
+$sub_parameters = "-DCPSConfigFile conf.ini -a $sub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
@@ -49,7 +53,7 @@ $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
 #NOTE: above 1000 queue samples does not give any better performance.
-$pub_parameters = "-p $num_writers"
+$pub_parameters = "-DCPSConfigFile conf.ini -a $pub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000";

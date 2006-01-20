@@ -39,6 +39,7 @@ $arg_idx = 0;
 if ($ARGV[0] eq 'udp') {
   $use_udp = 1;
   $arg_idx = 1;
+  $svc_conf = " -ORBSvcConf udp.conf ";
 }
 
 if ($ARGV[$arg_idx] eq 'take') { 
@@ -70,12 +71,12 @@ $common_parameters = "-u $use_udp"
               . " -l $num_unlively_periods -i $num_samples_per_reader " ;
               
 # test multiple cases
-$sub_parameters = "$common_parameters -p $sub_addr -t $use_take ";
+$sub_parameters = "$svc_conf $common_parameters -s $sub_addr -t $use_take ";
 
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "$common_parameters -p $pub_addr" ;
+$pub_parameters = "$svc_conf $common_parameters -p $pub_addr" ;
 
 $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
 print $Publisher->CommandLine(), "\n";

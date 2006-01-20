@@ -4,6 +4,7 @@
 #ifndef TAO_DCPS_REPOIDSET_H
 #define TAO_DCPS_REPOIDSET_H
 
+#include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "dds/DdsDcpsInfoUtilsC.h"
 #include  "ace/Hash_Map_Manager.h"
@@ -16,7 +17,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class RepoIdSet : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

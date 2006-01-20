@@ -20,14 +20,7 @@
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h"
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
-
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -73,16 +66,19 @@ int init_tranport ()
 {
   int status = 0;
 
-  TheTransportFactory->register_type(SIMPLE_UDP,
-                                    new TAO::DCPS::SimpleUdpFactory());
-  TheTransportFactory->register_type(SIMPLE_TCP,
-                                    new TAO::DCPS::SimpleTcpFactory());
-
   if (sub_using_udp)
     {
-      TAO::DCPS::SimpleUdpConfiguration_rch reader_config =
-          new TAO::DCPS::SimpleUdpConfiguration();
+      reader_transport_impl 
+        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
+                                                      "SimpleUdp",
+                                                      DONT_AUTO_CONFIG);
 
+      TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
+      
+      SimpleUdpConfiguration* reader_udp_config 
+        = static_cast <SimpleUdpConfiguration*> (reader_config.in ());
+      
       if (!reader_address_given)
         {
           ACE_ERROR((LM_ERROR,
@@ -93,11 +89,7 @@ int init_tranport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      reader_config->local_address_ = reader_address;
-
-      reader_transport_impl =
-          TheTransportFactory->create(SUB_TRAFFIC,
-                                      SIMPLE_UDP);
+      reader_udp_config->local_address_ = reader_address;
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -109,19 +101,23 @@ int init_tranport ()
     }
   else
     {
-      TAO::DCPS::SimpleTcpConfiguration_rch reader_config =
-          new TAO::DCPS::SimpleTcpConfiguration();
+      reader_transport_impl 
+        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
+                                                      "SimpleTcp",
+                                                      DONT_AUTO_CONFIG);
+
+      TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+      
+      SimpleTcpConfiguration* reader_tcp_config 
+        = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
         {
           ACE_INET_Addr reader_address (reader_address_str);
-          reader_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_ = reader_address;
         }
         // else use default address - OS assigned.
-
-      reader_transport_impl =
-          TheTransportFactory->create(SUB_TRAFFIC,
-                                      SIMPLE_TCP);
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -134,13 +130,17 @@ int init_tranport ()
 
   if (pub_using_udp)
     {
-      TAO::DCPS::SimpleUdpConfiguration_rch writer_config =
-          new TAO::DCPS::SimpleUdpConfiguration();
+      writer_transport_impl 
+         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+                                                       "SimpleUdp",
+                                                       DONT_AUTO_CONFIG);
 
-      writer_transport_impl =
-          TheTransportFactory->create(PUB_TRAFFIC,
-                                      SIMPLE_UDP);
-
+      TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
+      
+      SimpleUdpConfiguration* writer_udp_config 
+        = static_cast <SimpleUdpConfiguration*> (writer_config.in ());
+      
       if (!writer_address_given)
         {
           ACE_ERROR((LM_ERROR,
@@ -150,7 +150,7 @@ int init_tranport ()
         }
 
       ACE_INET_Addr writer_address (writer_address_str);
-      writer_config->local_address_ = writer_address;
+      writer_udp_config->local_address_ = writer_address;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -162,17 +162,20 @@ int init_tranport ()
     }
   else
     {
-      TAO::DCPS::SimpleTcpConfiguration_rch writer_config =
-          new TAO::DCPS::SimpleTcpConfiguration();
-
-      writer_transport_impl =
-          TheTransportFactory->create(PUB_TRAFFIC,
-                                      SIMPLE_TCP);
-
+      writer_transport_impl 
+        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+                                                      "SimpleTcp",
+                                                      DONT_AUTO_CONFIG);
+      TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+      
+      SimpleTcpConfiguration* writer_tcp_config 
+        = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
+      
       if (writer_address_given)
         {
           ACE_INET_Addr writer_address (writer_address_str);
-          writer_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_ = writer_address;
         }
         // else use default address - OS assigned.
 
@@ -685,5 +688,10 @@ cleanup:
     }
   ACE_ENDTRY;
 
+  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  //       main if the concrete transport libraries are loaded dynamically.
+  //       Otherwise cleanup after main() will encount access vilation.
+  reader_transport_impl = 0;
+  writer_transport_impl = 0;
   return test_failed;
 }
