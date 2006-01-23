@@ -19,7 +19,7 @@ int
 TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id, 
                                          ACE_Configuration_Heap& cf)
 {
-  TAO::DCPS::TransportConfiguration::load (id, cf);
+  TransportConfiguration::load (id, cf);
   
   char section [20];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
