@@ -153,12 +153,12 @@ PubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleUdp",
-                                                  DONT_AUTO_CONFIG);
-  TransportConfiguration_rch config 
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  SimpleUdpConfiguration* udp_config 
-    = static_cast <SimpleUdpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleUdpConfiguration* udp_config 
+    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
   udp_config->local_address_ = this->pub_addr_;
 

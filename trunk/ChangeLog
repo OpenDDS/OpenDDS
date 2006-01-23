@@ -1,3 +1,61 @@
+Sun Jan 22 23:23:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        
+          Added ace/Configuration.h include to fix compilation errors on DOC's 
+          nightly builds and made the modifiers of the  "common" configuration values 
+          can overwrite the value from command line option and command line option can 
+          overwrite the values in configuration file.
+          
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportGenerator.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpGenerator.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        
+          Added includes or namespace to fix the compilation errors.
+        
 Fri Jan 20 14:02:53 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/transport/simple_n/DDS_transport_simple_n.mpc:

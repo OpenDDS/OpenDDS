@@ -163,7 +163,7 @@ SubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleUdp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
   // Get the existing or create a new SimpleUdpConfiguration object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
@@ -172,11 +172,11 @@ SubDriver::init()
   // See comments in the $TAO_ROOT/orbsvcs/tests/DDS/transport/simple/
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
-  TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  SimpleUdpConfiguration* udp_config 
-    = static_cast <SimpleUdpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleUdpConfiguration* udp_config 
+    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
   udp_config->local_address_ = this->sub_addr_;
 

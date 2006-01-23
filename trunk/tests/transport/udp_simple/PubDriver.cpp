@@ -146,16 +146,16 @@ PubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleUdp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Get the existing or create a new SimpleUdpConfiguration object.\n"));
 
-  TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  SimpleUdpConfiguration* udp_config 
-    = static_cast <SimpleUdpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleUdpConfiguration* udp_config 
+    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) pub_addr_.\n"));

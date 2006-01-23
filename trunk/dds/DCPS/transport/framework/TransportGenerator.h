@@ -47,7 +47,6 @@ namespace TAO
 
         /// Default ctor.
         TransportGenerator();
-        //ACE_CString transport_name_;
     };
 
   }

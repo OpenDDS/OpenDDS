@@ -41,10 +41,6 @@ namespace TAO
         /// for any reason.
         virtual TransportImpl* create() = 0;
 
-      private:
-
-        /// Name of the concrete transport.
-        //ACE_CString transport_name_;
     };
 
   } /* namespace DCPS */

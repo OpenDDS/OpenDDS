@@ -9,6 +9,7 @@
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/Synch.h"
 #include  "ace/Configuration.h"
+#include  "ace/SString.h"
 
 class ACE_Reactor;
 

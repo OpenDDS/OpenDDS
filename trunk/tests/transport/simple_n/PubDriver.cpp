@@ -145,12 +145,12 @@ PubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
-  TransportConfiguration_rch config 
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  SimpleTcpConfiguration* tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
 

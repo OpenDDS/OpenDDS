@@ -681,16 +681,16 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
 {
   int status = 0;
   
-  TransportImpl_rch trans_impl 
+  TAO::DCPS::TransportImpl_rch trans_impl 
     = TheTransportFactory->create_transport_impl (TAO::DCPS::BIT_ALL_TRAFFIC, 
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
   TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->get_or_create_configuration (TAO::DCPS::BIT_ALL_TRAFFIC, 
                                                         "SimpleTcp");
-  SimpleTcpConfiguration* tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
       
   if (listen_address_given)
     tcp_config->local_address_ = listen;

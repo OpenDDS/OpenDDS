@@ -354,13 +354,13 @@ int Writer::init_transport ()
   writer_transport_impl 
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config 
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-  SimpleTcpConfiguration* writer_tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
   writer_tcp_config->local_address_ = writer_address;

@@ -170,17 +170,17 @@ SubDriver::init(int& argc, char* argv[])
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
   // Get or create SimpleTcpConfiguration object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
   // used to open an acceptor object to listen for passive connection
   // requests.  This is the TransportImpl object's (local) "endpoint" address.
-  TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  SimpleTcpConfiguration* tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = ACE_INET_Addr (this->sub_addr_.c_str ());
 

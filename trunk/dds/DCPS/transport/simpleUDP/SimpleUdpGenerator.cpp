@@ -15,17 +15,17 @@ TAO::DCPS::SimpleUdpGenerator::~SimpleUdpGenerator()
 {
 }
 
-TransportImplFactory* 
+TAO::DCPS::TransportImplFactory* 
 TAO::DCPS::SimpleUdpGenerator::new_factory() 
 {
   SimpleUdpFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
-                 SimpleUdpFactory(/*this->transport_name_*/), 
+                 SimpleUdpFactory(), 
                  0);
   return factory;
 }
 
-TransportConfiguration* 
+TAO::DCPS::TransportConfiguration* 
 TAO::DCPS::SimpleUdpGenerator::new_configuration()
 {
   SimpleUdpConfiguration* trans_config = 0;

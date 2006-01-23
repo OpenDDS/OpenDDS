@@ -15,17 +15,17 @@ TAO::DCPS::SimpleTcpGenerator::~SimpleTcpGenerator()
 {
 }
 
-TransportImplFactory* 
+TAO::DCPS::TransportImplFactory* 
 TAO::DCPS::SimpleTcpGenerator::new_factory() 
 {
   SimpleTcpFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
-                 SimpleTcpFactory(/*this->transport_name_*/), 
+                 SimpleTcpFactory(), 
                  0);
   return factory;
 }
 
-TransportConfiguration* 
+TAO::DCPS::TransportConfiguration* 
 TAO::DCPS::SimpleTcpGenerator::new_configuration()
 {
   SimpleTcpConfiguration* trans_config = 0;

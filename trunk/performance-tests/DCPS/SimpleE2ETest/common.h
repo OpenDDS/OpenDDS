@@ -61,7 +61,7 @@ int init_reader_tranport ()
   reader_transport_impl =
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
   
   TAO::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
@@ -95,7 +95,7 @@ int init_writer_tranport ()
   writer_transport_impl =
       TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
   
   TAO::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
