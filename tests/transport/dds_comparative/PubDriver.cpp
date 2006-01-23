@@ -106,13 +106,13 @@ PubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
-  TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, "SimpleTcp");
       
-  SimpleTcpConfiguration* tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   // We use all of the default configuration settings, except for those
   // that need to be set (ie, the default values are not valid).

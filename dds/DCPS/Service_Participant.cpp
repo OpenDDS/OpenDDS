@@ -516,6 +516,7 @@ namespace TAO
     Service_Participant::set_repo_ior(const char* repo_ior)
     {
       ior = repo_ior;
+      got_info = true;
     }
     int 
     Service_Participant::bit_transport_port () const
@@ -527,6 +528,7 @@ namespace TAO
     Service_Participant::bit_transport_port (int port)
     {
        bit_transport_port_ = port;
+       got_bit_transport_port = true;
     }
 
     int
@@ -581,6 +583,46 @@ namespace TAO
     Service_Participant::bit_lookup_duration_sec (int sec)
     {
       bit_lookup_duration_sec_ = sec;
+      got_bit_lookup_duration_sec = true;
+    }
+
+    size_t   
+    Service_Participant::n_chunks () const
+    {
+      return n_chunks_;
+    }
+  
+    void 
+    Service_Participant::n_chunks (size_t chunks)
+    {
+      n_chunks_ = chunks;
+      got_chunks = true;
+    }
+
+    size_t   
+    Service_Participant::association_chunk_multiplier () const
+    {
+      return association_chunk_multiplier_;
+    }
+  
+    void 
+    Service_Participant::association_chunk_multiplier (size_t multiplier)
+    {
+      association_chunk_multiplier_ = multiplier;
+      got_chunk_association_multiplier = true;
+    }
+
+    void 
+    Service_Participant::liveliness_factor (int factor)
+    {
+      liveliness_factor_ = factor;
+      got_liveliness_factor = true;
+    }
+
+    int 
+    Service_Participant::liveliness_factor () const
+    {
+      return liveliness_factor_;
     }
 
     int 

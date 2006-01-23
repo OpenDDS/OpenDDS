@@ -58,13 +58,13 @@ enum TransportInstanceId
 int init_reader_tranport ()
 {
   reader_transport_impl 
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TransportConfiguration_rch reader_config 
+  TAO::DCPS::TransportConfiguration_rch reader_config 
     = TheTransportFactory->get_configuration (SUB_TRAFFIC);
 
-  SimpleTcpConfiguration* reader_tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
       
   if (0 != ACE_OS::strcmp("default", reader_address_str) )
     {
@@ -87,13 +87,13 @@ int init_reader_tranport ()
 int init_writer_tranport ()
 {
   writer_transport_impl 
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config 
     = TheTransportFactory->get_configuration (PUB_TRAFFIC);
 
-  SimpleTcpConfiguration* writer_tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (writer_config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
       
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {

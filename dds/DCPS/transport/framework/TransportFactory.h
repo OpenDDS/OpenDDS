@@ -55,9 +55,8 @@ namespace TAO
 
         /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory
         /// object which uses hash map to cache those configuration. This is called by the 
-        /// Service_Participant at initialization time. This function iterates each sections of
-        /// in the configuration file, if it's factory section then the factory_id->transport_name
-        /// is added to the factory_id_name_map_. If it's transport section then a TransportConfiguration
+        /// Service_Participant at initialization time. This function iterates each sections 
+        /// in the configuration file, if it's transport section then a TransportConfiguration
         /// object is created and added to the configuration_map_.
         int load_transport_configuration (ACE_Configuration_Heap& cf);
 

@@ -5,6 +5,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "tao/debug.h"
+#include "ace/OS_NS_strings.h"
 
 TAO_DCPS_SimpleUdpLoader::TAO_DCPS_SimpleUdpLoader (void)
 {

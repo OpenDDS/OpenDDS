@@ -199,47 +199,5 @@ namespace TAO
       return initial_SubscriberQos_;
     }
 
-    ACE_INLINE
-    size_t   
-    Service_Participant::n_chunks () const
-    {
-      return n_chunks_;
-    }
-  
-    ACE_INLINE
-    void 
-    Service_Participant::n_chunks (size_t chunks)
-    {
-      n_chunks_ = chunks;
-    }
-
-    ACE_INLINE
-    size_t   
-    Service_Participant::association_chunk_multiplier () const
-    {
-      return association_chunk_multiplier_;
-    }
-  
-    ACE_INLINE
-    void 
-    Service_Participant::association_chunk_multiplier (size_t multiplier)
-    {
-      association_chunk_multiplier_ = multiplier;
-    }
-
-    ACE_INLINE
-    void 
-    Service_Participant::liveliness_factor (int factor)
-    {
-      liveliness_factor_ = factor;
-    }
-
-    ACE_INLINE
-    int 
-    Service_Participant::liveliness_factor () const
-    {
-      return liveliness_factor_;
-    }
-
   } // namespace ::DDS
 } // namespace TAO

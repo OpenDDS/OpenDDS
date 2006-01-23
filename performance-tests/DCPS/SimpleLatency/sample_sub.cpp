@@ -117,12 +117,12 @@ int main(int argc, char *argv[])
          pub_tcp_impl 
            = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
                                                          "SimpleUdp", 
-                                                         DONT_AUTO_CONFIG);
-         TransportConfiguration_rch config 
+                                                         TAO::DCPS::DONT_AUTO_CONFIG);
+         TAO::DCPS::TransportConfiguration_rch config 
            = TheTransportFactory->create_configuration (UDP_IMPL_ID, "SimpleUdp");
 
-         SimpleUdpConfiguration* udp_config 
-           = static_cast <SimpleUdpConfiguration*> (config.in ());
+         TAO::DCPS::SimpleUdpConfiguration* udp_config 
+           = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          udp_config->local_address_.set("localhost:12367");
          pub_tcp_impl->configure (config.in ());
@@ -169,13 +169,13 @@ int main(int argc, char *argv[])
          sub_tcp_impl 
            = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
                                                         "SimpleUdp", 
-                                                        DONT_AUTO_CONFIG);
-         TransportConfiguration_rch config 
+                                                        TAO::DCPS::DONT_AUTO_CONFIG);
+         TAO::DCPS::TransportConfiguration_rch config 
            = TheTransportFactory->create_configuration (UDP_IMPL_ID+1,
            "SimpleUdp");
 
-         SimpleUdpConfiguration* udp_config 
-           = static_cast <SimpleUdpConfiguration*> (config.in ());
+         TAO::DCPS::SimpleUdpConfiguration* udp_config 
+           = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          udp_config->local_address_.set("localhost:1237");
          sub_tcp_impl->configure(config.in());

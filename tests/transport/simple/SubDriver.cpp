@@ -147,7 +147,7 @@ SubDriver::init()
   TAO::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleTcp",
-                                                  DONT_AUTO_CONFIG);
+                                                  TAO::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create a new SimpleTcpConfiguration object.\n"));
@@ -159,11 +159,11 @@ SubDriver::init()
   // See comments in the $TAO_ROOT/orbsvcs/tests/DDS/transport/simple/
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
-  TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  SimpleTcpConfiguration* tcp_config 
-    = static_cast <SimpleTcpConfiguration*> (config.in ());
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) sub_addr_.\n"));

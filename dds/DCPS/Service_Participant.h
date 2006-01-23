@@ -17,6 +17,7 @@
 
 #include  "ace/Task.h"
 #include  "ace/Auto_Ptr.h"
+#include  "ace/Configuration.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -38,13 +38,13 @@ static int init_reader_tranport ()
       reader_transport_impl =
           TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
                                                       "SimpleUdp",
-                                                      DONT_AUTO_CONFIG);
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
 
-      TransportConfiguration_rch reader_config 
+      TAO::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
       
-      SimpleUdpConfiguration* reader_udp_config 
-        = static_cast <SimpleUdpConfiguration*> (reader_config.in ());
+      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config 
+        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -71,13 +71,13 @@ static int init_reader_tranport ()
       reader_transport_impl =
           TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      DONT_AUTO_CONFIG);
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
 
-      TransportConfiguration_rch reader_config 
+      TAO::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
       
-      SimpleTcpConfiguration* reader_tcp_config 
-        = static_cast <SimpleTcpConfiguration*> (reader_config.in ());
+      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
         {

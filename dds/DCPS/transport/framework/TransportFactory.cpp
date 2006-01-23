@@ -5,6 +5,7 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "TransportFactory.h"
 #include  "TransportConfiguration.h"
+#include  "ace/OS_NS_strings.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportFactory.inl"
@@ -193,7 +194,7 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
 }
 
 
-TransportImpl_rch
+TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id, 
                                                     bool auto_configure)
 {
@@ -203,7 +204,7 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 }
 
 
-TransportImpl_rch
+TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id, 
                                                     ACE_CString transport_type,
                                                     bool auto_configure)
@@ -237,7 +238,7 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 }
 
 
-TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch 
 TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
 {
   TransportConfiguration_rch config;
@@ -259,7 +260,7 @@ TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
 }
 
 
-TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch 
 TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
                                                    ACE_CString transport_type)
 {
@@ -285,7 +286,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
 }
 
 
-TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch 
 TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transport_id,
                                                           ACE_CString transport_type)
 {
@@ -319,7 +320,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
 }
 
 
-TransportImplFactory_rch 
+TAO::DCPS::TransportImplFactory_rch 
 TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 {
   if (factory_id == "")
