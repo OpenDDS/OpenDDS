@@ -1,3 +1,13 @@
+Tue Jan 24 12:54:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/transport/simple_n/DDS_transport_simple_n.mpc:
+        
+          Removed dependency on SimplUdp lib.
+          
+        * tests/transport/udp_simple_n/DDS_transport_udp_simple_n.mpc:
+
+          Added dependency on SimplUdp lib.
+          
 Tue Jan 24 12:34:53 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
