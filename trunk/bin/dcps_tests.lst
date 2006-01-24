@@ -53,18 +53,18 @@ tests/DCPS/FooTest4/run_test.pl mrit: !DCPS_MIN
 tests/DCPS/FooTest4_0/run_test.pl
 
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl nokey udp mi: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl nokey udp mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl
-tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN
+tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC 
+tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl give_addrs: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
@@ -73,7 +73,7 @@ tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN
 tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN
 
-tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
