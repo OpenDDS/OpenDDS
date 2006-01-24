@@ -1,3 +1,13 @@
+Tue Jan 24 12:34:53 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        
+          Fixed a deadlock situation that recursively acquires the ACE_Thread_Mutex.
+          
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+          
+          Updated a debug message.
+          
 Tue Jan 24 11:44:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

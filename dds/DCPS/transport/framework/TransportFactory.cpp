@@ -36,9 +36,10 @@ TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
 {
   DBG_ENTRY("TransportFactory","create_transport_impl_i");
-  GuardType guard(this->lock_);
 
   TransportImplFactory_rch impl_factory = this->get_or_create_factory (type_id);
+
+  GuardType guard(this->lock_);
 
   int created_reactor = 0;
   TransportImpl_rch impl;
