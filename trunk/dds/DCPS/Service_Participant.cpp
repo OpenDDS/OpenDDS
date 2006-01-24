@@ -668,7 +668,6 @@ namespace TAO
     int 
     Service_Participant::load_common_configuration ()
     {
-      int status = 0;
       const ACE_Configuration_Section_Key &root = this->cf_.root_section ();
       ACE_Configuration_Section_Key sect;
       if (this->cf_.open_section (root, COMMON_SECTION_NAME, 0, sect) != 0)

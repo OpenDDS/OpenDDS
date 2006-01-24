@@ -1,7 +1,6 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ReceiveListenerSet.h"
 #include  "TransportReceiveListener.h"
 #include  "ReceivedDataSample.h"
 #include  "EntryExit.h"

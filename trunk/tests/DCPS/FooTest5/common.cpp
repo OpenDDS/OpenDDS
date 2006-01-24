@@ -3,6 +3,10 @@
 // $Id$
 
 #include "common.h"
+// Add the TransportImpl.h before TransportImpl_rch.h is included to  
+// resolve the build problem that the class is not defined when 
+// RcHandle<T> template is instantiated.
+#include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
