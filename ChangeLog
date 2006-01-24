@@ -1,3 +1,10 @@
+Tue Jan 24 13:54:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Turned off the tests with SimpleUdp dynamically loaded via service
+          configurator on static builds.
+          
 Tue Jan 24 12:54:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/transport/simple_n/DDS_transport_simple_n.mpc:
