@@ -5,6 +5,7 @@
 #define TAO_DCPS_REPOIDSETMAP_H
 
 #include  "dds/DCPS/dcps_export.h"
+#include  "RepoIdSet.h"
 #include  "RepoIdSet_rch.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "ace/Hash_Map_Manager.h"
