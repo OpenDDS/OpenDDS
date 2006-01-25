@@ -154,7 +154,7 @@ namespace TAO
 
 
 // gcc on AIX needs explicit instantiation of the singleton templates
-#if defined (ACE_HAS_EXPLICIT_TEMPLATENSTANTIATION) || (defined (__GNUC__) && defined (_AIX))
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION) || (defined (__GNUC__) && defined (_AIX))
 
 template class TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>;
 
@@ -170,7 +170,7 @@ template class ACE_Node<POA_TAO::DCPS::TypeSupport_ptr>;
 template class ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>;
 template class ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>;
 
-#elif defined (ACE_HAS_TEMPLATENSTANTIATION_PRAGMA)
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
 
 #pragma instantiate TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>
 
@@ -186,5 +186,5 @@ template class ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>;
 #pragma instantiate ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>
 #pragma instantiate ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>
 
-#endif /*ACE_HAS_EXPLICIT_TEMPLATENSTANTIATION */
+#endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
 

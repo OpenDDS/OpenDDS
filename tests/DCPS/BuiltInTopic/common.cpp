@@ -164,6 +164,7 @@ int attach_subscriber_transport ()
 
 int ignore ()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   switch (ignore_kind)
   {
   case IGNORE_PARTICIPANT:
@@ -370,6 +371,10 @@ int ignore ()
   }
   
   return 0;
+#else
+
+  return -1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 int write ()

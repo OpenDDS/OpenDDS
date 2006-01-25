@@ -534,6 +534,7 @@ namespace TAO
     int
     Service_Participant::init_bit_transport_impl ()
     {
+#if !defined (DDS_HAS_MINIMUM_BIT)
       this->bit_transport_impl_
         = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
@@ -559,6 +560,9 @@ namespace TAO
         {
           return 0;
         }
+#else
+      return -1;
+#endif // DDS_HAS_MINIMUM_BIT
     }
 
 
@@ -758,7 +762,7 @@ namespace TAO
 
 
 // gcc on AIX needs explicit instantiation of the singleton templates
-#if defined (ACE_HAS_EXPLICIT_TEMPLATENSTANTIATION) || (defined (__GNUC__) && defined (_AIX))
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION) || (defined (__GNUC__) && defined (_AIX))
 
 template class TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
 
@@ -766,5 +770,5 @@ template class TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
 
 #pragma instantiate TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>
 
-#endif /*ACE_HAS_EXPLICIT_TEMPLATENSTANTIATION */
+#endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
 
