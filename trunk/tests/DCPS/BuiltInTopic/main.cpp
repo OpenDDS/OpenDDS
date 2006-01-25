@@ -33,6 +33,9 @@ using namespace ::TAO::DCPS;
 int ignore_before_association = 0;
 
 
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
 void
 parse_args (int argc,
             ACE_TCHAR *argv[]
@@ -60,8 +63,10 @@ parse_args (int argc,
     }
   }
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 int init (int argc, ACE_TCHAR *argv[])
 {
   ACE_TRY_NEW_ENV 
@@ -218,8 +223,10 @@ int init (int argc, ACE_TCHAR *argv[])
 
   return 0;
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_participant ()
 {
   ACE_TRY_NEW_ENV 
@@ -266,8 +273,10 @@ void test_bit_participant ()
     }
   ACE_ENDTRY;
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
  
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_topic ()
 {
   ACE_TRY_NEW_ENV 
@@ -330,7 +339,10 @@ void test_bit_topic ()
     }
   ACE_ENDTRY;
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_publication ()
 {
   ACE_TRY_NEW_ENV 
@@ -400,8 +412,10 @@ void test_bit_publication ()
     }
   ACE_ENDTRY;
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
  
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_subscription ()
 {
   ACE_TRY_NEW_ENV 
@@ -472,8 +486,10 @@ void test_bit_subscription ()
     }
   ACE_ENDTRY;
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 void shutdown ()
 {
   if (participant->delete_contained_entities (ACE_ENV_ARG_PARAMETER) 
@@ -496,11 +512,14 @@ void shutdown ()
 
   TheServiceParticipant->shutdown (); 
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
   parse_args (argc, argv);
 
   if (ignore_kind != DONT_IGNORE)
@@ -568,5 +587,10 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   shutdown ();
 
   return failed;
+#else
+
+  ACE_DEBUG((LM_DEBUG, "BIT support is not enabled.\n"));
+  return 0;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 

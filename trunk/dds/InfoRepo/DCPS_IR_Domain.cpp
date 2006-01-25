@@ -11,12 +11,15 @@
 #include "dds/DCPS/PublisherImpl.h"
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/TopicBuiltinTopicDataTypeSupportImpl.h"
 #include "dds/ParticipantBuiltinTopicDataTypeSupportImpl.h"
 #include "dds/SubscriptionBuiltinTopicDataTypeSupportImpl.h"
 #include "dds/PublicationBuiltinTopicDataTypeSupportImpl.h"
 
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 #include "dds/DCPS/Transient_Kludge.h"
 
 #include /**/ "tao/debug.h"
@@ -33,10 +36,12 @@ DCPS_IR_Domain::DCPS_IR_Domain (::DDS::DomainId_t id)
 
 DCPS_IR_Domain::~DCPS_IR_Domain()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (0 != cleanup_built_in_topics() )
     {
       ACE_ERROR((LM_ERROR, "ERROR: Failed to clean up the Built-In Topics!\n"));
     }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
@@ -394,6 +399,9 @@ int DCPS_IR_Domain::find_topic_description(const char* name,
 
 int DCPS_IR_Domain::init_built_in_topics()
 {
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
   // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT 
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
@@ -466,12 +474,16 @@ int DCPS_IR_Domain::init_built_in_topics()
   useBIT_ = true;
 
   return 0;
+#else
+  return 1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 int DCPS_IR_Domain::init_built_in_topics_topics()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   ACE_TRY_NEW_ENV
     {
       ::DDS::TopicQos topic_qos;
@@ -636,12 +648,18 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
   ACE_ENDTRY;
 
   return 0;
+
+#else
+
+  return 1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 int DCPS_IR_Domain::init_built_in_topics_datawriters()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   ACE_TRY_NEW_ENV
     {
       ::DDS::DataWriter_var datawriter;
@@ -739,12 +757,17 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
   ACE_ENDTRY;
 
   return 0;
+#else
+
+  return 1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 int DCPS_IR_Domain::init_built_in_topics_transport ()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   ACE_TRY_NEW_ENV
     {
       transportImpl_ =
@@ -810,12 +833,17 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
   ACE_ENDTRY;
 
   return 0;
+#else
+
+  return 1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 int DCPS_IR_Domain::cleanup_built_in_topics()
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       // clean up the Built-in Topic objects
@@ -863,6 +891,10 @@ int DCPS_IR_Domain::cleanup_built_in_topics()
     }
 
   return 0;
+
+#else
+  return 1;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
@@ -1038,6 +1070,7 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
 
 void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       if (1 != participant->get_id())
@@ -1076,12 +1109,16 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
         }
 
     }
+#else
+  ACE_UNUSED_ARG(participant);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       DCPS_IR_Topic_Description* desc =
@@ -1142,12 +1179,16 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
           topic->set_bit_status(1);
         }
     }
+#else
+  ACE_UNUSED_ARG(topic);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscription)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       DCPS_IR_Topic_Description* desc =
@@ -1216,12 +1257,16 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
           subscription->set_bit_status(1);
         }
     }
+#else
+  ACE_UNUSED_ARG(subscription);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       DCPS_IR_Topic_Description* desc =
@@ -1289,12 +1334,16 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
           publication->set_bit_status(1);
         }
     }
+#else
+  ACE_UNUSED_ARG(publication);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       if ( ! participant->is_bit())
@@ -1348,12 +1397,16 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
           ACE_ENDTRY;
         }
     }
+#else
+  ACE_UNUSED_ARG(participant);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       if ( ! topic->is_bit())
@@ -1406,12 +1459,16 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
           ACE_ENDTRY;
         }
     }
+#else
+  ACE_UNUSED_ARG(topic);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscription)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       if ( ! subscription->is_bit() )
@@ -1465,12 +1522,16 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
           ACE_ENDTRY;
         }
     }
+#else
+  ACE_UNUSED_ARG(subscription);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
 
 void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
 {
+#if !defined (DDS_HAS_MINIMUM_BIT)
   if (useBIT_)
     {
       if ( ! publication->is_bit())
@@ -1522,6 +1583,9 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
           ACE_ENDTRY;
         }
     }
+#else
+  ACE_UNUSED_ARG(publication);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 
