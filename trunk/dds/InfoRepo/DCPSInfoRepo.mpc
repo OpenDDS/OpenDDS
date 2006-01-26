@@ -1,4 +1,4 @@
-project (DCPSInfoRepo) : dcpsexe, portableserver {
+project (DCPSInfoRepo) : dcpsexe, portableserver, iortable {
   exename  = DCPSInfoRepo
 
   pch_header   = DcpsInfo_pch.h

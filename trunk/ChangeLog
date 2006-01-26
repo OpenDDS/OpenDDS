@@ -1,3 +1,20 @@
+Thu Jan 26 09:36:24 2006  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Modified the DCPSInfoRepo process so it registers the
+          Info Repo object using a simple object key via the
+          IOR Table.  This makes it easier to implement alternate
+          schemes of distributing the object reference (besides
+          storing it in a file).
+
+        * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+
+          Add some examples/tests of how to locate the InfoRepo 
+          using corbaloc and the naming service (using corbaname).
+
 Wed Jan 25 11:15:55 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -10,7 +27,7 @@ Wed Jan 25 11:15:55 MST 2006  Trevor Fields  <fields_t@ociweb.com>
         * tests/DCPS/BuiltInTopic/common.cpp:
         * tests/DCPS/BuiltInTopic/main.cpp:
 
-          Added DDS_HAS_MINIMUM_BIT macro to build without 
+          Added DDS_HAS_MINIMUM_BIT macro to build without
           Built In Topic support.
           Defining the macro will NOT build BIT support.
 
@@ -26,33 +43,33 @@ Tue Jan 24 13:54:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Turned off the tests with SimpleUdp dynamically loaded via service
           configurator on static builds.
-          
+
 Tue Jan 24 12:54:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/transport/simple_n/DDS_transport_simple_n.mpc:
-        
+
           Removed dependency on SimplUdp lib.
-          
+
         * tests/transport/udp_simple_n/DDS_transport_udp_simple_n.mpc:
 
           Added dependency on SimplUdp lib.
-          
+
 Tue Jan 24 12:34:53 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
-        
+
           Fixed a deadlock situation that recursively acquires the ACE_Thread_Mutex.
-          
+
         * dds/DCPS/transport/framework/TransportConfiguration.inl:
-          
+
           Updated a debug message.
-          
+
 Tue Jan 24 11:44:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
-        
+
           Fixed a warning with unused variable.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
@@ -80,7 +97,7 @@ Tue Jan 24 11:44:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Fixed compilation erros on some builds that complains the T type is not
           defined when the RcHandle<T> template is instantiated.
-          
+
 Mon Jan 23 13:56:59 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
