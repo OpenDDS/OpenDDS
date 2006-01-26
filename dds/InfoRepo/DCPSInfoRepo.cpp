@@ -6,6 +6,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "tao/ORB_Core.h"
+#include "tao/IORTable/IORTable.h"
 
 #include "ace/Get_Opt.h"
 #include "ace/Arg_Shifter.h"
@@ -130,13 +131,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                       obj.in () ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
-      CORBA::String_var str =
+      CORBA::String_var objref_str =
         orb->object_to_string (info_repo.in ()
                                ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       TheServiceParticipant->set_ORB(orb.in());
-      TheServiceParticipant->set_repo_ior(str.in());
+      TheServiceParticipant->set_repo_ior(objref_str.in());
 
       // Initialize the DomainParticipantFactory
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -169,8 +170,25 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           //ACE_ERROR_RETURN((LM_ERROR, "ERROR: Failed to load any domains!\n"), -1);
         }
 
+      CORBA::Object_var table_object =
+        orb->resolve_initial_references ("IORTable" ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+
+      IORTable::Table_var adapter =
+        IORTable::Table::_narrow (table_object.in () ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+      if (CORBA::is_nil (adapter.in ()))
+        {
+          ACE_ERROR ((LM_ERROR, "Nil IORTable\n"));
+        }
+      else
+        {
+          adapter->bind ("DCPSInfoRepo", objref_str.in () ACE_ENV_ARG_PARAMETER);
+          ACE_TRY_CHECK;
+        }
+
       FILE * file = ACE_OS::fopen (::ior_file, "w");
-      ACE_OS::fprintf (file, "%s", str.in ());
+      ACE_OS::fprintf (file, "%s", objref_str.in ());
       ACE_OS::fclose (file);
 
 
