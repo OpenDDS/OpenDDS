@@ -16,6 +16,16 @@ New to this verion are the following changes:
     No heap allocations are in the write -> read code path for 
     value types containing scalars (no arrays, sequences or strings).
 
+[] more!
+
+--- more notes on limitations ---
+- A transport instance my only be used by publications and subscriptions
+  of a single donmain because the pub & sub ids are only unique within
+  a donmain and the transport uses this ids to map associtions to 
+  links/connections.
+
+- 
+
 =========================================================================
 
 Version 0.7 of TAO DDS.
