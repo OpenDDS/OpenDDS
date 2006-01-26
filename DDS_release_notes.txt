@@ -1,12 +1,12 @@
 !! not yet released !!!
 Version 0.8 of TAO DDS.
 
-New to this verion are the following changes:
+New to this version are the following changes:
   - Added configuration of DCPS and transports via configuration files.
     This also simplified the code related to creating and configuring
     transports.
   - fixed a possible deadlock.
-    The senario it was found in was:
+    The scenario it was found in was:
     * Start a subscriber with two readers.
     * start a publisher with two corresponding writers.
     * the subscriber would deadlock between the ORB and transport 
@@ -20,8 +20,8 @@ New to this verion are the following changes:
 
 --- more notes on limitations ---
 - A transport instance my only be used by publications and subscriptions
-  of a single donmain because the pub & sub ids are only unique within
-  a donmain and the transport uses this ids to map associtions to 
+  of a single domain because the pub & sub ids are only unique within
+  a domain and the transport uses this ids to map associations to 
   links/connections.
 
 - 
@@ -30,7 +30,7 @@ New to this verion are the following changes:
 
 Version 0.7 of TAO DDS.
 
-New to this verion are the following changes:
+New to this version are the following changes:
   - Added a configuration parameter to control the use of the Nagle
     algorithm for the SimpleTCP protocol.  By default, the Nagle 
     algorithm is now disabled.
@@ -42,7 +42,7 @@ New to this verion are the following changes:
 
 Version 0.6 of TAO DDS.
 
-New to this verion are the following changes:
+New to this version are the following changes:
   - Changed the default ior file name for DCPSInfoRepo from dcps_ir.ior
     to repo.ior.
   - Changed the packet and sample length fields to 32 bit integers so
@@ -53,7 +53,7 @@ New to this verion are the following changes:
 
 Version 0.5 of TAO DDS.
 
-New to this verion are the following changes:
+New to this version are the following changes:
   - Many memory leaks have been removed.
   - A memory allocation bug has been corrected.
   - The -a option of DCPSInfoRepo now works as documented.
@@ -383,7 +383,7 @@ Note: A list of test that are run in the nightly automated build/test
   I believe it is a test related timing issue.
 
 * TAO/orbsvcs/tests/DDS/DCPS/FooTest5/run_test.pl blocking
-  Occasionally cores while shutingdown on Solaris box 
+  Occasionally cores while shutting down on Solaris box 
   but passes on Linux and Windows.
 
 
