@@ -125,8 +125,38 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       TAO_DDS_DCPSInfo_i info;
 
-      PortableServer::ObjectId_var oid = root_poa->activate_object(&info);
-      obj = root_poa->id_to_reference(oid.in());
+      // Use persistent and user id POA policies so the Info Repo's
+      // object references are consistent.
+      CORBA::PolicyList policies (2);
+      policies.length (2);
+      policies[0] =
+        root_poa->create_id_assignment_policy (PortableServer::USER_ID
+                                               ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+      policies[1] =
+        root_poa->create_lifespan_policy (PortableServer::PERSISTENT
+                                          ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+      PortableServer::POA_var poa = root_poa->create_POA ("NameService",
+                                                          poa_manager.in (),
+                                                          policies
+                                                          ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+
+      // Creation of the new POAs over, so destroy the Policy_ptr's.
+      for (CORBA::ULong i = 0; i < policies.length (); ++i)
+        {
+          policies[i]->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
+          ACE_TRY_CHECK;
+        }
+
+      PortableServer::ObjectId_var oid = 
+        PortableServer::string_to_ObjectId ("InfoRepo");
+      poa->activate_object_with_id (oid.in (),
+                                    &info
+                                    ACE_ENV_ARG_PARAMETER);
+      ACE_TRY_CHECK;
+      obj = poa->id_to_reference(oid.in());
       TAO::DCPS::DCPSInfo_var info_repo = TAO::DCPS::DCPSInfo::_narrow(
                       obj.in () ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;

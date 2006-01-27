@@ -1,3 +1,28 @@
+Fri Jan 27 13:54:43 2006  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Add support for -DCPSInfoRepo.  This is identical in action to
+          -DCPSInfo (which is essentially deprecated).  I think this is 
+          more consistent.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Make the Info Repo's object reference persistent.  This makes
+          the object references consistent (as long as fixed endpoints are
+          specified) and simplifies deployment.
+
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple_n/udp.conf:
+
+          Change this test to work with a static DDS build.
+
+        * dds/DCPSInfo.idl:
+
+          Removed this file.  It appears obsolete (virtually identical to
+          DdsDcpsInfo.idl).
+
 Thu Jan 26 09:36:24 2006  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
@@ -12,7 +37,7 @@ Thu Jan 26 09:36:24 2006  Paul Calabrese  <calabrese_p@ociweb.com>
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
 
-          Add some examples/tests of how to locate the InfoRepo 
+          Add some examples/tests of how to locate the InfoRepo
           using corbaloc and the naming service (using corbaname).
 
 Wed Jan 25 11:15:55 MST 2006  Trevor Fields  <fields_t@ociweb.com>
