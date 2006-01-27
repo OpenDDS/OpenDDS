@@ -1,9 +1,15 @@
+Fri Jan 27 14:04:05 2006  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Change the name of the POA to "InfoRepo".
+
 Fri Jan 27 13:54:43 2006  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
           Add support for -DCPSInfoRepo.  This is identical in action to
-          -DCPSInfo (which is essentially deprecated).  I think this is 
+          -DCPSInfo (which is essentially deprecated).  I think this is
           more consistent.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:

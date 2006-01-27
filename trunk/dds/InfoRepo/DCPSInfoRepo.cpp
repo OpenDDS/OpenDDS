@@ -137,7 +137,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         root_poa->create_lifespan_policy (PortableServer::PERSISTENT
                                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
-      PortableServer::POA_var poa = root_poa->create_POA ("NameService",
+      PortableServer::POA_var poa = root_poa->create_POA ("InfoRepo",
                                                           poa_manager.in (),
                                                           policies
                                                           ACE_ENV_ARG_PARAMETER);
