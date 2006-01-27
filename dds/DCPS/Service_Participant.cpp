@@ -352,8 +352,15 @@ namespace TAO
               arg_shifter.consume_arg ();
               got_debug_level = true;
             }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfoRepo")) != 0) 
+            {
+              ior = currentArg;
+              arg_shifter.consume_arg ();
+              got_info = true;
+            }
           else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
             {
+              // Deprecated, use -DCPSInfoRepo
               ior = currentArg;
               arg_shifter.consume_arg ();
               got_info = true;
