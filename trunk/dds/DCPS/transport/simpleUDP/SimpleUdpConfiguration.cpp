@@ -21,7 +21,7 @@ TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
 {
   // Call the base class method through 'this' to help VC6 figure out
   // what to do.
-  this->TAO::DCPS::TransportConfiguration::load (id, cf);
+  this->TransportConfiguration::load (id, cf);
   
   char section [20];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
