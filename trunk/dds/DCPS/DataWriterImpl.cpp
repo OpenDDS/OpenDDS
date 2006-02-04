@@ -14,7 +14,11 @@
 #include "PublicationInstance.h"
 #include "Serializer.h"
 #include "Transient_Kludge.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
 #include  "ace/Reactor.h"

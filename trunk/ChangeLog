@@ -1,3 +1,17 @@
+Fri Feb 03 17:22:10 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          Additional BIT macros.
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Fix virtual call on windows with DOC group.
+          We were passing a listener impl from the stack to the
+          poa which caused the virtual call at shutdown.
+
 Mon Jan 30 07:31:28 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:

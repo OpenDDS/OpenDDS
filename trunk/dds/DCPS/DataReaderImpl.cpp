@@ -12,7 +12,11 @@
 #include  "Qos_Helper.h"
 #include  "TopicImpl.h"
 #include  "SubscriberImpl.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include  "BuiltInTopicUtils.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 #include  "ace/Reactor.h"
 
 #if !defined (__ACE_INLINE__)
