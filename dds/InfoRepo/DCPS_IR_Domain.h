@@ -16,10 +16,13 @@
 #include /**/ "DCPS_Entity_Id_Generator.h"
 
 #include /**/ "dds/DdsDcpsDomainC.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include /**/ "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
 #include /**/ "dds/TopicBuiltinTopicDataTypeSupportC.h"
 #include /**/ "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
 #include /**/ "dds/PublicationBuiltinTopicDataTypeSupportC.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
@@ -192,6 +195,7 @@ private:
   ::DDS::Publisher_var                               bitPublisher_;
   TAO::DCPS::TransportImpl_rch                       transportImpl_;
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
   ::DDS::Topic_var                                   bitParticipantTopic_;
   ::DDS::ParticipantBuiltinTopicDataDataWriter_var   bitParticipantDataWriter_;
 
@@ -203,6 +207,7 @@ private:
 
   ::DDS::Topic_var                                   bitPublicationTopic_;
   ::DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 };
 
