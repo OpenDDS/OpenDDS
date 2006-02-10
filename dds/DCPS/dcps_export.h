@@ -9,9 +9,17 @@
 
 #include "ace/config-all.h"
 
-#if !defined (TAO_DDSDCPS_HAS_DLL)
-#  define TAO_DDSDCPS_HAS_DLL 1
-#endif /* ! TAO_DDSDCPS_HAS_DLL */
+#if defined (ACE_AS_STATIC_LIBS)
+
+# if !defined (TAO_DDSDCPS_HAS_DLL)
+#   define TAO_DDSDCPS_HAS_DLL 0
+# endif /* ! TAO_DDSDCPS_HAS_DLL */
+#else
+# if !defined (TAO_DDSDCPS_HAS_DLL)
+#   define TAO_DDSDCPS_HAS_DLL 1
+# endif /* ! TAO_DDSDCPS_HAS_DLL */
+#endif /* ACE_AS_STATIC_LIBS */
+
 
 #if defined (TAO_DDSDCPS_HAS_DLL) && (TAO_DDSDCPS_HAS_DLL == 1)
 #  if defined (TAO_DDSDCPS_BUILD_DLL)
