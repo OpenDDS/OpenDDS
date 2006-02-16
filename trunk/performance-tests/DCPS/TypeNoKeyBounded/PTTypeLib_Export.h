@@ -9,9 +9,16 @@
 
 #include "ace/config-all.h"
 
+#if defined (ACE_AS_STATIC_LIBS)
+
+# if !defined (PTTYPELIB_HAS_DLL)
+#   define PTTYPELIB_HAS_DLL 0
+# endif /* ! PTTYPELIB_HAS_DLL */
+#else
 #if !defined (PTTYPELIB_HAS_DLL)
 #  define PTTYPELIB_HAS_DLL 1
 #endif /* ! PTTYPELIB_HAS_DLL */
+#endif /* ACE_AS_STATIC_LIBS */
 
 #if defined (PTTYPELIB_HAS_DLL) && (PTTYPELIB_HAS_DLL == 1)
 #  if defined (PTTYPELIB_BUILD_DLL)

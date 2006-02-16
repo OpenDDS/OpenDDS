@@ -9,9 +9,15 @@
 
 #include "ace/config-all.h"
 
+#if defined (ACE_AS_STATIC_LIBS)
+# if !defined (FOOTYPE_HAS_DLL)
+#   define FOOTYPE_HAS_DLL 0
+# endif /* ! FOOTYPE_HAS_DLL */
+#else
 #if !defined (FOOTYPE_HAS_DLL)
 #  define FOOTYPE_HAS_DLL 1
 #endif /* ! FOOTYPE_HAS_DLL */
+#endif /* ACE_AS_STATIC_LIBS */
 
 #if defined (FOOTYPE_HAS_DLL) && (FOOTYPE_HAS_DLL == 1)
 #  if defined (FOOTYPE_BUILD_DLL)
