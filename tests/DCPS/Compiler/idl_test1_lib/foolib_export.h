@@ -9,9 +9,15 @@
 
 #include "ace/config-all.h"
 
+#if defined (ACE_AS_STATIC_LIBS)
+# if !defined (FOOLIB_HAS_DLL)
+#   define FOOLIB_HAS_DLL 0
+# endif /* ! FOOLIB_HAS_DLL */
+#else
 #if !defined (FOOLIB_HAS_DLL)
 #  define FOOLIB_HAS_DLL 1
 #endif /* ! FOOLIB_HAS_DLL */
+#endif /* ACE_AS_STATIC_LIBS */
 
 #if defined (FOOLIB_HAS_DLL) && (FOOLIB_HAS_DLL == 1)
 #  if defined (FOOLIB_BUILD_DLL)

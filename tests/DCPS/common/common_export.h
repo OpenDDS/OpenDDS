@@ -9,9 +9,15 @@
 
 #include "ace/config-all.h"
 
+#if defined (ACE_AS_STATIC_LIBS)
+# if !defined (COMMON_HAS_DLL)
+#   define COMMON_HAS_DLL 0
+# endif /* ! COMMON_HAS_DLL */
+#else
 #if !defined (COMMON_HAS_DLL)
 #  define COMMON_HAS_DLL 1
 #endif /* ! COMMON_HAS_DLL */
+#endif /* ACE_AS_STATIC_LIBS */
 
 #if defined (COMMON_HAS_DLL) && (COMMON_HAS_DLL == 1)
 #  if defined (COMMON_BUILD_DLL)

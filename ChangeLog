@@ -1,3 +1,21 @@
+Thu Feb 16 16:23:28 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/TypeNoKeyBounded/PTTypeLib_Export.h:
+        * tests/DCPS/Compiler/idl_test1_lib/foolib_export.h:
+        * tests/DCPS/Compiler/idl_test2_lib/foolib_export.h:
+        * tests/DCPS/Compiler/idl_test3_lib/foolib_export.h:
+        * tests/DCPS/FooType/footype_export.h:
+        * tests/DCPS/FooType2/footype_export.h:
+        * tests/DCPS/FooType3/foolib_export.h:
+        * tests/DCPS/FooType3NoKey/foolib_export.h:
+        * tests/DCPS/FooType3Unbounded/foolib_export.h:
+        * tests/DCPS/FooType4/foolib_export.h:
+        * tests/DCPS/FooType5/foolib_export.h:
+        * tests/DCPS/MultiTopicTypes/foolib_export.h:
+        * tests/DCPS/common/common_export.h:
+
+          Fixed export macros for windows static builds.
+
 Wed Feb 15 17:35:11 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
