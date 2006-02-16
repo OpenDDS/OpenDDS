@@ -69,7 +69,9 @@ PubDriver::run(int& argc, char* argv[])
       TheTransientKludge->enable (); 
 
       // Let the subscriber catch up before we reenqueue_all.
-      ACE_OS::sleep (2);
+      // this value depends on how long the run_test waits before starting
+      // up the second subscriber.
+      ACE_OS::sleep (6);
 
       add_subscription (sub_id_, sub_addr_.c_str ());
       add_new_subscription_ = 0;
