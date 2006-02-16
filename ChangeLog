@@ -1,3 +1,10 @@
+Wed Feb 15 17:35:11 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Changed delay between adding subscribers.  The test was
+          adding the second subscriber before the subscriber was running.
+
 Thu Feb  9 22:11:11 2006  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/dcps_export.h:
