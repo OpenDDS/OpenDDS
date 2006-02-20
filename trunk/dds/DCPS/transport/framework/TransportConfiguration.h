@@ -72,7 +72,7 @@ namespace TAO
 
         /// Number of pre-created link (list) objects per pool for the
         /// "send queue" of each DataLink.
-        size_t queue_links_per_pool_;
+        size_t queue_messages_per_pool_;
 
         /// Initial number of pre-allocated pools of link (list) objects
         /// for the "send queue" of each DataLink.

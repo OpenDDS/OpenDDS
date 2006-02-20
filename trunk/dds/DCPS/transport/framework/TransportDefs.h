@@ -153,7 +153,7 @@ namespace TAO
     /// Default TransportConfiguration settings
     enum
       {
-        DEFAULT_CONFIG_QUEUE_LINKS_PER_POOL   = 10,
+        DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL   = 10,
         DEFAULT_CONFIG_QUEUE_INITIAL_POOLS    = 5,
         DEFAULT_CONFIG_MAX_PACKET_SIZE        = 2147481599,
         DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET = 10,

@@ -1,5 +1,31 @@
 Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
 
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        
+          Changed config parameter from "DcpsInfo" to "DCPSInfoRepo".
+          Changed config parameter from "DCPSBitLookupDurationSec" to
+          "DCPSBitLookupDurationMsec" and changed its units to milliseconds.
+          Change config parameter from "queue_links_per_pool" to
+          "queue_messages_per_pool".
+          Changed transport config ""DCPSBitTransportPort" default from
+          2841 to 0 so the OS will pick a port and multiple Built-in Topic
+          subscribers can run on one machine.
+          Fixed a bug where the config parameter "swap_bytes" was being
+          read as "swap_byte".
+          
+
+Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
+
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
         * tests/DCPS/BuiltInTopic/run_test.pl:

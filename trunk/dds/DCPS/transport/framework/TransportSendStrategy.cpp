@@ -20,7 +20,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
   : max_samples_(config->max_samples_per_packet_),
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
-    queue_(config->queue_links_per_pool_,config->queue_initial_pools_),
+    queue_(config->queue_messages_per_pool_,config->queue_initial_pools_),
     elems_(1,config->max_samples_per_packet_),
     pkt_chain_(0),
     header_complete_(0),

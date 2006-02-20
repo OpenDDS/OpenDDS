@@ -161,7 +161,7 @@ PubDriver::init()
   //
   //        Value must be 0 or 1.  Default value is 0.
   //
-  //    config->queue_links_per_pool_
+  //    config->queue_messages_per_pool_
   //
   //        Used to pre-allocate the "linked-list" objects for each
   //        TransportSendStrategy object's (send) queue.

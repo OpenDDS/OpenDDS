@@ -25,13 +25,13 @@ namespace TAO
   {
     int Service_Participant::zero_argc = 0;
 
-    const int DEFAULT_BIT_TRANSPORT_PORT = 0xB17 + 2; // = 2841
+    const int DEFAULT_BIT_TRANSPORT_PORT = 0; // let the OS pick the port
 
     const size_t DEFAULT_NUM_CHUNKS = 20;
 
     const size_t DEFAULT_CHUNK_MULTIPLIER = 10;
 
-    const int BIT_LOOKUP_DURATION_SEC = 2;
+    const int BIT_LOOKUP_DURATION_MSEC = 2000;
 
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
     //     Change it to be from configuration file.
@@ -47,7 +47,7 @@ namespace TAO
     static bool got_chunk_association_multiplier = false;
     static bool got_liveliness_factor = false;
     static bool got_bit_transport_port = false;
-    static bool got_bit_lookup_duration_sec = false;
+    static bool got_bit_lookup_duration_msec = false;
 
     Service_Participant::Service_Participant ()
     : orb_ (CORBA::ORB::_nil ()), 
@@ -57,7 +57,7 @@ namespace TAO
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (false),
-      bit_lookup_duration_sec_ (BIT_LOOKUP_DURATION_SEC)
+      bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       initialize();
     }
@@ -394,11 +394,11 @@ namespace TAO
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationSec")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationMsec")) != 0) 
             {
-              bit_lookup_duration_sec_ = ACE_OS::atoi (currentArg);
+              bit_lookup_duration_msec_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
-              got_bit_lookup_duration_sec = true;
+              got_bit_lookup_duration_msec = true;
             }
           else 
             {
@@ -585,16 +585,16 @@ namespace TAO
     }
 
     int 
-    Service_Participant::bit_lookup_duration_sec () const
+    Service_Participant::bit_lookup_duration_msec () const
     {
-      return bit_lookup_duration_sec_;
+      return bit_lookup_duration_msec_;
     }
 
     void 
-    Service_Participant::bit_lookup_duration_sec (int sec)
+    Service_Participant::bit_lookup_duration_msec (int sec)
     {
-      bit_lookup_duration_sec_ = sec;
-      got_bit_lookup_duration_sec = true;
+      bit_lookup_duration_msec_ = sec;
+      got_bit_lookup_duration_msec = true;
     }
 
     size_t   
@@ -708,11 +708,11 @@ namespace TAO
           if (got_info)
             {
               ACE_DEBUG((LM_DEBUG, 
-                ACE_TEXT("(%P|%t)ignore DcpsInfo config value, use command option.\n")));
+                ACE_TEXT("(%P|%t)ignore DCPSInfoRepo config value, use command option.\n")));
             }
           else
             { 
-              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DcpsInfo", ior)
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DCPSInfoRepo", ior)
             }
           if (got_chunks)
             {
@@ -750,14 +750,14 @@ namespace TAO
             {
               GET_CONFIG_VALUE (this->cf_, sect, "DCPSLivelinessFactor", this->liveliness_factor_, int)
             }
-          if (got_bit_lookup_duration_sec)
+          if (got_bit_lookup_duration_msec)
             {
               ACE_DEBUG((LM_DEBUG, 
-                ACE_TEXT("(%P|%t)ignore DCPSBitLookupDurationSec config value, use command option.\n")));
+                ACE_TEXT("(%P|%t)ignore DCPSBitLookupDurationMsec config value, use command option.\n")));
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationSec", this->bit_lookup_duration_sec_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationMsec", this->bit_lookup_duration_msec_, int)
             }
         }
        
