@@ -16,7 +16,7 @@ Builtin topic basic function test:
     
   - start the unittest client with the orb initialized by the Service_Participant.
   
-    ./bit -DCPSInfo file://$iorfile
+    ./bit -DCPSInfoRepo file://$iorfile
       
  
 Ingore* interface tests are done by passing the -i option.
