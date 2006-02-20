@@ -18,7 +18,7 @@
 ACE_INLINE
 TAO::DCPS::TransportConfiguration::TransportConfiguration()
   : swap_bytes_(0),
-    queue_links_per_pool_(DEFAULT_CONFIG_QUEUE_LINKS_PER_POOL),
+    queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
     max_packet_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
     max_samples_per_packet_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),

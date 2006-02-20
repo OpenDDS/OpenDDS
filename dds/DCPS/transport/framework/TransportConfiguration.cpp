@@ -29,8 +29,8 @@ TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configur
     ACE_ERROR_RETURN ((LM_ERROR, 
                        ACE_TEXT ("Failed to open section: %s\n"), section),
                        -1);
-  GET_CONFIG_VALUE (cf, sect, "swap_byte", this->swap_bytes_, bool)
-  GET_CONFIG_VALUE (cf, sect, "queue_links_per_pool", this->queue_links_per_pool_, size_t)
+  GET_CONFIG_VALUE (cf, sect, "swap_bytes", this->swap_bytes_, bool)
+  GET_CONFIG_VALUE (cf, sect, "queue_messages_per_pool", this->queue_messages_per_pool_, size_t)
   GET_CONFIG_VALUE (cf, sect, "queue_initial_pools", this->queue_initial_pools_, size_t)
   GET_CONFIG_VALUE (cf, sect, "max_packet_size", this->max_packet_size_, ACE_UINT32)
   GET_CONFIG_VALUE (cf, sect, "max_samples_per_packet", this->max_samples_per_packet_, size_t)

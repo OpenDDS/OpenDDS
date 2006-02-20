@@ -172,13 +172,13 @@ namespace TAO
       TransportImpl_rch bit_transport_impl ();
 
       /**
-      * Accessor for bit_lookup_duration_sec_.
+      * Accessor for bit_lookup_duration_msec_.
       * The accessor is used for client application to configure
       * the timeout for lookup data from the builtin topic 
-      * datareader.
+      * datareader.  Value is in milliseconds.
       */
-      int bit_lookup_duration_sec () const;
-      void bit_lookup_duration_sec (int sec);
+      int bit_lookup_duration_msec () const;
+      void bit_lookup_duration_msec (int msec);
 
       ///TBD: Should be removed finally.
       ///     Added temparary to turn on and off the builtin topic stuff.
@@ -301,7 +301,7 @@ namespace TAO
       bool bit_enabled_;
 
       /// The timeout for lookup data from the builtin topic datareader.
-      int                                    bit_lookup_duration_sec_;
+      int                                    bit_lookup_duration_msec_;
 
       /// The configuration object that imports the configuration file.
       ACE_Configuration_Heap cf_;

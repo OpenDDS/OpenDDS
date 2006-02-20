@@ -119,7 +119,8 @@ namespace TAO {
           ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
           
           ACE_Time_Value due = ACE_OS::gettimeofday ()
-            + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_sec ());
+            + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_msec () / 1000,
+                             (TheServiceParticipant->bit_lookup_duration_msec () % 1000)*1000);
 
           DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
@@ -242,7 +243,8 @@ namespace TAO {
           ::DDS::SampleInfoSeq infos(max_samples);
 
           ACE_Time_Value due = ACE_OS::gettimeofday ()
-            + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_sec());
+            + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_msec () / 1000,
+                             (TheServiceParticipant->bit_lookup_duration_msec () % 1000)*1000);
 
           DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
