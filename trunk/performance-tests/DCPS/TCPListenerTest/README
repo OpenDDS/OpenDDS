@@ -30,3 +30,20 @@ address for the publisher and subscriber and makes the test pass.
    run_test.pl 
    
    
+---------------------------------------------
+Run manually on Windows for a "long" period:
+
+  - start InfoRepo:
+  
+    start
+    ..\..\..\dds\InfoRepo\DCPSInfoRepo -NOBITS -o repo.ior -d domain_ids
+    
+  - start subscriber:
+    
+    start
+    .\subscriber -DCPSConfigFile conf.ini -a localhost:0 -p 1 -i 10 -n 10000 -d 13 -msi 30 -mxs 30
+  
+  - start publisher:
+  
+    .\publisher -DCPSConfigFile conf.ini -a localhost:0 -p 1 -n 10000 -d 13 -msi 1000 -mxs 1000
+    

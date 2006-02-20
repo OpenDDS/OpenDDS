@@ -340,6 +340,9 @@ int main (int argc, char *argv[])
       ::DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
       sub->copy_from_topic_qos (dr_qos, topic_qos);
+      
+      dr_qos.liveliness.lease_duration.sec = 2 ;
+      dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
       DataReaderListenerImpl* dr_listener_impl =
         new DataReaderListenerImpl(num_datawriters,
