@@ -25,7 +25,7 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 
 
 $Topic = new PerlACE::Process ("topic_test",
-                               "-DCPSInfo file://$dcpsrepo_ior");
+                               "-DCPSInfoRepo file://$dcpsrepo_ior");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {

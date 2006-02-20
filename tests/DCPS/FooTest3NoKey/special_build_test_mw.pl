@@ -35,14 +35,14 @@ $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
 
 #Test with multiple write threads and non blocking write.
 $FooTest_1 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfo file://$dcpsrepo_ior "
+                            "-DCPSInfoRepo file://$dcpsrepo_ior "
                             . "-t $num_threads_to_write -i $num_writes_per_thread "
                             . "-w $num_writers");
 
 #Test write block waiting for available space with RELIABLE and 
 #KEEP_ALL qos.
 $FooTest_2 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfo file://$dcpsrepo_ior "
+                            "-DCPSInfoRepo file://$dcpsrepo_ior "
                             . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
                             . "-w $num_writers");
 

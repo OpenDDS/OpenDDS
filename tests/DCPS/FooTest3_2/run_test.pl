@@ -101,7 +101,7 @@ $DCPSREPO=new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 
 $publisher=new PerlACE::Process ("FooTest3_publisher", 
                                  "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                 . " -DCPSInfo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+                                 . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
                                  . " -m $multiple_instance -i $num_writes_per_thread "
                                  . " -n $max_samples_per_instance -d $history_depth"
                                  . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
