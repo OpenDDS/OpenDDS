@@ -159,6 +159,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
+    ACE_DEBUG((LM_INFO,"(%P|%t) DataReaderListenerImpl::on_liveliness_changed called\n"));
   }
 
 
@@ -173,6 +174,7 @@ void DataReaderListenerImpl::on_subscription_match (
   {
     ACE_UNUSED_ARG(reader) ;
     ACE_UNUSED_ARG(status) ;
+    ACE_DEBUG((LM_INFO,"(%P|%t) DataReaderListenerImpl::on_subscription_match called\n"));
   }
 
 

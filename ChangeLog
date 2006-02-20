@@ -1,3 +1,16 @@
+Sun Feb 19 17:05:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/README:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Set the data reader's liveliness.lease_duration QoS
+          and log when it is not met.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Print the size of Built-in Topic structures.
+
 Thu Feb 16 16:23:28 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/TypeNoKeyBounded/PTTypeLib_Export.h:
