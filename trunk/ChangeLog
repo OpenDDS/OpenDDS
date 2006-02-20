@@ -1,4 +1,4 @@
-Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
+Mon Feb 20 09:26:00 USMST 2006  Scott Harris  <harris_s@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/pub.ini:
         * DevGuideExamples/DDS/Messenger/sub.ini:
@@ -22,7 +22,6 @@ Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
           subscribers can run on one machine.
           Fixed a bug where the config parameter "swap_bytes" was being
           read as "swap_byte".
-          
 
 Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
 
