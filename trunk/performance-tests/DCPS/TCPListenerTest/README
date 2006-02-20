@@ -33,6 +33,8 @@ address for the publisher and subscriber and makes the test pass.
 ---------------------------------------------
 Run manually on Windows for a "long" period:
 
+cd %DDS_ROOT%\performance-tests\Dcps\TCPListenerTest
+
   - start InfoRepo:
   
     start

@@ -15,6 +15,13 @@ Sun Feb 19 17:24:02 USMST 2006  Scott Harris  <harris_s@ociweb.com>
         * tests/DCPS/FooTest3_2/run_test.pl:
         * tests/DCPS/SimpleFooTest/obsolete_test.pl:
         * tests/DCPS/unit/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/README:
+        * tests/DCPS/BuiltInTopic/README:
+        * tests/DCPS/FooTest3/README:
+        * tests/DCPS/FooTest3NoKey/README:
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/unit/README:
 
           Changed all -DCPSInfo options to -DCPSInfoRepo options
           because the -DCPSInfo is deprecated.
