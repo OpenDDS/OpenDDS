@@ -41,11 +41,11 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 $Subscriber = new PerlACE::Process ("subscriber", 
                                     "$svc_conf -DCPSConfigFile sub.ini "
                                   . "$arg_ns_ref "
-                                  . "-DCPSInfo corbaname:rir:#InfoRepo");
+                                  . "-DCPSInfoRepo corbaname:rir:#InfoRepo");
 $Publisher = new PerlACE::Process ("publisher", 
                                    "$svc_conf -DCPSConfigFile pub.ini "
                                  . "$arg_ns_ref "
-                                 . "-DCPSInfo corbaname:rir:#InfoRepo");
+                                 . "-DCPSInfoRepo corbaname:rir:#InfoRepo");
 
 $NS->Spawn();
 if (PerlACE::waitforfile_timed ($ns_ior, 5) == -1) {

@@ -21,7 +21,7 @@ if ($ARGV[0] eq "-client_orb") {
 }
 
 $REPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo", "-o $iorfile -d domain_ids");
-$CL = new PerlACE::Process ("DdsDcps_UnitTest", " -DCPSInfo file://$iorfile -c $client_orb");
+$CL = new PerlACE::Process ("DdsDcps_UnitTest", " -DCPSInfoRepo file://$iorfile -c $client_orb");
 
 $REPO->Spawn ();
 

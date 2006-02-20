@@ -25,7 +25,7 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 
 
 $Test = new PerlACE::Process ("infrastructure_test",
-                               "-DCPSInfo file://$dcpsrepo_ior");
+                               "-DCPSInfoRepo file://$dcpsrepo_ior");
 
 # save output to a faile because the output contaings "ERROR"
 open(SAVEERR, ">&STDERR");

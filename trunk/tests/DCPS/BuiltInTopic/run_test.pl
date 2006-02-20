@@ -44,7 +44,7 @@ $REPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                               "-o $iorfile -d domain_ids"
                               );
 #                              . " -ORBDebugLevel 1");
-$CL = new PerlACE::Process ("bit", " -DCPSInfo file://$iorfile -i $ignore_kind");
+$CL = new PerlACE::Process ("bit", " -DCPSInfoRepo file://$iorfile -i $ignore_kind");
 
 $REPO->Spawn ();
 

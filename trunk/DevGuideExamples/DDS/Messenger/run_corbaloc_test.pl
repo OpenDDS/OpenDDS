@@ -36,10 +36,10 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = new PerlACE::Process ("subscriber", 
                                     "$svc_conf -DCPSConfigFile sub.ini "
-                                  . "-DCPSInfo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
+                                  . "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
 $Publisher = new PerlACE::Process ("publisher", 
                                    "$svc_conf -DCPSConfigFile pub.ini "
-                                 . "-DCPSInfo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
+                                 . "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

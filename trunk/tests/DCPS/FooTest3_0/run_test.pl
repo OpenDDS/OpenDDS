@@ -94,14 +94,14 @@ print $DCPSREPO->CommandLine(), "\n";
 
 $parameter = "-p $pub_id_fname:localhost:$pub_port "
                  . "-s $sub_id:localhost:$sub_port "
-                 . " -DCPSInfo file://$dcpsrepo_ior -d $history_depth"
+                 . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
                  . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior";
 			     
 
 $publisher = new PerlACE::Process ("FooTest3_publisher", 
                                    "-p $pub_id_fname:localhost:$pub_port "
                                    . "-s $sub_id:localhost:$sub_port "
-                                   . " -DCPSInfo file://$dcpsrepo_ior -d $history_depth"
+                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
                                    . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior"); 
 
 print $publisher->CommandLine(), "\n";

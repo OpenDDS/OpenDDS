@@ -96,7 +96,7 @@ $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
 
 
 # test multiple cases
-$parameters = " -DCPSInfo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+$parameters = " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
               . " -m $multiple_instance -i $num_writes_per_thread "
               . " -n $max_samples_per_instance -d $history_depth -b $blocking_write";
 $FooTest3 = new PerlACE::Process ("FooTest3", $parameters);
