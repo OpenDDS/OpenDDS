@@ -76,14 +76,14 @@ namespace TAO
 
 
     ::DDS::ReturnCode_t Data_Types_Register::register_type (
-      ::DDS::DomainId_t domain,
+      ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name,
       POA_TAO::DCPS::TypeSupport_ptr the_type)
     {
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash;
 
-      if (0 == domains_.find(domain, supportHash))
+      if (0 == domains_.find(reinterpret_cast <CORBA::Long> (domain_participant), supportHash))
         {
           int lookup = supportHash->bind(type_name, the_type);
 
@@ -109,7 +109,7 @@ namespace TAO
           // new domain id!
           supportHash = new TypeSupportHash;
 
-          if (0 == domains_.bind(domain, supportHash))
+          if (0 == domains_.bind(reinterpret_cast<CORBA::Long> (domain_participant), supportHash))
             {
               if (0 == supportHash->bind(type_name, the_type))
                 {
@@ -120,22 +120,22 @@ namespace TAO
           else
             {
               delete supportHash;
-            } /* if (0 == domains_.bind(domain, supportHash)) */
-        } /* if (0 == domains_.find(domain, supportHash)) */
+            } /* if (0 == domains_.bind(domain_participant, supportHash)) */
+        } /* if (0 == domains_.find(domain_participant, supportHash)) */
 
       return retCode;
     }
 
 
     POA_TAO::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
-      ::DDS::DomainId_t domain,
+      ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name)
     {
       POA_TAO::DCPS::TypeSupport_ptr typeSupport = 0;
 
       TypeSupportHash*  supportHash;
 
-      if (0 == domains_.find(domain, supportHash))
+      if (0 == domains_.find(reinterpret_cast<CORBA::Long> (domain_participant), supportHash))
         {
           if (0 != supportHash->find(type_name, typeSupport))
             {

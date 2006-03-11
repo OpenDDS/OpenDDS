@@ -21,7 +21,7 @@ namespace TAO
   namespace DCPS
   {
     typedef ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX> TypeSupportHash;
-    typedef ACE_Hash_Map_Manager<DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
+    typedef ACE_Hash_Map_Manager<CORBA::Long, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
 
     /**
     * A singleton class that keeps track of the registered DDS data types
@@ -41,11 +41,11 @@ namespace TAO
        *  when this method returns RETCODE_OK  It does this by calling
        *  _add_ref() on the TypeSupport_ptr
        *
-       * @returns RETCODE_OK if the type_name is unique to the domain
+       * @returns RETCODE_OK if the type_name is unique to the domain participant
        *         or the type_name is already registered to the_type.
        *         Otherwise returns RETCODE_ERROR
        */ 
-      ::DDS::ReturnCode_t register_type (::DDS::DomainId_t domain,
+      ::DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr domain_participant,
                                          ACE_CString type_name,
                                          POA_TAO::DCPS::TypeSupport_ptr the_type);
 
@@ -56,7 +56,7 @@ namespace TAO
        *         type_name
        *         Otherwise returns TypeSupport::_nil()
        */
-      POA_TAO::DCPS::TypeSupport_ptr lookup(::DDS::DomainId_t domain,
+      POA_TAO::DCPS::TypeSupport_ptr lookup(::DDS::DomainParticipant_ptr domain_participant,
                                       ACE_CString type_name);
     private:
       Data_Types_Register(void);
