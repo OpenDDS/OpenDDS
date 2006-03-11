@@ -1495,7 +1495,7 @@ namespace TAO
         }
 
       POA_TAO::DCPS::TypeSupport_ptr type_support = 
-        TAO::DCPS::Registered_Data_Types->lookup(domain_id_,type_name);
+        TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (),type_name);
 
       if (0 == type_support)
         {
@@ -1633,7 +1633,7 @@ namespace TAO
         ACE_TRY_CHECK;
 
         POA_TAO::DCPS::TypeSupport_ptr type_support = 
-          TAO::DCPS::Registered_Data_Types->lookup(domain_id_, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1673,7 +1673,7 @@ namespace TAO
 
         // Topic topic
         type_support = 
-          TAO::DCPS::Registered_Data_Types->lookup(domain_id_, BUILT_IN_TOPIC_TOPIC_TYPE);
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_TOPIC_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1714,7 +1714,7 @@ namespace TAO
 
         // Subscription topic
         type_support = 
-          TAO::DCPS::Registered_Data_Types->lookup(domain_id_, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1755,7 +1755,7 @@ namespace TAO
 
         // Publication topic
         type_support = 
-          TAO::DCPS::Registered_Data_Types->lookup(domain_id_, BUILT_IN_PUBLICATION_TOPIC_TYPE);
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
         if (0 == type_support)
           {

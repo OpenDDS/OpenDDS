@@ -1,3 +1,46 @@
+Tue Jan 24 13:54:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes fixes a bug in Registered_Data_Types that causes
+        multiple domain participants within the same domain in a process
+        can not register same data types. See RT8440.
+        
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+        
+          Made the DomainHash hash map use DomainParticipant object reference
+          as the key instead of domain id. This would allow the data type 
+          be unique within a DomainParticipant and not within a domain.
+          
+        * bin/DCPS/CPPTemplate.pm:          
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        
+          Updated the first argument to the 
+          Registered_Data_Types::register_type() call.
+          
+        * tests/DCPS/MultiDPTest/common.cpp:
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/domain_ids:
+        * tests/DCPS/MultiDPTest/MultiDPTest.mpc:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/README:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/TestException.h:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.h:
+
+          Created a new test for the bug fix. This is a test to show
+          that multiple domain participants within a domain in a process
+          can register the same data type.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+        * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
+
+          Updated the first argument to the 
+          Registered_Data_Types::register_type() call.
+
 Mon Feb 20 09:26:00 USMST 2006  Scott Harris  <harris_s@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/pub.ini:

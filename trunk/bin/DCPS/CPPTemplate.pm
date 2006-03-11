@@ -55,15 +55,9 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-    ::DDS::DomainId_t domain = 0;
-    domain = participant->get_domain_id();
-
-    ::DDS::ReturnCode_t registered = 
-      ::TAO::DCPS::Registered_Data_Types->register_type(domain,
-                                                        type_name,
-                                                        this);
-
-    return registered;
+  return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
+                                                           type_name,
+                                                           this);
 }
 
 ::TAO::DCPS::DataWriterRemote_ptr
