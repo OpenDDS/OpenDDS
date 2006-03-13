@@ -68,7 +68,7 @@ int parse_args (int argc, char *argv[])
     if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0) 
     {
       //Maximum two addresses.
-      static i = 0;
+      static size_t i = 0;
       reader_address_str[i] = currentArg;
       i++;
       arg_shifter.consume_arg ();

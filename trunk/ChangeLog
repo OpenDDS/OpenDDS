@@ -1,22 +1,28 @@
+Mon Mar 13 14:50:00 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+
+          Added a type to the declaration of 'i'.
+
 Tue Jan 24 13:54:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes fixes a bug in Registered_Data_Types that causes
         multiple domain participants within the same domain in a process
         can not register same data types. See RT8440.
-        
+
         * dds/DCPS/Registered_Data_Types.cpp:
         * dds/DCPS/Registered_Data_Types.h:
-        
+
           Made the DomainHash hash map use DomainParticipant object reference
-          as the key instead of domain id. This would allow the data type 
+          as the key instead of domain id. This would allow the data type
           be unique within a DomainParticipant and not within a domain.
-          
-        * bin/DCPS/CPPTemplate.pm:          
+
+        * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DomainParticipantImpl.cpp:
-        
-          Updated the first argument to the 
+
+          Updated the first argument to the
           Registered_Data_Types::register_type() call.
-          
+
         * tests/DCPS/MultiDPTest/common.cpp:
         * tests/DCPS/MultiDPTest/common.h:
         * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
@@ -38,7 +44,7 @@ Tue Jan 24 13:54:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
         * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
 
-          Updated the first argument to the 
+          Updated the first argument to the
           Registered_Data_Types::register_type() call.
 
 Mon Feb 20 09:26:00 USMST 2006  Scott Harris  <harris_s@ociweb.com>
@@ -54,7 +60,7 @@ Mon Feb 20 09:26:00 USMST 2006  Scott Harris  <harris_s@ociweb.com>
         * dds/DCPS/transport/framework/TransportDefs.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
         * tests/transport/simple/PubDriver.cpp:
-        
+
           Changed config parameter from "DcpsInfo" to "DCPSInfoRepo".
           Changed config parameter from "DCPSBitLookupDurationSec" to
           "DCPSBitLookupDurationMsec" and changed its units to milliseconds.
