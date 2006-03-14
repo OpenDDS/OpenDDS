@@ -117,7 +117,20 @@ void init_dcps_objects (int i)
     = new ::Mine::FooTypeSupportImpl();
   PortableServer::ServantBase_var safe_servant = fts_servant;
 
+  ::Mine::FooTypeSupportImpl* another_fts_servant 
+    = new ::Mine::FooTypeSupportImpl();
+  PortableServer::ServantBase_var another_safe_servant = another_fts_servant;
+
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant[i].in (), type_name))
+  {
+    ACE_ERROR ((LM_ERROR, 
+      ACE_TEXT ("Failed to register the FooNoTypeTypeSupport."))); 
+    ACE_THROW (TestException ());      
+  }
+
+  // Test if different TypeSupport instances of the same TypeSupport type can register
+  // with the same type name within the same domain participant.
+  if (::DDS::RETCODE_OK != another_fts_servant->register_type(participant[i].in (), type_name))
   {
     ACE_ERROR ((LM_ERROR, 
       ACE_TEXT ("Failed to register the FooNoTypeTypeSupport."))); 
