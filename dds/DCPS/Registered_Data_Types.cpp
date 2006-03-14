@@ -97,7 +97,12 @@ namespace TAO
               POA_TAO::DCPS::TypeSupport_ptr currentType;
               if ( 0 == supportHash->find(type_name, currentType) )
                 {
-                  if (the_type == currentType)
+                  // Allow different TypeSupport instances of the same TypeSupport
+                  // type register with the same type name in the same 
+                  // domain pariticipant. The second (and subsequent) registrations
+                  // will be ignored.
+                  if (ACE_OS::strcmp (the_type->_interface_repository_id(), 
+                                      currentType->_interface_repository_id()) == 0)
                     {
                       retCode = ::DDS::RETCODE_OK;
                     } /* if (the_type == currentType) */

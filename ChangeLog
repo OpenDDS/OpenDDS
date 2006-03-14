@@ -1,3 +1,19 @@
+Tue Mar 14 12:37:29 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.cpp:
+
+          Changed the register_type() to use the_interface_repository_id
+          comparison instead of  POA_TAO::DCPS::TypeSupport_ptr comparison.
+          This would allow different TypeSupport instances of the same TypeSupport
+          type register with the same type name in the same domain pariticipant. 
+          The second (and subsequent) registrations are ignored.
+
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+
+          Added a test case that registers different TypeSupport instances of 
+          the same TypeSupport type using the same type name in a domain
+          participant.
+                    
 Mon Mar 13 14:50:00 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * tests/DCPS/MultiDPTest/subscriber.cpp:
