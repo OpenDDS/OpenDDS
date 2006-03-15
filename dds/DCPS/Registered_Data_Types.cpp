@@ -83,7 +83,7 @@ namespace TAO
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash;
 
-      if (0 == domains_.find(reinterpret_cast <CORBA::Long> (domain_participant), supportHash))
+      if (0 == domains_.find(reinterpret_cast <void*> (domain_participant), supportHash))
         {
           int lookup = supportHash->bind(type_name, the_type);
 
@@ -114,7 +114,7 @@ namespace TAO
           // new domain id!
           supportHash = new TypeSupportHash;
 
-          if (0 == domains_.bind(reinterpret_cast<CORBA::Long> (domain_participant), supportHash))
+          if (0 == domains_.bind(reinterpret_cast<void*> (domain_participant), supportHash))
             {
               if (0 == supportHash->bind(type_name, the_type))
                 {
@@ -140,7 +140,7 @@ namespace TAO
 
       TypeSupportHash*  supportHash;
 
-      if (0 == domains_.find(reinterpret_cast<CORBA::Long> (domain_participant), supportHash))
+      if (0 == domains_.find(reinterpret_cast<void*> (domain_participant), supportHash))
         {
           if (0 != supportHash->find(type_name, typeSupport))
             {

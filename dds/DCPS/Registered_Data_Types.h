@@ -21,7 +21,7 @@ namespace TAO
   namespace DCPS
   {
     typedef ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX> TypeSupportHash;
-    typedef ACE_Hash_Map_Manager<CORBA::Long, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
+    typedef ACE_Hash_Map_Manager<void*, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
 
     /**
     * A singleton class that keeps track of the registered DDS data types
