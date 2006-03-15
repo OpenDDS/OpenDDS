@@ -1,3 +1,9 @@
+Wed Mar 15 11:26:50 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added tests/DCPS/MultiDPTest test.
+
 Wed Mar 15 11:17:25 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.cpp:
