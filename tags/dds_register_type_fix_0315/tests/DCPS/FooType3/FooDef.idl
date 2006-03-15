@@ -1,0 +1,15 @@
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo a_long_value"
+
+  // Example user defined "Foo" structure
+  struct Foo {
+    long  a_long_value;  // the instance key
+    long  handle_value;
+    long  sample_sequence;
+    long  writer_id;
+  };
+
+};
