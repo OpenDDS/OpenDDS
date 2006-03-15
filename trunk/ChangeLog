@@ -1,3 +1,11 @@
+Wed Mar 15 11:17:25 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+
+          Change the hash map using void* as the key to fix the build problem 
+          on 64bits build.
+
 Tue Mar 14 12:37:29 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.cpp:
