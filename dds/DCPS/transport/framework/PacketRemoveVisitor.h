@@ -19,18 +19,20 @@ namespace TAO
   {
 
 
-
+    
     class TAO_DdsDcps_Export PacketRemoveVisitor : public BasicQueueVisitor<TransportQueueElement>
     {
       public:
 
         PacketRemoveVisitor(const ACE_Message_Block* sample,
                             ACE_Message_Block*&      unsent_head_block,
-                            ACE_Message_Block*       header_block);
+                            ACE_Message_Block*       header_block,
+                            TransportReplacedElementAllocator& allocator);
 
         PacketRemoveVisitor(RepoId               pub_id,
                             ACE_Message_Block*&  unsent_head_block,
-                            ACE_Message_Block*   header_block);
+                            ACE_Message_Block*   header_block,
+                            TransportReplacedElementAllocator& allocator);
 
         virtual ~PacketRemoveVisitor();
 
@@ -73,7 +75,7 @@ namespace TAO
         ACE_Message_Block* previous_block_;
 
         /// Cached allocator for TransportReplaceElement.
-        TransportReplacedElementAllocator replaced_element_allocator_;
+        TransportReplacedElementAllocator& replaced_element_allocator_;
     };
 
   }

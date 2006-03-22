@@ -10,6 +10,8 @@
 #include  "TransportDefs.h"
 #include  "BasicQueue_T.h"
 #include  "TransportHeader.h"
+#include  "TransportReplacedElement.h"
+
 #include  "ace/Synch.h"
 
 
@@ -248,6 +250,8 @@ namespace TAO
         LockType lock_;
 
 
+        /// Cached allocator for TransportReplaceElement.
+        TransportReplacedElementAllocator replaced_element_allocator_;
 
 //remove these are only for debugging: DUMP_FOR_PACKET_INFO
         protected:

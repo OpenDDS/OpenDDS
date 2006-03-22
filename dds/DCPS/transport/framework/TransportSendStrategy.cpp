@@ -9,6 +9,13 @@
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
+//TBD: The number of chunks of the replace element allocator
+//     is hard coded for now. This will be configurable when
+//     we implement the dds configurations. This value should
+//     be the number of marshalled DataSampleHeader that a 
+//     packet could contain.
+#define NUM_REPLACED_ELEMENT_CHUNKS 20
+
 // I think 2 chunks for the header message block is enough
 // - one for the original copy and one for duplicate which 
 // occurs every packet and is released after packet is sent.
@@ -28,7 +35,8 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     mode_(MODE_DIRECT),
     num_delayed_notifications_(0),
     header_db_allocator_(1),
-    header_mb_allocator_(2)
+    header_mb_allocator_(2),
+    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
 
