@@ -417,7 +417,8 @@ TAO::DCPS::TransportSendStrategy::remove_sample
   // Construct a PacketRemoveVisitor object.
   PacketRemoveVisitor remove_from_packet_visitor(sample->sample_,
                                                  this->pkt_chain_,
-                                                 this->header_block_);
+                                                 this->header_block_,
+                                                 this->replaced_element_allocator_);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit our elems_ with the PacketRemoveVisitor.\n"));
@@ -502,7 +503,8 @@ TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
   // Construct a PacketRemoveVisitor object.
   PacketRemoveVisitor remove_from_packet_visitor(pub_id,
                                                  this->pkt_chain_,
-                                                 this->header_block_);
+                                                 this->header_block_,
+                                                 this->replaced_element_allocator_);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit our elems_ with the PacketRemoveVisitor.\n"));

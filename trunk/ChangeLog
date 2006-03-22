@@ -1,3 +1,18 @@
+Wed Mar 22 11:53:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        
+          Moved the TransportReplaceElement cached allocator from PacketRemoveVisitor
+          to TransportSendStrategy to fix a bug in the transport. The problem is 
+          PacketRemoveVisitor is allocated on stack so the allocator is destroyed 
+          as the PacketRemoveVisitor goes out of scope, but late the 
+          TransportReplaceElement accesses the allocator and causes the access 
+          voilation.
+
 Wed Mar 15 11:26:50 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:

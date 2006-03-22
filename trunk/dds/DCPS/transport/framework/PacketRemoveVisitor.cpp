@@ -12,17 +12,12 @@
 #include "PacketRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-//TBD: The number of chunks of the replace element allocator
-//     is hard coded for now. This will be configurable when
-//     we implement the dds configurations. This value should
-//     be the number of marshalled DataSampleHeader that a 
-//     packet could contain.
-#define NUM_REPLACED_ELEMENT_CHUNKS 20
 
 TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
                               (const ACE_Message_Block* sample,
                                ACE_Message_Block*&      unsent_head_block,
-                               ACE_Message_Block*       header_block)
+                               ACE_Message_Block*       header_block,
+                               TransportReplacedElementAllocator& allocator)
   : sample_(sample),
     pub_id_(0),
     head_(unsent_head_block),
@@ -30,7 +25,7 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     status_(0),
     current_block_(0),
     previous_block_(0),
-    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
+    replaced_element_allocator_(allocator)
 {
   DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
 }
@@ -39,7 +34,8 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
 TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
                                     (RepoId              pub_id,
                                      ACE_Message_Block*& unsent_head_block,
-                                     ACE_Message_Block*  header_block)
+                                     ACE_Message_Block*  header_block,
+                                     TransportReplacedElementAllocator& allocator)
   : sample_(0),
     pub_id_(pub_id),
     head_(unsent_head_block),
@@ -47,7 +43,7 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     status_(0),
     current_block_(0),
     previous_block_(0),
-    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
+    replaced_element_allocator_(allocator)
 {
   DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
 }
