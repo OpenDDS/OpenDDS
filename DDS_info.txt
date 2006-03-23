@@ -1,0 +1,208 @@
+This document contains various notes about DDS.
+The DDS section of the TAO Developer's Guide is a better source
+of information on DDS.
+WARNING: these note may become obsolete and may not be updated.
+         USE AT YOUR OWN RISK!!!
+
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 3/22/06
+DDS version: 0.7/0.8
+
+> Hi, Some questions from the DDS class at Progeny:
+>
+> What if I don't define a key field in IDL?
+
+That is OK.  There will be just one instance of that value type.
+If a value type has a key (or keys) it can have more than one instance.
+A value is assigned to an instance based on the key(s) values(s).
+
+>
+> Can I define more than one key field?
+
+Yes.  Just provide multiple #pragma DCPS_DATA_KEY lines.
+For example
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo theType"
+#pragma DCPS_DATA_KEY "Xyz::Foo id"
+  // Example user defined "Foo" structure
+  struct Foo {
+    long  theType;
+    long  id;
+    float x;
+    float y;
+  };
+};
+
+All values with both the same theType value and id value would be in the
+same instance.
+See page 2-8 and 2-9 of the DDS specification for a definition of an
+instance.
+
+>
+> What if I don't register an instance on the publisher? Is everything
+> considered to be part of the same instance?
+
+No, if you don't register and instance it is automatically registered for
+you when you write the value.
+The registration method is available for optimization.  An implementation of
+DDS may have less latency if you register instances before writing them (see
+2.1.2.4.2.5 register_instance). It also allows you to get the instance
+handle that may also improve performance.
+
+>
+> On the subscriber, can I do something analogous to registering an
+> instance, so I only receive samples of a particular instance? Or do I
+> always receive samples from all published instances?
+
+You always receive all published instances but you may use
+read_instance/take_instance to get values for one a particular instance.
+See 2.1.2.5.3.14 read_instance.
+
+>
+> How many threads does DDS spin off on the publisher and subscriber sides?
+
+I think it is something like:
+-- publisher side --
+1 for the ORB.
+1 per transport
+1 per connection (per association to a transport on the other side not
+already connected).
+
+-- subscriber side --
+1 for the ORB
+1 per transport
+
+
+If I have time, I will verify the above.
+
+>
+> Can you explain the following slide from the DDC AAC proposal? I'm a
+> little unclear on exactly what's happening under the covers:
+>
+> ----------
+>
+> Here is an example data writer with some QoS policies set
+>
+> DDS::DataWriterQos dw_qos;
+> pub->get_default_datawriter_qos (dw_qos);
+> dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+> dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+> dw_qos.reliability.max_blocking_time.sec = 10;
+> dw_qos.reliability.max_blocking_time.nanosec = 0;
+> dw_qos.resource_limits.max_samples_per_instance = 100;
+> DDS::DataWriter_var dw = pub->create_datawriter(topic.in
+> (),dw_qos,DDS::DataWriterListener::_nil());
+>
+> • This data writer has the following behaviors:
+> – Can queue up to 100 samples that are pending delivery to one or more
+> subscribers
+> – If 100 samples are pending, then the write call blocks for up to 10
+> seconds waiting for an
+> opening in the queue
+> » An opening occurs when a previously written sample is delivered to all
+> subscribers
+>
+
+A FooDataWriter::write call will attempt to directly write the value to all
+associations.
+If a link/connection for an association is in backpressure then the value is
+just queued.
+A thread per link/connection will process the queue when the connection is
+available for output.
+Until the instance queue is full, FooDataWriter::write calls will just queue
+the message even if the write cannot be accomplished without blocking (in
+backpressure).
+
+For KEEP_ALL_HISTORY when the instance queue is full the
+FooDataWriter::write call will block for upto the max_blocking_time.
+
+If it was history.kind = KEEP_LATEST then when the queue is full the oldest
+value in the queue will be lost (discarded) and the new value will be added
+to the queue.  For KEEP_LATEST the FooDataWriter::write call will never
+block.
+
+
+-----------------------------------------------------------------------------
+Date: 3/21/06
+DDS version: 0.7/0.8
+
+> I'm still testing DCPS Info Repository server and I'm getting the
+> Run-time error below:
+>
+> .......
+> (20710|3086940768)  13:15:29.787132 Repo main
+> (20710|3086940768) EXCEPTION, ERROR: Exception caught in
+> DCPS_IR_Subscription::add_associated_publication:
+> system exception, ID 'IDL:omg.org/CORBA/TRANSIENT:1.0'
+> OMG minor code (2), described as 'No usable profile in IOR.', completed
+> = NO
+>
+> ERROR: DCPS_IR_Domain::remove_dead_participants () Removing dead
+> participant 8E99B70 id 1
+> .......
+>
+> It happens everytime I restart Publisher and Subscriber processes.
+> Do you have any idea what's going on?
+
+Yes, you are not properly shutting down the publisher or subscriber so the
+Info Repo still has a reference it.
+
+When a new datareader or datawriter is added that matches the old
+datawriter/datareader proxy in the Info Repo that was improperly shutdown
+the Info Repo tries to inform the old datareader/datawriter of the match.
+At that point the Info Repo notices that the old datareader/datawriter is
+gone and removes its obsolete proxy entities in the Info Repo.
+
+The TRANSIENT exception log is from Info Repo trying to tell the old
+datareader/datawriter about a new match.
+The remove_dead_participants log is an informative message saying that proxy
+entities have been recognized as dead and have been removed.
+
+>
+> If I restart DCPS Info repository server along with Publisher and
+> Subscriber
+> processes, this doesn't happen.  Should I restart DCPS Info Repository
+> server everytime I start Publisher and Subscriber processes?
+
+That is not necessary.
+
+
+-----------------------------------------------------------------------------
+Date: 2/8/06
+DDS version: 0.7
+
+> When building DDS I get warnings reporting that the environment variable 
+> TAO_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no 
+> reference to it there.  What's it for and what should it be set to (, or 
+> should I just ignore it)?
+
+You can safely ignore this.
+
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+

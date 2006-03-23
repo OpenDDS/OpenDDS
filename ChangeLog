@@ -1,3 +1,10 @@
+Thu Mar 23 09:17:23 USMST 2006  Scott Harris <harris_s@ociweb.com>
+
+        * DDS_info.txt
+
+          This file is a place to collect notes that may later
+          become part of the DDS section of the TAO Dev. Guide.
+
 Wed Mar 22 11:53:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
