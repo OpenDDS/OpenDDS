@@ -353,6 +353,8 @@ namespace TAO
     /// Get an object reference given the servant pointer.
     /// @throws PortableServer::POA::ServantNotActive, 
     ///         PortableServer::POA::WongPolicy
+    /// @note This method is DEPRICATED - use the one with
+    ///       just one tempate parameter.
     template <class T, class T_impl, class T_ptr>
     T_ptr servant_to_reference (
       T_impl* servant
@@ -367,6 +369,27 @@ namespace TAO
       ACE_CHECK_RETURN(T::_nil ());
 
       T_ptr the_obj = T::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
+      ACE_CHECK_RETURN(T::_nil ());
+      return the_obj;
+    }	
+
+    /// Get an object reference given the servant pointer.
+    /// @throws PortableServer::POA::ServantNotActive, 
+    ///         PortableServer::POA::WongPolicy
+    template <class T>
+    typename T::_ptr_type servant_to_reference (
+      PortableServer::ServantBase* servant
+      ACE_ENV_ARG_DECL
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
+    {
+      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+      CORBA::Object_var obj = poa->servant_to_reference (servant ACE_ENV_ARG_PARAMETER);
+      ACE_CHECK_RETURN(T::_nil ());
+
+      T::_ptr_type the_obj = T::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
       ACE_CHECK_RETURN(T::_nil ());
       return the_obj;
     }	
