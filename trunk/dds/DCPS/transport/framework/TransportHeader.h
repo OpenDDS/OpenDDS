@@ -38,9 +38,15 @@ namespace TAO
         /// Determine if this is a valid packet header.
         bool valid() const ;
 
+        /// Byte order for the transport header. This byte_order_ flag indicates
+        /// the endianess of the host of the publisher side. This is not affected
+        /// by the swap_bytes configuration defined for the specific TransportImpl
+        /// instance.
+        ACE_CDR::Octet byte_order_;
+        
         /// The protocol and version of the packet being transmitted.
         ACE_CDR::Octet packet_id_[6];
-
+       
         /// The size of the message following this header, not including the
         /// 8 bytes used by this TransportHeader.
         ACE_UINT32 length_;

@@ -17,8 +17,13 @@ TAO::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 {
   this->marshaled_size_ = 0;
 
-  TAO::DCPS::Serializer reader( buffer) ;
-
+  TAO::DCPS::Serializer reader( buffer )  ;
+  // TODO: Now it's ok to serialize the message_id before flag byte
+  // since the message_id_ is defined as char. If the message_id_ 
+  // is changed to be defined as a type with multiple bytes then 
+  // we need define it after the flag byte or serialize flag byte before
+  // serializing the message_id_. I think the former approach is simpler
+  // than the latter approach.
   reader >> this->message_id_ ;
   if( reader.good_bit() != true) return ;
   this->marshaled_size_ += sizeof( this->message_id_) ;
@@ -37,6 +42,10 @@ TAO::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
   this->reserved_4   = ((byte & 0x20) != 0) ;
   this->reserved_5   = ((byte & 0x40) != 0) ;
   this->reserved_6   = ((byte & 0x80) != 0) ;
+
+  // Set swap_bytes flag to the Serializer if data sample from
+  // the publisher is in different byte order.
+  reader.swap_bytes (this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
   reader >> this->message_length_ ;
   if( reader.good_bit() != true) return ;
@@ -73,7 +82,7 @@ TAO::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 ACE_CDR::Boolean
 operator<< (ACE_Message_Block*& buffer, TAO::DCPS::DataSampleHeader& value)
 {
-  TAO::DCPS::Serializer writer( buffer) ;
+  TAO::DCPS::Serializer writer( buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
 
   writer << value.message_id_ ;
 

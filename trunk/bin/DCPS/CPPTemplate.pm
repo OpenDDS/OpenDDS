@@ -30,7 +30,8 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublicationInstance.h"
-
+#include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "<%TYPE%>TypeSupportImpl.h"
 
 <%NAMESPACESTART%>
@@ -514,7 +515,8 @@ ACE_Message_Block*
                     0);
   }
   
-  ::TAO::DCPS::Serializer serializer (mb);
+  ::TAO::DCPS::Serializer serializer (mb, 
+                                      this->get_publisher_servant()->swap_bytes());
   serializer << instance_data;
   
   return mb;
@@ -1764,7 +1766,7 @@ void
                               sizeof (::<%SCOPE%><%TYPE%>))),
                          ::<%SCOPE%><%TYPE%>) ;
  
-  Serializer ser(sample.sample_, sample.header_.byte_order_) ;
+  Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
   ser >> *data ;
 
   store_instance_data(data, sample.header_) ;
@@ -1973,7 +1975,7 @@ void
                               sizeof (::<%SCOPE%><%TYPE%>))),
                          ::<%SCOPE%><%TYPE%>) ;
  
-  Serializer ser(sample.sample_, sample.header_.byte_order_) ;
+  Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
   ser >> *data ;
   
   DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;

@@ -2,11 +2,18 @@
 ///
 /// $Id$
 
+//TODO: we should really use the ACE_CDR_BYTE_ORDER instead of
+//      TAO_ENCAP_BYTE_ORDER, but since the ACE_CDR_BYTE_ORDER
+//      is currently defined under the ACE_HAS_WCHAR guard which
+//      is different from DOC's version (I'm not sure why) and 
+//      the TAO_ENCAP_BYTE_ORDER is currently consistent with
+//      the ACE_CDR_BYTE_ORDER, it's ok to use 
+//      TAO_ENCAP_BYTE_ORDER for now.
 ACE_INLINE
 DataSampleHeader::DataSampleHeader ()
   : message_id_( 0)
   , last_sample_( 0)
-  , byte_order_( 0)
+  , byte_order_(TAO_ENCAP_BYTE_ORDER)
   , reserved_1( 0)
   , reserved_2( 0)
   , reserved_3( 0)
@@ -27,7 +34,7 @@ ACE_INLINE
 DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
   : message_id_( 0)
   , last_sample_( 0)
-  , byte_order_( 0)
+  , byte_order_( TAO_ENCAP_BYTE_ORDER)
   , reserved_1( 0)
   , reserved_2( 0)
   , reserved_3( 0)
@@ -48,7 +55,7 @@ ACE_INLINE
 DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
   : message_id_( 0)
   , last_sample_( 0)
-  , byte_order_( 0)
+  , byte_order_( TAO_ENCAP_BYTE_ORDER)
   , reserved_1( 0)
   , reserved_2( 0)
   , reserved_3( 0)

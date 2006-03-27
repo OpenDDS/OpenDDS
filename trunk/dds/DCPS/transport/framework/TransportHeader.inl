@@ -11,6 +11,7 @@ TAO::DCPS::TransportHeader::TransportHeader()
 {
   DBG_SUB_ENTRY("TransportHeader","TransportHeader",1);
 
+  this->byte_order_ = TAO_ENCAP_BYTE_ORDER;
   this->packet_id_[0] = supported_id_[0];
   this->packet_id_[1] = supported_id_[1];
   this->packet_id_[2] = supported_id_[2];
@@ -62,7 +63,7 @@ TAO::DCPS::TransportHeader::max_marshaled_size()
 {
   DBG_ENTRY("TransportHeader","max_marshaled_size");
   // Representation takes no extra space for encoding.
-  return sizeof(this->packet_id_) + sizeof(this->length_) ;
+  return sizeof(this->byte_order_) + sizeof(this->packet_id_) + sizeof(this->length_) ;
 }
 
 
@@ -97,6 +98,11 @@ TAO::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
   DBG_ENTRY("TransportHeader","init");
 
   TAO::DCPS::Serializer reader(buffer);
+
+  // Extract the byte order for the transport header.
+  reader >> ACE_InputCDR::to_octet (this->byte_order_);
+
+  reader.swap_bytes (this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
   // Extract the packet_id_ octet values.
   reader.read_octet_array(this->packet_id_, sizeof(this->packet_id_));

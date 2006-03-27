@@ -24,7 +24,8 @@ operator<<(ACE_Message_Block& buffer, TAO::DCPS::TransportHeader& value)
 {
   DBG_SUB_ENTRY("TransportHeader","operator<<",1);
 
-  TAO::DCPS::Serializer writer(&buffer);
+  TAO::DCPS::Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  writer << ACE_OutputCDR::from_octet (value.byte_order_);
 
   writer.write_octet_array( value.packet_id_, sizeof(value.packet_id_)) ;
   writer << value.length_;
@@ -38,7 +39,8 @@ operator<<(ACE_Message_Block*& buffer, TAO::DCPS::TransportHeader& value)
 {
   DBG_SUB_ENTRY("TransportHeader","operator<<",2);
 
-  TAO::DCPS::Serializer writer(buffer);
+  TAO::DCPS::Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  writer << ACE_OutputCDR::from_octet (value.byte_order_);
 
   writer.write_octet_array( value.packet_id_, sizeof(value.packet_id_)) ;
   writer << value.length_;
