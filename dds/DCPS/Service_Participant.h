@@ -389,7 +389,7 @@ namespace TAO
       CORBA::Object_var obj = poa->servant_to_reference (servant ACE_ENV_ARG_PARAMETER);
       ACE_CHECK_RETURN(T::_nil ());
 
-      T::_ptr_type the_obj = T::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
+      typename T::_ptr_type the_obj = T::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
       ACE_CHECK_RETURN(T::_nil ());
       return the_obj;
     }	

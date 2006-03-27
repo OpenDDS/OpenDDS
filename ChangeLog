@@ -1,3 +1,10 @@
+Mon Mar 27 12:06:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Fixed the compilation error on some platforms in servant_to_reference()
+          that misses the "typename" keyword for the_obj variable. 
+          
 Fri Mar 24 11:22:34 USMST 2006  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
