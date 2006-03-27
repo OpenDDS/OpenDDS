@@ -1,3 +1,37 @@
+Mon Mar 27 16:14:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes are made to fix the DDS test failures between machines
+        with different endianess. The swap_bytes configuration value per 
+        TransportImpl instance is also appropriately used to allow different
+        transports use different setting of swap_bytes.
+     
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Made the Serializer in *DataWriterImpl::marshal() constructed 
+          with the swap_bytes flag based on swap_byte configuration value
+          and made the Serializer in *DataReaderImpl::demarshal() constructed 
+          with the swap_bytes flag based on the endianess of the host and
+          the byte order flag from the publisher.
+
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleHeader.inl:
+        
+          Set the swap_bytes flag to the Serializer in the reading side based
+          on the the endianess of the host and the byte order flag in the data
+          sample from publisher.
+          
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Made the sample and control message header correctly set byte_order.
+          
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          Added one more octet to the TransportHeader to indicate the endianess
+          of the publisher side and updated the marshal and demarshal methods 
+          with the new flag.
+               
 Mon Mar 27 12:06:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

@@ -1187,7 +1187,8 @@ namespace TAO
       DataSampleHeader header_data; 
       header_data.message_id_ = message_id;
       //header_data.last_sample_
-      //header_data.byte_order_
+      header_data.byte_order_ 
+        = this->publisher_servant_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
       header_data.message_length_ = data->total_length ();
       header_data.sequence_ = 0;
       header_data.source_timestamp_sec_ = source_timestamp.sec;
@@ -1242,7 +1243,8 @@ namespace TAO
         DataSampleHeader header_data; 
         header_data.message_id_ = SAMPLE_DATA;
         //header_data.last_sample_
-        //header_data.byte_order_
+        header_data.byte_order_ 
+          = this->publisher_servant_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
         header_data.message_length_ = data->total_length ();
         header_data.sequence_ = instance->sequence_.value_;
         instance->sequence_ ++;
