@@ -1,0 +1,34 @@
+project(DCPS_Perf*Pub): dcpsexe, portableserver {
+  exename   = publisher
+  libpaths += ../TypeNoKeyBounded
+  libs     += DCPS_Perf_TypeNoKeyBounded
+  after    += DCPS_Perf_TypeNoKeyBounded
+
+  Header_Files {
+    common.h
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+
+project(DCPS_Perf*Sub): dcpsexe, portableserver {
+  exename   = subscriber
+  libpaths += ../TypeNoKeyBounded
+  libs     += DCPS_Perf_TypeNoKeyBounded
+  after    += DCPS_Perf_TypeNoKeyBounded
+
+  Header_Files {
+    common.h
+    TestStats.h
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+
