@@ -91,8 +91,6 @@ $Sub1->Spawn ();
 $Sub2->Spawn ();
 $Sub3->Spawn ();
 
-sleep 20;
-
 $Pub1->Spawn ();
 $Pub2->Spawn ();
 
