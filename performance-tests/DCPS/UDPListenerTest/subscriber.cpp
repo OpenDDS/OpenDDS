@@ -291,7 +291,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       ::TAO::DCPS::SubscriberImpl* sub_impl 
-        = reference_to_servant< ::TAO::DCPS::SubscriberImpl,
+        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                 ::DDS::Subscriber_ptr>
                               (sub.in() ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;

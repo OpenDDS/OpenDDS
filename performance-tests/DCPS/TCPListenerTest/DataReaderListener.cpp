@@ -25,7 +25,7 @@ int read (::DDS::DataReader_ptr reader)
 
   R_ptr pt_dr = var_dr.ptr();
   Rimpl* dr_servant =
-      reference_to_servant< Rimpl, R_ptr>
+      ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
               (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
 
   if (subscriber_delay_msec)

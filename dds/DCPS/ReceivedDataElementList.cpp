@@ -9,21 +9,20 @@
 # include "ReceivedDataElementList.inl"
 #endif /* ! __ACE_INLINE__ */
 
-using namespace TAO::DCPS ;
 
-ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
+TAO::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
           : head_(0), tail_(0), size_(0), instance_state_(instance_state)
 {
 }
 
-ReceivedDataElementList::~ReceivedDataElementList()
+TAO::DCPS::ReceivedDataElementList::~ReceivedDataElementList()
 {
   // The memory pointed to by instance_state_ is owned by
   // another object.
 }
    
 bool
-ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
+TAO::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
 {
   if (!head_)
   {

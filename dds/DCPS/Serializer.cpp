@@ -10,10 +10,9 @@
 # include "Serializer.inl"
 #endif /* ! __ACE_INLINE__ */
 
-using namespace TAO::DCPS;
 
 // Default constructor
-Serializer::Serializer (
+TAO::DCPS::Serializer::Serializer (
   ACE_Message_Block* chain,
   bool               swap_bytes)
  : start_ (chain)
@@ -24,12 +23,12 @@ Serializer::Serializer (
 }
 
 // Default destructor
-Serializer::~Serializer (void)
+TAO::DCPS::Serializer::~Serializer (void)
 {
 }
 
 void
-Serializer::smemcpy (char* to, const char* from, size_t n)
+TAO::DCPS::Serializer::smemcpy (char* to, const char* from, size_t n)
 {
   // Unroll the loop...
   switch (n)
@@ -60,7 +59,7 @@ Serializer::smemcpy (char* to, const char* from, size_t n)
 }
 
 void
-Serializer::swapcpy (char* to, const char* from, size_t n)
+TAO::DCPS::Serializer::swapcpy (char* to, const char* from, size_t n)
 {
   // Unroll the loop...
   switch (n)                             // 2   4   8   16
@@ -87,7 +86,7 @@ Serializer::swapcpy (char* to, const char* from, size_t n)
 }
 
 void
-Serializer::read_string (ACE_CDR::Char*& dest)
+TAO::DCPS::Serializer::read_string (ACE_CDR::Char*& dest)
 {
   //
   // Ensure no bad values leave the routine.
@@ -148,7 +147,7 @@ Serializer::read_string (ACE_CDR::Char*& dest)
 }
 
 void
-Serializer::read_string (ACE_CDR::WChar*& dest)
+TAO::DCPS::Serializer::read_string (ACE_CDR::WChar*& dest)
 {
   //
   // Ensure no bad values leave the routine.

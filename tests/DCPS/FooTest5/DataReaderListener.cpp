@@ -45,8 +45,7 @@ int read (::DDS::DataReader_ptr reader)
     }
 
     DR_impl* dr_servant =
-        reference_to_servant< DR_impl,
-                              DR_ptr>
+        ::TAO::DCPS::reference_to_servant< DR_impl, DR_ptr>
                 (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[5] ;

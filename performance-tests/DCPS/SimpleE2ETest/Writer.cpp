@@ -53,7 +53,7 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   Wimpl* pt_servant =
-    reference_to_servant< Wimpl, W_ptr>
+    ::TAO::DCPS::reference_to_servant< Wimpl, W_ptr>
             (pt_dw.in ()  ACE_ENV_SINGLE_ARG_PARAMETER);
 
   //SHH remove this kludge when the transport is fixed.

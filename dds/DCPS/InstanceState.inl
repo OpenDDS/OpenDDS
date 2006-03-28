@@ -5,17 +5,16 @@
 #include "ReceivedDataElementList.h"
 #include "ace/OS_NS_sys_time.h"
 
-using namespace TAO::DCPS ;
 
 ACE_INLINE
-InstanceState::~InstanceState ()
+TAO::DCPS::InstanceState::~InstanceState ()
 {
 }
 
 
 ACE_INLINE
 void
-InstanceState::accessed()
+TAO::DCPS::InstanceState::accessed()
 {
 //
 // Manage the view state due to data access here.
@@ -28,7 +27,7 @@ InstanceState::accessed()
 
 
 ACE_INLINE
-void InstanceState::sample_info(::DDS::SampleInfo& si,
+void TAO::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
                                 const ReceivedDataElement* de)
 {
   si.sample_state = de->sample_state_ ;
@@ -56,26 +55,26 @@ void InstanceState::sample_info(::DDS::SampleInfo& si,
 
 ACE_INLINE
 DDS::InstanceStateKind
-InstanceState::instance_state() const
+TAO::DCPS::InstanceState::instance_state() const
 {
   return this->instance_state_ ;
 }
 
 ACE_INLINE
 DDS::ViewStateKind
-InstanceState::view_state() const
+TAO::DCPS::InstanceState::view_state() const
 {
   return this->view_state_ ;
 }
 
 ACE_INLINE
-size_t InstanceState::disposed_generation_count() const
+size_t TAO::DCPS::InstanceState::disposed_generation_count() const
 {
   return disposed_generation_count_ ;
 }
 
 ACE_INLINE
-size_t InstanceState::no_writers_generation_count() const
+size_t TAO::DCPS::InstanceState::no_writers_generation_count() const
 {
   return no_writers_generation_count_ ;
 }
@@ -83,7 +82,7 @@ size_t InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-InstanceState::data_was_received()
+TAO::DCPS::InstanceState::data_was_received()
 {
   //
   // Update the view state here, since only sample data received affects
@@ -126,7 +125,7 @@ InstanceState::data_was_received()
 
 ACE_INLINE
 void
-InstanceState::lively(PublicationId         writer_id)
+TAO::DCPS::InstanceState::lively(PublicationId         writer_id)
 {
   ACE_UNUSED_ARG(writer_id);
   //
@@ -143,7 +142,7 @@ InstanceState::lively(PublicationId         writer_id)
 
 ACE_INLINE
 void
-InstanceState::empty( bool value)
+TAO::DCPS::InstanceState::empty( bool value)
 {
   //
   // Manage the instance state due to the DataReader becoming empty

@@ -46,8 +46,8 @@ Reader::start ()
     }
 
     ::Mine::FooDataReaderImpl* dr_servant =
-        reference_to_servant< ::Mine::FooDataReaderImpl,
-                             ::Mine::FooDataReader_ptr>
+        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
+                                           ::Mine::FooDataReader_ptr>
                 (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[5] ;
@@ -151,8 +151,8 @@ Reader::start1 ()
     }
 
     ::Mine::FooDataReaderImpl* dr_servant =
-        reference_to_servant< ::Mine::FooDataReaderImpl,
-                             ::Mine::FooDataReader_ptr>
+        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
+                                           ::Mine::FooDataReader_ptr>
                 (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     char action[14] ;
@@ -395,8 +395,8 @@ Reader::start2 ()
     }
 
     ::Mine::FooDataReaderImpl* dr_servant =
-        reference_to_servant< ::Mine::FooDataReaderImpl,
-                             ::Mine::FooDataReader_ptr>
+        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
+                                           ::Mine::FooDataReader_ptr>
                 (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     ::Mine::FooSeq foo;

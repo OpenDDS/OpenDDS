@@ -65,7 +65,7 @@ int main (int argc, char *argv[])
 
     // Initialize the transport
     TAO::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, AUTO_CONFIG);
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::TAO::DCPS::AUTO_CONFIG);
     
     // Create the subscriber and attach to the corresponding
     // transport.
@@ -79,8 +79,8 @@ int main (int argc, char *argv[])
 
     // Attach the subscriber to the transport.
     TAO::DCPS::SubscriberImpl* sub_impl =
-      reference_to_servant< TAO::DCPS::SubscriberImpl,
-                            DDS::Subscriber_ptr> (sub.in ());
+      ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
+                                         DDS::Subscriber_ptr> (sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant\n" << endl;
       exit(1);

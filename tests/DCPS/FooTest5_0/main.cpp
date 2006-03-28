@@ -428,8 +428,8 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       ::TAO::DCPS::SubscriberImpl* sub_impl 
-        = reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                ::DDS::Subscriber_ptr>
+        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
+                                             ::DDS::Subscriber_ptr>
                               (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
@@ -445,8 +445,8 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       ::TAO::DCPS::PublisherImpl* pub_impl 
-        = reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                ::DDS::Publisher_ptr>
+        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
+                                             ::DDS::Publisher_ptr>
                               (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 
@@ -512,8 +512,8 @@ int main (int argc, char *argv[])
       }
 
       ::Mine::FooDataWriterImpl* fast_dw =
-        reference_to_servant< ::Mine::FooDataWriterImpl,
-                             ::Mine::FooDataWriter_ptr>
+        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
+                                           ::Mine::FooDataWriter_ptr>
                 (foo_dw.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
       ::Mine::FooDataReader_var foo_dr 
@@ -526,8 +526,8 @@ int main (int argc, char *argv[])
       }
 
       ::Mine::FooDataReaderImpl* fast_dr =
-        reference_to_servant< ::Mine::FooDataReaderImpl,
-                             ::Mine::FooDataReader_ptr>
+        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
+                                           ::Mine::FooDataReader_ptr>
                 (foo_dr.in ()  ACE_ENV_SINGLE_ARG_PARAMETER);
 
       

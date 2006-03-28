@@ -6,13 +6,12 @@
 #include  <ace/CDR_Stream.h>
 #include  "Serializer.h"
 
-using namespace TAO::DCPS;
 
 // NOTE: I use the ternary operators in here for conditionals to help
 //       the compiler inline the code -- and it does end up fairly
 //       tight...
 ACE_INLINE size_t
-Serializer::doread (char* dest, size_t size, bool swap, size_t offset)
+TAO::DCPS::Serializer::doread (char* dest, size_t size, bool swap, size_t offset)
 {
   //
   // Ensure we work only with buffer data.
@@ -79,7 +78,7 @@ Serializer::doread (char* dest, size_t size, bool swap, size_t offset)
 }
 
 ACE_INLINE void
-Serializer::buffer_read (char* dest, size_t size, bool swap)
+TAO::DCPS::Serializer::buffer_read (char* dest, size_t size, bool swap)
 {
   register size_t offset = 0;
   while (size > offset)
@@ -92,7 +91,7 @@ Serializer::buffer_read (char* dest, size_t size, bool swap)
 //       the compiler inline the code -- and it does end up fairly
 //       tight...
 ACE_INLINE size_t
-Serializer::dowrite (const char* src, size_t size, bool swap, size_t offset)
+TAO::DCPS::Serializer::dowrite (const char* src, size_t size, bool swap, size_t offset)
 {
   //
   // Ensure we work only with buffer data.
@@ -158,7 +157,7 @@ Serializer::dowrite (const char* src, size_t size, bool swap, size_t offset)
 }
 
 ACE_INLINE void
-Serializer::buffer_write (const char* src, size_t size, bool swap)
+TAO::DCPS::Serializer::buffer_write (const char* src, size_t size, bool swap)
 {
   register size_t offset = 0;
   while (size > offset)
@@ -168,7 +167,7 @@ Serializer::buffer_write (const char* src, size_t size, bool swap)
 }
 
 ACE_INLINE ACE_Message_Block*
-Serializer::add_chain (ACE_Message_Block* chain)
+TAO::DCPS::Serializer::add_chain (ACE_Message_Block* chain)
 {
   ACE_Message_Block* previous = this->start_;
   this->current_ = this->start_ = chain;
@@ -176,25 +175,25 @@ Serializer::add_chain (ACE_Message_Block* chain)
 }
 
 ACE_INLINE void
-Serializer::swap_bytes (bool do_swap)
+TAO::DCPS::Serializer::swap_bytes (bool do_swap)
 {
   this->swap_bytes_ = do_swap;
 }
 
 ACE_INLINE bool
-Serializer::swap_bytes () const
+TAO::DCPS::Serializer::swap_bytes () const
 {
   return this->swap_bytes_;
 }
 
 ACE_INLINE bool
-Serializer::good_bit () const
+TAO::DCPS::Serializer::good_bit () const
 {
   return this->good_bit_;
 }
 
 ACE_INLINE void
-Serializer::read_array (char* x, size_t size, ACE_CDR::ULong length)
+TAO::DCPS::Serializer::read_array (char* x, size_t size, ACE_CDR::ULong length)
 {
   //
   // Array reads will always honor the object swap state.
@@ -224,7 +223,7 @@ Serializer::read_array (char* x, size_t size, ACE_CDR::ULong length)
 }
 
 ACE_INLINE void
-Serializer::write_array (const char* x, size_t size, ACE_CDR::ULong length)
+TAO::DCPS::Serializer::write_array (const char* x, size_t size, ACE_CDR::ULong length)
 {
   //
   // Array writes will always honor the object swap state.
@@ -255,7 +254,7 @@ Serializer::write_array (const char* x, size_t size, ACE_CDR::ULong length)
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_boolean_array (ACE_CDR::Boolean* x,
+TAO::DCPS::Serializer::read_boolean_array (ACE_CDR::Boolean* x,
                                 ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Boolean), length);
@@ -263,7 +262,7 @@ Serializer::read_boolean_array (ACE_CDR::Boolean* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_char_array (ACE_CDR::Char *x,
+TAO::DCPS::Serializer::read_char_array (ACE_CDR::Char *x,
                              ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Char), length);
@@ -271,7 +270,7 @@ Serializer::read_char_array (ACE_CDR::Char *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_wchar_array (ACE_CDR::WChar* x,
+TAO::DCPS::Serializer::read_wchar_array (ACE_CDR::WChar* x,
                               ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::WChar), length);
@@ -279,7 +278,7 @@ Serializer::read_wchar_array (ACE_CDR::WChar* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_octet_array (ACE_CDR::Octet* x,
+TAO::DCPS::Serializer::read_octet_array (ACE_CDR::Octet* x,
                               ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Octet), length);
@@ -287,7 +286,7 @@ Serializer::read_octet_array (ACE_CDR::Octet* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_short_array (ACE_CDR::Short *x,
+TAO::DCPS::Serializer::read_short_array (ACE_CDR::Short *x,
                               ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Short), length);
@@ -295,7 +294,7 @@ Serializer::read_short_array (ACE_CDR::Short *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_ushort_array (ACE_CDR::UShort *x,
+TAO::DCPS::Serializer::read_ushort_array (ACE_CDR::UShort *x,
                                ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::UShort), length);
@@ -303,7 +302,7 @@ Serializer::read_ushort_array (ACE_CDR::UShort *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_long_array (ACE_CDR::Long *x,
+TAO::DCPS::Serializer::read_long_array (ACE_CDR::Long *x,
                              ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Long), length);
@@ -311,7 +310,7 @@ Serializer::read_long_array (ACE_CDR::Long *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_ulong_array (ACE_CDR::ULong *x,
+TAO::DCPS::Serializer::read_ulong_array (ACE_CDR::ULong *x,
                               ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::ULong), length);
@@ -319,7 +318,7 @@ Serializer::read_ulong_array (ACE_CDR::ULong *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_longlong_array (ACE_CDR::LongLong* x,
+TAO::DCPS::Serializer::read_longlong_array (ACE_CDR::LongLong* x,
                                  ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::LongLong), length);
@@ -327,7 +326,7 @@ Serializer::read_longlong_array (ACE_CDR::LongLong* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_ulonglong_array (ACE_CDR::ULongLong* x,
+TAO::DCPS::Serializer::read_ulonglong_array (ACE_CDR::ULongLong* x,
                                   ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::ULongLong), length);
@@ -335,7 +334,7 @@ Serializer::read_ulonglong_array (ACE_CDR::ULongLong* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_float_array (ACE_CDR::Float *x,
+TAO::DCPS::Serializer::read_float_array (ACE_CDR::Float *x,
                               ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Float), length);
@@ -343,7 +342,7 @@ Serializer::read_float_array (ACE_CDR::Float *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_double_array (ACE_CDR::Double *x,
+TAO::DCPS::Serializer::read_double_array (ACE_CDR::Double *x,
                                ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::Double), length);
@@ -351,7 +350,7 @@ Serializer::read_double_array (ACE_CDR::Double *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::read_longdouble_array (ACE_CDR::LongDouble* x,
+TAO::DCPS::Serializer::read_longdouble_array (ACE_CDR::LongDouble* x,
                                    ACE_CDR::ULong length)
 {
   this->read_array (reinterpret_cast<char*> (x), sizeof (ACE_CDR::LongDouble), length);
@@ -360,7 +359,7 @@ Serializer::read_longdouble_array (ACE_CDR::LongDouble* x,
 
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_boolean_array (const ACE_CDR::Boolean *x,
+TAO::DCPS::Serializer::write_boolean_array (const ACE_CDR::Boolean *x,
                                  ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Boolean), length);
@@ -368,7 +367,7 @@ Serializer::write_boolean_array (const ACE_CDR::Boolean *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_char_array (const ACE_CDR::Char *x,
+TAO::DCPS::Serializer::write_char_array (const ACE_CDR::Char *x,
                               ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Char), length);
@@ -376,7 +375,7 @@ Serializer::write_char_array (const ACE_CDR::Char *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_wchar_array (const ACE_CDR::WChar* x,
+TAO::DCPS::Serializer::write_wchar_array (const ACE_CDR::WChar* x,
                                ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::WChar), length);
@@ -384,7 +383,7 @@ Serializer::write_wchar_array (const ACE_CDR::WChar* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_octet_array (const ACE_CDR::Octet* x,
+TAO::DCPS::Serializer::write_octet_array (const ACE_CDR::Octet* x,
                                ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Octet), length);
@@ -392,7 +391,7 @@ Serializer::write_octet_array (const ACE_CDR::Octet* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_short_array (const ACE_CDR::Short *x,
+TAO::DCPS::Serializer::write_short_array (const ACE_CDR::Short *x,
                                ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Short), length);
@@ -400,7 +399,7 @@ Serializer::write_short_array (const ACE_CDR::Short *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_ushort_array (const ACE_CDR::UShort *x,
+TAO::DCPS::Serializer::write_ushort_array (const ACE_CDR::UShort *x,
                                 ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::UShort), length);
@@ -408,7 +407,7 @@ Serializer::write_ushort_array (const ACE_CDR::UShort *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_long_array (const ACE_CDR::Long *x,
+TAO::DCPS::Serializer::write_long_array (const ACE_CDR::Long *x,
                               ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Long), length);
@@ -416,7 +415,7 @@ Serializer::write_long_array (const ACE_CDR::Long *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_ulong_array (const ACE_CDR::ULong *x,
+TAO::DCPS::Serializer::write_ulong_array (const ACE_CDR::ULong *x,
                                ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::ULong), length);
@@ -424,7 +423,7 @@ Serializer::write_ulong_array (const ACE_CDR::ULong *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_longlong_array (const ACE_CDR::LongLong* x,
+TAO::DCPS::Serializer::write_longlong_array (const ACE_CDR::LongLong* x,
                                   ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::LongLong), length);
@@ -432,7 +431,7 @@ Serializer::write_longlong_array (const ACE_CDR::LongLong* x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_ulonglong_array (const ACE_CDR::ULongLong *x,
+TAO::DCPS::Serializer::write_ulonglong_array (const ACE_CDR::ULongLong *x,
                                    ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::ULongLong), length);
@@ -440,7 +439,7 @@ Serializer::write_ulonglong_array (const ACE_CDR::ULongLong *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_float_array (const ACE_CDR::Float *x,
+TAO::DCPS::Serializer::write_float_array (const ACE_CDR::Float *x,
                                ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Float), length);
@@ -448,7 +447,7 @@ Serializer::write_float_array (const ACE_CDR::Float *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_double_array (const ACE_CDR::Double *x,
+TAO::DCPS::Serializer::write_double_array (const ACE_CDR::Double *x,
                                 ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::Double), length);
@@ -456,7 +455,7 @@ Serializer::write_double_array (const ACE_CDR::Double *x,
 }
 
 ACE_INLINE ACE_CDR::Boolean
-Serializer::write_longdouble_array (const ACE_CDR::LongDouble* x,
+TAO::DCPS::Serializer::write_longdouble_array (const ACE_CDR::LongDouble* x,
                                     ACE_CDR::ULong length)
 {
   this->write_array (reinterpret_cast<const char*> (x), sizeof (ACE_CDR::LongDouble), length);

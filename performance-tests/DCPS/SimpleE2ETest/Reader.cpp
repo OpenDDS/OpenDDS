@@ -49,7 +49,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
     }
 
   Rimpl* dr_servant =
-      reference_to_servant< Rimpl, R_ptr>
+      ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
               (pt_dr.in() ACE_ENV_SINGLE_ARG_PARAMETER);
 
   const ::CORBA::Long max_read_samples = 100;

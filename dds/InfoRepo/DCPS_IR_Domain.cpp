@@ -405,7 +405,7 @@ int DCPS_IR_Domain::init_built_in_topics()
   // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT 
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
-  TheTransientKludge->enable ();
+  ::TAO::DCPS::TheTransientKludge->enable ();
 
   if (TAO_debug_level > 0)
     {
@@ -423,7 +423,7 @@ int DCPS_IR_Domain::init_built_in_topics()
       TAO_DCPS_DomainParticipantListener_i* listenerImpl =
         new TAO_DCPS_DomainParticipantListener_i;
 
-      bitParticipantListener_ = servant_to_reference
+      bitParticipantListener_ = ::TAO::DCPS::servant_to_reference
           < ::DDS::DomainParticipantListener,
            TAO_DCPS_DomainParticipantListener_i,
            ::DDS::DomainParticipantListener_ptr>
@@ -502,7 +502,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
       if (::DDS::RETCODE_OK !=
           participantTypeSupport->register_type(bitParticipant_.in (),
-                                                BUILT_IN_PARTICIPANT_TOPIC_TYPE))
+                                                ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR, 
             ACE_TEXT ("ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport."))); 
@@ -539,7 +539,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
       if (::DDS::RETCODE_OK !=
           topicTypeSupport->register_type(bitParticipant_.in (),
-                                          BUILT_IN_TOPIC_TOPIC_TYPE))
+                                          ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR, 
             ACE_TEXT ("ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport."))); 
@@ -576,7 +576,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
       if (::DDS::RETCODE_OK !=
           subscriptionTypeSupport->register_type(bitParticipant_.in (),
-                                                 BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
+                                                 ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR, 
             ACE_TEXT ("ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport."))); 
@@ -613,7 +613,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
       if (::DDS::RETCODE_OK !=
           publicationTypeSupport->register_type(bitParticipant_.in (),
-                                                BUILT_IN_PUBLICATION_TOPIC_TYPE))
+                                                ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR, 
             ACE_TEXT ("ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport."))); 

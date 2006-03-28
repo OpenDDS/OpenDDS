@@ -13,9 +13,8 @@
 # include "InstanceState.inl"
 #endif /* ! __ACE_INLINE__ */
 
-using namespace TAO::DCPS ;
 
-InstanceState::InstanceState (DataReaderImpl* reader,
+TAO::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
                               ::DDS::InstanceHandle_t handle)
    : instance_state_( 0)
    , view_state_( 0)
@@ -34,7 +33,7 @@ InstanceState::InstanceState (DataReaderImpl* reader,
 // cannot ACE_INLINE because of #include loop
 
 void
-InstanceState::dispose_was_received()
+TAO::DCPS::InstanceState::dispose_was_received()
 {
   //
   // Manage the instance state on disposal here.
@@ -44,12 +43,12 @@ InstanceState::dispose_was_received()
       this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ;
       //spec says: if "no samples in the DataReader && no "live" writers"
       //      then destroy the instance.
-      // InstanceState::empty(true) will be called if "no samples"
+      // TAO::DCPS::InstanceState::empty(true) will be called if "no samples"
     }
 }
 
 void 
-InstanceState::writer_became_dead (PublicationId         writer_id,
+TAO::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
                                    int                   num_alive_writers,
                                    const ACE_Time_Value& when)
 {
@@ -68,6 +67,6 @@ InstanceState::writer_became_dead (PublicationId         writer_id,
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
-     // InstanceState::empty(true) will be called if "no samples"
+     // TAO::DCPS::InstanceState::empty(true) will be called if "no samples"
     }
 }

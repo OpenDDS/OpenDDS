@@ -38,7 +38,7 @@
 TAO::DCPS::TransportImpl_rch reader_impl[2];
 ::DDS::DataReaderListener_var listener[2];
 ::DDS::DataReader_var datareader[2];
-TransportIdType transport_id[2] = {SUB_TRAFFIC_TCP_1, SUB_TRAFFIC_TCP_2};
+TAO::DCPS::TransportIdType transport_id[2] = {SUB_TRAFFIC_TCP_1, SUB_TRAFFIC_TCP_2};
 ACE_TString reader_address_str[2];
 
 /// parse the command line arguments
@@ -193,8 +193,8 @@ void init_dcps_objects (int i)
 
   // Attach the subscriber to the transport.
   ::TAO::DCPS::SubscriberImpl* sub_impl 
-    = reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                            ::DDS::Subscriber_ptr>
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
+                                         ::DDS::Subscriber_ptr>
                           (subscriber[i].in () ACE_ENV_SINGLE_ARG_PARAMETER);
   ACE_TRY_CHECK;
 
