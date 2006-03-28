@@ -1,3 +1,32 @@
+Tue Mar 28 14:11:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        Added TypeSupport::get_type_name() support for RT8496.
+        
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        
+          Added *TypeSupportImpl::get_type_name() implementation that use 
+          the interface repository id as the default type name.
+          Made *TypeSupportImpl::register_type() check nil type name. If a nil
+          type name is given then the default type_name is used.
+          
+        * dds/DdsDcpsTopic.idl:
+        
+          Added get_type_name() to the TypeSupport interface.
+          
+        * dds/DCPS/Registered_Data_Types.cpp:
+        
+          Updated the register_type() to use the get_type_name() for 
+          TypeSupport comparison instead of using 
+          _interface_repository_id() directly.
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+
+          Updated the example to test TypeSupport::get_type_name() support.
+          The nil type name is passed for type registration and get_type_name()
+          is called to get the type name for topic creation.
+          
 Tue Mar 28 14:19:22 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/dcps_tests.lst:

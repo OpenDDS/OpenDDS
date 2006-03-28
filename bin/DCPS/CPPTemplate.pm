@@ -57,11 +57,30 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
+  CORBA::String_var tn;
+  if (type_name == 0 || type_name[0] == '\0')
+     tn = this->get_type_name ();
+  else
+     tn = CORBA::string_dup (type_name);
+
   return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
-                                                           type_name,
+                                                           tn.in (),
                                                            this);
 }
 
+
+char *
+<%TYPE%>TypeSupportImpl::get_type_name (
+    ACE_ENV_SINGLE_ARG_DECL
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
+{
+  return CORBA::string_dup (this->_interface_repository_id());
+}
+
+    
 ::TAO::DCPS::DataWriterRemote_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter (
     ACE_ENV_SINGLE_ARG_DECL
