@@ -42,17 +42,18 @@ int main (int argc, char *argv[]) {
     MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
     PortableServer::ServantBase_var safe_servant = servant;
 
-    if (DDS::RETCODE_OK != servant->register_type(participant.in (),
-                                                  "Message")) {
+    if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
       cerr << "register_type failed." << endl;
       exit(1);
     }
+  
+    CORBA::String_var type_name = servant->get_type_name ();
 
     DDS::TopicQos topic_qos;
     participant->get_default_topic_qos(topic_qos);
     DDS::Topic_var topic =
       participant->create_topic ("Movie Discussion List",
-                                 "Message",
+                                 type_name.in (),
                                  topic_qos,
                                  DDS::TopicListener::_nil());
     if (CORBA::is_nil (topic.in ())) {

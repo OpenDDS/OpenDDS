@@ -73,6 +73,14 @@ public:
     ));
   
   virtual
+  char * get_type_name (
+      ACE_ENV_SINGLE_ARG_DECL
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
+    
+  virtual
   ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
       ACE_ENV_SINGLE_ARG_DECL
     )

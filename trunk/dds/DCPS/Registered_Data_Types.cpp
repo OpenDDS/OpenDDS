@@ -101,8 +101,9 @@ namespace TAO
                   // type register with the same type name in the same 
                   // domain pariticipant. The second (and subsequent) registrations
                   // will be ignored.
-                  if (ACE_OS::strcmp (the_type->_interface_repository_id(), 
-                                      currentType->_interface_repository_id()) == 0)
+                  CORBA::String_var the_type_name = the_type->get_type_name();
+                  CORBA::String_var current_type_name = currentType->get_type_name(); 
+                  if (ACE_OS::strcmp (the_type_name.in (), current_type_name.in ()) == 0)
                     {
                       retCode = ::DDS::RETCODE_OK;
                     } /* if (the_type == currentType) */
