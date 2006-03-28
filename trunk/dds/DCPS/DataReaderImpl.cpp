@@ -1301,7 +1301,7 @@ namespace TAO
       return 0;
     }
 
-    WriterInfo::WriterInfo ()
+    TAO::DCPS::WriterInfo::WriterInfo ()
     : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
       is_alive_(1),
       reader_(0),
@@ -1309,7 +1309,7 @@ namespace TAO
     {
     }
 
-    WriterInfo::WriterInfo (DataReaderImpl* reader,
+    TAO::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
                             PublicationId   writer_id)
     : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
       is_alive_(1),
@@ -1323,7 +1323,7 @@ namespace TAO
     }
 
     ACE_Time_Value 
-    WriterInfo::check_activity (const ACE_Time_Value& now)
+    TAO::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
     {
       ACE_Time_Value expires_at = ACE_Time_Value::max_time;
       if (is_alive_)

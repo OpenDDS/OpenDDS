@@ -39,8 +39,6 @@ sub contents { return <<'!EOT'
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-using namespace ::TAO::DCPS;
-
 <%NAMESPACESTART%>
   // for support of zero-copy read
   typedef std::vector<<%SCOPE%><%TYPE%>*> <%TYPE%>PtrVec;
@@ -221,7 +219,7 @@ public:
    */
   virtual void init (
         ::DDS::Topic_ptr                       topic,
-        TopicImpl                             *topic_servant,
+        TAO::DCPS::TopicImpl                 *topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
         TAO::DCPS::DomainParticipantImpl*      participant_servant,
@@ -339,13 +337,13 @@ public:
    */
   virtual
   void init (
-        TopicImpl*                    a_topic,
-        const ::DDS::DataReaderQos &  qos,
-        ::DDS::DataReaderListener_ptr a_listener,
-        DomainParticipantImpl*        participant,
-        SubscriberImpl*               subscriber,
-        ::DDS::Subscriber_ptr         subscriber_objref,
-        DataReaderRemote_ptr          dr_remote_objref
+        TAO::DCPS::TopicImpl*                    a_topic,
+        const ::DDS::DataReaderQos &             qos,
+        ::DDS::DataReaderListener_ptr            a_listener,
+        TAO::DCPS::DomainParticipantImpl*        participant,
+        TAO::DCPS::SubscriberImpl*               subscriber,
+        ::DDS::Subscriber_ptr                    subscriber_objref,
+        TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
         ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
@@ -522,9 +520,9 @@ public:
  
  protected:
  
-    virtual void demarshal(const ReceivedDataSample& sample) ;
+    virtual void demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;
     
-    virtual void dispose(const ReceivedDataSample& sample) ;
+    virtual void dispose(const TAO::DCPS::ReceivedDataSample& sample) ;
     
     //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 

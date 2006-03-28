@@ -38,7 +38,7 @@ namespace TAO
     class DomainParticipantImpl;
     class SubscriptionInstance ;
     
-    typedef Cached_Allocator_With_Overflow<ReceivedDataElement, ACE_Null_Mutex>
+    typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.

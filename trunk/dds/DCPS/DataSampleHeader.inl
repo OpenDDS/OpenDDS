@@ -10,7 +10,7 @@
 //      the ACE_CDR_BYTE_ORDER, it's ok to use 
 //      TAO_ENCAP_BYTE_ORDER for now.
 ACE_INLINE
-DataSampleHeader::DataSampleHeader ()
+TAO::DCPS::DataSampleHeader::DataSampleHeader ()
   : message_id_( 0)
   , last_sample_( 0)
   , byte_order_(TAO_ENCAP_BYTE_ORDER)
@@ -31,7 +31,7 @@ DataSampleHeader::DataSampleHeader ()
 }
 
 ACE_INLINE
-DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
+TAO::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
   : message_id_( 0)
   , last_sample_( 0)
   , byte_order_( TAO_ENCAP_BYTE_ORDER)
@@ -52,7 +52,7 @@ DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
 }
 
 ACE_INLINE
-DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
+TAO::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
   : message_id_( 0)
   , last_sample_( 0)
   , byte_order_( TAO_ENCAP_BYTE_ORDER)
@@ -73,16 +73,16 @@ DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
 }
 
 ACE_INLINE
-DataSampleHeader&
-DataSampleHeader::operator= (ACE_Message_Block* buffer)
+TAO::DCPS::DataSampleHeader&
+TAO::DCPS::DataSampleHeader::operator= (ACE_Message_Block* buffer)
 {
   this->init( buffer) ;
   return *this ;
 }
 
 ACE_INLINE
-DataSampleHeader&
-DataSampleHeader::operator= (ACE_Message_Block& buffer)
+TAO::DCPS::DataSampleHeader&
+TAO::DCPS::DataSampleHeader::operator= (ACE_Message_Block& buffer)
 {
   this->init( &buffer) ;
   return *this ;
@@ -90,14 +90,14 @@ DataSampleHeader::operator= (ACE_Message_Block& buffer)
 
 ACE_INLINE
 size_t
-DataSampleHeader::marshaled_size()
+TAO::DCPS::DataSampleHeader::marshaled_size()
 {
   return marshaled_size_ ;
 }
 
 ACE_INLINE
 size_t
-DataSampleHeader::max_marshaled_size()
+TAO::DCPS::DataSampleHeader::max_marshaled_size()
 {
   return sizeof( this->message_id_)
        + sizeof(char) // Flags are a single byte.

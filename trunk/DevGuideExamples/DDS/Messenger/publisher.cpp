@@ -61,7 +61,8 @@ int main (int argc, char *argv[]) {
     }
 
     TAO::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, AUTO_CONFIG);
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
+                                                  ::TAO::DCPS::AUTO_CONFIG);
 
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -73,7 +74,8 @@ int main (int argc, char *argv[]) {
 
     // Attach the publisher to the transport.
     TAO::DCPS::PublisherImpl* pub_impl =
-      reference_to_servant< TAO::DCPS::PublisherImpl, DDS::Publisher_ptr>(pub.in ());
+      ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl, 
+                                         DDS::Publisher_ptr>(pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
       exit(1);

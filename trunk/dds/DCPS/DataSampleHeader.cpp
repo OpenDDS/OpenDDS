@@ -6,7 +6,6 @@
 #include  "DataSampleHeader.h"
 #include  "Serializer.h"
 
-using namespace TAO::DCPS ;
 
 #if ! defined (__ACE_INLINE__)
 #include "DataSampleHeader.inl"
@@ -107,11 +106,11 @@ operator<< (ACE_Message_Block*& buffer, TAO::DCPS::DataSampleHeader& value)
   // We need to copy the publication ID here since we need to modify the
   // value as we encode it.
   //
-  PublicationId id = value.publication_id_ ;
+  TAO::DCPS::PublicationId id = value.publication_id_ ;
 
   // Encode.
-  const size_t amount = (((sizeof(PublicationId)*8)%7)? 2: 1)
-                      +  ((sizeof(PublicationId)*8)/7) ;
+  const size_t amount = (((sizeof(TAO::DCPS::PublicationId)*8)%7)? 2: 1)
+                      +  ((sizeof(TAO::DCPS::PublicationId)*8)/7) ;
   char  encoder[ amount] ;
   char* current = encoder + amount - 1 ;
   char* start   = current ;

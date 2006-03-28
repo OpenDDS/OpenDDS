@@ -44,7 +44,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   // Attach the publisher to the transport.
   ::TAO::DCPS::PublisherImpl* pub_impl 
-      = reference_to_servant< ::TAO::DCPS::PublisherImpl,
+      = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                               ::DDS::Publisher_ptr>
                               (pub_.in () ACE_ENV_SINGLE_ARG_PARAMETER);
   ACE_TRY_CHECK;
@@ -88,8 +88,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ = reference_to_servant< ::Mine::FooDataWriterImpl,
-                                   ::Mine::FooDataWriter_ptr>
+  fast_dw_ = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
+                                                ::Mine::FooDataWriter_ptr>
                 (foo_dw.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
 }
@@ -100,7 +100,7 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
 
   switch(message_id)
   {
-    case SAMPLE_DATA:
+    case ::TAO::DCPS::SAMPLE_DATA:
       ACE_OS::printf ("writing %c foo.x = %f foo.y = %f, foo.key = %d\n",
                       foo.c, foo.x, foo.y, foo.key);
 
@@ -109,12 +109,12 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
                       ACE_ENV_ARG_PARAMETER);
       break;
 
-    case INSTANCE_REGISTRATION:
+    case ::TAO::DCPS::INSTANCE_REGISTRATION:
       ACE_OS::printf ("registering foo.key = %d\n", foo.key) ;
       handle = fast_dw_->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
       break;
 
-    case DISPOSE_INSTANCE:
+    case ::TAO::DCPS::DISPOSE_INSTANCE:
       ACE_OS::printf ("disposing foo.key = %d\n", foo.key) ;
 
       fast_dw_->dispose(foo, 
@@ -144,19 +144,19 @@ Writer::test1 ()
     foo.key = I1 ;
 
     // register I1
-    write(INSTANCE_REGISTRATION, foo) ;
+    write(::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
 
     foo.x = 1.0 ;
     foo.y = -1.0 ;
     foo.c = 'A';
 
     // write I1 value A
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     foo.key = I2 ;
 
     // register I2
-    write (INSTANCE_REGISTRATION, foo) ;
+    write (::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
   }
   ACE_CATCHANY
   {
@@ -183,7 +183,7 @@ Writer::test2 ()
     foo.key = I2 ;
 
     // write I2 value X
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     foo.x = 2.0 ;
     foo.y = -2.0 ;
@@ -191,19 +191,19 @@ Writer::test2 ()
     foo.key = I1 ;
 
     // write I1 value B
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     foo.key = I3 ;
 
     // register I3
-    write (INSTANCE_REGISTRATION, foo) ;
+    write (::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
 
     foo.x = 2.0 ;
     foo.y = -3.0 ;
     foo.c = 'Q';
 
     // write I3 value Q
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
   ACE_CATCHANY
   {
@@ -229,24 +229,24 @@ Writer::test3 ()
     foo.key = I1 ;
 
     // Dispose I1
-    write (DISPOSE_INSTANCE, foo) ;
+    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -1.0 ;
     foo.c = 'C' ;
 
     // write I1 value C
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     // Dispose I1
-    write (DISPOSE_INSTANCE, foo) ;
+    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -2.0 ;
     foo.c = 'D' ;
 
     // write I1 value D
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -4.0 ;
@@ -254,10 +254,10 @@ Writer::test3 ()
     foo.key = I2 ;
 
     // write I2 value Y
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
 
     // Dispose I2
-    write (DISPOSE_INSTANCE, foo) ;
+    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
   }
   ACE_CATCHANY
   {
@@ -283,7 +283,7 @@ Writer::test4 ()
     foo.key = I1 ;
 
     // write I1 value c
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
   ACE_CATCHANY
   {
@@ -309,7 +309,7 @@ Writer::test5 ()
     foo.key = I1 ;
 
     // write I1 value d
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
   ACE_CATCHANY
   {
@@ -336,7 +336,7 @@ Writer::test6 ()
     foo.key = I1 ;
 
     // write I1 value d
-    write (SAMPLE_DATA, foo) ;
+    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
   ACE_CATCHANY
   {

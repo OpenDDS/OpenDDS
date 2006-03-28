@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
          pub_tcp_impl 
            = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
                                                          "SimpleTcp", 
-                                                         AUTO_CONFIG);
+                                                         ::TAO::DCPS::AUTO_CONFIG);
        } else {
          pub_tcp_impl 
            = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the publishing entity */
        TAO::DCPS::PublisherImpl* p_impl =
-         reference_to_servant <TAO::DCPS::PublisherImpl, DDS::Publisher_ptr> (p);
+         ::TAO::DCPS::reference_to_servant <TAO::DCPS::PublisherImpl, DDS::Publisher_ptr> (p);
        p_impl->attach_transport (pub_tcp_impl.in ());
 
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
          sub_tcp_impl 
            = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1, 
                                                          "SimpleTcp", 
-                                                         AUTO_CONFIG);
+                                                         ::TAO::DCPS::AUTO_CONFIG);
        } else {
          sub_tcp_impl 
            = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the subscribing entity */
        TAO::DCPS::SubscriberImpl* sub_impl =
-         reference_to_servant< TAO::DCPS::SubscriberImpl,
+         ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
                                DDS::Subscriber_ptr> (s.in ());
        sub_impl->attach_transport(sub_tcp_impl.in());
 

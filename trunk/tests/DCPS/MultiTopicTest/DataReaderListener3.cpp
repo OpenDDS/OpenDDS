@@ -27,8 +27,8 @@
       }
 
     ::Mine::Foo3DataReaderImpl* dr_servant =
-        reference_to_servant< ::Mine::Foo3DataReaderImpl,
-                              ::Mine::Foo3DataReader_ptr>
+      ::TAO::DCPS::reference_to_servant< ::Mine::Foo3DataReaderImpl,
+                                         ::Mine::Foo3DataReader_ptr>
             (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
 
     ::Mine::Foo3Seq foo(num_ops_per_thread) ;

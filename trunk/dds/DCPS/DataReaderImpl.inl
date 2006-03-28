@@ -2,12 +2,10 @@
 //
 // $Id$
 
-using namespace TAO::DCPS ;
-
 
 ACE_INLINE
 ::DDS::DataReader_ptr 
-DataReaderImpl::get_dr_obj_ref() { 
+TAO::DCPS::DataReaderImpl::get_dr_obj_ref() { 
 #if 1
   //TBD this may be faster than servant_to_reference - ?significantly?
   return ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref_.in ()) ;
@@ -31,7 +29,7 @@ DataReaderImpl::get_dr_obj_ref() {
 
 ACE_INLINE
 int 
-WriterInfo::received_activity (const ACE_Time_Value& when)
+TAO::DCPS::WriterInfo::received_activity (const ACE_Time_Value& when)
 { 
   last_liveliness_activity_time_ = when;
   if (!is_alive_)

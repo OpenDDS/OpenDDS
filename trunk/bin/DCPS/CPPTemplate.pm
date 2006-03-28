@@ -31,6 +31,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublicationInstance.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "<%TYPE%>TypeSupportImpl.h"
 
@@ -397,7 +398,7 @@ DDS::ReturnCode_t
 void
 <%TYPE%>DataWriterImpl::init (
       ::DDS::Topic_ptr                       topic,
-      TopicImpl                             *topic_servant,
+      TAO::DCPS::TopicImpl                   *topic_servant,
       const ::DDS::DataWriterQos &           qos,
       ::DDS::DataWriterListener_ptr          a_listener,
       TAO::DCPS::DomainParticipantImpl*      participant_servant,
@@ -539,7 +540,7 @@ ACE_Message_Block*
     needs_creation = 0;
 
     handle = it->second;
-    PublicationInstance* instance = DataWriterImpl::get_handle_instance(handle);
+    TAO::DCPS::PublicationInstance* instance = DataWriterImpl::get_handle_instance(handle);
 
     if (instance->unregistered_ == false)
     { 
@@ -621,13 +622,13 @@ void
 
 void
 <%TYPE%>DataReaderImpl::init (
-        TopicImpl*                    a_topic,
+        TAO::DCPS::TopicImpl*         a_topic,
         const ::DDS::DataReaderQos &  qos,
         ::DDS::DataReaderListener_ptr a_listener,
-        DomainParticipantImpl*        participant,
-        SubscriberImpl*               subscriber,
+        TAO::DCPS::DomainParticipantImpl* participant,
+        TAO::DCPS::SubscriberImpl*        subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
-        DataReaderRemote_ptr          dr_remote_objref
+        TAO::DCPS::DataReaderRemote_ptr   dr_remote_objref
         ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
@@ -671,12 +672,12 @@ void
        it ++)
     {
       ::DDS::InstanceHandle_t handle = it->second;
-      SubscriptionInstance *ptr =
+      TAO::DCPS::SubscriptionInstance *ptr =
           DataReaderImpl::get_handle_instance (handle) ;
 
       while (ptr->rcvd_sample_.size_)
         {
-          ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
+          TAO::DCPS::ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
             
           ptr->rcvd_sample_.remove(head_ptr) ;
           
@@ -766,12 +767,12 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+    TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
     {
-      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -856,12 +857,12 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+    TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
     {
-      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -967,15 +968,15 @@ DDS::ReturnCode_t
       ::CORBA::Long start_samples_in_instance(count) ;
       ::CORBA::Long samples_in_instance_count(0) ;
       ::DDS::InstanceHandle_t handle = it->second;
-      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+      TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
-      ReceivedDataElement *tail = 0 ;
+      TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
           (ptr->instance_state_.instance_state() & instance_states))
       {
-        ReceivedDataElement *next ;
+        TAO::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
-        ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
         while (item)
         {
           if (item->sample_state_ & sample_states)
@@ -1100,12 +1101,12 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+    TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
     {
-      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -1184,12 +1185,12 @@ DDS::ReturnCode_t
        it ++)
   {
     ::DDS::InstanceHandle_t handle = it->second;
-    SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+    TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
         (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
-      for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1254,15 +1255,15 @@ DDS::ReturnCode_t
        it ++)
     {
       ::DDS::InstanceHandle_t handle = it->second;
-      SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
+      TAO::DCPS::SubscriptionInstance *ptr = DataReaderImpl::get_handle_instance (handle) ;
 
-      ReceivedDataElement *tail = 0 ;
+      TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
           (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
       {
-        ReceivedDataElement *next ;
+        TAO::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
-        ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
         while (item)
         {
           if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1395,13 +1396,13 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
   
-  SubscriptionInstance * ptr = 
+  TAO::DCPS::SubscriptionInstance * ptr = 
       DataReaderImpl::get_handle_instance (a_handle) ;
 
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-    for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+    for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
          item != 0 ; item = item->next_data_sample_)
     {
       if (item->sample_state_ & sample_states)
@@ -1491,15 +1492,15 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
   
-  SubscriptionInstance * ptr = 
+  TAO::DCPS::SubscriptionInstance * ptr = 
     DataReaderImpl::get_handle_instance (a_handle) ;
 
-  ReceivedDataElement *tail = 0 ;
+  TAO::DCPS::ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-    ReceivedDataElement *next ;
-    ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+    TAO::DCPS::ReceivedDataElement *next ;
+    TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
     while (item)
     {
       if (item->sample_state_ & sample_states)
@@ -1756,7 +1757,7 @@ DDS::ReturnCode_t
 }
 
 void
-<%TYPE%>DataReaderImpl::demarshal(const ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::demarshal(const TAO::DCPS::ReceivedDataSample& sample)
 {
   ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
   
@@ -1766,7 +1767,7 @@ void
                               sizeof (::<%SCOPE%><%TYPE%>))),
                          ::<%SCOPE%><%TYPE%>) ;
  
-  Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
+  TAO::DCPS::Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
   ser >> *data ;
 
   store_instance_data(data, sample.header_) ;
@@ -1785,10 +1786,10 @@ void
 
   if (it == instance_map_.end()) 
   {
-    SubscriptionInstance* instance;
+    TAO::DCPS::SubscriptionInstance* instance;
     handle = DataReaderImpl::get_next_handle ();
     ACE_NEW_RETURN (instance,
-                    SubscriptionInstance(this, handle),
+                    TAO::DCPS::SubscriptionInstance(this, handle),
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
@@ -1821,9 +1822,9 @@ void
     handle = it->second;
   }
 
-  if (header.message_id_ != INSTANCE_REGISTRATION)
+  if (header.message_id_ != TAO::DCPS::INSTANCE_REGISTRATION)
   {
-    SubscriptionInstance* instance_ptr = DataReaderImpl::get_handle_instance (handle) ;
+    TAO::DCPS::SubscriptionInstance* instance_ptr = DataReaderImpl::get_handle_instance (handle) ;
     
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
@@ -1864,7 +1865,7 @@ void
        else
        {
          // Discard the oldest previously-read sample
-         ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
+         TAO::DCPS::ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
          instance_ptr->rcvd_sample_.remove(item) ;
          
          ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
@@ -1878,12 +1879,12 @@ void
       }
     }
     
-    ReceivedDataElement *ptr /* = new ReceivedDataElement(data) */ ;
+    TAO::DCPS::ReceivedDataElement *ptr /* = new TAO::DCPS::ReceivedDataElement(data) */ ;
     ACE_NEW_MALLOC_RETURN (ptr,
-                           static_cast<ReceivedDataElement *> (
+                           static_cast<TAO::DCPS::ReceivedDataElement *> (
                            rd_allocator_->malloc (
-                              sizeof (ReceivedDataElement))),
-                           ReceivedDataElement(instance_data),
+                              sizeof (TAO::DCPS::ReceivedDataElement))),
+                           TAO::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
     instance_ptr->instance_state_.data_was_received() ;
@@ -1902,7 +1903,7 @@ void
 
     if (instance_ptr->rcvd_sample_.size_ > get_depth())
     {
-      ReceivedDataElement *head_ptr =
+      TAO::DCPS::ReceivedDataElement *head_ptr =
         instance_ptr->rcvd_sample_.head_ ;
             
       instance_ptr->rcvd_sample_.remove(head_ptr) ;
@@ -1931,7 +1932,7 @@ void
                     ReceivedDataElement);
     }
 
-    SubscriberImpl* sub = get_subscriber_servant () ;
+    TAO::DCPS::SubscriberImpl* sub = get_subscriber_servant () ;
     ::POA_DDS::SubscriberListener* sub_listener =
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS) ;
     if (sub_listener != 0)
@@ -1952,7 +1953,7 @@ void
   }
   else
   {
-    SubscriptionInstance *instance_ptr = 
+    TAO::DCPS::SubscriptionInstance *instance_ptr = 
          DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
     ACE_DES_FREE (instance_data,
@@ -1964,7 +1965,7 @@ void
 }
 
 void 
-<%TYPE%>DataReaderImpl::dispose(const ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::dispose(const TAO::DCPS::ReceivedDataSample& sample)
 {
   //!!! caller should already have the sample_lock_
 
@@ -1975,7 +1976,7 @@ void
                               sizeof (::<%SCOPE%><%TYPE%>))),
                          ::<%SCOPE%><%TYPE%>) ;
  
-  Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
+  TAO::DCPS::Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
   ser >> *data ;
   
   DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
@@ -1985,7 +1986,7 @@ void
   if (it != instance_map_.end()) 
   {
     handle = it->second;
-    SubscriptionInstance* instance_ptr = 
+    TAO::DCPS::SubscriptionInstance* instance_ptr = 
           DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }

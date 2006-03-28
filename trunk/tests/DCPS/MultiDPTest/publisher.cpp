@@ -182,8 +182,8 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
 
   // Attach the publisher to the transport.
   ::TAO::DCPS::PublisherImpl* pub_impl 
-    = reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                            ::DDS::Publisher_ptr>
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
+                                         ::DDS::Publisher_ptr>
                           (publisher.in () ACE_ENV_SINGLE_ARG_PARAMETER);
     ACE_TRY_CHECK;
 

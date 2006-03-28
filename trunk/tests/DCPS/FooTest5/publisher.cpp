@@ -171,8 +171,8 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
 
       // Attach the publisher to the transport.
       ::TAO::DCPS::PublisherImpl* pub_impl 
-        = reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                ::DDS::Publisher_ptr>
+        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
+                                             ::DDS::Publisher_ptr>
                               (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
         ACE_TRY_CHECK;
 

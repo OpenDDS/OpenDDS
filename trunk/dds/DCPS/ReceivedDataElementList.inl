@@ -5,11 +5,10 @@
 #include  "ReceivedDataElementList.h"
 #include  "InstanceState.h"
 
-using namespace TAO::DCPS ;
 
 ACE_INLINE
 void
-ReceivedDataElementList::add(ReceivedDataElement *data_sample)
+TAO::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 {
   // The default action is to simply add to the
   // tail - in the future we may want to add
@@ -42,15 +41,15 @@ ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 
 
 ACE_INLINE
-ReceivedDataElement *
-ReceivedDataElementList::remove_head()
+TAO::DCPS::ReceivedDataElement *
+TAO::DCPS::ReceivedDataElementList::remove_head()
 {
   if (!size_)
   {
     return 0 ;
   }
 
-  ReceivedDataElement *ptr = head_ ;
+  TAO::DCPS::ReceivedDataElement *ptr = head_ ;
 
   remove(head_) ;
 
@@ -60,15 +59,15 @@ ReceivedDataElementList::remove_head()
 
 
 ACE_INLINE
-ReceivedDataElement *
-ReceivedDataElementList::remove_tail()
+TAO::DCPS::ReceivedDataElement *
+TAO::DCPS::ReceivedDataElementList::remove_tail()
 {
   if (!size_)
   {
     return 0 ;
   }
 
-  ReceivedDataElement *ptr = tail_ ;
+  TAO::DCPS::ReceivedDataElement *ptr = tail_ ;
 
   remove(tail_) ;
 
