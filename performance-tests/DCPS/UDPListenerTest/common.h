@@ -64,11 +64,11 @@ int init_reader_tranport ()
   TAO::DCPS::TransportConfiguration_rch reader_config 
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* reader_tcp_config 
+  TAO::DCPS::SimpleUdpConfiguration* reader_udp_config 
     = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
-  reader_tcp_config->local_address_ = reader_address;
+  reader_udp_config->local_address_ = reader_address;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -95,13 +95,13 @@ int init_writer_tranport ()
   TAO::DCPS::TransportConfiguration_rch writer_config 
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* writer_tcp_config 
+  TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
     = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);
-      writer_tcp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_ = writer_address;
     }
 
   if (writer_transport_impl->configure(writer_config.in()) != 0)
