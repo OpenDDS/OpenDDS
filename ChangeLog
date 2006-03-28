@@ -1,3 +1,12 @@
+Tue Mar 28 14:19:22 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added TCPListenerTests to the nightly build list of tests to run.
+          UDP was not added due to the highly machine dependent performance
+          of UDP.
+
+
 Tue Mar 28 14:09:36 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         Adding scripts for topology tests for RT 8490.
