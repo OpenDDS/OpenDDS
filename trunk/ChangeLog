@@ -1,3 +1,28 @@
+Tue Mar 28 14:09:36 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        Adding scripts for topology tests for RT 8490.
+
+        * performance-tests/DCPS/TCPListenerTest/conf.ini:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+
+          Added scripts to run the different topology tests.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+
+          Removed old test scripts.
+
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+
+          Changed variable name for clarity in reading.
+
 Tue Mar 28 10:20:20 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are made to remove the "using namespace" in the
