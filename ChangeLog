@@ -1,5 +1,8 @@
 Tue Mar 28 10:20:20 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
+        These changes are made to remove the "using namespace" in the
+        dds core code. See RT8495. 
+        
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -66,7 +69,7 @@ Mon Mar 27 16:14:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         These changes are made to fix the DDS test failures between machines
         with different endianess. The swap_bytes configuration value per 
         TransportImpl instance is also appropriately used to allow different
-        transports use different setting of swap_bytes.
+        transports use different setting of swap_bytes. (See RT8381)
      
         * bin/DCPS/CPPTemplate.pm:
         
