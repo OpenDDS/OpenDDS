@@ -85,18 +85,7 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
   if (pub_result == 0)
     {
-      if (sub_result == 1)
-        {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Did you mean -1?  Or were you thinking of the set::insert?
-          ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: Reservation between remote subscriber_id (%d) "
-                     "and local publisher_id (%d) already exists "
-                     "in sub_map_.  Reservation failed.\n",
-                     subscriber_id, publisher_id));
-        }
-      else
+      if (sub_result != 0)
         {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: Failed to insert remote subscriber_id (%d) "
@@ -114,22 +103,8 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
                      publisher_id, subscriber_id));
         }
     }
-  else if (pub_result == 1)
-    {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Did you mean -1?
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Reservation between local publisher_id (%d) "
-                 "and remote subscriber_id (%d) already exists "
-                 "in pub_map_.  Reservation failed.\n",
-                 publisher_id, subscriber_id));
-    }
   else
     {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Was the intent to return other values?
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to insert local publisher_id (%d) "
                  "to remote subscriber_id (%d) reservation into "
@@ -189,17 +164,7 @@ TAO::DCPS::DataLink::make_reservation
 
   if (sub_result == 0)
     {
-      if (pub_result == 1)
-        {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Did you mean -1?
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Reservation between remote publisher_id (%d) "                     "and local subscriber_id (%d) already exists "
-                     "in pub_map_.  Reservation failed.\n",
-                     publisher_id,subscriber_id));
-        }
-      else
+      if (pub_result != 0)
         {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: Failed to insert remote publisher_id (%d) "
@@ -217,22 +182,8 @@ TAO::DCPS::DataLink::make_reservation
                      subscriber_id, publisher_id));
         }
     }
-  else if (sub_result == 1)
-    {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Did you mean -1?
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Reservation between local subscriber_id (%d) "
-                 "and remote publisher_id (%d) already exists "
-                 "in sub_map_.  Reservation failed.\n",
-                 subscriber_id, publisher_id));
-    }
   else
     {
-//MJM: I don't see that this branch will ever be reached?
-//MJM: A quick trip through the map shows that only 0/-1 is ever returned.
-//MJM: Was the intent to return other values?
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to insert local subscriber_id (%d) "
                  "to remote publisher_id (%d) reservation into "

@@ -1,3 +1,9 @@
+Wed Mar 29 13:59:23 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Removed old comments and never reached code.
+
 Wed Mar 29 10:46:36 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
