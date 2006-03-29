@@ -78,7 +78,7 @@ private:
   AckMessageDataWriterImpl* dw_servant_;
   DDS::InstanceHandle_t handle_;
   //  DDS::DataReader_var reader_;
-  long  sample_num_;
+  CORBA::Long  sample_num_;
   int   done_;
 };
 

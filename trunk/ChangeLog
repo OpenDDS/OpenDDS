@@ -1,3 +1,24 @@
+Wed Mar 29 10:46:36 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed a warning "control reaches end of non-void function" 
+          on linux build.
+          
+        * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
+        * tests/DCPS/FooType/FooTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+     
+          Added the get_type_name() implementation to fix the compilation
+          error "cannot instantiate abstract class".
+           
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+
+          Changed the sample_num_ from long to be CORBA::Long to fix
+          a warning in fprintf().
+          
 Tue Mar 28 14:11:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         Added TypeSupport::get_type_name() support for RT8496.

@@ -79,7 +79,7 @@ private:
   PubMessageDataWriterImpl* dw_servant_;
   DDS::InstanceHandle_t handle_;
   CORBA::Long size_;
-  long  sample_num_;
+  CORBA::Long sample_num_;
   int   done_;
   ACE_High_Res_Timer timer_;
 };

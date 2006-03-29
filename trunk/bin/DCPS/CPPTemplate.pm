@@ -259,13 +259,11 @@ DDS::ReturnCode_t
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
-  else
-  {
-    // DataWriterImpl::unregister will call back to inform the <%TYPE%>DataWriter
-    // that the instance handle is removed from there and hence <%TYPE%>DataWriter
-    // can remove the instance here.
-    return DataWriterImpl::unregister(handle, source_timestamp);
-  }
+  
+  // DataWriterImpl::unregister will call back to inform the <%TYPE%>DataWriter
+  // that the instance handle is removed from there and hence <%TYPE%>DataWriter
+  // can remove the instance here.
+  return DataWriterImpl::unregister(handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
