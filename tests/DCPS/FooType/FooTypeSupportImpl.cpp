@@ -20,7 +20,8 @@ FooTypeSupportImpl::~FooTypeSupportImpl (void)
   {
   }
   
-::DDS::ReturnCode_t FooTypeSupportImpl::register_type (
+DDS::ReturnCode_t
+FooTypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name
     ACE_ENV_ARG_DECL
@@ -28,11 +29,30 @@ FooTypeSupportImpl::~FooTypeSupportImpl (void)
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
-  {
-    return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
-                                                             type_name,
-                                                             this);
-  }
+{
+  CORBA::String_var tn;
+  if (type_name == 0 || type_name[0] == '\0')
+     tn = this->get_type_name ();
+  else
+     tn = CORBA::string_dup (type_name);
+
+  return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
+                                                           tn.in (),
+                                                           this);
+}
+
+
+char *
+FooTypeSupportImpl::get_type_name (
+    ACE_ENV_SINGLE_ARG_DECL
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
+{
+  return CORBA::string_dup (this->_interface_repository_id());
+}
+
   
 ::TAO::DCPS::DataWriterRemote_ptr FooTypeSupportImpl::create_datawriter (
     ACE_ENV_SINGLE_ARG_DECL
