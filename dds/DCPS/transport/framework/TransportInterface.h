@@ -133,12 +133,6 @@ namespace TAO
 
       private:
 
-        /// We trust the ReceiveListenerSetMap class as our friend.
-        /// It will invoke our protected data_received() method when
-        /// it needs to deliver data to this TransportInterface.
-        friend class ReceiveListenerSetMap;
-//MJM: yuk.
-
         /// We trust the TransportImpl as our friend.  It needs to call
         /// our private attach_transport() and detach_transport() methods.
         friend class TransportImpl;

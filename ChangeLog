@@ -1,3 +1,36 @@
+Fri Mar 31 09:02:01 MST 2006  Trevor Fields  <fields_t@ociweb.com>
+
+        Adding a listener type for handling the notification of disconnects
+        from the transport. RT 8499
+
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+
+          Added TAO::DCPS::DataReaderListener and
+          TAO::DCPS::DataWriterListener to provide the on_subscription_lost
+          and on_publication_lost functionalities.
+
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+
+          Changed the Listeners to inherit from the POA_TAO::DCPS
+          version instead of the the POA_DDS
+
+
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Removed unnecessary friend class declaration.
+
 Wed Mar 29 13:59:23 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

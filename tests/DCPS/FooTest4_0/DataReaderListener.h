@@ -12,7 +12,7 @@
 
 
 //Class DataReaderListenerImpl
-class DataReaderListenerImpl : public virtual POA_DDS::DataReaderListener
+class DataReaderListenerImpl : public virtual POA_TAO::DCPS::DataReaderListener
 {
 public:
   //Constructor 
@@ -79,6 +79,15 @@ public:
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ));
+
+  virtual void on_subscription_lost (
+      ::DDS::DataReader_ptr reader,
+      const ::TAO::DCPS::SubscriptionLostStatus & status
+      ACE_ENV_ARG_DECL_WITH_DEFAULTS
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
