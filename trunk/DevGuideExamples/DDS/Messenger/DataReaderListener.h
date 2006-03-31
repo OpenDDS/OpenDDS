@@ -13,7 +13,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual POA_DDS::DataReaderListener,
+  : public virtual POA_TAO::DCPS::DataReaderListener,
     public virtual PortableServer::RefCountServantBase
 {
 public:
@@ -58,6 +58,12 @@ public:
   virtual void on_sample_lost(
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status
+  )
+  throw (CORBA::SystemException);
+
+  virtual void on_subscription_lost (
+    DDS::DataReader_ptr reader,
+    const ::TAO::DCPS::SubscriptionLostStatus & status
   )
   throw (CORBA::SystemException);
 

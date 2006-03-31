@@ -123,4 +123,19 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
   }
-  
+
+  void DataReaderListenerImpl::on_subscription_lost (
+      ::DDS::DataReader_ptr reader,
+      const ::TAO::DCPS::SubscriptionLostStatus & status
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+      ))
+  {
+    ACE_UNUSED_ARG(reader) ;
+    ACE_UNUSED_ARG(status) ;
+
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost \n")));
+  }
+

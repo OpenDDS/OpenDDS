@@ -229,4 +229,32 @@ module DDS {
 
 };
 
+
+module TAO {
+  module DCPS {
+
+    struct SubscriptionLostStatus {
+      long total_count;
+      long total_count_change;
+      ::DDS::InstanceHandleSeq publication_handles;
+    };
+
+    interface DataReaderListener : ::DDS::DataReaderListener {
+
+      // called when a connection is lost and hence one
+      // or more associations from this subscription to
+      // some publishers have been lost.
+      // A connection is "lost" when the retry attempts
+      // have been exhausted.
+      void on_subscription_lost(
+        in ::DDS::DataReader reader,
+        in SubscriptionLostStatus status);
+    };
+
+  }; // End of module DCPS
+}; // End of module TAO
+
+
+
+
 #endif /* TAO_DDS_DCPS_SUBSCRIPTION_IDL */

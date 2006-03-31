@@ -12,7 +12,7 @@
 
 
 //Class DataWriterListenerImpl
-class DataWriterListenerImpl : public virtual POA_DDS::DataWriterListener
+class DataWriterListenerImpl : public virtual POA_TAO::DCPS::DataWriterListener
 {
 public:
   //Constructor 
@@ -57,7 +57,18 @@ virtual void on_publication_match (
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-  ));};
+  ));
+
+virtual void on_publication_lost (
+    ::DDS::DataWriter_ptr writer,
+    const ::TAO::DCPS::PublicationLostStatus & status
+    ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ));
+
+};
 
 
 #endif /* DATAWRITER_LISTENER_IMPL  */
