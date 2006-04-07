@@ -427,6 +427,13 @@ namespace TAO
           }
       }
       this->publisher_servant_->remove_associations (readers);
+      // If this remove_association is invoked when the InfoRepo
+      // detects a lost reader then make a callback to notify
+      // subscription lost.
+      if (notify_lost)
+        {
+          this->notify_publication_lost (readers);
+        }
     }
       
 
@@ -1499,7 +1506,6 @@ namespace TAO
             }
         }
 
-      CORBA::ULong new_sz = cur_sz;
       CORBA::ULong total_sz = publication_lost_status_.subscription_handles.length ();
       CORBA::ULong orig_sz = total_sz;
 
@@ -1536,5 +1542,7 @@ namespace TAO
 
   } // namespace DCPS
 } // namespace TAO
+
+
 
   

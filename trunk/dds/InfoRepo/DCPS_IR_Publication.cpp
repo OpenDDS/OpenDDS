@@ -182,7 +182,6 @@ int DCPS_IR_Publication::remove_associations (CORBA::Boolean notify_lost)
           sub = *iter;
           ++iter;
           sub->remove_associated_publication(this, send, notify_lost);
-          CORBA::Boolean dont_notify_lost = 0;
           remove_associated_subscription (sub, dontSend, notify_lost);
         }
     }

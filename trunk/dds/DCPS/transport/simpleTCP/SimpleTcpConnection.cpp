@@ -427,8 +427,8 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify)
 /// A timer is scheduled on acceptor side to check if a new connection 
 /// is accepted after the connection is lost. 
 int
-TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &tv,
-                                                const void *arg)
+TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
+                                                const void *)
 {
   DBG_ENTRY("SimpleTcpConnection","handle_timeout");
 
