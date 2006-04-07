@@ -7,7 +7,7 @@
 #include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
-
+#if 0
 ACE_INLINE
 TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
@@ -17,7 +17,7 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
 {
   DBG_ENTRY("SimpleTcpDataLink","SimpleTcpDataLink");
 }
-
+#endif
 
 
 ACE_INLINE const ACE_INET_Addr&

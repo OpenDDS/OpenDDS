@@ -1592,7 +1592,6 @@ namespace TAO
             }
         }
 
-      CORBA::ULong new_sz = cur_sz;
       CORBA::ULong total_sz = subscription_lost_status_.publication_handles.length ();
       CORBA::ULong orig_sz = total_sz;
 

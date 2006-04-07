@@ -828,7 +828,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 }
 
 
-int 
+ACE_INLINE int 
 TAO::DCPS::TransportSendStrategy::relink ()
 {
   // The subsclass needs implement this function for re-establishing

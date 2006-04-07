@@ -14,7 +14,8 @@
 #include  "dds/DCPS/DataWriterImpl.h"
 #include  "dds/DCPS/DataReaderImpl.h"
 
-#include "EntryExit.h"
+#include  "EntryExit.h"
+#include  "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"

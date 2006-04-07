@@ -6,6 +6,7 @@
 #include  "TransportImpl.h"
 #include  "dds/DCPS/DataWriterImpl.h"
 #include  "dds/DCPS/DataReaderImpl.h"
+#include  "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
