@@ -288,6 +288,8 @@ PubDriver::initialize(int& argc, char *argv[])
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
       (publisher_.in ());
 
+  attach_to_transport ();
+
   ::DDS::PublisherQos pub_qos_got;
   publisher_->get_qos (pub_qos_got ACE_ENV_ARG_PARAMETER);
 
@@ -504,62 +506,6 @@ PubDriver::run()
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) PubDriver::run, ")
               ACE_TEXT(" Wait for subscriber start. \n")));
-
-  TAO::DCPS::TransportImpl_rch transport_impl 
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
-
-  TAO::DCPS::TransportConfiguration_rch config 
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
-
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
-
-  tcp_config->local_address_ = this->pub_addr_;
-
-  if (transport_impl->configure(config.in ()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) Failed to configure the transport impl\n"));
-      throw TestException();
-    }
-
-  // Attach the Publisher with the TransportImpl.
-  ::TAO::DCPS::PublisherImpl* pub_servant 
-    = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in () ACE_ENV_ARG_PARAMETER);
-
-  ACE_CHECK;
-  TEST_CHECK (pub_servant != 0);
-
-  TAO::DCPS::AttachStatus status 
-    = pub_servant->attach_transport(transport_impl.in()); 
-
-  if (status != TAO::DCPS::ATTACH_OK)
-  {
-    // We failed to attach to the transport for some reason.
-    std::string status_str;
-
-    switch (status)
-      {
-        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case TAO::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
-      }
-
-    ACE_ERROR((LM_ERROR,
-                "(%P|%t) Failed to attach to the transport. "
-                "AttachStatus == %s\n", status_str.c_str()));
-    throw TestException();
-  }
 
   // Set up the subscriptions.
   add_subscription (this->sub_id_, this->sub_addr_.c_str ());
@@ -1280,4 +1226,56 @@ void PubDriver::add_subscription (
 
   TAO::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
   foo_datawriter_->add_associations (pub_id, associations);
+}
+
+
+void PubDriver::attach_to_transport ()
+{
+  TAO::DCPS::TransportImpl_rch transport_impl 
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+
+  TAO::DCPS::TransportConfiguration_rch config 
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
+
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+
+  tcp_config->local_address_ = this->pub_addr_;
+
+  if (transport_impl->configure(config.in ()) != 0)
+    {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) Failed to configure the transport impl\n"));
+      throw TestException();
+    }
+
+  TAO::DCPS::AttachStatus status 
+    = publisher_servant_->attach_transport(transport_impl.in()); 
+
+  if (status != TAO::DCPS::ATTACH_OK)
+  {
+    // We failed to attach to the transport for some reason.
+    std::string status_str;
+
+    switch (status)
+      {
+        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          status_str = "ATTACH_BAD_TRANSPORT";
+          break;
+        case TAO::DCPS::ATTACH_ERROR:
+          status_str = "ATTACH_ERROR";
+          break;
+        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          status_str = "ATTACH_INCOMPATIBLE_QOS";
+          break;
+        default:
+          status_str = "Unknown Status";
+          break;
+      }
+
+    ACE_ERROR((LM_ERROR,
+                "(%P|%t) Failed to attach to the transport. "
+                "AttachStatus == %s\n", status_str.c_str()));
+    throw TestException();
+  }
 }

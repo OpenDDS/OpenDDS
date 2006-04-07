@@ -208,27 +208,21 @@ namespace TAO
         TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
         if (impl.is_nil ())
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("SubscriberImpl::create_datareader, ")
                         ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
-            //TODO: This should return nil, but some tests do not attach the subscriber to
-            //      the transport.
-            //return ::DDS::DataReader::_nil ();
-#endif
+            return ::DDS::DataReader::_nil ();
           }
         // Register the DataReader object with the TransportImpl.
         else if (impl->register_subscription (dr_servant->get_subscription_id(), 
                                                                dr_servant) == -1)
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("SubscriberImpl::create_datareader, ")
                         ACE_TEXT("failed to register datareader %d with TransportImpl.\n"),
                         dr_servant->get_subscription_id()));
-#endif
             return ::DDS::DataReader::_nil ();
           }
 
@@ -329,26 +323,21 @@ namespace TAO
         TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
         if (impl.is_nil ())
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("SubscriberImpl::delete_datareader, ")
                         ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
-            //TODO: This should return nil, but some tests do not attach the subscriber to
-            //      the transport.
-            //return ::DDS::DataReader::_nil ();
-#endif
+            return ::DDS::RETCODE_ERROR;
           }
         // Unregister the DataReader object with the TransportImpl.
         else if (impl->unregister_subscription (subscription_id) == -1)
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("SubscriberImpl::delete_datareader, ")
                         ACE_TEXT("failed to unregister datareader %d with TransportImpl.\n"),
                         subscription_id));
-#endif
+            return ::DDS::RETCODE_ERROR;
           }
 
         // Clean up any remaining associations
