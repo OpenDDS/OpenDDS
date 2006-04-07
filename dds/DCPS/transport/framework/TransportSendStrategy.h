@@ -84,6 +84,10 @@ namespace TAO
         /// called again.
         virtual WorkOutcome perform_work();
 
+        /// The subclass needs provide the implementation
+        /// for re-establishing the datalink. This is called
+        /// when send returns an error.
+        virtual int relink ();
 
       protected:
 
@@ -100,7 +104,6 @@ namespace TAO
 //MJM: each time on success, instead of checking the bp flag only on
 //MJM: failure.
 //MJM: Oh.  Nevermind.
-
 
       private:
 

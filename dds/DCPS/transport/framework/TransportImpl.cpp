@@ -4,7 +4,8 @@
 
 #include  "DCPS/DdsDcps_pch.h"
 #include  "TransportImpl.h"
-
+#include  "dds/DCPS/DataWriterImpl.h"
+#include  "dds/DCPS/DataReaderImpl.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -14,7 +15,27 @@
 TAO::DCPS::TransportImpl::~TransportImpl()
 {
   DBG_ENTRY("TransportImpl","~TransportImpl");
+  {
+    PublicationObjectMap::ENTRY* entry;
+    for (PublicationObjectMap::ITERATOR itr(dw_map_);
+      itr.next(entry);
+      itr.advance ())
+    {
+      entry->int_id_->_remove_ref ();
+    }
+  }
+	
+  {
+    SubscriptionObjectMap::ENTRY* entry;
+    for (SubscriptionObjectMap::ITERATOR itr(dr_map_);
+      itr.next(entry);
+      itr.advance ())
+    {
+      entry->int_id_->_remove_ref ();
+    }
+  }
 }
+
 
 void
 TAO::DCPS::TransportImpl::shutdown()
@@ -89,8 +110,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
                         publisher_id, subscriber_id),
                        0);
     }
-
-  link->make_reservation(subscriber_id,publisher_id);
+  
+ link->make_reservation(subscriber_id,publisher_id);
 
   return link._retn();
 }
@@ -114,7 +135,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
   // Since find_or_create() is pure virtual, the concrete subclass must
   // provide an implementation for us to use.
 
-  // Note that we pass-in a 0 as the second argument.  This means that
+ // Note that we pass-in a 0 as the second argument.  This means that
   // if a new DataLink needs to be created (ie, the find operation fails),
   // then the connection establishment logic will treat the local endpoint
   // as a subscriber.  This knowledge dictates whether a passive or active
@@ -174,4 +195,85 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
   // Everything worked.  Return success code.
   return ATTACH_OK;
 }
+
+
+int 
+TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id, 
+                                                TAO::DCPS::DataWriterImpl* dw)
+{
+  DBG_ENTRY("TransportImpl","register_publication");
+  GuardType guard(this->lock_);
+
+  int ret = this->dw_map_.bind (pub_id, dw);
+  if (ret != -1)
+    {
+      dw->_add_ref ();
+    }
+
+  return ret;
+}
+
+
+int 
+TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
+{
+  DBG_ENTRY("TransportImpl","unregister_publication");
+  GuardType guard(this->lock_);
+  return this->dw_map_.unbind (pub_id);
+}
+
+
+TAO::DCPS::DataWriterImpl* 
+TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id)
+{
+  DBG_ENTRY("TransportImpl","find_publication");
+  GuardType guard(this->lock_);
+  TAO::DCPS::DataWriterImpl* dw = 0;
+  if (this->dw_map_.find (pub_id, dw) == -1)
+    {
+      if (TAO_debug_level > 0)
+        {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_publication   pub(%d) "
+            "not found\n", pub_id));
+        }
+    }
+  return dw;
+}
+
+
+int 
+TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id, 
+                                                 TAO::DCPS::DataReaderImpl* dr)
+{
+  DBG_ENTRY("TransportImpl","register_subscription");
+  GuardType guard(this->lock_);
+  return this->dr_map_.bind (sub_id, dr);
+}
+
+
+int 
+TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
+{
+  DBG_ENTRY("TransportImpl","unregister_subscription");
+  return this->dr_map_.unbind (sub_id);
+}
+
+
+TAO::DCPS::DataReaderImpl* 
+TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id)
+{
+  DBG_ENTRY("TransportImpl","find_subscription");
+  GuardType guard(this->lock_);
+  TAO::DCPS::DataReaderImpl* dr = 0;
+  if (this->dr_map_.find (sub_id, dr) == -1)
+    {
+      if (TAO_debug_level > 0)
+        {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_subscription   sub(%d) not found\n",
+            sub_id));
+        }
+    }
+  return dr;
+}
+
 

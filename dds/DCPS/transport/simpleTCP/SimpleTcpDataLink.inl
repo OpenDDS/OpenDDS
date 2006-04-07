@@ -27,3 +27,11 @@ TAO::DCPS::SimpleTcpDataLink::remote_address() const
   return this->remote_address_;
 }
 
+
+ACE_INLINE TAO::DCPS::SimpleTcpConnection_rch 
+TAO::DCPS::SimpleTcpDataLink::get_connection ()
+{
+  return this->connection_;
+}
+
+

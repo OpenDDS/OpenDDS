@@ -81,7 +81,8 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 
 
 
-int DCPS_IR_Domain::remove_participant(TAO::DCPS::RepoId participantId)
+int DCPS_IR_Domain::remove_participant(TAO::DCPS::RepoId participantId,
+                                       CORBA::Boolean notify_lost)
 {
   DCPS_IR_Participant* participant;
 
@@ -91,7 +92,7 @@ int DCPS_IR_Domain::remove_participant(TAO::DCPS::RepoId participantId)
     {
       // make sure the participant has cleaned up all publications,
       // subscriptions, and any topic references
-      participant->remove_all_dependents();
+      participant->remove_all_dependents(notify_lost);
 
       status = participants_.unbind (participantId, participant);
 
@@ -1025,8 +1026,10 @@ void DCPS_IR_Domain::remove_dead_participants ()
           deadParticipants_.remove(dead);
 
           dead->set_alive(0);
-          dead->remove_all_dependents();
-          remove_participant(dead->get_id());
+
+          CORBA::Boolean notify_lost = 1;
+          dead->remove_all_dependents(notify_lost);
+          remove_participant(dead->get_id(), notify_lost);
         }
     }
 }

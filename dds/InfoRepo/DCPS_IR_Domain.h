@@ -74,7 +74,8 @@ public:
   /// Remove the particpant
   /// The participant has been deleted if returns successful.
   /// Returns 0 if successful
-  int remove_participant(TAO::DCPS::RepoId particpantId);
+  int remove_participant(TAO::DCPS::RepoId particpantId,
+                         CORBA::Boolean    notify_lost);
 
   /// Find the participant with the particpant id
   /// Does NOT take ownership of any initial memory pointed to by participant

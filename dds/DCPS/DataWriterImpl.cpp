@@ -74,6 +74,8 @@ namespace TAO
         publication_match_status_.total_count = 0; 
         publication_match_status_.total_count_change = 0;
         publication_match_status_.last_subscription_handle = ::DDS::HANDLE_NIL; 
+        publication_lost_status_.total_count = 0;
+        publication_lost_status_.total_count_change = 0;
       }
       
     // This method is called when there are no longer any reference to the 
@@ -325,7 +327,8 @@ namespace TAO
       
     void 
     DataWriterImpl::remove_associations (
-        const ReaderIdSeq & readers
+        const ReaderIdSeq & readers,
+        ::CORBA::Boolean notify_lost
         ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
@@ -444,7 +447,8 @@ namespace TAO
           {
             if (0 < size)
               {
-                this->remove_associations(readers ACE_ENV_ARG_PARAMETER);
+              	CORBA::Boolean dont_notify_lost = 0;
+                this->remove_associations(readers, dont_notify_lost ACE_ENV_ARG_PARAMETER);
               }
           }
         ACE_CATCHANY
@@ -1454,6 +1458,81 @@ namespace TAO
     }
 
 
+    void 
+    DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
+    {
+      DBG_ENTRY("DataWriterImpl","notify_publication_lost");
+      DDS::InstanceHandleSeq subhdls;
+
+      CORBA::ULong cur_sz = subids.length ();
+      // TBD: Remove the condition check after we change to default support 
+      //      builtin topics.
+      if (TheServiceParticipant->get_BIT () == true)
+        {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+          BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
+                        ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
+                        ::DDS::SubscriptionBuiltinTopicDataSeq,
+                        ReaderIdSeq > hh;
+
+          ::DDS::ReturnCode_t ret 
+            = hh.repo_ids_to_instance_handles(participant_servant_, 
+                                              BUILT_IN_SUBSCRIPTION_TOPIC, 
+                                              subids, 
+                                              subhdls);
+          
+          if (ret != ::DDS::RETCODE_OK)
+            {
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::notify_publication_lost, ")
+                          ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
+              return;
+            }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+        }
+      else
+        {
+          subhdls.length (cur_sz);
+          for (CORBA::ULong i = 0; i < cur_sz; i++)
+            {
+              subhdls[i] = subids[i];
+            }
+        }
+
+      CORBA::ULong new_sz = cur_sz;
+      CORBA::ULong total_sz = publication_lost_status_.subscription_handles.length ();
+      CORBA::ULong orig_sz = total_sz;
+
+      // Since this callback might be called multiple times by the transport,
+      // we need make sure we are not adding duplcaited reader ids to the 
+      // publication_lost_status_.
+      for (CORBA::ULong i = 0; i < cur_sz; i++)
+        {
+          bool is_new_hdl = true;
+          total_sz = publication_lost_status_.subscription_handles.length ();
+          for (CORBA::ULong j = 0; j < total_sz; j++)
+            {
+              if (subhdls[i] == publication_lost_status_.subscription_handles[j])
+                is_new_hdl = false;
+            }
+
+          if (is_new_hdl)
+            {
+              ++total_sz;
+              publication_lost_status_.subscription_handles.length (total_sz);
+              publication_lost_status_.subscription_handles[total_sz -1] = subhdls[i];
+            }
+         }
+
+      publication_lost_status_.total_count += (total_sz-orig_sz);
+      publication_lost_status_.total_count_change += (total_sz-orig_sz);
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+      the_listener->on_publication_lost (this->dw_remote_objref_.in (),
+                                         this->publication_lost_status_); 
+    }
 
   } // namespace DCPS
 } // namespace TAO

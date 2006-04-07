@@ -205,6 +205,33 @@ namespace TAO
               }
           }
         
+        TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+        if (impl.is_nil ())
+          {
+#if 0
+            ACE_ERROR ((LM_ERROR, 
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::create_datareader, ")
+                        ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
+            //TODO: This should return nil, but some tests do not attach the subscriber to
+            //      the transport.
+            //return ::DDS::DataReader::_nil ();
+#endif
+          }
+        // Register the DataReader object with the TransportImpl.
+        else if (impl->register_subscription (dr_servant->get_subscription_id(), 
+                                                               dr_servant) == -1)
+          {
+#if 0
+            ACE_ERROR ((LM_ERROR, 
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::create_datareader, ")
+                        ACE_TEXT("failed to register datareader %d with TransportImpl.\n"),
+                        dr_servant->get_subscription_id()));
+#endif
+            return ::DDS::DataReader::_nil ();
+          }
+
 // add created data reader to this' data reader container -
 // done in enable_reader
         return ::DDS::DataReader::_duplicate(dr_obj.in ());
@@ -275,7 +302,7 @@ namespace TAO
               subscription_id
               ACE_ENV_ARG_PARAMETER) ;
           ACE_TRY_CHECK;
-        }
+       }
         ACE_CATCH (CORBA::SystemException, sysex)
         {
           ACE_PRINT_EXCEPTION (sysex,
@@ -295,10 +322,34 @@ namespace TAO
         datareader_map_.erase(it) ;
 
         if (datareader_set_.find(dr_servant) != datareader_set_.end())
-        {
-          datareader_set_.erase(dr_servant) ;
-        }
+          {
+            datareader_set_.erase(dr_servant) ;
+          }
 
+        TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+        if (impl.is_nil ())
+          {
+#if 0
+            ACE_ERROR ((LM_ERROR, 
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::delete_datareader, ")
+                        ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
+            //TODO: This should return nil, but some tests do not attach the subscriber to
+            //      the transport.
+            //return ::DDS::DataReader::_nil ();
+#endif
+          }
+        // Unregister the DataReader object with the TransportImpl.
+        else if (impl->unregister_subscription (subscription_id) == -1)
+          {
+#if 0
+            ACE_ERROR ((LM_ERROR, 
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::delete_datareader, ")
+                        ACE_TEXT("failed to unregister datareader %d with TransportImpl.\n"),
+                        subscription_id));
+#endif
+          }
 
         // Clean up any remaining associations
         dr_servant->remove_all_associations();

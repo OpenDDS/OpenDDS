@@ -25,6 +25,9 @@ namespace TAO
                                  TransportReactorTask* task);
         virtual ~SimpleTcpReceiveStrategy();
 
+        int reset(SimpleTcpConnection* connection);
+
+        ACE_Reactor* get_reactor();
 
       protected:
 
@@ -37,6 +40,10 @@ namespace TAO
 
         virtual int start_i();
         virtual void stop_i();
+
+        // Delegate to the connection object to re-establishment
+        // the connection.
+        virtual int relink ();
 
       private:
 

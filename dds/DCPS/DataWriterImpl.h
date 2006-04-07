@@ -188,7 +188,8 @@ namespace TAO
       ));
 
     virtual void remove_associations (
-        const ReaderIdSeq & readers
+        const ReaderIdSeq & readers,
+        ::CORBA::Boolean callback
         ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
@@ -402,6 +403,8 @@ namespace TAO
 
     void remove_all_associations();
 
+    void notify_publication_lost (const ReaderIdSeq& subids);
+ 
     /// Statistics counter.
     int         data_dropped_count_;
     int         data_delivered_count_;
@@ -504,6 +507,9 @@ namespace TAO
       ::DDS::OfferedDeadlineMissedStatus  offered_deadline_missed_status_ ;
       ::DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
       ::DDS::PublicationMatchStatus       publication_match_status_ ;
+
+      // Statistics of the lost publications due to lost connection.
+      PublicationLostStatus               publication_lost_status_;
 
       /// The message block allocator.
       MessageBlockAllocator*     mb_allocator_;

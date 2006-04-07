@@ -89,6 +89,9 @@ namespace TAO
         /// by calling this method.
         void transport_shutdown();
 
+        /// Notify the datawriters and datareaders the lost 
+        /// publication/subscription due to a connection problem.
+        void notify_lost ();
 
       protected:
 
@@ -118,6 +121,9 @@ namespace TAO
 
         /// Used to provide unique Ids to all DataLink methods.
         static ACE_UINT64 get_next_datalink_id ();
+
+        /// The transport receive strategy object for this DataLink.
+        TransportReceiveStrategy_rch receive_strategy_;
 
       private:
 
@@ -161,9 +167,6 @@ namespace TAO
 
         /// The transport send strategy object for this DataLink.
         TransportSendStrategy_rch send_strategy_;
-
-        /// The transport receive strategy object for this DataLink.
-        TransportReceiveStrategy_rch receive_strategy_;
 
         /// The id for this DataLink
         ACE_UINT64 id_;

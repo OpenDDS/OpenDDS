@@ -999,7 +999,8 @@ PubDriver::listener_test ()
   reader_ids.length (1);
   reader_ids[0] = this->sub_id_;
 
-  foo_datawriter_->remove_associations (reader_ids ACE_ENV_ARG_PARAMETER);
+  CORBA::Boolean dont_notify_lost = 0;
+  foo_datawriter_->remove_associations (reader_ids, dont_notify_lost ACE_ENV_ARG_PARAMETER);
 
   ret = foo_datawriter_->get_matched_subscriptions (subscription_handles
                                                     ACE_ENV_ARG_PARAMETER);

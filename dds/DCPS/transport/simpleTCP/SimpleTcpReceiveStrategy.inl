@@ -27,3 +27,11 @@ TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
   this->connection_ = connection;
 }
 
+
+ACE_INLINE ACE_Reactor*
+TAO::DCPS::SimpleTcpReceiveStrategy::get_reactor()
+{
+  DBG_ENTRY("SimpleTcpReceiveStrategy","get_reactor");
+  return this->reactor_task_->get_reactor ();
+}
+

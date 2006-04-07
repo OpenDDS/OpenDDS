@@ -241,11 +241,20 @@ TAO::DCPS::TransportSendStrategy::perform_work()
                  "We lost our connection, or had some fatal connection "
                  "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"));
 
-      // Either we've lost our connection to the peer (ie, the peer
-      // disconnected), or we've encountered some unknown fatal error
-      // attempting to send the packet.  Stay in MODE_QUEUE, but lets
-      // return WORK_OUTCOME_BROKEN_RESOURCE.
-      return WORK_OUTCOME_BROKEN_RESOURCE;
+      if (this->relink () == -1)
+        {
+          // Either we've lost our connection to the peer (ie, the peer
+          // disconnected), or we've encountered some unknown fatal error
+          // attempting to send the packet.  Stay in MODE_QUEUE, but lets
+          // return WORK_OUTCOME_BROKEN_RESOURCE.
+          return WORK_OUTCOME_BROKEN_RESOURCE;
+        }
+      else
+        {
+          // If the datalink is re-established then notigy the synch
+          // thread to perform work.
+          this->synch_->work_available();
+        }
     }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -614,5 +623,6 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 
   num_delayed_notifications_ = 0;
 }
+
 
 

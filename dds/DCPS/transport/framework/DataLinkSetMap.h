@@ -78,12 +78,16 @@ namespace TAO
 
       private:
 
+        typedef ACE_SYNCH_MUTEX     LockType;
+        typedef ACE_Guard<LockType> GuardType;
+
         typedef ACE_Hash_Map_Manager_Ex<RepoId,
                                         DataLinkSet_rch,
                                         ACE_Hash<RepoId>,
                                         ACE_Equal_To<RepoId>,
                                         ACE_Null_Mutex>        MapType;
 
+        LockType lock_;
         MapType  map_;
     };
 

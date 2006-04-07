@@ -455,7 +455,8 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
       throw TAO::DCPS::Invalid_Domain();
     }
 
-  int status = domainPtr->remove_participant (participantId);
+  CORBA::Boolean dont_notify_lost = 0;
+  int status = domainPtr->remove_participant (participantId, dont_notify_lost);
 
   if (0 != status)
     {

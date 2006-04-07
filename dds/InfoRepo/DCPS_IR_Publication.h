@@ -61,15 +61,22 @@ public:
   ///  subscriptions if return successful
   /// sendNotify indicates whether to tell the datawriter about
   ///  removing the subscription
+  /// The notify_lost flag true indicates this remove_associations is called
+  /// when the InfoRepo detects this publication is lost because of the failure
+  /// of invocation on this publication.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_subscription (DCPS_IR_Subscription* sub,
-                                      CORBA::Boolean sendNotify);
+                                      CORBA::Boolean sendNotify,
+                                      CORBA::Boolean notify_lost);
 
   /// Removes all the associated subscriptions
   /// This method can mark the participant dead
+  /// The notify_lost flag true indicates this remove_associations is called
+  /// when the InfoRepo detects this publication is lost because of the failure
+  /// of invocation on this publication.
   /// Returns 0 if successful
-  int remove_associations ();
+  int remove_associations (CORBA::Boolean notify_lost);
 
   /// Remove any subscriptions whose participant has the id
   void disassociate_participant (TAO::DCPS::RepoId id);

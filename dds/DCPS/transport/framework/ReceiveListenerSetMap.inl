@@ -104,3 +104,19 @@ TAO::DCPS::ReceiveListenerSetMap::data_received(ReceivedDataSample& sample)
 
   return 0;
 }
+
+
+ACE_INLINE TAO::DCPS::ReceiveListenerSetMap::MapType&
+TAO::DCPS::ReceiveListenerSetMap::map()
+{
+  DBG_SUB_ENTRY("ReceiveListenerSetMap","map",1);
+  return this->map_;
+}
+
+
+ACE_INLINE const TAO::DCPS::ReceiveListenerSetMap::MapType&
+TAO::DCPS::ReceiveListenerSetMap::map() const
+{
+  DBG_SUB_ENTRY("ReceiveListenerSetMap","map",2);
+  return this->map_;
+}

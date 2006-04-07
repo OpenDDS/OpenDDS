@@ -171,6 +171,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp
     DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp
     DCPS/transport/simpleTCP/SimpleTcpTransport.cpp
+    DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp
   }
 
   Inline_Files {  

@@ -180,6 +180,15 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
       this->tcp_config_->local_address_ = new_addr;
     }
 
+  // Open the reconnect task
+  if (this->reconnect_task_->open ())
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Reconnect task failed to open : %p\n",
+                        "open"),
+                        -1);
+    }
+
   // Open our acceptor object so that we can accept passive connections
   // on our this->tcp_config_->local_address_.
 
@@ -235,6 +244,8 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   // Don't accept any more connections.
   this->acceptor_.close();
   this->acceptor_.transport_shutdown ();
+
+  this->reconnect_task_->close ();
 
   {
     GuardType guard(this->connections_lock_);
@@ -350,23 +361,28 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
                                          SimpleTcpConnection* connection)
 {
   DBG_ENTRY("SimpleTcpTransport","passive_connection");
-
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
-  GuardType guard(this->connections_lock_);
+  {
+    GuardType guard(this->connections_lock_);
 
-  if (this->connections_.bind(remote_address,connection_obj) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Unable to bind SimpleTcpConnection object "
-                 "to the connections_ map.\n"));
-    }
+    if (this->connections_.bind(remote_address,connection_obj) != 0)
+      {
+        ACE_ERROR((LM_ERROR,
+                  "(%P|%t) ERROR: Unable to bind SimpleTcpConnection object "
+                  "to the connections_ map.\n"));
+      }
 
-  // Regardless of the outcome of the bind operation, let's tell any threads
-  // that are wait()'ing on the connections_updated_ condition to check
-  // the connections_ map again.
-  this->connections_updated_.broadcast();
+    // Regardless of the outcome of the bind operation, let's tell any threads
+    // that are wait()'ing on the connections_updated_ condition to check
+    // the connections_ map again.
+    this->connections_updated_.broadcast();
+  }
+
+  // Enqueue the connection to the reconnect task that verifies if the connection
+  // is re-established.
+  this->reconnect_task_->add (remote_address, connection_obj);
 }
 
 
@@ -384,7 +400,7 @@ TAO::DCPS::SimpleTcpTransport::make_active_connection
   // Ask the connection object to attempt the active connection establishment.
   if (connection->active_establishment(remote_address,
                                        this->tcp_config_->local_address_,
-                                       this->tcp_config_.in()) != 0)
+                                       this->tcp_config_) != 0)
     {
       return -1;
     }
@@ -407,10 +423,9 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
   // will extract it from the connections_ map and give it to the link.
   {
     GuardType guard(this->connections_lock_);
-
     while (this->connections_.unbind(remote_address,connection) != 0)
       {
-        // There is no connection object waiting for us (yet).
+       // There is no connection object waiting for us (yet).
         // We need to wait on the connections_updated_ condition
         // and then re-attempt to extract our connection.
         this->connections_updated_.wait();
@@ -433,7 +448,8 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
   DBG_ENTRY("SimpleTcpTransport","connect_datalink");
 
   TransportSendStrategy_rch send_strategy = 
-             new SimpleTcpSendStrategy(this->tcp_config_.in(),
+             new SimpleTcpSendStrategy(link,
+                                       this->tcp_config_.in(),
                                        connection,
                                        new SimpleTcpSynchResource(connection));
 
@@ -452,3 +468,26 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
   return 0;
 }
 
+
+/// This function is called by the SimpleTcpReconnectTask thread to check if the passively
+/// accepted connection is the re-established connection. If it is, then the "old" connection
+/// object in the datalink is replaced by the "new" connection object.
+int
+TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
+                                           SimpleTcpConnection_rch connection)
+{
+  DBG_ENTRY("SimpleTcpTransport","fresh_link");
+
+  SimpleTcpDataLink_rch link;
+  GuardType guard(this->links_lock_);
+
+  if (this->links_.find(remote_address,link) == 0)
+    {
+      SimpleTcpConnection_rch old_con = link->get_connection ();
+      if (old_con.in () != connection.in ())
+        // Replace the "old" connection object with the "new" connection object.
+        return link->reconnect (connection.in ());
+    }
+
+  return 0;
+}

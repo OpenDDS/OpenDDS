@@ -11,6 +11,8 @@
 
 #include  "TransportImpl.h"
 #include  "TransportConfiguration.h"
+#include  "dds/DCPS/DataWriterImpl.h"
+#include  "dds/DCPS/DataReaderImpl.h"
 
 #include "EntryExit.h"
 
@@ -406,4 +408,107 @@ TAO::DCPS::DataLink::transport_shutdown()
   // Drop our reference to the TransportImpl object
   this->impl_ = 0;
 }
+
+
+void
+TAO::DCPS::DataLink::notify_lost ()
+{
+  DBG_ENTRY("DataLink","notify_lost");
+
+  GuardType guard(this->lock_);
+  {
+    ReceiveListenerSetMap::MapType & map = this->pub_map_.map ();
+
+    // Notify the datawriters registered with TransportImpl
+    // the lost publications due to a connection problem.
+    ReceiveListenerSetMap::MapType::ENTRY* entry;
+    for (ReceiveListenerSetMap::MapType::ITERATOR itr(map);
+      itr.next(entry);
+      itr.advance())
+      {
+        DataWriterImpl* dw = this->impl_->find_publication(entry->ext_id_);
+        if (dw != 0)
+          {
+            if (TAO_debug_level > 0)
+              {
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost notify pub %d publication lost \n", 
+                  entry->ext_id_));
+              }
+            ReceiveListenerSet_rch subset = entry->int_id_;
+            ReceiveListenerSet::MapType & imap = subset->map ();
+
+            ReaderIdSeq subids;
+            subids.length (subset->size ());
+            CORBA::ULong i = 0;
+            ReceiveListenerSet::MapType::ENTRY* ientry;
+            for (ReceiveListenerSet::MapType::ITERATOR iitr(imap);
+              iitr.next(ientry);
+              iitr.advance())
+            {
+              subids[i++] = ientry->ext_id_;
+            }
+
+          dw->notify_publication_lost (subids);
+        }
+        else
+          {
+            if (TAO_debug_level > 0)
+              {
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost  not notify pub %d publication lost \n", 
+                  entry->ext_id_));
+              }
+          }
+
+      }
+  }
+
+  {
+    // Notify the datareaders registered with TransportImpl
+    // the lost subscriptions due to a connection problem.
+    RepoIdSetMap::MapType & map = this->sub_map_.map ();
+
+    RepoIdSetMap::MapType::ENTRY* entry;
+    for (RepoIdSetMap::MapType::ITERATOR itr(map);
+          itr.next(entry);
+          itr.advance())
+      {
+        // subscription_handles
+        DataReaderImpl* dr = this->impl_->find_subscription (entry->ext_id_);
+
+        if (dr != 0)
+          {
+            if (TAO_debug_level > 0)
+              {
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost notify sub %d subscription lost \n", 
+                entry->ext_id_));
+              }
+            RepoIdSet_rch pubset = entry->int_id_;
+            RepoIdSet::MapType & map = pubset->map ();
+
+            WriterIdSeq pubids;
+            pubids.length (pubset->size ());
+            CORBA::ULong i = 0;
+            RepoIdSet::MapType::ENTRY* ientry;
+            for (RepoIdSet::MapType::ITERATOR iitr(map);
+              iitr.next(ientry);
+              iitr.advance())
+              {
+                pubids[i++] = ientry->ext_id_;
+              }
+
+            dr->notify_subscription_lost (pubids);
+          }
+        else
+          {
+            if (TAO_debug_level > 0)
+              {
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost not notify sub %d subscription lost \n", 
+                  entry->ext_id_));
+              }
+
+          }
+      }
+  }
+}
+
 

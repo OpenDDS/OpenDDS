@@ -28,6 +28,8 @@ TAO::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
   DBG_ENTRY("DataLinkSetMap","find_or_create_set");
   DataLinkSet_rch link_set;
 
+  GuardType guard(this->lock_);
+
   if (this->map_.find(id, link_set) != 0)
     {
       // It wasn't found.  Create one and insert it.
@@ -52,6 +54,7 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id)
 {
   DBG_ENTRY("DataLinkSetMap","find_set");
   DataLinkSet_rch link_set;
+  GuardType guard(this->lock_);
 
   if (this->map_.find(id, link_set) != 0)
     {
@@ -68,6 +71,8 @@ TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 {
   DBG_ENTRY("DataLinkSetMap","insert_link");
   DataLinkSet_rch link_set;
+
+  GuardType guard(this->lock_);
 
   // Try to find it first...
   if (this->map_.find(id, link_set) != 0)
@@ -103,6 +108,7 @@ TAO::DCPS::DataLinkSetMap::release_reservations
   //       context.  The released map represents released "local id" to
   //       DataLink associations that result from removing the remote ids
   //       (the keys) here.
+  GuardType guard(this->lock_);
   for (ssize_t i = 0; i < num_remote_ids; ++i)
     {
       RepoId remote_id = remote_ids[i];
@@ -158,6 +164,8 @@ TAO::DCPS::DataLinkSetMap::remove_released
   // Iterate over the released_locals map where each entry in the map
   // represents a local_id and its set of DataLinks that have become invalid
   // due to the releasing of remote_id reservations from the DataLinks.
+  GuardType guard(this->lock_);
+
   MapType::ENTRY* entry;
 
   for (MapType::CONST_ITERATOR itr(released_locals.map_);
@@ -206,5 +214,6 @@ void
 TAO::DCPS::DataLinkSetMap::clear()
 {
   DBG_ENTRY("DataLinkSetMap","clear");
+  GuardType guard(this->lock_);
   this->map_.close();
 }

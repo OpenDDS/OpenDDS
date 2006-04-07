@@ -37,6 +37,9 @@ namespace TAO
                     TransportSendStrategy*    send_strategy,
                     TransportReceiveStrategy* receive_strategy);
 
+        int reconnect (SimpleTcpConnection* connection);
+       
+        SimpleTcpConnection_rch get_connection ();
 
       protected:
 
