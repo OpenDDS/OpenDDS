@@ -77,6 +77,8 @@ namespace TAO
         /// to the supplied TransportImpl object.
         AttachStatus attach_transport(TransportImpl* impl);
 
+        /// Return the TransportImpl object reference.
+        TransportImpl_rch get_transport_impl ();
 
       protected:
 

@@ -537,56 +537,69 @@ TAO::DCPS::TransportSendStrategy::direct_send()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Now attempt to send the packet.\n"));
 
-  // Attempt to send the packet
-  SendPacketOutcome outcome = this->send_packet(NOTIFY_IMMEADIATELY);
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "The outcome of the send_packet() was %d.\n", outcome));
-
-  if ((outcome == OUTCOME_BACKPRESSURE) ||
-      (outcome == OUTCOME_PARTIAL_SEND))
+ 
+  // We will try resend the packet if the send() fails and then connection 
+  // is re-established.
+  for (CORBA::ULong i = 0; i < 2; ++i)
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "The outcome of the send_packet() was either "
-                 "OUTCOME_BACKPRESSURE or OUTCOME_PARTIAL_SEND.\n"));
+      // Attempt to send the packet
+      SendPacketOutcome outcome = this->send_packet(NOTIFY_IMMEADIATELY);
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "Flip into the MODE_QUEUE mode_.\n"));
+                "The outcome of the send_packet() was %d.\n", outcome));
 
-      // We encountered backpressure, or only sent part of the packet.
-      this->mode_ = MODE_QUEUE;
-      this->synch_->work_available();
-    }
-  else if ((outcome == OUTCOME_PEER_LOST) ||
-           (outcome == OUTCOME_SEND_ERROR))
-    {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "The outcome of the send_packet() was either "
-                 "OUTCOME_PEER_LOST or OUTCOME_SEND_ERROR.\n"));
+      if ((outcome == OUTCOME_BACKPRESSURE) ||
+          (outcome == OUTCOME_PARTIAL_SEND))
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "The outcome of the send_packet() was either "
+                    "OUTCOME_BACKPRESSURE or OUTCOME_PARTIAL_SEND.\n"));
 
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "Nothing better to do other than flip to MODE_QUEUE, but "
-                 "don't announce work_available() to the synch_ object.\n"));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Flip into the MODE_QUEUE mode_.\n"));
 
-      // Either we've lost our connection to the peer (ie, the peer
-      // disconnected), or we've encountered some unknown fatal error
-      // attempting to send the packet.  We can't do anything other than
-      // flip into MODE_QUEUE, and never be able to send anything.
-      // This isn't elegant or optimal, but we don't have any other
-      // smart way to deal with this yet.
-      this->mode_ = MODE_QUEUE;
+          // We encountered backpressure, or only sent part of the packet.
+          this->mode_ = MODE_QUEUE;
+          this->synch_->work_available();
+        }
+      else if ((outcome == OUTCOME_PEER_LOST) ||
+              (outcome == OUTCOME_SEND_ERROR))
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "The outcome of the send_packet() was either "
+                    "OUTCOME_PEER_LOST or OUTCOME_SEND_ERROR.\n"));
 
-      // No reason to announce that we have work_available.  We can't
-      // do anything about it anyhow.
-    }
-  else
-    {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "The outcome of the send_packet() must have been "
-                 "OUTCOME_COMPLETE_SEND.\n"));
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "So, we will just stay in MODE_DIRECT.\n"));
-    }
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Nothing better to do other than flip to MODE_QUEUE, but "
+                    "don't announce work_available() to the synch_ object.\n"));
+
+          if (this->relink () == -1)
+            {
+              // Either we've lost our connection to the peer (ie, the peer
+              // disconnected), or we've encountered some unknown fatal error
+              // attempting to send the packet. We tried relink and it failed.
+              // We can't do anything other than flip into MODE_QUEUE, and never
+              // be able to send anything. The user should stop sending when 
+              // receiving the callback.
+              this->mode_ = MODE_QUEUE;
+            }
+          else
+            {
+              // Try send the packet again if the connection is re-established.
+              continue; 
+            }
+      }
+    else
+      {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "The outcome of the send_packet() must have been "
+                  "OUTCOME_COMPLETE_SEND.\n"));
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "So, we will just stay in MODE_DIRECT.\n"));
+      }
+    
+    break;
+  }
 
   // We stay in MODE_DIRECT mode if we didn't encounter any backpressure.
   return;
@@ -812,5 +825,14 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
              "sent. Return OUTCOME_PARTIAL_SEND.\n"));
 
   return OUTCOME_PARTIAL_SEND;
+}
+
+
+int 
+TAO::DCPS::TransportSendStrategy::relink ()
+{
+  // The subsclass needs implement this function for re-establishing
+  // the link upon send failure.
+  return -1;
 }
 

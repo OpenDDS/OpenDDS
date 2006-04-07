@@ -33,8 +33,14 @@ module TAO {
         );
 
       // will tell transport that associations are going away 
+      // The notify_lost flag true indicates the remove_association is invoked
+      // by the InfoRepo after it detected a lost reader. The InfoRepo detects
+      // the lost reader when the add_association/remove_association invocations
+      // on the reader object reference fail. The datawriter need notify the
+      // the DataWriterListener on_subscription_lost.
       oneway void remove_associations(
-        in ReaderIdSeq readers
+        in ReaderIdSeq readers,
+        in boolean notify_lost
         );
 
       // supporting DataWriterListener::on_offered_incompatible_qos()

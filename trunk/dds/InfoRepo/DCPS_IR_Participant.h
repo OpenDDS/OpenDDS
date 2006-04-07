@@ -90,7 +90,7 @@ public:
 
   /// Removes all topics, publications and
   // subscriptions for this participant
-  void remove_all_dependents ();
+  void remove_all_dependents (CORBA::Boolean notify_lost);
 
   // called by publications and subscriptions when the writer
   // or reader throws an exception during a remote invocation

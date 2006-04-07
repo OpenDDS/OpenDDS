@@ -58,3 +58,20 @@ TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
   return value._retn();
 }
 
+
+ACE_INLINE TAO::DCPS::RepoIdSetMap::MapType&
+TAO::DCPS::RepoIdSetMap::map()
+{
+  DBG_SUB_ENTRY("RepoIdSetMap","map",1);
+  return this->map_;
+}
+
+
+ACE_INLINE const TAO::DCPS::RepoIdSetMap::MapType&
+TAO::DCPS::RepoIdSetMap::map() const
+{
+  DBG_SUB_ENTRY("RepoIdSetMap","map",2);
+  return this->map_;
+}
+
+

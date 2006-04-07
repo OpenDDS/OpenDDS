@@ -122,7 +122,8 @@ namespace TAO
         ));
 
       virtual void remove_associations (
-          const TAO::DCPS::WriterIdSeq & writers
+          const TAO::DCPS::WriterIdSeq & writers,
+          ::CORBA::Boolean callback
           ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
@@ -346,6 +347,9 @@ namespace TAO
       void liveliness_lost() ;
 
       void remove_all_associations();
+
+      void notify_subscription_lost (const WriterIdSeq& pubids);
+
     protected:
 
       // type specific DataReader's part of enable.
@@ -412,17 +416,18 @@ namespace TAO
       CORBA::Long                     depth_ ;
       size_t                          n_chunks_ ;
 
-      ACE_Recursive_Thread_Mutex                publication_handle_lock_ ;
+      ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
 
       ::DDS::InstanceHandleSeq        publication_handles_;
 
       // Status conditions.
-      ::DDS::LivelinessChangedStatus      liveliness_changed_status_ ;
+      ::DDS::LivelinessChangedStatus        liveliness_changed_status_ ;
       ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_ ;
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_ ;
-      // YD: should this be publication_match_status_ ?
-      ::DDS::SubscriptionMatchStatus         subscription_match_status_ ;
+      ::DDS::SubscriptionMatchStatus        subscription_match_status_ ;
 
+      // Statistics of the lost subscriptions due to lost connection.
+      SubscriptionLostStatus                subscription_lost_status_;
 
       /// The orb's reactor to be used to register the liveliness 
       /// timer.

@@ -39,7 +39,22 @@ TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
 
   GET_CONFIG_VALUE (cf, trans_sect, "enable_nagle_algorithm", 
     this->enable_nagle_algorithm_, bool)
- 
+
+  GET_CONFIG_VALUE (cf, trans_sect, "attempt_connection_reestablishment", 
+    this->attempt_connection_reestablishment_, bool)
+
+  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_initial_delay", 
+    this->conn_retry_initial_delay_, int)
+
+  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_backoff_multiplier", 
+    this->conn_retry_backoff_multiplier_, int)
+
+  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_attempts", 
+    this->conn_retry_attempts_, int)
+
+  GET_CONFIG_VALUE (cf, trans_sect, "passive_reconenct_duration", 
+    this->passive_reconenct_duration_, int)
+
   return 0;
 }
 

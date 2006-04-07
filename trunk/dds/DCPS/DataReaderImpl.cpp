@@ -69,6 +69,9 @@ namespace TAO
         subscription_match_status_.total_count_change = 0 ;
         subscription_match_status_.last_publication_handle =
             ::DDS::HANDLE_NIL ;
+        
+        subscription_lost_status_.total_count = 0;
+        subscription_lost_status_.total_count_change = 0;
 
         sample_lost_status_.total_count = 0 ;
         sample_lost_status_.total_count_change = 0 ;
@@ -259,7 +262,7 @@ namespace TAO
                         " Starting/resetting liveliness timer for reader %d\n",
                         subscription_id_ ));
             this->handle_timeout (now, this);
-          }
+         }
         // else - no timer needed when LIVELINESS.lease_duration is INFINITE
 
         // add associations to the transport before using
@@ -334,7 +337,7 @@ namespace TAO
       set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
         
       subscription_match_status = subscription_match_status_;
-      
+
       if (listener != 0)
         {
           listener->on_subscription_match (dr_remote_objref_.in (), 
@@ -353,7 +356,8 @@ namespace TAO
     }
 
     void DataReaderImpl::remove_associations (
-        const TAO::DCPS::WriterIdSeq & writers
+        const TAO::DCPS::WriterIdSeq & writers,
+        ::CORBA::Boolean notify_lost
         ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
@@ -493,6 +497,13 @@ namespace TAO
 
         this->subscriber_servant_->remove_associations(writers);
 
+        // If this remove_association is invoked when the InfoRepo
+        // detects a lost writer then make a callback to notify
+        // subscription lost.
+        if (notify_lost)
+          {
+            this->notify_subscription_lost (writers);
+          }
       }
 
 
@@ -517,9 +528,10 @@ namespace TAO
 
         ACE_TRY_NEW_ENV
           {
+            CORBA::Boolean dont_notify_lost = 0;
             if (0 < size)
               {
-                remove_associations(writers ACE_ENV_ARG_PARAMETER);
+                remove_associations(writers, dont_notify_lost ACE_ENV_ARG_PARAMETER);
               }
           }
         ACE_CATCHANY
@@ -1539,6 +1551,83 @@ namespace TAO
       return next_handle_++;
     }
 
+
+    void 
+    DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
+    {
+      DDS::InstanceHandleSeq pubhdls;
+
+      CORBA::ULong cur_sz = pubids.length ();
+      // TBD: Remove the condition check after we change to default support 
+      //      builtin topics.
+      if (TheServiceParticipant->get_BIT () == true)
+        {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+          BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
+                        ::DDS::PublicationBuiltinTopicDataDataReader_var,
+                        ::DDS::PublicationBuiltinTopicDataSeq,
+                        WriterIdSeq > hh;
+
+          ::DDS::ReturnCode_t ret 
+            = hh.repo_ids_to_instance_handles(participant_servant_, 
+                                              BUILT_IN_PUBLICATION_TOPIC, 
+                                              pubids, 
+                                              pubhdls);
+          
+          if (ret != ::DDS::RETCODE_OK)
+            {
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_publication_lost, ")
+                          ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
+              return;
+            }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+        }
+      else
+        {
+          pubhdls.length (cur_sz);
+          for (CORBA::ULong i = 0; i < cur_sz; i++)
+            {
+              pubhdls[i] = pubids[i];
+            }
+        }
+
+      CORBA::ULong new_sz = cur_sz;
+      CORBA::ULong total_sz = subscription_lost_status_.publication_handles.length ();
+      CORBA::ULong orig_sz = total_sz;
+
+      // Since this callback might be called multiple times by the transport,
+      // we need make sure we are not adding duplcaited reader ids to the 
+      // subscription_lost_status_.
+      for (CORBA::ULong i = 0; i < cur_sz; i++)
+        {
+          bool is_new_hdl = true;
+          total_sz = subscription_lost_status_.publication_handles.length ();
+          for (CORBA::ULong j = 0; j < total_sz; j++)
+            {
+              if (pubhdls[i] == subscription_lost_status_.publication_handles[j])
+                is_new_hdl = false;
+            }
+
+          if (is_new_hdl)
+            {
+              ++total_sz;
+              subscription_lost_status_.publication_handles.length (total_sz);
+              subscription_lost_status_.publication_handles[total_sz -1] = pubhdls[i];
+            }
+         }
+
+      subscription_lost_status_.total_count += (total_sz-orig_sz);
+      subscription_lost_status_.total_count_change += (total_sz-orig_sz);
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataReaderListener_var the_listener 
+        = DataReaderListener::_narrow (this->listener_.in ());
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
+                                            this->subscription_lost_status_); 
+    }
 
   } // namespace DCPS
 } // namespace TAO

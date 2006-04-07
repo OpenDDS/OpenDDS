@@ -29,6 +29,19 @@ namespace TAO
         ACE_INET_Addr local_address_;
 
         bool enable_nagle_algorithm_;
+
+        /// Determine if reestablishment needs be performed when the connection
+        /// is lost.
+        bool attempt_connection_reestablishment_;
+        /// The initial retry delay in milliseconds. 
+        int conn_retry_initial_delay_;
+        /// The backoff multiplier for reconnection strategy. 
+        int conn_retry_backoff_multiplier_;
+        /// Number of attemps before giving up.
+        int conn_retry_attempts_;
+        /// The time period in milliseconds for the acceptor side of a connection
+        /// to wait for reconnecting.
+        int passive_reconenct_duration_;
     };
 
   } /* namespace DCPS */

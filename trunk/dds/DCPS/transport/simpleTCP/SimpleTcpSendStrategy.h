@@ -5,6 +5,7 @@
 #define TAO_DCPS_SIMPLETCPSENDSTRATEGY_H
 
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpDataLink_rch.h"
 #include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 
@@ -22,7 +23,8 @@ namespace TAO
     {
       public:
 
-        SimpleTcpSendStrategy(SimpleTcpConfiguration* config,
+        SimpleTcpSendStrategy(SimpleTcpDataLink*      link,
+                              SimpleTcpConfiguration* config,
                               SimpleTcpConnection*    connection,
                               SimpleTcpSynchResource* synch_resource);
         virtual ~SimpleTcpSendStrategy();
@@ -32,10 +34,14 @@ namespace TAO
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
+        // Delegate to the connection object to re-establishment
+        // the connection.
+        virtual int relink ();
 
       private:
 
         SimpleTcpConnection_rch connection_;
+        SimpleTcpDataLink_rch   link_;
     };
 
   }  /* namespace DCPS */

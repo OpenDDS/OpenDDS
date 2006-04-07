@@ -10,6 +10,7 @@
 #include  "SimpleTcpDataLink_rch.h"
 #include  "SimpleTcpAcceptor.h"
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpReconnectTask_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include  "ace/INET_Addr.h"
 #include  "ace/Hash_Map_Manager.h"
@@ -30,6 +31,9 @@ namespace TAO
         virtual ~SimpleTcpTransport();
 
         SimpleTcpConfiguration* get_configuration();
+
+        int fresh_link (const ACE_INET_Addr&    remote_addr,
+                        SimpleTcpConnection_rch connection);
 
 
       protected:
@@ -140,7 +144,9 @@ namespace TAO
         LockType connections_lock_;
 
         /// We need the reactor for our Acceptor.
-        TransportReactorTask_rch reactor_task_;
+        TransportReactorTask_rch   reactor_task_;
+
+        SimpleTcpReconnectTask_rch reconnect_task_;
     };
 
   } /* namespace DCPS */

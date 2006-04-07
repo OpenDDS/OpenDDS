@@ -18,7 +18,8 @@ namespace TAO
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export TransportReceiveStrategy : public RcObject<ACE_SYNCH_MUTEX>
+    class TAO_DdsDcps_Export TransportReceiveStrategy 
+      : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -29,6 +30,10 @@ namespace TAO
 
         int handle_input();
 
+        /// The subclass needs provide the implementation
+        /// for re-establishing the datalink. This is called
+        /// when recv returns an error.
+        virtual int relink ();
 
       protected:
 

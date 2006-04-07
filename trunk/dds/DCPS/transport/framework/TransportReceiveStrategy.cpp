@@ -289,11 +289,16 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
     }
   else if( bytes_remaining < 0)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
-                        ACE_TEXT("with data link detected: %p.\n"),
-                        "receive_bytes"),
-                       -1) ;
+      if (this->relink () == -1)
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+                          ACE_TEXT("with data link detected: %p.\n"),
+                          "receive_bytes"),
+                        -1) ;
+        }
+      else
+        return 0;
     }
 
   VDBG((LM_DEBUG,"(%P|%t) DBG:   "
@@ -804,4 +809,6 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
   //
   return 0 ;
 }
+
+
 

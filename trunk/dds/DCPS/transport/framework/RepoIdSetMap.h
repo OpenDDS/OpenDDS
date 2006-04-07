@@ -21,6 +21,13 @@ namespace TAO
     {
       public:
 
+        typedef ACE_Hash_Map_Manager_Ex<RepoId,
+                                        RepoIdSet_rch,
+                                        ACE_Hash<RepoId>,
+                                        ACE_Equal_To<RepoId>,
+                                        ACE_Null_Mutex>        MapType;
+
+
         RepoIdSetMap();
         virtual ~RepoIdSetMap();
 
@@ -34,17 +41,14 @@ namespace TAO
 
         ssize_t size() const;
 
+        /// Give access to the underlying map for iteration purposes.
+        MapType& map();
+        const MapType& map() const;
+
 
       private:
 
         RepoIdSet* find_or_create(RepoId key);
-
-
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        RepoIdSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
 
         MapType  map_;
     };

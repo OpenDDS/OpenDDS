@@ -1,3 +1,179 @@
+Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These files are changed to support the connection reestablishment
+        and lost connection notify. See RT8499.
+
+        * dds/DdsDcps.mpc:
+        
+          Added new file SimpleTcpReconnectTask.h/.cpp.
+          
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        
+          Added a paramter "notify_lost" to the remove_association
+          in DataReaderRemote and DataWriterRemote interfaces.
+          The flag true indicates the remove_association is invoked
+          by the InfoRepo after it detected a lost writer/reader. The 
+          InfoRepo detect the lost writer/reader when the 
+          add_association/remove_association invocations on the writer/reader
+          object reference fail. The datareader/datawriter needs notify the
+          the DataReaderListener/DatawriterListener the publication/subscription
+          lost.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        
+          Added methods to support the notification of the publication/subscription
+          lost and updated the remove_associations() signature change.
+          
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        
+          Made the datareader/datawriter register with the TransportImpl upon 
+          creation and unregister upon deletion.
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        
+          Added notify_lost() method that is called by the SimpleTcpConnection
+          upon reconnect failure. Changed the receive_strategy_ to be protected
+          data so the SimpleTcpDataLink can access it.
+          
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        
+          Added lock to protect the map. This would fix the problem when
+          multiple add_association() are called at the same time. The
+          find_or_create_set() failure causes the add_association() failure.
+          
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        
+          Added internal map accessor so we can iterate the map to notify
+          listener about the lost subscriptions/publication.
+          
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        
+          Added methods to register/unregister/find the datareader 
+          and datawriter object.
+          
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        
+          Added TransportImpl object reference accessor.
+          
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        
+          Added relink() funcation and call it when the send_packet() 
+          and receive_packet() return an error.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        
+          Added new configurations to support connection re-establishment.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        
+          This is the main change made for the re-establish a connection.
+          Added more states to have enough information for re-establish
+          and reuse the connection object. If connector/acceptor role of
+          the connection is not changed when the connection is re-established.
+          As the connector side, we reuse the same connection object after
+          reconnected. As the acceptor side, since the ACE_Acceptor creates
+          a new connection each time when it accept a connection, we can not
+          reuse the connection object. The states in the "old" connection 
+          object are copied to the "new" connection object.
+                    
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        
+          Added reconnect() function to replace an "old" connection with the 
+          "new" connection.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        
+          Added method to restart the ReceiveStrategy.
+        
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        
+          This is a new class that is dedicated to check if the incoming
+          connections are re-established connection from the remote. This
+          would resolve the deadlock problem between the reactor thread 
+          (calling SimpleTcpTransport::passive_connction()) and the orb
+          thread (calling SimpleTcpTransport::make_passive_connction()). 
+          The reactor thread will enqueue the new connection  to this task 
+          and let this task dequeue and check the connection.
+         
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
+        
+          Added association with the SimpleTcpDataLink.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+          
+          Called SimpleTcpReconnectTask open and close upon transport
+          initialization and shutdown.
+          
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        
+          Updated to accommodate the change of the remove_association() 
+          signature change.
+          
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        
+          Added configuration values for retry connect to the example.
+          
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        
+          Updated to accommodate the change of the remove_association() 
+          signature change.
+          
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/domain_ids:
+        * tests/DCPS/Reconnect/Messenger.idl:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/sub.ini:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/Reconnect/Writer.h:
+
+          Added new test to test connection re-establishment and the lost
+          connection notification.
+
 Fri Mar 31 09:02:01 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         Adding a listener type for handling the notification of disconnects

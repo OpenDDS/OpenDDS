@@ -34,7 +34,8 @@ DCPS_IR_Publication::~DCPS_IR_Publication ()
 {
   if (0 != associations_.size() )
     {
-      remove_associations();
+      CORBA::Boolean dont_notify_lost = 0;
+      remove_associations(dont_notify_lost);
     }
 }
 
@@ -104,7 +105,8 @@ int DCPS_IR_Publication::add_associated_subscription (DCPS_IR_Subscription* sub)
 
 
 int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* sub,
-                                                         CORBA::Boolean sendNotify)
+                                                         CORBA::Boolean sendNotify,
+                                                         CORBA::Boolean notify_lost)
 {
   bool marked_dead = false;
 
@@ -117,7 +119,7 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
         {
           ACE_TRY_NEW_ENV
             {
-              writer_->remove_associations(idSeq);
+              writer_->remove_associations(idSeq, notify_lost);
               ACE_TRY_CHECK;
             }
           ACE_CATCHANY
@@ -162,7 +164,7 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
 }
 
 
-int DCPS_IR_Publication::remove_associations ()
+int DCPS_IR_Publication::remove_associations (CORBA::Boolean notify_lost)
 {
   int status = 0;
   DCPS_IR_Subscription* sub = 0;
@@ -179,9 +181,9 @@ int DCPS_IR_Publication::remove_associations ()
         {
           sub = *iter;
           ++iter;
-
-          sub->remove_associated_publication(this, send);
-          remove_associated_subscription (sub, dontSend);
+          sub->remove_associated_publication(this, send, notify_lost);
+          CORBA::Boolean dont_notify_lost = 0;
+          remove_associated_subscription (sub, dontSend, notify_lost);
         }
     }
 
@@ -218,8 +220,9 @@ void DCPS_IR_Publication::disassociate_participant (TAO::DCPS::RepoId id)
 
           if (id == sub->get_participant_id() )
             {
-              sub->remove_associated_publication(this, send);
-              remove_associated_subscription (sub, dontSend);
+              CORBA::Boolean dont_notify_lost = 0;
+              sub->remove_associated_publication(this, send, dont_notify_lost);
+              remove_associated_subscription (sub, dontSend, dont_notify_lost);
 
               idSeq[count] = sub->get_id();
               ++count;
@@ -234,7 +237,8 @@ void DCPS_IR_Publication::disassociate_participant (TAO::DCPS::RepoId id)
             {
               ACE_TRY_NEW_ENV
                 {
-                  writer_->remove_associations(idSeq);
+                  CORBA::Boolean dont_notify_lost = 0;
+                  writer_->remove_associations(idSeq, dont_notify_lost);
                   ACE_TRY_CHECK;
                 }
               ACE_CATCHANY
@@ -283,8 +287,9 @@ void DCPS_IR_Publication::disassociate_topic (TAO::DCPS::RepoId id)
 
           if (id == sub->get_topic_id() )
             {
-              sub->remove_associated_publication(this, send);
-              remove_associated_subscription (sub, dontSend);
+              CORBA::Boolean dont_notify_lost = 0;
+              sub->remove_associated_publication(this, send, dont_notify_lost);
+              remove_associated_subscription (sub, dontSend, dont_notify_lost);
 
               idSeq[count] = sub->get_id();
               ++count;
@@ -299,7 +304,8 @@ void DCPS_IR_Publication::disassociate_topic (TAO::DCPS::RepoId id)
             {
               ACE_TRY_NEW_ENV
                 {
-                  writer_->remove_associations(idSeq);
+                  CORBA::Boolean dont_notify_lost = 0;
+                  writer_->remove_associations(idSeq, dont_notify_lost);
                   ACE_TRY_CHECK;
                 }
               ACE_CATCHANY
@@ -348,8 +354,9 @@ void DCPS_IR_Publication::disassociate_subscription (TAO::DCPS::RepoId id)
 
           if (id == sub->get_id() )
             {
-              sub->remove_associated_publication(this, send);
-              remove_associated_subscription (sub, dontSend);
+              CORBA::Boolean dont_notify_lost = 0;
+              sub->remove_associated_publication(this, send, dont_notify_lost);
+              remove_associated_subscription (sub, dontSend, dont_notify_lost);
 
               idSeq[count] = sub->get_id();
               ++count;
@@ -364,7 +371,8 @@ void DCPS_IR_Publication::disassociate_subscription (TAO::DCPS::RepoId id)
             {
               ACE_TRY_NEW_ENV
                 {
-                  writer_->remove_associations(idSeq);
+                  CORBA::Boolean dont_notify_lost = 0;
+                  writer_->remove_associations(idSeq, dont_notify_lost);
                   ACE_TRY_CHECK;
                 }
               ACE_CATCHANY

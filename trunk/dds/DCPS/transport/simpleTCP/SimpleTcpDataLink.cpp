@@ -4,7 +4,7 @@
 
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpDataLink.h"
-
+#include  "SimpleTcpReceiveStrategy.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpDataLink.inl"
@@ -62,6 +62,9 @@ TAO::DCPS::SimpleTcpDataLink::connect
   connection->_add_ref();
   this->connection_ = connection;
 
+  // Let connection know the datalink for callbacks upon reconnect failure.
+  this->connection_->set_datalink (this);
+
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
   if (this->start(send_strategy,receive_strategy) != 0)
@@ -78,4 +81,41 @@ TAO::DCPS::SimpleTcpDataLink::connect
 
   return 0;
 }
+
+
+/// Associate the new connection object with this datalink object.
+/// The states of the "old" connection object are copied to the new 
+/// connection object and the "old" connection object is replaced by 
+/// the new connection object.
+int
+TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
+{
+  DBG_ENTRY("SimpleTcpDataLink","reconnect");
+
+  // Sanity check - the connection should exist already since we are reconnecting.
+  if (this->connection_.is_nil())
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect old connection is nil.\n"),
+                       -1);
+    }
+
+  // Keep a "copy" of the reference to the connection object for ourselves.
+  connection->_add_ref();
+  connection->copy_states (this->connection_.in ());
+  this->connection_ = connection;
+
+  SimpleTcpReceiveStrategy* rs 
+    = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+  // Associate the new connection object with the receiveing strategy and disassociate
+  // the old connection object with the receiveing strategy.
+  return rs->reset (this->connection_.in ());
+}
+
+
+
+
+
+
 

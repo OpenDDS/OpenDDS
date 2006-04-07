@@ -6,6 +6,7 @@
 
 #include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
+#include  "dds/DdsDcpsInfoUtilsC.h"
 #include  "TransportDefs.h"
 #include  "TransportConfiguration_rch.h"
 #include  "TransportReactorTask_rch.h"
@@ -24,7 +25,8 @@ namespace TAO
     class TransportImplFactory;
     class TransportFactory;
     class DataLink;
-
+    class DataWriterImpl;
+    class DataReaderImpl;
 
     class TAO_DdsDcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
     {
@@ -38,6 +40,30 @@ namespace TAO
         /// TransportInterface object.
         int configure(TransportConfiguration* config);
 
+
+        /// Called by the PublisherImpl to register datawriter upon
+        /// datawriter creation.
+        int register_publication (RepoId pub_id, DataWriterImpl* dw);
+        
+        /// Called by the PublisherImpl to unregister datawriter upon
+        /// datawriter destruction.
+        int unregister_publication (RepoId pub_id);
+        
+        /// Called by the DataLink to find the registered datawriter
+        /// for the lost publication notification.
+        DataWriterImpl* find_publication (RepoId pub_id);
+
+        /// Called by the SubscriberImpl to register datareader upon
+        /// datareader creation.
+        int register_subscription (RepoId sub_id, DataReaderImpl* dr);
+        
+        /// Called by the SubscriberImpl to unregister datareader upon
+        /// datareader destruction.
+        int unregister_subscription (RepoId sub_id);
+        
+        /// Called by the DataLink to find the registered datareader
+        /// for the lost subscription notification.
+        DataReaderImpl* find_subscription (RepoId sub_id);
 
       protected:
 
@@ -88,9 +114,6 @@ namespace TAO
 
 
       private:
-
-        typedef ACE_SYNCH_MUTEX                ReservationLockType;
-        typedef ACE_Guard<ReservationLockType> ReservationGuardType;
 
         /// We have a few friends in the transport framework so that they
         /// can access our private methods.  We do this to avoid pollution
@@ -151,7 +174,9 @@ namespace TAO
 //MJM: a default NULL recieve listener (as the last arg) as long as this
 //MJM: collapsing propogates down to the datalink as well.  The method
 //MJM: implementations are remarkably similar.
-
+protected:
+        typedef ACE_SYNCH_MUTEX                ReservationLockType;
+        typedef ACE_Guard<ReservationLockType> ReservationGuardType;
         /// Called by our friends, the TransportInterface, and the DataLink.
         /// Since this TransportImpl can be attached to many TransportInterface
         /// objects, and each TransportInterface object could be "running" in
@@ -162,7 +187,7 @@ namespace TAO
         /// should release the reservation_lock() as soon as it is done.
         ReservationLockType& reservation_lock();
         const ReservationLockType& reservation_lock() const;
-
+private:
         /// Called by our friend, the TransportInterface.
         /// Accessor for the TransportInterfaceInfo.  Accepts a reference
         /// to a TransportInterfaceInfo object that will be "populated"
@@ -186,7 +211,28 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
+        typedef ACE_Hash_Map_Manager_Ex
+                               <RepoId,
+                                DataWriterImpl*,
+                                ACE_Hash<RepoId>,
+                                ACE_Equal_To<RepoId>,
+                                ACE_Null_Mutex>              PublicationObjectMap;
 
+        typedef ACE_Hash_Map_Manager_Ex
+                               <RepoId,
+                                DataReaderImpl*,
+                                ACE_Hash<RepoId>,
+                                ACE_Equal_To<RepoId>,
+                                ACE_Null_Mutex>              SubscriptionObjectMap;
+
+
+        /// The collection of the DataWriterImpl objects that are created by
+        /// the PublisherImpl currently "attached" to this TransportImpl.
+        PublicationObjectMap  dw_map_;
+        
+        /// The collection of the DataWriterImpl objects that are created by
+        /// the SubscriberImpl currently "attached" to this TransportImpl.
+        SubscriptionObjectMap dr_map_;
         /// Our reservation lock.
         ReservationLockType reservation_lock_;
 

@@ -9,6 +9,8 @@
 
 ACE_INLINE
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
+: connected_ (false),
+  is_connector_ (true)
 {
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 }
@@ -32,3 +34,18 @@ TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
   this->receive_strategy_ = 0;
 }
 
+
+ACE_INLINE bool
+TAO::DCPS::SimpleTcpConnection::is_connector ()
+{
+  return this->is_connector_;
+}
+
+
+ACE_INLINE void
+TAO::DCPS::SimpleTcpConnection::set_datalink (SimpleTcpDataLink* link)
+{
+  // Keep a "copy" of the reference to the data link for ourselves.
+  link->_add_ref ();
+  this->link_ = link;
+}

@@ -138,7 +138,8 @@ int DCPS_IR_Participant::remove_publication (long pubId)
       DCPS_IR_Topic* topic = pub->get_topic ();
       topic->remove_publication_reference(pub);
 
-      status = pub->remove_associations();
+      CORBA::Boolean dont_notify_lost = 0;
+      status = pub->remove_associations(dont_notify_lost);
       if (0 != status)
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_publication ")
@@ -212,7 +213,8 @@ int DCPS_IR_Participant::remove_subscription (long subId)
       DCPS_IR_Topic_Description* desc = sub->get_topic_description ();
       desc->remove_subscription_reference(sub);
 
-      status = sub->remove_associations();
+      CORBA::Boolean dont_notify_lost = 0;
+      status = sub->remove_associations(dont_notify_lost);
       if (0 != status)
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_subscription ")
@@ -324,7 +326,7 @@ int DCPS_IR_Participant::find_topic_reference (long topicId,
 }
 
 
-void DCPS_IR_Participant::remove_all_dependents ()
+void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
 {
   DCPS_IR_Topic* topic = 0;
   DCPS_IR_Topic_Description* subDesc = 0;
@@ -341,7 +343,7 @@ void DCPS_IR_Participant::remove_all_dependents ()
 
       topic = pub->get_topic ();
       topic->remove_publication_reference(pub);
-      if (0 != pub->remove_associations())
+      if (0 != pub->remove_associations(notify_lost))
         {
           return;
         }
@@ -359,7 +361,7 @@ void DCPS_IR_Participant::remove_all_dependents ()
 
       subDesc = sub->get_topic_description ();
       subDesc->remove_subscription_reference(sub);
-      if (0 != sub->remove_associations())
+      if (0 != sub->remove_associations(notify_lost))
         {
           return;
         }

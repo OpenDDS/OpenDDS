@@ -227,3 +227,12 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
   // send method.
   this->send_links_->send_stop();
 }
+
+
+ACE_INLINE TAO::DCPS::TransportImpl_rch
+TAO::DCPS::TransportInterface::get_transport_impl ()
+{
+  return this->impl_;
+}
+
+

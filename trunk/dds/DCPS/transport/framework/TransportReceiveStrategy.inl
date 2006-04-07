@@ -27,3 +27,11 @@ TAO::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
   return ++index % RECEIVE_BUFFERS;
 }
 
+
+int 
+TAO::DCPS::TransportReceiveStrategy::relink ()
+{
+  // The subsclass needs implement this function for re-establishing
+  // the link upon recv failure.
+  return -1;
+}

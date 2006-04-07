@@ -25,6 +25,12 @@ namespace TAO
     class TAO_DdsDcps_Export ReceiveListenerSetMap
     {
       public:
+       
+        typedef ACE_Hash_Map_Manager_Ex<RepoId,
+                                        ReceiveListenerSet_rch,
+                                        ACE_Hash<RepoId>,
+                                        ACE_Equal_To<RepoId>,
+                                        ACE_Null_Mutex>        MapType;
 
         ReceiveListenerSetMap();
         virtual ~ReceiveListenerSetMap();
@@ -53,17 +59,14 @@ namespace TAO
         /// Only called by the DataLink.
         int data_received(ReceivedDataSample& sample);
 
+        /// Give access to the underlying map for iteration purposes.
+        MapType& map();
+        const MapType& map() const;
+
 
       private:
 
         ReceiveListenerSet* find_or_create(RepoId publisher_id);
-
-
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        ReceiveListenerSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
 
         MapType  map_;
     };

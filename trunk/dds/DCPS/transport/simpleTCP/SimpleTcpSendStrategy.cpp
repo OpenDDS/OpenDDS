@@ -66,3 +66,12 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
   return result;
 }
 
+
+int 
+TAO::DCPS::SimpleTcpSendStrategy::relink ()
+{
+  DBG_ENTRY("SimpleTcpReceiveStrategy","relink");
+  return this->connection_->reconnect ();
+}
+
+
