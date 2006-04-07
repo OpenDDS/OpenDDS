@@ -3,6 +3,7 @@
 // $Id$
 
 #include  "SimpleTcpAcceptor.h"
+#include  "SimpleTcpDataLink.h"
 #include  "dds/DCPS/transport/framework/NetworkAddress.h"
 #include  "ace/SOCK_Connector.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"

@@ -11,7 +11,7 @@
 ACE_INLINE
 TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
-                                         SimpleTcpTransport*  transport_impl)
+                                         TAO::DCPS::SimpleTcpTransport*  transport_impl)
   : DataLink(transport_impl),
     remote_address_(remote_address)
 {
