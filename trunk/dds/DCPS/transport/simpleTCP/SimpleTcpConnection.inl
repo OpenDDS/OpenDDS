@@ -43,7 +43,7 @@ TAO::DCPS::SimpleTcpConnection::is_connector ()
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleTcpConnection::set_datalink (SimpleTcpDataLink* link)
+TAO::DCPS::SimpleTcpConnection::set_datalink (TAO::DCPS::SimpleTcpDataLink* link)
 {
   // Keep a "copy" of the reference to the data link for ourselves.
   link->_add_ref ();
