@@ -204,27 +204,21 @@ namespace TAO
         TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
         if (impl.is_nil ())
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("PublisherImpl::create_datawriter, ")
                         ACE_TEXT("the publisher has not been attached to the TransportImpl.\n")));
-            //TODO: This should return nil, but some tests do not attach the publisher to
-            //      the transport.
-            //return ::DDS::DataWriter::_nil ();
-#endif
+            return ::DDS::DataWriter::_nil ();
           }
         // Register the DataWriterImpl object with the TransportImpl.
         else if (impl->register_publication (dw_servant->get_publication_id(), 
                                              dw_servant) == -1)
           {
-#if 0
             ACE_ERROR ((LM_ERROR, 
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("PublisherImpl::create_datawriter, ")
                         ACE_TEXT("failed to register datawriter %d with TransportImpl.\n"),
                         dw_servant->get_publication_id()));
-#endif
             return ::DDS::DataWriter::_nil ();
           }
         return ::DDS::DataWriter::_duplicate (dw_obj.in ());
@@ -310,26 +304,21 @@ namespace TAO
           TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
           if (impl.is_nil ())
             {
-#if 0
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("PublisherImpl::delete_datawriter, ")
                           ACE_TEXT("the publisher has not been attached to the TransportImpl.\n")));
-              //TODO: This should return nil, but some tests do not attach the publisher to
-              //      the transport.
-              //return ::DDS::DataWriter::_nil ();
-#endif
+              return ::DDS::RETCODE_ERROR;
             }
           // Unregister the DataWriterImpl object with the TransportImpl.
           else if (impl->unregister_publication (publication_id) == -1)
             {
-#if 0
               ACE_ERROR ((LM_ERROR, 
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("PublisherImpl::delete_datawriter, ")
                           ACE_TEXT("failed to unregister datawriter %d with TransportImpl.\n"),
                           publication_id));
-#endif
+              return ::DDS::RETCODE_ERROR;
             }
           
           delete dw_info;

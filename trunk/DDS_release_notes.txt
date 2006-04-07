@@ -15,7 +15,54 @@ New to this version are the following changes:
   - changed some heap allocations to cached allocator allocations.
     No heap allocations are in the write -> read code path for 
     value types containing scalars (no arrays, sequences or strings).
+  - Supported the SimpleTCP connection re-establishment and the 
+    lost publication/subscription callbacks upon the retry connect
+    failure. The main changes are:
+    
+    1) A new interface - relink() is added to both receive
+       and send strategy. The relink () is called whenever send or
+       recv call fails. The acceptor/connector role of a connection
+       object represents does not change during reconnecting. The 
+       connector side actively tries to reconnect and the acceptor 
+       side passively waits for the new connection coming. 
+        
+    2) Added new idl interfaces - DataReaderListener and 
+       DataWriterListener to support the on_subscription_lost 
+       and on_publication_lost callbacks upon the retry connect 
+       failure. 
+           
+    3) New configuration values are added to support the 
+       reconnect strategy.
+    
+        === Configurations for connector side ===
+        
+        # The initial retry delay in milliseconds. 
+        conn_retry_initial_delay=
+        # The backoff multiplier for reconnection strategy.
+        conn_retry_backoff_multiplier=
+        # Number of attemps before giving up. 
+        conn_retry_attempts=
+        
+        ## TBD - may be added in the future
+        ## Maximum period of not being able to send queued messages.
+        ## (if timeout happens before handle_output() is called
+        ##  then call on_*_lost()).
+        #max_backpressure_period=
+        
+        === Configurations for acceptor side ===
+        
+        # The time period in milliseconds for the acceptor side
+        # of a connection to wait for reconnecting. 
+        passive_reconnect_duration=
 
+     4) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test 
+        the on_*_lost callback and the connection re-establishment.
+     
+  - Fixed a problem that add_association() fails when multiple 
+    publishers/subscribers start simultaneously. Added a lock 
+    to pretect the internal map in DataLinkSetMap to fix the 
+    problem.
+  
 [] more!
 
 --- more notes on limitations ---

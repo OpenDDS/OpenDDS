@@ -1,3 +1,42 @@
+Fri Apr  7 15:15:23 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added notes for reconnect and lost connection callback support.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        
+          Removed the "#if 0" in create_*/delete_* that was used to avoid
+          some test failure, but the tests are fixed, we just remove it.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+
+          Removed the "attempt_connection_reestablishment" configuration
+          since it's duplicated with other configuration values and 
+          updated some spelling errors with the configuration values.
+          
+        * tests/DCPS/FooTest3_0/pub_main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/sub_main.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+        * tests/DCPS/FooTest3_2/pub_main.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+  
+          Made the test call attach_transport before create_datawriter()
+          to fix the test failures.
+          
 Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These files are changed to support the connection reestablishment

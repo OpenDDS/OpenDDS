@@ -83,6 +83,8 @@ class PubDriver
     const char *      sub_addr
     );
 
+    void attach_to_transport ();
+
     ::DDS::DomainParticipant_var participant_;
     ::DDS::Topic_var             topic_;
     ::DDS::Publisher_var         publisher_;

@@ -48,6 +48,7 @@ class PubDriver
     void init(int& argc, char* argv[]);
     void run();
     void end();
+    void attach_to_transport ();
 
     int parse_pub_arg(const std::string& arg);
     int parse_sub_arg(const std::string& arg);

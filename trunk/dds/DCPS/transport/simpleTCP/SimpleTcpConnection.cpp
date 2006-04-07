@@ -319,25 +319,29 @@ TAO::DCPS::SimpleTcpConnection::reconnect ()
    
   // Schedule a timer to see if a incoming connection is accepted when timeout.
   if (! this->is_connector_)
-  {
-    // Mark the connection lost since the recv just failed.
-    this->connected_ = false;
+    {
+      // Mark the connection lost since the recv just failed.
+      this->connected_ = false;
 
-    // Give a copy to reactor.
-    this->_add_ref ();
-    ACE_Time_Value timeout (this->tcp_config_->passive_reconenct_duration_/1000,
-                            this->tcp_config_->passive_reconenct_duration_%1000 * 1000);
-    SimpleTcpReceiveStrategy* rs 
-      = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
-    if (rs->get_reactor()->schedule_timer(this, 0, timeout) == -1)
-      {
-        this->_remove_ref ();
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::reconnect, ")
-                          ACE_TEXT(" %p. \n"), "schedule_timer" ),
-                          -1);
-      }
-  }
+      // Give a copy to reactor.
+      this->_add_ref ();
+
+      if (this->tcp_config_->passive_reconnect_duration_ == 0)
+        return -1;
+
+      ACE_Time_Value timeout (this->tcp_config_->passive_reconnect_duration_/1000,
+                              this->tcp_config_->passive_reconnect_duration_%1000 * 1000);
+      SimpleTcpReceiveStrategy* rs 
+        = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+      if (rs->get_reactor()->schedule_timer(this, 0, timeout) == -1)
+        {
+          this->_remove_ref ();
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::reconnect, ")
+                            ACE_TEXT(" %p. \n"), "schedule_timer" ),
+                            -1);
+        }
+    }
 
   return 0;
 }
@@ -381,37 +385,34 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify)
       this->peer ().close ();
       this->connected_ = false;
 
-      if (this->tcp_config_->attempt_connection_reestablishment_)
+      int retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
+      for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i)
         {
-          int retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
-          for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i)
-            {
-              ret = this->active_establishment (this->remote_address_,
-                                                this->local_address_,
-                                                this->tcp_config_);
-              if (ret == -1)
-              {
-                ACE_Time_Value delay_tv (retry_delay_msec/1000, 
-                                        retry_delay_msec %1000 * 1000);
-                ACE_OS::sleep (delay_tv);
-                retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
-              }
-              else
-              {
-                ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established lost connection to %s:%d.\n",
-                            this->remote_address_.get_host_addr (), 
-                            this->remote_address_.get_port_number ()));
-                break;
-              }
-            }
-
+          ret = this->active_establishment (this->remote_address_,
+                                            this->local_address_,
+                                            this->tcp_config_);
           if (ret == -1)
-            ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
-                        this->remote_address_.get_host_addr (), 
-                        this->remote_address_.get_port_number ()));
-
-          this->last_reconnect_attempt_tv_ = now;
+            {
+              ACE_Time_Value delay_tv (retry_delay_msec/1000, 
+                                      retry_delay_msec %1000 * 1000);
+              ACE_OS::sleep (delay_tv);
+              retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
+            }
+          else
+            {
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established lost connection to %s:%d.\n",
+                          this->remote_address_.get_host_addr (), 
+                          this->remote_address_.get_port_number ()));
+              break;
+            }
         }
+
+      if (ret == -1)
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
+                    this->remote_address_.get_host_addr (), 
+                    this->remote_address_.get_port_number ()));
+
+      this->last_reconnect_attempt_tv_ = now;
     }
   else
     {
