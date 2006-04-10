@@ -68,6 +68,7 @@ New to this version are the following changes:
         # If not reconnected within this period then 
         # on_publication_lost() and on_subscription_lost() callbacks 
         # will be called.
+        # The default is 2 seconds (2000 millseconds).
         passive_reconnect_duration=
 
     Implemenation details:
