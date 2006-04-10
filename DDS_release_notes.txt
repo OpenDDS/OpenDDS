@@ -2,9 +2,11 @@
 Version 0.8 of TAO DDS.
 
 New to this version are the following changes:
+
   - Added configuration of DCPS and transports via configuration files.
     This also simplified the code related to creating and configuring
     transports.
+
   - fixed a possible deadlock.
     The scenario it was found in was:
     * Start a subscriber with two readers.
@@ -12,50 +14,72 @@ New to this version are the following changes:
     * the subscriber would deadlock between the ORB and transport 
       threads.
     * If the publisher started first, it would not deadlock.
+
   - changed some heap allocations to cached allocator allocations.
     No heap allocations are in the write -> read code path for 
     value types containing scalars (no arrays, sequences or strings).
+
   - Supported the SimpleTCP connection re-establishment and the 
     lost publication/subscription callbacks upon the retry connect
     failure. The main changes are:
-    
-    1) A new interface - relink() is added to both receive
-       and send strategy. The relink () is called whenever send or
-       recv call fails. The acceptor/connector role of a connection
-       object represents does not change during reconnecting. The 
-       connector side actively tries to reconnect and the acceptor 
-       side passively waits for the new connection coming. 
-        
-    2) Added new idl interfaces - DataReaderListener and 
+            
+    1) Added new idl interfaces - DataReaderListener and 
        DataWriterListener to support the on_subscription_lost 
        and on_publication_lost callbacks upon the retry connect 
        failure. 
            
-    3) New configuration values are added to support the 
+    2) New configuration values are added to support the 
        reconnect strategy.
     
         === Configurations for connector side ===
         
         # The initial retry delay in milliseconds. 
+        # the first connection retry will be when the loss of connection
+        # is detected.  The second try will be after this delay.
+        # The default is 500 miliseconds.
         conn_retry_initial_delay=
+
         # The backoff multiplier for reconnection strategy.
+        # The third and so on reconnect will this value * the previous delay.
+        # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
+        # the second reconnect attempt will be at 0.5 seconds after the detection of
+        # the connection being lost; the third attempt will be 0.75 seconds later and
+        # the fourth attempt will be 1.125 seconds later (for a total of 2.375 seconds
+        # since detection of the loss).
+        # The default value is 2.0.
         conn_retry_backoff_multiplier=
-        # Number of attemps before giving up. 
+
+        # Number of attemps to reconnect before giving up and calling 
+        # on_publication_lost() and on_subscription_lost() callbacks.
+        # The default is 3.
         conn_retry_attempts=
         
-        ## TBD - may be added in the future
-        ## Maximum period of not being able to send queued messages.
-        ## (if timeout happens before handle_output() is called
-        ##  then call on_*_lost()).
-        #max_backpressure_period=
+        # Maximum period (in milliseconds) of not being able to send queued messages.
+        # If there are samples queued and no output for longer 
+        # than this period on_*_lost() callbacks will be called.
+        # The connection will not attept to be reconnected.
+        # If the value is zero, the default, then this check will not be made.
+        max_output_pause_period=
         
         === Configurations for acceptor side ===
         
         # The time period in milliseconds for the acceptor side
-        # of a connection to wait for reconnecting. 
+        # of a connection to wait for the connection to be reconnected.
+        # If not reconnected within this period then 
+        # on_publication_lost() and on_subscription_lost() callbacks 
+        # will be called.
         passive_reconnect_duration=
 
-     4) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test 
+    Implemenation details:
+    a) A new interface - relink() is added to both receive
+       and send strategy. The relink () is called whenever send or
+       recv call fails. The acceptor/connector role of a connection
+       object represents does not change during reconnecting. The 
+       connector side actively tries to reconnect and the acceptor 
+       side passively waits for the new connection coming. 
+
+
+     b) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test 
         the on_*_lost callback and the connection re-establishment.
      
   - Fixed a problem that add_association() fails when multiple 
