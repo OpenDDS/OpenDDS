@@ -58,12 +58,15 @@ namespace TAO
 
         void set_sock_options (SimpleTcpConfiguration* tcp_config);
 
-        int reconnect ();
+        int reconnect (bool on_new_association = false);
 
         /// Return true if the object represents the connector side, otherwise 
         /// it's the acceptor side. The acceptor/connector role is not changed
         /// when re-establishing the connection.
         bool is_connector ();
+
+        /// Return true if connection is connected.
+        bool is_connected ();
 
         void copy_states (SimpleTcpConnection* connection);
 
@@ -76,7 +79,7 @@ namespace TAO
 
       private:
         
-        int reconnect_i (bool& notify);
+        int reconnect_i (bool& notify, bool on_new_association);
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
@@ -90,8 +93,6 @@ namespace TAO
         bool      connected_;
         /// Flag indicate this connection object is the connector or acceptor.
         bool      is_connector_;
-        /// Last time the reconect is attemped (calling connector.connect()).
-        ACE_Time_Value last_reconnect_attempt_tv_;
         /// Reference to the receiving strategy.
         TransportReceiveStrategy_rch receive_strategy_;
         /// Remote address.
@@ -106,6 +107,9 @@ namespace TAO
         /// SimpleTcpDataLink object. This is needed for checking if the connection is
         /// re-established as the acceptor side when timer goes off.
         SimpleTcpConnection_rch    conn_replacement_;
+        /// The flag true indicates reconnect fails and connection lost notification 
+        /// is sent.
+        bool connection_lost_notified_;
     };
 
   }

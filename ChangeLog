@@ -1,3 +1,24 @@
+Mon Apr 10 09:20:35 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Corrected the notify_*_lost() to avoid duplicate reader/writer id
+          report lost.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        
+          Corrected reconnect() to notify connection lost just once and not
+          try to reconnect in subsequence send/recv failure.
+                  
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+         
+          Added reconnect() call in find_or_create_datalink() method when the 
+          connection is previously lost and now the datalink is requested because
+          of the new association.
+
 Fri Apr  7 15:15:23 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:

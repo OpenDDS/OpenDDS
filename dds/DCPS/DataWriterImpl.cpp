@@ -1506,8 +1506,9 @@ namespace TAO
             }
         }
 
-      CORBA::ULong total_sz = publication_lost_status_.subscription_handles.length ();
-      CORBA::ULong orig_sz = total_sz;
+      PublicationLostStatus status;
+      status.total_count = 0;
+      status.total_count_change = 0;
 
       // Since this callback might be called multiple times by the transport,
       // we need make sure we are not adding duplcaited reader ids to the 
@@ -1515,7 +1516,7 @@ namespace TAO
       for (CORBA::ULong i = 0; i < cur_sz; i++)
         {
           bool is_new_hdl = true;
-          total_sz = publication_lost_status_.subscription_handles.length ();
+          CORBA::ULong total_sz = publication_lost_status_.subscription_handles.length ();
           for (CORBA::ULong j = 0; j < total_sz; j++)
             {
               if (subhdls[i] == publication_lost_status_.subscription_handles[j])
@@ -1524,20 +1525,27 @@ namespace TAO
 
           if (is_new_hdl)
             {
-              ++total_sz;
-              publication_lost_status_.subscription_handles.length (total_sz);
-              publication_lost_status_.subscription_handles[total_sz -1] = subhdls[i];
+              ++ status.total_count;
+              ++ status.total_count_change;
+              CORBA::ULong sz = status.subscription_handles.length ();
+              status.subscription_handles.length (sz + 1);
+              status.subscription_handles[sz] = subhdls[i];
+              
+              ++ publication_lost_status_.total_count;
+              ++ publication_lost_status_.total_count_change;
+              sz = publication_lost_status_.subscription_handles.length ();
+              publication_lost_status_.subscription_handles.length (sz + 1);
+              publication_lost_status_.subscription_handles[sz] = subhdls[i];
             }
          }
-
-      publication_lost_status_.total_count += (total_sz-orig_sz);
-      publication_lost_status_.total_count_change += (total_sz-orig_sz);
 
       // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
       // is given to this DataWriter then narrow() fails.
       DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
-      the_listener->on_publication_lost (this->dw_remote_objref_.in (),
-                                         this->publication_lost_status_); 
+
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_publication_lost (this->dw_remote_objref_.in (),
+                                           status); 
     }
 
   } // namespace DCPS
