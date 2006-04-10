@@ -1,3 +1,9 @@
+Mon Apr 10 13:03:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Corrected the description for "conn_retry_backoff_multiplier" configuration.
+          
 Mon Apr 10 09:20:35 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
