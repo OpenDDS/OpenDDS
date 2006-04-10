@@ -31,21 +31,21 @@ New to this version are the following changes:
     2) New configuration values are added to support the 
        reconnect strategy.
     
-        === Configurations for connector side ===
-        
+        ###=== Configurations for connector side during reconnecting===
+
         # The initial retry delay in milliseconds. 
-        # the first connection retry will be when the loss of connection
+        # The first connection retry will be when the loss of connection
         # is detected.  The second try will be after this delay.
         # The default is 500 miliseconds.
         conn_retry_initial_delay=
 
         # The backoff multiplier for reconnection strategy.
-        # The third and so on reconnect will this value * the previous delay.
+        # The third and so on reconnect will be this value * the previous delay.
         # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
-        # the second reconnect attempt will be at 0.5 seconds after the detection of
-        # the connection being lost; the third attempt will be 0.75 seconds later and
-        # the fourth attempt will be 1.125 seconds later (for a total of 2.375 seconds
-        # since detection of the loss).
+        # the second reconnect attempt will be at 0.5 seconds after first retry connect
+        # fails; the third attempt will be 0.75 seconds after the second retry connect
+        # fails; the fourth attempt will be 1.125 seconds after the third retry connect
+        # fails.
         # The default value is 2.0.
         conn_retry_backoff_multiplier=
 
@@ -53,16 +53,16 @@ New to this version are the following changes:
         # on_publication_lost() and on_subscription_lost() callbacks.
         # The default is 3.
         conn_retry_attempts=
-        
+
         # Maximum period (in milliseconds) of not being able to send queued messages.
         # If there are samples queued and no output for longer 
         # than this period on_*_lost() callbacks will be called.
         # The connection will not attept to be reconnected.
         # If the value is zero, the default, then this check will not be made.
         max_output_pause_period=
-        
-        === Configurations for acceptor side ===
-        
+
+        ###=== Configurations for acceptor side during reconnecting===
+
         # The time period in milliseconds for the acceptor side
         # of a connection to wait for the connection to be reconnected.
         # If not reconnected within this period then 
