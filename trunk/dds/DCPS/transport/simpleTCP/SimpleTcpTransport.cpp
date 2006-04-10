@@ -51,6 +51,19 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 
   if (this->links_.find(remote_address,link) == 0)
     {
+      SimpleTcpConnection_rch con = link->get_connection ();
+      if (con->is_connector () && ! con->is_connected ())
+        {
+          bool on_new_association = true;
+          if (con->reconnect (on_new_association) == -1)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                "(%P|%t) ERROR: Unable to reconnect to remote %s:%d.\n", 
+                remote_address.get_host_addr (),
+                remote_address.get_port_number ()),
+                0);
+            }
+        }
       // This means we found a suitable (and already connected) DataLink.
       // We can return it now since we are done.
       return link._retn();

@@ -302,16 +302,22 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
 /// is the connector side of the connection then it tries to reconnet to the
 /// remote, if it's the acceptor side of the connection then it schedules a timer
 /// to check if it passively accepted a connection from remote.
+/// The on_new_association true indicates this is called when the connection is
+/// previous lost and new association is added. The connector side needs try to
+/// actively reconnect to remote.
 int
-TAO::DCPS::SimpleTcpConnection::reconnect ()
+TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect");
   bool notify = true;
-  // Try to reconnect as it's connector previously.
-  if (this->is_connector_ && this->reconnect_i (notify) == -1)
+  // Try to reconnect if it's connector previously.
+  if (this->is_connector_ && this->reconnect_i (notify, on_new_association) == -1)
     {
-      if (notify)
+      if (this->connection_lost_notified_)
+      {
         this->link_->notify_lost ();
+        this->connection_lost_notified_ = true;
+      }
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: SimpleTcpConnection::reconnect reconnect failed \n"),
                         -1);
@@ -358,33 +364,22 @@ TAO::DCPS::SimpleTcpConnection::reconnect ()
 // - fifth at 4.0 (2*2.0) seconds
 // - sixth at  8.0 (2*4.0) seconds
 int
-TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify)
+TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify, bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect_i");
 
-  notify = true;
-
-  // Both the SendStrategy and ReceiveStrategy might discover the connection
-  // lost at the same time or in a short period and try to re-establish the connection.
-  // To avoid the re-established connection by first reconnect() call closed by the 
-  // seond reconnect() call in a short period, we use the lock to allow the caller first
-  // gets the lock try reconnect and the other reconnect() call in a short period just 
-  // uses the previous reconnect result after it got lock.
-  int ret = -1;
-  ACE_Time_Value now = ACE_OS::gettimeofday ();
-
   GuardType guard (this->reconnect_lock_);
 
-  // Not sure what's the appropriate "short" period for the two reconnect() calls.
-  // Now I just hard code it 100 milliseconds. It will be changed later if we find
-  // any appropiate criteria.
-  ACE_Time_Value min_retry_delay (0, 100 * 1000);
-  if (now > this->last_reconnect_attempt_tv_
-    && now - this->last_reconnect_attempt_tv_ > min_retry_delay)
+  // Try to reconnect if the connection just lost or the connection was lost 
+  // previously and now new association is comming.
+  if (! this->connection_lost_notified_ || on_new_association)
     {
+      if (on_new_association)
+        this->connection_lost_notified_ = false;
       this->peer ().close ();
       this->connected_ = false;
 
+      int ret = -1;
       int retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
       for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i)
         {
@@ -408,20 +403,15 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify)
         }
 
       if (ret == -1)
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
-                    this->remote_address_.get_host_addr (), 
-                    this->remote_address_.get_port_number ()));
-
-      this->last_reconnect_attempt_tv_ = now;
+        {
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
+                      this->remote_address_.get_host_addr (), 
+                      this->remote_address_.get_port_number ()));
+          this->link_->notify_lost ();
+          this->connection_lost_notified_ = true;
+        }
     }
-  else
-    {
-      ret = this->connected_ ? 0 : -1;
-      notify = false;
-    }
-
-
-  return ret;
+  return this->connected_;
 }
 
 
@@ -458,7 +448,6 @@ TAO::DCPS::SimpleTcpConnection::copy_states (SimpleTcpConnection* connection)
   DBG_ENTRY("SimpleTcpConnection","copy_states");
   this->connected_ = connection->connected_;
   this->is_connector_ = connection->is_connector_;
-  this->last_reconnect_attempt_tv_ = connection->last_reconnect_attempt_tv_;
   this->receive_strategy_ = connection->receive_strategy_;
   this->remote_address_ = connection->remote_address_;
   this->local_address_ = connection->local_address_;
@@ -469,6 +458,7 @@ TAO::DCPS::SimpleTcpConnection::copy_states (SimpleTcpConnection* connection)
   // "old" SimpleTcpConnection object.
   this->_add_ref ();
   connection->conn_replacement_ = this;
+  this->connection_lost_notified_ = connection->connection_lost_notified_;
 }
 
 

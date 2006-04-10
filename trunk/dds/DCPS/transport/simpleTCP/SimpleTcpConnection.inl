@@ -11,7 +11,8 @@
 ACE_INLINE
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
-  is_connector_ (true)
+  is_connector_ (true),
+  connection_lost_notified_(false)
 {
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 }
@@ -40,6 +41,13 @@ ACE_INLINE bool
 TAO::DCPS::SimpleTcpConnection::is_connector ()
 {
   return this->is_connector_;
+}
+
+
+ACE_INLINE bool
+TAO::DCPS::SimpleTcpConnection::is_connected ()
+{
+  return this->connected_;
 }
 
 
