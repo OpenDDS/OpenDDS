@@ -16,17 +16,28 @@ TAO::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
 }
 
 
-void
+int
 TAO::DCPS::SimpleTcpSynchResource::wait_to_unclog()
 {
   DBG_ENTRY("SimpleTcpSynchResource","wait_to_unclog");
 
-  // Wait for the blocking to subside.
-  if (ACE::handle_write_ready(this->handle_, 0) == -1)
+
+  // Wait for the blocking to subside or timeout.
+  if (ACE::handle_write_ready(this->handle_, &this->max_output_pause_period_) == -1)
     {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: ACE::handle_write_ready return -1 while waiting "
-                 " to unclog.\n"));
+      if (errno == ETIME)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: handle_write_ready timed out\n"));
+          this->connection_->notify_lost_on_backpressure_timeout ();
+        }
+      else
+        {
+          ACE_ERROR((LM_ERROR,
+                    "(%P|%t) ERROR: ACE::handle_write_ready return -1 while waiting "
+                    " to unclog. %p \n", "handle_write_ready"));
+        }
+      return -1;
     }
+  return 0;
 }
 

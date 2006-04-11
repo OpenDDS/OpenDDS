@@ -43,14 +43,17 @@ TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_initial_delay", 
     this->conn_retry_initial_delay_, int)
 
-  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_backoff_multiplier", 
-    this->conn_retry_backoff_multiplier_, int)
+  GET_CONFIG_FLOAT_VALUE (cf, trans_sect, "conn_retry_backoff_multiplier", 
+    this->conn_retry_backoff_multiplier_)
 
   GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_attempts", 
     this->conn_retry_attempts_, int)
 
   GET_CONFIG_VALUE (cf, trans_sect, "passive_reconnect_duration", 
     this->passive_reconnect_duration_, int)
+
+  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period", 
+    this->max_output_pause_period_, int)
 
   return 0;
 }

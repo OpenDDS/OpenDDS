@@ -31,14 +31,14 @@ TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 
 
 int
-TAO::DCPS::SimpleTcpReconnectTask::add(const ACE_INET_Addr& remote_addr,
+TAO::DCPS::SimpleTcpReconnectTask::add(COMMAND  command,
                                        SimpleTcpConnection_rch conn)
 {
   DBG_ENTRY("SimpleTcpReconnectTask","add");
   GuardType guard(this->lock_);
   
   ConnectionInfo* info = new ConnectionInfo();
-  info->remote_addr = remote_addr;
+  info->command = command;
   info->connection = conn;
 
   int result = this->queue_.enqueue_tail (info);
@@ -138,7 +138,20 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
     }
     else
     {
-      transport_->fresh_link (conn_info->remote_addr, conn_info->connection);
+        switch (conn_info->command)
+        {
+          case DO_RECONNECT:
+            conn_info->connection->reconnect ();
+          break;
+          case NEW_CONNECTION_CHECK:
+            transport_->fresh_link (conn_info->connection->get_remote_address(), conn_info->connection);
+          break;
+          default:
+            ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::svc unknown command %d\n",
+              conn_info->command));
+          break;
+        }
+
       delete conn_info;
     }
   }

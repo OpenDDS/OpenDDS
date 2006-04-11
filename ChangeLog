@@ -1,3 +1,122 @@
+Tue Apr 11 10:10:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes are made for RT8499 to resolve the problem that publisher 
+        does not stop sending during reconnecting. There are two parts of the changes
+        need be made and note the second part is not done yet.
+          1)transport should queue the messages while reconnecting
+          2)transport should discard the messages if the reconnect fails.
+        
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        
+          Made handle_input () return -1 if the receive_bytes() return -1. This would
+          close the connection anyway even it will try to reconnect. 
+     
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
+
+          Added ready_send() virtual function to check if the connection is connected. 
+          This will be called whenever this->synch_->work_available is called or before 
+          sendv. This would stop the writing on a disconnected socket.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        
+          Made it has reference to the SimpleTcpTransport object and
+          added get_transport_impl() accessor.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        
+          Made relink() to queue the connection object to the SimpleTcpReconnectTask
+          to do the reconnect since we don't want the reactor thread block on reconnecting
+          and not receiving other incoming messages.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        
+          Made this task handle both reconnecting and new connection checking.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+        
+          Added reconnect task accessor so the SimpleTcpReceiveStrategy can access
+          it and handle the connection to the reconnect task to do reconnect.
+
+          
+        These changes are made for RT8499 to add the support to declare connection 
+        lost upon backpressure timed out.
+        
+        * DDS_release_notes.txt:
+        
+          Updated comments for "max_output_pause_period" configuration.
+          
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        
+          Added GET_CONFIG_FLOAT_VALUE macro.
+          
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.h:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        
+          Made the wait_on_clogged_resource() and wait_on_unclog() return status.
+          The PerConnectionSynch thread terminates if it returns an error.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        
+          Added max_output_pause_period_ and changed the 
+          conn_retry_backoff_multiplier_ to be float instead of int.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        
+          Added new method notify_lost_on_backpressure_timeout() to support
+          the disconnecting and notification when the transport stay in
+          backpressure too long ( > max_output_pause_period).
+          Removed unused parameter "notify" from reconnect_i().
+          Accomodated with the changes of conn_retry_backoff_multiplier_ 
+          type change.
+        
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.inl:
+        
+          Made the max_output_pause_period passed to the constructor and made
+          wait_to_unclog() call notify_lost_on_backpressure_timeout() upon
+          handle_write_ready() timeout.
+          
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+
+          Updated comments for the reconnect strategy configuration values and
+          added new configuration "max_output_pause_period".
+          
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+
+          Added read/write delay for bp_timeout test.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Added bp_timeout test case.
+          
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Made subscriber attach to transport to avoid the errors return 
+          from create_datareader() due to no transport.
+          
 Mon Apr 10 13:03:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -186,13 +305,7 @@ Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           thread (calling SimpleTcpTransport::make_passive_connction()). 
           The reactor thread will enqueue the new connection  to this task 
           and let this task dequeue and check the connection.
-         
-        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
-        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
-        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
-        
-          Added association with the SimpleTcpDataLink.
-          
+                   
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:

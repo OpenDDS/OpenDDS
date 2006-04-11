@@ -89,6 +89,11 @@ namespace TAO
         /// when send returns an error.
         virtual int relink ();
 
+        /// This is called whenever the work_available() is called to check
+        /// if the link is lost. If the link is not lost then the work_available()
+        /// is called. The subclass needs provide the implementation.
+        virtual bool lost_link();
+
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,

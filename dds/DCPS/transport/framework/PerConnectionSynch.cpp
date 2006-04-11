@@ -108,7 +108,12 @@ TAO::DCPS::PerConnectionSynch::svc()
         {
           // Ask the ThreadSynchResource to block us until the clog situation
           // clears up.
-          this->wait_on_clogged_resource();
+          if (this->wait_on_clogged_resource() == -1)
+            {
+              VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+                        "Fatal error - wait_on_clogged_resource fails.\n"));
+              break;
+            }
         }
 
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "

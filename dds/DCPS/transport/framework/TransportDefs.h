@@ -76,6 +76,33 @@ class ACE_Data_Block ;
   }                                                                            \
 }
 
+#define GET_CONFIG_FLOAT_VALUE(CF, SECT, KEY, VALUE)                           \
+{                                                                              \
+  ACE_CString stringvalue;                                                     \
+  if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  KEY));                                                       \
+    }                                                                          \
+  }                                                                            \
+  else  if (stringvalue == "")                                                 \
+  {                                                                            \
+    if (DCPS_debug_level > 0)                                                  \
+    {                                                                          \
+      ACE_DEBUG ((LM_WARNING,                                                  \
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                KEY));                                                         \
+    }                                                                          \
+  }                                                                            \
+  else                                                                         \
+  {                                                                            \
+    VALUE = atof (stringvalue.c_str ());                                       \
+  }                                                                            \
+}
+
 // The factory section name prefix.
 static const char FACTORY_SECTION_NAME_PREFIX[] = "transport_factory_";
 // The factory section name prefix is "transport_factory_" so the length is 18.

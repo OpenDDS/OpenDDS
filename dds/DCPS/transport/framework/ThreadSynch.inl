@@ -51,14 +51,16 @@ TAO::DCPS::ThreadSynch::perform_work()
 }
 
 
-ACE_INLINE void
+ACE_INLINE int
 TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
 {
   DBG_ENTRY("ThreadSynch","wait_on_clogged_resource");
 
+  int result = -1;
+
   if (this->resource_)
     {
-      this->resource_->wait_to_unclog();
+      result = this->resource_->wait_to_unclog();
     }
   else
     {
@@ -67,6 +69,8 @@ TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
 //MJM: Do the %P|%t thing here, and identify where we are at.  This
 //MJM: could become a critical message.
     }
+
+  return result;
 }
 
 

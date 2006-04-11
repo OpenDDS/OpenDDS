@@ -35,6 +35,8 @@ namespace TAO
         int fresh_link (const ACE_INET_Addr&    remote_addr,
                         SimpleTcpConnection_rch connection);
 
+        SimpleTcpReconnectTask_rch get_reconnect_task ();
+
 
       protected:
 

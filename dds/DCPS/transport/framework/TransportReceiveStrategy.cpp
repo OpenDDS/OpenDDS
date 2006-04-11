@@ -289,16 +289,17 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
     }
   else if( bytes_remaining < 0)
     {
-      if (this->relink () == -1)
-        {
-          ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
-                          ACE_TEXT("with data link detected: %p.\n"),
-                          "receive_bytes"),
-                        -1) ;
-        }
-      else
-        return 0;
+      ACE_ERROR((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+                      ACE_TEXT("with data link detected: %p.\n"),
+                      "receive_bytes"));
+  
+      // The relink() will handle the connection to the ReconnectTask to do
+      // the reconnect so this reactor thread will not be block.
+      this->relink ();
+
+      // Close connection anyway.
+      return -1;
     }
 
   VDBG((LM_DEBUG,"(%P|%t) DBG:   "

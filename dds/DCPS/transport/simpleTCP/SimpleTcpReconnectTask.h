@@ -47,8 +47,14 @@ namespace TAO
     {
     public:
 
+      enum COMMAND
+      {
+        NEW_CONNECTION_CHECK,
+        DO_RECONNECT
+      };
+
       struct ConnectionInfo  {
-        ACE_INET_Addr remote_addr;
+        COMMAND command;
         SimpleTcpConnection_rch connection;
       };
 
@@ -60,8 +66,7 @@ namespace TAO
 
       /// Put a connection info object on to the request queue.
       /// Returns 0 if successful, -1 otherwise (it has been "rejected").
-      int add(const ACE_INET_Addr&    remote_addr,
-              SimpleTcpConnection_rch connection);
+      int add(COMMAND command, SimpleTcpConnection_rch connection);
 
       /// Activate the worker threads
       virtual int open(void* ptr = 0);

@@ -5,7 +5,7 @@
 #define TAO_DCPS_SIMPLETCPRECEIVESTRATEGY_H
 
 #include  "SimpleTcpConnection_rch.h"
-#include  "dds/DCPS/transport/framework/DataLink_rch.h"
+#include  "SimpleTcpDataLink_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
@@ -20,7 +20,7 @@ namespace TAO
     {
       public:
 
-        SimpleTcpReceiveStrategy(DataLink*             link,
+        SimpleTcpReceiveStrategy(SimpleTcpDataLink*    link,
                                  SimpleTcpConnection*  connection,
                                  TransportReactorTask* task);
         virtual ~SimpleTcpReceiveStrategy();
@@ -47,7 +47,7 @@ namespace TAO
 
       private:
 
-        DataLink_rch             link_;
+        SimpleTcpDataLink_rch    link_;
         SimpleTcpConnection_rch  connection_;
         TransportReactorTask_rch reactor_task_;
     };

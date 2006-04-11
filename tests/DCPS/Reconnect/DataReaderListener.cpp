@@ -8,6 +8,7 @@
 #include <ace/streams.h>
 
 extern int num_reads_before_crash;
+extern int read_delay_ms;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
@@ -23,6 +24,10 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
+  if (read_delay_ms > 0)
+    ACE_OS::sleep (ACE_Time_Value (read_delay_ms/1000,
+                                   read_delay_ms%1000*1000));
+
   num_reads_ ++;
 
   try {

@@ -53,7 +53,7 @@ namespace TAO
         /// be called again in this case.
         ThreadSynchWorker::WorkOutcome perform_work();
 
-        void wait_on_clogged_resource();
+        int wait_on_clogged_resource();
 
         /// The default implementation is to do nothing here.  The
         /// subclass may override the implementation in order to do

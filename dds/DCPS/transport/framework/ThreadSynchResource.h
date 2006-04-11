@@ -17,7 +17,7 @@ namespace TAO
 
         virtual ~ThreadSynchResource();
 
-        virtual void wait_to_unclog() = 0;
+        virtual int wait_to_unclog() = 0;
 
 
       protected:

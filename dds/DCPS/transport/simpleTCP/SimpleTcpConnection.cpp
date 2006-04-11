@@ -309,19 +309,9 @@ int
 TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect");
-  bool notify = true;
   // Try to reconnect if it's connector previously.
-  if (this->is_connector_ && this->reconnect_i (notify, on_new_association) == -1)
-    {
-      if (this->connection_lost_notified_)
-      {
-        this->link_->notify_lost ();
-        this->connection_lost_notified_ = true;
-      }
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpConnection::reconnect reconnect failed \n"),
-                        -1);
-    }
+  if (this->is_connector_ && this->reconnect_i (on_new_association) == -1)
+    return -1;
    
   // Schedule a timer to see if a incoming connection is accepted when timeout.
   if (! this->is_connector_)
@@ -364,54 +354,74 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 // - fifth at 4.0 (2*2.0) seconds
 // - sixth at  8.0 (2*4.0) seconds
 int
-TAO::DCPS::SimpleTcpConnection::reconnect_i (bool& notify, bool on_new_association)
+TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect_i");
+      
+  int ret = -1;
+  bool notify_lost = false;
+  bool connected = false;
+  {
+    GuardType guard (this->reconnect_lock_);
 
-  GuardType guard (this->reconnect_lock_);
+    // Try to reconnect if the connection just lost or the connection was lost 
+    // previously and now new association is coming.
+    if (! this->connection_lost_notified_ || on_new_association)
+      {
+        int conn_retry_attempts = this->tcp_config_->conn_retry_attempts_;
+        if (on_new_association)
+          {
+            // If reconnect() is called upon the new association, then 
+            // we need try reconnect at least once even though the
+            // the "conn_retry_attempts" is zero, 
+            this->connection_lost_notified_ = false;
+            if (conn_retry_attempts == 0)
+              conn_retry_attempts = 1;
+          }
+        this->peer ().close ();
+        this->connected_ = false;
 
-  // Try to reconnect if the connection just lost or the connection was lost 
-  // previously and now new association is comming.
-  if (! this->connection_lost_notified_ || on_new_association)
+        double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
+        for (int i = 0; i < conn_retry_attempts; ++i)
+          {
+            ret = this->active_establishment (this->remote_address_,
+              this->local_address_,
+              this->tcp_config_);
+            if (ret == -1)
+              {
+                ACE_Time_Value delay_tv (((int)retry_delay_msec)/1000, 
+                                         ((int)retry_delay_msec)%1000*1000);
+                ACE_OS::sleep (delay_tv);
+                retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
+              }
+            else
+              {
+                ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established lost connection to %s:%d.\n",
+                  this->remote_address_.get_host_addr (), 
+                  this->remote_address_.get_port_number ()));
+                break;
+              }
+          }
+
+        if (ret == -1)
+          {
+            ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
+                        this->remote_address_.get_host_addr (), 
+                        this->remote_address_.get_port_number ()));
+            this->connection_lost_notified_ = true;
+            notify_lost = true;
+          }
+      }
+
+    connected = this->connected_;
+  }  
+
+  if (notify_lost)
     {
-      if (on_new_association)
-        this->connection_lost_notified_ = false;
-      this->peer ().close ();
-      this->connected_ = false;
-
-      int ret = -1;
-      int retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
-      for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i)
-        {
-          ret = this->active_establishment (this->remote_address_,
-                                            this->local_address_,
-                                            this->tcp_config_);
-          if (ret == -1)
-            {
-              ACE_Time_Value delay_tv (retry_delay_msec/1000, 
-                                      retry_delay_msec %1000 * 1000);
-              ACE_OS::sleep (delay_tv);
-              retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
-            }
-          else
-            {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established lost connection to %s:%d.\n",
-                          this->remote_address_.get_host_addr (), 
-                          this->remote_address_.get_port_number ()));
-              break;
-            }
-        }
-
-      if (ret == -1)
-        {
-          ACE_DEBUG ((LM_DEBUG, "(%P|%t) failed to re-establish lost connection to %s:%d.\n",
-                      this->remote_address_.get_host_addr (), 
-                      this->remote_address_.get_port_number ()));
-          this->link_->notify_lost ();
-          this->connection_lost_notified_ = true;
-        }
+      this->link_->notify_lost ();
     }
-  return this->connected_;
+
+  return connected ? 0 : -1;
 }
 
 
@@ -461,4 +471,32 @@ TAO::DCPS::SimpleTcpConnection::copy_states (SimpleTcpConnection* connection)
   this->connection_lost_notified_ = connection->connection_lost_notified_;
 }
 
+
+/// This function is called when the backpresure occurs and timed out after
+/// "max_output_pause_period". The lost connection notification should be sent
+/// and the connection needs be closed since we declared it as a "lost" 
+/// connection. 
+void 
+TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
+{
+  DBG_ENTRY("SimpleTcpConnection","notify_lost_on_backpressure_timeout");
+  bool notify_lost = false;  
+  {
+    GuardType guard (this->reconnect_lock_);
+    if (this->connection_lost_notified_ == false)
+      {
+        this->connection_lost_notified_ = true;
+        notify_lost = true;
+        // Disconnect the connection
+        if (this->connected_)
+          {
+            this->peer ().close ();
+            this->connected_ = false;
+          }
+      }
+  }
+
+  if (notify_lost)
+    this->link_->notify_lost ();
+}
 

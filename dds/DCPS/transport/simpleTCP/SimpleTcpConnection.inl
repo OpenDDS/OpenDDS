@@ -58,3 +58,12 @@ TAO::DCPS::SimpleTcpConnection::set_datalink (TAO::DCPS::SimpleTcpDataLink* link
   link->_add_ref ();
   this->link_ = link;
 }
+
+
+ACE_INLINE ACE_INET_Addr 
+TAO::DCPS::SimpleTcpConnection::get_remote_address ()
+{
+  return this->remote_address_;
+}
+
+

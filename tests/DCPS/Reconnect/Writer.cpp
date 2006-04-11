@@ -79,7 +79,10 @@ Writer::svc ()
       }
 
       message.count++;
-      ACE_OS::sleep (ACE_Time_Value (write_delay_ms/1000, write_delay_ms%1000*1000));
+
+      if (write_delay_ms > 0)
+        ACE_OS::sleep (ACE_Time_Value (write_delay_ms/1000, write_delay_ms%1000*1000));
+
       if (num_writes_before_crash > 0 && message.count == num_writes_before_crash)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t)Publisher crash after %dth writes\n", num_writes_before_crash));
