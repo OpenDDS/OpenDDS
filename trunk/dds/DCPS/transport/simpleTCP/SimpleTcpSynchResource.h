@@ -7,6 +7,7 @@
 #include  "SimpleTcpConnection_rch.h"
 #include  "dds/DCPS/transport/framework/ThreadSynchResource.h"
 #include  "ace/Handle_Set.h"
+#include  "ace/Time_Value.h"
 
 
 namespace TAO
