@@ -5,6 +5,7 @@
 #define TAO_DCPS_SIMPLETCPDATALINK_H
 
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpTransport_rch.h"
 #include  "dds/DCPS/transport/framework/DataLink.h"
 #include  "ace/INET_Addr.h"
 
@@ -14,7 +15,6 @@ namespace TAO
   namespace DCPS
   {
 
-    class SimpleTcpTransport;
     class TransportSendStrategy;
     class TransportReceiveStrategy;
 
@@ -40,6 +40,7 @@ namespace TAO
         int reconnect (SimpleTcpConnection* connection);
        
         SimpleTcpConnection_rch get_connection ();
+        SimpleTcpTransport_rch get_transport_impl ();
 
       protected:
 
@@ -53,6 +54,7 @@ namespace TAO
 
         ACE_INET_Addr           remote_address_;
         SimpleTcpConnection_rch connection_;
+        SimpleTcpTransport_rch  transport_;
     };
 
   } /* namespace DCPS */

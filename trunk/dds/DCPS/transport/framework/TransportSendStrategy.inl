@@ -112,7 +112,8 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
                  "this->mode_ == MODE_QUEUE, so queue elem and leave.\n"));
 
       this->queue_.put(element);
-      this->synch_->work_available();
+      if (! this->lost_link ())
+        this->synch_->work_available();
       return;
     }
 
@@ -185,7 +186,8 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
                      "We experienced backpressure on that direct send, as "
                      "the mode_ is now MODE_QUEUE.  Queue elem and leave.\n"));
           this->queue_.put(element);
-          this->synch_->work_available();
+          if (! this->lost_link ())
+            this->synch_->work_available();
           return;
         }
     }
@@ -582,6 +584,7 @@ TAO::DCPS::TransportSendStrategy::direct_send()
               // be able to send anything. The user should stop sending when 
               // receiving the callback.
               this->mode_ = MODE_QUEUE;
+              break;
             }
           else
             {
@@ -835,4 +838,13 @@ TAO::DCPS::TransportSendStrategy::relink ()
   // the link upon send failure.
   return -1;
 }
+
+
+ACE_INLINE bool
+TAO::DCPS::TransportSendStrategy::lost_link()
+{
+  // Defaults to not lost.
+  return false;
+}
+
 

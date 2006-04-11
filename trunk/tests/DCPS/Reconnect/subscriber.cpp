@@ -31,11 +31,12 @@ const char* sub_finished_filename = "subscriber_finished.txt";
 int num_expected_reads = 10;
 int num_reads_before_crash = 0;
 int num_reads_in_range = 0;
+int read_delay_ms = 0;
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vn:a:r");
+  ACE_Get_Opt get_opts (argc, argv, "vn:a:ri:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -53,6 +54,9 @@ int parse_args (int argc, char *argv[])
       case 'r':
         num_reads_in_range = 1;
         break;      
+      case 'i':
+        read_delay_ms = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,

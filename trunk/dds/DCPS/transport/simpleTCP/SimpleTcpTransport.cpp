@@ -395,7 +395,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
-  this->reconnect_task_->add (remote_address, connection_obj);
+  this->reconnect_task_->add (SimpleTcpReconnectTask::NEW_CONNECTION_CHECK, connection_obj);
 }
 
 
@@ -460,11 +460,14 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
 {
   DBG_ENTRY("SimpleTcpTransport","connect_datalink");
 
+  ACE_Time_Value max_output_pause_period(this->tcp_config_->max_output_pause_period_/1000,
+                                         this->tcp_config_->max_output_pause_period_%1000*1000); 
   TransportSendStrategy_rch send_strategy = 
              new SimpleTcpSendStrategy(link,
                                        this->tcp_config_.in(),
                                        connection,
-                                       new SimpleTcpSynchResource(connection));
+                                       new SimpleTcpSynchResource(connection,
+                                                                  max_output_pause_period));
 
   TransportReceiveStrategy_rch receive_strategy = 
                        new SimpleTcpReceiveStrategy(link,

@@ -77,9 +77,13 @@ namespace TAO
         /// callbacks.
         void set_datalink (SimpleTcpDataLink* link);
 
+        void notify_lost_on_backpressure_timeout ();
+
+        ACE_INET_Addr get_remote_address ();
+
       private:
         
-        int reconnect_i (bool& notify, bool on_new_association);
+        int reconnect_i (bool on_new_association);
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;

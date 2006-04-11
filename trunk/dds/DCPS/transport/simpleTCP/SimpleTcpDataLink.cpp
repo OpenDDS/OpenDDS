@@ -18,6 +18,8 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
     remote_address_(remote_address)
 {
   DBG_ENTRY("SimpleTcpDataLink","SimpleTcpDataLink");
+  transport_impl->_add_ref ();
+  this->transport_ = transport_impl;
 }
 
 

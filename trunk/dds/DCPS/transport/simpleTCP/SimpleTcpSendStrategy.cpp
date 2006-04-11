@@ -29,6 +29,13 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
   // Set the back-pressure flag to false.
   bp = 0;
 
+  if (! this->lost_link ())
+    {
+      VDBG((LM_DEBUG,"DBG:   "
+                "(%P|%t) Could not send bytes since connection is not connected.\n"));
+      return -1;
+    }
+
   // Clear errno
   errno = 0;
 
@@ -39,13 +46,13 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
       if ((errno == EWOULDBLOCK) || (errno == ENOBUFS))
         {
           VDBG((LM_DEBUG,"DBG:   "
-                     "Backpressure encountered.\n"));
+                    "Backpressure encountered.\n"));
           // Set the back-pressure flag to true
           bp = 1;
         }
       else
         {
-          ACE_ERROR((LM_ERROR, "SimpleTcpSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
+          ACE_ERROR((LM_ERROR, "(%P|%t)SimpleTcpSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
             "sendv", n));
 
           // try to get the application to core when "Bad Address" is returned

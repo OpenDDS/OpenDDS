@@ -27,3 +27,11 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
   this->link_ = link;
 }
 
+
+ACE_INLINE bool
+TAO::DCPS::SimpleTcpSendStrategy::lost_link()
+{
+  return ! this->connection_->is_connected (); 
+}
+
+

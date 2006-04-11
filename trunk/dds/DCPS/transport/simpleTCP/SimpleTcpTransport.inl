@@ -22,3 +22,12 @@ TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
   DBG_ENTRY("SimpleTcpTransport","SimpleTcpTransport");
 }
 
+
+ACE_INLINE       
+TAO::DCPS::SimpleTcpReconnectTask_rch 
+TAO::DCPS::SimpleTcpTransport::get_reconnect_task ()
+{
+  return this->reconnect_task_;
+}
+
+

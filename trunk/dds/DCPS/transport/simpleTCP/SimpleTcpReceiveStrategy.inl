@@ -2,13 +2,13 @@
 //
 // $Id$
 
-#include  "dds/DCPS/transport/framework/DataLink.h"
 #include  "SimpleTcpConnection.h"
+#include  "SimpleTcpDataLink.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
-                                        (DataLink*             link,
+                                        (SimpleTcpDataLink*    link,
                                          SimpleTcpConnection*  connection,
                                          TransportReactorTask* task)
 {

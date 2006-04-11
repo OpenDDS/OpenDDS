@@ -16,8 +16,13 @@ $num_writes_before_crash = 0;
 $num_writes = 10;
 $num_expected_reads = $num_writes - $num_reads_before_crash;
 $restart_delay = 0;
+$write_delay_ms = 1000;
+$read_delay_ms=0;
 
 if ($ARGV[0] eq 'restart_sub') {
+  # Increase the number of messages so that the publisher will last
+  # until the subscriber restarted.
+  $num_writes = 20;
   $restart_delay = 10;
   $num_reads_before_crash = 2;
   $num_expected_reads_restart_sub = $num_writes - $num_reads_before_crash;
@@ -26,6 +31,15 @@ elsif ($ARGV[0] eq 'restart_pub') {
   $restart_delay = 10;
   $num_writes_before_crash = 2;
   $num_expected_reads = $num_writes + $num_writes_before_crash;
+}
+elsif ($ARGV[0] eq 'bp_timeout') { 
+  # no delay between writes.
+  $write_delay_ms=0;
+  # delay 2 seconds between reads to make the 
+  # transport have backpressure.
+  $read_delay_ms=2000;
+  $num_writes = 10000;
+  $num_expected_reads = $num_writes;
 }
 elsif ($ARGV[0] eq '') { 
   #default test - no reconnect 
@@ -53,9 +67,11 @@ unlink $publisher_ready;
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process ("subscriber", 
-          "-DCPSConfigFile sub.ini -a $num_reads_before_crash -n $num_expected_reads");
+          "-DCPSConfigFile sub.ini -a $num_reads_before_crash -n $num_expected_reads"
+          . " -i $read_delay_ms");
 $Publisher = new PerlACE::Process ("publisher", 
-          "-DCPSConfigFile pub.ini -a $num_writes_before_crash -n $num_writes");
+          "-DCPSConfigFile pub.ini -a $num_writes_before_crash -n $num_writes"
+          . " -i $write_delay_ms");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

@@ -18,16 +18,18 @@ namespace TAO
     {
       public:
 
-        SimpleTcpSynchResource(SimpleTcpConnection* connection);
+        SimpleTcpSynchResource(SimpleTcpConnection*  connection,
+                               const ACE_Time_Value& max_output_pause_period);
         virtual ~SimpleTcpSynchResource();
 
-        virtual void wait_to_unclog();
+        virtual int wait_to_unclog();
 
 
       private:
 
         SimpleTcpConnection_rch connection_;
         ACE_HANDLE handle_;
+        ACE_Time_Value max_output_pause_period_;
     };
 
   } /* namespace DCPS */
