@@ -76,7 +76,7 @@ class ACE_Data_Block ;
   }                                                                            \
 }
 
-#define GET_CONFIG_FLOAT_VALUE(CF, SECT, KEY, VALUE)                           \
+#define GET_CONFIG_DOUBLE_VALUE(CF, SECT, KEY, VALUE)                           \
 {                                                                              \
   ACE_CString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
