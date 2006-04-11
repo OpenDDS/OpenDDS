@@ -29,7 +29,7 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
   // Set the back-pressure flag to false.
   bp = 0;
 
-  if (! this->lost_link ())
+  if (this->lost_link ())
     {
       VDBG((LM_DEBUG,"DBG:   "
                 "(%P|%t) Could not send bytes since connection is not connected.\n"));

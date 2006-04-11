@@ -44,7 +44,7 @@ namespace TAO
         /// fails; the fourth attempt will be 1.125 seconds after the third retry connect
         /// fails.
         /// The default value is 2.0.
-        float conn_retry_backoff_multiplier_;
+        double conn_retry_backoff_multiplier_;
 
         /// Number of attemps to reconnect before giving up and calling 
         /// on_publication_lost() and on_subscription_lost() callbacks.
