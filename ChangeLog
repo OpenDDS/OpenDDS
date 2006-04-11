@@ -1,3 +1,10 @@
+Tue Apr 11 11:44:32 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
+
+          Fixed a compilation error on linux builds that need ace/Time_Value.h
+          include.
+    
 Tue Apr 11 10:34:34 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
