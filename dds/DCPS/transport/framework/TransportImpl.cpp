@@ -111,8 +111,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
                         publisher_id, subscriber_id),
                        0);
     }
-  
- link->make_reservation(subscriber_id,publisher_id);
+
+  link->make_reservation(subscriber_id,publisher_id);
 
   return link._retn();
 }
@@ -136,7 +136,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
   // Since find_or_create() is pure virtual, the concrete subclass must
   // provide an implementation for us to use.
 
- // Note that we pass-in a 0 as the second argument.  This means that
+  // Note that we pass-in a 0 as the second argument.  This means that
   // if a new DataLink needs to be created (ie, the find operation fails),
   // then the connection establishment logic will treat the local endpoint
   // as a subscriber.  This knowledge dictates whether a passive or active

@@ -40,7 +40,7 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
 {
   DBG_ENTRY("SimpleTcpConnection","open");
 
-  // A safty check - This should not happen since the is_connector_ 
+  // A safety check - This should not happen since the is_connector_ 
   // defaults to true and open() is called after the ACE_Aceptor 
   // creates this new svc handler.
   if (this->is_connector_ == false)
@@ -299,11 +299,11 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
 
 
 /// This function is called to re-establish the connection. If this object 
-/// is the connector side of the connection then it tries to reconnet to the
+/// is the connector side of the connection then it tries to reconnect to the
 /// remote, if it's the acceptor side of the connection then it schedules a timer
 /// to check if it passively accepted a connection from remote.
 /// The on_new_association true indicates this is called when the connection is
-/// previous lost and new association is added. The connector side needs try to
+/// previous lost and new association is added. The connector side needs to try to
 /// actively reconnect to remote.
 int
 TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
@@ -345,7 +345,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 
 // This is the reconnect implementation. The backoff algorithm is used as the reconnect
 // strategy. e.g. 
-// With conne_retry_initial_interval = 500, conn_retry_backoff_multiplier = 2.0 and
+// With conn_retry_initial_interval = 500, conn_retry_backoff_multiplier = 2.0 and
 // conn_retry_attempts = 6 the reconnect attempts will be:
 // - first at 0 seconds(upon detection of the disconnect)
 // - second at 0.5 seconds
@@ -415,6 +415,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
 
     connected = this->connected_;
   }  
+
 
   if (notify_lost)
     {

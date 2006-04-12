@@ -1511,7 +1511,7 @@ namespace TAO
       status.total_count_change = 0;
 
       // Since this callback might be called multiple times by the transport,
-      // we need make sure we are not adding duplcaited reader ids to the 
+      // we need make sure we are not adding duplicated reader ids to the 
       // publication_lost_status_.
       for (CORBA::ULong i = 0; i < cur_sz; i++)
         {

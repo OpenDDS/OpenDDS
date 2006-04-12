@@ -368,7 +368,7 @@ void DCPS_IR_Subscription::disassociate_publication (TAO::DCPS::RepoId id)
             {
               ACE_TRY_NEW_ENV
                 {
-		  CORBA::Boolean dont_notify_lost = 0;
+                  CORBA::Boolean dont_notify_lost = 0;
                   reader_->remove_associations(idSeq, dont_notify_lost);
                   ACE_TRY_CHECK;
                 }

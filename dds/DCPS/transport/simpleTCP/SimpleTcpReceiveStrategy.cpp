@@ -81,15 +81,15 @@ TAO::DCPS::SimpleTcpReceiveStrategy::start_i()
 }
 
 
-//This is called by the datalink object to associate with the "new" connection object.
-//The "old" connection object is unregistered with the reactor and the "new" connection 
-//object is registered for receiving.
+// This is called by the datalink object to associate with the "new" connection object.
+// The "old" connection object is unregistered with the reactor and the "new" connection 
+// object is registered for receiving.
 int
 TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 {
   DBG_ENTRY("SimpleTcpReceiveStrategy","reset");
 
-  // Sanity check - this connection is passed when from the constructor and
+  // Sanity check - this connection is passed in from the constructor and
   // it should not be nil.
   if (this->connection_.is_nil())
     {
