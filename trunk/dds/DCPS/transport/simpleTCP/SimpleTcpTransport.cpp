@@ -438,7 +438,7 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
     GuardType guard(this->connections_lock_);
     while (this->connections_.unbind(remote_address,connection) != 0)
       {
-       // There is no connection object waiting for us (yet).
+        // There is no connection object waiting for us (yet).
         // We need to wait on the connections_updated_ condition
         // and then re-attempt to extract our connection.
         this->connections_updated_.wait();

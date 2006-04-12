@@ -30,7 +30,7 @@ namespace TAO
 
         int handle_input();
 
-        /// The subclass needs provide the implementation
+        /// The subclass needs to provide the implementation
         /// for re-establishing the datalink. This is called
         /// when recv returns an error.
         virtual int relink ();

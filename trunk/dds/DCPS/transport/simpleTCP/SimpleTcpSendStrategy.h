@@ -34,7 +34,7 @@ namespace TAO
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
-        // Delegate to the connection object to re-establishment
+        // Delegate to the connection object to re-establish
         // the connection.
         virtual int relink ();
 

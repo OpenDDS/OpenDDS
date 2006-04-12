@@ -84,7 +84,7 @@ namespace TAO
         /// called again.
         virtual WorkOutcome perform_work();
 
-        /// The subclass needs provide the implementation
+        /// The subclass needs to provide the implementation
         /// for re-establishing the datalink. This is called
         /// when send returns an error.
         virtual int relink ();

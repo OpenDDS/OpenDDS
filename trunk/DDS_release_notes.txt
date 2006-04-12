@@ -23,8 +23,8 @@ New to this version are the following changes:
     lost publication/subscription callbacks upon the retry connect
     failure. The main changes are:
             
-    1) Added new idl interfaces - DataReaderListener and 
-       DataWriterListener to support the on_subscription_lost 
+    1) Added new idl interfaces - TAO::DataReaderListener and 
+       TAO::DataWriterListener to support the on_subscription_lost 
        and on_publication_lost callbacks upon the retry connect 
        failure. 
            

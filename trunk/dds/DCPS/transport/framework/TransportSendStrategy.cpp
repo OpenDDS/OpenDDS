@@ -251,7 +251,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
         }
       else
         {
-          // If the datalink is re-established then notigy the synch
+          // If the datalink is re-established then notify the synch
           // thread to perform work.
           this->synch_->work_available();
         }
