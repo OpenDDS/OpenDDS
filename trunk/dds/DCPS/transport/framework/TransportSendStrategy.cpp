@@ -3,6 +3,7 @@
 // $Id$
 #include  "DCPS/DdsDcps_pch.h"
 #include  "TransportSendStrategy.h"
+#include  "RemoveAllVisitor.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -33,6 +34,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     header_complete_(0),
     start_counter_(0),
     mode_(MODE_DIRECT),
+    mode_before_suspend_(MODE_NOT_SET),
     num_delayed_notifications_(0),
     header_db_allocator_(1),
     header_mb_allocator_(2),
@@ -102,6 +104,15 @@ TAO::DCPS::TransportSendStrategy::perform_work()
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
 
+    if (this->mode_ == MODE_TERMINATED)
+      {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Entered perform_work() and mode_ is MODE_TERMINATED - "
+                  "we lost connection and could not reconnect, just return "
+                  "WORK_OUTCOME_BROKEN_RESOURCE.\n"));
+        return WORK_OUTCOME_BROKEN_RESOURCE;
+      }
+
     // The perform_work() is called by our synch_ object using
     // a thread designated to call this method when it thinks
     // we need to be called in order to "service" the queue_ and/or
@@ -121,8 +132,8 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     if (this->mode_ != MODE_QUEUE)
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Entered perform_work() and mode_ is not MODE_QUEUE - "
-                  "just return WORK_OUTCOME_NO_MORE_TO_DO.\n"));
+                  "Entered perform_work() and mode_ is %s - just return "
+                  "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str (this->mode_)));
         return WORK_OUTCOME_NO_MORE_TO_DO;
       }
 
@@ -245,8 +256,15 @@ TAO::DCPS::TransportSendStrategy::perform_work()
         {
           // Either we've lost our connection to the peer (ie, the peer
           // disconnected), or we've encountered some unknown fatal error
-          // attempting to send the packet.  Stay in MODE_QUEUE, but lets
+          // attempting to send the packet. We tried to reconnect and it
+          // failed, the mode should be in MODE_TERMINATED and now lets
           // return WORK_OUTCOME_BROKEN_RESOURCE.
+          if (this->mode_ != MODE_TERMINATED)
+            {
+              ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
+                "reconnect failed and it should be in MODE_TERMINATED, but it's "
+                "%s\n", mode_as_str(this->mode_)));
+            }
           return WORK_OUTCOME_BROKEN_RESOURCE;
         }
       else
@@ -478,13 +496,19 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                   // Inform the element that the data has been delivered.
                   if (delay_notification == NOTIFY_IMMEADIATELY)
                     {
-                      element->data_delivered();
+                      if (this->mode_ == MODE_TERMINATED)
+                        {
+                          bool dropped_by_transport = true;
+                          element->data_dropped (dropped_by_transport);
+                        }
+                      else
+                        element->data_delivered();
                     }
                   else if (delay_notification == DELAY_NOTIFICATION)
                     {
                       delayed_delivered_notification_queue_[num_delayed_notifications_++] = element;
                     }
-
+ 
                   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                              "Peek at the next element in the packet "
                              "elems_.\n"));
@@ -624,5 +648,41 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
   num_delayed_notifications_ = 0;
 }
 
+
+/// Remove all samples in the backpressure queue and packet queue.
+void
+TAO::DCPS::TransportSendStrategy::terminate_send ()
+{
+  DBG_ENTRY("TransportSendStrategy","terminate_send");
+  GuardType guard(this->lock_);
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            "Reconnect failed. Now flip to MODE_TERMINATED.\n"));
+
+  this->mode_ = MODE_TERMINATED;
+
+  if (this->header_.length_ > 0)
+    {
+      // Clear the messages in the pkt_chain_ that is partially sent.
+      // We just reuse these functions for normal partial send except actual sending.
+      int num_bytes_left = this->pkt_chain_->total_length ();
+      int result = this->adjust_packet_after_send(num_bytes_left, NOTIFY_IMMEADIATELY);
+      if (result == 0)
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "The adjustment logic says that the packet is cleared.\n"));
+        }
+      else
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: terminate_send  adjust_packet_after_send()"
+            " should not return partial send.\n"));
+        }
+    }
+ 
+  // Clear all samples in queue.
+  RemoveAllVisitor remove_all_visitor;
+
+  this->elems_.accept_remove_visitor(remove_all_visitor);
+  this->queue_.accept_remove_visitor(remove_all_visitor);
+}
 
 

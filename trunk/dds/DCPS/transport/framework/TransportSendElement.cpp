@@ -18,13 +18,13 @@ TAO::DCPS::TransportSendElement::~TransportSendElement()
 
 
 void
-TAO::DCPS::TransportSendElement::release_element()
+TAO::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 {
   DBG_ENTRY("TransportSendElement","release_element");
 
   if (this->was_dropped())
     {
-      this->element_->send_listener_->data_dropped(this->element_);
+      this->element_->send_listener_->data_dropped(this->element_, dropped_by_transport);
     }
   else
     {

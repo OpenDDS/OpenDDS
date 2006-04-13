@@ -32,7 +32,8 @@ TAO::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sample)
 
 
 void
-TAO::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample)
+TAO::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample, 
+                                                  bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,

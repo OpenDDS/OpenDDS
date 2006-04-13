@@ -25,7 +25,9 @@ if ($ARGV[0] eq 'restart_sub') {
   $num_writes = 20;
   $restart_delay = 10;
   $num_reads_before_crash = 2;
-  $num_expected_reads_restart_sub = $num_writes - $num_reads_before_crash;
+  $num_lost_messages_estimate = $restart_delay * 1000/$write_delay_ms;
+  $num_expected_reads_restart_sub 
+    = $num_writes - $num_reads_before_crash - $num_lost_messages_estimate;
 } 
 elsif ($ARGV[0] eq 'restart_pub') { 
   $restart_delay = 10;
@@ -71,7 +73,7 @@ $Subscriber = new PerlACE::Process ("subscriber",
           . " -i $read_delay_ms");
 $Publisher = new PerlACE::Process ("publisher", 
           "-DCPSConfigFile pub.ini -a $num_writes_before_crash -n $num_writes"
-          . " -i $write_delay_ms");
+          . " -i $write_delay_ms ");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
@@ -81,8 +83,9 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 $Publisher->Spawn ();
-
+print STDERR $Publisher->CommandLine () . "\n";
 $Subscriber->Spawn ();
+print STDERR $Subscriber->CommandLine () . "\n";
 
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
@@ -101,10 +104,11 @@ if ($num_reads_before_crash > 0)
   
   $Subscriber = new PerlACE::Process ("subscriber", 
           "-DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub -r");
-  
+
   sleep($restart_delay);
          
   print STDERR "\n\n!!! Restart subscriber !!! \n\n";;
+  print STDERR $Subscriber->CommandLine () . "\n";
   $Subscriber->Spawn ();
 }
 
@@ -128,6 +132,7 @@ if ($num_writes_before_crash > 0) {
   sleep($restart_delay);
     
   print STDERR "\n\n!!! Restart publisher !!! \n\n";;
+  print STDERR $Publisher->CommandLine () . "\n";
   $Publisher->Spawn ();
 }
   

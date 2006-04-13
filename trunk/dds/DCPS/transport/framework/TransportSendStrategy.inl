@@ -10,6 +10,7 @@
 #include  "QueueRemoveVisitor.h"
 #include  "PacketRemoveVisitor.h"
 #include  "TransportDefs.h"
+#include  "RemoveAllVisitor.h"
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
 
@@ -79,6 +80,15 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
 
   GuardType guard(this->lock_);
 
+  if (this->mode_ == MODE_TERMINATED)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "TransportSendStrategy::send: this->mode_ == MODE_TERMINATED, so discard message.\n"));
+      bool dropped_by_transport = true;
+      element->data_dropped (dropped_by_transport);
+      return;
+    }
+
   size_t element_length = element->msg()->total_length();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -106,13 +116,13 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
     }
 
   // Check the mode_ to see if we simply put the element on the queue.
-  if (this->mode_ == MODE_QUEUE)
+  if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "this->mode_ == MODE_QUEUE, so queue elem and leave.\n"));
+        "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)));
 
       this->queue_.put(element);
-      if (! this->lost_link ())
+      if (this->mode_ != MODE_SUSPEND)
         this->synch_->work_available();
       return;
     }
@@ -184,10 +194,9 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
         {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                      "We experienced backpressure on that direct send, as "
-                     "the mode_ is now MODE_QUEUE.  Queue elem and leave.\n"));
+                     "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  Queue elem and leave.\n"));
           this->queue_.put(element);
-          if (! this->lost_link ())
-            this->synch_->work_available();
+          this->synch_->work_available();
           return;
         }
     }
@@ -289,6 +298,14 @@ TAO::DCPS::TransportSendStrategy::send_stop()
       return;
     }
 
+  if (this->mode_ == MODE_TERMINATED)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "TransportSendStrategy::send_stop: dont try to send current packet "
+        "since this->mode_ == MODE_TERMINATED\n"));
+      return;
+    }
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "This is an 'important' send_stop() event since our "
              "start_counter_ is 0.\n"));
@@ -299,17 +316,18 @@ TAO::DCPS::TransportSendStrategy::send_stop()
 //MJM: It means that the publisher(s) have indicated a desire to push
 //MJM: all the data just sent out to the remote ends.
 
-  // If our mode_ is currently MODE_QUEUE, then we don't have
+  // If our mode_ is currently MODE_QUEUE or MODE_SUSPEND, then we don't have
   // anything to do here because samples have already been going to the
   // queue.  We only need to do something if the mode_ is
   // MODE_DIRECT.  It means that we may have some sample(s) in the
   // current packet that have never been sent.  This is our
   // opportunity to send the current packet directly if this is the case.
-  if (this->mode_ == MODE_QUEUE)
+  if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "But since we are in MODE_QUEUE, we don't have to do "
-                 "anything more in this important send_stop().\n"));
+                 "But since we are in %s, we don't have to do "
+                 "anything more in this important send_stop().\n",
+                 mode_as_str(this->mode_)));
       // We don't do anything if we are in MODE_QUEUE.  Just leave.
       return;
     }
@@ -350,6 +368,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
   DBG_ENTRY("TransportSendStrategy","remove_sample");
 
   GuardType guard(this->lock_);
+
 
   QueueRemoveVisitor remove_element_visitor(sample->sample_);
 
@@ -580,10 +599,12 @@ TAO::DCPS::TransportSendStrategy::direct_send()
               // Either we've lost our connection to the peer (ie, the peer
               // disconnected), or we've encountered some unknown fatal error
               // attempting to send the packet. We tried relink and it failed.
-              // We can't do anything other than flip into MODE_QUEUE, and never
-              // be able to send anything. The user should stop sending when 
-              // receiving the callback.
-              this->mode_ = MODE_QUEUE;
+              if (this->mode_ != MODE_TERMINATED)
+                {
+                  ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
+                    "reconnect failed and it should be in MODE_TERMINATED, but it's "
+                    "%s\n", mode_as_str(this->mode_)));
+                }
               break;
             }
           else
@@ -834,17 +855,63 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 ACE_INLINE int 
 TAO::DCPS::TransportSendStrategy::relink ()
 {
+  DBG_ENTRY("TransportSendStrategy","relink");
   // The subsclass needs implement this function for re-establishing
   // the link upon send failure.
   return -1;
 }
 
 
-ACE_INLINE bool
-TAO::DCPS::TransportSendStrategy::lost_link()
+ACE_INLINE void
+TAO::DCPS::TransportSendStrategy::suspend_send ()
 {
-  // Defaults to not lost.
-  return false;
+  DBG_ENTRY("TransportSendStrategy","suspend_send");
+  GuardType guard(this->lock_);
+  this->mode_before_suspend_ = this->mode_;
+  this->mode_ = MODE_SUSPEND;
+}
+
+
+ACE_INLINE void        
+TAO::DCPS::TransportSendStrategy::resume_send ()
+{
+  DBG_ENTRY("TransportSendStrategy","resume_send");
+  GuardType guard(this->lock_);
+  // If this send strategy is reused when the connection is reestablished, then 
+  // we need re-initialize the mode_ and mode_before_suspend_.
+  if (this->mode_ == MODE_TERMINATED)
+    {
+      this->header_.length_ = 0; 
+      this->pkt_chain_ = 0; 
+      this->header_complete_ = 0; 
+      this->start_counter_ = 0; 
+      this->mode_ = MODE_DIRECT;
+      this->mode_before_suspend_ = MODE_NOT_SET;
+      this->num_delayed_notifications_ = 0; 
+    }
+  else if (this->mode_before_suspend_ == MODE_NOT_SET)
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t)TransportSendStrategy::resume_send  The suspend_send()"
+        " is not called previously.\n"));
+    }
+  else
+    {
+      this->mode_ = this->mode_before_suspend_;
+    }
+}
+
+
+ACE_INLINE const char* 
+TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
+{
+  static const char* SendModeStr[] = { "MODE_NOT_SET",
+                                       "MODE_DIRECT",
+                                       "MODE_QUEUE",
+                                       "MODE_SUSPEND",
+                                       "MODE_TERMINATED",
+                                       "UNKNOWN" };
+
+  return SendModeStr [mode];
 }
 
 

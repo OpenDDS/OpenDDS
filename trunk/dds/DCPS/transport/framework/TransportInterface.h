@@ -68,7 +68,7 @@ namespace TAO
         /// Returns 0 for success (whether or not the sample was
         /// removed).  Returns -1 if some fatal error was encountered
         /// along the way.
-        int remove_sample(const DataSampleListElement* sample);
+        int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
         int remove_all_control_msgs(RepoId pub_id);
 

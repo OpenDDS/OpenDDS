@@ -67,7 +67,8 @@ TAO::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
 
 
 ACE_INLINE int
-TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
+TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample, 
+                                      bool  dropped_by_transport)
 {
   DBG_ENTRY("DataLinkSet","remove_sample");
   int status = 0;
@@ -79,7 +80,7 @@ TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
        itr.advance())
     {
       // Tell the current DataLink to remove_sample.
-      if (entry->int_id_->remove_sample(sample) != 0)
+      if (entry->int_id_->remove_sample(sample, dropped_by_transport) != 0)
         {
           // Still go on to all of the DataLinks.  But we will make sure
           // to return the error status when we finally leave.

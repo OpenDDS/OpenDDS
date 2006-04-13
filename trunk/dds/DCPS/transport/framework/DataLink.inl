@@ -43,7 +43,8 @@ TAO::DCPS::DataLink::send_stop()
 
 
 ACE_INLINE int
-TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample)
+TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample, 
+                                   bool dropped_by_transport)
 {
   DBG_ENTRY("DataLink","remove_sample");
 

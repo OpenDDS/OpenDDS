@@ -17,8 +17,9 @@ TAO::DCPS::TransportReplacedElement::~TransportReplacedElement()
 
 
 void
-TAO::DCPS::TransportReplacedElement::release_element()
+TAO::DCPS::TransportReplacedElement::release_element(bool dropped_by_transport)
 {
+  ACE_UNUSED_ARG (dropped_by_transport);
   DBG_ENTRY("TransportReplacedElement","release_element");
 
   if (this->msg_ != 0)

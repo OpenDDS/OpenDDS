@@ -77,7 +77,8 @@ TAO::DCPS::TransportInterface::send_control(RepoId                 pub_id,
 
 ACE_INLINE int
 TAO::DCPS::TransportInterface::remove_sample
-                                     (const DataSampleListElement* sample)
+                                     (const DataSampleListElement* sample,
+                                      bool  dropped_by_transport)
 {
   DBG_ENTRY("TransportInterface","remove_sample");
 
@@ -93,7 +94,7 @@ TAO::DCPS::TransportInterface::remove_sample
     {
       // Tell the DataLinkSet to tell each DataLink in the set to attempt
       // the remove_sample() operation.
-      return pub_links->remove_sample(sample);
+      return pub_links->remove_sample(sample, dropped_by_transport);
     }
 
   // The sample->publication_id_ isn't associated with any DataLinks, so
@@ -209,9 +210,6 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
           // since they heard about it when they were inserted into the
           // send_links_ set.
           this->send_links_->send_start(pub_links.in());
-
-          // Just have the DataLinkSet do the send for us, on each DataLink
-          // in the set that is associated with the local publisher id.
           pub_links->send(cur);
         }
 

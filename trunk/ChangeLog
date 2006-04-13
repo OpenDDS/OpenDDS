@@ -1,3 +1,92 @@
+Thu Apr 13 10:30:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changs are made to drop messages after the reconnect 
+        failed for RT8499. 
+        
+        * dds/DdsDcps.mpc:
+        
+          Added RemoveAllVisitor.cpp.
+          
+        * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.h:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+
+          New files are added to support the clear all elements in
+          a BasicQueue.
+          
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        
+          Added an extra parameter dropped_by_transport bool to the 
+          data_dropped(), remove_sample() and related methods. The 
+          dropped_by_transport true indicates the data dropping is initiated
+          by transport which occurs when the transport send strategy is in
+          a MODE_TERMINATED state. All messages are dropped in that state.
+          The dropped_by_transport false which is the case before adding 
+          this extra parameter. The dropping is a result of remove_sample()
+          call which is initiated by datawriter with KEEP_LAST history policy
+          when the number of samples exceeds the depth of history queue.
+          
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        
+          Added a few SendMode types(MODE_TERMINATED, MODE_SUSPEND and
+          MODE_NOT_SET). These modes are used when reconnecting logic is
+          used. When the connection is lost, the mode is set to 
+          MODE_SUSPEND until reconnect finishes. In the MODE_SUSPEND state,
+          all messages are queued. If the reconnect succeeds, the mode is 
+          back to the state before suspend. If the reconnect fails after
+          a "conn_retry_attempts" attempts, then the mode is set to 
+          MODE_TERMINATED and all messages in the backpressure queue and
+          packet queue are removed and the data_dropped () is called for 
+          every element. During the state of MODE_TERMINATED, any sending
+          or queuing are stopped and the messages are dropped.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        
+          Added send_strategy_ data member for state change when reconnecting
+          happens. The suspend_send is called before reconnecting. The 
+          resume_send is called when the reconnect succeeds. The terminate_send
+          is called after the reconnect fails.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy_rch.h:
+
+          Removed lost_link() hook. Now we can use the mode in the 
+          TransportSendStrategy to know the state of the connection.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+        
+          Fixed the restart_sub test since now we drop the messages
+          after reconnect failed.
+           
+        * tests/DCPS/Reconnect/sub.ini:
+        
+          Change to default "conn_retry_attempts".
+          
 Wed Apr 12 17:19:27 UTC 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * DDS_release_notes.txt:

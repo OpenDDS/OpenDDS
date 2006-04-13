@@ -341,16 +341,20 @@ namespace TAO
     /**
     * This method is called when there is no more space in the 
     * instance sample list for a non-blocking write. It requests
-    * the transport to drop the oldest sample. 
+    * the transport to drop the oldest sample.
+    * The dropped_by_transport parameter will be passed all way to the transport
+    * and is used when the data_dropped() is called back. 
+    * See WriterDataContainer::data_dropped() comment for the dropped_by_transport
+    * parameter.
     */
-    void remove_sample(DataSampleListElement* element); 
+    void remove_sample(DataSampleListElement* element, bool dropped_by_transport = false); 
 
     /**
     * This mothod is called by transport to notify the instance
     * sample is dropped and it delegates to WriteDataContainer
     * to update the internal list.
     */
-    void data_dropped (DataSampleListElement* element);
+    void data_dropped (DataSampleListElement* element, bool dropped_by_transport);
    
 
     /**
