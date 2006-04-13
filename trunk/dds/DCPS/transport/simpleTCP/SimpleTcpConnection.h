@@ -100,7 +100,7 @@ namespace TAO
         /// Flag indicates if connected or disconneted. It's set to true 
         /// when actively connecting or passively acepting succeeds and set
         /// to false whenever the peer stream is closed.
-        ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>  connected_;
+        ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
         /// Flag indicate this connection object is the connector or acceptor.
         bool      is_connector_;
         /// Reference to the receiving strategy.

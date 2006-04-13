@@ -47,6 +47,7 @@ TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
                                    bool dropped_by_transport)
 {
   DBG_ENTRY("DataLink","remove_sample");
+  ACE_UNUSED_ARG (dropped_by_transport);
 
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
