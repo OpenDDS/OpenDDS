@@ -38,7 +38,6 @@ namespace TAO
         // the connection.
         virtual int relink ();
 
-        virtual bool lost_link();
 
       private:
 

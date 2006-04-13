@@ -26,13 +26,15 @@ TAO::DCPS::TransportSendControlElement::requires_exclusive_packet() const
 
 
 void
-TAO::DCPS::TransportSendControlElement::release_element()
+TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transport)
 {
+  ACE_UNUSED_ARG (dropped_by_transport);
+
   DBG_ENTRY("TransportSendControlElement","release_element");
 
   if (this->was_dropped())
     {
-      this->listener_->control_dropped(this->msg_);
+      this->listener_->control_dropped(this->msg_, dropped_by_transport);
     }
   else
     {

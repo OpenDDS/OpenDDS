@@ -55,7 +55,7 @@ namespace TAO
                                        TransportSendListener* listener,
                                        ACE_Message_Block*     msg);
 
-        int remove_sample(const DataSampleListElement* sample);
+        int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
         int remove_all_control_msgs(RepoId pub_id);
 

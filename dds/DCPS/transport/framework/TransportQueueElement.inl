@@ -26,11 +26,11 @@ TAO::DCPS::TransportQueueElement::operator==
 
 ACE_INLINE
 void
-TAO::DCPS::TransportQueueElement::data_dropped()
+TAO::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
   DBG_ENTRY("TransportQueueElement","data_dropped");
   this->dropped_ = true;
-  this->decision_made();
+  this->decision_made(dropped_by_transport);
 }
 
 
@@ -39,13 +39,14 @@ void
 TAO::DCPS::TransportQueueElement::data_delivered()
 {
   DBG_ENTRY("TransportQueueElement","data_delivered");
-  this->decision_made();
+  bool dropped = false;
+  this->decision_made(dropped);
 }
 
 
 ACE_INLINE
 void
-TAO::DCPS::TransportQueueElement::decision_made()
+TAO::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY("TransportQueueElement","decision_made");
 
@@ -63,7 +64,7 @@ TAO::DCPS::TransportQueueElement::decision_made()
 
   // The queue elements are released to its cached allocator
   // in release_element() call.
-  this->release_element();
+  this->release_element(dropped_by_transport);
 }
 
 

@@ -37,6 +37,7 @@ TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
 }
 
 
+
 ACE_INLINE bool
 TAO::DCPS::SimpleTcpConnection::is_connector ()
 {
@@ -47,7 +48,7 @@ TAO::DCPS::SimpleTcpConnection::is_connector ()
 ACE_INLINE bool
 TAO::DCPS::SimpleTcpConnection::is_connected ()
 {
-  return this->connected_;
+  return this->connected_.value ();
 }
 
 

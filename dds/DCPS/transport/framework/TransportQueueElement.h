@@ -49,7 +49,11 @@ namespace TAO
 
         /// Invoked when the sample is dropped from a DataLink due to a
         /// remove_sample() call.
-        void data_dropped();
+        /// The dropped_by_transport flag true indicates the data dropping is initiated
+        /// by transport when the transport send strategy is in a MODE_TERMINATED.
+        /// The dropped_by_transport flag false indicates the dropping is initiated
+        /// by the remove_sample and data_dropped() is a result of remove_sample().
+        void data_dropped(bool dropped_by_transport = false);
 
         /// Invoked when the sample has been sent by a DataLink.
         void data_delivered();
@@ -74,7 +78,7 @@ namespace TAO
         TransportQueueElement(int initial_count);
 
         /// Invoked when the counter reaches 0.
-        virtual void release_element() = 0;
+        virtual void release_element(bool dropped_by_transport) = 0;
 
         /// May be used by subclass' implementation of release_element()
         /// to determine if any DataLinks dropped the data instead of
@@ -85,7 +89,7 @@ namespace TAO
       private:
 
         /// Common logic for data_dropped() and data_delivered().
-        void decision_made();
+        void decision_made(bool dropped_by_transport);
 
         /// Thread lock type
         typedef ACE_SYNCH_MUTEX LockType;

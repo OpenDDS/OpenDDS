@@ -22,16 +22,13 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
   connection->_add_ref();
   this->connection_ = connection;
 
+  // Give a "copy" of this send strategy to the connection object.
+  connection->set_send_strategy (this);
+
   // Keep a "copy" of the SimpleTcpDataLink reference for ourselves
   link->_add_ref();
   this->link_ = link;
 }
 
-
-ACE_INLINE bool
-TAO::DCPS::SimpleTcpSendStrategy::lost_link()
-{
-  return ! this->connection_->is_connected (); 
-}
 
 

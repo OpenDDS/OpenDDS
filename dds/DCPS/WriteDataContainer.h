@@ -223,8 +223,12 @@ namespace TAO
       * If the sample was "released" then the sample is released.
       * If there are any threads waiting for available space then it
       * needs wake up these threads.
+      * The dropped_by_transport flag true indicates the dropping initiated
+      * by transport when the transport send strategy is in a MODE_TERMINATED.
+      * The dropped_by_transport flag false indicates the dropping is initiated
+      * by the remove_sample and data_dropped() is a result of remove_sample().
       */
-      void data_dropped (DataSampleListElement* element);
+      void data_dropped (DataSampleListElement* element, bool dropped_by_transport);
 
       /**
       * Allocate a DataSampleListElement object and check the space 

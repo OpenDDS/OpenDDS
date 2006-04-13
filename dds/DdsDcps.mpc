@@ -139,6 +139,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/ReceiveListenerSetMap.cpp
     DCPS/transport/framework/RepoIdSet.cpp
     DCPS/transport/framework/RepoIdSetMap.cpp
+    DCPS/transport/framework/RemoveAllVisitor.cpp
     DCPS/transport/framework/TheTransportFactory.cpp
     DCPS/transport/framework/ThreadSynch.cpp
     DCPS/transport/framework/ThreadSynchResource.cpp

@@ -422,7 +422,7 @@ namespace TAO
 
 
     void 
-    WriteDataContainer::data_dropped (DataSampleListElement* sample)
+    WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by_transport)
     {    
       //In current implementation, the data_dropped call results 
       //from the remove_sample, hence it's called in the same 
@@ -448,13 +448,16 @@ namespace TAO
 
       if (sending_data_.dequeue_next_send_sample (sample) == true)
         {
-          // The remove_sample is called from reenqueue_all()
-          // which supports the TRANSIENT_LOCAL qos.
-          // The samples sending by transport are dropped from
-          // transport and will be moved to the unsent list for 
-          // resend.
-          unsent_data_.enqueue_tail_next_send_sample (sample);
-          
+          // If the transport initiates the data dropping then we
+          // need release the sample.
+          if (dropped_by_transport)
+            release_buffer (sample);
+          else
+            // else: The data_dropped is called as a result of remove_sample()
+            // called from reenqueue_all() which supports the TRANSIENT_LOCAL 
+            // qos. The samples that are sending by transport are dropped from
+            // transport and will be moved to the unsent list for resend.
+            unsent_data_.enqueue_tail_next_send_sample (sample);
         }          
       else if (released_data_.dequeue_next_sample (sample) == true)
         {

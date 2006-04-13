@@ -7,6 +7,7 @@
 #include  "SimpleTcpConfiguration_rch.h"
 #include  "SimpleTcpDataLink_rch.h"
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpSendStrategy_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/SOCK_Stream.h"
@@ -48,7 +49,12 @@ namespace TAO
         virtual int open(void* arg);
 
         void set_receive_strategy(TransportReceiveStrategy* receive_strategy);
+
         void remove_receive_strategy();
+
+        /// Give a "copy" of the SimpleTcpSendStrategy object to this
+        /// connection object.
+        void set_send_strategy(SimpleTcpSendStrategy* send_strategy);
 
         /// We pass this "event" along to the receive_strategy.
         virtual int handle_input(ACE_HANDLE);
@@ -94,11 +100,13 @@ namespace TAO
         /// Flag indicates if connected or disconneted. It's set to true 
         /// when actively connecting or passively acepting succeeds and set
         /// to false whenever the peer stream is closed.
-        bool      connected_;
+        ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>  connected_;
         /// Flag indicate this connection object is the connector or acceptor.
         bool      is_connector_;
         /// Reference to the receiving strategy.
         TransportReceiveStrategy_rch receive_strategy_;
+        /// Reference to the send strategy.
+        SimpleTcpSendStrategy_rch send_strategy_;
         /// Remote address.
         ACE_INET_Addr remote_address_;
         /// Local address.
@@ -112,7 +120,9 @@ namespace TAO
         /// re-established as the acceptor side when timer goes off.
         SimpleTcpConnection_rch    conn_replacement_;
         /// The flag true indicates reconnect fails and connection lost notification 
-        /// is sent.
+        /// is sent. This flag also controls that the reconnect is attempted by
+        /// a single thread if there are multiple threads that detect connection problem
+        /// and both try to reconnect.
         bool connection_lost_notified_;
     };
 

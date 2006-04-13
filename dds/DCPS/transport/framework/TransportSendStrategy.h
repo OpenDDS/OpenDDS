@@ -89,10 +89,17 @@ namespace TAO
         /// when send returns an error.
         virtual int relink ();
 
-        /// This is called whenever the work_available() is called to check
-        /// if the link is lost. If the link is not lost then the work_available()
-        /// is called. The subclass needs provide the implementation.
-        virtual bool lost_link();
+        /// This is called when first time reconnect is attempted. The send mode
+        /// is set to MODE_SUSPEND. Messages are queued at this state.
+        void suspend_send ();
+
+        /// This is called when connection is lost and reconnect succeeds.
+        /// The send mode is set to the mode before suspend which is either MODE_QUEUE
+        /// or MODE_DIRECT.
+        void resume_send ();
+        /// This is called whenver the connection is lost and reconnect fails.
+        /// It removes all samples in the backpressure queue and packet queue. 
+        void terminate_send ();
 
       protected:
 
@@ -124,7 +131,7 @@ namespace TAO
         enum UseDelayedNotification
         {
           NOTIFY_IMMEADIATELY,
-          DELAY_NOTIFICATION
+          DELAY_NOTIFICATION,
         };
 
         /// Called from send() when it is time to attempt to send our
@@ -175,8 +182,24 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        /// The two modes of sending.
-        enum SendMode { MODE_DIRECT, MODE_QUEUE };
+        enum SendMode { 
+          // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so 
+          // we can check if the resume_send is paired with suspend_send.
+          MODE_NOT_SET,    
+          // Send out the sample with current packet.
+          MODE_DIRECT,
+          // The samples need be queued because of the backpressure or partial send.
+          MODE_QUEUE,
+          // The samples need be queued because the connection is lost and we are 
+          // trying to reconnect.
+          MODE_SUSPEND,
+          // The samples need be dropped since we lost connection and could not 
+          // reconnect.
+          MODE_TERMINATED
+        };
+
+        /// Helper function to debugging.
+        static const char* mode_as_str (SendMode mode);
 
         /// Configuration - max number of samples per transport packet
         size_t max_samples_;
@@ -239,6 +262,10 @@ namespace TAO
         /// This mode determines how send() calls will be handled.
         SendMode mode_;
 
+        /// This mode remembers the mode before send is suspended and is
+        /// used after the send is resumed because the connection is
+        /// re-established. 
+        SendMode mode_before_suspend_;
 
         /// Used for delayed notifications when performing work.
         TransportQueueElement** delayed_delivered_notification_queue_;

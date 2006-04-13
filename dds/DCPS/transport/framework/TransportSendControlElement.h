@@ -50,7 +50,7 @@ namespace TAO
 
       protected:
 
-        virtual void release_element();
+        virtual void release_element(bool dropped_by_transport);
 
 
       private:

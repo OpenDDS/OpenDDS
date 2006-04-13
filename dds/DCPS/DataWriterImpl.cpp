@@ -1321,17 +1321,17 @@ namespace TAO
     }
 
     void 
-    DataWriterImpl::remove_sample (DataSampleListElement* element) 
+    DataWriterImpl::remove_sample (DataSampleListElement* element, bool dropped_by_transport) 
     {
       DBG_ENTRY("DataWriterImpl","remove_sample");
-      publisher_servant_->remove_sample (element);
+      publisher_servant_->remove_sample (element, dropped_by_transport);
     }
 
     void 
-    DataWriterImpl::data_dropped (DataSampleListElement* element)
+    DataWriterImpl::data_dropped (DataSampleListElement* element, bool dropped_by_transport)
     {
       DBG_ENTRY("DataWriterImpl","data_dropped");
-      this->data_container_->data_dropped (element);
+      this->data_container_->data_dropped (element, dropped_by_transport);
       
       data_dropped_count_ ++;
     }
