@@ -1,3 +1,10 @@
+Thu Apr 13 13:23:18 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+
+          Fixed compilation errors on lunix build.
+
 Thu Apr 13 12:54:39 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These are review fix for RT8499 and the compilation errors due to
