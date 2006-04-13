@@ -61,9 +61,9 @@ public:
   ///  subscriptions if return successful
   /// sendNotify indicates whether to tell the datawriter about
   ///  removing the subscription
-  /// The notify_lost flag true indicates this remove_associations is called
-  /// when the InfoRepo detects this publication is lost because of the failure
-  /// of invocation on this publication.
+  /// The notify_lost parameter is passed to the remove_associations()
+  /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
+  /// or DdsDcpsDataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_subscription (DCPS_IR_Subscription* sub,

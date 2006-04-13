@@ -31,7 +31,8 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
     void transport_lost();
 
     virtual void data_delivered(TAO::DCPS::DataSampleListElement* sample);
-    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample);
+    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample,
+                              bool dropped_by_transport = false);
 
     int delivered_test_message();
 

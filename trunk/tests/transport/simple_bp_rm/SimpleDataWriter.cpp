@@ -118,10 +118,12 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+                               bool dropped_by_transport)
 {
   unsigned num_delivered = this->release_element(sample);
   ACE_UNUSED_ARG(num_delivered);
+  ACE_UNUSED_ARG(dropped_by_transport);
 
   VDBG((LM_DEBUG,
              "(%P|%t) Got our data_dropped() for %d sample.\n",
@@ -147,7 +149,8 @@ SimpleDataWriter::obtain_element(SimplePublisher* publisher)
       return;
     }
 
-  publisher->remove_sample(this->element_);
+  bool dropped_by_transport = false;
+  publisher->remove_sample(this->element_, dropped_by_transport);
 
   if (this->num_delivered_ == this->num_sent_)
     {

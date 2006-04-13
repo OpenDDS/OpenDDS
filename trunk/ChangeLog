@@ -1,3 +1,39 @@
+Thu Apr 13 12:54:39 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These are review fix for RT8499 and the compilation errors due to
+        data_dropped () and remove_sample() signature changes are also fixed.
+        
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        
+          Changed to use while loop instead of for loop for code clarity.
+                    
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Added checking of the return value from dynamic_cast.
+          
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        
+          Added comments for the new parameter notify_lost.
+          
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.h:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.h:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.h:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.h:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.h:
+
+          Fixed compilation errors due to the data_dropped () 
+          and remove_sample() signature changes. 
+
 Thu Apr 13 10:30:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changs are made to drop messages after the reconnect 

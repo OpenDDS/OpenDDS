@@ -149,8 +149,11 @@ PubWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-PubWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample)
+PubWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+                        bool dropped_by_transport)
 {
+  ACE_UNUSED_ARG (dropped_by_transport);
+
   {
     GuardType guard(this->lock_);
     ++this->num_dropped_;
