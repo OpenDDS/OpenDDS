@@ -140,7 +140,8 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+                               bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
 

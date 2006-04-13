@@ -561,7 +561,7 @@ TAO::DCPS::TransportSendStrategy::direct_send()
  
   // We will try resend the packet if the send() fails and then connection 
   // is re-established.
-  for (CORBA::ULong i = 0; i < 2; ++i)
+  while (1)
     {
       // Attempt to send the packet
       SendPacketOutcome outcome = this->send_packet(NOTIFY_IMMEADIATELY);

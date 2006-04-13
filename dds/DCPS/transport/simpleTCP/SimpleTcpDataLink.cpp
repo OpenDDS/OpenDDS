@@ -120,6 +120,12 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
   SimpleTcpReceiveStrategy* rs 
     = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
 
+  if (rs == 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect dynamic_cast failed\n"),
+        -1);
+    }
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
   return rs->reset (this->connection_.in ());

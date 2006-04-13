@@ -58,7 +58,8 @@ class PubWriter : public TAO::DCPS::TransportSendListener
     /// request by asking the TransportInterface to remove_sample().
     /// Thus, this should only be invoked if the remove_sample() method
     /// is actually used by the particular test.
-    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample);
+    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample,
+                              bool dropped_by_transport = false);
 
 
   private:
