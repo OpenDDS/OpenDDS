@@ -1,3 +1,10 @@
+Thu Apr 13 14:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+       * tests/DCPS/Reconnect/repo.conf:
+ 
+          Added missing file.
+
+
 Thu Apr 13 13:23:18 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.inl:
