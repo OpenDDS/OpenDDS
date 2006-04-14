@@ -179,7 +179,10 @@ namespace TAO
 
         typedef BasicQueue<TransportQueueElement> QueueType;
 
-        typedef ACE_SYNCH_MUTEX     LockType;
+        //TODO: Use the ACE_Recursive_Thread_Mutex temperary to fix the deadlock
+        //      situation during reconnecting on linux. 
+        typedef ACE_Recursive_Thread_Mutex LockType;
+        //typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
         enum SendMode { 

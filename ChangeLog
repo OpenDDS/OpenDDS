@@ -1,3 +1,11 @@
+Thu Apr 13 17:01:08 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          Changed to use ACE_Recursive_Thread_Mutex to fix the deadlock
+          situation during reconnecting on linux. This is a temporary
+          workarround. I need find a better way to fix it.
+          
 Thu Apr 13 14:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
        * tests/DCPS/Reconnect/repo.conf:
