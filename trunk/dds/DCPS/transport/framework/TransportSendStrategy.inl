@@ -591,8 +591,7 @@ TAO::DCPS::TransportSendStrategy::direct_send()
                     "OUTCOME_PEER_LOST or OUTCOME_SEND_ERROR.\n"));
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "Nothing better to do other than flip to MODE_QUEUE, but "
-                    "don't announce work_available() to the synch_ object.\n"));
+                    "Now flip to MODE_SUSPEND before we try to reconnect.\n"));
 
           if (this->mode_ != MODE_SUSPEND)
             {
@@ -604,8 +603,8 @@ TAO::DCPS::TransportSendStrategy::direct_send()
 
           if (this->mode_ == MODE_SUSPEND)
             {
-              ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
-                      "it should NOT be in MODE_SUSPEND after reconnect finish.\n"));
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                        "The reconnect has not done yet and we are still in MODE_SUSPEND.\n"));
             }
           else if (this->mode_ == MODE_TERMINATED)
             {

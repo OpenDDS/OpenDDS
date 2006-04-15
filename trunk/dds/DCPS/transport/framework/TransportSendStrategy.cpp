@@ -251,6 +251,9 @@ TAO::DCPS::TransportSendStrategy::perform_work()
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                  "We lost our connection, or had some fatal connection "
                  "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"));
+          
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Now flip to MODE_SUSPEND before we try to reconnect.\n"));
 
       if (this->mode_ != MODE_SUSPEND)
         {
@@ -262,8 +265,12 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 
       if (this->mode_ == MODE_SUSPEND)
         {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
-                  "it should NOT be in MODE_SUSPEND after reconnect finish.\n"));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "The reconnect has not done yet and we are still in MODE_SUSPEND. "
+                    "Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"));
+          // Return WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we
+          // don't desire another call to this perform_work() method.
+          return WORK_OUTCOME_NO_MORE_TO_DO;
         }
       else if (this->mode_ == MODE_TERMINATED)
         {
