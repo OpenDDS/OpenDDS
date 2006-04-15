@@ -66,8 +66,6 @@ namespace TAO
 
         int reconnect (bool on_new_association = false);
 
-        void  reconnect_done ();
-
         /// Return true if the object represents the connector side, otherwise 
         /// it's the acceptor side. The acceptor/connector role is not changed
         /// when re-establishing the connection.

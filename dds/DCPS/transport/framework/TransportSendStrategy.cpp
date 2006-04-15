@@ -38,7 +38,6 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     num_delayed_notifications_(0),
     header_db_allocator_(1),
     header_mb_allocator_(2),
-    reconnect_done_(lock_),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
@@ -691,17 +690,5 @@ TAO::DCPS::TransportSendStrategy::terminate_send ()
 }
 
 
-void TAO::DCPS::TransportSendStrategy::wait_for_reconnect ()
-{
-  DBG_ENTRY("TransportSendStrategy","wait_for_reconnect");
-  this->reconnect_done_.wait ();
-}
 
-
-void TAO::DCPS::TransportSendStrategy::reconnect_done ()
-{
-  DBG_ENTRY("TransportSendStrategy","reconnect_done");
-  GuardType guard(this->lock_);
-  this->reconnect_done_.signal ();
-}
 
