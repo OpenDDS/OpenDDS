@@ -78,9 +78,7 @@ TAO::DCPS::SimpleTcpSendStrategy::relink ()
     = this->link_->get_transport_impl ()->get_reconnect_task();
   // Handle this connection to the reconnect task to do the reconnect since
   // we do not want block this reactor thread.
-  reconnect_task->add (SimpleTcpReconnectTask::DO_RECONNECT_UPON_SEND, this->connection_);
-
-  this->wait_for_reconnect();
+  reconnect_task->add (SimpleTcpReconnectTask::DO_RECONNECT, this->connection_);
 }
 
 

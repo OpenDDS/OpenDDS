@@ -1,7 +1,27 @@
+Sat Apr 15 13:23:09 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes are tested on linux and fixed the deadlock situation
+        during reconnecting.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        
+          Made the send strategy will not wait for the reconnecting finish
+          since the thread might hold the lock in DataWriterImpl and the 
+          reconnect thread might need call data_dropped () on DataWriterImpl
+          which will cause datalock.
+          
 Sat Apr 15 11:47:43 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
-          These changes fixed a deadlock situation during reconencting on linux
-          and fixed unregister data sample errors during shutdown for RT8499.
+          These changes are made to expect to fix a deadlock situation during 
+          reconencting on linux and they also fixed unregister data sample 
+          errors during shutdown for RT8499.
 
         * dds/DCPS/WriteDataContainer.cpp:
 

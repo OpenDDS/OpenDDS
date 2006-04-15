@@ -140,14 +140,8 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
     {
         switch (conn_info->command)
         {
-          case DO_RECONNECT_UPON_RECV:
+          case DO_RECONNECT:
             conn_info->connection->reconnect ();
-          break;
-          case DO_RECONNECT_UPON_SEND:
-            {
-              conn_info->connection->reconnect ();
-              conn_info->connection->reconnect_done ();  
-            }
           break;
           case NEW_CONNECTION_CHECK:
             transport_->fresh_link (conn_info->connection->get_remote_address(), conn_info->connection);

@@ -560,12 +560,3 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 }
 
 
-/// This is called by the reconnect task after it finishes the reconnecting.
-/// It tells the send strategy that the reconnect is done so the send strategy
-/// can unsuspend the send. 
-void 
-TAO::DCPS::SimpleTcpConnection::reconnect_done ()
-{
-  this->send_strategy_->reconnect_done ();
-}
-

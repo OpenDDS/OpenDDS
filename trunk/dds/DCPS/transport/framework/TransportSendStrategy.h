@@ -102,15 +102,6 @@ namespace TAO
         /// It removes all samples in the backpressure queue and packet queue. 
         void terminate_send ();
 
-        /// Wait on reconnect_done_ condition. This is called after this send strategy
-        /// hand the connection object to the reconnect task to do the reconnecting.
-        void wait_for_reconnect ();
-
-        /// Signal the reconnect_done_ condition. This is called after the reconnect 
-        /// task finishes the reconnecting. If the reconnect succeeds, the sending is
-        /// resumed otherwise all messages are discarded.
-        void reconnect_done ();
-
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,
@@ -191,7 +182,6 @@ namespace TAO
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
-        typedef ACE_Condition<LockType> ConditionType;
 
         enum SendMode { 
           // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so 
@@ -294,11 +284,6 @@ namespace TAO
         /// This lock will protect critical sections of code that play a
         /// role in the sending of data.
         LockType lock_;
-
-        /// Condition used to signal the send threads that they hand the connection
-        /// to the reconnect task to do the reconnection. This condition will be 
-        /// signal()'ed when the reconnect is done.
-        ConditionType reconnect_done_;
 
         /// Cached allocator for TransportReplaceElement.
         TransportReplacedElementAllocator replaced_element_allocator_;
