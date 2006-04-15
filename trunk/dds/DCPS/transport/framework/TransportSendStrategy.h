@@ -87,7 +87,7 @@ namespace TAO
         /// The subclass needs to provide the implementation
         /// for re-establishing the datalink. This is called
         /// when send returns an error.
-        virtual int relink ();
+        virtual void relink ();
 
         /// This is called when first time reconnect is attempted. The send mode
         /// is set to MODE_SUSPEND. Messages are queued at this state.
@@ -97,9 +97,19 @@ namespace TAO
         /// The send mode is set to the mode before suspend which is either MODE_QUEUE
         /// or MODE_DIRECT.
         void resume_send ();
+        
         /// This is called whenver the connection is lost and reconnect fails.
         /// It removes all samples in the backpressure queue and packet queue. 
         void terminate_send ();
+
+        /// Wait on reconnect_done_ condition. This is called after this send strategy
+        /// hand the connection object to the reconnect task to do the reconnecting.
+        void wait_for_reconnect ();
+
+        /// Signal the reconnect_done_ condition. This is called after the reconnect 
+        /// task finishes the reconnecting. If the reconnect succeeds, the sending is
+        /// resumed otherwise all messages are discarded.
+        void reconnect_done ();
 
       protected:
 
@@ -179,11 +189,9 @@ namespace TAO
 
         typedef BasicQueue<TransportQueueElement> QueueType;
 
-        //TODO: Use the ACE_Recursive_Thread_Mutex temperary to fix the deadlock
-        //      situation during reconnecting on linux. 
-        typedef ACE_Recursive_Thread_Mutex LockType;
-        //typedef ACE_SYNCH_MUTEX     LockType;
+        typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
+        typedef ACE_Condition<LockType> ConditionType;
 
         enum SendMode { 
           // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so 
@@ -287,6 +295,10 @@ namespace TAO
         /// role in the sending of data.
         LockType lock_;
 
+        /// Condition used to signal the send threads that they hand the connection
+        /// to the reconnect task to do the reconnection. This condition will be 
+        /// signal()'ed when the reconnect is done.
+        ConditionType reconnect_done_;
 
         /// Cached allocator for TransportReplaceElement.
         TransportReplacedElementAllocator replaced_element_allocator_;

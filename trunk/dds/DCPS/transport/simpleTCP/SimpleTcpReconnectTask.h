@@ -50,7 +50,8 @@ namespace TAO
       enum COMMAND
       {
         NEW_CONNECTION_CHECK,
-        DO_RECONNECT
+        DO_RECONNECT_UPON_SEND,
+        DO_RECONNECT_UPON_RECV
       };
 
       struct ConnectionInfo  {

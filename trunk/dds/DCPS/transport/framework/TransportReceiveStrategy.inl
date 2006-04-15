@@ -28,10 +28,9 @@ TAO::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
 }
 
 
-ACE_INLINE int 
+ACE_INLINE void 
 TAO::DCPS::TransportReceiveStrategy::relink ()
 {
   // The subsclass needs implement this function for re-establishing
-  // the link upon recv failure.
-  return -1;
+  // the link upon recv failure.  
 }
