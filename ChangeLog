@@ -1,3 +1,41 @@
+Sat Apr 15 11:47:43 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+          These changes fixed a deadlock situation during reconencting on linux
+          and fixed unregister data sample errors during shutdown for RT8499.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Updated the data_dropped() to do same thing as data delivered 
+          when the transport initiates the data dropping which happens when
+          connection lost and reconnet fails.
+          
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Made send strategy queue the connection to reconnect task in relink()
+          and wait on a condition variable until the reconnect task completes 
+          the reconnecting and signal the condition. This would resolve the 
+          deadlock problem on linux and avoid using a recursive lock in 
+          TransportSendStrategy as a work around in my last commit.
+        
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        
+          Made the relink() has no return value.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        
+          Added DO_RECONNECT_UPON_SEND case to handle re-establishing
+          of a lost connection detected by send strategy.
+          
 Thu Apr 13 17:01:08 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

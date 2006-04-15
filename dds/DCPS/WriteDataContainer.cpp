@@ -424,6 +424,15 @@ namespace TAO
     void 
     WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by_transport)
     {    
+      // If the transport initiates the data dropping, we need do same thing
+      // as data_delivered. e.g. remove the sample from the internal list
+      // and the instance list.
+      if (dropped_by_transport)
+        {
+          this->data_delivered (sample);
+          return;
+        }
+    
       //In current implementation, the data_dropped call results 
       //from the remove_sample, hence it's called in the same 
       //thread that calls remove_sample which is already guarded.  
@@ -448,11 +457,6 @@ namespace TAO
 
       if (sending_data_.dequeue_next_send_sample (sample) == true)
         {
-          // If the transport initiates the data dropping then we
-          // need release the sample.
-          if (dropped_by_transport)
-            release_buffer (sample);
-          else
             // else: The data_dropped is called as a result of remove_sample()
             // called from reenqueue_all() which supports the TRANSIENT_LOCAL 
             // qos. The samples that are sending by transport are dropped from

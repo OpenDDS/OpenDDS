@@ -167,16 +167,16 @@ TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
   this->connection_->remove_receive_strategy();
 }
 
-int 
+
+void
 TAO::DCPS::SimpleTcpReceiveStrategy::relink ()
 {
   DBG_ENTRY("SimpleTcpReceiveStrategy","relink");
   SimpleTcpReconnectTask_rch reconnect_task 
     = this->link_->get_transport_impl ()->get_reconnect_task();
-  reconnect_task->add (SimpleTcpReconnectTask::DO_RECONNECT, this->connection_);
   // Handle this connection to the reconnect task to do the reconnect since
   // we do not want block this reactor thread.
-  return -1;
+  reconnect_task->add (SimpleTcpReconnectTask::DO_RECONNECT_UPON_RECV, this->connection_);
 }
 
 

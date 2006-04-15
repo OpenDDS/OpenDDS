@@ -38,6 +38,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     num_delayed_notifications_(0),
     header_db_allocator_(1),
     header_mb_allocator_(2),
+    reconnect_done_(lock_),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
@@ -252,19 +253,23 @@ TAO::DCPS::TransportSendStrategy::perform_work()
                  "We lost our connection, or had some fatal connection "
                  "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"));
 
-      if (this->relink () == -1)
+      if (this->mode_ != MODE_SUSPEND)
         {
-          // Either we've lost our connection to the peer (ie, the peer
-          // disconnected), or we've encountered some unknown fatal error
-          // attempting to send the packet. We tried to reconnect and it
-          // failed, the mode should be in MODE_TERMINATED and now lets
-          // return WORK_OUTCOME_BROKEN_RESOURCE.
-          if (this->mode_ != MODE_TERMINATED)
-            {
-              ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
-                "reconnect failed and it should be in MODE_TERMINATED, but it's "
-                "%s\n", mode_as_str(this->mode_)));
-            }
+          this->mode_before_suspend_ = this->mode_;
+          this->mode_ = MODE_SUSPEND;
+        }
+
+      this->relink ();
+
+      if (this->mode_ == MODE_SUSPEND)
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
+                  "it should NOT be in MODE_SUSPEND after reconnect finish.\n"));
+        }
+      else if (this->mode_ == MODE_TERMINATED)
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            "Reconnect failed, now we are in MODE_TERMINATED\n"));
           return WORK_OUTCOME_BROKEN_RESOURCE;
         }
       else
@@ -685,4 +690,18 @@ TAO::DCPS::TransportSendStrategy::terminate_send ()
   this->queue_.accept_remove_visitor(remove_all_visitor);
 }
 
+
+void TAO::DCPS::TransportSendStrategy::wait_for_reconnect ()
+{
+  DBG_ENTRY("TransportSendStrategy","wait_for_reconnect");
+  this->reconnect_done_.wait ();
+}
+
+
+void TAO::DCPS::TransportSendStrategy::reconnect_done ()
+{
+  DBG_ENTRY("TransportSendStrategy","reconnect_done");
+  GuardType guard(this->lock_);
+  this->reconnect_done_.signal ();
+}
 

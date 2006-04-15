@@ -43,7 +43,7 @@ namespace TAO
 
         // Delegate to the connection object to re-establishment
         // the connection.
-        virtual int relink ();
+        virtual void relink ();
 
       private:
 

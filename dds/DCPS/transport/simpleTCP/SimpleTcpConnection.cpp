@@ -388,7 +388,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
     // previously and now new association is coming.
     if (! this->connection_lost_notified_ || on_new_association)
       {
-         // Suspend send once.
+        // Suspend send once.
         if (! this->connection_lost_notified_)
           {
             this->send_strategy_->suspend_send ();
@@ -557,5 +557,15 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 
   if (terminate)
     this->send_strategy_->terminate_send ();
+}
+
+
+/// This is called by the reconnect task after it finishes the reconnecting.
+/// It tells the send strategy that the reconnect is done so the send strategy
+/// can unsuspend the send. 
+void 
+TAO::DCPS::SimpleTcpConnection::reconnect_done ()
+{
+  this->send_strategy_->reconnect_done ();
 }
 

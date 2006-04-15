@@ -594,22 +594,28 @@ TAO::DCPS::TransportSendStrategy::direct_send()
                     "Nothing better to do other than flip to MODE_QUEUE, but "
                     "don't announce work_available() to the synch_ object.\n"));
 
-          if (this->relink () == -1)
+          if (this->mode_ != MODE_SUSPEND)
             {
-              // Either we've lost our connection to the peer (ie, the peer
-              // disconnected), or we've encountered some unknown fatal error
-              // attempting to send the packet. We tried relink and it failed.
-              if (this->mode_ != MODE_TERMINATED)
-                {
-                  ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
-                    "reconnect failed and it should be in MODE_TERMINATED, but it's "
-                    "%s\n", mode_as_str(this->mode_)));
-                }
+              this->mode_before_suspend_ = this->mode_;
+              this->mode_ = MODE_SUSPEND;
+            }
+
+          this->relink ();
+
+          if (this->mode_ == MODE_SUSPEND)
+            {
+              ACE_ERROR ((LM_ERROR, "(%P|%t)TransportSendStrategy::direct_send "
+                      "it should NOT be in MODE_SUSPEND after reconnect finish.\n"));
+            }
+          else if (this->mode_ == MODE_TERMINATED)
+            {
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Reconnect failed, we are in MODE_TERMINATED\n"));
               break;
             }
           else
             {
-              // Try send the packet again if the connection is re-established.
+              // Try send the packet again since the connection is re-established.
               continue; 
             }
       }
@@ -852,13 +858,12 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 }
 
 
-ACE_INLINE int 
+ACE_INLINE void 
 TAO::DCPS::TransportSendStrategy::relink ()
 {
   DBG_ENTRY("TransportSendStrategy","relink");
   // The subsclass needs implement this function for re-establishing
   // the link upon send failure.
-  return -1;
 }
 
 
@@ -867,8 +872,12 @@ TAO::DCPS::TransportSendStrategy::suspend_send ()
 {
   DBG_ENTRY("TransportSendStrategy","suspend_send");
   GuardType guard(this->lock_);
-  this->mode_before_suspend_ = this->mode_;
-  this->mode_ = MODE_SUSPEND;
+
+  if (this->mode_ != MODE_SUSPEND)
+    {
+      this->mode_before_suspend_ = this->mode_;
+      this->mode_ = MODE_SUSPEND;
+    }
 }
 
 
