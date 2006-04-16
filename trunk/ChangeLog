@@ -1,3 +1,12 @@
+Sun Apr 16 07:30:45 2006  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          Removed extraneous comma from enumeration list. I noticed that
+          the enumeration also contains "NOTIFY_IMMEADIATELY" which should
+          be changed to "NOTIFY_IMMEDIATELY". I'm not going to change that
+          because I don't know the implications of such a change.
+
 Sat Apr 15 13:23:09 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are tested on linux and fixed the deadlock situation
@@ -11,24 +20,24 @@ Sat Apr 15 13:23:09 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
-        
+
           Made the send strategy will not wait for the reconnecting finish
-          since the thread might hold the lock in DataWriterImpl and the 
+          since the thread might hold the lock in DataWriterImpl and the
           reconnect thread might need call data_dropped () on DataWriterImpl
           which will cause datalock.
-          
+
 Sat Apr 15 11:47:43 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
-          These changes are made to expect to fix a deadlock situation during 
-          reconencting on linux and they also fixed unregister data sample 
+          These changes are made to expect to fix a deadlock situation during
+          reconencting on linux and they also fixed unregister data sample
           errors during shutdown for RT8499.
 
         * dds/DCPS/WriteDataContainer.cpp:
 
-          Updated the data_dropped() to do same thing as data delivered 
+          Updated the data_dropped() to do same thing as data delivered
           when the transport initiates the data dropping which happens when
           connection lost and reconnet fails.
-          
+
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
@@ -38,24 +47,24 @@ Sat Apr 15 11:47:43 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
           Made send strategy queue the connection to reconnect task in relink()
-          and wait on a condition variable until the reconnect task completes 
-          the reconnecting and signal the condition. This would resolve the 
-          deadlock problem on linux and avoid using a recursive lock in 
+          and wait on a condition variable until the reconnect task completes
+          the reconnecting and signal the condition. This would resolve the
+          deadlock problem on linux and avoid using a recursive lock in
           TransportSendStrategy as a work around in my last commit.
-        
+
         * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
         * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
-        
+
           Made the relink() has no return value.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
-        
+
           Added DO_RECONNECT_UPON_SEND case to handle re-establishing
           of a lost connection detected by send strategy.
-          
+
 Thu Apr 13 17:01:08 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
@@ -63,11 +72,11 @@ Thu Apr 13 17:01:08 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           Changed to use ACE_Recursive_Thread_Mutex to fix the deadlock
           situation during reconnecting on linux. This is a temporary
           workarround. I need find a better way to fix it.
-          
+
 Thu Apr 13 14:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
        * tests/DCPS/Reconnect/repo.conf:
- 
+
           Added missing file.
 
 
@@ -82,20 +91,20 @@ Thu Apr 13 12:54:39 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These are review fix for RT8499 and the compilation errors due to
         data_dropped () and remove_sample() signature changes are also fixed.
-        
+
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        
+
           Changed to use while loop instead of for loop for code clarity.
-                    
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Added checking of the return value from dynamic_cast.
-          
+
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Publication.h:
-        
+
           Added comments for the new parameter notify_lost.
-          
+
         * tests/transport/dds_comparative/PubWriter.cpp:
         * tests/transport/dds_comparative/PubWriter.h:
         * tests/transport/simple/SimpleDataWriter.cpp:
@@ -111,25 +120,25 @@ Thu Apr 13 12:54:39 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
         * tests/transport/udp_simple_n/SimpleDataWriter.h:
 
-          Fixed compilation errors due to the data_dropped () 
-          and remove_sample() signature changes. 
+          Fixed compilation errors due to the data_dropped ()
+          and remove_sample() signature changes.
 
 Thu Apr 13 10:30:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changs are made to drop messages after the reconnect 
-        failed for RT8499. 
-        
+        These changs are made to drop messages after the reconnect
+        failed for RT8499.
+
         * dds/DdsDcps.mpc:
-        
+
           Added RemoveAllVisitor.cpp.
-          
+
         * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
         * dds/DCPS/transport/framework/RemoveAllVisitor.h:
         * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
 
           New files are added to support the clear all elements in
           a BasicQueue.
-          
+
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/WriteDataContainer.cpp:
@@ -150,39 +159,39 @@ Thu Apr 13 10:30:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportSendElement.h:
         * dds/DCPS/transport/framework/TransportSendListener.cpp:
         * dds/DCPS/transport/framework/TransportSendListener.h:
-        
-          Added an extra parameter dropped_by_transport bool to the 
-          data_dropped(), remove_sample() and related methods. The 
+
+          Added an extra parameter dropped_by_transport bool to the
+          data_dropped(), remove_sample() and related methods. The
           dropped_by_transport true indicates the data dropping is initiated
           by transport which occurs when the transport send strategy is in
           a MODE_TERMINATED state. All messages are dropped in that state.
-          The dropped_by_transport false which is the case before adding 
+          The dropped_by_transport false which is the case before adding
           this extra parameter. The dropping is a result of remove_sample()
           call which is initiated by datawriter with KEEP_LAST history policy
           when the number of samples exceeds the depth of history queue.
-          
+
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        
+
           Added a few SendMode types(MODE_TERMINATED, MODE_SUSPEND and
           MODE_NOT_SET). These modes are used when reconnecting logic is
-          used. When the connection is lost, the mode is set to 
+          used. When the connection is lost, the mode is set to
           MODE_SUSPEND until reconnect finishes. In the MODE_SUSPEND state,
-          all messages are queued. If the reconnect succeeds, the mode is 
+          all messages are queued. If the reconnect succeeds, the mode is
           back to the state before suspend. If the reconnect fails after
-          a "conn_retry_attempts" attempts, then the mode is set to 
+          a "conn_retry_attempts" attempts, then the mode is set to
           MODE_TERMINATED and all messages in the backpressure queue and
-          packet queue are removed and the data_dropped () is called for 
+          packet queue are removed and the data_dropped () is called for
           every element. During the state of MODE_TERMINATED, any sending
           or queuing are stopped and the messages are dropped.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
-        
+
           Added send_strategy_ data member for state change when reconnecting
-          happens. The suspend_send is called before reconnecting. The 
+          happens. The suspend_send is called before reconnecting. The
           resume_send is called when the reconnect succeeds. The terminate_send
           is called after the reconnect fails.
 
@@ -191,18 +200,18 @@ Thu Apr 13 10:30:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy_rch.h:
 
-          Removed lost_link() hook. Now we can use the mode in the 
+          Removed lost_link() hook. Now we can use the mode in the
           TransportSendStrategy to know the state of the connection.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
-        
+
           Fixed the restart_sub test since now we drop the messages
           after reconnect failed.
-           
+
         * tests/DCPS/Reconnect/sub.ini:
-        
+
           Change to default "conn_retry_attempts".
-          
+
 Wed Apr 12 17:19:27 UTC 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -226,116 +235,116 @@ Tue Apr 11 11:44:32 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Fixed a compilation error on linux builds that need ace/Time_Value.h
           include.
-    
+
 Tue Apr 11 10:34:34 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
-          
+
           Corrected lost_link() check in send_bytes().
 
         * dds/DCPS/transport/framework/TransportDefs.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
-        
+
           Changed the conn_retry_backoff_multiplier_ to be double instead of float
           to avoid warnings.
-          
+
 Tue Apr 11 10:10:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changes are made for RT8499 to resolve the problem that publisher 
+        These changes are made for RT8499 to resolve the problem that publisher
         does not stop sending during reconnecting. There are two parts of the changes
         need be made and note the second part is not done yet.
           1)transport should queue the messages while reconnecting
           2)transport should discard the messages if the reconnect fails.
-        
+
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
-        
+
           Made handle_input () return -1 if the receive_bytes() return -1. This would
-          close the connection anyway even it will try to reconnect. 
-     
+          close the connection anyway even it will try to reconnect.
+
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
 
-          Added ready_send() virtual function to check if the connection is connected. 
-          This will be called whenever this->synch_->work_available is called or before 
+          Added ready_send() virtual function to check if the connection is connected.
+          This will be called whenever this->synch_->work_available is called or before
           sendv. This would stop the writing on a disconnected socket.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
-        
+
           Made it has reference to the SimpleTcpTransport object and
           added get_transport_impl() accessor.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
-        
+
           Made relink() to queue the connection object to the SimpleTcpReconnectTask
           to do the reconnect since we don't want the reactor thread block on reconnecting
           and not receiving other incoming messages.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
-        
+
           Made this task handle both reconnecting and new connection checking.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
-        
+
           Added reconnect task accessor so the SimpleTcpReceiveStrategy can access
           it and handle the connection to the reconnect task to do reconnect.
 
-          
-        These changes are made for RT8499 to add the support to declare connection 
+
+        These changes are made for RT8499 to add the support to declare connection
         lost upon backpressure timed out.
-        
+
         * DDS_release_notes.txt:
-        
+
           Updated comments for "max_output_pause_period" configuration.
-          
+
         * dds/DCPS/transport/framework/TransportDefs.h:
-        
+
           Added GET_CONFIG_FLOAT_VALUE macro.
-          
+
         * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
         * dds/DCPS/transport/framework/ThreadSynch.h:
         * dds/DCPS/transport/framework/ThreadSynch.inl:
         * dds/DCPS/transport/framework/ThreadSynchResource.h:
-        
+
           Made the wait_on_clogged_resource() and wait_on_unclog() return status.
           The PerConnectionSynch thread terminates if it returns an error.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
-        
-          Added max_output_pause_period_ and changed the 
+
+          Added max_output_pause_period_ and changed the
           conn_retry_backoff_multiplier_ to be float instead of int.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
-        
+
           Added new method notify_lost_on_backpressure_timeout() to support
           the disconnecting and notification when the transport stay in
           backpressure too long ( > max_output_pause_period).
           Removed unused parameter "notify" from reconnect_i().
-          Accomodated with the changes of conn_retry_backoff_multiplier_ 
+          Accomodated with the changes of conn_retry_backoff_multiplier_
           type change.
-        
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.inl:
-        
+
           Made the max_output_pause_period passed to the constructor and made
           wait_to_unclog() call notify_lost_on_backpressure_timeout() upon
           handle_write_ready() timeout.
-          
+
         * DevGuideExamples/DDS/Messenger/pub.ini:
         * DevGuideExamples/DDS/Messenger/sub.ini:
         * tests/DCPS/Reconnect/pub.ini:
@@ -343,46 +352,46 @@ Tue Apr 11 10:10:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Updated comments for the reconnect strategy configuration values and
           added new configuration "max_output_pause_period".
-          
+
         * tests/DCPS/Reconnect/DataReaderListener.cpp:
         * tests/DCPS/Reconnect/subscriber.cpp:
         * tests/DCPS/Reconnect/Writer.cpp:
 
           Added read/write delay for bp_timeout test.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
 
           Added bp_timeout test case.
-          
+
         * tests/DCPS/FooTest4/main.cpp:
 
-          Made subscriber attach to transport to avoid the errors return 
+          Made subscriber attach to transport to avoid the errors return
           from create_datareader() due to no transport.
-          
+
 Mon Apr 10 13:03:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
 
           Corrected the description for "conn_retry_backoff_multiplier" configuration.
-          
+
 Mon Apr 10 09:20:35 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Corrected the notify_*_lost() to avoid duplicate reader/writer id
           report lost.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
-        
+
           Corrected reconnect() to notify connection lost just once and not
           try to reconnect in subsequence send/recv failure.
-                  
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
-         
-          Added reconnect() call in find_or_create_datalink() method when the 
+
+          Added reconnect() call in find_or_create_datalink() method when the
           connection is previously lost and now the datalink is requested because
           of the new association.
 
@@ -394,10 +403,10 @@ Fri Apr  7 15:15:23 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
-        
+
           Removed the "#if 0" in create_*/delete_* that was used to avoid
           some test failure, but the tests are fixed, we just remove it.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
@@ -408,9 +417,9 @@ Fri Apr  7 15:15:23 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/Reconnect/sub.ini:
 
           Removed the "attempt_connection_reestablishment" configuration
-          since it's duplicated with other configuration values and 
+          since it's duplicated with other configuration values and
           updated some spelling errors with the configuration values.
-          
+
         * tests/DCPS/FooTest3_0/pub_main.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.h:
@@ -421,27 +430,27 @@ Fri Apr  7 15:15:23 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/FooTest3_2/pub_main.cpp:
         * tests/DCPS/FooTest3_2/PubDriver.cpp:
         * tests/DCPS/FooTest3_2/PubDriver.h:
-  
+
           Made the test call attach_transport before create_datawriter()
           to fix the test failures.
-          
+
 Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These files are changed to support the connection reestablishment
         and lost connection notify. See RT8499.
 
         * dds/DdsDcps.mpc:
-        
+
           Added new file SimpleTcpReconnectTask.h/.cpp.
-          
+
         * dds/DdsDcpsDataReaderRemote.idl:
         * dds/DdsDcpsDataWriterRemote.idl:
-        
+
           Added a paramter "notify_lost" to the remove_association
           in DataReaderRemote and DataWriterRemote interfaces.
           The flag true indicates the remove_association is invoked
-          by the InfoRepo after it detected a lost writer/reader. The 
-          InfoRepo detect the lost writer/reader when the 
+          by the InfoRepo after it detected a lost writer/reader. The
+          InfoRepo detect the lost writer/reader when the
           add_association/remove_association invocations on the writer/reader
           object reference fail. The datareader/datawriter needs notify the
           the DataReaderListener/DatawriterListener the publication/subscription
@@ -451,69 +460,69 @@ Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
-        
+
           Added methods to support the notification of the publication/subscription
           lost and updated the remove_associations() signature change.
-          
+
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
-        
-          Made the datareader/datawriter register with the TransportImpl upon 
+
+          Made the datareader/datawriter register with the TransportImpl upon
           creation and unregister upon deletion.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/DataLink.h:
-        
+
           Added notify_lost() method that is called by the SimpleTcpConnection
           upon reconnect failure. Changed the receive_strategy_ to be protected
           data so the SimpleTcpDataLink can access it.
-          
+
         * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
         * dds/DCPS/transport/framework/DataLinkSetMap.h:
-        
+
           Added lock to protect the map. This would fix the problem when
           multiple add_association() are called at the same time. The
           find_or_create_set() failure causes the add_association() failure.
-          
+
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
         * dds/DCPS/transport/framework/RepoIdSetMap.h:
         * dds/DCPS/transport/framework/RepoIdSetMap.inl:
-        
+
           Added internal map accessor so we can iterate the map to notify
           listener about the lost subscriptions/publication.
-          
+
         * dds/DCPS/transport/framework/TransportImpl.cpp:
         * dds/DCPS/transport/framework/TransportImpl.h:
-        
-          Added methods to register/unregister/find the datareader 
+
+          Added methods to register/unregister/find the datareader
           and datawriter object.
-          
+
         * dds/DCPS/transport/framework/TransportInterface.h:
         * dds/DCPS/transport/framework/TransportInterface.inl:
-        
+
           Added TransportImpl object reference accessor.
-          
+
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
         * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
         * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        
-          Added relink() funcation and call it when the send_packet() 
+
+          Added relink() funcation and call it when the send_packet()
           and receive_packet() return an error.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
-        
+
           Added new configurations to support connection re-establishment.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
-        
+
           This is the main change made for the re-establish a connection.
           Added more states to have enough information for re-establish
           and reuse the connection object. If connector/acceptor role of
@@ -521,40 +530,40 @@ Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           As the connector side, we reuse the same connection object after
           reconnected. As the acceptor side, since the ACE_Acceptor creates
           a new connection each time when it accept a connection, we can not
-          reuse the connection object. The states in the "old" connection 
+          reuse the connection object. The states in the "old" connection
           object are copied to the "new" connection object.
-                    
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
-        
-          Added reconnect() function to replace an "old" connection with the 
+
+          Added reconnect() function to replace an "old" connection with the
           "new" connection.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
-        
+
           Added method to restart the ReceiveStrategy.
-        
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
-        
+
           This is a new class that is dedicated to check if the incoming
           connections are re-established connection from the remote. This
-          would resolve the deadlock problem between the reactor thread 
+          would resolve the deadlock problem between the reactor thread
           (calling SimpleTcpTransport::passive_connction()) and the orb
-          thread (calling SimpleTcpTransport::make_passive_connction()). 
-          The reactor thread will enqueue the new connection  to this task 
+          thread (calling SimpleTcpTransport::make_passive_connction()).
+          The reactor thread will enqueue the new connection  to this task
           and let this task dequeue and check the connection.
-                   
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
-          
+
           Called SimpleTcpReconnectTask open and close upon transport
           initialization and shutdown.
-          
+
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
@@ -564,20 +573,20 @@ Fri Apr  7 00:46:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
-        
-          Updated to accommodate the change of the remove_association() 
+
+          Updated to accommodate the change of the remove_association()
           signature change.
-          
+
         * DevGuideExamples/DDS/Messenger/pub.ini:
         * DevGuideExamples/DDS/Messenger/sub.ini:
-        
+
           Added configuration values for retry connect to the example.
-          
+
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
-        
-          Updated to accommodate the change of the remove_association() 
+
+          Updated to accommodate the change of the remove_association()
           signature change.
-          
+
         * tests/DCPS/Reconnect/DataReaderListener.cpp:
         * tests/DCPS/Reconnect/DataReaderListener.h:
         * tests/DCPS/Reconnect/DataWriterListener.cpp:
@@ -638,43 +647,43 @@ Wed Mar 29 10:46:36 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
-          Fixed a warning "control reaches end of non-void function" 
+          Fixed a warning "control reaches end of non-void function"
           on linux build.
-          
+
         * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
         * tests/DCPS/FooType/FooTypeSupportImpl.h:
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
         * tests/DCPS/unit/MyTypeSupportImpl.h:
-     
+
           Added the get_type_name() implementation to fix the compilation
           error "cannot instantiate abstract class".
-           
+
         * performance-tests/DCPS/SimpleLatency/PubListener.h:
         * performance-tests/DCPS/SimpleLatency/SubListener.h:
 
           Changed the sample_num_ from long to be CORBA::Long to fix
           a warning in fprintf().
-          
+
 Tue Mar 28 14:11:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         Added TypeSupport::get_type_name() support for RT8496.
-        
+
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
-        
-          Added *TypeSupportImpl::get_type_name() implementation that use 
+
+          Added *TypeSupportImpl::get_type_name() implementation that use
           the interface repository id as the default type name.
           Made *TypeSupportImpl::register_type() check nil type name. If a nil
           type name is given then the default type_name is used.
-          
+
         * dds/DdsDcpsTopic.idl:
-        
+
           Added get_type_name() to the TypeSupport interface.
-          
+
         * dds/DCPS/Registered_Data_Types.cpp:
-        
-          Updated the register_type() to use the get_type_name() for 
-          TypeSupport comparison instead of using 
+
+          Updated the register_type() to use the get_type_name() for
+          TypeSupport comparison instead of using
           _interface_repository_id() directly.
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
@@ -683,7 +692,7 @@ Tue Mar 28 14:11:41 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           Updated the example to test TypeSupport::get_type_name() support.
           The nil type name is passed for type registration and get_type_name()
           is called to get the type name for topic creation.
-          
+
 Tue Mar 28 14:19:22 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -721,8 +730,8 @@ Tue Mar 28 14:09:36 MST 2006  Trevor Fields  <fields_t@ociweb.com>
 Tue Mar 28 10:20:20 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are made to remove the "using namespace" in the
-        dds core code. See RT8495. 
-        
+        dds core code. See RT8495.
+
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -737,9 +746,9 @@ Tue Mar 28 10:20:20 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/Serializer.cpp:
         * dds/DCPS/Serializer.inl:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
-        
+
           Removed "using namespace" from the dds core code.
-        
+
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
         * DevGuideExamples/DDS/Messenger/subscriber.cpp:
         * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
@@ -781,50 +790,50 @@ Tue Mar 28 10:20:20 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
         * tests/DCPS/MultiTopicTest/publisher.cpp:
         * tests/DCPS/MultiTopicTest/subscriber.cpp:
-        
+
           Fixed compilation after the "using namespace" removal change.
 
 Mon Mar 27 16:14:47 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are made to fix the DDS test failures between machines
-        with different endianess. The swap_bytes configuration value per 
+        with different endianess. The swap_bytes configuration value per
         TransportImpl instance is also appropriately used to allow different
         transports use different setting of swap_bytes. (See RT8381)
-     
+
         * bin/DCPS/CPPTemplate.pm:
-        
-          Made the Serializer in *DataWriterImpl::marshal() constructed 
+
+          Made the Serializer in *DataWriterImpl::marshal() constructed
           with the swap_bytes flag based on swap_byte configuration value
-          and made the Serializer in *DataReaderImpl::demarshal() constructed 
+          and made the Serializer in *DataReaderImpl::demarshal() constructed
           with the swap_bytes flag based on the endianess of the host and
           the byte order flag from the publisher.
 
         * dds/DCPS/DataSampleHeader.cpp:
         * dds/DCPS/DataSampleHeader.inl:
-        
+
           Set the swap_bytes flag to the Serializer in the reading side based
           on the the endianess of the host and the byte order flag in the data
           sample from publisher.
-          
+
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Made the sample and control message header correctly set byte_order.
-          
+
         * dds/DCPS/transport/framework/TransportHeader.cpp:
         * dds/DCPS/transport/framework/TransportHeader.h:
         * dds/DCPS/transport/framework/TransportHeader.inl:
 
           Added one more octet to the TransportHeader to indicate the endianess
-          of the publisher side and updated the marshal and demarshal methods 
+          of the publisher side and updated the marshal and demarshal methods
           with the new flag.
-               
+
 Mon Mar 27 12:06:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
 
           Fixed the compilation error on some platforms in servant_to_reference()
-          that misses the "typename" keyword for the_obj variable. 
-          
+          that misses the "typename" keyword for the_obj variable.
+
 Fri Mar 24 11:22:34 USMST 2006  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
@@ -837,7 +846,7 @@ Fri Mar 24 11:22:34 USMST 2006  Scott Harris <harris_s@ociweb.com>
         * DDS_info.txt:
 
           More notes from Don's questions.
-          
+
 Thu Mar 23 09:17:23 USMST 2006  Scott Harris <harris_s@ociweb.com>
 
         * DDS_info.txt
@@ -852,12 +861,12 @@ Wed Mar 22 11:53:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        
+
           Moved the TransportReplaceElement cached allocator from PacketRemoveVisitor
-          to TransportSendStrategy to fix a bug in the transport. The problem is 
-          PacketRemoveVisitor is allocated on stack so the allocator is destroyed 
-          as the PacketRemoveVisitor goes out of scope, but late the 
-          TransportReplaceElement accesses the allocator and causes the access 
+          to TransportSendStrategy to fix a bug in the transport. The problem is
+          PacketRemoveVisitor is allocated on stack so the allocator is destroyed
+          as the PacketRemoveVisitor goes out of scope, but late the
+          TransportReplaceElement accesses the allocator and causes the access
           voilation.
 
 Wed Mar 15 11:26:50 USMST 2006  Yan Dai  <dai_y@ociweb.com>
@@ -871,7 +880,7 @@ Wed Mar 15 11:17:25 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/Registered_Data_Types.cpp:
         * dds/DCPS/Registered_Data_Types.h:
 
-          Change the hash map using void* as the key to fix the build problem 
+          Change the hash map using void* as the key to fix the build problem
           on 64bits build.
 
 Tue Mar 14 12:37:29 USMST 2006  Yan Dai  <dai_y@ociweb.com>
@@ -881,15 +890,15 @@ Tue Mar 14 12:37:29 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           Changed the register_type() to use the_interface_repository_id
           comparison instead of  POA_TAO::DCPS::TypeSupport_ptr comparison.
           This would allow different TypeSupport instances of the same TypeSupport
-          type register with the same type name in the same domain pariticipant. 
+          type register with the same type name in the same domain pariticipant.
           The second (and subsequent) registrations are ignored.
 
         * tests/DCPS/MultiDPTest/subscriber.cpp:
 
-          Added a test case that registers different TypeSupport instances of 
+          Added a test case that registers different TypeSupport instances of
           the same TypeSupport type using the same type name in a domain
           participant.
-                    
+
 Mon Mar 13 14:50:00 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * tests/DCPS/MultiDPTest/subscriber.cpp:
