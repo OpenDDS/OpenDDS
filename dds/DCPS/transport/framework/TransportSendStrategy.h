@@ -28,7 +28,7 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class TAO_DdsDcps_Export TransportSendStrategy 
+    class TAO_DdsDcps_Export TransportSendStrategy
       : public RcObject<ACE_SYNCH_MUTEX>,
         public ThreadSynchWorker
     {
@@ -97,9 +97,9 @@ namespace TAO
         /// The send mode is set to the mode before suspend which is either MODE_QUEUE
         /// or MODE_DIRECT.
         void resume_send ();
-        
+
         /// This is called whenver the connection is lost and reconnect fails.
-        /// It removes all samples in the backpressure queue and packet queue. 
+        /// It removes all samples in the backpressure queue and packet queue.
         void terminate_send ();
 
       protected:
@@ -132,7 +132,7 @@ namespace TAO
         enum UseDelayedNotification
         {
           NOTIFY_IMMEADIATELY,
-          DELAY_NOTIFICATION,
+          DELAY_NOTIFICATION
         };
 
         /// Called from send() when it is time to attempt to send our
@@ -175,7 +175,7 @@ namespace TAO
         int adjust_packet_after_send(ssize_t num_bytes_sent,
                                      UseDelayedNotification delay_notification);
 
-        /// This is called by perform_work() after it has sent 
+        /// This is called by perform_work() after it has sent
         void send_delayed_notifications();
 
         typedef BasicQueue<TransportQueueElement> QueueType;
@@ -183,18 +183,18 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        enum SendMode { 
-          // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so 
+        enum SendMode {
+          // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so
           // we can check if the resume_send is paired with suspend_send.
-          MODE_NOT_SET,    
+          MODE_NOT_SET,
           // Send out the sample with current packet.
           MODE_DIRECT,
           // The samples need be queued because of the backpressure or partial send.
           MODE_QUEUE,
-          // The samples need be queued because the connection is lost and we are 
+          // The samples need be queued because the connection is lost and we are
           // trying to reconnect.
           MODE_SUSPEND,
-          // The samples need be dropped since we lost connection and could not 
+          // The samples need be dropped since we lost connection and could not
           // reconnect.
           MODE_TERMINATED
         };
@@ -265,7 +265,7 @@ namespace TAO
 
         /// This mode remembers the mode before send is suspended and is
         /// used after the send is resumed because the connection is
-        /// re-established. 
+        /// re-established.
         SendMode mode_before_suspend_;
 
         /// Used for delayed notifications when performing work.
@@ -274,7 +274,7 @@ namespace TAO
 
         /// Allocator for header data block.
         TransportMessageBlockAllocator header_db_allocator_;
-        
+
         /// Allocator for header message block.
         TransportDataBlockAllocator header_mb_allocator_;
 
