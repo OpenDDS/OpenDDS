@@ -48,13 +48,15 @@ void TAO_DDS_DCPSDataWriter_i::add_associations (
 
 
 void TAO_DDS_DCPSDataWriter_i::remove_associations (
-    const TAO::DCPS::ReaderIdSeq & readers
+    const TAO::DCPS::ReaderIdSeq & readers,
+    ::CORBA::Boolean notify_lost
     ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
+    ACE_UNUSED_ARG (notify_lost);
     CORBA::ULong length = readers.length();
 
     ACE_DEBUG((LM_DEBUG,

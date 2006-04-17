@@ -1,3 +1,15 @@
+Sun Apr 16 22:32:55 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+
+          Added the notify_lost bool parameter to the remove_association()
+          method which overrides the virtual methods in
+          TAO::DCPS::DataReaderImpl/DataWriterImpl. This should fix the
+          test failure on remove_association.
+
 Sun Apr 16 21:43:11 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendListener.cpp:

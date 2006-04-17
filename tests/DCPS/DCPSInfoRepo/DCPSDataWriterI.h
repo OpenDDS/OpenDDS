@@ -60,7 +60,8 @@ public:
     ));
 
   virtual void remove_associations (
-      const TAO::DCPS::ReaderIdSeq & readers
+      const TAO::DCPS::ReaderIdSeq & readers,
+      ::CORBA::Boolean notify_lost
       ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((

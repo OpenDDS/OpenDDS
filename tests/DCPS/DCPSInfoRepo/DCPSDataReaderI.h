@@ -61,7 +61,8 @@ public:
     ));
 
   virtual void remove_associations (
-      const TAO::DCPS::WriterIdSeq & writers
+      const TAO::DCPS::WriterIdSeq & writers,
+      ::CORBA::Boolean notify_lost
       ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
