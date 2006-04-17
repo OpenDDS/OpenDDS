@@ -19,9 +19,38 @@ New to this version are the following changes:
     No heap allocations are in the write -> read code path for 
     value types containing scalars (no arrays, sequences or strings).
 
-  - Supported the SimpleTCP connection re-establishment and the 
-    lost publication/subscription callbacks upon the retry connect
-    failure. The main changes are:
+  - Uninlined some unnecessary inlines to reduce the footprint.
+
+  - Added DDS_HAS_MINIMUM_BIT macro to build without Built In Topic 
+    support. Defining the macro to NOT build BIT support.
+
+  - Made the DCPSInfoRepo register with IOR table as well as providing
+    the ior file to provide alternate schemes of distributing the object 
+    reference and made the DCPSInfoRepo object reference to be persistent
+    to simplify deployment.
+
+  - Added an option -DCPSInfoRepo to replace -DCPSInfo option and deprecated 
+    -DCPSInfo option.
+
+  - Fixes a bug in Registered_Data_Types that causes multiple domain participants
+    within the same domain in a process can not register same data types. 
+
+  - Fixed DDS application failure between the publisher and subscriber on different
+    endianess machines. The byte order is set upon data serializing and de-serializing.
+    The swap_bytes configuration value per TransportImpl instance is also appropriately
+    used to allow different transports use different setting of swap_bytes.
+
+  - Added TypeSupport::get_type_name() support. If a nil type name is supplied by
+    user to register type support then the default type name - the interface repository
+    id is used.
+
+  - Supported the SimpleTCP connection re-establishment and the lost 
+    publication/subscription callbacks upon the retry connect failure. During 
+    reconnecting, the messages are queued until the reconnecting is done. If 
+    the reconnecting succeeds, the messages are sent out. Otherwise the messages 
+    are discarded.
+
+    The main changes are:
             
     1) Added new idl interfaces - TAO::DataReaderListener and 
        TAO::DataWriterListener to support the on_subscription_lost 
@@ -72,7 +101,7 @@ New to this version are the following changes:
         passive_reconnect_duration=
 
     Implemenation details:
-    a) A new interface - relink() is added to both receive
+     a) A new interface - relink() is added to both receive
        and send strategy. The relink () is called whenever send or
        recv call fails. The acceptor/connector role of a connection
        object represents does not change during reconnecting. The 
