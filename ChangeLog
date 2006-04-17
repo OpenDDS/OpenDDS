@@ -1,3 +1,9 @@
+Mon Apr 17 09:45:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added release notes for main changes after 0.7 release.
+          
 Sun Apr 16 22:32:55 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
