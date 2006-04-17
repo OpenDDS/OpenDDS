@@ -36,6 +36,7 @@ TAO::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
                                                   bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
+  ACE_UNUSED_ARG(dropped_by_transport);
   ACE_ERROR((LM_ERROR,
              "(%P|%t) ERROR: Subclass should override if sending control samples."));
 }

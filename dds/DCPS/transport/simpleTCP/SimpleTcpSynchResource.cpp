@@ -20,10 +20,12 @@ int
 TAO::DCPS::SimpleTcpSynchResource::wait_to_unclog()
 {
   DBG_ENTRY("SimpleTcpSynchResource","wait_to_unclog");
-
-
+ 
+  ACE_Time_Value* timeout = 0;
+  if (this->max_output_pause_period_ != ACE_Time_Value::zero)
+    timeout = &this->max_output_pause_period_;
   // Wait for the blocking to subside or timeout.
-  if (ACE::handle_write_ready(this->handle_, &this->max_output_pause_period_) == -1)
+  if (ACE::handle_write_ready(this->handle_, timeout) == -1)
     {
       if (errno == ETIME)
         {
