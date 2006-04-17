@@ -1,3 +1,15 @@
+Sun Apr 16 21:43:11 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        
+          Fixed a compilation warning due to an unused variable.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+
+          Fixed a bug on wait_to_unclog that passes an ACE_Time_Value::zero
+          to handle_write_ready instance of 0 as the timeout parameter. 
+          This would fix the TCPListener performance test.
+
 Sun Apr 16 21:53:02 2006  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
