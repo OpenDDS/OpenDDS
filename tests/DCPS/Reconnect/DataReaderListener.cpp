@@ -33,7 +33,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
-      ACE_DEBUG ((LM_DEBUG , 
+      ACE_DEBUG ((LM_DEBUG ,
         "(%P|%t)read: _narrow failed.\n"));
       exit(1);
     }
@@ -76,7 +76,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
     const DDS::RequestedDeadlineMissedStatus &)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_requested_deadline_missed\n"));
 }
 
@@ -85,7 +85,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
     const DDS::RequestedIncompatibleQosStatus &)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_requested_incompatible_qos\n"));
 }
 
@@ -94,7 +94,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
     const DDS::LivelinessChangedStatus &)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_liveliness_changed\n"));
 }
 
@@ -103,7 +103,7 @@ void DataReaderListenerImpl::on_subscription_match (
     const DDS::SubscriptionMatchStatus &)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_subscription_match\n"));
 }
 
@@ -112,7 +112,7 @@ void DataReaderListenerImpl::on_sample_rejected(
     const DDS::SampleRejectedStatus&)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_sample_rejected\n"));
 }
 
@@ -121,23 +121,23 @@ void DataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus&)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_sample_lost\n"));
 }
 
 void DataReaderListenerImpl::on_subscription_lost (
-  DDS::DataReader_ptr reader,
+  DDS::DataReader_ptr,
   const ::TAO::DCPS::SubscriptionLostStatus & status)
   throw (CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG , 
+  ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_subscription_lost "
     "total_count=%d total_count_change=%d \n",
     status.total_count, status.total_count_change));
 
   for (CORBA::Long i = 0; i < status.total_count; ++i)
   {
-    ACE_DEBUG ((LM_DEBUG , 
+    ACE_DEBUG ((LM_DEBUG ,
       "(%P|%t)Lost subscription to writer %d \n", status.publication_handles[i]));
   }
 }
