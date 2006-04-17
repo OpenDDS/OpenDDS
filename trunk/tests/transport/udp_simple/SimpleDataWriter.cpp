@@ -126,7 +126,7 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;
@@ -142,14 +142,14 @@ SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
   DBG_ENTRY("SimpleDataWriter","data_dropped");
 
   ACE_UNUSED_ARG(sample);
-
+  ACE_UNUSED_ARG(dropped_by_transport);
   ACE_DEBUG((LM_DEBUG,
              "(%P|%t) The transport has confirmed that a sample has "
              "been dropped.\n"));
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;

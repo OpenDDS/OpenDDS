@@ -107,8 +107,8 @@ void DataReaderListenerImpl::on_sample_lost(
 }
 
 void DataReaderListenerImpl::on_subscription_lost (
-  DDS::DataReader_ptr reader,
-  const ::TAO::DCPS::SubscriptionLostStatus & status)
+  DDS::DataReader_ptr,
+  const ::TAO::DCPS::SubscriptionLostStatus &)
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;

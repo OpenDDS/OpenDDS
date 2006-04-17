@@ -1,3 +1,24 @@
+Sun Apr 16 21:53:02 2006  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+
+          More scoreboard directed cleanup.
+
+        * tests/DCPS/FooTest4/main.cpp:
+
+          This change from std::string to ACE_CString was not dictated by
+          the nightly scoreboard, but my local PC failed to compile the
+          test as provided with std::string. This is on my home x86-32
+          running Linux 2.6.10-1.770_FC2 with gcc version 3.3.3 20040412
+          (Red Hat Linux 3.3.3-7). I felt it was not a big deal to add the
+          ACE_CString since the test code is already linking in ACE to do
+          parameter parsing.
+
 Sun Apr 16 07:30:45 2006  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

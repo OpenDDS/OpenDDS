@@ -60,15 +60,15 @@ parse_args (int argc,
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
-  while (arg_shifter.is_anything_left ()) 
+  while (arg_shifter.is_anything_left ())
   {
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
     {
       arg_shifter.consume_arg ();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -261,9 +261,9 @@ checkValues( const Values& expected, const Values& observed)
     std::cout << ")." << std::endl ;
     failed = true;
   }
-  if( (expected.wstringValue != 0) && (0 != ACE_OS::strcmp( expected.stringValue, observed.stringValue))) {
-    ACE::format_hexdump( (char*)&(expected.stringValue), ACE_OS::strlen(expected.stringValue), ebuffer, sizeof(ebuffer)) ;
-    ACE::format_hexdump( (char*)&(observed.stringValue), ACE_OS::strlen(observed.stringValue), obuffer, sizeof(obuffer)) ;
+  if( (expected.stringValue != 0) && (0 != ACE_OS::strcmp( expected.stringValue, observed.stringValue))) {
+    ACE::format_hexdump( expected.stringValue, ACE_OS::strlen(expected.stringValue), ebuffer, sizeof(ebuffer)) ;
+    ACE::format_hexdump( observed.stringValue, ACE_OS::strlen(observed.stringValue), obuffer, sizeof(obuffer)) ;
     std::cout << "string values not correct after insertion and extraction." << std::endl ;
     std::cout << "(expected: " << expected.stringValue << "/" << ebuffer ;
     std::cout << ", observed: " << observed.stringValue << "/" << obuffer ;
@@ -271,8 +271,8 @@ checkValues( const Values& expected, const Values& observed)
     failed = true;
   }
   if( (expected.wstringValue != 0) && (0 != ACE_OS::strcmp( expected.wstringValue, observed.wstringValue))) {
-    ACE::format_hexdump( (char*)&(expected.wstringValue), ACE_OS::strlen(expected.wstringValue), ebuffer, sizeof(ebuffer)) ;
-    ACE::format_hexdump( (char*)&(observed.wstringValue), ACE_OS::strlen(observed.wstringValue), obuffer, sizeof(obuffer)) ;
+    ACE::format_hexdump( reinterpret_cast<char*>(expected.wstringValue), ACE_OS::strlen(expected.wstringValue), ebuffer, sizeof(ebuffer)) ;
+    ACE::format_hexdump( reinterpret_cast<char*>(observed.wstringValue), ACE_OS::strlen(observed.wstringValue), obuffer, sizeof(obuffer)) ;
     std::cout << "wstring values not correct after insertion and extraction." << std::endl ;
     std::cout << "(expected: " << expected.wstringValue << "/" << ebuffer ;
     std::cout << ", observed: " << observed.wstringValue << "/" << obuffer ;
@@ -406,7 +406,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   parse_args (argc, argv);
 
-  ACE_CDR::Char*  string = "This is a test of the string serialization." ;
+  const ACE_CDR::Char *string = "This is a test of the string serialization.";
   ACE_CDR::WChar* wstring = 0 ;
 
   Values expected = { 0x01,
@@ -425,7 +425,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 #endif
                       0x1a,
                       0xb2,
-                      string,
+                      const_cast<char *>(string),
                       wstring
                     } ;
   Values observed ;
@@ -498,14 +498,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   checkArrayValues( expectedArray, observedArray) ;
   testchain->release() ;
 
-  if (failed) 
+  if (failed)
   {
     std::cerr << std::endl << "SerializerTest FAILED" << std::endl;
   }
-  else 
+  else
   {
     std::cout << std::endl << "SerializerTest PASSED" << std::endl;
   }
   return failed;
 }
-
