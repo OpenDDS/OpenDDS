@@ -1,3 +1,11 @@
+Wed Apr 19 13:04:26 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+
+          Added inheritance from portableserver base project for subscriber. 
+          This would resolve compilation errors shown on static builds on linux 
+          platforms.
+
 Mon Apr 17 09:45:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
