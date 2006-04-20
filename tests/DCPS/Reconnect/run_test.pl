@@ -164,7 +164,9 @@ if ($ir != 0) {
     $status = 1;
 }
 
-close(TESTOUTPUT);
+# Stop capturing the output
+close(STDERR);
+open(STDERR, ">&SAVEERR");
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
