@@ -1,3 +1,22 @@
+Wed Apr 19 19:13:01 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        
+          Added tests/DCPS/Reconnect tests.
+          
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        
+          Added more options to publisher and subscriber to help automate the
+          reconnect tests. Changed run_test.pl to redirect the output to a log 
+          file so that errors due to an abnormal shutdown and lost connection
+          will not show on scoreboard. The final output "test PASSED" or 
+          "test FAILED" will show the test result.
+
 Wed Apr 19 13:04:26 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_0/FooTest3_0.mpc:

@@ -31,11 +31,14 @@ const char* sub_finished_filename = "subscriber_finished.txt";
 int num_writes_before_crash = 0;
 int num_writes = 10;
 int write_delay_ms = 1000;
+int expected_lost_pub_notification = 0;
+int actual_lost_pub_notification = 0;
+
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "va:n:i:");
+  ACE_Get_Opt get_opts (argc, argv, "va:n:i:l:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -53,11 +56,18 @@ int parse_args (int argc, char *argv[])
       case 'i':
         write_delay_ms = ACE_OS::atoi (get_opts.opt_arg ());
         break;
+      case 'l':
+        expected_lost_pub_notification = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s "
-                           "-a <num_reads_before_crash> -v "
+                           "-a <num_reads_before_crash> "
+                           "-n <num_writers> "
+                           "-i <write_delay_ms> "
+                           "-l <expected_lost_pub_notification> "
+                           "-v "
                            "\n",
                            argv [0]),
                           -1);
@@ -240,6 +250,14 @@ int main (int argc, char *argv[]) {
     cerr << "Exception caught in main.cpp:" << endl
          << e << endl;
     exit(1);
+  }
+
+  if (actual_lost_pub_notification != expected_lost_pub_notification)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_publication_lost called %d times "
+      "and expected %d times\n", actual_lost_pub_notification, 
+      expected_lost_pub_notification));
+    return 1;
   }
 
   return 0;

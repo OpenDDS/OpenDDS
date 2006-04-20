@@ -30,13 +30,16 @@ const char* sub_finished_filename = "subscriber_finished.txt";
 
 int num_expected_reads = 10;
 int num_reads_before_crash = 0;
-int num_reads_in_range = 0;
+int num_reads_deviation = 0;
 int read_delay_ms = 0;
+int expected_lost_sub_notification = 0;
+int actual_lost_sub_notification = 0;
+int end_with_publisher = 0;
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vn:a:ri:");
+  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -52,17 +55,28 @@ int parse_args (int argc, char *argv[])
         num_reads_before_crash = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case 'r':
-        num_reads_in_range = 1;
+        num_reads_deviation = ACE_OS::atoi (get_opts.opt_arg ());
         break;      
       case 'i':
         read_delay_ms = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
+      case 'l':
+        expected_lost_sub_notification = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
+      case 'e':
+        end_with_publisher = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s "
                            "-n <num_expected_reads> "
-                           "-a <num_reads_before_crash> -v "
+                           "-a <num_reads_before_crash> "
+                           "-d <num_reads_deviation> "
+                           "-i <read_delay_ms> "
+                           "-l <expected_lost_sub_notification> "
+                           "-t <end_with_publisher> "
+                           "-v "
                            "\n",
                            argv [0]),
                           -1);
@@ -200,8 +214,7 @@ int main (int argc, char *argv[])
 
     // Since the publisher continue sending while the subscriber crashes,
     // some messages may be lost, we lower the num_expected_reads by 2.
-    if (num_reads_in_range)
-      num_expected_reads -= 2;
+    num_expected_reads -= num_reads_deviation;
 
     FILE* writers_completed = 0;
     int timeout_writes = 0;
@@ -212,6 +225,22 @@ int main (int argc, char *argv[])
       if (writers_completed == 0) {
         writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
         if (writers_completed != 0) {
+          if (end_with_publisher)
+          {
+            // Since we are in the "bp_timeout" test case that publisher 
+            // close connection when backpressure last longer than 
+            // max_output_pause_period, the publisher ends as it finishes
+            // sending. As the subscriber sees the publisher is done, it 
+            // changes the read_delay_ms to 0 so it can read all received 
+            // messages and them announce it completed.
+
+            int old_read_delay_ms = read_delay_ms;
+            read_delay_ms = 0;
+            // Give time to finish reading. 
+            ACE_OS::sleep (old_read_delay_ms/1000 * 2);
+            break;
+          }
+
           //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
           fscanf (writers_completed, "%d\n", &timeout_writes);
           num_expected_reads -= timeout_writes;
@@ -249,6 +278,14 @@ int main (int argc, char *argv[])
 
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in main ():" << endl << e << endl;
+    return 1;
+  }
+
+  if (actual_lost_sub_notification != expected_lost_sub_notification)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_subscription_lost called %d times "
+      "and expected %d times\n", actual_lost_sub_notification, 
+      expected_lost_sub_notification));
     return 1;
   }
 
