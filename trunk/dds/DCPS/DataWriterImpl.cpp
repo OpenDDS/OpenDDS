@@ -1328,7 +1328,8 @@ namespace TAO
     }
 
     void 
-    DataWriterImpl::data_dropped (DataSampleListElement* element, bool dropped_by_transport)
+    DataWriterImpl::data_dropped (DataSampleListElement* element, 
+                                  bool dropped_by_transport)
     {
       DBG_ENTRY("DataWriterImpl","data_dropped");
       this->data_container_->data_dropped (element, dropped_by_transport);
@@ -1337,7 +1338,8 @@ namespace TAO
     }
 
     void 
-    DataWriterImpl::control_dropped (ACE_Message_Block* sample) 
+    DataWriterImpl::control_dropped (ACE_Message_Block* sample,
+                                     bool dropped_by_transport) 
     {
       DBG_ENTRY("DataWriterImpl","data_delivered");
       control_dropped_count_ ++;

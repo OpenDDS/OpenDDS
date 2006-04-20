@@ -361,7 +361,7 @@ namespace TAO
     * This is called by transport to notify that the control
     * message is dropped.
     */
-    void control_dropped(ACE_Message_Block* sample);
+    void control_dropped(ACE_Message_Block* sample, bool dropped_by_transport);
 
 
     /**

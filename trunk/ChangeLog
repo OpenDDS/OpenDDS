@@ -1,3 +1,14 @@
+Thu Apr 20 13:40:46 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+
+          Updated the data_dropped() method signature to be same as in the base
+          class TransportSendListener. This would fix the errors 
+          "ERROR: Subclass should override if sending control samples. "
+          when the transport drops the control messages due to a lost 
+          connection.
+
 Wed Apr 19 19:13:01 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
