@@ -79,7 +79,6 @@ Writer::svc ()
       }
 
       message.count++;
-
       if (write_delay_ms > 0)
         ACE_OS::sleep (ACE_Time_Value (write_delay_ms/1000, write_delay_ms%1000*1000));
 
@@ -113,3 +112,5 @@ Writer::get_timeout_writes () const
 {
   return timeout_writes_.value ();
 }
+
+

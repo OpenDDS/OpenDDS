@@ -9,6 +9,7 @@
 
 extern int num_reads_before_crash;
 extern int read_delay_ms;
+extern int actual_lost_sub_notification;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
@@ -130,6 +131,8 @@ void DataReaderListenerImpl::on_subscription_lost (
   const ::TAO::DCPS::SubscriptionLostStatus & status)
   throw (CORBA::SystemException)
 {
+  ++ actual_lost_sub_notification;
+
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataReaderListenerImpl::on_subscription_lost "
     "total_count=%d total_count_change=%d \n",

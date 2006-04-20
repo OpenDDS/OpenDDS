@@ -8,6 +8,7 @@
 #include <ace/streams.h>
 
 extern int num_reads_before_crash;
+extern int actual_lost_pub_notification;
 
 // Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl()
@@ -84,6 +85,7 @@ void DataWriterListenerImpl::on_publication_lost (
   ::CORBA::SystemException
   ))
 {
+  ++ actual_lost_pub_notification;
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t)DataWriterListenerImpl::on_publication_lost "
     "total_count=%d total_count_change=%d \n",
