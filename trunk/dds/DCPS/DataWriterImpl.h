@@ -407,6 +407,8 @@ namespace TAO
 
     void remove_all_associations();
 
+    void notify_publication_disconnected (const ReaderIdSeq& subids);
+    void notify_publication_reconnected (const ReaderIdSeq& subids);
     void notify_publication_lost (const ReaderIdSeq& subids);
  
     /// Statistics counter.
@@ -464,6 +466,10 @@ namespace TAO
       /// Send the liveliness message.
       void send_liveliness (const ACE_Time_Value& now);
 
+      /// Convert the subscription repo ids to the subscription handle.
+      void repo_ids_to_instance_handles (const ReaderIdSeq& ids, 
+                                         ::DDS::InstanceHandleSeq & hdls);
+
       /// The name of associated topic.
       CORBA::String_var               topic_name_;
       /// The associated topic repository id.
@@ -512,8 +518,14 @@ namespace TAO
       ::DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
       ::DDS::PublicationMatchStatus       publication_match_status_ ;
 
+      // TODO: 
+      // The publication_lost_status_ and publication_reconnecting_status_
+      // are left here for future use when we add get_publication_lost_status() and 
+      // get_publication_reconnecting_status() methods.
       // Statistics of the lost publications due to lost connection.
       PublicationLostStatus               publication_lost_status_;
+      // Statistics of the publications that associates with a reconnecting datalink.
+      // PublicationReconnectingStatus       publication_reconnecting_status_;
 
       /// The message block allocator.
       MessageBlockAllocator*     mb_allocator_;

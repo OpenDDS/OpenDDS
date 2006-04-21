@@ -156,12 +156,26 @@ module TAO {
   module DCPS {
 
     struct PublicationLostStatus {
-      long total_count;
-      long total_count_change;
       ::DDS::InstanceHandleSeq subscription_handles;
     };
 
+    typedef PublicationLostStatus PublicationDisconnectedStatus;
+    typedef PublicationLostStatus PublicationReconnectedStatus;
+
     interface DataWriterListener : ::DDS::DataWriterListener {
+
+      // Called when a connection failure has been detected 
+      // and there are still associations using the connection
+      // after the configurable graceful_disconnected_period.
+      void on_publication_disconnected(
+        in ::DDS::DataWriter reader,
+        in PublicationDisconnectedStatus status);
+
+      // Called when a disconnected connection
+      // has been reconnected.
+      void on_publication_reconnected(
+        in ::DDS::DataWriter reader,
+        in PublicationReconnectedStatus status);
 
       // called when a connection is lost and hence one
       // or more associations from this publication to

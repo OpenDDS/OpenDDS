@@ -32,6 +32,12 @@ namespace TAO
     {
       public:
 
+        enum ConnectionNotice{ 
+          DISCONNECTED,
+          RECONNECTED,
+          LOST
+        };
+
         /// A DataLink object is always created by a TransportImpl object.
         /// Thus, the TransportImpl object passed-in here is the object that
         /// created this DataLink.
@@ -89,11 +95,12 @@ namespace TAO
         /// by calling this method.
         void transport_shutdown();
 
-        /// Notify the datawriters and datareaders the lost 
-        /// publication/subscription due to a connection problem.
-        void notify_lost ();
-
-      protected:
+        /// Notify the datawriters and datareaders that the connection is
+        /// disconnected, lost, or reconnected. The datareader/datawriter 
+        /// will notify the corresponding listener.
+        void notify (enum ConnectionNotice notice);
+      
+       protected:
 
         /// This is how the subclass "announces" to this DataLink base class
         /// that this DataLink has now been "connected" and should start
@@ -126,6 +133,9 @@ namespace TAO
         TransportReceiveStrategy_rch receive_strategy_;
 
       private:
+
+        /// Helper function to output the enum as a string to help debugging.
+        const char* connection_notice_as_str (enum ConnectionNotice notice);
 
         /// Used by release_reservations() once it has determined that the
         /// remote_id being released is, in fact, a remote subscriber id.

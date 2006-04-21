@@ -126,6 +126,37 @@ void DataReaderListenerImpl::on_sample_lost(
     "(%P|%t)DataReaderListenerImpl::on_sample_lost\n"));
 }
 
+
+void DataReaderListenerImpl::on_subscription_disconnected (
+  DDS::DataReader_ptr,
+  const ::TAO::DCPS::SubscriptionDisconnectedStatus & status)
+  throw (CORBA::SystemException)
+{
+  CORBA::ULong len = status.publication_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
+  {
+    cout << "on_subscription_disconnected writer " << status.publication_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_subscription_disconnected  writer %d \n", status.publication_handles[i]));
+  }
+}
+
+
+void DataReaderListenerImpl::on_subscription_reconnected (
+  DDS::DataReader_ptr,
+  const ::TAO::DCPS::SubscriptionReconnectedStatus & status)
+  throw (CORBA::SystemException)
+{
+  CORBA::ULong len = status.publication_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
+  {
+    cout << "on_subscription_reconnected writer " << status.publication_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_subscription_reconnected  writer %d \n", status.publication_handles[i]));
+  }
+}
+
+
 void DataReaderListenerImpl::on_subscription_lost (
   DDS::DataReader_ptr,
   const ::TAO::DCPS::SubscriptionLostStatus & status)
@@ -133,14 +164,11 @@ void DataReaderListenerImpl::on_subscription_lost (
 {
   ++ actual_lost_sub_notification;
 
-  ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_subscription_lost "
-    "total_count=%d total_count_change=%d \n",
-    status.total_count, status.total_count_change));
-
-  for (CORBA::Long i = 0; i < status.total_count; ++i)
+  CORBA::ULong len = status.publication_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
   {
-    ACE_DEBUG ((LM_DEBUG ,
-      "(%P|%t)Lost subscription to writer %d \n", status.publication_handles[i]));
+    cout << "on_subscription_lost writer " << status.publication_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_subscription_lost  writer %d \n", status.publication_handles[i]));
   }
 }

@@ -74,8 +74,6 @@ namespace TAO
         publication_match_status_.total_count = 0; 
         publication_match_status_.total_count_change = 0;
         publication_match_status_.last_subscription_handle = ::DDS::HANDLE_NIL; 
-        publication_lost_status_.total_count = 0;
-        publication_lost_status_.total_count_change = 0;
       }
       
     // This method is called when there are no longer any reference to the 
@@ -1468,12 +1466,67 @@ namespace TAO
 
 
     void 
+    DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
+    {
+      DBG_ENTRY("DataWriterImpl","notify_publication_disconnected");
+      PublicationDisconnectedStatus status;
+
+      this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_publication_disconnected (this->dw_remote_objref_.in (),
+                                                   status); 
+    }
+
+
+    void 
+    DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
+    {
+      DBG_ENTRY("DataWriterImpl","notify_publication_reconnected");
+      PublicationLostStatus status;
+
+      this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_publication_reconnected (this->dw_remote_objref_.in (),
+                                                  status); 
+    }
+
+   
+    void 
     DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
     {
       DBG_ENTRY("DataWriterImpl","notify_publication_lost");
-      DDS::InstanceHandleSeq subhdls;
+      PublicationLostStatus status;
 
-      CORBA::ULong cur_sz = subids.length ();
+      this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_publication_lost (this->dw_remote_objref_.in (),
+                                           status); 
+    }
+
+
+    void 
+    DataWriterImpl::repo_ids_to_instance_handles (const ReaderIdSeq& ids, 
+                                                  ::DDS::InstanceHandleSeq & hdls)
+    {
+      CORBA::ULong cur_sz = ids.length ();
       // TBD: Remove the condition check after we change to default support 
       //      builtin topics.
       if (TheServiceParticipant->get_BIT () == true)
@@ -1487,69 +1540,26 @@ namespace TAO
           ::DDS::ReturnCode_t ret 
             = hh.repo_ids_to_instance_handles(participant_servant_, 
                                               BUILT_IN_SUBSCRIPTION_TOPIC, 
-                                              subids, 
-                                              subhdls);
+                                              ids, 
+                                              hdls);
           
           if (ret != ::DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::notify_publication_lost, ")
-                          ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
+                          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::repo_ids_to_instance_handles failed\n")));
               return;
             }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
         }
       else
         {
-          subhdls.length (cur_sz);
+          hdls.length (cur_sz);
           for (CORBA::ULong i = 0; i < cur_sz; i++)
             {
-              subhdls[i] = subids[i];
+              hdls[i] = ids[i];
             }
         }
-
-      PublicationLostStatus status;
-      status.total_count = 0;
-      status.total_count_change = 0;
-
-      // Since this callback might be called multiple times by the transport,
-      // we need make sure we are not adding duplicated reader ids to the 
-      // publication_lost_status_.
-      for (CORBA::ULong i = 0; i < cur_sz; i++)
-        {
-          bool is_new_hdl = true;
-          CORBA::ULong total_sz = publication_lost_status_.subscription_handles.length ();
-          for (CORBA::ULong j = 0; j < total_sz; j++)
-            {
-              if (subhdls[i] == publication_lost_status_.subscription_handles[j])
-                is_new_hdl = false;
-            }
-
-          if (is_new_hdl)
-            {
-              ++ status.total_count;
-              ++ status.total_count_change;
-              CORBA::ULong sz = status.subscription_handles.length ();
-              status.subscription_handles.length (sz + 1);
-              status.subscription_handles[sz] = subhdls[i];
-              
-              ++ publication_lost_status_.total_count;
-              ++ publication_lost_status_.total_count_change;
-              sz = publication_lost_status_.subscription_handles.length ();
-              publication_lost_status_.subscription_handles.length (sz + 1);
-              publication_lost_status_.subscription_handles[sz] = subhdls[i];
-            }
-         }
-
-      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-      // is given to this DataWriter then narrow() fails.
-      DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
-
-      if (! CORBA::is_nil (the_listener.in ()))
-        the_listener->on_publication_lost (this->dw_remote_objref_.in (),
-                                           status); 
-    }
-
+     }
   } // namespace DCPS
 } // namespace TAO
 
