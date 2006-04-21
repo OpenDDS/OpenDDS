@@ -117,6 +117,18 @@ New to this version are the following changes:
     to pretect the internal map in DataLinkSetMap to fix the 
     problem.
   
+  - Note: There is a limitation in the current transport implementation
+    which disallow the associations between a datareader and a datawriter
+    associated with the same topic in the same process. To workarround 
+    with this limitation, such datareader and datawriter need use different
+    TransportImpl object. Otherwise, there are such errors:
+ 
+    (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
+    (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
+    
+    
+    
+
 [] more!
 
 --- more notes on limitations ---

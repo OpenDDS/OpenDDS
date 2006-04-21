@@ -1,3 +1,9 @@
+Fri Apr 21 11:42:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added note for a transport limitation.
+
 Fri Apr 21 10:17:51 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
