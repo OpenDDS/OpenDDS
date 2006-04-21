@@ -1,3 +1,25 @@
+Fri Apr 21 10:17:51 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Corrected incorrect parameter order in a logging message.
+          
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+
+          Added the new on_*_disconnected and on_*_reconnected to the listener
+          implementations.
+          
 Fri Apr 21 01:09:00 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         The main changes are made to add the on_*_reconnected and on_*_disconnected

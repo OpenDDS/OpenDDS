@@ -59,6 +59,24 @@ virtual void on_publication_match (
     CORBA::SystemException
   ));
 
+virtual void on_publication_disconnected (
+    ::DDS::DataWriter_ptr writer,
+    const ::TAO::DCPS::PublicationDisconnectedStatus & status
+    ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ));
+
+virtual void on_publication_reconnected (
+    ::DDS::DataWriter_ptr writer,
+    const ::TAO::DCPS::PublicationReconnectedStatus & status
+    ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ));
+
 virtual void on_publication_lost (
     ::DDS::DataWriter_ptr writer,
     const ::TAO::DCPS::PublicationLostStatus & status
@@ -67,7 +85,6 @@ virtual void on_publication_lost (
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ));
-
 };
 
 
