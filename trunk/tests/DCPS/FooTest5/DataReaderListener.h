@@ -82,6 +82,24 @@ public:
     CORBA::SystemException
   ));
 
+  virtual void on_subscription_disconnected (
+      ::DDS::DataReader_ptr reader,
+      const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
+      ACE_ENV_ARG_DECL_WITH_DEFAULTS
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
+
+  virtual void on_subscription_reconnected (
+      ::DDS::DataReader_ptr reader,
+      const ::TAO::DCPS::SubscriptionReconnectedStatus & status
+      ACE_ENV_ARG_DECL_WITH_DEFAULTS
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
+
   virtual void on_subscription_lost (
       ::DDS::DataReader_ptr reader,
       const ::TAO::DCPS::SubscriptionLostStatus & status

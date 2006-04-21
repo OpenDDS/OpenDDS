@@ -1329,7 +1329,7 @@ namespace TAO
       if (DCPS_debug_level >= 5)
         ACE_DEBUG((LM_DEBUG,"(%P|%t) WriterInfo::WriterInfo"
                   " added writer %d to reader %d", 
-                  reader_->subscription_id_, writer_id_));
+                  writer_id_, reader_->subscription_id_));
     }
 
     ACE_Time_Value 
