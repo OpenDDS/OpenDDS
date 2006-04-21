@@ -130,7 +130,7 @@ if ($Sub1Result != 0) {
 
 
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+$ir = $DCPSREPO->TerminateWaitKill(10);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
