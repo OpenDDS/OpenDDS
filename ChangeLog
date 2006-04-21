@@ -1,3 +1,61 @@
+Fri Apr 21 01:09:00 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        The main changes are made to add the on_*_reconnected and on_*_disconnected
+        new callbacks for RT8499.
+        
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        
+          Added the on_*_reconnected and on_*_disconnected callbacks
+          Updated the *LostStatus to just contain the instance handles
+          and typedef'd the *LostStatus as *DisconnectedStatus and
+          *ReconnectedStatus.
+                    
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        
+          Made the DataReader/DataWriter not cache the *LostStatus and 
+          added notify_*_diconnected and notify_*_reconnected to support
+          the new callbacks.
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        
+          Updated the notify() function for DISCONNECTED, RECONNECTED and
+          LOST connection notification.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        
+          On active connection side, made the disconnected callback called
+          before reconnect, the reconnceted callback called after reconnect
+          succeeded and the lost connection callback called after reconnet
+          failed.
+          On passive connection side, made the disconnected callback called
+          before reconnectschedule the timer, the reconnceted callback called
+          when new connection is created and the lost connection callback
+          called after the passive_reconnect_duration_ period if not reconnected.
+          Updated some methods to correct the reconnect logic on the passive side.
+                    
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Changed to use the "old" connection object to transfer its state to
+          the "new" connection object instance of using "new" connection object
+          copy state from "old" connection object. This was changed since we
+          need synchronize the handle_timeout() and transfer state to "new"
+          connection object on the "old" connection object.
+          
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+
+          Added the new callback implementations.
+
 Fri Apr 21 00:01:11 UTC 2006  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:

@@ -12,7 +12,8 @@ ACE_INLINE
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
   is_connector_ (true),
-  connection_lost_notified_(false)
+  connection_lost_notified_(false),
+  passive_reconnect_timer_id_ (-1)
 {
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 }

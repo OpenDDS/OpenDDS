@@ -127,3 +127,17 @@ TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
   return 0;
 }
 
+
+ACE_INLINE
+const char* 
+TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
+{
+  static const char* NoticeStr[] = { "DISCONNECTED",
+                                     "RECONNECTED",
+                                     "LOST"
+                                   };
+
+  return NoticeStr [notice];
+}
+
+

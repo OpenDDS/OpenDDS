@@ -12,6 +12,7 @@
 #include  "Qos_Helper.h"
 #include  "TopicImpl.h"
 #include  "SubscriberImpl.h"
+#include  "dds/DCPS/transport/framework/EntryExit.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include  "BuiltInTopicUtils.h"
@@ -70,9 +71,6 @@ namespace TAO
         subscription_match_status_.last_publication_handle =
             ::DDS::HANDLE_NIL ;
         
-        subscription_lost_status_.total_count = 0;
-        subscription_lost_status_.total_count_change = 0;
-
         sample_lost_status_.total_count = 0 ;
         sample_lost_status_.total_count_change = 0 ;
 
@@ -1553,11 +1551,64 @@ namespace TAO
 
 
     void 
+    DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
+    {
+      DBG_ENTRY("DataReaderImpl","notify_subscription_disconnected");
+      SubscriptionLostStatus status;
+
+      this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+
+      // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+      // is given to this DataReader then narrow() fails.
+      DataReaderListener_var the_listener 
+        = DataReaderListener::_narrow (this->listener_.in ());
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
+                                            status); 
+    }
+
+
+    void 
+    DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
+    {
+      DBG_ENTRY("DataReaderImpl","notify_subscription_reconnected");
+      SubscriptionLostStatus status;
+
+      this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+
+      // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+      // is given to this DataReader then narrow() fails.
+      DataReaderListener_var the_listener 
+        = DataReaderListener::_narrow (this->listener_.in ());
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
+                                            status); 
+    }
+
+
+    void 
     DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
     {
-      DDS::InstanceHandleSeq pubhdls;
+      DBG_ENTRY("DataReaderImpl","notify_subscription_lost");
+      SubscriptionLostStatus status;
 
-      CORBA::ULong cur_sz = pubids.length ();
+      this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+
+      // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+      // is given to this DataReader then narrow() fails.
+      DataReaderListener_var the_listener 
+        = DataReaderListener::_narrow (this->listener_.in ());
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
+                                            status); 
+    }
+
+    
+    void 
+    DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids, 
+                                                  ::DDS::InstanceHandleSeq & hdls)
+    {
+      CORBA::ULong cur_sz = ids.length ();
       // TBD: Remove the condition check after we change to default support 
       //      builtin topics.
       if (TheServiceParticipant->get_BIT () == true)
@@ -1571,70 +1622,26 @@ namespace TAO
           ::DDS::ReturnCode_t ret 
             = hh.repo_ids_to_instance_handles(participant_servant_, 
                                               BUILT_IN_PUBLICATION_TOPIC, 
-                                              pubids, 
-                                              pubhdls);
+                                              ids, 
+                                              hdls);
           
           if (ret != ::DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_publication_lost, ")
-                          ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
+                          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::repo_ids_to_instance_handles failed \n")));
               return;
             }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
         }
       else
         {
-          pubhdls.length (cur_sz);
+          hdls.length (cur_sz);
           for (CORBA::ULong i = 0; i < cur_sz; i++)
             {
-              pubhdls[i] = pubids[i];
+              hdls[i] = ids[i];
             }
         }
-
-      
-      SubscriptionLostStatus status;
-      status.total_count = 0;
-      status.total_count_change = 0;
-
-      // Since this callback might be called multiple times by the transport,
-      // we need make sure we are not adding duplicated reader ids to the 
-      // subscription_lost_status_.
-      for (CORBA::ULong i = 0; i < cur_sz; i++)
-        {
-          bool is_new_hdl = true;
-          CORBA::ULong total_sz = subscription_lost_status_.publication_handles.length ();
-          for (CORBA::ULong j = 0; j < total_sz; j++)
-            {
-              if (pubhdls[i] == subscription_lost_status_.publication_handles[j])
-                is_new_hdl = false;
-            }
-
-          if (is_new_hdl)
-            {
-              ++ status.total_count;
-              ++ status.total_count_change;
-              CORBA::ULong sz = status.publication_handles.length ();
-              status.publication_handles.length (sz + 1);
-              status.publication_handles[sz] = pubhdls[i];
-              
-              ++ subscription_lost_status_.total_count;
-              ++ subscription_lost_status_.total_count_change;
-              sz = subscription_lost_status_.publication_handles.length ();
-              subscription_lost_status_.publication_handles.length (sz + 1);
-              subscription_lost_status_.publication_handles[sz] = pubhdls[i];
-            }
-         }
-
-      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-      // is given to this DataWriter then narrow() fails.
-      DataReaderListener_var the_listener 
-        = DataReaderListener::_narrow (this->listener_.in ());
-      if (! CORBA::is_nil (the_listener.in ()))
-        the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
-                                            status); 
-    }
-
+     }
   } // namespace DCPS
 } // namespace TAO
 

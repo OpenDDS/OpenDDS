@@ -76,6 +76,44 @@ void DataWriterListenerImpl::on_publication_match (
 }
 
 
+void DataWriterListenerImpl::on_publication_disconnected (
+  ::DDS::DataWriter_ptr,
+  const ::TAO::DCPS::PublicationDisconnectedStatus & status
+  ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+  ::CORBA::SystemException
+  ))
+{
+  CORBA::ULong len = status.subscription_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
+  {
+    cout << "on_publication_disconnected reader " << status.subscription_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_publication_disconnected reader %d \n", status.subscription_handles[i]));
+  }
+}
+
+
+void DataWriterListenerImpl::on_publication_reconnected (
+  ::DDS::DataWriter_ptr,
+  const ::TAO::DCPS::PublicationReconnectedStatus & status
+  ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+  ::CORBA::SystemException
+  ))
+{
+  CORBA::ULong len = status.subscription_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
+  {
+    cout << "on_publication_reconnected reader " << status.subscription_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_publication_reconnected reader %d \n", status.subscription_handles[i]));
+  }
+}
+
+
 void DataWriterListenerImpl::on_publication_lost (
   ::DDS::DataWriter_ptr,
   const ::TAO::DCPS::PublicationLostStatus & status
@@ -86,14 +124,12 @@ void DataWriterListenerImpl::on_publication_lost (
   ))
 {
   ++ actual_lost_pub_notification;
-  ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWriterListenerImpl::on_publication_lost "
-    "total_count=%d total_count_change=%d \n",
-    status.total_count, status.total_count_change));
 
-  for (CORBA::Long i = 0; i < status.total_count; ++i)
+  CORBA::ULong len = status.subscription_handles.length ();
+  for (CORBA::ULong i = 0; i < len; ++i)
   {
-    ACE_DEBUG ((LM_DEBUG ,
-      "(%P|%t)Lost publication to reader %d \n", status.subscription_handles[i]));
+    cout << "on_publication_lost reader " << status.subscription_handles[i] << endl;
+    //ACE_DEBUG ((LM_DEBUG ,
+    //  "(%P|%t)on_publication_lost reader %d \n", status.subscription_handles[i]));
   }
 }

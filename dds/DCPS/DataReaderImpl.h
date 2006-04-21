@@ -348,6 +348,8 @@ namespace TAO
 
       void remove_all_associations();
 
+      void notify_subscription_disconnected (const WriterIdSeq& pubids);
+      void notify_subscription_reconnected (const WriterIdSeq& pubids);
       void notify_subscription_lost (const WriterIdSeq& pubids);
 
     protected:
@@ -399,6 +401,11 @@ namespace TAO
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t         next_handle_;
     private:
+          
+      /// Convert the publication repo ids to the publication handle.
+      void repo_ids_to_instance_handles (const WriterIdSeq& ids, 
+                                         ::DDS::InstanceHandleSeq & hdls);
+
       friend class WriterInfo;
 
       TopicImpl*                      topic_servant_;
@@ -426,8 +433,15 @@ namespace TAO
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_ ;
       ::DDS::SubscriptionMatchStatus        subscription_match_status_ ;
 
+      // TODO: 
+      // The subscription_lost_status_ and subscription_reconnecting_status_
+      // are left here for future use when we add get_subscription_lost_status() and 
+      // get_subscription_reconnecting_status() methods.
       // Statistics of the lost subscriptions due to lost connection.
-      SubscriptionLostStatus                subscription_lost_status_;
+      SubscriptionLostStatus               subscription_lost_status_;
+      // Statistics of the subscriptions that are associated with a reconnecting datalink.
+      // SubscriptionReconnectingStatus       subscription_reconnecting_status_;
+
 
       /// The orb's reactor to be used to register the liveliness 
       /// timer.

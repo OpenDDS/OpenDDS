@@ -74,7 +74,7 @@ namespace TAO
         /// Return true if connection is connected.
         bool is_connected ();
 
-        void copy_states (SimpleTcpConnection* connection);
+        void transfer (SimpleTcpConnection* connection);
 
         int handle_timeout (const ACE_Time_Value &tv,
                             const void *arg);
@@ -89,7 +89,8 @@ namespace TAO
 
       private:
         
-        int reconnect_i (bool on_new_association);
+        int active_reconnect_i (bool on_new_association);
+        int passive_reconnect_i ();
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
@@ -119,11 +120,18 @@ namespace TAO
         /// SimpleTcpDataLink object. This is needed for checking if the connection is
         /// re-established as the acceptor side when timer goes off.
         SimpleTcpConnection_rch    conn_replacement_;
-        /// The flag true indicates reconnect fails and connection lost notification 
-        /// is sent. This flag also controls that the reconnect is attempted by
+
+        /// The flag true indicates active reconnect fails and connection lost notification 
+        /// is sent. This flag also controls that the active reconnect is attempted by
         /// a single thread if there are multiple threads that detect connection problem
         /// and both try to reconnect.
         bool connection_lost_notified_;
+
+        /// The id of the scheduled timer. The timer is scheduled to check if the connection
+        /// is re-established during the passive_reconnect_duration_. This id controls
+        /// that the timer is just scheduled once when there are multiple threads detect
+        /// the lost connection.
+        int passive_reconnect_timer_id_;
     };
 
   }

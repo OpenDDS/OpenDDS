@@ -61,6 +61,18 @@ public:
   )
   throw (CORBA::SystemException);
 
+  virtual void on_subscription_disconnected (
+    DDS::DataReader_ptr reader,
+    const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
+  )
+  throw (CORBA::SystemException);
+
+  virtual void on_subscription_reconnected (
+    DDS::DataReader_ptr reader,
+    const ::TAO::DCPS::SubscriptionReconnectedStatus & status
+  )
+  throw (CORBA::SystemException);
+
   virtual void on_subscription_lost (
     DDS::DataReader_ptr reader,
     const ::TAO::DCPS::SubscriptionLostStatus & status

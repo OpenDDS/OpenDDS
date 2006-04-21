@@ -114,7 +114,7 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 
   // Keep a "copy" of the reference to the connection object for ourselves.
   connection->_add_ref();
-  connection->copy_states (this->connection_.in ());
+  this->connection_->transfer (connection);
   this->connection_ = connection;
 
   SimpleTcpReceiveStrategy* rs 

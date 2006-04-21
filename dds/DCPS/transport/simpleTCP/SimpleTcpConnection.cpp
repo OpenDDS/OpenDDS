@@ -324,30 +324,50 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect");
   // Try to reconnect if it's connector previously.
-  if (this->is_connector_ && this->reconnect_i (on_new_association) == -1)
+  if (this->is_connector_ && this->active_reconnect_i (on_new_association) == -1)
     return -1;
    
   // Schedule a timer to see if a incoming connection is accepted when timeout.
-  if (! this->is_connector_)
+  if (! this->is_connector_ && this->passive_reconnect_i () == -1)
+    return -1;
+
+  return 0;
+}
+
+
+// This method is called on acceptor side when the lost connection is detected.
+// A timer is scheduled to check if a new connection is created within the 
+// passive_reconnect_duration_ period.
+int
+TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
+{
+  GuardType guard (this->reconnect_lock_);
+  
+  // The passive_reconnect_timer_id_ is used as flag to allow the timer scheduled just once.
+  if (this->passive_reconnect_timer_id_ == -1)
     {
-      // Mark the connection lost since the recv just failed.
-      this->connected_ = false;
+     // Mark the connection lost since the recv/send just failed.
+     this->connected_ = false;
 
-      // Give a copy to reactor.
-      this->_add_ref ();
-
-      if (this->tcp_config_->passive_reconnect_duration_ == 0)
+     if (this->tcp_config_->passive_reconnect_duration_ == 0)
         return -1;
 
       ACE_Time_Value timeout (this->tcp_config_->passive_reconnect_duration_/1000,
                               this->tcp_config_->passive_reconnect_duration_%1000 * 1000);
       SimpleTcpReceiveStrategy* rs 
         = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
-      if (rs->get_reactor()->schedule_timer(this, 0, timeout) == -1)
+
+      this->link_->notify (DataLink::DISCONNECTED);
+
+      // Give a copy to reactor.
+      this->_add_ref ();
+      this->passive_reconnect_timer_id_ = rs->get_reactor()->schedule_timer(this, 0, timeout);
+
+      if (this->passive_reconnect_timer_id_ == -1)
         {
           this->_remove_ref ();
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::reconnect, ")
+                            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i, ")
                             ACE_TEXT(" %p. \n"), "schedule_timer" ),
                             -1);
         }
@@ -357,8 +377,8 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 }
 
 
-// This is the reconnect implementation. The backoff algorithm is used as the reconnect
-// strategy. e.g. 
+// This is the active reconnect implementation. The backoff algorithm is used as the 
+// reconnect strategy. e.g. 
 // With conn_retry_initial_interval = 500, conn_retry_backoff_multiplier = 2.0 and
 // conn_retry_attempts = 6 the reconnect attempts will be:
 // - first at 0 seconds(upon detection of the disconnect)
@@ -368,13 +388,14 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 // - fifth at 4.0 (2*2.0) seconds
 // - sixth at  8.0 (2*4.0) seconds
 int
-TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
+TAO::DCPS::SimpleTcpConnection::active_reconnect_i (bool on_new_association)
 {
   DBG_ENTRY("SimpleTcpConnection","reconnect_i");
       
   int ret = -1;
   bool notify_lost = false;
   bool connected = false;
+
   {
     GuardType guard (this->reconnect_lock_);
 
@@ -394,6 +415,8 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
             this->send_strategy_->suspend_send ();
           }
 
+        this->peer ().close ();
+        this->connected_ = false;
         int conn_retry_attempts = this->tcp_config_->conn_retry_attempts_;
         if (on_new_association)
           {
@@ -402,8 +425,13 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
             // value.            
             conn_retry_attempts = 1;
           }
-        this->peer ().close ();
-        this->connected_ = false;
+        else if (conn_retry_attempts > 0) // TODO: may cause deadlock
+          {
+            this->link_->notify (DataLink::DISCONNECTED);
+          }
+        // else the conn_retry_attempts is 0 then we do not need this extra 
+        // notify_disconnected() since the user application should get the 
+        // notify_lost() without delay.
 
         double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
         for (int i = 0; i < conn_retry_attempts; ++i)
@@ -455,6 +483,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
                 ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established lost connection to %s:%d.\n",
                   this->remote_address_.get_host_addr (), 
                   this->remote_address_.get_port_number ()));
+                this->link_->notify (DataLink::RECONNECTED);
               }
 
             // We re-established the connection and should reset the connection_lost_notified_.
@@ -469,7 +498,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect_i (bool on_new_association)
 
   if (notify_lost)
     {
-      this->link_->notify_lost ();
+      this->link_->notify (DataLink::LOST);
       this->send_strategy_->terminate_send ();
     }
 
@@ -484,45 +513,73 @@ TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
   DBG_ENTRY("SimpleTcpConnection","handle_timeout");
+  GuardType guard (this->reconnect_lock_);
 
-  bool connected = this->conn_replacement_.is_nil () 
-    ? this->connected_.value () : this->conn_replacement_->connected_.value ();
-
-  if (! connected)
+  // The handle_timeout is called before the new connection is established
+  // or never re-established.
+  if (this->conn_replacement_.is_nil ())  // not reconnected yet
     {
-      this->link_->notify_lost ();
+      this->link_->notify (DataLink::LOST);
       this->send_strategy_->terminate_send ();
     }
-
+  //else we got a new connection already and the RECONNECTED notification is sent
+  // already.
+  
   // Take back the "copy" we gave to reactor when we schedule the timer.
   this->_remove_ref ();
   return 0;
 }
 
 
-/// Copy the states from an "old" SimpleTcpConnection object associated with 
-/// a SimpleTcpDataLink to the new SimpleTcpConnection object.
-/// This is called by the SimpleTcpDataLink when a new connection is accepted
-/// (with a new SimpleTcpConnection object). We need replace the "old" SimpleTcpConnection
-/// object with the new one.
+/// This object would be "old" connection object and the provided is the new
+/// connection object.  The "old" connection object will copy its states to
+/// to the "new" connection object. This is called by the SimpleTcpDataLink 
+/// when a new connection is accepted (with a new SimpleTcpConnection object).
+/// We need make the state in "new" connection object consistent with the "old" 
+/// connection object.
 void 
-TAO::DCPS::SimpleTcpConnection::copy_states (SimpleTcpConnection* connection)
+TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpConnection","copy_states");
-  this->connected_ = connection->connected_;
-  this->is_connector_ = connection->is_connector_;
-  this->receive_strategy_ = connection->receive_strategy_;
-  this->send_strategy_ = connection->send_strategy_;
-  this->remote_address_ = connection->remote_address_;
-  this->local_address_ = connection->local_address_;
-  this->tcp_config_ = connection->tcp_config_;
-  this->link_ = connection->link_;
+  DBG_ENTRY("SimpleTcpConnection","transfer");
+  
+  GuardType guard (this->reconnect_lock_);
 
-  // Give a copy to the "old" connection object since the timer is schedule with the 
-  // "old" SimpleTcpConnection object.
-  this->_add_ref ();
-  connection->conn_replacement_ = this;
-  this->connection_lost_notified_ = connection->connection_lost_notified_;
+  SimpleTcpReceiveStrategy* rs 
+    = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+  // Cancel the timer since we got new connection.
+  if (rs->get_reactor()->cancel_timer(this) == -1)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
+        ACE_TEXT(" %p. \n"), "cancel_timer" ));
+    }
+
+  this->_remove_ref ();
+
+  // Verify if this acceptor side.
+  if (this->is_connector_ || connection->is_connector_)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
+        ACE_TEXT(" should NOT be called by the connector side \n")));
+    }
+
+
+  connection->receive_strategy_ = this->receive_strategy_;
+  connection->send_strategy_ = this->send_strategy_;
+  connection->remote_address_ = this->remote_address_;
+  connection->local_address_ = this->local_address_;
+  connection->tcp_config_ = this->tcp_config_;
+  connection->link_ = this->link_;
+
+  // Keep a copy of the "new" connection object in case the handle_timeout
+  // is called after this method is called. In this case the handle_timeout
+  // need check if new connection is connected.
+  connection->_add_ref ();
+  this->conn_replacement_ = connection;
+
+  this->link_->notify (DataLink::RECONNECTED);
 }
 
 
@@ -553,7 +610,7 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
   }
 
   if (notify_lost)
-    this->link_->notify_lost ();
+    this->link_->notify (DataLink::LOST);
 
   if (terminate)
     this->send_strategy_->terminate_send ();

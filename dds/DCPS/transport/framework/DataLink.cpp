@@ -412,9 +412,9 @@ TAO::DCPS::DataLink::transport_shutdown()
 
 
 void
-TAO::DCPS::DataLink::notify_lost ()
+TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 {
-  DBG_ENTRY("DataLink","notify_lost");
+  DBG_ENTRY("DataLink","notify");
 
   GuardType guard(this->lock_);
   {
@@ -432,8 +432,8 @@ TAO::DCPS::DataLink::notify_lost ()
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost notify pub %d publication lost \n", 
-                  entry->ext_id_));
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify pub %d %s \n", 
+                  entry->ext_id_, connection_notice_as_str(notice)));
               }
             ReceiveListenerSet_rch subset = entry->int_id_;
             ReceiveListenerSet::MapType & imap = subset->map ();
@@ -449,14 +449,28 @@ TAO::DCPS::DataLink::notify_lost ()
               subids[i++] = ientry->ext_id_;
             }
 
-          dw->notify_publication_lost (subids);
-        }
+            switch (notice)
+            {
+            case DISCONNECTED:
+              dw->notify_publication_disconnected (subids);
+              break;
+            case RECONNECTED:
+              dw->notify_publication_reconnected (subids);
+              break;
+            case LOST:
+              dw->notify_publication_lost (subids);
+              break;
+            default:
+              ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: DataLink::notify  unknown notice to datawriter\n"));
+              break;
+            }
+          }
         else
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost  not notify pub %d publication lost \n", 
-                  entry->ext_id_));
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify  not notify pub %d %s \n", 
+                  entry->ext_id_, connection_notice_as_str(notice)));
               }
           }
 
@@ -480,8 +494,8 @@ TAO::DCPS::DataLink::notify_lost ()
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost notify sub %d subscription lost \n", 
-                entry->ext_id_));
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify sub %d %s \n", 
+                entry->ext_id_, connection_notice_as_str(notice)));
               }
             RepoIdSet_rch pubset = entry->int_id_;
             RepoIdSet::MapType & map = pubset->map ();
@@ -497,13 +511,27 @@ TAO::DCPS::DataLink::notify_lost ()
                 pubids[i++] = ientry->ext_id_;
               }
 
-            dr->notify_subscription_lost (pubids);
+            switch (notice)
+            {
+            case DISCONNECTED:
+              dr->notify_subscription_disconnected (pubids);
+              break;
+            case RECONNECTED:
+              dr->notify_subscription_reconnected (pubids);
+              break;
+            case LOST:
+              dr->notify_subscription_lost (pubids);
+              break;
+            default:
+              ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: DataLink::notify  unknown notice to datareader\n"));
+              break;
+            }           
           }
         else
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_lost not notify sub %d subscription lost \n", 
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify not notify sub %d subscription lost \n", 
                   entry->ext_id_));
               }
 
@@ -511,5 +539,7 @@ TAO::DCPS::DataLink::notify_lost ()
       }
   }
 }
+
+
 
 
