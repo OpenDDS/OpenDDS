@@ -9,6 +9,7 @@
 #include  "SimpleTcpDataLink.h"
 #include  "SimpleTcpReceiveStrategy.h"
 #include  "SimpleTcpSendStrategy.h"
+#include  "SimpleTcpReconnectTask.h"
 #include  "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
@@ -17,9 +18,32 @@
 
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
+
+TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
+: connected_ (false),
+  is_connector_ (true),
+  connection_lost_notified_(false),
+  passive_reconnect_timer_id_ (-1),
+  reconnect_task_ (new SimpleTcpReconnectTask ())
+{
+  DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
+
+  // Open the reconnect task
+  if (this->reconnect_task_->open ())
+    {
+      ACE_ERROR ((LM_ERROR,
+                  "(%P|%t) ERROR: Reconnect task failed to open : %p\n",
+                  "open"));
+    }
+}
+
+
+
 TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
   DBG_ENTRY("SimpleTcpConnection","~SimpleTcpConnection");
+  // Shutdown the reconnect task.
+  this->reconnect_task_->close ();
 }
 
 
@@ -341,6 +365,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 int
 TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 {
+  DBG_ENTRY("SimpleTcpConnection","passive_reconnect_i");
   GuardType guard (this->reconnect_lock_);
   
   // The passive_reconnect_timer_id_ is used as flag to allow the timer scheduled just once.
@@ -390,7 +415,7 @@ TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 int
 TAO::DCPS::SimpleTcpConnection::active_reconnect_i (bool on_new_association)
 {
-  DBG_ENTRY("SimpleTcpConnection","reconnect_i");
+  DBG_ENTRY("SimpleTcpConnection","active_reconnect_i");
       
   int ret = -1;
   bool notify_lost = false;
@@ -616,4 +641,14 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
     this->send_strategy_->terminate_send ();
 }
 
+
+/// This is called by both SimpleTcpSendStrategy and SimpleTcpReceiveStrategy
+/// when lost connection is detected. This method handles the connection
+/// to the reactor task to do the reconnecting.
+void 
+TAO::DCPS::SimpleTcpConnection::relink ()
+{
+  this->send_strategy_->suspend_send ();
+  this->reconnect_task_->add (SimpleTcpReconnectTask::DO_RECONNECT, this);
+}
 

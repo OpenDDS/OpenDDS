@@ -8,15 +8,6 @@
 #include  "ace/SOCK_Connector.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
 
-ACE_INLINE
-TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
-: connected_ (false),
-  is_connector_ (true),
-  connection_lost_notified_(false),
-  passive_reconnect_timer_id_ (-1)
-{
-  DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
-}
 
 
 ACE_INLINE void

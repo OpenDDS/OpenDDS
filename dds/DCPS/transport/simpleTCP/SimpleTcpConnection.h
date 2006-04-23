@@ -8,6 +8,7 @@
 #include  "SimpleTcpDataLink_rch.h"
 #include  "SimpleTcpConnection_rch.h"
 #include  "SimpleTcpSendStrategy_rch.h"
+#include  "SimpleTcpReconnectTask_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/SOCK_Stream.h"
@@ -87,6 +88,8 @@ namespace TAO
 
         ACE_INET_Addr get_remote_address ();
 
+        void  relink ();
+
       private:
         
         int active_reconnect_i (bool on_new_association);
@@ -132,6 +135,12 @@ namespace TAO
         /// that the timer is just scheduled once when there are multiple threads detect
         /// the lost connection.
         int passive_reconnect_timer_id_;
+
+        /// The task to do the reconnecting.
+        /// TODO: We might need reuse the PerConnectionSynch thread
+        /// to do the reconnecting or create the reconnect task when
+        /// we need reconnect. 
+        SimpleTcpReconnectTask_rch reconnect_task_;
     };
 
   }

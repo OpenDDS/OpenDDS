@@ -59,14 +59,14 @@ namespace TAO
       };
 
       /// Constructor.
-      SimpleTcpReconnectTask(SimpleTcpTransport* transport_impl);
+      SimpleTcpReconnectTask(SimpleTcpTransport* transport_impl = 0);
 
       /// Virtual Destructor.
       virtual ~SimpleTcpReconnectTask();
 
       /// Put a connection info object on to the request queue.
       /// Returns 0 if successful, -1 otherwise (it has been "rejected").
-      int add(COMMAND command, SimpleTcpConnection_rch connection);
+      int add(COMMAND command, SimpleTcpConnection* connection);
 
       /// Activate the worker threads
       virtual int open(void* ptr = 0);

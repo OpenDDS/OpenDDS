@@ -11,6 +11,7 @@
 #include  "BasicQueue_T.h"
 #include  "TransportHeader.h"
 #include  "TransportReplacedElement.h"
+#include  "TransportConfiguration_rch.h"
 
 #include  "ace/Synch.h"
 
@@ -21,7 +22,6 @@ namespace TAO
   namespace DCPS
   {
 
-    class TransportConfiguration;
     class ThreadSynch;
     class ThreadSynchResource;
     class TransportQueueElement;
@@ -214,7 +214,7 @@ namespace TAO
         /// Used during backpressure situations to hold samples that have
         /// not yet been made to be part of a transport packet, and are
         /// completely unsent.
-        QueueType queue_;
+        QueueType* queue_;
 
         /// Current transport packet header.
         TransportHeader header_;
@@ -233,7 +233,7 @@ namespace TAO
 
         /// Current elements that have contributed blocks to the current
         /// transport packet.
-        QueueType elems_;
+        QueueType* elems_;
 
         /// Current (head of chain) block containing unsent bytes for the
         /// current transport packet.
@@ -287,6 +287,8 @@ namespace TAO
 
         /// Cached allocator for TransportReplaceElement.
         TransportReplacedElementAllocator replaced_element_allocator_;
+
+        TransportConfiguration_rch config_;
 
 //remove these are only for debugging: DUMP_FOR_PACKET_INFO
         protected:

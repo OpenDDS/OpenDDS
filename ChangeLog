@@ -1,3 +1,31 @@
+Sat Apr 22 21:54:02 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        
+          Made the elems_ and queue_ to be allocated on heap. This would help 
+          resolve a deadlock situation after reconnect fails. The deadlock
+          happens when a send thread holds datawriter's lock and try to acquire
+          the SendStrategy's lock and the reconnect thread calls terminate_send
+          which got the SendStrategy's lock and drop all queued samples and try
+          to call data_dropped on DataWriter. The changes makes we can remove
+          queued elements outside the SendStrategy's lock. 
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Changed to create per connection reconnect task to do the reconnecting instead
+          of using single thread to do reconnecting for all datalinks in a TransportImpl.
+          Hope this fix the rae\rt8448\test failure 
+                    
 Fri Apr 21 11:42:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
