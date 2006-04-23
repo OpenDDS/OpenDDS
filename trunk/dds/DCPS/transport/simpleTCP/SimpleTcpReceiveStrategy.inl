@@ -4,6 +4,7 @@
 
 #include  "SimpleTcpConnection.h"
 #include  "SimpleTcpDataLink.h"
+#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE

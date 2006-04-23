@@ -5,8 +5,6 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpReceiveStrategy.h"
 #include  "SimpleTcpTransport.h"
-#include  "SimpleTcpReconnectTask.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -172,11 +170,7 @@ void
 TAO::DCPS::SimpleTcpReceiveStrategy::relink ()
 {
   DBG_ENTRY("SimpleTcpReceiveStrategy","relink");
-  SimpleTcpReconnectTask_rch reconnect_task 
-    = this->link_->get_transport_impl ()->get_reconnect_task();
-  // Handle this connection to the reconnect task to do the reconnect since
-  // we do not want block this reactor thread.
-  reconnect_task->add (SimpleTcpReconnectTask::DO_RECONNECT, this->connection_);
+  this->connection_->relink ();
 }
 
 

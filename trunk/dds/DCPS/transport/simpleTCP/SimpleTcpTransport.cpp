@@ -395,7 +395,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
-  this->reconnect_task_->add (SimpleTcpReconnectTask::NEW_CONNECTION_CHECK, connection_obj);
+  this->reconnect_task_->add (SimpleTcpReconnectTask::NEW_CONNECTION_CHECK, connection);
 }
 
 

@@ -4,6 +4,7 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "TransportSendStrategy.h"
 #include  "RemoveAllVisitor.h"
+#include  "TransportConfiguration.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -28,8 +29,8 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
   : max_samples_(config->max_samples_per_packet_),
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
-    queue_(config->queue_messages_per_pool_,config->queue_initial_pools_),
-    elems_(1,config->max_samples_per_packet_),
+    queue_(new QueueType (config->queue_messages_per_pool_,config->queue_initial_pools_)),
+    elems_(new QueueType (1,config->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(0),
     start_counter_(0),
@@ -41,6 +42,9 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
+
+  config->_add_ref ();
+  this->config_ = config;
 
   // Create a ThreadSynch object just for us.
   this->synch_ = config->send_thread_strategy()->create_synch_object
@@ -89,8 +93,12 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 //MJM: thingie manage itself the way it sees fit.
     }
 
-    delete [] this->delayed_delivered_notification_queue_;
+  delete [] this->delayed_delivered_notification_queue_;
 
+  if (this->elems_)
+    delete this->elems_;
+  if (this->queue_)
+    delete this->queue_;
 }
 
 
@@ -157,7 +165,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 
         // Before we build the packet from the queue_, let's make sure that
         // there is actually something on the queue_ to build from.
-        if (this->queue_.size() == 0)
+        if (this->queue_->size() == 0)
           {
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                       "But the queue is empty.  We have cleared the "
@@ -215,7 +223,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 
     // If we sent the whole packet (eg, partial_send is false), and the queue_
     // is now empty, then we've cleared the backpressure situation.
-    if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_.size() == 0))
+    if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0))
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Flip the mode to MODE_DIRECT, and then return "
@@ -231,7 +239,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
   // is now empty, then we've cleared the backpressure situation.
-  if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_.size() == 0))
+  if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0))
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                  "We sent the whole packet, and there is nothing left on "
@@ -356,7 +364,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
              "Peek at the element at the front of the packet elems_.\n"));
 
   // This is the element currently at the front of elems_.
-  TransportQueueElement* element = this->elems_.peek();
+  TransportQueueElement* element = this->elems_->peek();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Use the element's msg() to find the last block in "
@@ -498,7 +506,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                              "the packet elems_ (we were just peeking).\n"));
 
                   // Extract the element from the elems_ collection
-                  element = this->elems_.get();
+                  element = this->elems_->get();
 
                   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                              "Tell the element that a decision has been made "
@@ -525,7 +533,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                              "elems_.\n"));
 
                   // Set up for the next element in elems_ by peek()'ing.
-                  element = this->elems_.peek();
+                  element = this->elems_->peek();
 
                   if (element != 0)
                     {
@@ -665,35 +673,53 @@ void
 TAO::DCPS::TransportSendStrategy::terminate_send ()
 {
   DBG_ENTRY("TransportSendStrategy","terminate_send");
-  GuardType guard(this->lock_);
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Reconnect failed. Now flip to MODE_TERMINATED.\n"));
 
-  this->mode_ = MODE_TERMINATED;
+  QueueType* elems;
+  QueueType* queue;
 
-  if (this->header_.length_ > 0)
-    {
-      // Clear the messages in the pkt_chain_ that is partially sent.
-      // We just reuse these functions for normal partial send except actual sending.
-      int num_bytes_left = this->pkt_chain_->total_length ();
-      int result = this->adjust_packet_after_send(num_bytes_left, NOTIFY_IMMEADIATELY);
-      if (result == 0)
-        {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "The adjustment logic says that the packet is cleared.\n"));
-        }
-      else
-        {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: terminate_send  adjust_packet_after_send()"
-            " should not return partial send.\n"));
-        }
-    }
- 
+  {
+    GuardType guard(this->lock_);
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Reconnect failed. Now flip to MODE_TERMINATED.\n"));
+
+    this->mode_ = MODE_TERMINATED;
+
+    if (this->header_.length_ > 0)
+      {
+        // Clear the messages in the pkt_chain_ that is partially sent.
+        // We just reuse these functions for normal partial send except actual sending.
+        int num_bytes_left = this->pkt_chain_->total_length ();
+        int result = this->adjust_packet_after_send(num_bytes_left, NOTIFY_IMMEADIATELY);
+        if (result == 0)
+          {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                      "The adjustment logic says that the packet is cleared.\n"));
+          }
+        else
+          {
+            ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: terminate_send  adjust_packet_after_send()"
+              " should not return partial send.\n"));
+          }
+      }
+
+    elems = this->elems_;
+    this->elems_ = new QueueType (this->config_->queue_messages_per_pool_,this->config_->queue_initial_pools_);
+    queue = this->queue_;
+    this->queue_ = new QueueType (1,this->config_->max_samples_per_packet_);
+  }
+
+  // We need remove the queued elements outside the lock,
+  // otherwise we have a deadlock situation when remove vistor
+  // calls the data_droped on each dropped elements.
+  
   // Clear all samples in queue.
   RemoveAllVisitor remove_all_visitor;
 
-  this->elems_.accept_remove_visitor(remove_all_visitor);
-  this->queue_.accept_remove_visitor(remove_all_visitor);
+  elems->accept_remove_visitor(remove_all_visitor);
+  queue->accept_remove_visitor(remove_all_visitor);
+
+  delete elems;
+  delete queue;
 }
 
 

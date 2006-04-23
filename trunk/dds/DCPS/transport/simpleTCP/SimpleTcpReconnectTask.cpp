@@ -18,9 +18,13 @@ TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
     num_threads_(0)
 {
   DBG_ENTRY("SimpleTcpReconnectTask","SimpleTcpReconnectTask");
-  // Keep a reference for ourselves
-  transport_impl->_add_ref();
-  this->transport_ = transport_impl;
+
+  if (transport_impl != 0)
+    {
+      // Keep a reference for ourselves
+      transport_impl->_add_ref();
+      this->transport_ = transport_impl;
+    }
 }
 
 
@@ -32,13 +36,14 @@ TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 
 int
 TAO::DCPS::SimpleTcpReconnectTask::add(COMMAND  command,
-                                       SimpleTcpConnection_rch conn)
+                                       SimpleTcpConnection* conn)
 {
   DBG_ENTRY("SimpleTcpReconnectTask","add");
   GuardType guard(this->lock_);
   
   ConnectionInfo* info = new ConnectionInfo();
   info->command = command;
+  conn->_add_ref ();
   info->connection = conn;
 
   int result = this->queue_.enqueue_tail (info);

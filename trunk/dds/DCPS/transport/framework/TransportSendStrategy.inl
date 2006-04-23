@@ -121,7 +121,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)));
 
-      this->queue_.put(element);
+      this->queue_->put(element);
       if (this->mode_ != MODE_SUSPEND)
         this->synch_->work_available();
       return;
@@ -170,7 +170,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
   if ((this->max_header_size_ +
        this->header_.length_  +
        element_length           > this->max_size_) ||
-      ((this->elems_.size() != 0) && (element_requires_exclusive_packet == 1)))
+      ((this->elems_->size() != 0) && (element_requires_exclusive_packet == 1)))
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                  "Element won't fit in current packet - send current "
@@ -195,7 +195,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                      "We experienced backpressure on that direct send, as "
                      "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  Queue elem and leave.\n"));
-          this->queue_.put(element);
+          this->queue_->put(element);
           this->synch_->work_available();
           return;
         }
@@ -212,7 +212,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
   // the current packet.
 
   // Add the current element to the collection of packet elements.
-  this->elems_.put(element);
+  this->elems_->put(element);
 //MJM: I am not sure that this works when either the previous element or
 //MJM: the current (new) element is a exclusive one.  This would only
 //MJM: happen if the previous packet (if any) was not completely sent
@@ -244,7 +244,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
   //       requires an exclusive packet.
   //
 //MJM: Should probably check >= max_samples_ here.  Belts/suspenders thing.
-  if ((this->elems_.size() == this->max_samples_)                            ||
+  if ((this->elems_->size() == this->max_samples_)                            ||
       (this->max_header_size_ + this->header_.length_ > this->optimum_size_) ||
       (element_requires_exclusive_packet == 1))
 //MJM: I think that I need to think about the exclusive cases here.
@@ -377,7 +377,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "The mode is MODE_DIRECT.\n"));
 
-      this->elems_.accept_remove_visitor(remove_element_visitor);
+      this->elems_->accept_remove_visitor(remove_element_visitor);
 
       int status = remove_element_visitor.status();
 
@@ -400,7 +400,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
 
   // First we will attempt to remove the element from the queue_,
   // in case it is "stuck" in there.
-  this->queue_.accept_remove_visitor(remove_element_visitor);
+  this->queue_->accept_remove_visitor(remove_element_visitor);
 
   int status = remove_element_visitor.status();
 
@@ -445,7 +445,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
         "Visit our elems_ with the PacketRemoveVisitor.\n"));
 
   // Let it visit our elems_ collection as a "replace" visitor.
-  this->elems_.accept_replace_visitor(remove_from_packet_visitor);
+  this->elems_->accept_replace_visitor(remove_from_packet_visitor);
 
   status = remove_from_packet_visitor.status();
 
@@ -484,7 +484,7 @@ TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "The mode is MODE_DIRECT.\n"));
 
-      this->elems_.accept_remove_visitor(remove_element_visitor);
+      this->elems_->accept_remove_visitor(remove_element_visitor);
 
       int status = remove_element_visitor.status();
 
@@ -506,7 +506,7 @@ TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 
   // First we will attempt to remove the element from the queue_,
   // in case it is "stuck" in there.
-  this->queue_.accept_remove_visitor(remove_element_visitor);
+  this->queue_->accept_remove_visitor(remove_element_visitor);
 
   int status = remove_element_visitor.status();
 
@@ -531,7 +531,7 @@ TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
         "Visit our elems_ with the PacketRemoveVisitor.\n"));
 
   // Let it visit our elems_ collection as a "replace" visitor.
-  this->elems_.accept_replace_visitor(remove_from_packet_visitor);
+  this->elems_->accept_replace_visitor(remove_from_packet_visitor);
 
   status = remove_from_packet_visitor.status();
 
@@ -640,7 +640,7 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 {
   DBG_ENTRY("TransportSendStrategy","get_packet_elems_from_queue");
 
-  TransportQueueElement* element = this->queue_.peek();
+  TransportQueueElement* element = this->queue_->peek();
 
   while (element != 0)
     {
@@ -661,14 +661,14 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 
       if (exclusive_packet == 1)
         {
-          if (this->elems_.size() == 0)
+          if (this->elems_->size() == 0)
             {
               // The current packet is empty so we won't violate the
               // exclusive_packet requirement by put()'ing the element
               // into the elems_ collection.  We also extract the current
               // element from the queue_ at this time (we've been peek()'ing
               // at the element all this time).
-              this->elems_.put(this->queue_.get());
+              this->elems_->put(this->queue_->get());
               this->header_.length_ = element_length;
             }
 
@@ -684,12 +684,12 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
       // At this point, we have passed all of the pre-conditions and we can
       // now extract the current element from the queue_, put it into the
       // packet elems_, and adjust the packet header_.length_.
-      this->elems_.put(this->queue_.get());
+      this->elems_->put(this->queue_->get());
       this->header_.length_ += element_length;
 
       // If the current number of packet elems_ has reached the maximum
       // number of samples per packet, then we are done.
-      if (this->elems_.size() == this->max_samples_)
+      if (this->elems_->size() == this->max_samples_)
         {
           break;
         }
@@ -702,7 +702,7 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
         }
 
       // Set up the element to peek() at the front of the queue.
-      element = this->queue_.peek();
+      element = this->queue_->peek();
     }
 }
 
@@ -737,7 +737,7 @@ TAO::DCPS::TransportSendStrategy::prepare_packet()
   // held by each element (in elems_), and then chaining the new duplicate
   // blocks together to form one long chain.
   BuildChainVisitor visitor;
-  this->elems_.accept_visitor(visitor);
+  this->elems_->accept_visitor(visitor);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Attach the visitor's chain of blocks to the lone (packet "
