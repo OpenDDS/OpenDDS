@@ -58,6 +58,8 @@ TAO::DCPS::TransportSendStrategy::stop()
   // to take it back now.
   this->_remove_ref();
 
+  this->stop_i ();
+
   // TBD SOON - What about all of the samples that may still be stuck in
   //            our queue_ and/or elems_?
 }

@@ -148,6 +148,10 @@ namespace TAO
         /// We need the reactor for our Acceptor.
         TransportReactorTask_rch   reactor_task_;
 
+        /// This task is used to resolve some deadlock situation
+        /// duing reconnecting. 
+        /// TODO: reuse the reconnect_task in the SimpleTcpConnection
+        ///       for new connection checking.
         SimpleTcpReconnectTask_rch reconnect_task_;
     };
 

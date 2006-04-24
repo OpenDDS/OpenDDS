@@ -27,8 +27,9 @@ namespace TAO
                               SimpleUdpSocket*        socket);
         virtual ~SimpleUdpSendStrategy();
 
-
       protected:
+
+        virtual void stop_i();
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 

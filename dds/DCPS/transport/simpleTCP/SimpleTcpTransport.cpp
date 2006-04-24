@@ -297,6 +297,9 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   // Drop our reference to the TransportReactorTask
   this->reactor_task_ = 0;
 
+  // Drop our reference to the TransportReconnectTask.
+  this->reconnect_task_ = 0;
+
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this SimpleTcpTransport object (via smart-pointer).
   this->acceptor_.transport_shutdown();

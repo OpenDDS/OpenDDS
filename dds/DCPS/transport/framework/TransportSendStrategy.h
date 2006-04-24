@@ -102,6 +102,9 @@ namespace TAO
         /// It removes all samples in the backpressure queue and packet queue.
         void terminate_send ();
 
+        /// Let the subclass stop.
+        virtual void stop_i() = 0;
+
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,

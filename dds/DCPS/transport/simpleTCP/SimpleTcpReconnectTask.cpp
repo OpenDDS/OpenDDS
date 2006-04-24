@@ -30,7 +30,7 @@ TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
 
 TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 {
-  DBG_ENTRY("SimpleTcpReconnectTask","~SimpleTcpReconnectTas");
+  DBG_ENTRY("SimpleTcpReconnectTask","~SimpleTcpReconnectTask");
 }
 
 
@@ -40,8 +40,11 @@ TAO::DCPS::SimpleTcpReconnectTask::add(COMMAND  command,
 {
   DBG_ENTRY("SimpleTcpReconnectTask","add");
   GuardType guard(this->lock_);
-  
-  ConnectionInfo* info = new ConnectionInfo();
+
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "SimpleTcpReconnectTask::add   con %X to %X \n", conn, this));
+
+  ConnectionInfo_rch info = new ConnectionInfo();
   info->command = command;
   conn->_add_ref ();
   info->connection = conn;
@@ -51,7 +54,7 @@ TAO::DCPS::SimpleTcpReconnectTask::add(COMMAND  command,
     this->work_available_.signal();
   else
     {
-      ACE_ERROR((LM_ERROR, "(%P|%t)SimpleTcpReconnectTask::add %p\n", "enqueue_tail"));
+      ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::add %p\n", "enqueue_tail"));
     }
   return result;
 }
@@ -124,7 +127,7 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
     if (this->shutdown_initiated_)
       break;
 
-    ConnectionInfo* conn_info = 0;
+    ConnectionInfo_rch conn_info;
     int result = -1;
     {
       GuardType guard(this->lock_);
@@ -136,7 +139,7 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
       ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::svc %p\n", 
         "dequeue_head"));
     }
-    if (conn_info == 0)
+    if (conn_info.is_nil ())
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::svc  "
         "dequeued a nil ConnectionInfo object\n"));
@@ -156,10 +159,11 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
               conn_info->command));
           break;
         }
-
-      delete conn_info;
     }
   }
+
+  this->queue_.reset ();
+
   // This will never get executed.
   return 0;
 }

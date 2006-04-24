@@ -416,6 +416,9 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 {
   DBG_ENTRY("DataLink","notify");
 
+  VDBG((LM_DEBUG, "(%P|%t) DBG: DataLink %X notify %s\n", this,
+    connection_notice_as_str(notice)));
+  
   GuardType guard(this->lock_);
   {
     ReceiveListenerSetMap::MapType & map = this->pub_map_.map ();

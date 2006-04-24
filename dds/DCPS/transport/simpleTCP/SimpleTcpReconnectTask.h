@@ -53,10 +53,12 @@ namespace TAO
         DO_RECONNECT
       };
 
-      struct ConnectionInfo  {
+      struct ConnectionInfo : public RcObject<ACE_SYNCH_MUTEX> {
         COMMAND command;
         SimpleTcpConnection_rch connection;
       };
+
+      typedef RcHandle<ConnectionInfo> ConnectionInfo_rch;
 
       /// Constructor.
       SimpleTcpReconnectTask(SimpleTcpTransport* transport_impl = 0);
@@ -83,7 +85,7 @@ namespace TAO
       typedef ACE_Guard<LockType>     GuardType;
       typedef ACE_Condition<LockType> ConditionType;
 
-      typedef ACE_Unbounded_Queue<ConnectionInfo*> ConnectionInfoQueue;
+      typedef ACE_Unbounded_Queue<ConnectionInfo_rch> ConnectionInfoQueue;
 
       /// Lock to protect the "state" (all of the data members) of this object.
       LockType lock_;
