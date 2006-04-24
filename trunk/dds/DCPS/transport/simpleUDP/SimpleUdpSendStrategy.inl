@@ -22,3 +22,12 @@ TAO::DCPS::SimpleUdpSendStrategy::SimpleUdpSendStrategy
   this->socket_ = socket;
 }
 
+
+ACE_INLINE
+void
+TAO::DCPS::SimpleUdpSendStrategy::stop_i()
+{
+  DBG_ENTRY("SimpleUdpSendStrategy","stop_i");
+  //TODO: noop
+}
+

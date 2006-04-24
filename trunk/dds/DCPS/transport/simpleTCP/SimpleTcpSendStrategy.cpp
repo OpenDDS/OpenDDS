@@ -75,4 +75,16 @@ TAO::DCPS::SimpleTcpSendStrategy::relink ()
   this->connection_->relink ();
 }
 
+void
+TAO::DCPS::SimpleTcpSendStrategy::stop_i()
+{
+  DBG_ENTRY("SimpleTcpSendStrategy","stop_i");
+
+  // This will cause the connection_ object to drop its reference to this
+  // TransportSendStrategy object.
+  this->connection_->remove_send_strategy();
+
+  // Take back the "copy" of connection object given. (see constructor).
+  this->connection_ = 0;
+}
 

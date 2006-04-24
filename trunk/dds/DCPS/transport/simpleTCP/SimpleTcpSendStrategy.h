@@ -38,6 +38,7 @@ namespace TAO
         // the connection.
         virtual void relink ();
 
+        virtual void stop_i();
 
       private:
 

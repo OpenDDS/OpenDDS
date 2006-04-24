@@ -29,6 +29,14 @@ TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
 }
 
 
+ACE_INLINE void
+TAO::DCPS::SimpleTcpConnection::remove_send_strategy()
+{
+  DBG_ENTRY("SimpleTcpConnection","remove_send_strategy");
+
+  this->send_strategy_ = 0;
+}
+
 
 ACE_INLINE bool
 TAO::DCPS::SimpleTcpConnection::is_connector ()

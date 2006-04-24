@@ -1,3 +1,32 @@
+Sun Apr 23 22:50:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes are made to an effort to fix rae\rt8448\test failure.
+        
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.inl:
+        
+          Fixed memory leaks and added more debugging messages.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+
+          Fixed multiple reconnected notification problem. The problem
+          is the passive connection side seems not realize the lost
+          connection before a new connection is reestablished.
+          Changed to use the enum reconnect_state_ instead of a bool
+          variable to mark various states during reconnecting and also
+          seperate the active_reconnect_on_new_association() from 
+          active_reconnect_i() to make these function more obvious.
+                    
 Sat Apr 22 21:54:02 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

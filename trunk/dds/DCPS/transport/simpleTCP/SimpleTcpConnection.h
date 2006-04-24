@@ -28,6 +28,15 @@ namespace TAO
                       public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
+         
+        /// States are used during reconnecting.
+        enum ReconnectState {
+          INIT_STATE,
+          LOST_STATE,
+          RECONNECTED_STATE,
+          PASSIVE_WAITING_STATE,
+          PASSIVE_TIMEOUT_CALLED_STATE
+        };
 
         SimpleTcpConnection();
         virtual ~SimpleTcpConnection();
@@ -56,6 +65,8 @@ namespace TAO
         /// Give a "copy" of the SimpleTcpSendStrategy object to this
         /// connection object.
         void set_send_strategy(SimpleTcpSendStrategy* send_strategy);
+
+        void remove_send_strategy();
 
         /// We pass this "event" along to the receive_strategy.
         virtual int handle_input(ACE_HANDLE);
@@ -92,8 +103,9 @@ namespace TAO
 
       private:
         
-        int active_reconnect_i (bool on_new_association);
+        int active_reconnect_i ();
         int passive_reconnect_i ();
+        int active_reconnect_on_new_association ();
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
@@ -119,16 +131,16 @@ namespace TAO
         SimpleTcpConfiguration_rch tcp_config_;
         /// Datalink object which is needed for connection lost callback.
         SimpleTcpDataLink_rch      link_;
+        /// TODO: This can be removed since we do not need it for checking the 
+        /// the new connection state during handle_timeout.
         /// The "new" SimpleTcpConnection that replaces this "old" object in the
         /// SimpleTcpDataLink object. This is needed for checking if the connection is
         /// re-established as the acceptor side when timer goes off.
-        SimpleTcpConnection_rch    conn_replacement_;
-
-        /// The flag true indicates active reconnect fails and connection lost notification 
-        /// is sent. This flag also controls that the active reconnect is attempted by
-        /// a single thread if there are multiple threads that detect connection problem
-        /// and both try to reconnect.
-        bool connection_lost_notified_;
+        SimpleTcpConnection_rch    new_con_;
+  
+        /// Keep a copy of the old connection object in the new connection object
+        /// to help control of the old connection object deletion.
+        SimpleTcpConnection_rch    old_con_;
 
         /// The id of the scheduled timer. The timer is scheduled to check if the connection
         /// is re-established during the passive_reconnect_duration_. This id controls
@@ -141,6 +153,9 @@ namespace TAO
         /// to do the reconnecting or create the reconnect task when
         /// we need reconnect. 
         SimpleTcpReconnectTask_rch reconnect_task_;
+
+        /// The state indicates each step of the reconnecting.
+        ReconnectState reconnect_state_;
     };
 
   }
