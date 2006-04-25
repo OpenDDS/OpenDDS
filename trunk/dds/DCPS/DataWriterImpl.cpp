@@ -1046,7 +1046,7 @@ namespace TAO
           ACE_ERROR_RETURN ((LM_ERROR, 
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("DataWriterImpl::write, ")
-                            ACE_TEXT("obtain_buffer retured %d.\n"),
+                            ACE_TEXT("obtain_buffer returned %d.\n"),
                             ret),
                             ret);
         }
