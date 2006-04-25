@@ -18,13 +18,20 @@
 
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
+// TODO: We need add this to configuration.
+// The minimum time period between the active reconnect is attempted last time 
+// and the re-established connection is lost again. This period is the apporoximate
+// period of re-establishing a connection + delay of the lost connection detection
+// by other threads.
+const ACE_Time_Value min_reconnect_period (10000);
 
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
   is_connector_ (true),
   passive_reconnect_timer_id_ (-1),
   reconnect_task_ (new SimpleTcpReconnectTask ()),
-  reconnect_state_ (INIT_STATE)
+  reconnect_state_ (INIT_STATE),
+  last_reconnect_attempted_ (ACE_Time_Value::zero)
 {
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 
@@ -459,9 +466,22 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
     this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
     this->local_address_.get_host_addr (), this->local_address_.get_port_number (),
     this->reconnect_state_));
-    
+   
+  // We need reset the state to INIT_STATE if we are previously reconnected.
+  // This would allow reconnect after the re-established connection lost again.
+  ACE_Time_Value cur = ACE_OS::gettimeofday ();
+  ACE_Time_Value diff = cur - this->last_reconnect_attempted_;
+  if ( diff.msec() > min_reconnect_period 
+    && this->reconnect_state_ == RECONNECTED_STATE)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "We are in RECONNECTED_STATE and now flip reconnect state to INIT_STATE.\n"));
+      this->reconnect_state_ = INIT_STATE;
+    }
+
   if (this->reconnect_state_ == INIT_STATE)
     {
+      this->last_reconnect_attempted_ = ACE_OS::gettimeofday ();
       // Suspend send once.
       this->send_strategy_->suspend_send ();
 
@@ -646,7 +666,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
   connection->old_con_ = this;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "active_reconnect_i(%s:%d->%s:%d) passive reconnected. new con %X   "
+        "transfer(%s:%d->%s:%d) passive reconnected. new con %X   "
         " old con %X \n",
         this->remote_address_.get_host_addr (), this->remote_address_.get_port_number (),
         this->local_address_.get_host_addr (), this->local_address_.get_port_number (),

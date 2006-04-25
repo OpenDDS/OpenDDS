@@ -1,3 +1,16 @@
+Tue Apr 25 09:48:23 USMST 2006  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+
+          Fix a problem were a second disconnect and reconenct did
+          not call on_*_disconnected() or on_*_reconnected().
+          Yan made the initial fix and I changed it a bit.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Correct a typo in a log message.
+
 Sun Apr 23 22:50:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are made to an effort to fix rae\rt8448\test failure.

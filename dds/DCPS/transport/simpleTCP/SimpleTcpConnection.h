@@ -156,6 +156,9 @@ namespace TAO
 
         /// The state indicates each step of the reconnecting.
         ReconnectState reconnect_state_;
+
+        /// Last time the connection is re-established.
+        ACE_Time_Value last_reconnect_attempted_;
     };
 
   }
