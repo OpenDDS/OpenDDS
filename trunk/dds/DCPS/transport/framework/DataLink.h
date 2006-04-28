@@ -99,7 +99,11 @@ namespace TAO
         /// disconnected, lost, or reconnected. The datareader/datawriter 
         /// will notify the corresponding listener.
         void notify (enum ConnectionNotice notice);
-      
+              
+        /// Called before release the datalink or before shutdown to let
+        /// the concrete DataLink to do anything necessary.
+        virtual void pre_stop_i () {};
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class

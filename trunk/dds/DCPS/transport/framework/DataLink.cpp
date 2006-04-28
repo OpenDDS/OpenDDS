@@ -246,6 +246,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
     {
+      this->pre_stop_i ();
       this->impl_->release_datalink(this);
       this->impl_ = 0;
 

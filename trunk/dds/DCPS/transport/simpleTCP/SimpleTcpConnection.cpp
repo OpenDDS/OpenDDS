@@ -18,12 +18,9 @@
 
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
-// TODO: We need add this to configuration.
-// The minimum time period between the active reconnect is attempted last time 
-// and the re-established connection is lost again. This period is the apporoximate
-// period of re-establishing a connection + delay of the lost connection detection
-// by other threads.
-const ACE_Time_Value min_reconnect_period (10000);
+// The reconnect delay is the period from the last time the reconnect attempt
+// completes to the time when another thread detects the lost connection.
+const ACE_Time_Value reconnect_delay (2);
 
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
@@ -468,10 +465,9 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
     this->reconnect_state_));
    
   // We need reset the state to INIT_STATE if we are previously reconnected.
-  // This would allow reconnect after the re-established connection lost again.
-  ACE_Time_Value cur = ACE_OS::gettimeofday ();
-  ACE_Time_Value diff = cur - this->last_reconnect_attempted_;
-  if ( diff.msec() > min_reconnect_period 
+  // This would allow re-establishing connection after the re-established 
+  // connection lost again.
+  if (ACE_OS::gettimeofday () - this->last_reconnect_attempted_ > reconnect_delay 
     && this->reconnect_state_ == RECONNECTED_STATE)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -481,7 +477,6 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
 
   if (this->reconnect_state_ == INIT_STATE)
     {
-      this->last_reconnect_attempted_ = ACE_OS::gettimeofday ();
       // Suspend send once.
       this->send_strategy_->suspend_send ();
 
@@ -542,6 +537,8 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
           this->link_->notify (DataLink::RECONNECTED);
           this->send_strategy_->resume_send ();
         }
+       
+      this->last_reconnect_attempted_ = ACE_OS::gettimeofday ();
     }
 
     return this->reconnect_state_ == LOST_STATE ? -1 : 0;

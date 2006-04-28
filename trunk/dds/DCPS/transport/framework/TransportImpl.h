@@ -94,6 +94,10 @@ namespace TAO
         /// concrete TransportImpl subclass a chance to do something when
         /// the shutdown "event" occurs.
         virtual void shutdown_i() = 0;
+        
+        /// Called before transport is shutdown to let the
+        /// concrete transport to do anything necessary.
+        virtual void pre_shutdown_i();
 
         /// Called by our connection_info() method to allow the concrete
         /// TransportImpl subclass to do the dirty work since it really

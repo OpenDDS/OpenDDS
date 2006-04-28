@@ -41,6 +41,8 @@ namespace TAO
        
         SimpleTcpConnection_rch get_connection ();
         SimpleTcpTransport_rch get_transport_impl ();
+          
+        virtual void pre_stop_i();
 
       protected:
 
@@ -51,10 +53,13 @@ namespace TAO
 
 
       private:
+      
+        void send_graceful_disconnect_message ();
 
         ACE_INET_Addr           remote_address_;
         SimpleTcpConnection_rch connection_;
         SimpleTcpTransport_rch  transport_;
+        bool graceful_disconnect_sent_;
     };
 
   } /* namespace DCPS */

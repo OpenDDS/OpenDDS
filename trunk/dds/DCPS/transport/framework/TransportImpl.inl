@@ -185,3 +185,10 @@ TAO::DCPS::TransportImpl::swap_bytes() const
 
   return this->config_->swap_bytes_;
 }
+
+
+ACE_INLINE void
+TAO::DCPS::TransportImpl::pre_shutdown_i ()
+{
+  //noop
+}

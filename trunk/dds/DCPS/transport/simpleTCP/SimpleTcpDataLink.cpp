@@ -5,6 +5,9 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpDataLink.h"
 #include  "SimpleTcpReceiveStrategy.h"
+#include  "dds/DCPS/transport/framework/TransportGDControlElement.h"
+#include  "dds/DCPS/DataSampleHeader.h"
+
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpDataLink.inl"
@@ -15,7 +18,8 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
                                          TAO::DCPS::SimpleTcpTransport*  transport_impl)
   : DataLink(transport_impl),
-    remote_address_(remote_address)
+    remote_address_(remote_address),
+    graceful_disconnect_sent_ (false)
 {
   DBG_ENTRY("SimpleTcpDataLink","SimpleTcpDataLink");
   transport_impl->_add_ref ();
@@ -41,7 +45,7 @@ TAO::DCPS::SimpleTcpDataLink::stop_i()
   DBG_ENTRY("SimpleTcpDataLink","stop_i");
 
   if (!this->connection_.is_nil())
-    {
+    {      
       // Tell the connection object to disconnect.
       this->connection_->disconnect();
 
@@ -50,6 +54,18 @@ TAO::DCPS::SimpleTcpDataLink::stop_i()
     }
 }
 
+
+void
+TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
+{
+  DBG_ENTRY("SimpleTcpDataLink","stop_i");
+ 
+  if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_)
+    {
+      this->send_graceful_disconnect_message ();
+      this->graceful_disconnect_sent_ = true;
+    }
+}
 
 /// The SimpleTcpTransport calls this method when it has an established
 /// connection object for us.  This call puts this SimpleTcpDataLink into
@@ -133,7 +149,75 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 
 
 
+void 
+TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
+{
+  DBG_ENTRY("SimpleTcpDataLink","send_graceful_disconnect_message");
+  DataSampleHeader header_data; 
+  // The message_id_ is the most important value for the DataSampleHeader.
+  header_data.message_id_ = GRACEFUL_DISCONNECT;
 
+  // Other data in the DataSampleHeader are not necessary set. The bogus values
+  // can be used.
+
+  //header_data.byte_order_ 
+  //  = this->transport_->get_configuration()->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
+  //header_data.message_length_ = 0;
+  //header_data.sequence_ = 0;
+  //::DDS::Time_t source_timestamp 
+  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //header_data.source_timestamp_sec_ = source_timestamp.sec;
+  //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
+  //header_data.coherency_group_ = 0;
+  //header_data.publication_id_ = 0;
+
+  // TODO:
+  // It seems a bug in the transport implementation that the receiving side can
+  // not receive the message when the message has no sample data and is sent 
+  // in a single packet.
+
+  // To work arround this problem, I have to add bogus data to chain with the 
+  // DataSampleHeader to make the receiving work.
+  ACE_Message_Block* message;
+  size_t max_marshaled_size = header_data.max_marshaled_size ();
+  ACE_Message_Block* data = 0;
+  ACE_NEW (data,
+    ACE_Message_Block(20,
+    ACE_Message_Block::MB_DATA,
+    0, //cont
+    0, //data
+    0, //allocator_strategy
+    0, //locking_strategy
+    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+    ACE_Time_Value::zero,
+    ACE_Time_Value::max_time,
+    0,
+    0));
+  data->wr_ptr (20);
+
+  ACE_NEW (message,
+    ACE_Message_Block(max_marshaled_size,
+    ACE_Message_Block::MB_DATA,
+    data, //cont
+    0, //data
+    0, //allocator_strategy
+    0, //locking_strategy
+    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+    ACE_Time_Value::zero,
+    ACE_Time_Value::max_time,
+    0,
+    0));
+
+  message << header_data;    
+
+  TransportGDControlElement* send_element = 0;
+
+  ACE_NEW(send_element, TransportGDControlElement(message));
+
+  this->send (send_element);
+
+  message->release ();
+}
 
 
 

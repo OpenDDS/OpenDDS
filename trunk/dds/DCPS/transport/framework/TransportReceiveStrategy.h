@@ -54,6 +54,8 @@ namespace TAO
         /// Let the subclass stop.
         virtual void stop_i() = 0;
 
+        /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
+        bool gracefully_disconnected_;
 
       private:
 
