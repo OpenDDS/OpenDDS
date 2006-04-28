@@ -98,6 +98,7 @@ namespace TAO
         void notify_lost_on_backpressure_timeout ();
 
         ACE_INET_Addr get_remote_address ();
+        
 
         void  relink ();
 

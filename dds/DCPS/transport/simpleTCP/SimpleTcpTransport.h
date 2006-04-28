@@ -50,6 +50,7 @@ namespace TAO
         virtual int configure_i(TransportConfiguration* config);
 
         virtual void shutdown_i();
+        virtual void pre_shutdown_i();
 
         virtual int connection_info_i
                                  (TransportInterfaceInfo& local_info) const;

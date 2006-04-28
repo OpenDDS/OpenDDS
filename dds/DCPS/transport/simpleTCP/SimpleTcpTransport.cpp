@@ -248,12 +248,29 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   return 0;
 }
 
+void
+TAO::DCPS::SimpleTcpTransport::pre_shutdown_i()
+{
+  DBG_ENTRY("SimpleTcpTransport","pre_shutdown_i");
+  
+  GuardType guard(this->links_lock_);
+
+  AddrLinkMap::ENTRY* entry;
+
+  for (AddrLinkMap::ITERATOR itr(this->links_);
+        itr.next(entry);
+        itr.advance())
+    {
+      entry->int_id_->pre_stop_i();
+    }
+}
+
 
 void
 TAO::DCPS::SimpleTcpTransport::shutdown_i()
 {
   DBG_ENTRY("SimpleTcpTransport","shutdown_i");
-
+  
   // Don't accept any more connections.
   this->acceptor_.close();
   this->acceptor_.transport_shutdown ();

@@ -12,7 +12,8 @@
 
 
 TAO::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
-  : receive_sample_remaining_(0),
+  : gracefully_disconnected_(false),
+    receive_sample_remaining_(0),
     mb_allocator_(MESSAGE_BLOCKS),
     db_allocator_(DATA_BLOCKS),
     data_allocator_(DATA_BLOCKS),
@@ -281,13 +282,14 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
              "recvv() return %d - we call this the bytes_remaining.\n",
              bytes_remaining));
 
-  if( bytes_remaining == 0)
+  if( bytes_remaining == 0 && this->gracefully_disconnected_)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Peer has disconnected.\n")),
+                        ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n")),
                        -1) ;
     }
-  else if( bytes_remaining < 0)
+  else if((bytes_remaining == 0 && ! this->gracefully_disconnected_)
+    || bytes_remaining < 0)
     {
       ACE_ERROR((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
@@ -531,6 +533,8 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                        "== %u.\n",
                        this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
 
+            // TODO: We should use the marshaled_size() instead of max_marshaled_size()
+            //       for this checking.
             if( this->receive_buffers_[ this->buffer_index_]->total_length()
                 < this->receive_sample_.header_.max_marshaled_size())
               {

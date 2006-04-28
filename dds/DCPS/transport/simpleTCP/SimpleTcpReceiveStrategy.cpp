@@ -44,8 +44,13 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
 {
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
-
-  this->link_->data_received(sample);
+  if (sample.header_.message_id_ == GRACEFUL_DISCONNECT)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
+      this->gracefully_disconnected_ = true;
+    }
+  else
+    this->link_->data_received(sample);
 }
 
 

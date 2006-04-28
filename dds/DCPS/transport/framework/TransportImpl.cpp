@@ -43,6 +43,8 @@ TAO::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY("TransportImpl","shutdown");
 
+  this->pre_shutdown_i();
+
   {
     GuardType guard(this->lock_);
 

@@ -1,3 +1,51 @@
+Fri Apr 28 12:59:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes fixes a problem on linux that transport does not 
+        identify peer disconnecting due to crash. This should fix
+        the "run_test.pl restart_pub" test on linux.
+        
+        * dds/DdsDcps.mpc:
+        
+          Added TransportGDControlElement.cpp.
+          
+        * dds/DCPS/DataSampleHeader.h:
+        
+          Added GRACEFUL_DISCONNECT message id.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+
+          Added new hooks so the concrete datalink can send graceful 
+          disconnect message before transport shutdown or releasing 
+          datalink.
+          
+        * dds/DCPS/transport/framework/TransportGDControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportGDControlElement.h:
+        
+          New type control message that does not need data_delivered
+          callback.
+          
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+
+          Made the transport also try to reconnect if it did not receive
+          the graceful disconnect message when receive_bytes() returns 0.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+
+          This is the correct version that Scott committed for fixing
+          rae\rt8448\test failure.
+          "Tue Apr 25 09:48:23 USMST 2006  Scott Harris <harris_s@ociweb.com>"
+
 Tue Apr 25 09:48:23 USMST 2006  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:

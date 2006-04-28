@@ -159,6 +159,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/TransportReceiveStrategy.cpp
     DCPS/transport/framework/TransportReplacedElement.cpp
     DCPS/transport/framework/TransportSendControlElement.cpp
+    DCPS/transport/framework/TransportGDControlElement.cpp
     DCPS/transport/framework/TransportSendElement.cpp
     DCPS/transport/framework/TransportSendListener.cpp
     DCPS/transport/framework/TransportSendStrategy.cpp
