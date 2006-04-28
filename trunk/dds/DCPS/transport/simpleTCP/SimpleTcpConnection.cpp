@@ -18,8 +18,17 @@
 
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
+// The connection lost can be detected by both send and receive strategy. When
+// that happens, both of them add a request to the reconnect task. The reconnect
+// will be attempted when the first request is dequeued and the second request
+// just look the state to determine if the connection is good. To distinguish 
+// if the request is queued because the lost connection is detected by different 
+// threads or is because the re-established connection lost again, we need the
+// reconnect_delay to help to identify these two cases so we can reset the reconnect
+// state to trigger reconnecting after a re-established connection is lost.
+
 // The reconnect delay is the period from the last time the reconnect attempt
-// completes to the time when another thread detects the lost connection.
+// completes to when the reconnect request is dequeued.
 const ACE_Time_Value reconnect_delay (2);
 
 TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
