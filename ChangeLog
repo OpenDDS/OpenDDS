@@ -1,3 +1,31 @@
+Mon May  1 13:16:56 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Replaced the close() in SimpleTcpReconnectTask with shutdown () 
+          method. The difference is the shutdown() will wait for thread 
+          exit. This would resolve an access violation due to the race 
+          condition in the SimpleTcpReconnectTask object
+          Some un-necessary variables num_threads_ and active_workers_
+          are also removed.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Made the Datalink not send the GRACEFUL_DISCONNECT message if
+          it already received the GRACEFUL_DISCONNECT message from peer.
+          This would fix the error  
+          "SimpleTcpSendStrategy::send_bytes: ERROR: sendv: Bad file 
+           descriptor iovec count: 3" upon shutdown.
+          
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed a warning with unused variable.
+
 Fri Apr 28 12:59:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes fixes a problem on linux that transport does not 

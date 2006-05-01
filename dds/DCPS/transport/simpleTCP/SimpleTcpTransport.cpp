@@ -275,7 +275,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   this->acceptor_.close();
   this->acceptor_.transport_shutdown ();
 
-  this->reconnect_task_->close ();
+  this->reconnect_task_->shutdown ();
 
   {
     GuardType guard(this->connections_lock_);
