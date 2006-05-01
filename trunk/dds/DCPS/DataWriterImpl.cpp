@@ -1339,6 +1339,7 @@ namespace TAO
     DataWriterImpl::control_dropped (ACE_Message_Block* sample,
                                      bool dropped_by_transport) 
     {
+      ACE_UNUSED_ARG (dropped_by_transport);
       DBG_ENTRY("DataWriterImpl","data_delivered");
       control_dropped_count_ ++;
       sample->release ();

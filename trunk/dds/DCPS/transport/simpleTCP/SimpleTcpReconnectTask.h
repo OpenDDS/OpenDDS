@@ -76,8 +76,11 @@ namespace TAO
       /// The "mainline" executed by the worker thread.
       virtual int svc();
 
-      /// Shutdown the worker thread.
+      /// Called when the thread exits.
       virtual int close(u_long flag = 0);
+
+      /// Shutdown the worker thread.
+      int shutdown();
 
     private:
 
@@ -99,19 +102,11 @@ namespace TAO
       /// added to the queue_, and also when this task is shutdown.
       ConditionType work_available_;
 
-      /// This condition will be signal()'ed when the thread started or
-      /// this task is shutdown.
-      ConditionType active_workers_;
-
       /// Flag used to initiate a shutdown request to all worker threads.
       bool shutdown_initiated_;
 
       /// Flag used to avoid multiple open() calls.
       bool opened_;
-
-      /// The number of currently active worker thread that used to sychronize
-      /// the work thread and the caller thread.
-      Thread_Counter num_threads_;
 
       /// Reference to the SimpleTcpTransport needed for the refresh_link() call.
       SimpleTcpTransport_rch transport_;

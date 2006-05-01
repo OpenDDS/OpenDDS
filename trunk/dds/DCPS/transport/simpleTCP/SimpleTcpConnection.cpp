@@ -56,7 +56,7 @@ TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
   DBG_ENTRY("SimpleTcpConnection","~SimpleTcpConnection");
   // Shutdown the reconnect task.
-  this->reconnect_task_->close ();
+  this->reconnect_task_->shutdown ();
   // Remove the reference of the old connection object
   // or the reference of new connection object.
   this->old_con_ = 0;

@@ -12,10 +12,8 @@
 TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
   TAO::DCPS::SimpleTcpTransport* transport_impl)
   : work_available_(lock_),
-    active_workers_(lock_),
     shutdown_initiated_(false),
-    opened_(false),
-    num_threads_(0)
+    opened_(false)
 {
   DBG_ENTRY("SimpleTcpReconnectTask","SimpleTcpReconnectTask");
 
@@ -91,12 +89,6 @@ TAO::DCPS::SimpleTcpReconnectTask::open(void*)
   // Now we have past the point where we can say we've been open()'ed before.
   this->opened_ = true;
 
-  // Now we wait until the thread has started.
-  while (this->num_threads_ != 1)
-    {
-      this->active_workers_.wait();
-    }
-
   return 0;
 }
 
@@ -105,13 +97,6 @@ int
 TAO::DCPS::SimpleTcpReconnectTask::svc()
 {
    DBG_ENTRY("SimpleTcpReconnectTask","svc");
-  // Account for this current worker thread having started the
-  // execution of this svc() method.
-  {
-    GuardType guard(this->lock_);
-    ++this->num_threads_;
-    this->active_workers_.signal();
-  }
 
   // Start the "GetWork-And-PerformWork" loop for the current worker thread.
   while (! this->shutdown_initiated_)
@@ -172,25 +157,23 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
 int
 TAO::DCPS::SimpleTcpReconnectTask::close(u_long)
 {
-  DBG_ENTRY("SimpleTcpReconnectTask","close");
+  return 0;
+}
+
+
+int
+TAO::DCPS::SimpleTcpReconnectTask::shutdown()
+{
+  DBG_ENTRY("SimpleTcpReconnectTask","shutdown");
 
   {
     GuardType guard(this->lock_);
     // Set the shutdown flag to true.
     this->shutdown_initiated_ = true;
-    this->active_workers_.signal();
-  }
-
-  {
-    GuardType guard(this->lock_);
     this->work_available_.signal();
   }
 
-  // Do nothing if this task has never been open()'ed.
-  if (!this->opened_)
-  {
-    return 0;
-  }
+  this->wait ();
 
   return 0;
 }

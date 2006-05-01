@@ -60,7 +60,16 @@ TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
   DBG_ENTRY("SimpleTcpDataLink","stop_i");
  
-  if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_)
+  SimpleTcpReceiveStrategy * rs 
+    = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+  // If we received the GRACEFUL_DISCONNECT message from peer before we
+  // initiate the disconnecting of the datalink, then we will not send 
+  // the GRACEFUL_DISCONNECT message to the peer.
+  bool disconnected = rs->gracefully_disconnected ();
+
+  if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_
+    && ! disconnected)
     {
       this->send_graceful_disconnect_message ();
       this->graceful_disconnect_sent_ = true;

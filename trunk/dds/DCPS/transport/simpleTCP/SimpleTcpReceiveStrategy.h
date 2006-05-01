@@ -29,6 +29,8 @@ namespace TAO
 
         ACE_Reactor* get_reactor();
 
+        bool gracefully_disconnected ();
+
       protected:
 
         virtual ssize_t receive_bytes(iovec iov[],

@@ -36,3 +36,10 @@ TAO::DCPS::SimpleTcpReceiveStrategy::get_reactor()
   return this->reactor_task_->get_reactor ();
 }
 
+
+ACE_INLINE bool
+TAO::DCPS::SimpleTcpReceiveStrategy::gracefully_disconnected ()
+{
+ return this->gracefully_disconnected_;
+}
+
