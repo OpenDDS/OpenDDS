@@ -1,3 +1,14 @@
+Tue May  2 13:38:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/transport/dds_comparative/dds_transport_comparative.mpc:
+
+          Added inheritance from portableserver base project for subscriber. 
+          This would resolve compilation errors shown on static builds on linux 
+          platforms.
+
 Mon May  1 13:16:56 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:

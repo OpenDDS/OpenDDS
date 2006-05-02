@@ -22,7 +22,7 @@ project(*Publisher): dcpsexe, portableserver {
   }
 }
 
-project(*Subscriber): dcpsexe {
+project(*Subscriber): dcpsexe, portableserver {
   exename = FooTest3_subscriber
   after       += DcpsFooType3Unbounded
   libs     += DcpsFooType3Unbounded
