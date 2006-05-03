@@ -1,9 +1,21 @@
+Wed May  3 11:30:09 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+
+          Changed from char* to const char* to avoid build warnings from
+          SunCC.
+
+        * tests/DCPS/MultiDPTest/common.h:
+
+          Removed the trailing comma from an enum to avoid build warnings
+          from SunCC.
+
 Tue May  2 16:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
 
           Changed to call operator==(TAO::unbounded_value_sequence<CORBA::Octet>)
-          explicitly. It is ugly but it resolves the compilation error on VC71 
+          explicitly. It is ugly but it resolves the compilation error on VC71
           against DOC's latest version. This seems be a compiler problem that
           does not recognize the global operator== when the global operator== is
           defined as inline and it's called by the code inside of a namespace.
@@ -15,7 +27,7 @@ Tue May  2 16:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           before adding new elements to the sequence. This problem was detected
           in FooTest4_0 with the DOC's latest version which has the new sequence
           implementation.
-          
+
 Tue May  2 13:38:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
@@ -23,8 +35,8 @@ Tue May  2 13:38:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
         * tests/transport/dds_comparative/dds_transport_comparative.mpc:
 
-          Added inheritance from portableserver base project for subscriber. 
-          This would resolve compilation errors shown on static builds on linux 
+          Added inheritance from portableserver base project for subscriber.
+          This would resolve compilation errors shown on static builds on linux
           platforms.
 
 Mon May  1 13:16:56 USMST 2006  Yan Dai  <dai_y@ociweb.com>
@@ -34,39 +46,39 @@ Mon May  1 13:16:56 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
-          Replaced the close() in SimpleTcpReconnectTask with shutdown () 
-          method. The difference is the shutdown() will wait for thread 
-          exit. This would resolve an access violation due to the race 
+          Replaced the close() in SimpleTcpReconnectTask with shutdown ()
+          method. The difference is the shutdown() will wait for thread
+          exit. This would resolve an access violation due to the race
           condition in the SimpleTcpReconnectTask object
           Some un-necessary variables num_threads_ and active_workers_
           are also removed.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Made the Datalink not send the GRACEFUL_DISCONNECT message if
           it already received the GRACEFUL_DISCONNECT message from peer.
-          This would fix the error  
-          "SimpleTcpSendStrategy::send_bytes: ERROR: sendv: Bad file 
+          This would fix the error
+          "SimpleTcpSendStrategy::send_bytes: ERROR: sendv: Bad file
            descriptor iovec count: 3" upon shutdown.
-          
+
         * dds/DCPS/DataWriterImpl.cpp:
 
           Fixed a warning with unused variable.
 
 Fri Apr 28 12:59:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changes fixes a problem on linux that transport does not 
+        These changes fixes a problem on linux that transport does not
         identify peer disconnecting due to crash. This should fix
         the "run_test.pl restart_pub" test on linux.
-        
+
         * dds/DdsDcps.mpc:
-        
+
           Added TransportGDControlElement.cpp.
-          
+
         * dds/DCPS/DataSampleHeader.h:
-        
+
           Added GRACEFUL_DISCONNECT message id.
 
         * dds/DCPS/transport/framework/DataLink.cpp:
@@ -79,23 +91,23 @@ Fri Apr 28 12:59:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
 
-          Added new hooks so the concrete datalink can send graceful 
-          disconnect message before transport shutdown or releasing 
+          Added new hooks so the concrete datalink can send graceful
+          disconnect message before transport shutdown or releasing
           datalink.
-          
+
         * dds/DCPS/transport/framework/TransportGDControlElement.cpp:
         * dds/DCPS/transport/framework/TransportGDControlElement.h:
-        
+
           New type control message that does not need data_delivered
           callback.
-          
+
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
         * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
 
           Made the transport also try to reconnect if it did not receive
           the graceful disconnect message when receive_bytes() returns 0.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
 
@@ -119,7 +131,7 @@ Tue Apr 25 09:48:23 USMST 2006  Scott Harris <harris_s@ociweb.com>
 Sun Apr 23 22:50:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes are made to an effort to fix rae\rt8448\test failure.
-        
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
@@ -130,7 +142,7 @@ Sun Apr 23 22:50:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.h:
         * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.inl:
-        
+
           Fixed memory leaks and added more debugging messages.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
@@ -142,23 +154,23 @@ Sun Apr 23 22:50:40 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           connection before a new connection is reestablished.
           Changed to use the enum reconnect_state_ instead of a bool
           variable to mark various states during reconnecting and also
-          seperate the active_reconnect_on_new_association() from 
+          seperate the active_reconnect_on_new_association() from
           active_reconnect_i() to make these function more obvious.
-                    
+
 Sat Apr 22 21:54:02 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        
-          Made the elems_ and queue_ to be allocated on heap. This would help 
+
+          Made the elems_ and queue_ to be allocated on heap. This would help
           resolve a deadlock situation after reconnect fails. The deadlock
           happens when a send thread holds datawriter's lock and try to acquire
           the SendStrategy's lock and the reconnect thread calls terminate_send
           which got the SendStrategy's lock and drop all queued samples and try
           to call data_dropped on DataWriter. The changes makes we can remove
-          queued elements outside the SendStrategy's lock. 
-          
+          queued elements outside the SendStrategy's lock.
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
@@ -171,8 +183,8 @@ Sat Apr 22 21:54:02 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Changed to create per connection reconnect task to do the reconnecting instead
           of using single thread to do reconnecting for all datalinks in a TransportImpl.
-          Hope this fix the rae\rt8448\test failure 
-                    
+          Hope this fix the rae\rt8448\test failure
+
 Fri Apr 21 11:42:58 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -184,7 +196,7 @@ Fri Apr 21 10:17:51 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataReaderImpl.cpp:
 
           Corrected incorrect parameter order in a logging message.
-          
+
         * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
         * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
         * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
@@ -200,40 +212,40 @@ Fri Apr 21 10:17:51 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
           Added the new on_*_disconnected and on_*_reconnected to the listener
           implementations.
-          
+
 Fri Apr 21 01:09:00 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         The main changes are made to add the on_*_reconnected and on_*_disconnected
         new callbacks for RT8499.
-        
+
         * dds/DdsDcpsPublication.idl:
         * dds/DdsDcpsSubscription.idl:
-        
+
           Added the on_*_reconnected and on_*_disconnected callbacks
           Updated the *LostStatus to just contain the instance handles
           and typedef'd the *LostStatus as *DisconnectedStatus and
           *ReconnectedStatus.
-                    
+
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
-        
-          Made the DataReader/DataWriter not cache the *LostStatus and 
+
+          Made the DataReader/DataWriter not cache the *LostStatus and
           added notify_*_diconnected and notify_*_reconnected to support
           the new callbacks.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
-        
+
           Updated the notify() function for DISCONNECTED, RECONNECTED and
           LOST connection notification.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
-        
+
           On active connection side, made the disconnected callback called
           before reconnect, the reconnceted callback called after reconnect
           succeeded and the lost connection callback called after reconnet
@@ -243,15 +255,15 @@ Fri Apr 21 01:09:00 USMST 2006  Yan Dai  <dai_y@ociweb.com>
           when new connection is created and the lost connection callback
           called after the passive_reconnect_duration_ period if not reconnected.
           Updated some methods to correct the reconnect logic on the passive side.
-                    
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Changed to use the "old" connection object to transfer its state to
           the "new" connection object instance of using "new" connection object
           copy state from "old" connection object. This was changed since we
           need synchronize the handle_timeout() and transfer state to "new"
           connection object on the "old" connection object.
-          
+
         * tests/DCPS/Reconnect/DataReaderListener.cpp:
         * tests/DCPS/Reconnect/DataReaderListener.h:
         * tests/DCPS/Reconnect/DataWriterListener.cpp:
@@ -274,36 +286,36 @@ Thu Apr 20 13:40:46 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataWriterImpl.h:
 
           Updated the data_dropped() method signature to be same as in the base
-          class TransportSendListener. This would fix the errors 
+          class TransportSendListener. This would fix the errors
           "ERROR: Subclass should override if sending control samples. "
-          when the transport drops the control messages due to a lost 
+          when the transport drops the control messages due to a lost
           connection.
 
 Wed Apr 19 19:13:01 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
-        
+
           Added tests/DCPS/Reconnect tests.
-          
+
         * tests/DCPS/Reconnect/DataReaderListener.cpp:
         * tests/DCPS/Reconnect/DataWriterListener.cpp:
         * tests/DCPS/Reconnect/publisher.cpp:
         * tests/DCPS/Reconnect/subscriber.cpp:
         * tests/DCPS/Reconnect/Writer.cpp:
         * tests/DCPS/Reconnect/run_test.pl:
-        
+
           Added more options to publisher and subscriber to help automate the
-          reconnect tests. Changed run_test.pl to redirect the output to a log 
+          reconnect tests. Changed run_test.pl to redirect the output to a log
           file so that errors due to an abnormal shutdown and lost connection
-          will not show on scoreboard. The final output "test PASSED" or 
+          will not show on scoreboard. The final output "test PASSED" or
           "test FAILED" will show the test result.
 
 Wed Apr 19 13:04:26 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
 
-          Added inheritance from portableserver base project for subscriber. 
-          This would resolve compilation errors shown on static builds on linux 
+          Added inheritance from portableserver base project for subscriber.
+          This would resolve compilation errors shown on static builds on linux
           platforms.
 
 Mon Apr 17 09:45:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
@@ -311,7 +323,7 @@ Mon Apr 17 09:45:30 USMST 2006  Yan Dai  <dai_y@ociweb.com>
         * DDS_release_notes.txt:
 
           Added release notes for main changes after 0.7 release.
-          
+
 Sun Apr 16 22:32:55 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
@@ -327,13 +339,13 @@ Sun Apr 16 22:32:55 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 Sun Apr 16 21:43:11 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendListener.cpp:
-        
+
           Fixed a compilation warning due to an unused variable.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
 
           Fixed a bug on wait_to_unclog that passes an ACE_Time_Value::zero
-          to handle_write_ready instance of 0 as the timeout parameter. 
+          to handle_write_ready instance of 0 as the timeout parameter.
           This would fix the TCPListener performance test.
 
 Sun Apr 16 21:53:02 2006  Phil Mesnier  <mesnier_p@ociweb.com>
