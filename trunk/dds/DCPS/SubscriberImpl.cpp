@@ -479,10 +479,10 @@ namespace TAO
             (*pos)->have_view_states(view_states) &&
             (*pos)->have_instance_states(instance_states))
         {
+          readers->length(count + 1) ;
           (*readers)[count++] = (*pos)->get_dr_obj_ref() ;
         }
       }
-      readers->length(count) ;
 
       return ::DDS::RETCODE_OK ; 
     }
