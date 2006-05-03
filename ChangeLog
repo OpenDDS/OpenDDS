@@ -1,3 +1,21 @@
+Tue May  2 16:59:07 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Changed to call operator==(TAO::unbounded_value_sequence<CORBA::Octet>)
+          explicitly. It is ugly but it resolves the compilation error on VC71 
+          against DOC's latest version. This seems be a compiler problem that
+          does not recognize the global operator== when the global operator== is
+          defined as inline and it's called by the code inside of a namespace.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fix bugs on subscriber that does not increase the sequence length
+          before adding new elements to the sequence. This problem was detected
+          in FooTest4_0 with the DOC's latest version which has the new sequence
+          implementation.
+          
 Tue May  2 13:38:45 USMST 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3_2/FooTest3_2.mpc:

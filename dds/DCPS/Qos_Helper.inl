@@ -83,7 +83,7 @@ namespace TAO
     bool operator == (const ::DDS::UserDataQosPolicy& qos1, 
                       const ::DDS::UserDataQosPolicy& qos2) 
     {
-      if (qos1.value == qos2.value)
+      if (::operator== (qos1.value, qos2.value))
       {
         return true;
       }
@@ -95,7 +95,7 @@ namespace TAO
     bool operator == (const ::DDS::TopicDataQosPolicy & qos1, 
                       const ::DDS::TopicDataQosPolicy & qos2) 
     {
-      if (qos1.value == qos2.value)
+      if (::operator== (qos1.value, qos2.value))
       {
         return true;
       }
@@ -107,7 +107,7 @@ namespace TAO
     bool operator == (const ::DDS::GroupDataQosPolicy& qos1, 
                       const ::DDS::GroupDataQosPolicy& qos2) 
     {
-      if (qos1.value == qos2.value)
+      if (::operator == (qos1.value, qos2.value))
       {
         return true;
       }
@@ -544,7 +544,7 @@ namespace TAO
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::UserDataQosPolicy& qos) 
     {
-      if (qos.value == TheServiceParticipant->initial_UserDataQosPolicy().value)
+      if (::operator== (qos.value, TheServiceParticipant->initial_UserDataQosPolicy().value))
       {
         return true;
       }

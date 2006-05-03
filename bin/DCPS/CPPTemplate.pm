@@ -794,8 +794,11 @@ DDS::ReturnCode_t
       {
         if (item->sample_state_ & sample_states)
         {
+          // Increase sequence length before adding new element to sequence.
+          received_data.length (count + 1); 
           received_data[count] =
               *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          info_seq.length (count + 1); 
           ptr->instance_state_.sample_info(info_seq[count], item) ;
       
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -829,9 +832,6 @@ DDS::ReturnCode_t
   }
   if (count)
   {  
-    received_data.length(count) ;
-    info_seq.length(count) ;
-
     return ::DDS::RETCODE_OK;
   }
   else
@@ -886,6 +886,8 @@ DDS::ReturnCode_t
         {
           received_data[count] =
               (::<%SCOPE%><%TYPE%> *)item->registered_data_ ;
+          // Increase sequence length before adding new element to sequence.
+          info_seq.length (count + 1); 
           ptr->instance_state_.sample_info(info_seq[count], item) ;
       
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -921,7 +923,6 @@ DDS::ReturnCode_t
 
   if (count)
   {  
-    info_seq.length(count) ;
     return ::DDS::RETCODE_OK;
   }
   else
@@ -998,8 +999,11 @@ DDS::ReturnCode_t
         {
           if (item->sample_state_ & sample_states)
             {
+              // Increase sequence length before adding new element to sequence.
+              received_data.length (count + 1);
               received_data[count] =
                   *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+              info_seq.length (count + 1);
               ptr->instance_state_.sample_info(info_seq[count], item) ;
       
               item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1074,8 +1078,6 @@ DDS::ReturnCode_t
 
   if (count)
     { 
-      received_data.length(count) ;
-      info_seq.length(count) ;
       return ::DDS::RETCODE_OK;
     }
     else
@@ -1134,6 +1136,8 @@ DDS::ReturnCode_t
  */
           received_data[count] =
               (::<%SCOPE%><%TYPE%> *)item->registered_data_ ;
+          // Increase sequence length before adding new element to sequence.
+          info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
       
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1169,7 +1173,6 @@ DDS::ReturnCode_t
 
   if (count)
   {  
-    info_seq.length(count) ;
     return ::DDS::RETCODE_OK;
   }
   else
@@ -1424,8 +1427,11 @@ DDS::ReturnCode_t
     {
       if (item->sample_state_ & sample_states)
       {
+        // Increase sequence length before adding new element to sequence.
+        received_data.length (count + 1);
         received_data[count] =
             *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+        info_seq.length (count + 1);
         ptr->instance_state_.sample_info(info_seq[count], item) ;
     
         item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1449,9 +1455,6 @@ DDS::ReturnCode_t
     //
     sample_info(info_seq, 0, count, ptr->rcvd_sample_.tail_) ;
       
-    received_data.length(count) ;
-    info_seq.length(count) ;
-
     return ::DDS::RETCODE_OK;
   }
   else
@@ -1522,8 +1525,10 @@ DDS::ReturnCode_t
     {
       if (item->sample_state_ & sample_states)
       {
+        received_data.length (count + 1);
         received_data[count] =
             *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+        info_seq.length (count + 1);
         ptr->instance_state_.sample_info(info_seq[count], item) ;
     
         item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1590,9 +1595,6 @@ DDS::ReturnCode_t
                   ptr->rcvd_sample_.tail_) ;
     }
       
-    received_data.length(count) ;
-    info_seq.length(count) ;
-
     return ::DDS::RETCODE_OK;
   }
   else
