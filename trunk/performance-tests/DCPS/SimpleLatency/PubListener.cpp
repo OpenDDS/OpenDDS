@@ -57,7 +57,7 @@ add_stats (
 static void
 init_stats (
     stats_type& stats,
-    char *name)
+    const char *name)
 {
     strncpy ((char *)stats.name, name, 19);
     stats.name[19] = '\0';
