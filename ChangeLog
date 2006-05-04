@@ -1,3 +1,11 @@
+Thu May  4 20:06:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet_rch.h
+
+          Reversed the changes Scott made on
+          "Thu Dec 15  8:35:17 USMST 2005 2005  Scott Harris  <harris_s@ociweb.com>"
+          since the TAO1.4a latest version works without the change.
+
 Wed May  3 11:30:09 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
