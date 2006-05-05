@@ -33,8 +33,8 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file -DCPSConfigFile \"\"");
-
+                             . " -d $domains_file -DCPSConfigFile \"\"
+                             . "-ORBSvcConf repo.conf");
 
 print $DCPSREPO->CommandLine(), "\n";
 

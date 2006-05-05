@@ -1,3 +1,18 @@
+Fri May  5 17:48:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/repo.conf:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+
+          Made the repo use the repo.conf to avoid multiple requests
+          handled by single orb thread at the same time. This would  
+          fix the problem on sunos59 gcc3.3.2 builds that the DCPSInfo 
+          could not be terminated. It seems without using the service
+          config file, the DCPSInfo deadlocked and the TerminateWaitKill()
+          in perl script will return non-zero which causes the test failure.
+          
 Fri May  5 14:44:39 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
