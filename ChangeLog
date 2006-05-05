@@ -1,3 +1,16 @@
+Fri May  5 18:41:51 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/transport/simple/DDS_transport_simple.mpc:
+        * tests/transport/simple_bp/DDS_transport_simple_bp.mpc:
+        * tests/transport/simple_bp_rm/DDS_transport_simple_bp_rm.mpc:
+        * tests/transport/simple_n/DDS_transport_simple_n.mpc:
+        * tests/transport/udp_simple/DDS_transport_udp_simple.mpc:
+        * tests/transport/udp_simple_n/DDS_transport_udp_simple_n.mpc:
+
+          Added inheritance from portableserver base project.
+          This would resolve compilation errors shown on static builds on linux
+          platforms.
+
 Fri May  5 17:48:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/repo.conf:
