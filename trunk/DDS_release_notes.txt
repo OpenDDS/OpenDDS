@@ -44,11 +44,12 @@ New to this version are the following changes:
     user to register type support then the default type name - the interface repository
     id is used.
 
-  - Supported the SimpleTCP connection re-establishment and the lost 
-    publication/subscription callbacks upon the retry connect failure. During 
-    reconnecting, the messages are queued until the reconnecting is done. If 
-    the reconnecting succeeds, the messages are sent out. Otherwise the messages 
-    are discarded.
+  - Supported the SimpleTCP connection re-establishment and disconnected/lost/reconnected 
+    publication/subscription callbacks. The disconnected callback is called just before
+    reconnect is attempted. If reconnect fails, the lost callback is called. If reconnect
+    succeeds, the reconnected callback is called. During reconnecting, the messages are 
+    queued until the reconnecting is done. If the reconnecting succeeds, the messages are
+    sent out. Otherwise the messages are discarded.
 
     The main changes are:
             
