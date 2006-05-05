@@ -1,3 +1,26 @@
+Fri May  5 21:33:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        
+          Moved the qos operator functions from TAO::DCPS namespace to global
+          namespace. This would resolve the compilation errors on DDS builds 
+          against DOC's latest version that the VC71 compiler can not find  
+          the octet sequence operator==.
+          
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        
+          Made the qos operator== called implicitly instead of explicitly.
+          Calling operator== explicitly was used as a workarround of the 
+          compilation problem metioned above.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Added expected lost_subscription_callback=1 to the bp_timeout test.
+          This fixed the test failure on windows.
+
 Fri May  5 18:41:51 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/transport/simple/DDS_transport_simple.mpc:
