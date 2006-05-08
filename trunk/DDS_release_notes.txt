@@ -1,4 +1,3 @@
-!! not yet released !!!
 Version 0.8 of TAO DDS.
 
 New to this version are the following changes:
@@ -45,11 +44,11 @@ New to this version are the following changes:
     id is used.
 
   - Supported the SimpleTCP connection re-establishment and disconnected/lost/reconnected 
-    publication/subscription callbacks. The disconnected callback is called just before
-    reconnect is attempted. If reconnect fails, the lost callback is called. If reconnect
-    succeeds, the reconnected callback is called. During reconnecting, the messages are 
-    queued until the reconnecting is done. If the reconnecting succeeds, the messages are
-    sent out. Otherwise the messages are discarded.
+    publication and subscription callbacks. The disconnected callback is called just before
+    reconnect is attempted. If reconnect fails, the connection lost callback is called. 
+    If reconnect succeeds, the reconnected callback is called. During reconnecting, the 
+    messages are queued until the reconnecting is done. If the reconnecting succeeds, 
+    the queued messages are sent out. Otherwise the messages are discarded.
 
     The main changes are:
             
@@ -118,27 +117,21 @@ New to this version are the following changes:
     to pretect the internal map in DataLinkSetMap to fix the 
     problem.
   
-  - Note: There is a limitation in the current transport implementation
-    which disallow the associations between a datareader and a datawriter
-    associated with the same topic in the same process. To workarround 
-    with this limitation, such datareader and datawriter need use different
-    TransportImpl object. Otherwise, there are such errors:
+===Limitations==
+
+  - A transport instance may only be used by publications and subscriptions
+    of a single domain because the pub & sub ids are only unique within
+    a domain and the transport uses this ids to map associations to 
+    links/connections.
+
+  - The current transport implementation disallow the associations between 
+    a datareader and a datawriter associated with the same topic in the same 
+    process. To workarround with this limitation, such datareader and datawriter
+    need use different TransportImpl object. Otherwise, there are such errors:
  
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
     
-    
-    
-
-[] more!
-
---- more notes on limitations ---
-- A transport instance my only be used by publications and subscriptions
-  of a single domain because the pub & sub ids are only unique within
-  a domain and the transport uses this ids to map associations to 
-  links/connections.
-
-- 
 
 =========================================================================
 
