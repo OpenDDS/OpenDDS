@@ -5,6 +5,7 @@ New to this version are the following changes:
   - Added configuration of DCPS and transports via configuration files.
     This also simplified the code related to creating and configuring
     transports.
+    See file://TAO_DDS_Configuration_Settings.html for more information.
 
   - fixed a possible deadlock.
     The scenario it was found in was:
@@ -31,24 +32,29 @@ New to this version are the following changes:
   - Added an option -DCPSInfoRepo to replace -DCPSInfo option and deprecated 
     -DCPSInfo option.
 
-  - Fixes a bug in Registered_Data_Types that causes multiple domain participants
-    within the same domain in a process can not register same data types. 
+  - Fixes a bug in Registered_Data_Types that causes multiple domain 
+    participants within the same domain in a process can not register 
+    same data types. 
 
-  - Fixed DDS application failure between the publisher and subscriber on different
-    endianess machines. The byte order is set upon data serializing and de-serializing.
-    The swap_bytes configuration value per TransportImpl instance is also appropriately
-    used to allow different transports use different setting of swap_bytes.
+  - Fixed DDS application failure between the publisher and subscriber 
+    on different endianess machines. The byte order is set upon data 
+    serializing and de-serializing.
+    The swap_bytes configuration value per TransportImpl instance is now 
+    appropriately used to allow different transports use different setting
+    of swap_bytes.
 
-  - Added TypeSupport::get_type_name() support. If a nil type name is supplied by
-    user to register type support then the default type name - the interface repository
-    id is used.
+  - Added TypeSupport::get_type_name() support. If a nil type name is supplied
+    by user to register type support then the default type name - the interface
+    repository id is used.
 
-  - Supported the SimpleTCP connection re-establishment and disconnected/lost/reconnected 
-    publication and subscription callbacks. The disconnected callback is called just before
-    reconnect is attempted. If reconnect fails, the connection lost callback is called. 
-    If reconnect succeeds, the reconnected callback is called. During reconnecting, the 
-    messages are queued until the reconnecting is done. If the reconnecting succeeds, 
-    the queued messages are sent out. Otherwise the messages are discarded.
+  - Supported the SimpleTCP connection re-establishment and 
+    disconnected/lost/reconnected publication and subscription callbacks. 
+    The disconnected callback is called just before reconnect is attempted. 
+    If reconnect fails, the connection lost callback is called. 
+    If reconnect succeeds, the reconnected callback is called. During 
+    reconnecting, the messages are queued until the reconnecting is done. 
+    If the reconnecting succeeds, the queued messages are sent out. 
+    Otherwise the messages are discarded.
 
     The main changes are:
             
@@ -117,21 +123,24 @@ New to this version are the following changes:
     to pretect the internal map in DataLinkSetMap to fix the 
     problem.
   
-===Limitations==
+--- more notes and limitations ---
+  This section adds on to the "KNONW LIMITATIONS" section at the bottom
+  of this document.
 
-  - A transport instance may only be used by publications and subscriptions
-    of a single domain because the pub & sub ids are only unique within
-    a domain and the transport uses this ids to map associations to 
-    links/connections.
+- A transport instance may only be used by publications and subscriptions
+  of a single domain because the pub & sub ids are only unique within
+  a domain and the transport uses this ids to map associations to 
+  links/connections.
 
-  - The current transport implementation disallow the associations between 
-    a datareader and a datawriter associated with the same topic in the same 
-    process. To workarround with this limitation, such datareader and datawriter
-    need use different TransportImpl object. Otherwise, there are such errors:
+- There is a limitation in the current transport implementation
+    which disallow the associations between a datareader and a datawriter
+    in the same process. (i.e. publishing to a subscriber in the same process)
+    To workarround with this limitation, such datareader and datawriter 
+    need use different TransportImpl objects. 
+    Otherwise, there are such errors:
  
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
-    
 
 =========================================================================
 
