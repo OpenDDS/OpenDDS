@@ -133,14 +133,14 @@ settings for attributes such as debugging output, the object reference of the
 DCPSInfoRepo process, and memory pre-allocation settings. A sample
 &quot;common&quot; section is below. <o:p></o:p></span></p>
 
-<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>[common]<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSDebugLevel=0<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSInfoRepo=corbaloc::localhost:12345/DCPSInfoRepo<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSLivelinessFactor=80<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSChunks=20<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSChunksAssociationMultiplier=10<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSBitTransportPort=<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSBitLookupDurationMsec=2000<o:p></o:p></span></pre>
+<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>[common]<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSDebugLevel=0<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSInfoRepo=corbaloc::localhost:12345/DCPSInfoRepo<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSLivelinessFactor=80<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSChunks=20<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSChunksAssociationMultiplier=10<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSBitTransportPort=<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>DCPSBitLookupDurationMsec=2000<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>It is not necessary to specify every attribute. <o:p></o:p></span></p>
@@ -150,7 +150,7 @@ EN'>Each attribute's value can be overridden by a command-line argument. The
 command-line argument has the same name as the configuration option with a
 &quot;-&quot; prepended to the front of it. For example, <o:p></o:p></span></p>
 
-<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>subscriber -DCPSInfoRepo corbaloc::localhost:12345/DCPSInfoRepo<o:p></o:p></span></pre>
+<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>subscriber -DCPSInfoRepo corbaloc::localhost:12345/DCPSInfoRepo<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>The following table summarizes the &quot;common&quot; configuration
@@ -288,11 +288,11 @@ attributes: <o:p></o:p></span></p>
 EN'>A DDS user may configure one or more transports in a single configuration
 file. A sample transport configuration is below: <o:p></o:p></span></p>
 
-<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>[transport_impl_1]<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>transport_type=SimpleTcp<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>local_address=localhost:4444<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>swap_bytes=0<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>optimum_packet_size=8192<o:p></o:p></span></pre>
+<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>[transport_impl_1]<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>transport_type=SimpleTcp<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>local_address=localhost:4444<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>swap_bytes=0<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>optimum_packet_size=8192<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>Again, it is not necessary to specify every attribute. <o:p></o:p></span></p>
@@ -304,20 +304,20 @@ style='mso-ansi-language:EN'> marker is the identifier for the transport. That
 number must match the transport id used in our code. You'll recall that, in
 both the publisher and subscriber, we identified the transport id as follows: <o:p></o:p></span></p>
 
-<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// constants used by this publisher for transport; the <o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// TRANSPORT_IMPL_ID must match the value in the <o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// configuration file.<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>const TAO::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;<o:p></o:p></span></pre>
+<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// constants used by this publisher for transport; the <o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// TRANSPORT_IMPL_ID must match the value in the <o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// configuration file.<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>const TAO::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>and created the transport implementation object as follows: <o:p></o:p></span></p>
 
-<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// Initialize the transport; the TRANSPORT_IMPL_ID<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// must match the value in the configuration file.<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>TAO::DCPS::TransportImpl_rch tcp_impl =<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">  </span><span style="mso-spacerun: yes">    </span>TheTransportFactory-&gt;create_transport_impl (<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>TRANSPORT_IMPL_ID,<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>AUTO_CONFIG);<o:p></o:p></span></pre>
+<pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// Initialize the transport; the TRANSPORT_IMPL_ID<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// must match the value in the configuration file.<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>TAO::DCPS::TransportImpl_rch tcp_impl =<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">  </span><span style="mso-spacerun: yes">    </span>TheTransportFactory-&gt;create_transport_impl (<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>TRANSPORT_IMPL_ID,<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>AUTO_CONFIG);<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>Thus, we can see where the transport's identifier of &quot;1&quot; in the
@@ -499,6 +499,76 @@ style='mso-ansi-language:EN'> transport: <o:p></o:p></span></p>
   <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoNormal>Enable/disable the Nagle algorithm. By default, it is
   disabled. <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+ </tr>
+<tr>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><code><span style='font-size:10.0pt;font-family:"Arial Unicode MS"'>conn_retry_initial_delay</span></code>
+  <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>non-negative integer<br>
+  (500) <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>The initial retry delay in milliseconds. The first connection retry will be when the loss of connection is detected. The second try will be after this delay. The default is 500 milliseconds. <span
+  style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+ </tr>
+<tr>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><code><span style='font-size:10.0pt;font-family:"Arial Unicode MS"'>conn_retry_backoff_multiplier</span></code>
+  <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal> non-negative double<br>
+  (2.0) <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal> The backoff multiplier for reconnection strategy. The third and so on reconnect will be this value * the previous delay. Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5 the second reconnect attempt will be at 0.5 seconds after first retry connect fails; the third attempt will be 0.75 seconds after the second retry connect fails; the fourth attempt will be 1.125 seconds after the third retry connect fails. The default value is 2.0. <span
+  style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+ </tr>
+<tr>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><code><span style='font-size:10.0pt;font-family:"Arial Unicode MS"'>conn_retry_attempts</span></code>
+  <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>non-negative integer<br>
+  (3) <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>Number of attemps to reconnect before giving up and calling on_publication_lost() and on_subscription_lost() callbacks.<span
+  style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+ </tr>
+<tr>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><code><span style='font-size:10.0pt;font-family:"Arial Unicode MS"'>max_output_pause_period</span></code>
+  <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>non-negative integer<br>
+  (0) <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>Maximum period (in milliseconds) of not being able to send queued messages. If there are samples queued and no output for longer than this period then the connection will be closed and on_*_lost() callbacks will be called. If the value is zero, the default, then this check will not be made.<span
+  style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+ </tr>
+<tr>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><code><span style='font-size:10.0pt;font-family:"Arial Unicode MS"'>passive_reconnect_duration</span></code>
+  <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td valign=top style='padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>non-negative integer<br>
+  (2000) <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
+  </td>
+  <td width=411 valign=top style='width:308.3pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal>The time period in milliseconds for the acceptor side of a connection to wait for the connection to be reconnected. If not reconnected within this period then on_publication_lost() and on_subscription_lost() callbacks will be called. The default is 2 seconds (2000 millseconds).<span
+  style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
   </td>
  </tr>
 </table>

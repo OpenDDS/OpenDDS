@@ -1,3 +1,19 @@
+Mon May  8 20:16:50 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+          
+          DDS 0.8 released.
+
+        * VERSION:
+
+          Updated timestamp of the 0.8 release.
+          
+        * DDS_release_notes.txt:
+
+          Updated one limitation note.
+
+        * TAO_DDS_Configuration_Settings.html:
+        
+          Added reconnection configuration values.
+          
 Mon May  8 18:46:56 UTC 2006  Scott Harris <harris_s@ociweb.com>
 
 
@@ -7,8 +23,6 @@ Mon May  8 18:46:56 UTC 2006  Scott Harris <harris_s@ociweb.com>
           Updated the release notes and added the config file html.
 
 Mon May  8 18:36:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
-
-          DDS 0.8 released.
 
         * DDS_release_notes.txt:
         * VERSION:

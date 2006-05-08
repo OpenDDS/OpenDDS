@@ -22,7 +22,7 @@ New to this version are the following changes:
   - Uninlined some unnecessary inlines to reduce the footprint.
 
   - Added DDS_HAS_MINIMUM_BIT macro to build without Built In Topic 
-    support. Defining the macro to NOT build BIT support.
+    support. Defining the macro will NOT build BIT support.
 
   - Made the DCPSInfoRepo register with IOR table as well as providing
     the ior file to provide alternate schemes of distributing the object 
@@ -32,9 +32,8 @@ New to this version are the following changes:
   - Added an option -DCPSInfoRepo to replace -DCPSInfo option and deprecated 
     -DCPSInfo option.
 
-  - Fixes a bug in Registered_Data_Types that causes multiple domain 
-    participants within the same domain in a process can not register 
-    same data types. 
+  - Fixed a bug in Registered_Data_Types that caused multiple domain participants
+    within the same domain in a process to not register same data types. 
 
   - Fixed DDS application failure between the publisher and subscriber 
     on different endianess machines. The byte order is set upon data 
@@ -59,9 +58,8 @@ New to this version are the following changes:
     The main changes are:
             
     1) Added new idl interfaces - TAO::DataReaderListener and 
-       TAO::DataWriterListener to support the on_subscription_lost 
-       and on_publication_lost callbacks upon the retry connect 
-       failure. 
+       TAO::DataWriterListener to support on_*_disconnected,
+       on_*_lost and on_*_reconnected callbacks.
            
     2) New configuration values are added to support the 
        reconnect strategy.
@@ -118,7 +116,7 @@ New to this version are the following changes:
      b) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test 
         the on_*_lost callback and the connection re-establishment.
      
-  - Fixed a problem that add_association() fails when multiple 
+  - Fixed a problem that add_association() failed when multiple 
     publishers/subscribers start simultaneously. Added a lock 
     to pretect the internal map in DataLinkSetMap to fix the 
     problem.
@@ -127,17 +125,15 @@ New to this version are the following changes:
   This section adds on to the "KNONW LIMITATIONS" section at the bottom
   of this document.
 
-- A transport instance may only be used by publications and subscriptions
-  of a single domain because the pub & sub ids are only unique within
-  a domain and the transport uses this ids to map associations to 
-  links/connections.
+  - A transport instance may only be used by publications and subscriptions
+    of a single domain because the pub & sub ids are only unique within
+    a domain and the transport uses this ids to map associations to 
+    links/connections.
 
-- There is a limitation in the current transport implementation
-    which disallow the associations between a datareader and a datawriter
-    in the same process. (i.e. publishing to a subscriber in the same process)
-    To workarround with this limitation, such datareader and datawriter 
-    need use different TransportImpl objects. 
-    Otherwise, there are such errors:
+  - The current transport implementation does not allow associations between 
+    datareaders and datawriters associated with the same transport in the same 
+    process. To work around this limitation, the datareader and the datawriter
+    need use different TransportImpl objects. Otherwise, there are such errors:
  
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
