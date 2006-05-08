@@ -1,3 +1,12 @@
+Mon May  8 18:36:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+          DDS 0.8 released.
+
+        * DDS_release_notes.txt:
+        * VERSION:
+
+          Changes related to the 0.8 release.
+
 Fri May  5 21:33:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
