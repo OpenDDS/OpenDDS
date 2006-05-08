@@ -1,3 +1,11 @@
+Mon May  8 18:46:56 UTC 2006  Scott Harris <harris_s@ociweb.com>
+
+
+        * DDS_release_notes.txt:
+        * TAO_DDS_Configuration_Settings.html:
+
+          Updated the release notes and added the config file html.
+
 Mon May  8 18:36:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           DDS 0.8 released.
