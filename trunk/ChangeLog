@@ -1,3 +1,9 @@
+Fri May 12 00:13:19 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added VC6 build support and a potential deadlock fix.
+
 Fri May 12 00:00:27 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
@@ -21,7 +27,8 @@ Fri May 12 00:00:27 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         
           Added the thr_id_ data for checking if the shutdown()
           is called by the thread the task created. The thread 
-          should not wait for itself. 
+          should not wait for itself. This should fix a potential
+          deadlock.
 
 Mon May  8 20:16:50 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           

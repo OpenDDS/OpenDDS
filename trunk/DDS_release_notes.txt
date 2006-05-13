@@ -1,3 +1,12 @@
+Version 0.9 of TAO DDS.
+
+New to this version are the following changes:
+   
+  - Supported DDS build with VC6. It was broken on 0.8.
+  
+  - Fixed a potential deadlock in SimpleTcpReconnectTask which could 
+    happen when shutdown() is invoked by the reconnect thread.
+  
 Version 0.8 of TAO DDS.
 
 New to this version are the following changes:
