@@ -377,7 +377,7 @@ namespace TAO
     /// @throws PortableServer::POA::ServantNotActive, 
     ///         PortableServer::POA::WongPolicy
     template <class T>
-    typename T::_ptr_type servant_to_reference (
+    typename T::_ptr_type servant_to_reference_2 (
       PortableServer::ServantBase* servant
       ACE_ENV_ARG_DECL
     )

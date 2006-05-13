@@ -164,7 +164,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt128ts_servant;
 
           ::Mine::Pt128TypeSupport_var pt128ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt128TypeSupport >(pt128ts_servant);
+            TAO::DCPS::servant_to_reference_2< ::Mine::Pt128TypeSupport >(pt128ts_servant);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in() , TEST_TYPE))
@@ -182,7 +182,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt512ts_servant;
 
           ::Mine::Pt512TypeSupport_var pt512ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt512TypeSupport >(pt512ts_servant);
+            TAO::DCPS::servant_to_reference_2< ::Mine::Pt512TypeSupport >(pt512ts_servant);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in() , TEST_TYPE))
@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
 
           ::Mine::Pt2048TypeSupport_var pt2048ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt2048TypeSupport >(pt2048ts_servant);
+            TAO::DCPS::servant_to_reference_2< ::Mine::Pt2048TypeSupport >(pt2048ts_servant);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in() , TEST_TYPE))
@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
 
           ::Mine::Pt8192TypeSupport_var pt8192ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt8192TypeSupport >(pt8192ts_servant);
+            TAO::DCPS::servant_to_reference_2< ::Mine::Pt8192TypeSupport >(pt8192ts_servant);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in() , TEST_TYPE))
