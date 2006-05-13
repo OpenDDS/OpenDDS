@@ -1,3 +1,28 @@
+Fri May 12 00:00:27 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Renamed the second version of servant_to_reference() to
+          servant_to_reference_2 to resolve the compilation errors 
+          on VC6. The VC6 can not recognize the template function 
+          with same name but difference template parameters.  
+          
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        
+          Updated to use servant_to_reference_2().
+            
+        * tests/DCPS/MultiDPTest/README:
+        
+          Made a corresponding readme. 
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        
+          Added the thr_id_ data for checking if the shutdown()
+          is called by the thread the task created. The thread 
+          should not wait for itself. 
+
 Mon May  8 20:16:50 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           
           DDS 0.8 released.

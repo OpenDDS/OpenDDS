@@ -110,6 +110,9 @@ namespace TAO
 
       /// Reference to the SimpleTcpTransport needed for the refresh_link() call.
       SimpleTcpTransport_rch transport_;
+
+      /// The id of the thread created by this task.
+      ACE_thread_t thr_id_;
     };
   }
 }

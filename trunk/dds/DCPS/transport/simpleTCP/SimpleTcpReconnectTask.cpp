@@ -13,7 +13,8 @@ TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
   TAO::DCPS::SimpleTcpTransport* transport_impl)
   : work_available_(lock_),
     shutdown_initiated_(false),
-    opened_(false)
+    opened_(false),
+    thr_id_ (0)
 {
   DBG_ENTRY("SimpleTcpReconnectTask","SimpleTcpReconnectTask");
 
@@ -96,7 +97,9 @@ TAO::DCPS::SimpleTcpReconnectTask::open(void*)
 int
 TAO::DCPS::SimpleTcpReconnectTask::svc()
 {
-   DBG_ENTRY("SimpleTcpReconnectTask","svc");
+  DBG_ENTRY("SimpleTcpReconnectTask","svc");
+ 
+  this->thr_id_ = ACE_OS::thr_self ();
 
   // Start the "GetWork-And-PerformWork" loop for the current worker thread.
   while (! this->shutdown_initiated_)
@@ -104,19 +107,19 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
     {
       GuardType guard(this->lock_);
       if (this->queue_.is_empty())
-      {
         this->work_available_.wait ();
-      }
-    }
 
-    if (this->shutdown_initiated_)
-      break;
+      if (this->shutdown_initiated_)
+        break;
+    }
 
     ConnectionInfo_rch conn_info;
     int result = -1;
     {
       GuardType guard(this->lock_);
       result = queue_.dequeue_head (conn_info);
+      if (this->shutdown_initiated_)
+        break;
     }
 
     if(result != 0)
@@ -157,6 +160,8 @@ TAO::DCPS::SimpleTcpReconnectTask::svc()
 int
 TAO::DCPS::SimpleTcpReconnectTask::close(u_long)
 {
+  DBG_ENTRY("SimpleTcpReconnectTask","close");
+
   return 0;
 }
 
@@ -173,7 +178,8 @@ TAO::DCPS::SimpleTcpReconnectTask::shutdown()
     this->work_available_.signal();
   }
 
-  this->wait ();
+  if (this->opened_ && this->thr_id_ != ACE_OS::thr_self ())
+    this->wait ();
 
   return 0;
 }
