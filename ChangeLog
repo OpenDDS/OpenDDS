@@ -1,3 +1,12 @@
+Thu Jun  1 20:01:23 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * tests/DCPS/FooTest4_0/Reader.h:
+
+          Fixed the compilation errors with gcc4.1 due to the 
+          class scope prefixed to the method declaration. 
+          
 Fri May 12 00:13:19 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:

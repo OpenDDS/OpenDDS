@@ -17,7 +17,7 @@ public:
           int history_depth,
           int max_samples_per_instance);
 
-  Reader::~Reader();
+  ~Reader();
 
   void read (const SampleInfoMap& si_map,
              ::DDS::SampleStateMask ss = ::DDS::ANY_SAMPLE_STATE,

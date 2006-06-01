@@ -324,7 +324,7 @@ namespace TAO
 
       SubscriberImpl* get_subscriber_servant ();
 
-      RepoId DataReaderImpl::get_subscription_id() const ;
+      RepoId get_subscription_id() const ;
       void set_subscription_id(RepoId subscription_id) ;
 
       ::DDS::DataReader_ptr get_dr_obj_ref();

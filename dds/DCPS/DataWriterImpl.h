@@ -233,7 +233,7 @@ namespace TAO
      * the transport to broadcast the registered instance.
      */
     ::DDS::ReturnCode_t
-      DataWriterImpl::register_instance (
+      register_instance (
         ::DDS::InstanceHandle_t& handle, 
         DataSample* data,
         const ::DDS::Time_t & source_timestamp
