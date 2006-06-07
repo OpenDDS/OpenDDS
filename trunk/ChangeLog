@@ -1,3 +1,10 @@
+Wed Jun  7 18:30:09 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added a limitation that transport can not receive single packet
+          with single control message without data.
+
 Wed Jun  7 09:11:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Transient_Kludge.h:

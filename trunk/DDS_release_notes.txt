@@ -7,6 +7,13 @@ New to this version are the following changes:
   - Fixed a potential deadlock in SimpleTcpReconnectTask which could 
     happen when shutdown() is invoked by the reconnect thread.
   
+--- more notes and limitations ---
+
+    - Current transport on receiving side does not handle a packet with 
+      a single control message with no data such as GRACEFUL_DISCONNECT 
+      message. To work around with this problem, some bogus data is sent
+      with the message. 
+
 Version 0.8 of TAO DDS.
 
 New to this version are the following changes:
