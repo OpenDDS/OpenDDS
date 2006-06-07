@@ -1,12 +1,20 @@
+Wed Jun  7 09:11:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Transient_Kludge.h:
+          Fixed compile error with Borland
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+          Added missing include of post.h
+
 Thu Jun  1 20:01:23 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataWriterImpl.h:
         * tests/DCPS/FooTest4_0/Reader.h:
 
-          Fixed the compilation errors with gcc4.1 due to the 
-          class scope prefixed to the method declaration. 
-          
+          Fixed the compilation errors with gcc4.1 due to the
+          class scope prefixed to the method declaration.
+
 Fri May 12 00:13:19 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -18,43 +26,43 @@ Fri May 12 00:00:27 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/Service_Participant.h:
 
           Renamed the second version of servant_to_reference() to
-          servant_to_reference_2 to resolve the compilation errors 
-          on VC6. The VC6 can not recognize the template function 
-          with same name but difference template parameters.  
-          
+          servant_to_reference_2 to resolve the compilation errors
+          on VC6. The VC6 can not recognize the template function
+          with same name but difference template parameters.
+
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
         * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
-        
+
           Updated to use servant_to_reference_2().
-            
+
         * tests/DCPS/MultiDPTest/README:
-        
-          Made a corresponding readme. 
-          
+
+          Made a corresponding readme.
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
-        
+
           Added the thr_id_ data for checking if the shutdown()
-          is called by the thread the task created. The thread 
+          is called by the thread the task created. The thread
           should not wait for itself. This should fix a potential
           deadlock.
 
 Mon May  8 20:16:50 UTC 2006  Yan Dai  <dai_y@ociweb.com>
-          
+
           DDS 0.8 released.
 
         * VERSION:
 
           Updated timestamp of the 0.8 release.
-          
+
         * DDS_release_notes.txt:
 
           Updated one limitation note.
 
         * TAO_DDS_Configuration_Settings.html:
-        
+
           Added reconnection configuration values.
-          
+
 Mon May  8 18:46:56 UTC 2006  Scott Harris <harris_s@ociweb.com>
 
 
@@ -74,20 +82,20 @@ Fri May  5 21:33:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
         * dds/DCPS/Qos_Helper.inl:
-        
+
           Moved the qos operator functions from TAO::DCPS namespace to global
-          namespace. This would resolve the compilation errors on DDS builds 
-          against DOC's latest version that the VC71 compiler can not find  
+          namespace. This would resolve the compilation errors on DDS builds
+          against DOC's latest version that the VC71 compiler can not find
           the octet sequence operator==.
-          
+
         * tests/DCPS/BuiltInTopic/main.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest4/main.cpp:
-        
+
           Made the qos operator== called implicitly instead of explicitly.
-          Calling operator== explicitly was used as a workarround of the 
+          Calling operator== explicitly was used as a workarround of the
           compilation problem metioned above.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
 
           Added expected lost_subscription_callback=1 to the bp_timeout test.
@@ -115,12 +123,12 @@ Fri May  5 17:48:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
 
           Made the repo use the repo.conf to avoid multiple requests
-          handled by single orb thread at the same time. This would  
-          fix the problem on sunos59 gcc3.3.2 builds that the DCPSInfo 
+          handled by single orb thread at the same time. This would
+          fix the problem on sunos59 gcc3.3.2 builds that the DCPSInfo
           could not be terminated. It seems without using the service
           config file, the DCPSInfo deadlocked and the TerminateWaitKill()
           in perl script will return non-zero which causes the test failure.
-          
+
 Fri May  5 14:44:39 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
