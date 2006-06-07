@@ -40,7 +40,7 @@ namespace TAO
      *  connection from the remote. This would resolve the deadlock problem between the
      *  reactor thread (calling SimpleTcpTransport::passive_connction()) and the orb
      *  thread (calling SimpleTcpTransport::make_passive_connction()). The reactor
-     *  thread will enqueue the new connection to this task and let this task dequeue 
+     *  thread will enqueue the new connection to this task and let this task dequeue
      *  and check the connection.
      */
     class SimpleTcpReconnectTask : public ACE_Task_Base, public RcObject<ACE_SYNCH_MUTEX>
@@ -117,5 +117,6 @@ namespace TAO
   }
 }
 
+#include /**/ "ace/post.h"
 
 #endif /* TAO_DCPS_SIMPLETCPRECONNECTTASK_H */
