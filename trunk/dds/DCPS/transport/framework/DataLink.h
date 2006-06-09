@@ -10,7 +10,9 @@
 #include  "ReceiveListenerSetMap.h"
 #include  "RepoIdSetMap.h"
 #include  "TransportImpl_rch.h"
+#include  "TransportSendStrategy.h"
 #include  "TransportSendStrategy_rch.h"
+#include  "TransportReceiveStrategy.h"
 #include  "TransportReceiveStrategy_rch.h"
 #include  "ace/Synch.h"
 
@@ -32,7 +34,7 @@ namespace TAO
     {
       public:
 
-        enum ConnectionNotice{ 
+        enum ConnectionNotice{
           DISCONNECTED,
           RECONNECTED,
           LOST
@@ -96,10 +98,10 @@ namespace TAO
         void transport_shutdown();
 
         /// Notify the datawriters and datareaders that the connection is
-        /// disconnected, lost, or reconnected. The datareader/datawriter 
+        /// disconnected, lost, or reconnected. The datareader/datawriter
         /// will notify the corresponding listener.
         void notify (enum ConnectionNotice notice);
-              
+
         /// Called before release the datalink or before shutdown to let
         /// the concrete DataLink to do anything necessary.
         virtual void pre_stop_i () {};

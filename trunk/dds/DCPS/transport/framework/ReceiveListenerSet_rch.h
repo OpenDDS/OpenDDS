@@ -16,7 +16,7 @@ namespace TAO
     /**
      * This file instantiates a smart-pointer type (rch) to a specific
      * underlying "pointed-to" type.
-     * 
+     *
      * This type definition is in its own header file so that the
      * smart-pointer type can be defined without causing the inclusion
      * of the underlying "pointed-to" type header file.  Instead, the
