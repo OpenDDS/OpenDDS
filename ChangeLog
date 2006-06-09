@@ -1,3 +1,19 @@
+Fri Jun  9 07:37:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/DCPS/CPPTemplate.pm:
+          Made changes to fix compile problems with BCB6
+
+        * dds/DCPS/transport/framework/DataLink.h
+        * dds/DCPS/transport/framework/DataLinkSetMap.h
+        * dds/DCPS/transport/framework/ReceiveListenerSet_rch.h
+        * dds/DCPS/transport/framework/TransportFactory.h
+        * dds/DCPS/transport/framework/TransportImpl.h
+        * dds/DCPS/transport/framework/TransportImplFactory.h
+        * dds/DCPS/transport/framework/TransportSendStrategy_rch.h
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h
+          Added needed includes to get things compiling with BCB6
+
 Wed Jun  7 18:30:09 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:

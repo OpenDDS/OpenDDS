@@ -4,11 +4,16 @@
 #ifndef TAO_DCPS_SIMPLETCPCONNECTION_H
 #define TAO_DCPS_SIMPLETCPCONNECTION_H
 
+#include  "SimpleTcpConfiguration.h"
 #include  "SimpleTcpConfiguration_rch.h"
+#include  "SimpleTcpDataLink.h"
 #include  "SimpleTcpDataLink_rch.h"
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpSendStrategy.h"
 #include  "SimpleTcpSendStrategy_rch.h"
+#include  "SimpleTcpReconnectTask.h"
 #include  "SimpleTcpReconnectTask_rch.h"
+#include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/SOCK_Stream.h"
@@ -28,7 +33,7 @@ namespace TAO
                       public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
-         
+
         /// States are used during reconnecting.
         enum ReconnectState {
           INIT_STATE,
@@ -78,7 +83,7 @@ namespace TAO
 
         int reconnect (bool on_new_association = false);
 
-        /// Return true if the object represents the connector side, otherwise 
+        /// Return true if the object represents the connector side, otherwise
         /// it's the acceptor side. The acceptor/connector role is not changed
         /// when re-establishing the connection.
         bool is_connector ();
@@ -90,20 +95,20 @@ namespace TAO
 
         int handle_timeout (const ACE_Time_Value &tv,
                             const void *arg);
-  
-        /// Cache the reference to the datalink object for lost connection 
+
+        /// Cache the reference to the datalink object for lost connection
         /// callbacks.
         void set_datalink (SimpleTcpDataLink* link);
 
         void notify_lost_on_backpressure_timeout ();
 
         ACE_INET_Addr get_remote_address ();
-        
+
 
         void  relink ();
 
       private:
-        
+
         int active_reconnect_i ();
         int passive_reconnect_i ();
         int active_reconnect_on_new_association ();
@@ -111,10 +116,10 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        /// Lock to avoid the reconnect() called multiple times when 
+        /// Lock to avoid the reconnect() called multiple times when
         /// both send() and recv() fail.
         LockType  reconnect_lock_;
-        /// Flag indicates if connected or disconneted. It's set to true 
+        /// Flag indicates if connected or disconneted. It's set to true
         /// when actively connecting or passively acepting succeeds and set
         /// to false whenever the peer stream is closed.
         ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
@@ -132,13 +137,13 @@ namespace TAO
         SimpleTcpConfiguration_rch tcp_config_;
         /// Datalink object which is needed for connection lost callback.
         SimpleTcpDataLink_rch      link_;
-        /// TODO: This can be removed since we do not need it for checking the 
+        /// TODO: This can be removed since we do not need it for checking the
         /// the new connection state during handle_timeout.
         /// The "new" SimpleTcpConnection that replaces this "old" object in the
         /// SimpleTcpDataLink object. This is needed for checking if the connection is
         /// re-established as the acceptor side when timer goes off.
         SimpleTcpConnection_rch    new_con_;
-  
+
         /// Keep a copy of the old connection object in the new connection object
         /// to help control of the old connection object deletion.
         SimpleTcpConnection_rch    old_con_;
@@ -152,7 +157,7 @@ namespace TAO
         /// The task to do the reconnecting.
         /// TODO: We might need reuse the PerConnectionSynch thread
         /// to do the reconnecting or create the reconnect task when
-        /// we need reconnect. 
+        /// we need reconnect.
         SimpleTcpReconnectTask_rch reconnect_task_;
 
         /// The state indicates each step of the reconnecting.

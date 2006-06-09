@@ -8,7 +8,9 @@
 #include  "dds/DCPS/RcObject_T.h"
 #include  "dds/DdsDcpsInfoUtilsC.h"
 #include  "TransportDefs.h"
+#include  "TransportConfiguration.h"
 #include  "TransportConfiguration_rch.h"
+#include  "TransportReactorTask.h"
 #include  "TransportReactorTask_rch.h"
 #include  "ace/Hash_Map_Manager.h"
 #include  "ace/Synch.h"
@@ -44,11 +46,11 @@ namespace TAO
         /// Called by the PublisherImpl to register datawriter upon
         /// datawriter creation.
         int register_publication (RepoId pub_id, DataWriterImpl* dw);
-        
+
         /// Called by the PublisherImpl to unregister datawriter upon
         /// datawriter destruction.
         int unregister_publication (RepoId pub_id);
-        
+
         /// Called by the DataLink to find the registered datawriter
         /// for the lost publication notification.
         DataWriterImpl* find_publication (RepoId pub_id);
@@ -56,11 +58,11 @@ namespace TAO
         /// Called by the SubscriberImpl to register datareader upon
         /// datareader creation.
         int register_subscription (RepoId sub_id, DataReaderImpl* dr);
-        
+
         /// Called by the SubscriberImpl to unregister datareader upon
         /// datareader destruction.
         int unregister_subscription (RepoId sub_id);
-        
+
         /// Called by the DataLink to find the registered datareader
         /// for the lost subscription notification.
         DataReaderImpl* find_subscription (RepoId sub_id);
@@ -94,7 +96,7 @@ namespace TAO
         /// concrete TransportImpl subclass a chance to do something when
         /// the shutdown "event" occurs.
         virtual void shutdown_i() = 0;
-        
+
         /// Called before transport is shutdown to let the
         /// concrete transport to do anything necessary.
         virtual void pre_shutdown_i();

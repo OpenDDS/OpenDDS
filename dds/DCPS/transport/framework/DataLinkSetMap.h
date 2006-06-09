@@ -5,6 +5,7 @@
 #define TAO_DCPS_DATALINKSETMAP_H
 
 #include  "dds/DCPS/dcps_export.h"
+#include  "DataLinkSet.h"
 #include  "DataLinkSet_rch.h"
 #include  "TransportDefs.h"
 #include  "dds/DCPS/Definitions.h"
