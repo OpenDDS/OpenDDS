@@ -1,0 +1,38 @@
+project(MultiTopicTestPublisher): dcpsexe, portableserver {
+  exename   = publisher
+  libpaths += ../MultiTopicTypes
+  libpaths += ../common
+  libs     +=  common MultiTopicTypes
+  after    += common MultiTopicTypes
+
+  Header_Files {
+    common.h
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+
+project(MultiTopicTestSubscriber): dcpsexe, portableserver {
+  exename   = subscriber
+  libpaths += ../MultiTopicTypes
+  libpaths += ../common
+  libs     +=  common MultiTopicTypes
+  after    += common MultiTopicTypes
+
+  Header_Files {
+    common.h
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+    DataReaderListener1.cpp
+    DataReaderListener2.cpp
+    DataReaderListener3.cpp
+  }
+}
+
