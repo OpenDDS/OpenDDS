@@ -74,6 +74,10 @@ TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
       this->send_graceful_disconnect_message ();
       this->graceful_disconnect_sent_ = true;
     }
+  if (!this->connection_.is_nil())
+    {
+      this->connection_->shutdown ();
+    }
 }
 
 /// The SimpleTcpTransport calls this method when it has an established
@@ -226,6 +230,8 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
   this->send (send_element);
 
   message->release ();
+  
+  delete send_element;
 }
 
 

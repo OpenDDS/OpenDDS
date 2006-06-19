@@ -1,3 +1,44 @@
+Mon Jun 19 18:58:43 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * TAO/DDS/dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * TAO/DDS/dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * TAO/DDS/dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * TAO/DDS/dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * TAO/DDS/dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+
+          Fixed a deadlock situation on linux when the direct_send()
+          detects a lost connection and calls the relink(). The problem is the 
+          direct_send() is called under the lock in send strategy and the 
+          suspend_send() called by relink() aquires the same lock.
+          To fix it, an extra parameter do_suspend is added to relink() 
+          function to indicate if the relink() needs call suspend_send() on 
+          send strategy object. If the thread calling relink() already hold
+          the lock it will call the operations in suspend_send() before calling
+          relink (), otherwise the relink() will call suspend_send().
+          
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+
+          Added shutdown () method to SimpleTcpConnection to shutdown the 
+          reconnect task. This is called during transport pre-shutdown phase 
+          after the datalink sends graceful disconnect message. This would
+          avoid an access violation during transport shutdown.
+          
+        * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        
+          Made the shutdown () do shutdown work just once if it's called multiple
+          times.
+          
+        * TAO/DDS/dds/DCPS/DataWriterImpl.cpp:
+        
+          Corrected a debug message.
+          
 Fri Jun  9 07:37:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/DCPS/CPPTemplate.pm:

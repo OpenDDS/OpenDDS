@@ -137,7 +137,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     // WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we really don't
     // see a need for it to call our perform_work() again (at least not
     // right now).
-    if (this->mode_ != MODE_QUEUE)
+    if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND) 
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Entered perform_work() and mode_ is %s - just return "
@@ -263,13 +263,8 @@ TAO::DCPS::TransportSendStrategy::perform_work()
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                     "Now flip to MODE_SUSPEND before we try to reconnect.\n"));
 
-      if (this->mode_ != MODE_SUSPEND)
-        {
-          this->mode_before_suspend_ = this->mode_;
-          this->mode_ = MODE_SUSPEND;
-        }
-
-      this->relink ();
+      bool do_suspend = true;
+      this->relink (do_suspend);
 
       if (this->mode_ == MODE_SUSPEND)
         {

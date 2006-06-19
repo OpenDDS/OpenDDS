@@ -87,7 +87,7 @@ namespace TAO
         /// The subclass needs to provide the implementation
         /// for re-establishing the datalink. This is called
         /// when send returns an error.
-        virtual void relink ();
+        virtual void relink (bool do_suspend = true);
 
         /// This is called when first time reconnect is attempted. The send mode
         /// is set to MODE_SUSPEND. Messages are queued at this state.

@@ -170,7 +170,9 @@ int
 TAO::DCPS::SimpleTcpReconnectTask::shutdown()
 {
   DBG_ENTRY("SimpleTcpReconnectTask","shutdown");
-
+  if (this->shutdown_initiated_)
+     return 0;
+  
   {
     GuardType guard(this->lock_);
     // Set the shutdown flag to true.

@@ -172,10 +172,10 @@ TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
 
 
 void
-TAO::DCPS::SimpleTcpReceiveStrategy::relink ()
+TAO::DCPS::SimpleTcpReceiveStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY("SimpleTcpReceiveStrategy","relink");
-  this->connection_->relink ();
+  this->connection_->relink (do_suspend);
 }
 
 

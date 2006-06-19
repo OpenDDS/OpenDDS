@@ -1340,7 +1340,7 @@ namespace TAO
                                      bool dropped_by_transport) 
     {
       ACE_UNUSED_ARG (dropped_by_transport);
-      DBG_ENTRY("DataWriterImpl","data_delivered");
+      DBG_ENTRY("DataWriterImpl","control_dropped");
       control_dropped_count_ ++;
       sample->release ();
     }
@@ -1348,7 +1348,7 @@ namespace TAO
     int 
     DataWriterImpl::remove_all_control_msgs()
     {
-      DBG_ENTRY("DataWriterImpl","data_delivered");
+      DBG_ENTRY("DataWriterImpl","remove_all_control_msgs");
       return 
         publisher_servant_->remove_all_control_msgs (this->publication_id_);
     }
