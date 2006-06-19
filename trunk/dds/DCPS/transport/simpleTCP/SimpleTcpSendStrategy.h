@@ -36,7 +36,7 @@ namespace TAO
 
         // Delegate to the connection object to re-establish
         // the connection.
-        virtual void relink ();
+        virtual void relink (bool do_suspend = true);
 
         virtual void stop_i();
 

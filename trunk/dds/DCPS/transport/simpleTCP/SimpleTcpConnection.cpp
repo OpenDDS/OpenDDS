@@ -718,9 +718,19 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 /// when lost connection is detected. This method handles the connection
 /// to the reactor task to do the reconnecting.
 void 
-TAO::DCPS::SimpleTcpConnection::relink ()
+TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
-  this->send_strategy_->suspend_send ();
-  this->reconnect_task_->add (SimpleTcpReconnectTask::DO_RECONNECT, this);
+  if (do_suspend && ! this->send_strategy_.is_nil ())
+    this->send_strategy_->suspend_send ();
+  if (! this->reconnect_task_.is_nil ()) 
+    this->reconnect_task_->add (SimpleTcpReconnectTask::DO_RECONNECT, this);
 }
+
+void
+TAO::DCPS::SimpleTcpConnection::shutdown ()
+{
+  this->reconnect_task_->shutdown ();
+}
+
+
 

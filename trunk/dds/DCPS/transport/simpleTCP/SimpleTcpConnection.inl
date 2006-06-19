@@ -15,6 +15,7 @@ TAO::DCPS::SimpleTcpConnection::disconnect()
 {
   DBG_ENTRY("SimpleTcpConnection","disconnect");
   this->peer().close();
+  this->connected_ = false;
 }
 
 

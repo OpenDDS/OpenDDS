@@ -105,7 +105,9 @@ namespace TAO
         ACE_INET_Addr get_remote_address ();
 
 
-        void  relink ();
+        void  relink (bool do_suspend);
+
+        void shutdown ();
 
       private:
 

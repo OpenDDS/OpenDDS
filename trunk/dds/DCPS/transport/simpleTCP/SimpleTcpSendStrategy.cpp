@@ -69,10 +69,10 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 
 
 void 
-TAO::DCPS::SimpleTcpSendStrategy::relink ()
+TAO::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY("SimpleTcpSendStrategy","relink");
-  this->connection_->relink ();
+  this->connection_->relink (do_suspend);
 }
 
 void

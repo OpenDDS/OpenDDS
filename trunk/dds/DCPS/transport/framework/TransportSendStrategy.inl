@@ -600,8 +600,8 @@ TAO::DCPS::TransportSendStrategy::direct_send()
               this->mode_before_suspend_ = this->mode_;
               this->mode_ = MODE_SUSPEND;
             }
-
-          this->relink ();
+          bool do_suspend = false;
+          this->relink (do_suspend);
 
           if (this->mode_ == MODE_SUSPEND)
             {
@@ -860,7 +860,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 
 
 ACE_INLINE void 
-TAO::DCPS::TransportSendStrategy::relink ()
+TAO::DCPS::TransportSendStrategy::relink (bool)
 {
   DBG_ENTRY("TransportSendStrategy","relink");
   // The subsclass needs implement this function for re-establishing
