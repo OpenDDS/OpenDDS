@@ -136,7 +136,7 @@ TAO::DCPS::TransportInterface::add_associations
                           CORBA::Long               priority,
                           const char*               local_id_str,
                           const char*               remote_id_str,
-                          ssize_t                   num_remote_associations,
+                          size_t                    num_remote_associations,
                           const AssociationData*    remote_associations,
                           TransportReceiveListener* receive_listener)
 {
@@ -183,7 +183,7 @@ TAO::DCPS::TransportInterface::add_associations
   // add or remove reservations at the same time as us.
   TransportImpl::ReservationGuardType guard(impl->reservation_lock());
 
-  for (ssize_t i = 0; i < num_remote_associations; ++i)
+  for (size_t i = 0; i < num_remote_associations; ++i)
     {
       RepoId remote_id = remote_associations[i].remote_id_;
 
@@ -315,6 +315,13 @@ TAO::DCPS::TransportInterface::add_associations
       return -1;
     }
 
+  if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
+  {
+    if (this->impl_->add_pending_association (local_id, 
+                                              num_remote_associations, 
+                                              remote_associations) != 0)
+      return -1;
+  }
   // We completed everything without a problem.
   return 0;
 }

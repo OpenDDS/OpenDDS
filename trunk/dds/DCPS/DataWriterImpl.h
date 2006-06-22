@@ -16,6 +16,7 @@
 #include  "DataSampleList.h"
 #include  "DataSampleHeader.h"
 #include  "TopicImpl.h"
+#include  "AssociationData.h" 
 
 #include  "ace/Event_Handler.h"
 
@@ -416,6 +417,13 @@ namespace TAO
     int         data_delivered_count_;
     int         control_dropped_count_;
     int         control_delivered_count_;
+
+    /// Called by transport after transport received the FYULLY_ASSOCIATED 
+    /// ack from the associated subscriber. 
+    void fully_associated (
+      ::TAO::DCPS::RepoId     yourId,
+      size_t                  num_remote_associations,
+      const AssociationData*  remote_associations);
 
   protected:
 

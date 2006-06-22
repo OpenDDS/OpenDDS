@@ -16,13 +16,13 @@ namespace TAO
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export TransportGDControlElement : public TransportQueueElement
+    class TAO_DdsDcps_Export TransportControlElement : public TransportQueueElement
     {
       public:
 
-        TransportGDControlElement(ACE_Message_Block* msg_block);
+        TransportControlElement(ACE_Message_Block* msg_block);
 
-        virtual ~TransportGDControlElement();
+        virtual ~TransportControlElement();
 
       protected:
 

@@ -37,7 +37,8 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   passive_reconnect_timer_id_ (-1),
   reconnect_task_ (new SimpleTcpReconnectTask ()),
   reconnect_state_ (INIT_STATE),
-  last_reconnect_attempted_ (ACE_Time_Value::zero)
+  last_reconnect_attempted_ (ACE_Time_Value::zero),
+  shutdown_ (false)
 {
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 
@@ -55,8 +56,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
   DBG_ENTRY("SimpleTcpConnection","~SimpleTcpConnection");
-  // Shutdown the reconnect task.
-  this->reconnect_task_->shutdown ();
+
   // Remove the reference of the old connection object
   // or the reference of new connection object.
   this->old_con_ = 0;
@@ -314,6 +314,9 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
                         -1);
     }
 
+  if (this->shutdown_)
+    return -1;
+
   // Now use a connector object to establish the connection.
   ACE_SOCK_Connector connector;
   if (connector.connect(this->peer(), remote_address) != 0)
@@ -505,6 +508,9 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
         ret = this->active_establishment (this->remote_address_,
           this->local_address_,
           this->tcp_config_);
+
+        if (this->shutdown_)
+          break;
         if (ret == -1)
         {
           ACE_Time_Value delay_tv (((int)retry_delay_msec)/1000, 
@@ -655,6 +661,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
         ACE_TEXT(" should NOT be called by the connector side \n")));
     }
 
+  this->reconnect_task_->shutdown ();
   connection->receive_strategy_ = this->receive_strategy_;
   connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
@@ -720,6 +727,8 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 void 
 TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
+  DBG_ENTRY("SimpleTcpConnection","relink");
+
   if (do_suspend && ! this->send_strategy_.is_nil ())
     this->send_strategy_->suspend_send ();
   if (! this->reconnect_task_.is_nil ()) 
@@ -729,7 +738,10 @@ TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 void
 TAO::DCPS::SimpleTcpConnection::shutdown ()
 {
-  this->reconnect_task_->shutdown ();
+  DBG_ENTRY("SimpleTcpConnection","shutdown");
+  this->shutdown_ = true;
+  if (! this->reconnect_task_.is_nil ()) 
+    this->reconnect_task_->shutdown ();
 }
 
 

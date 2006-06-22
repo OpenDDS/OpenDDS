@@ -36,7 +36,7 @@ TAO::DCPS::RepoIdSet::remove_id(RepoId id)
 }
 
 
-ACE_INLINE ssize_t
+ACE_INLINE size_t
 TAO::DCPS::RepoIdSet::size() const
 {
   DBG_ENTRY("RepoIdSet","size");

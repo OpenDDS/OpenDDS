@@ -125,41 +125,11 @@ int main (int argc, char *argv[]) {
     }
     ACE_OS::fclose(writers_ready);
 
-    // Wait for the subscriber to be ready.
-    FILE* readers_ready = 0;
-    do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      readers_ready = ACE_OS::fopen (sub_ready_filename, "r");
-    } while (0 == readers_ready);
-    ACE_OS::fclose(readers_ready);
-
-    // ensure the associations are fully established before writing.
-    ACE_OS::sleep(3);
     writer->start ();
     while ( !writer->is_finished()) {
       ACE_Time_Value small(0,250000);
       ACE_OS::sleep (small);
     }
-
-    // Indicate that the publisher is done
-    FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, "w");
-    if (writers_completed == 0) {
-      cerr << "ERROR Unable to i publisher completed file" << endl;
-    } else {
-      ACE_OS::fprintf (writers_completed, "%d\n",
-                       writer->get_timeout_writes());
-    }
-    ACE_OS::fclose (writers_completed);
-
-    // Wait for the subscriber to finish.
-    FILE* readers_completed = 0;
-    do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      readers_completed = ACE_OS::fopen (sub_finished_filename, "r");
-    } while (0 == readers_completed);
-    ACE_OS::fclose(readers_completed);
 
     // Cleanup
     writer->end ();

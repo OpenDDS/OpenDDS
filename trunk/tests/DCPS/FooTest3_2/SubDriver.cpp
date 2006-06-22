@@ -250,6 +250,11 @@ SubDriver::run()
 
   pub_driver_->shutdown ();
 
+  // Sleep before release transport so the connection will not go away. 
+  // This would avoid the problem of publisher sendv failure due to lost 
+  // connection during the shutdown period.
+  ACE_OS::sleep (5);
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
 }

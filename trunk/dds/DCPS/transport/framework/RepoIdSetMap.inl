@@ -26,7 +26,7 @@ TAO::DCPS::RepoIdSetMap::find(RepoId key)
 }
 
 
-ACE_INLINE ssize_t
+ACE_INLINE size_t
 TAO::DCPS::RepoIdSetMap::size() const
 {
   DBG_ENTRY("RepoIdSetMap","size");
@@ -74,4 +74,30 @@ TAO::DCPS::RepoIdSetMap::map() const
   return this->map_;
 }
 
+
+ACE_INLINE size_t 
+TAO::DCPS::RepoIdSetMap::marshaled_size ()
+{
+  DBG_ENTRY("RepoIdSetMap","marshaled_size");
+
+  // serialize len for the map size and set size information.
+  size_t size = (this->size () + 1) * sizeof (size_t);
+  
+  size_t num_ids = 0;
+  MapType::ENTRY* entry;
+
+  for (MapType::ITERATOR itr(this->map_);
+    itr.next(entry);
+    itr.advance())
+  {
+    // one sub id
+    ++ num_ids;
+    // num of pubids in the RepoIdSet.
+    num_ids += entry->int_id_->size ();
+  }
+
+  size += num_ids * sizeof (RepoId);
+
+  return size;
+}
 

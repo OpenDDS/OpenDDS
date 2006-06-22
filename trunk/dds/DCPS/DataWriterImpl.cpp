@@ -195,17 +195,52 @@ namespace TAO
         // Built-In Topic support and telling the listener.
         this->publisher_servant_->add_associations( readers, this, qos_) ;
       }
+    
+      if (TheTransientKludge->is_enabled ()) 
+        {
+          // The above condition is only true for the DCPSInfo Server.
 
+          // kludge over a kludge
+          // This sleep ensures that the newly created connection used
+          // by Built-In Topics is established end-to-end
+          // before the BIT data is resent.
+          // Atleast hopefully that will happen in 3 seconds.
+          // !!! this sleep caused other problems.
+          //     Consider this double kludge at a later time.
+          //     Could optimize this by only sleeping when
+          //     it is the first time the TransportBlob is seen
+          //     (in other words when the connection is being established).
+          //     But actaully we still need a small sleep because
+          //     although the conneciton is established already the 
+          //     subscriber side association may not yet be established.
+          //     ACE_OS::sleep(2); 
 
+          // This is a very limited implementation of 
+          // DURABILITY.kind=TRANSIENT_LOCAL
+          // It suffers from resending the history to every subscription.
+
+          // Tell the WriteDataContainer to resend all sending/sent
+          // samples.
+          this->data_container_->reenqueue_all (this);
+          this->publisher_servant_->data_available(this) ;          
+        }
+    }
+      
+
+    void 
+    DataWriterImpl::fully_associated (
+        ::TAO::DCPS::RepoId     yourId,
+        size_t                  num_remote_associations,
+        const AssociationData*  remote_associations)
+    {
       {
         // protect readers_
         ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
         CORBA::ULong readers_old_length = readers_.length();
-        CORBA::ULong num_new_readers = readers.length();
-        readers_.length(readers_old_length + num_new_readers);
-        for (CORBA::ULong reader_cnt = 0; reader_cnt < readers.length(); reader_cnt++)
+        readers_.length(readers_old_length + num_remote_associations);
+        for (CORBA::ULong reader_cnt = 0; reader_cnt < num_remote_associations; reader_cnt++)
           {
-            readers_[reader_cnt+readers_old_length] = readers[reader_cnt].readerId;
+            readers_[reader_cnt+readers_old_length] = remote_associations[reader_cnt].remote_id_;
           }
       }
 
@@ -215,12 +250,11 @@ namespace TAO
         {
           // Create the list of readers repo id.
           ReaderIdSeq rd_ids;
-          CORBA::ULong rd_len = readers.length ();
-          rd_ids.length (rd_len);
+          rd_ids.length (num_remote_associations);
 
-          for (CORBA::ULong i = 0; i < rd_len; i++)
+          for (CORBA::ULong i = 0; i < num_remote_associations; i++)
             {
-              rd_ids[i] = readers[i].readerId;
+              rd_ids[i] = remote_associations[i].remote_id_;
             }
 
           // TBD: Remove the condition check after we change to default support 
@@ -250,8 +284,8 @@ namespace TAO
             }
           else
             {
-              handles.length (rd_len);
-              for (CORBA::ULong i = 0; i < rd_len; i++)
+              handles.length (num_remote_associations);
+              for (CORBA::ULong i = 0; i < num_remote_associations; i++)
                 {
                   handles[i] = rd_ids[i];
                 }
@@ -292,37 +326,12 @@ namespace TAO
           // change the ChangeFlagStatus after a listener call?
           publication_match_status_.total_count_change = 0;
        }
-    
-      if (TheTransientKludge->is_enabled ()) 
-        {
-          // The above condition is only true for the DCPSInfo Server.
-
-          // kludge over a kludge
-          // This sleep ensures that the newly created connection used
-          // by Built-In Topics is established end-to-end
-          // before the BIT data is resent.
-          // Atleast hopefully that will happen in 3 seconds.
-          // !!! this sleep caused other problems.
-          //     Consider this double kludge at a later time.
-          //     Could optimize this by only sleeping when
-          //     it is the first time the TransportBlob is seen
-          //     (in other words when the connection is being established).
-          //     But actaully we still need a small sleep because
-          //     although the conneciton is established already the 
-          //     subscriber side association may not yet be established.
-          //     ACE_OS::sleep(2); 
-
-          // This is a very limited implementation of 
-          // DURABILITY.kind=TRANSIENT_LOCAL
-          // It suffers from resending the history to every subscription.
-
-          // Tell the WriteDataContainer to resend all sending/sent
-          // samples.
-          this->data_container_->reenqueue_all (this);
-          this->publisher_servant_->data_available(this) ;          
-        }
-    }
       
+      delete [] remote_associations;
+    }
+
+
+
     void 
     DataWriterImpl::remove_associations (
         const ReaderIdSeq & readers,

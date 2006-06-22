@@ -545,5 +545,15 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 }
 
 
+ACE_Message_Block*
+TAO::DCPS::DataLink::marshal_acks (bool byte_order)
+{
+  DBG_ENTRY("DataLink","marshal_acks");
+  return this->sub_map_.marshal (byte_order);
+}
+
+
+
+
 
 

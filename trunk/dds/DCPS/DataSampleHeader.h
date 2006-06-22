@@ -23,7 +23,8 @@ namespace TAO
       INSTANCE_REGISTRATION,
       UNREGISTER_INSTANCE,
       DISPOSE_INSTANCE,
-      GRACEFUL_DISCONNECT
+      GRACEFUL_DISCONNECT,
+      FULLY_ASSOCIATED
     };
 
     /// The header message of a data sample.

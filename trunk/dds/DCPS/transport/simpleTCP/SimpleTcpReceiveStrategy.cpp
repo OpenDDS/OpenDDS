@@ -49,6 +49,14 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
       VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
       this->gracefully_disconnected_ = true;
     }
+  else if (sample.header_.message_id_ == FULLY_ASSOCIATED)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:  received FULLY_ASSOCIATED \n"));
+
+      SimpleTcpTransport_rch transport = this->link_->get_transport_impl();
+      transport->demarshal_acks (sample.sample_, 
+                                 sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    }
   else
     this->link_->data_received(sample);
 }

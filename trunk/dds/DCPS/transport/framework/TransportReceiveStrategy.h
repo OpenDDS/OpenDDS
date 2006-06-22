@@ -68,9 +68,6 @@ namespace TAO
         /// Current receive TransportHeader.
         TransportHeader receive_transport_header_;
 
-        /// Current data sample header.
-        ReceivedDataSample receive_sample_;
-
         //
         // Message Block Allocators are more plentiful since they hold samples
         // as well as data read from the handle(s).
@@ -94,6 +91,9 @@ namespace TAO
 
         /// Current receive buffer index in use.
         size_t buffer_index_;
+
+        /// Current data sample header.
+        ReceivedDataSample receive_sample_;
     };
 
   }  /* namespace DCPS */

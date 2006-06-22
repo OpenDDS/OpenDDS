@@ -20,18 +20,10 @@ my($port1) = 10001 + PerlACE::uniqueid() ;
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $ns_ior = PerlACE::LocalFile ("ns.ior");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 $NS = new PerlACE::Process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
                             "-o $ns_ior");
@@ -99,10 +91,6 @@ if ($ns != 0) {
 }
 
 unlink $ns_ior;
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";

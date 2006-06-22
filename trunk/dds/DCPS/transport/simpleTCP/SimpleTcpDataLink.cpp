@@ -5,7 +5,8 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpDataLink.h"
 #include  "SimpleTcpReceiveStrategy.h"
-#include  "dds/DCPS/transport/framework/TransportGDControlElement.h"
+#include  "SimpleTcpConfiguration.h"
+#include  "dds/DCPS/transport/framework/TransportControlElement.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 
 
@@ -223,16 +224,76 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 
   message << header_data;    
 
-  TransportGDControlElement* send_element = 0;
+  TransportControlElement* send_element = 0;
 
-  ACE_NEW(send_element, TransportGDControlElement(message));
+  ACE_NEW(send_element, TransportControlElement(message));
 
   this->send (send_element);
 
   message->release ();
-  
+
   delete send_element;
 }
+
+
+void 
+TAO::DCPS::SimpleTcpDataLink::fully_associated ()
+{
+  DBG_ENTRY("SimpleTcpDataLink","fully_associated");
+
+  bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
+  DataSampleHeader header_data; 
+  // The message_id_ is the most important value for the DataSampleHeader.
+  header_data.message_id_ = FULLY_ASSOCIATED;
+
+  // Other data in the DataSampleHeader are not necessary set. The bogus values
+  // can be used.
+
+  header_data.byte_order_ 
+    = swap_byte ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
+  //header_data.message_length_ = 0;
+  //header_data.sequence_ = 0;
+  //::DDS::Time_t source_timestamp 
+  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //header_data.source_timestamp_sec_ = source_timestamp.sec;
+  //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
+  //header_data.coherency_group_ = 0;
+  //header_data.publication_id_ = 0;
+
+  ACE_Message_Block* message;
+  size_t max_marshaled_size = header_data.max_marshaled_size ();
+
+  ACE_Message_Block* data = this->marshal_acks (swap_byte);
+
+  ACE_NEW (message,
+    ACE_Message_Block(max_marshaled_size,
+    ACE_Message_Block::MB_DATA,
+    data, //cont
+    0, //data
+    0, //allocator_strategy
+    0, //locking_strategy
+    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+    ACE_Time_Value::zero,
+    ACE_Time_Value::max_time,
+    0,
+    0));
+
+  message << header_data;    
+
+  TransportControlElement* send_element = 0;
+
+  ACE_NEW(send_element, TransportControlElement(message));
+
+  this->send (send_element);
+
+  message->release ();
+
+  delete send_element;
+}
+
+
+
+
 
 
 
