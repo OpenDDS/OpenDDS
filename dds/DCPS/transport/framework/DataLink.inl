@@ -141,3 +141,13 @@ TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
 }
 
 
+ACE_INLINE
+void 
+TAO::DCPS::DataLink::fully_associated ()
+{
+  //noop
+}
+
+
+
+

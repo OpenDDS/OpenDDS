@@ -152,3 +152,109 @@ TAO::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
   return (id_set->size() == 0) ? 1 : 0;
 }
 
+
+ACE_Message_Block*
+TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
+{
+  DBG_ENTRY("RepoIdSetMap","marshal");
+  ACE_Message_Block* data = 0;
+  
+  ACE_NEW_RETURN (data,
+    ACE_Message_Block(this->marshaled_size (),
+    ACE_Message_Block::MB_DATA,
+    0, //cont
+    0, //data
+    0, //allocator_strategy
+    0, //locking_strategy
+    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+    ACE_Time_Value::zero,
+    ACE_Time_Value::max_time,
+    0,
+    0),
+    0);
+  
+  TAO::DCPS::Serializer writer(data, byte_order);
+  writer << this->size ();
+
+  MapType::ENTRY* entry;
+
+  for (MapType::ITERATOR itr(this->map_);
+    itr.next(entry);
+    itr.advance())
+  {
+    writer << entry->ext_id_;
+    entry->int_id_->serialize (writer);
+  }
+
+  return data;
+}
+
+
+
+bool 
+TAO::DCPS::RepoIdSetMap::equal (RepoIdSetMap& map, RepoId id)
+{
+  DBG_ENTRY("RepoIdSetMap","equal");
+
+  RepoIdSet_rch given_id_set = map.find (id);
+  RepoIdSet_rch this_id_set = this->find (id);
+
+  if (! given_id_set.is_nil () && ! this_id_set.is_nil ())
+  {
+    return this_id_set->equal (* (given_id_set.in ()));
+  }
+
+  return false;
+}  
+
+
+int
+TAO::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
+{
+  DBG_ENTRY("RepoIdSetMap","demarshal");
+
+  TAO::DCPS::Serializer reader( acks, byte_order);
+
+  size_t num_subs = 0;
+  reader >> num_subs;
+  if( reader.good_bit() != true) return -1;
+
+  for (size_t i = 0; i < num_subs; ++i)
+  {
+    RepoId cur_sub = 0;
+    reader >> cur_sub;
+    if( reader.good_bit() != true) return -1;
+    size_t num_pubs_per_sub = 0;
+    reader >> num_pubs_per_sub;
+    if( reader.good_bit() != true) return -1;
+
+    for (size_t j = 0; j < num_pubs_per_sub; ++j)
+    {
+      RepoId pub = 0;
+      reader >> pub;
+      if( reader.good_bit() != true) return -1;
+      if (this->insert (pub, cur_sub) != 0)
+        return -1;
+    }
+  }
+
+  return 0;
+}
+
+
+
+void
+TAO::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
+{
+  DBG_ENTRY("RepoIdSetMap","get_keys");
+  
+  MapType::ENTRY* entry;
+
+    for (MapType::ITERATOR itr(this->map_);
+      itr.next(entry);
+      itr.advance())
+    {
+      keys.insert_id (entry->ext_id_);
+    }
+}
+

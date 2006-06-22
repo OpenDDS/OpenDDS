@@ -154,7 +154,7 @@ namespace TAO
                         CORBA::Long               priority,
                         const char*               local_id_str,
                         const char*               remote_id_str,
-                        ssize_t                   num_remote_associations,
+                        size_t                    num_remote_associations,
                         const AssociationData*    remote_associations,
                         TransportReceiveListener* receive_listener = 0);
 

@@ -43,6 +43,10 @@ namespace TAO
         SimpleTcpTransport_rch get_transport_impl ();
           
         virtual void pre_stop_i();
+        
+        /// Called on subscriber side to send the fully association
+        /// message to the publisher.
+        virtual void fully_associated ();
 
       protected:
 

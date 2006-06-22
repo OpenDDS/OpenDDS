@@ -159,6 +159,11 @@ TAO::DCPS::TransportImpl::reserve_datalink
                          subscriber_id,
                          receive_listener);
 
+  // This is called on the subscriber side to let the concrete
+  // datalink to do some necessary work such as SimpleTcp will 
+  // send the FULLY_ASSOCIATED ack to the publisher.
+  link->fully_associated ();
+
   return link._retn();
 }
 
@@ -212,6 +217,14 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
     {
       dw->_add_ref ();
     }
+
+  // It's possiable this function is called after the 
+  // add_association is handled and also the FULLY_ASSOCIATED
+  // ack is received by the publisher side, we need check the
+  // map to see if it's the case. If it is,the datawriter will be
+  // notified fully associated at this time.
+  if (this->pending_sub_map_.equal (this->acked_sub_map_, pub_id))
+    this->fully_associated (pub_id);
 
   return ret;
 }
@@ -280,3 +293,107 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id)
 }
 
 
+int
+TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
+                                                   size_t                  num_remote_associations,
+                                                   const AssociationData*  remote_associations)
+{
+  DBG_ENTRY("TransportImpl","add_pending_association");
+
+  GuardType guard(this->lock_);
+
+  // Add the remote_id to the pending publication map.
+  for (size_t i = 0; i < num_remote_associations; ++i)
+  {
+    if (this->pending_sub_map_.insert (pub_id, remote_associations [i].remote_id_) != 0)
+      return 0;
+  } 
+
+  AssociationInfo info;
+  info.num_associations_ = num_remote_associations;
+  info.association_data_ = remote_associations;
+  info.status_ = Not_Fully_Associated;
+
+  // Cache the Association data so it can be used for the callback
+  // to notify datawriter on_publication_match.
+  
+  PendingAssociationsMap::ENTRY* entry;
+  if (this->pending_association_sub_map_.find (pub_id, entry) == 0)
+    entry->int_id_->push_back (info);
+  else {
+    AssociationInfoList* infos = new AssociationInfoList;
+    infos->push_back (info);
+    if (this->pending_association_sub_map_.bind (pub_id, infos) == -1)
+      ACE_ERROR_RETURN ((LM_ERROR,
+      "(%P|%t) ERROR: add_pending_association: Failed to add pending associations for pub %d\n",
+      pub_id),
+      -1);
+  }
+
+  if (this->pending_sub_map_.equal (this->acked_sub_map_, pub_id))
+  {
+    this->fully_associated (pub_id);
+  }
+  
+  return 0;
+}
+
+
+int 
+TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
+{
+  DBG_ENTRY("TransportImpl","demarshal");
+
+  int status = this->acked_sub_map_.demarshal (acks, byte_order);
+
+  GuardType guard(this->lock_);
+
+  RepoIdSet acked_pubs;
+  
+  this->acked_sub_map_.get_keys (acked_pubs);
+  
+  RepoIdSet::MapType::ENTRY* entry;
+
+  for (RepoIdSet::MapType::ITERATOR itr(acked_pubs.map ());
+    itr.next(entry);
+    itr.advance())
+  {
+    if (this->pending_sub_map_.equal (this->acked_sub_map_, entry->ext_id_))
+      this->fully_associated (entry->ext_id_);
+  }
+  return 0;
+}
+
+
+void
+TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
+{
+  DBG_ENTRY("TransportImpl","fully_associated");
+
+  DataWriterImpl* dw = this->find_publication (pub_id);
+  AssociationInfoList* remote_associations;
+  int status = this->pending_association_sub_map_.find (pub_id, remote_associations);
+  size_t len = remote_associations->size ();
+
+  if (dw == 0 && status == 0)
+  {
+    for (size_t i = 0; i < len; ++i)
+      (*remote_associations)[i].status_ = Fully_Associated;
+  }
+  else if (dw != 0 && status == 0)
+  {
+    for (size_t i = 0; i < len; ++i)
+    {
+      dw->fully_associated (pub_id, 
+      (*remote_associations)[i].num_associations_, 
+      (*remote_associations)[i].association_data_);
+    }
+    this->pending_sub_map_.remove_set (pub_id);
+    this->acked_sub_map_.remove_set (pub_id);
+    delete remote_associations;
+    this->pending_association_sub_map_.unbind (pub_id);
+  }
+}
+
+
+ 

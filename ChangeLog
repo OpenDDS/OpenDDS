@@ -1,3 +1,137 @@
+Thu Jun 22 16:06:21 2006 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes mainly fix the problem    
+         "create_datawriter() does not wait for full association establishment
+         so even if there are waiting subscribers,  a write shortly after
+         creating the datawriter may be dropped on the publisher side because
+         add_associations() has not completed on the publisher side.
+         The sample may also be dropped on the subscriber side because the
+         connection exists between the publisher and subscriber but the
+         associations have not been mapped on the subscriber side."
+        
+         The solution is to make the subscriber send a FULLY_ASSOCIATED ack
+         when the new association is received from repo and the connection is 
+         established. On the publisher side, the transport will notify the 
+         datawriter that the subscriber is fully associated when the ack is 
+         received. The application can use get_matched_subscriptions() to 
+         determine when it should start sending samples.        
+         (See RT8498 for details)  
+         
+        * dds/DdsDcps.mpc:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportGDControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportGDControlElement.h:
+          
+          Renamed the TransportGDControlElement.* to TransportControlElement.*
+          so it can be used for both GRACEFUL_DISCONNECT and FULLY_ASSOCIATED 
+          messages. 
+                    
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        
+          Seperated remote reader handler caching and the listener 
+          on_publication_matched callback from add_associations(). The new 
+          method fully_associated() does that part which is called when the
+          transport received the FYULLY_ASSOCIATED message from subscriber.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        
+          Made the publisher not delete the associations after add_publication()
+          is done. The associations will be deleted when transport calls the 
+          full_associated().
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        
+          Provided marshal and demarshal method for the associated RepoIds.
+                    
+        * dds/DCPS/DataSampleHeader.h:
+
+          Added new message id FULLY_ASSOCIATED.
+          
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        
+          Added Association_Status definition.
+          
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        
+          Added local map to cache the pending association ids,pending
+          association data and acked associations.
+          
+          Notify the datawriter fully association at an approriated time 
+          which depend on the timing when pending association is added, 
+          when ack is received and when the datawriter is registered with
+          the TransportImpl. At either time, the pending and ack map will
+          be checked to see if any assoications related to a pub id is
+          fully associated. 
+          
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        
+          Made add_associations() call add_pending_associations() at
+          very last. 
+                    
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        
+          Handled the FULKLY_ASSOCIATED message.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+
+          Added method to send the FULKLY_ASSOCIATED messgage.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+
+          Added shutdown_ flag to stop the reconnecting during shutdown.
+          The shutdown reconnect task call is removed from the connection
+          destructor, the shutdown will be called when the connection related
+          association is removed or when the transport shutdown. This would 
+          avoid the destruction order problem of the connection and 
+          reconnect task objects.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+          
+          Made the reconnect task not accept new reuqests when it's already 
+          shutdown.
+        
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/Writer.cpp:
+        * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        
+          Changed the using of text file to coordinate between publisher
+          and subscriber to use the get_matched_*() function call to determine
+          when the publisher can start and finish and when the subscriber
+          can finish.
+          
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          Used the get_matched_*() function call to determine
+          when the publisher can start and finish and when the subscriber
+          can finish.
+          
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+
+          Made the subscriber sleep for a while before shuttting down the
+          transport to avoid the errors due to lost connection during 
+          shutdown.
+          
 Mon Jun 19 18:58:43 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * TAO/DDS/dds/DCPS/transport/framework/TransportReceiveStrategy.h:

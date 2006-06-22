@@ -753,7 +753,9 @@ namespace TAO
                                  writer_qos.transport_priority.value,
                                  length,
                                  associations);
-        delete []associations; // TransportInterface does not take ownership
+        // TransportInterface does not take ownership of the associations. 
+        // The associations will be deleted when transport inform
+        // datawriter fully associated (in DataWriterImpl::fully_associated()).
       }
 
       void PublisherImpl::remove_associations(

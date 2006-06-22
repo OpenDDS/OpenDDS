@@ -63,6 +63,11 @@ namespace TAO
         void release_reservations(RepoId          remote_id,
                                   DataLinkSetMap& released_locals);
 
+        /// A hook for the concrete transport to do something special on 
+        /// subscriber side after both add_associations is received and 
+        /// the connection is established.
+        virtual void fully_associated ();
+
         /// Called by the TransportInterface objects that reference this
         /// DataLink.  Used by the TransportInterface to send a sample,
         /// or to send a control message.
@@ -105,6 +110,10 @@ namespace TAO
         /// Called before release the datalink or before shutdown to let
         /// the concrete DataLink to do anything necessary.
         virtual void pre_stop_i () {};
+
+        /// This is called on subscriber side to serialize the 
+        /// associated publication and subscriptions.
+        ACE_Message_Block* marshal_acks (bool byte_order);
 
        protected:
 

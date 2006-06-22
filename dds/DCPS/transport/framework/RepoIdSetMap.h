@@ -6,8 +6,10 @@
 
 #include  "dds/DCPS/dcps_export.h"
 #include  "RepoIdSet.h"
+#include  "TransportDefs.h"
 #include  "RepoIdSet_rch.h"
 #include  "dds/DCPS/Definitions.h"
+#include  "dds/DCPS/Serializer.h"
 #include  "ace/Hash_Map_Manager.h"
 #include  "ace/Synch.h"
 
@@ -16,6 +18,7 @@ namespace TAO
 
   namespace DCPS
   {
+    class RepoIdSetMap;
 
     class TAO_DdsDcps_Export RepoIdSetMap
     {
@@ -39,14 +42,29 @@ namespace TAO
 
         int release_publisher(RepoId subscriber_id, RepoId publisher_id);
 
-        ssize_t size() const;
+        size_t size() const;
 
         /// Give access to the underlying map for iteration purposes.
         MapType& map();
         const MapType& map() const;
 
+        /// The size of the serialized map.
+        size_t marshaled_size ();
+        
+        /// Serialize this map. The data in the stream: 
+        /// size of this map, list of key(repoid)-value(RepoIdSet).
+        ACE_Message_Block* marshal (bool byte_order);
 
-      private:
+        /// Check if two RepoIdSetMaps have same contents.
+        bool equal (RepoIdSetMap& map, RepoId id);
+        
+        /// Demarshal the serialized data of a RepoIdSetMap. 
+        int demarshal (ACE_Message_Block* acks, bool byte_order);
+        
+        /// List the key of this map.
+        void get_keys (RepoIdSet& keys);
+
+    private:
 
         RepoIdSet* find_or_create(RepoId key);
 

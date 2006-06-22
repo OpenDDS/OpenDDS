@@ -44,7 +44,7 @@ void write (long id,
             (pt_dw.in ()  ACE_ENV_SINGLE_ARG_PARAMETER);
 
   //SHH remove this kludge when the transport is fixed.
-  ACE_OS::sleep(2); // ensure that the connection has been fully established
+  //ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 

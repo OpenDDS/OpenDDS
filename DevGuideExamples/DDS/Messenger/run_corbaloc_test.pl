@@ -19,17 +19,8 @@ if ($ARGV[0] eq 'udp') {
 my($port1) = 10001 + PerlACE::uniqueid() ;
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
 
 unlink $dcpsrepo_ior;
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
-
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file "
@@ -71,10 +62,6 @@ if ($ir != 0) {
     $status = 1;
 }
 
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";

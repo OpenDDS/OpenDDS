@@ -28,10 +28,10 @@ const char* sub_finished_filename = "subscriber_finished.txt";
 
 int main (int argc, char *argv[])
 {
-  DDS::DomainParticipantFactory_var dpf;
-  DDS::DomainParticipant_var participant;
-
   try {
+    DDS::DomainParticipantFactory_var dpf;
+    DDS::DomainParticipant_var participant;
+
     dpf = TheParticipantFactoryWithArgs(argc, argv);
     participant =
       dpf->create_participant(411,
@@ -132,76 +132,36 @@ int main (int argc, char *argv[])
       exit(1);
     }
 
-    // Indicate that the subscriber is ready
-    FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, "w");
-    if (readers_ready == 0) {
-      cerr << "ERROR Unable to create subscriber completed file." << endl;
-      exit(1);
-    }
-    ACE_OS::fclose(readers_ready);
-
-    // Wait for the publisher to be ready
-    FILE* writers_ready = 0;
-    do {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      writers_ready = ACE_OS::fopen (pub_ready_filename, "r");
-    } while (0 == writers_ready);
-    ACE_OS::fclose(writers_ready);
 
     int expected = 10;
-    FILE* writers_completed = 0;
-    int timeout_writes = 0;
     while ( listener_servant.num_reads() < expected) {
-      // Get the number of the timed out writes from publisher so we
-      // can re-calculate the number of expected messages. Otherwise,
-      // the blocking timeout test will never exit from this loop.
-      if (writers_completed == 0) {
-        writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-        if (writers_completed != 0) {
-          //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-          fscanf (writers_completed, "%d\n", &timeout_writes);
-          expected -= timeout_writes;
-          cout << "timed out writes " << timeout_writes << ", we expect "
-               << expected << endl;
-        }
-      }
       ACE_OS::sleep (1);
     }
 
-    // Indicate that the subscriber is done
-    FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, "w");
-    if (readers_completed == 0) {
-      cerr << "ERROR Unable to create subscriber completed file." << endl;
-      exit(1);
-    }
-    ACE_OS::fclose(readers_completed);
-
-    // Wait for the publisher to finish
-    while (writers_completed == 0) {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-    }
-    ACE_OS::fclose(writers_completed);
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in main ():" << endl << e << endl;
-    exit(1);
-  }
-
-  // Cleanup
-  try {
     if (!CORBA::is_nil (participant.in ())) {
       participant->delete_contained_entities();
     }
     if (!CORBA::is_nil (dpf.in ())) {
       dpf->delete_participant(participant.in ());
     }
+
+    ::DDS::InstanceHandleSeq handles;
+    while (1)
+    {
+      dr->get_matched_publications(handles);
+      if (handles.length() == 0)
+        break;
+      else
+        ACE_OS::sleep(1);
+    }
+
+    TheTransportFactory->release();
+    TheServiceParticipant->shutdown ();
+
   } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in cleanup." << endl << e << endl;
-    exit(1);
+    cerr << "Exception caught in main ():" << endl << e << endl;
+    return 1;
   }
-  TheTransportFactory->release();
-  TheServiceParticipant->shutdown ();
+
   return 0;
 }

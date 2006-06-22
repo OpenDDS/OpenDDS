@@ -40,6 +40,9 @@ TAO::DCPS::SimpleTcpReconnectTask::add(COMMAND  command,
   DBG_ENTRY("SimpleTcpReconnectTask","add");
   GuardType guard(this->lock_);
 
+  if (this->shutdown_initiated_)
+    return -1;
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "SimpleTcpReconnectTask::add   con %X to %X \n", conn, this));
 

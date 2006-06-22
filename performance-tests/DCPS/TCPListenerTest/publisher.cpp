@@ -324,7 +324,7 @@ int main (int argc, char *argv[])
                             status_str.c_str()),
                             1);
         }
-
+      
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);

@@ -167,6 +167,9 @@ namespace TAO
 
         /// Last time the connection is re-established.
         ACE_Time_Value last_reconnect_attempted_;
+
+        /// shutdown flag
+        bool shutdown_;
     };
 
   }
