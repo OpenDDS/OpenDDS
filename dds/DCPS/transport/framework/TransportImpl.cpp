@@ -345,6 +345,10 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
   DBG_ENTRY("TransportImpl","demarshal");
 
   int status = this->acked_sub_map_.demarshal (acks, byte_order);
+  if (status == -1)
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
+                      -1);
 
   GuardType guard(this->lock_);
 
@@ -370,7 +374,10 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 {
   DBG_ENTRY("TransportImpl","fully_associated");
 
-  DataWriterImpl* dw = this->find_publication (pub_id);
+  TAO::DCPS::DataWriterImpl* dw = 0;
+  int ret = this->dw_map_.find (pub_id, dw);
+  ACE_UNUSED_ARG (ret);
+
   AssociationInfoList* remote_associations;
   int status = this->pending_association_sub_map_.find (pub_id, remote_associations);
   size_t len = remote_associations->size ();
