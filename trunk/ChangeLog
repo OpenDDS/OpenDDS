@@ -1,3 +1,10 @@
+Thu Jun 23 6:45:12 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed the transport deadlock upon fully association on Linux. The problem
+          is the lock in TransportImpl is recursively aquired.
+
 Thu Jun 22 00:03:16 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h
