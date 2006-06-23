@@ -378,7 +378,7 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
   int ret = this->dw_map_.find (pub_id, dw);
   ACE_UNUSED_ARG (ret);
 
-  AssociationInfoList* remote_associations;
+  AssociationInfoList* remote_associations = 0;
   int status = this->pending_association_sub_map_.find (pub_id, remote_associations);
   size_t len = remote_associations->size ();
 
@@ -402,5 +402,3 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
   }
 }
 
-
- 
