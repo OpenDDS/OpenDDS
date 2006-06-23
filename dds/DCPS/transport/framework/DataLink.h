@@ -10,9 +10,9 @@
 #include  "ReceiveListenerSetMap.h"
 #include  "RepoIdSetMap.h"
 #include  "TransportImpl_rch.h"
-#include  "TransportSendStrategy.h"
+//borland #include  "TransportSendStrategy.h"
 #include  "TransportSendStrategy_rch.h"
-#include  "TransportReceiveStrategy.h"
+//borland #include  "TransportReceiveStrategy.h"
 #include  "TransportReceiveStrategy_rch.h"
 #include  "ace/Synch.h"
 

@@ -1,4 +1,18 @@
-Thu Jun 22 16:06:21 2006 2006  Yan Dai  <dai_y@ociweb.com>
+Thu Jun 22 00:03:16 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h
+        * dds/DCPS/transport/framework/DataLinkSetMap.h
+        * dds/DCPS/transport/framework/TransportFactory.h
+        * dds/DCPS/transport/framework/TransportImpl.h
+        * dds/DCPS/transport/framework/TransportImplFactory.h
+        * dds/DCPS/transport/framework/SimpleTcpConnection.h
+        * dds/DCPS/transport/framework/SimpleUdpTransport.h
+
+          Temporary commented the fix for BCB6 build at
+          "Fri Jun  9 07:37:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>"
+          These changes broke the Linux build.
+
+Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes mainly fix the problem    
          "create_datawriter() does not wait for full association establishment
