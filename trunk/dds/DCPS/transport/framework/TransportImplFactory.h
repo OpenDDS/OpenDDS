@@ -6,7 +6,7 @@
 
 #include  "dds/DCPS/dcps_export.h"
 #include  "dds/DCPS/RcObject_T.h"
-#include  "TransportImpl.h"
+//borland #include  "TransportImpl.h"
 #include  "TransportImpl_rch.h"
 #include  "ace/Synch.h"
 
