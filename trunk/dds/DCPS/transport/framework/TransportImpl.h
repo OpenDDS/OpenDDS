@@ -83,6 +83,10 @@ namespace TAO
         /// message.
         int demarshal_acks (ACE_Message_Block* acks, bool byte_order);
 
+        /// Return true if all the subscriptions to a datawriter are
+        /// acknowledged, otherwise return false.
+        virtual bool acked (RepoId pub_id);
+
       protected:
 
         TransportImpl();

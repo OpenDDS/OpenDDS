@@ -40,3 +40,12 @@ TAO::DCPS::SimpleUdpTransport::deliver_sample
 
   link->data_received(sample);
 }
+
+
+ACE_INLINE bool 
+TAO::DCPS::SimpleUdpTransport::acked (RepoId pub_id)
+{
+  return true;
+}
+
+

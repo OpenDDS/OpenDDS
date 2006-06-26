@@ -1,3 +1,23 @@
+Mon Jun 26 2:25:26 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes fixed the test using simpleUDP. The commit 
+        "Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>" appears
+        broke the UDP tests during the full association period.
+               
+        * TAO/DDS/dds/DCPS/transport/framework/TransportImpl.cpp:
+        * TAO/DDS/dds/DCPS/transport/framework/TransportImpl.h:
+        * TAO/DDS/dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
+        * TAO/DDS/dds/DCPS/transport/simpleUDP/SimpleUdpTransport.inl:
+
+          Added new virtual function acked() to check if the acks for 
+          pending associations are received so the simpleUDP can simply
+          always return acked.
+          
+        * TAO/DDS/DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        
+          Added more sleep period before releasing transport factory. This
+          would avoid the error on publisher during shutdown.
+          
 Thu Jun 23 6:45:12 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

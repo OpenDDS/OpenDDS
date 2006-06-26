@@ -37,6 +37,7 @@ namespace TAO
         SimpleUdpTransport();
         virtual ~SimpleUdpTransport();
 
+        virtual bool acked (RepoId pub_id);
 
       protected:
 

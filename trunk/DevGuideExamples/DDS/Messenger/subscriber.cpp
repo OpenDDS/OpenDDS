@@ -148,12 +148,13 @@ int main (int argc, char *argv[])
     ::DDS::InstanceHandleSeq handles;
     while (1)
     {
+      ACE_OS::sleep(1);
       dr->get_matched_publications(handles);
       if (handles.length() == 0)
         break;
-      else
-        ACE_OS::sleep(1);
     }
+
+    ACE_OS::sleep(2);
 
     TheTransportFactory->release();
     TheServiceParticipant->shutdown ();

@@ -223,7 +223,9 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
   // ack is received by the publisher side, we need check the
   // map to see if it's the case. If it is,the datawriter will be
   // notified fully associated at this time.
-  if (this->pending_sub_map_.equal (this->acked_sub_map_, pub_id))
+  TAO::DCPS::RepoIdSet_rch pending_subs
+    = this->pending_sub_map_.find (pub_id);
+  if (! pending_subs.is_nil () && this->acked (pub_id))
     this->fully_associated (pub_id);
 
   return ret;
@@ -330,10 +332,8 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
       -1);
   }
 
-  if (this->pending_sub_map_.equal (this->acked_sub_map_, pub_id))
-  {
+  if (this->acked (pub_id))
     this->fully_associated (pub_id);
-  }
   
   return 0;
 }
@@ -362,7 +362,10 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
     itr.next(entry);
     itr.advance())
   {
-    if (this->pending_sub_map_.equal (this->acked_sub_map_, entry->ext_id_))
+    TAO::DCPS::RepoIdSet_rch pending_subs
+      = this->pending_sub_map_.find (entry->ext_id_);
+
+    if (! pending_subs.is_nil () && this->acked (entry->ext_id_))
       this->fully_associated (entry->ext_id_);
   }
   return 0;
@@ -376,18 +379,12 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 
   TAO::DCPS::DataWriterImpl* dw = 0;
   int ret = this->dw_map_.find (pub_id, dw);
-  ACE_UNUSED_ARG (ret);
 
   AssociationInfoList* remote_associations = 0;
   int status = this->pending_association_sub_map_.find (pub_id, remote_associations);
   size_t len = remote_associations->size ();
 
-  if (dw == 0 && status == 0)
-  {
-    for (size_t i = 0; i < len; ++i)
-      (*remote_associations)[i].status_ = Fully_Associated;
-  }
-  else if (dw != 0 && status == 0)
+  if (ret == 0 && status == 0)
   {
     for (size_t i = 0; i < len; ++i)
     {
@@ -400,5 +397,16 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
     delete remote_associations;
     this->pending_association_sub_map_.unbind (pub_id);
   }
+  else if (status == 0)
+  {
+    for (size_t i = 0; i < len; ++i)
+      (*remote_associations)[i].status_ = Fully_Associated;
+  }
 }
 
+
+bool
+TAO::DCPS::TransportImpl::acked (RepoId pub_id)
+{
+  return this->pending_sub_map_.equal (this->acked_sub_map_, pub_id);
+}
