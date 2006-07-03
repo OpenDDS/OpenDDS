@@ -1,3 +1,14 @@
+Mon Jul  3 09:23:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.inl:
+
+          Fixed build errors and warning on Linux.
+
 Sun Jul  3 8:42:38 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes support thread-per-connection send feature. The 

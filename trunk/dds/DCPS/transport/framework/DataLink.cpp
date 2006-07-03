@@ -11,7 +11,6 @@
 
 #include  "TransportImpl.h"
 #include  "TransportConfiguration.h"
-#include  "ThreadPerConnectionSendTask.h"
 #include  "dds/DCPS/DataWriterImpl.h"
 #include  "dds/DCPS/DataReaderImpl.h"
 
