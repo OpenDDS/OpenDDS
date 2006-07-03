@@ -14,6 +14,7 @@
 #include  "TransportSendStrategy_rch.h"
 //borland #include  "TransportReceiveStrategy.h"
 #include  "TransportReceiveStrategy_rch.h"
+#include  "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 #include  "ace/Synch.h"
 
 
@@ -28,6 +29,7 @@ namespace TAO
     class  DataLinkSetMap;
     class  ReceivedDataSample;
     struct DataSampleListElement;
+    class  ThreadPerConnectionSendTask;
 
 
     class TAO_DdsDcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
@@ -70,7 +72,9 @@ namespace TAO
 
         /// Called by the TransportInterface objects that reference this
         /// DataLink.  Used by the TransportInterface to send a sample,
-        /// or to send a control message.
+        /// or to send a control message. These functions either give the 
+        /// request to the PerThreadConnectionSendTask when thread_per_connection
+        /// configuration is true or just simply delegate to the send strategy.
         void send_start();
         void send(TransportQueueElement* element);
         void send_stop();
@@ -109,7 +113,7 @@ namespace TAO
 
         /// Called before release the datalink or before shutdown to let
         /// the concrete DataLink to do anything necessary.
-        virtual void pre_stop_i () {};
+        virtual void pre_stop_i ();
 
         /// This is called on subscriber side to serialize the 
         /// associated publication and subscriptions.
@@ -147,9 +151,20 @@ namespace TAO
         /// The transport receive strategy object for this DataLink.
         TransportReceiveStrategy_rch receive_strategy_;
 
-      private:
+  protected:
 
-        /// Helper function to output the enum as a string to help debugging.
+        friend class ThreadPerConnectionSendTask;
+
+        /// The implementation of the functions that accomplish the 
+        /// sample or control message delivery. IThey just simply 
+        /// delegate to the send strategy.
+        void send_start_i();
+        void send_i(TransportQueueElement* element);
+        void send_stop_i();
+
+  private:
+
+       /// Helper function to output the enum as a string to help debugging.
         const char* connection_notice_as_str (enum ConnectionNotice notice);
 
         /// Used by release_reservations() once it has determined that the
@@ -195,6 +210,11 @@ namespace TAO
 
         /// The id for this DataLink
         ACE_UINT64 id_;
+
+        /// The task used to do the sending. This ThreadPerConnectionSendTask 
+        /// object is created when the thread_per_connection configuration is
+        /// true. It only dedicate to this datalink.
+        ThreadPerConnectionSendTask* thr_per_con_send_task_;
     };
 
   }  /* namespace DCPS */

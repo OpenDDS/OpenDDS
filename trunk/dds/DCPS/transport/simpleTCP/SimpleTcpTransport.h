@@ -10,7 +10,7 @@
 #include  "SimpleTcpDataLink_rch.h"
 #include  "SimpleTcpAcceptor.h"
 #include  "SimpleTcpConnection_rch.h"
-#include  "SimpleTcpReconnectTask_rch.h"
+#include  "SimpleTcpConnectionReplaceTask.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include  "ace/INET_Addr.h"
 #include  "ace/Hash_Map_Manager.h"
@@ -34,9 +34,6 @@ namespace TAO
 
         int fresh_link (const ACE_INET_Addr&    remote_addr,
                         SimpleTcpConnection_rch connection);
-
-        SimpleTcpReconnectTask_rch get_reconnect_task ();
-
 
       protected:
 
@@ -153,7 +150,7 @@ namespace TAO
         /// duing reconnecting. 
         /// TODO: reuse the reconnect_task in the SimpleTcpConnection
         ///       for new connection checking.
-        SimpleTcpReconnectTask_rch reconnect_task_;
+        SimpleTcpConnectionReplaceTask con_checker_;
     };
 
   } /* namespace DCPS */

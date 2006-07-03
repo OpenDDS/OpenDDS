@@ -61,6 +61,8 @@ TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
   DBG_ENTRY("SimpleTcpDataLink","stop_i");
  
+  DataLink::pre_stop_i();
+
   SimpleTcpReceiveStrategy * rs 
     = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
 
@@ -228,7 +230,7 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 
   ACE_NEW(send_element, TransportControlElement(message));
 
-  this->send (send_element);
+  this->send_i (send_element);
 
   message->release ();
 
@@ -284,7 +286,7 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
 
   ACE_NEW(send_element, TransportControlElement(message));
 
-  this->send (send_element);
+  this->send_i (send_element);
 
   message->release ();
 

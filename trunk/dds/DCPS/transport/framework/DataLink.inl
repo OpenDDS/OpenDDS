@@ -12,9 +12,24 @@ TAO::DCPS::DataLink::send_start()
 {
   DBG_ENTRY("DataLink","send_start");
 
-  // This one is easy.  Simply delegate to our TransportSendStrategy
-  // data member.
-  this->send_strategy_->send_start();
+  if (this->thr_per_con_send_task_ != 0)
+  {
+    SendRequest req;
+    req.op_ = SEND_START;
+    req.element_ = 0;
+    this->thr_per_con_send_task_->add (req);
+  }
+  else
+    this->send_start_i ();
+}
+
+
+ACE_INLINE void
+TAO::DCPS::DataLink::send_start_i()
+{
+    // This one is easy.  Simply delegate to our TransportSendStrategy
+    // data member.
+    this->send_strategy_->send_start();
 }
 
 
@@ -25,9 +40,24 @@ TAO::DCPS::DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY("DataLink","send");
 
-  // This one is easy.  Simply delegate to our TransportSendStrategy
-  // data member.
-  this->send_strategy_->send(element);
+  if (this->thr_per_con_send_task_ != 0)
+  {
+    SendRequest req;
+    req.op_ = SEND;
+    req.element_ = element;
+    this->thr_per_con_send_task_->add (req);
+  }
+  else
+    this->send_i (element);
+}
+
+
+ACE_INLINE void
+TAO::DCPS::DataLink::send_i(TransportQueueElement* element)
+{
+    // This one is easy.  Simply delegate to our TransportSendStrategy
+    // data member.
+    this->send_strategy_->send(element);
 }
 
 
@@ -36,6 +66,21 @@ TAO::DCPS::DataLink::send_stop()
 {
   DBG_ENTRY("DataLink","send_stop");
 
+  if (this->thr_per_con_send_task_ != 0)
+  {
+    SendRequest req;
+    req.op_ = SEND_STOP;
+    req.element_ = 0;
+    this->thr_per_con_send_task_->add (req);
+  }
+  else
+    this->send_stop_i ();
+}
+
+
+ACE_INLINE void
+TAO::DCPS::DataLink::send_stop_i()
+{
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
   this->send_strategy_->send_stop();

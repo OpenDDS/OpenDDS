@@ -35,7 +35,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
   is_connector_ (true),
   passive_reconnect_timer_id_ (-1),
-  reconnect_task_ (new SimpleTcpReconnectTask ()),
+  reconnect_task_ (this),
   reconnect_state_ (INIT_STATE),
   last_reconnect_attempted_ (ACE_Time_Value::zero),
   shutdown_ (false)
@@ -43,7 +43,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
 
   // Open the reconnect task
-  if (this->reconnect_task_->open ())
+  if (this->reconnect_task_.open ())
     {
       ACE_ERROR ((LM_ERROR,
                   "(%P|%t) ERROR: Reconnect task failed to open : %p\n",
@@ -661,7 +661,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
         ACE_TEXT(" should NOT be called by the connector side \n")));
     }
 
-  this->reconnect_task_->shutdown ();
+  this->reconnect_task_.close (1);
   connection->receive_strategy_ = this->receive_strategy_;
   connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
@@ -731,8 +731,9 @@ TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 
   if (do_suspend && ! this->send_strategy_.is_nil ())
     this->send_strategy_->suspend_send ();
-  if (! this->reconnect_task_.is_nil ()) 
-    this->reconnect_task_->add (SimpleTcpReconnectTask::DO_RECONNECT, this);
+  
+  ReconnectOpType op = DO_RECONNECT;  
+  this->reconnect_task_.add (op);
 }
 
 void
@@ -740,8 +741,8 @@ TAO::DCPS::SimpleTcpConnection::shutdown ()
 {
   DBG_ENTRY("SimpleTcpConnection","shutdown");
   this->shutdown_ = true;
-  if (! this->reconnect_task_.is_nil ()) 
-    this->reconnect_task_->shutdown ();
+  
+  this->reconnect_task_.close (1);
 }
 
 
