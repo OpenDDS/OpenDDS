@@ -229,7 +229,7 @@ namespace TAO
 
     void 
     DataWriterImpl::fully_associated (
-        ::TAO::DCPS::RepoId     yourId,
+        ::TAO::DCPS::RepoId,
         size_t                  num_remote_associations,
         const AssociationData*  remote_associations)
     {

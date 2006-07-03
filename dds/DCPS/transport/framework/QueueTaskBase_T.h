@@ -72,7 +72,7 @@ namespace TAO
       }
 
       /// Activate the worker threads
-      virtual int open(void* ptr = 0)
+      virtual int open(void* = 0)
       {
         DBG_ENTRY("QueueTaskBase","open");
 

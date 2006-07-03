@@ -229,7 +229,6 @@ protected:
         
 private:
 
-        friend class DataLink;
 
         /// This method is called when the FULLY_ASSOCIATED ack of the pending 
         /// associations is received. If the datawriter is registered, the 

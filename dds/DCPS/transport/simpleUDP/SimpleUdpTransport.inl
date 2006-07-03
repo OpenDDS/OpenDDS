@@ -43,7 +43,7 @@ TAO::DCPS::SimpleUdpTransport::deliver_sample
 
 
 ACE_INLINE bool 
-TAO::DCPS::SimpleUdpTransport::acked (RepoId pub_id)
+TAO::DCPS::SimpleUdpTransport::acked (RepoId)
 {
   return true;
 }
