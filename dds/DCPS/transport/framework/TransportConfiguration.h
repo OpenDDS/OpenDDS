@@ -89,6 +89,10 @@ namespace TAO
 
         ACE_CString transport_type_;
 
+        /// Flag for whether a new thread is needed for connection to  
+        /// send without backpressure.
+        bool thread_per_connection_;
+
       protected:
 
         /// Default ctor.

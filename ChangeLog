@@ -1,3 +1,83 @@
+Sun Jul  3 8:42:38 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        These changes support thread-per-connection send feature. The 
+        new configuration "thread_per_connection" is added to determine if
+        the transport needs create a new thread for a datalink/connection 
+        to send samples under normal traffic (no backpressure). If 
+        thread_per_connection is 1, the publisher always creates a seperate 
+        send thread for each datalink/connection to do the send instead of 
+        sending to each remote one by one by the same thread. 
+        
+        * dds/DdsDcps.mpc:
+   
+          Added new classes to support thread-per-connection send feature.
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        
+          Added the new task - ThreadPerConnectionSendTask object to handle
+          sending in a seperate thread.
+          
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        
+          A simple template ACE task that manages a request queue. The subclass
+          provides the function to handle the queued requests.
+          
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        
+          New class to support the thread-per-connection send.
+          
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        
+          Added thread_per_connection configuration.
+          
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        
+          Added DataLink as friend of TransportImpl so DataLink can
+          access the private data member configuration object of 
+          TransportImpl.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        
+          Updated to use the new interfaces of the SimpleReconnectTask
+          and made the reconnect_task_ allocated on stack instead of 
+          on heap.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.h:
+        
+          The new class added to do the connection replacement when
+          a new connection is accepted by the passive side.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Updated to call base class pre_stop_i () first.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
+        
+          Updated to use QueueTaskBase.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask_rch.h:
+          
+          Removed file not needed.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+         
+          Updated to use the SimpleTcpConnectionReplaceTask instead
+          of SimpleTcpReconnectTask.
+          
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+
+          Added thread_per_connection configuration.
+          
 Mon Jun 26 2:25:26 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         These changes fixed the test using simpleUDP. The commit 

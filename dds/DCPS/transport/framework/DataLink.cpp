@@ -11,6 +11,7 @@
 
 #include  "TransportImpl.h"
 #include  "TransportConfiguration.h"
+#include  "ThreadPerConnectionSendTask.h"
 #include  "dds/DCPS/DataWriterImpl.h"
 #include  "dds/DCPS/DataReaderImpl.h"
 
@@ -23,17 +24,28 @@
 
 /// Only called by our TransportImpl object.
 TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
+: thr_per_con_send_task_ (0)
 {
   DBG_ENTRY("DataLink","DataLink");
 
   impl->_add_ref();
   this->impl_ = impl;
+
   id_ = DataLink::get_next_datalink_id();
+
+  if (this->impl_->config_->thread_per_connection_)
+  {
+    this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask (this);
+    this->thr_per_con_send_task_->open ();
+  }
 }
 
 TAO::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY("DataLink","~DataLink");
+
+  if (this->thr_per_con_send_task_ != 0)
+    delete this->thr_per_con_send_task_;
 }
 
 
@@ -545,12 +557,24 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 }
 
 
+void
+TAO::DCPS::DataLink::pre_stop_i()
+{
+  if (this->thr_per_con_send_task_ != 0)
+  {
+    this->thr_per_con_send_task_->close (1);
+  }
+}
+
+
 ACE_Message_Block*
 TAO::DCPS::DataLink::marshal_acks (bool byte_order)
 {
   DBG_ENTRY("DataLink","marshal_acks");
   return this->sub_map_.marshal (byte_order);
 }
+
+
 
 
 

@@ -4,6 +4,7 @@
 
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpTransport.h"
+#include  "SimpleTcpConnectionReplaceTask.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpTransport.inl"
@@ -194,10 +195,10 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
     }
 
   // Open the reconnect task
-  if (this->reconnect_task_->open ())
+  if (this->con_checker_.open ())
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Reconnect task failed to open : %p\n",
+                        "(%P|%t) ERROR: connection checker failed to open : %p\n",
                         "open"),
                         -1);
     }
@@ -275,7 +276,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   this->acceptor_.close();
   this->acceptor_.transport_shutdown ();
 
-  this->reconnect_task_->shutdown ();
+  this->con_checker_.close (1);
 
   {
     GuardType guard(this->connections_lock_);
@@ -313,9 +314,6 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
 
   // Drop our reference to the TransportReactorTask
   this->reactor_task_ = 0;
-
-  // Drop our reference to the TransportReconnectTask.
-  this->reconnect_task_ = 0;
 
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this SimpleTcpTransport object (via smart-pointer).
@@ -415,7 +413,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
-  this->reconnect_task_->add (SimpleTcpReconnectTask::NEW_CONNECTION_CHECK, connection);
+  this->con_checker_.add (connection_obj);
 }
 
 

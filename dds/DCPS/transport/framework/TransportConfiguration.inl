@@ -22,8 +22,8 @@ TAO::DCPS::TransportConfiguration::TransportConfiguration()
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
     max_packet_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
     max_samples_per_packet_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),
-    optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE)
-    
+    optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
+    thread_per_connection_ (0)    
 {
   DBG_ENTRY("TransportConfiguration","TransportConfiguration");
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();

@@ -11,9 +11,8 @@
 #include  "SimpleTcpConnection_rch.h"
 //borland #include  "SimpleTcpSendStrategy.h"
 #include  "SimpleTcpSendStrategy_rch.h"
-//borland #include  "SimpleTcpReconnectTask.h"
-#include  "SimpleTcpReconnectTask_rch.h"
 //borland #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include  "SimpleTcpReconnectTask.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/RcObject_T.h"
 #include  "ace/SOCK_Stream.h"
@@ -160,7 +159,7 @@ namespace TAO
         /// TODO: We might need reuse the PerConnectionSynch thread
         /// to do the reconnecting or create the reconnect task when
         /// we need reconnect.
-        SimpleTcpReconnectTask_rch reconnect_task_;
+        SimpleTcpReconnectTask reconnect_task_;
 
         /// The state indicates each step of the reconnecting.
         ReconnectState reconnect_state_;
