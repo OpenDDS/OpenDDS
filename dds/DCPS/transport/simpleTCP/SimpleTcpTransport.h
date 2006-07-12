@@ -10,7 +10,7 @@
 #include  "SimpleTcpDataLink_rch.h"
 //#include  "SimpleTcpAcceptor.h"
 #include  "SimpleTcpConnection_rch.h"
-#include  "SimpleTcpConnectionReplaceTask.h"
+//#include  "SimpleTcpConnectionReplaceTask.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include  "ace/INET_Addr.h"
 #include  "ace/Hash_Map_Manager.h"
@@ -23,6 +23,7 @@ namespace TAO
   namespace DCPS
   {
     class SimpleTcpAcceptor;
+    class SimpleTcpConnectionReplaceTask;
 
     class TAO_DdsDcps_Export SimpleTcpTransport : public TransportImpl
     {
@@ -151,7 +152,7 @@ namespace TAO
         /// duing reconnecting. 
         /// TODO: reuse the reconnect_task in the SimpleTcpConnection
         ///       for new connection checking.
-        SimpleTcpConnectionReplaceTask con_checker_;
+        SimpleTcpConnectionReplaceTask* con_checker_;
     };
 
   } /* namespace DCPS */
