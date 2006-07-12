@@ -5,15 +5,32 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpTransport.h"
 #include  "SimpleTcpConnectionReplaceTask.h"
+#include  "SimpleTcpAcceptor.h"
+#include  "SimpleTcpSendStrategy.h"
+#include  "SimpleTcpReceiveStrategy.h"
+#include  "SimpleTcpConfiguration.h"
+#include  "SimpleTcpDataLink.h"
+#include  "SimpleTcpSynchResource.h"
+#include  "SimpleTcpConnection.h"
+#include  "dds/DCPS/transport/framework/NetworkAddress.h"
+#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include  "dds/DCPS/transport/framework/EntryExit.h"
 
-#if !defined (__ACE_INLINE__)
-#include "SimpleTcpTransport.inl"
-#endif /* __ACE_INLINE__ */
+
+TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
+  : acceptor_(new SimpleTcpAcceptor (this)),
+    connections_updated_(this->connections_lock_),
+    con_checker_ (this)
+{
+  DBG_ENTRY("SimpleTcpTransport","SimpleTcpTransport");
+}
+
 
 
 TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 {
   DBG_ENTRY("SimpleTcpTransport","~SimpleTcpTransport");
+  delete acceptor_;
 }
 
 
@@ -206,7 +223,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   // Open our acceptor object so that we can accept passive connections
   // on our this->tcp_config_->local_address_.
 
-  if (this->acceptor_.open(this->tcp_config_->local_address_,
+  if (this->acceptor_->open(this->tcp_config_->local_address_,
                            this->reactor_task_->get_reactor()) != 0)
     {
       // Remember to drop our reference to the tcp_config_ object since
@@ -224,7 +241,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 
   // update the port number (incase port zero was given).
   ACE_INET_Addr address;
-  if (this->acceptor_.acceptor ().get_local_addr (address) != 0)
+  if (this->acceptor_->acceptor ().get_local_addr (address) != 0)
     {
         ACE_ERROR ((LM_ERROR,
         ACE_TEXT ("(%P|%t) ERROR: SimpleTcpTransport::configure_i ")
@@ -273,8 +290,8 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   DBG_ENTRY("SimpleTcpTransport","shutdown_i");
   
   // Don't accept any more connections.
-  this->acceptor_.close();
-  this->acceptor_.transport_shutdown ();
+  this->acceptor_->close();
+  this->acceptor_->transport_shutdown ();
 
   this->con_checker_.close (1);
 
@@ -317,7 +334,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
 
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this SimpleTcpTransport object (via smart-pointer).
-  this->acceptor_.transport_shutdown();
+  this->acceptor_->transport_shutdown();
 }
 
 

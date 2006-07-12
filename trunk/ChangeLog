@@ -1,3 +1,13 @@
+Tue Jul 12 05:28:56 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+
+          Fixed a circular include dependency problem. This problem shown on 
+          gcc3.3.3 builds.
+
 Mon Jul  3 09:23:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
