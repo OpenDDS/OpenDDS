@@ -20,7 +20,7 @@
 TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
   : acceptor_(new SimpleTcpAcceptor (this)),
     connections_updated_(this->connections_lock_),
-    con_checker_ (this)
+    con_checker_ (new SimpleTcpConnectionReplaceTask(this))
 {
   DBG_ENTRY("SimpleTcpTransport","SimpleTcpTransport");
 }
@@ -31,6 +31,7 @@ TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 {
   DBG_ENTRY("SimpleTcpTransport","~SimpleTcpTransport");
   delete acceptor_;
+  delete con_checker_;
 }
 
 
@@ -212,7 +213,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
     }
 
   // Open the reconnect task
-  if (this->con_checker_.open ())
+  if (this->con_checker_->open ())
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: connection checker failed to open : %p\n",
@@ -293,7 +294,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
   this->acceptor_->close();
   this->acceptor_->transport_shutdown ();
 
-  this->con_checker_.close (1);
+  this->con_checker_->close (1);
 
   {
     GuardType guard(this->connections_lock_);
@@ -430,7 +431,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
-  this->con_checker_.add (connection_obj);
+  this->con_checker_->add (connection_obj);
 }
 
 
