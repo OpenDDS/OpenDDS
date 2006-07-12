@@ -8,7 +8,7 @@
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "SimpleTcpConfiguration_rch.h"
 #include  "SimpleTcpDataLink_rch.h"
-#include  "SimpleTcpAcceptor.h"
+//#include  "SimpleTcpAcceptor.h"
 #include  "SimpleTcpConnection_rch.h"
 #include  "SimpleTcpConnectionReplaceTask.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
@@ -22,6 +22,7 @@ namespace TAO
 
   namespace DCPS
   {
+    class SimpleTcpAcceptor;
 
     class TAO_DdsDcps_Export SimpleTcpTransport : public TransportImpl
     {
@@ -120,7 +121,7 @@ namespace TAO
 //            assume it has been done for us (in various situations).
 
         /// Used to accept passive connections on our local_address_.
-        SimpleTcpAcceptor acceptor_;
+        SimpleTcpAcceptor* acceptor_;
 
         /// Our configuration object, supplied to us in config_i().
         SimpleTcpConfiguration_rch tcp_config_;
@@ -156,10 +157,6 @@ namespace TAO
   } /* namespace DCPS */
 
 } /* namespace TAO */
-
-#if defined (__ACE_INLINE__)
-#include "SimpleTcpTransport.inl"
-#endif /* __ACE_INLINE__ */
 
 
 #endif  /* TAO_DCPS_SIMPLETCPTRANSPORT_H */
