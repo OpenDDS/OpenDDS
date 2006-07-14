@@ -4,6 +4,7 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpAcceptor.h"
 #include  "SimpleTcpTransport.h"
+#include  "SimpleTcpSendStrategy.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
 
 

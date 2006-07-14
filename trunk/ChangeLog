@@ -1,3 +1,33 @@
+Fri Jul 14 12:43:04 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+
+          Modifications required to build DDS with Visual C++ 6.0.  Most of
+          the changes involved adding include files and moving inline
+          methods into the .cpp's.  The change to the perl module is to
+          accommodate vc6's inability to handle calling a base class method
+          with an explicit class name.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
+
+          Removed these files.  Their contents was moved into the
+          corresponding .cpp files.
+
 Wed Jul 12 17:34:59 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
@@ -13,7 +43,7 @@ Tue Jul 12 05:28:56 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
 
-          Fixed a circular include dependency problem. This problem shown on 
+          Fixed a circular include dependency problem. This problem shown on
           gcc3.3.3 builds.
 
 Mon Jul  3 09:23:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
@@ -29,104 +59,104 @@ Mon Jul  3 09:23:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
 Sun Jul  3 8:42:38 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changes support thread-per-connection send feature. The 
+        These changes support thread-per-connection send feature. The
         new configuration "thread_per_connection" is added to determine if
-        the transport needs create a new thread for a datalink/connection 
-        to send samples under normal traffic (no backpressure). If 
-        thread_per_connection is 1, the publisher always creates a seperate 
-        send thread for each datalink/connection to do the send instead of 
-        sending to each remote one by one by the same thread. 
-        
+        the transport needs create a new thread for a datalink/connection
+        to send samples under normal traffic (no backpressure). If
+        thread_per_connection is 1, the publisher always creates a seperate
+        send thread for each datalink/connection to do the send instead of
+        sending to each remote one by one by the same thread.
+
         * dds/DdsDcps.mpc:
-   
+
           Added new classes to support thread-per-connection send feature.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
-        
+
           Added the new task - ThreadPerConnectionSendTask object to handle
           sending in a seperate thread.
-          
+
         * dds/DCPS/transport/framework/QueueTaskBase_T.h:
-        
+
           A simple template ACE task that manages a request queue. The subclass
           provides the function to handle the queued requests.
-          
+
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
-        
+
           New class to support the thread-per-connection send.
-          
+
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:
         * dds/DCPS/transport/framework/TransportConfiguration.h:
         * dds/DCPS/transport/framework/TransportConfiguration.inl:
-        
+
           Added thread_per_connection configuration.
-          
+
         * dds/DCPS/transport/framework/TransportImpl.h:
-        
+
           Added DataLink as friend of TransportImpl so DataLink can
-          access the private data member configuration object of 
+          access the private data member configuration object of
           TransportImpl.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
-        
+
           Updated to use the new interfaces of the SimpleReconnectTask
-          and made the reconnect_task_ allocated on stack instead of 
+          and made the reconnect_task_ allocated on stack instead of
           on heap.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.h:
-        
+
           The new class added to do the connection replacement when
           a new connection is accepted by the passive side.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Updated to call base class pre_stop_i () first.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.h:
-        
+
           Updated to use QueueTaskBase.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask_rch.h:
-          
+
           Removed file not needed.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.inl:
-         
+
           Updated to use the SimpleTcpConnectionReplaceTask instead
           of SimpleTcpReconnectTask.
-          
+
         * DevGuideExamples/DDS/Messenger/pub.ini:
 
           Added thread_per_connection configuration.
-          
+
 Mon Jun 26 2:25:26 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changes fixed the test using simpleUDP. The commit 
+        These changes fixed the test using simpleUDP. The commit
         "Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>" appears
         broke the UDP tests during the full association period.
-               
+
         * TAO/DDS/dds/DCPS/transport/framework/TransportImpl.cpp:
         * TAO/DDS/dds/DCPS/transport/framework/TransportImpl.h:
         * TAO/DDS/dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
         * TAO/DDS/dds/DCPS/transport/simpleUDP/SimpleUdpTransport.inl:
 
-          Added new virtual function acked() to check if the acks for 
+          Added new virtual function acked() to check if the acks for
           pending associations are received so the simpleUDP can simply
           always return acked.
-          
+
         * TAO/DDS/DevGuideExamples/DDS/Messenger/subscriber.cpp:
-        
+
           Added more sleep period before releasing transport factory. This
           would avoid the error on publisher during shutdown.
-          
+
 Thu Jun 23 6:45:12 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
@@ -150,7 +180,7 @@ Thu Jun 22 00:03:16 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
 Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        These changes mainly fix the problem    
+        These changes mainly fix the problem
          "create_datawriter() does not wait for full association establishment
          so even if there are waiting subscribers,  a write shortly after
          creating the datawriter may be dropped on the publisher side because
@@ -158,39 +188,39 @@ Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>
          The sample may also be dropped on the subscriber side because the
          connection exists between the publisher and subscriber but the
          associations have not been mapped on the subscriber side."
-        
+
          The solution is to make the subscriber send a FULLY_ASSOCIATED ack
-         when the new association is received from repo and the connection is 
-         established. On the publisher side, the transport will notify the 
-         datawriter that the subscriber is fully associated when the ack is 
-         received. The application can use get_matched_subscriptions() to 
-         determine when it should start sending samples.        
-         (See RT8498 for details)  
-         
+         when the new association is received from repo and the connection is
+         established. On the publisher side, the transport will notify the
+         datawriter that the subscriber is fully associated when the ack is
+         received. The application can use get_matched_subscriptions() to
+         determine when it should start sending samples.
+         (See RT8498 for details)
+
         * dds/DdsDcps.mpc:
         * dds/DCPS/transport/framework/TransportControlElement.cpp:
         * dds/DCPS/transport/framework/TransportControlElement.h:
         * dds/DCPS/transport/framework/TransportGDControlElement.cpp:
         * dds/DCPS/transport/framework/TransportGDControlElement.h:
-          
+
           Renamed the TransportGDControlElement.* to TransportControlElement.*
-          so it can be used for both GRACEFUL_DISCONNECT and FULLY_ASSOCIATED 
-          messages. 
-                    
+          so it can be used for both GRACEFUL_DISCONNECT and FULLY_ASSOCIATED
+          messages.
+
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
-        
-          Seperated remote reader handler caching and the listener 
-          on_publication_matched callback from add_associations(). The new 
+
+          Seperated remote reader handler caching and the listener
+          on_publication_matched callback from add_associations(). The new
           method fully_associated() does that part which is called when the
           transport received the FYULLY_ASSOCIATED message from subscriber.
 
         * dds/DCPS/PublisherImpl.cpp:
-        
+
           Made the publisher not delete the associations after add_publication()
-          is done. The associations will be deleted when transport calls the 
+          is done. The associations will be deleted when transport calls the
           full_associated().
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
@@ -200,73 +230,73 @@ Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
         * dds/DCPS/transport/framework/RepoIdSetMap.h:
         * dds/DCPS/transport/framework/RepoIdSetMap.inl:
-        
+
           Provided marshal and demarshal method for the associated RepoIds.
-                    
+
         * dds/DCPS/DataSampleHeader.h:
 
           Added new message id FULLY_ASSOCIATED.
-          
+
         * dds/DCPS/transport/framework/TransportDefs.h:
-        
+
           Added Association_Status definition.
-          
+
         * dds/DCPS/transport/framework/TransportImpl.cpp:
         * dds/DCPS/transport/framework/TransportImpl.h:
-        
+
           Added local map to cache the pending association ids,pending
           association data and acked associations.
-          
-          Notify the datawriter fully association at an approriated time 
-          which depend on the timing when pending association is added, 
+
+          Notify the datawriter fully association at an approriated time
+          which depend on the timing when pending association is added,
           when ack is received and when the datawriter is registered with
           the TransportImpl. At either time, the pending and ack map will
           be checked to see if any assoications related to a pub id is
-          fully associated. 
-          
+          fully associated.
+
         * dds/DCPS/transport/framework/TransportInterface.cpp:
         * dds/DCPS/transport/framework/TransportInterface.h:
-        
+
           Made add_associations() call add_pending_associations() at
-          very last. 
-                    
+          very last.
+
         * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
-        
+
           Handled the FULKLY_ASSOCIATED message.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
 
           Added method to send the FULKLY_ASSOCIATED messgage.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
 
           Added shutdown_ flag to stop the reconnecting during shutdown.
           The shutdown reconnect task call is removed from the connection
           destructor, the shutdown will be called when the connection related
-          association is removed or when the transport shutdown. This would 
-          avoid the destruction order problem of the connection and 
+          association is removed or when the transport shutdown. This would
+          avoid the destruction order problem of the connection and
           reconnect task objects.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
-          
-          Made the reconnect task not accept new reuqests when it's already 
+
+          Made the reconnect task not accept new reuqests when it's already
           shutdown.
-        
+
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
         * DevGuideExamples/DDS/Messenger/subscriber.cpp:
         * DevGuideExamples/DDS/Messenger/Writer.cpp:
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
         * DevGuideExamples/DDS/Messenger/run_test.pl:
-        
+
           Changed the using of text file to coordinate between publisher
           and subscriber to use the get_matched_*() function call to determine
           when the publisher can start and finish and when the subscriber
           can finish.
-          
+
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
         * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
         * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
@@ -274,14 +304,14 @@ Thu Jun 22 16:06:21 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           Used the get_matched_*() function call to determine
           when the publisher can start and finish and when the subscriber
           can finish.
-          
+
         * tests/DCPS/FooTest3_1/SubDriver.cpp:
         * tests/DCPS/FooTest3_2/SubDriver.cpp:
 
           Made the subscriber sleep for a while before shuttting down the
-          transport to avoid the errors due to lost connection during 
+          transport to avoid the errors due to lost connection during
           shutdown.
-          
+
 Mon Jun 19 18:58:43 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * TAO/DDS/dds/DCPS/transport/framework/TransportReceiveStrategy.h:
@@ -295,34 +325,34 @@ Mon Jun 19 18:58:43 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
 
           Fixed a deadlock situation on linux when the direct_send()
-          detects a lost connection and calls the relink(). The problem is the 
-          direct_send() is called under the lock in send strategy and the 
+          detects a lost connection and calls the relink(). The problem is the
+          direct_send() is called under the lock in send strategy and the
           suspend_send() called by relink() aquires the same lock.
-          To fix it, an extra parameter do_suspend is added to relink() 
-          function to indicate if the relink() needs call suspend_send() on 
+          To fix it, an extra parameter do_suspend is added to relink()
+          function to indicate if the relink() needs call suspend_send() on
           send strategy object. If the thread calling relink() already hold
           the lock it will call the operations in suspend_send() before calling
           relink (), otherwise the relink() will call suspend_send().
-          
+
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
 
-          Added shutdown () method to SimpleTcpConnection to shutdown the 
-          reconnect task. This is called during transport pre-shutdown phase 
+          Added shutdown () method to SimpleTcpConnection to shutdown the
+          reconnect task. This is called during transport pre-shutdown phase
           after the datalink sends graceful disconnect message. This would
           avoid an access violation during transport shutdown.
-          
+
         * TAO/DDS/dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
-        
+
           Made the shutdown () do shutdown work just once if it's called multiple
           times.
-          
+
         * TAO/DDS/dds/DCPS/DataWriterImpl.cpp:
-        
+
           Corrected a debug message.
-          
+
 Fri Jun  9 07:37:12 UTC 2006  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/DCPS/CPPTemplate.pm:

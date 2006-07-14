@@ -5,6 +5,7 @@
 #define TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H
 
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpConnection.h"
 #include  "dds/DCPS/transport/framework/ThreadSynchResource.h"
 #include  "ace/Handle_Set.h"
 #include  "ace/Time_Value.h"
@@ -36,10 +37,5 @@ namespace TAO
   } /* namespace DCPS */
 
 } /* namespace TAO */
-
-#if defined (__ACE_INLINE__)
-#include "SimpleTcpSynchResource.inl"
-#endif /* __ACE_INLINE__ */
-
 
 #endif  /* TAO_DCPS_SIMPLETCPDATALINK_H */
