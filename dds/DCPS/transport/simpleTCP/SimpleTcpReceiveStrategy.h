@@ -5,6 +5,7 @@
 #define TAO_DCPS_SIMPLETCPRECEIVESTRATEGY_H
 
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpConnection.h"
 #include  "SimpleTcpDataLink_rch.h"
 #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"

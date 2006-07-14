@@ -37,6 +37,10 @@ sub contents { return <<'!EOT'
 
 <%NAMESPACESTART%>
 
+// VC6 can not understand the baseclass calling syntax
+typedef TAO::DCPS::DataWriterImpl TAO_DCPS_DataWriterImpl;
+typedef TAO::DCPS::DataReaderImpl TAO_DCPS_DataReaderImpl;
+
 // Implementation skeleton constructor
 <%TYPE%>TypeSupportImpl::<%TYPE%>TypeSupportImpl (void)
 {
@@ -263,7 +267,7 @@ DDS::ReturnCode_t
   // DataWriterImpl::unregister will call back to inform the <%TYPE%>DataWriter
   // that the instance handle is removed from there and hence <%TYPE%>DataWriter
   // can remove the instance here.
-  return TAO::DCPS::DataWriterImpl::unregister(handle, source_timestamp);
+  return this->TAO_DCPS_DataWriterImpl::unregister(handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -329,7 +333,7 @@ DDS::ReturnCode_t
   }
 
   marshalled = marshal (instance_data); // FOR_WRITE - using cached allocators
-  return TAO::DCPS::DataWriterImpl::write(marshalled, handle, source_timestamp);
+  return this->TAO_DCPS_DataWriterImpl::write(marshalled, handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -379,7 +383,7 @@ DDS::ReturnCode_t
     }
   }
 
-  return TAO::DCPS::DataWriterImpl::dispose(instance_handle, source_timestamp);
+  return this->TAO_DCPS_DataWriterImpl::dispose(instance_handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -428,15 +432,15 @@ void
       CORBA::SystemException
     ))
 {
-  TAO::DCPS::DataWriterImpl::init (topic,
-                                  topic_servant,
-                                  qos,
-                                  a_listener,
-                                  participant_servant,
-                                  publisher,
-                                  publisher_servant,
-                                  dw_remote
-                                  ACE_ENV_ARG_PARAMETER);
+  this->TAO_DCPS_DataWriterImpl::init (topic,
+                                       topic_servant,
+                                       qos,
+                                       a_listener,
+                                       participant_servant,
+                                       publisher,
+                                       publisher_servant,
+                                       dw_remote
+                                       ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   ::<%SCOPE%><%TYPE%> data;
@@ -558,7 +562,7 @@ ACE_Message_Block*
 
     handle = it->second;
     TAO::DCPS::PublicationInstance* instance =
-      TAO::DCPS::DataWriterImpl::get_handle_instance(handle);
+      this->TAO_DCPS_DataWriterImpl::get_handle_instance(handle);
 
     if (instance->unregistered_ == false)
     {
@@ -653,13 +657,13 @@ void
         CORBA::SystemException
       ))
 {
-  TAO::DCPS::DataReaderImpl::init(a_topic,
-                                  qos,
-                                  a_listener,
-                                  participant,
-                                  subscriber,
-                                  subscriber_objref,
-                                  dr_remote_objref) ;
+  this->TAO_DCPS_DataReaderImpl::init(a_topic,
+                                      qos,
+                                      a_listener,
+                                      participant,
+                                      subscriber,
+                                      subscriber_objref,
+                                      dr_remote_objref) ;
   ACE_CHECK;
 
 }
@@ -691,7 +695,7 @@ void
     {
       ::DDS::InstanceHandle_t handle = it->second;
       TAO::DCPS::SubscriptionInstance *ptr =
-          TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+          this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
       while (ptr->rcvd_sample_.size_)
         {
@@ -786,7 +790,7 @@ DDS::ReturnCode_t
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
     TAO::DCPS::SubscriptionInstance *ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -877,7 +881,7 @@ DDS::ReturnCode_t
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
     TAO::DCPS::SubscriptionInstance *ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -990,7 +994,7 @@ DDS::ReturnCode_t
       ::CORBA::Long samples_in_instance_count(0) ;
       ::DDS::InstanceHandle_t handle = it->second;
       TAO::DCPS::SubscriptionInstance *ptr =
-        TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+        this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
       TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
@@ -1125,7 +1129,7 @@ DDS::ReturnCode_t
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
     TAO::DCPS::SubscriptionInstance *ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
@@ -1211,7 +1215,7 @@ DDS::ReturnCode_t
   {
     ::DDS::InstanceHandle_t handle = it->second;
     TAO::DCPS::SubscriptionInstance *ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
         (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
@@ -1282,7 +1286,7 @@ DDS::ReturnCode_t
     {
       ::DDS::InstanceHandle_t handle = it->second;
       TAO::DCPS::SubscriptionInstance *ptr =
-        TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+        this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
       TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
@@ -1424,7 +1428,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   TAO::DCPS::SubscriptionInstance * ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (a_handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
@@ -1520,7 +1524,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   TAO::DCPS::SubscriptionInstance * ptr =
-    TAO::DCPS::DataReaderImpl::get_handle_instance (a_handle) ;
+    this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
   TAO::DCPS::ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
@@ -1813,7 +1817,7 @@ void
   if (it == instance_map_.end())
   {
     TAO::DCPS::SubscriptionInstance* instance = 0;
-    handle = TAO::DCPS::DataReaderImpl::get_next_handle ();
+    handle = this->TAO_DCPS_DataReaderImpl::get_next_handle ();
     ACE_NEW_RETURN (instance,
                     TAO::DCPS::SubscriptionInstance(this, handle),
                     ::DDS::RETCODE_ERROR);
@@ -1851,7 +1855,7 @@ void
   if (header.message_id_ != TAO::DCPS::INSTANCE_REGISTRATION)
   {
     TAO::DCPS::SubscriptionInstance* instance_ptr =
-      TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
@@ -1981,7 +1985,7 @@ void
   else
   {
     TAO::DCPS::SubscriptionInstance *instance_ptr =
-         TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+         this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
     ACE_DES_FREE (instance_data,
                   data_allocator_->free,
@@ -2014,7 +2018,7 @@ void
   {
     handle = it->second;
     TAO::DCPS::SubscriptionInstance* instance_ptr =
-          TAO::DCPS::DataReaderImpl::get_handle_instance (handle) ;
+          this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
   else

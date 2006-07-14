@@ -5,11 +5,32 @@
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpSendStrategy.h"
 #include  "SimpleTcpTransport.h"
+#include  "SimpleTcpConfiguration.h"
+#include  "SimpleTcpSynchResource.h"
+#include  "SimpleTcpConnection.h"
+#include  "SimpleTcpDataLink.h"
 
+TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
+                                     (SimpleTcpDataLink*      link,
+                                      SimpleTcpConfiguration* config,
+                                      SimpleTcpConnection*    connection,
+                                      SimpleTcpSynchResource* synch_resource)
+  : TransportSendStrategy(config, synch_resource)
+{
+  DBG_ENTRY("SimpleTcpSendStrategy","SimpleTcpSendStrategy");
 
-#if !defined (__ACE_INLINE__)
-#include "SimpleTcpSendStrategy.inl"
-#endif /* __ACE_INLINE__ */
+  // Keep a "copy" of the connection reference for ourselves
+  connection->_add_ref();
+  this->connection_ = connection;
+
+  // Give a "copy" of this send strategy to the connection object.
+  connection->set_send_strategy (this);
+
+  // Keep a "copy" of the SimpleTcpDataLink reference for ourselves
+  link->_add_ref();
+  this->link_ = link;
+}
+
 
 TAO::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {

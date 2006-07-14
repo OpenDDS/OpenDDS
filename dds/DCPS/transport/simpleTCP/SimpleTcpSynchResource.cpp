@@ -4,11 +4,22 @@
 
 #include  "DCPS/DdsDcps_pch.h"
 #include  "SimpleTcpSynchResource.h"
+#include  "SimpleTcpConnection.h"
+#include  "SimpleTcpSendStrategy.h"
 
+TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
+                                            (SimpleTcpConnection*  connection,
+                                             const ACE_Time_Value& max_output_pause_period)
+  : handle_(connection->peer().get_handle()),
+    max_output_pause_period_ (max_output_pause_period)
+{
+  DBG_ENTRY("SimpleTcpSynchResource","SimpleTcpSynchResource");
 
-#if !defined (__ACE_INLINE__)
-#include "SimpleTcpSynchResource.inl"
-#endif /* __ACE_INLINE__ */
+  // Keep our own "copy" of the reference to the connection.
+  connection->_add_ref();
+  this->connection_ = connection;
+}
+
 
 TAO::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
 {

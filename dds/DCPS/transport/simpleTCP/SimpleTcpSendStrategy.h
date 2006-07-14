@@ -5,6 +5,7 @@
 #define TAO_DCPS_SIMPLETCPSENDSTRATEGY_H
 
 #include  "SimpleTcpConnection_rch.h"
+#include  "SimpleTcpConnection.h"
 #include  "SimpleTcpDataLink_rch.h"
 #include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
@@ -49,9 +50,5 @@ namespace TAO
   }  /* namespace DCPS */
 
 }  /* namespace TAO */
-
-#if defined (__ACE_INLINE__)
-#include "SimpleTcpSendStrategy.inl"
-#endif /* __ACE_INLINE__ */
 
 #endif  /* TAO_DCPS_SIMPLETCPSENDSTRATEGY_H */

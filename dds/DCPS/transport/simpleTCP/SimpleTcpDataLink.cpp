@@ -6,6 +6,7 @@
 #include  "SimpleTcpDataLink.h"
 #include  "SimpleTcpReceiveStrategy.h"
 #include  "SimpleTcpConfiguration.h"
+#include  "SimpleTcpSendStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportControlElement.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 
