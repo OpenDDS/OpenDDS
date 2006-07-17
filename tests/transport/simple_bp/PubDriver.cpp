@@ -210,6 +210,9 @@ PubDriver::run()
                         1,               /* size of subscriptions array */
                         subscriptions);
 
+  // Wait for a fully association establishment and then start sending samples.
+  ACE_OS::sleep (2);
+
   this->publisher_.run(this->num_msgs_, this->msg_size_);
 
   while (this->publisher_.delivered_test_message() == 0)
@@ -220,7 +223,8 @@ PubDriver::run()
   // TBD: Do we need a shutdown message from subscriber ?
   // Wait for subsciber to receive messages and then close the connection.
   // Increase the time when more messages are sent.
-  ACE_OS::sleep (5);
+  //ACE_OS::sleep (5);
+    ACE_ERROR((LM_ERROR, "(%P|%t)pub release \n"));
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
 }

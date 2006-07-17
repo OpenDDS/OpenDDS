@@ -196,6 +196,9 @@ PubDriver::run()
                         1,               /* size of subscriptions array */
                         subscriptions);
 
+  // Wait for a fully association establishment and then start sending samples.
+  ACE_OS::sleep (2);
+
   this->publisher_.run(this->num_msgs_);
 
   while (this->publisher_.delivered_test_message() == 0)

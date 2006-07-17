@@ -213,6 +213,9 @@ PubDriver::run()
                         1,               /* size of subscriptions array */
                         subscriptions);
 
+  // Wait for a fully association establishment and then start sending samples.
+  ACE_OS::sleep (2);
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Run our SimplePublisher object.\n"));
 
