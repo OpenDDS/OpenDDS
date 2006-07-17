@@ -142,6 +142,9 @@ PubDriver::run()
   // all of the appropriate subscriptions.
   this->publisher_.init(TRANSPORT_IMPL_ID);
 
+  // Wait for a fully association establishment and then start sending samples.
+  ACE_OS::sleep (2);
+
   // This will cause the publisher to send all of the messages to
   // the transport.
   this->publisher_.run();

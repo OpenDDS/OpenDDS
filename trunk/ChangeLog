@@ -1,3 +1,20 @@
+Mon Jul 17 04:34:47 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+          
+          Updated comments for thread_per_connection.
+          
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+
+          Added sleep after simulated publisher is initialized so it can wait
+          for fully association establishment and then start sending samples.
+
 Fri Jul 14 20:04:19 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
