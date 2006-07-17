@@ -2,18 +2,65 @@ Version 0.9 of TAO DDS.
 
 New to this version are the following changes:
    
-  - Supported DDS build with VC6. It was broken on 0.8.
+  - Supported DDS build on VC6, gcc 4.1 and gcc 3.3.3.
   
   - Fixed a potential deadlock in SimpleTcpReconnectTask which could 
     happen when shutdown() is invoked by the reconnect thread.
   
+  - Fixed a deadlock situation on linux when the direct_send()
+    detects a lost connection and calls the relink(). The problem is 
+    a non-recursive lock in send strategy is recursively acquired. 
+    
+  - Added fully association establishment support. This should fix the
+    problem: 
+      "create_datawriter() does not wait for full association establishment
+      so even if there are waiting subscribers,  a write shortly after
+      creating the datawriter may be dropped on the publisher side because
+      add_associations() has not completed on the publisher side.
+      The sample may also be dropped on the subscriber side because the
+      connection exists between the publisher and subscriber but the
+      associations have not been mapped on the subscriber side."
+
+  - Supported thread-per-connection send. A new configuration 
+     "thread_per_connection" is added to turn on and turn off(default) this 
+     new feature. With this new feature, the samples are sent to different 
+     connections in parallel. 
+
+      # Determine if the transport needs create a new thread for a 
+      # datalink/connection to send samples under normal traffic (no backpressure). 
+      # If thread_per_connection is 1, the publisher creates a seperate thread   
+      # for each datalink/connection to send samples instead of using the same
+      # thread to send to different datalinks/connections sequentially. 
+      # The default value is 0 (using same thread send to all datalinks)      
+      thread_per_connection=
+
 --- more notes and limitations ---
 
     - Current transport on receiving side does not handle a packet with 
       a single control message with no data such as GRACEFUL_DISCONNECT 
       message. To work around with this problem, some bogus data is sent
       with the message. 
+    
+--- status of nightly build tests ---
+    
+    - The builtin topic tests failure are expected since the builtin topic was not
+      supported and tested.
 
+    - tests failed intermittently 
+      
+      tests/DCPS/Compiler/idl_test1_main/run_test.pl 
+      [Details] ERROR: <idl_test1> exited with coredump from signal 11 : SEGV
+      
+      tests/DCPS/FooTest5_0/run_test.pl udp
+      [Details] (24994|1084229984) DataReaderImpl::remove_associations: ERROR: Unable to remove writer publisher_id 5.
+      [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid liveliness_changed_status inactive count.
+
+      tests/DCPS/Reconnect/run_test.pl bp_timeout
+      [Details] test FAILED. Please see the /tao_builds/taoadmin/BETA/ACE_wrappers/TAO/DDS/tests/DCPS/Reconnect/test.log for details.
+      [Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with status 2    
+    
+      
+      
 Version 0.8 of TAO DDS.
 
 New to this version are the following changes:
