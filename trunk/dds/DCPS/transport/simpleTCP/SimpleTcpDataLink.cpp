@@ -212,6 +212,8 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
     0));
   data->wr_ptr (20);
 
+  header_data.message_length_ = 20;
+
   ACE_NEW (message,
     ACE_Message_Block(max_marshaled_size,
     ACE_Message_Block::MB_DATA,
@@ -268,6 +270,8 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
 
   ACE_Message_Block* data = this->marshal_acks (swap_byte);
 
+  header_data.message_length_ = data->length ();
+
   ACE_NEW (message,
     ACE_Message_Block(max_marshaled_size,
     ACE_Message_Block::MB_DATA,
@@ -280,8 +284,8 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
     ACE_Time_Value::max_time,
     0,
     0));
-
-  message << header_data;    
+  
+  message << header_data;   
 
   TransportControlElement* send_element = 0;
 
