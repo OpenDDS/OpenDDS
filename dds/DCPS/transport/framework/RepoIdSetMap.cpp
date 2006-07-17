@@ -34,27 +34,23 @@ TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 
   int result = id_set->insert_id(value);
 
-  if (result == 0)
+  if (result == -1)
     {
-      // Success.  Leave now.
-      return 0;
-    }
 
-  // Handle the two possible failure cases (duplicate key or unknown)
-  if (result == 1)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: RepoId (%d) already exists "
-                 "in RepoIdSet for RepoId (%d).\n",
-                 value, key));
-    }
-  else
-    {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to insert RepoId (%d) "
                  "into RepoIdSet for RepoId (%d).\n",
                  value, key));
     }
+  else
+    {
+      // It could be already bound, but we accept it since the subscriber
+      // could send the acks for the same id multiple times.
+      
+      // Success.  Leave now.
+      return 0;
+    }
+
 
   // Deal with possibility that the id_set just got created - just for us.
   // If so, we need to "undo" the creation.

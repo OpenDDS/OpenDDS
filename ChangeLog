@@ -1,4 +1,12 @@
-Mon Jul 17 05:52:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+Mon Jul 17 20:03:32 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+
+          Made demarshal not return error if the repo id is already in the
+          map since the subscriber could send the ack for the same repo id
+          multiple times.
+          
+Mon Jul 17 05:52:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
         
