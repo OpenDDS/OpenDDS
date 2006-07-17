@@ -1,0 +1,13 @@
+
+module T2 {
+
+#pragma DCPS_DATA_TYPE "T2::Foo2"
+#pragma DCPS_DATA_KEY "T2::Foo2 key"
+
+  // Example user defined "Foo" structure
+  struct Foo2 {
+    long key;  // the instance key
+    string text;
+  };
+
+};
