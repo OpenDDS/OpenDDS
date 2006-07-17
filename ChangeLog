@@ -1,3 +1,15 @@
+Mon Jul 17 20:24:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+          DDS 0.9 released.
+
+        * VERSION:
+        
+          Updated for 0.9 release.
+
+        * DDS_release_notes.txt:
+
+          Added release notes for main changes since 0.8.
+          
 Mon Jul 17 20:03:32 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/RepoIdSetMap.cpp:

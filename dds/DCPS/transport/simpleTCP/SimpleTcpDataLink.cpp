@@ -212,7 +212,7 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
     0));
   data->wr_ptr (20);
 
-  header_data.message_length_ = 20;
+  header_data.message_length_ = data->length ();
 
   ACE_NEW (message,
     ACE_Message_Block(max_marshaled_size,
