@@ -224,7 +224,7 @@ PubDriver::run()
   // Wait for subsciber to receive messages and then close the connection.
   // Increase the time when more messages are sent.
   //ACE_OS::sleep (5);
-    ACE_ERROR((LM_ERROR, "(%P|%t)pub release \n"));
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
 }

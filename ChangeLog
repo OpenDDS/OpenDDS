@@ -1,3 +1,16 @@
+Mon Jul 17 05:52:33 USMST 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Fixed a bug that the length of data message block is not
+          written to the sample header. This would cause the publisher
+          side not deliver the graceful disconnect messages even though
+          it received the message from subscriber.
+          
+        * tests/transport/simple_bp/PubDriver.cpp:
+
+          Removed a logging message.
+
 Mon Jul 17 04:34:47 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/pub.ini:
