@@ -1,15 +1,23 @@
+Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * AUTHORS:
+        * NEWS:
+        * configure.ac:
+
+          Added files that are needed to generate automake makefiles.
+
 Mon Jul 17 20:24:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           DDS 0.9 released.
 
         * VERSION:
-        
+
           Updated for 0.9 release.
 
         * DDS_release_notes.txt:
 
           Added release notes for main changes since 0.8.
-          
+
 Mon Jul 17 20:03:32 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
@@ -17,16 +25,16 @@ Mon Jul 17 20:03:32 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           Made demarshal not return error if the repo id is already in the
           map since the subscriber could send the ack for the same repo id
           multiple times.
-          
+
 Mon Jul 17 05:52:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Fixed a bug that the length of data message block is not
           written to the sample header. This would cause the publisher
           side not deliver the graceful disconnect messages even though
           it received the message from subscriber.
-          
+
         * tests/transport/simple_bp/PubDriver.cpp:
 
           Removed a logging message.
@@ -34,9 +42,9 @@ Mon Jul 17 05:52:33 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 Mon Jul 17 04:34:47 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/pub.ini:
-          
+
           Updated comments for thread_per_connection.
-          
+
         * tests/transport/dds_comparative/PubDriver.cpp:
         * tests/transport/simple/PubDriver.cpp:
         * tests/transport/simple_bp/PubDriver.cpp:
@@ -51,7 +59,7 @@ Mon Jul 17 04:34:47 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 Fri Jul 14 20:04:19 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
-    
+
           Removed the SimpleTcpConnection.h include to fix the circular dependency
           problem on gcc 3.3.3 builds.
 
