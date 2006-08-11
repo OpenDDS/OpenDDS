@@ -310,7 +310,10 @@ namespace TAO
    
     typedef TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX> TAO_SERVICE_PARTICIPANT;
 
+#if (__GNUC__ > 3)
+#else
     TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Service_Participant, TAO_SYNCH_MUTEX)  
+#endif
 
     #define TheServiceParticipant                     TAO::DCPS::TAO_SERVICE_PARTICIPANT::instance()
 

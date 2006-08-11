@@ -49,9 +49,13 @@ namespace TAO
 
     typedef TAO_Singleton< ::TAO::DCPS::Transient_Kludge, TAO_SYNCH_MUTEX > TRANSIENT_KLUDGE;
 
+    #if (__GNUC__ > 3)
+    #else 
+
     TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton,
                                    Transient_Kludge,
                                    TAO_SYNCH_MUTEX)
+    #endif
 
     #define TheTransientKludge TRANSIENT_KLUDGE::instance()
 

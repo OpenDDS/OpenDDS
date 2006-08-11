@@ -1,3 +1,19 @@
+Fri Aug 11 18:13:54 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+       * dds/DCPS/Transient_Kludge.h:
+       * dds/DCPS/Registered_Data_Types.h:
+       * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+       * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+       * dds/DCPS/transport/framework/TheTransportFactory.h:
+       * dds/DCPS/Service_Participant.h:
+
+	 Worked around with the compilation problems on DDS gcc 4.x build with
+	 DOC version TAO. The problem is the ACE_EXPORT_SINGLETON_DECLARE
+	 new definition was added to config-g++-common.h in DOC version 
+	 which causes the template instantiation inside namespace errors.
+	 To work around this problem the TAO_DDSDCPS_SINGLETON_DECLARE
+	 is commented for gcc 4.x builds.
+
 Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * AUTHORS:
