@@ -1,18 +1,43 @@
+Sun Aug 13 19:17:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+          These changes supported the default transport id.
+          The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for
+          DEFAULT_<transport>_CONFIG values. Each specific transport
+          has its default id in that range. The default transports can not
+          be configured by the users. [See RT 8497]
+
+        * dds\DCPS\transport\framework\TransportDefs.h:
+        
+          Added definition for DEFAULT_SIMPLE_TCP_ID and 
+          DEFAULT_SIMPLE_UDP_ID.
+         
+        * dds\DCPS\transport\framework\TransportConfiguration.cpp:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpConfiguration.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
+        
+          Increased the size of the section array in load() so it has  
+          enough space for a big transport id.
+        
+        * dds\DCPS\transport\framework\TransportFactory.cpp:
+
+          Made the load_transport_configuration() check configuration load
+          return value.
+
 Fri Aug 11 18:13:54 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-       * dds/DCPS/Transient_Kludge.h:
-       * dds/DCPS/Registered_Data_Types.h:
-       * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-       * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-       * dds/DCPS/transport/framework/TheTransportFactory.h:
-       * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Transient_Kludge.h:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/Service_Participant.h:
 
-	 Worked around with the compilation problems on DDS gcc 4.x build with
-	 DOC version TAO. The problem is the ACE_EXPORT_SINGLETON_DECLARE
-	 new definition was added to config-g++-common.h in DOC version 
-	 which causes the template instantiation inside namespace errors.
-	 To work around this problem the TAO_DDSDCPS_SINGLETON_DECLARE
-	 is commented for gcc 4.x builds.
+	        Worked around with the compilation problems on DDS gcc 4.x build with
+	        DOC version TAO. The problem is the ACE_EXPORT_SINGLETON_DECLARE
+	        new definition was added to config-g++-common.h in DOC version 
+	        which causes the template instantiation inside namespace errors.
+	        To work around this problem the TAO_DDSDCPS_SINGLETON_DECLARE
+	        is commented for gcc 4.x builds.
 
 Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 

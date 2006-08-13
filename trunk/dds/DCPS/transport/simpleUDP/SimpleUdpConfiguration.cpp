@@ -19,11 +19,19 @@ int
 TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id, 
                                          ACE_Configuration_Heap& cf)
 {
+  // The default transport can not be configured by user.
+  if (id == DEFAULT_SIMPLE_UDP_ID)
+    {
+       ACE_ERROR ((LM_ERROR, "(%P|%t)You can not configure the default SimpleUdp transport(id=%u) !!! \n",
+         id));
+       return -1;
+    }
+
   // Call the base class method through 'this' to help VC6 figure out
   // what to do.
   this->TransportConfiguration::load (id, cf);
   
-  char section [20];
+  char section [50];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
