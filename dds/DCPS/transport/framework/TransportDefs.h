@@ -129,6 +129,13 @@ namespace TAO
     /// Identifier type for DataLink objects.
     typedef ACE_UINT64  DataLinkIdType;
 
+    // Note: The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for transport
+    //       DEFAULT_<transport>_CONFIG values. If a new transport is
+    //       implemented, the default id of the new transport need be
+    //       defined here.
+    const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
+    const TransportIdType DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01;
+
     /// Return code type for send_control() operations.
     enum SendControlStatus
     {

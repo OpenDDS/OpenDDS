@@ -21,8 +21,8 @@ TAO::DCPS::TransportConfiguration::~TransportConfiguration()
 int 
 TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configuration_Heap& cf)
 {
-  char section [20];
-  ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
+  char section [50];
+  ACE_OS::sprintf (section, "%s%u", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key sect;
   if (cf.open_section (root, section, 0, sect) != 0)

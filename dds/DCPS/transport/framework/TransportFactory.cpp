@@ -186,7 +186,8 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
             // ACE_Configuration_Heap to the TransportConfiguration object.
             TransportConfiguration_rch config 
               = this->create_configuration (transport_id, transport_type);
-            config->load (transport_id, cf);
+            if (config->load (transport_id, cf) == -1)
+              return -1;
           }
         }
       }

@@ -19,9 +19,17 @@ int
 TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id, 
                                          ACE_Configuration_Heap& cf)
 {
+  // The default transport can not be configured by user.
+  if (id == DEFAULT_SIMPLE_TCP_ID)
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t)You can not configure the default SimpleTcp transport(id=%u) !!! \n",
+        id));
+      return -1;
+    }
+
   TransportConfiguration::load (id, cf);
   
-  char section [20];
+  char section [50];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
