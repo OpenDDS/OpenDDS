@@ -1,3 +1,15 @@
+Thu Aug 24 18:12:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * bin\DCPS\CPPTemplate.pm:
+        
+          Corrected number of chunks for message block allocator in a 
+          logging message.
+        
+        * dds\DCPS\transport\framework\TransportImpl.cpp:
+
+          Corrected the DataReaderImpl/DataWriterImpl reference hold
+          by TransportImpl. This fixed the memory leak of datawriter.
+          
 Sun Aug 13 19:17:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           These changes supported the default transport id.

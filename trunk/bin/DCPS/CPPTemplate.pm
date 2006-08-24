@@ -487,7 +487,7 @@ void
     {
       ACE_DEBUG((LM_DEBUG,"(%P|%t) <%TYPE%>DataWriterImpl::enable_specific-mb"
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
-          mb_allocator_, n_chunks_));
+          mb_allocator_, n_chunks_ * association_chunk_multiplier_));
       ACE_DEBUG((LM_DEBUG,"(%P|%t) <%TYPE%>DataWriterImpl::enable_specific-db"
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
           db_allocator_, n_chunks_));
