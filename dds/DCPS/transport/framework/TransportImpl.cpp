@@ -237,7 +237,12 @@ TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
 {
   DBG_ENTRY("TransportImpl","unregister_publication");
   GuardType guard(this->lock_);
-  return this->dw_map_.unbind (pub_id);
+  DataWriterImpl* dw = 0;
+  int result = this->dw_map_.unbind (pub_id, dw);
+  if (dw != 0)
+    dw->_remove_ref ();
+
+  return result;
 }
 
 
@@ -265,7 +270,14 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
 {
   DBG_ENTRY("TransportImpl","register_subscription");
   GuardType guard(this->lock_);
-  return this->dr_map_.bind (sub_id, dr);
+
+  int ret = this->dr_map_.bind (sub_id, dr);
+  if (ret != -1)
+  {
+    dr->_add_ref ();
+  }
+
+  return ret;
 }
 
 
@@ -273,7 +285,13 @@ int
 TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 {
   DBG_ENTRY("TransportImpl","unregister_subscription");
-  return this->dr_map_.unbind (sub_id);
+
+  DataReaderImpl* dr = 0;
+  int result = this->dr_map_.unbind (sub_id, dr);
+  if (dr != 0)
+    dr->_remove_ref ();
+
+  return result;
 }
 
 
