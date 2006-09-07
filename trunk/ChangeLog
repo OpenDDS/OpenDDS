@@ -1,3 +1,12 @@
+Thu Sep  7 15:26:52 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+      * dds/DCPS/DomainParticipantImpl.cpp:
+      * dds/DCPS/transport/framework/DataLink.inl:
+      * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+        Fixed some compilation errors( due to <: and reinterpret_cast int to void*) 
+        on gcc compiler.
+
 Wed Sep  7 06:59:35 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
       The main changes are: (See RT8999)
