@@ -359,7 +359,7 @@ namespace TAO
           // from subscriber set.
           the_servant->_remove_ref ();  
       
-          deactivate_object <::DDS::Subscriber_ptr > (s);
+          deactivate_object < ::DDS::Subscriber_ptr > (s);
           return ::DDS::RETCODE_OK;
         }
     }

@@ -53,8 +53,9 @@ void TAO::DCPS::ThreadPerConnectionSendTask::execute (SendRequest& req)
     break;
   case REMOVE_ALL_CONTROL_SAMPLES:
     {
-      RepoId pub_id = reinterpret_cast <RepoId> (req.element_);
-      this->link_->remove_all_control_msgs_i (pub_id);
+      RepoId* pub_id = reinterpret_cast <RepoId*> (req.element_);
+      this->link_->remove_all_control_msgs_i (*pub_id);
+      delete pub_id;
     }
     break;
   default:

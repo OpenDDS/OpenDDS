@@ -130,7 +130,7 @@ TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
   {
     SendRequest req;
     req.op_ = REMOVE_ALL_CONTROL_SAMPLES;
-    req.element_ = reinterpret_cast <void*> (pub_id);
+    req.element_ = reinterpret_cast <void*> (new RepoId(pub_id));
     this->thr_per_con_send_task_->add (req);
   }
   else
