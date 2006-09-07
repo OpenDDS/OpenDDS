@@ -285,12 +285,13 @@ int
 TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 {
   DBG_ENTRY("TransportImpl","unregister_subscription");
+  GuardType guard(this->lock_);
 
   DataReaderImpl* dr = 0;
   int result = this->dr_map_.unbind (sub_id, dr);
   if (dr != 0)
     dr->_remove_ref ();
-
+  
   return result;
 }
 

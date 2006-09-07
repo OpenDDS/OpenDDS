@@ -37,6 +37,7 @@ TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configur
   GET_CONFIG_VALUE (cf, sect, "optimum_packet_size", this->optimum_packet_size_, ACE_UINT32)
   GET_CONFIG_STRING_VALUE (cf, sect, "transport_type", this->transport_type_)
   GET_CONFIG_VALUE (cf, sect, "thread_per_connection", this->thread_per_connection_, bool)
+  GET_CONFIG_VALUE (cf, sect, "keep_link", this->keep_link_, bool)
 
   adjust_config_value ();
   return 0;

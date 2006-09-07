@@ -144,16 +144,6 @@ int main (int argc, char *argv[])
     if (!CORBA::is_nil (dpf.in ())) {
       dpf->delete_participant(participant.in ());
     }
-
-    ::DDS::InstanceHandleSeq handles;
-    while (1)
-    {
-      ACE_OS::sleep(1);
-      dr->get_matched_publications(handles);
-      if (handles.length() == 0)
-        break;
-    }
-
     ACE_OS::sleep(2);
 
     TheTransportFactory->release();

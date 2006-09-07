@@ -93,6 +93,10 @@ namespace TAO
         /// send without backpressure.
         bool thread_per_connection_;
 
+        /// Flag indicates if the data link should be maintained when all
+        /// associations are removed.
+        bool keep_link_;
+
       protected:
 
         /// Default ctor.

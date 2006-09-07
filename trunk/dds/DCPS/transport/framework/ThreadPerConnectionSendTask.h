@@ -26,13 +26,15 @@ namespace TAO
     {
       SEND_START,
       SEND,
-      SEND_STOP
+      SEND_STOP,
+      REMOVE_SAMPLE,
+      REMOVE_ALL_CONTROL_SAMPLES
     };
 
     struct SendRequest
     {
       SendStrategyOpType op_;
-      TransportQueueElement* element_;
+      void* element_;
     };
 
     /**

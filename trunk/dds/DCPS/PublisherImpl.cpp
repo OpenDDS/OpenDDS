@@ -359,6 +359,8 @@ namespace TAO
         // map.
         local_writer->_remove_ref ();
 
+        deactivate_object < ::DDS::DataWriter_ptr > (a_datawriter);
+
         return ::DDS::RETCODE_OK;
       }
       

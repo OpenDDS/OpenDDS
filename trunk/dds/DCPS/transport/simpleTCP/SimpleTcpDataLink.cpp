@@ -60,7 +60,7 @@ TAO::DCPS::SimpleTcpDataLink::stop_i()
 void
 TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
-  DBG_ENTRY("SimpleTcpDataLink","stop_i");
+  DBG_ENTRY("SimpleTcpDataLink","pre_stop_i");
  
   DataLink::pre_stop_i();
 
@@ -170,6 +170,9 @@ void
 TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 {
   DBG_ENTRY("SimpleTcpDataLink","send_graceful_disconnect_message");
+
+  this->send_strategy_->terminate_send (true);
+
   DataSampleHeader header_data; 
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = GRACEFUL_DISCONNECT;

@@ -350,6 +350,8 @@ namespace TAO
         // from the datareader map.
         dr_servant->_remove_ref ();
 
+        deactivate_object < ::DDS::DataReader_ptr > (a_datareader);
+
         return ::DDS::RETCODE_OK;
       }
 

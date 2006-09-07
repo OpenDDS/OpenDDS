@@ -257,24 +257,31 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
     {
-      this->pre_stop_i ();
-      this->impl_->release_datalink(this);
-      this->impl_ = 0;
-
-      if (!this->send_strategy_.is_nil())
+      if ( ! this->impl_->config_->keep_link_)
         {
-          this->send_strategy_->stop();
-          this->send_strategy_ = 0;
-        }
+          this->pre_stop_i ();
+          this->impl_->release_datalink(this);
+          this->impl_ = 0;
 
-      if (!this->receive_strategy_.is_nil())
+          if (!this->send_strategy_.is_nil())
+            {
+              this->send_strategy_->stop();
+              this->send_strategy_ = 0;
+            }
+
+          if (!this->receive_strategy_.is_nil())
+            {
+              this->receive_strategy_->stop();
+              this->receive_strategy_ = 0;
+            }
+
+          // Tell our subclass to handle a "stop" event.
+          this->stop_i();
+        }
+      else
         {
-          this->receive_strategy_->stop();
-          this->receive_strategy_ = 0;
+          this->send_strategy_->clear ();
         }
-
-      // Tell our subclass to handle a "stop" event.
-      this->stop_i();
     }
 }
 

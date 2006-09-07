@@ -1,3 +1,99 @@
+Wed Sep  7 06:59:35 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+      The main changes are: (See RT8999)
+        - Made the DCPS entity servants deleted upon delete_*()
+          call instead of upon orb shutdown. This would make the create/delete
+          DCPS entity multiple times in a single process without shutdown 
+          Service Participant. 
+        - Added keep_link configuration to indicate whether a datalink should
+          be maintained when all associations are removed. This would allow 
+          the datareader/datawriter reconnect repeatedly using the same
+          connection.
+        
+      * dds/DCPS/WriteDataContainer.cpp:
+      * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+        Added logging for cached allocator information.
+        
+      * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+      * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+        Added guard to protect unregistration of subscription.
+        
+      * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+      
+        Made send_graceful_disconnect_message() call notify the
+        send strategy terminate send except the graceful disconnect
+        message.
+        
+      * dds/DCPS/transport/framework/DataLink.h:
+      * dds/DCPS/transport/framework/DataLink.cpp:
+      * dds/DCPS/transport/framework/DataLink.inl:
+
+        Made the release_reservations() not release datalink when 
+        all associations are removed if keep_link is configured to be on.
+        Made the remove_sample() and remove_all_control_msgs_i() handled
+        by ThreadPerConnectionSendTask when thread_per_connection is
+        enabled. This makes the send() and remove_sample() be handled 
+        sequentially.
+
+      * dds/DCPS/transport/framework/TransportConfiguration.h:
+      * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+      * dds/DCPS/transport/framework/TransportConfiguration.inl:
+
+        Added a new configuration - "keep_link", which indicates if the 
+        data link should be maintained when all associations are removed. 
+        The default value (0) means the link will be released as the 
+        last association is removed from the link.
+
+      * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+      
+        Added delayed_notification_mode_ status so the delayed notification
+        will know if it's a data_delievered or data_dropped.
+        Added clear() function to clean up the elements referenced by this
+        datalink. This would let the datalink be reused when keep_link is
+        on.
+        
+      * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+      
+        Commented error log when the dequeue_head failed. 
+        I'm not sure why this thread got more signals than actual signals
+        when using thread_per_connection and the user application thread 
+        send requests without interval.
+        
+      * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+      * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+      
+        Made this task handle the REMOVE_SAMPLE and REMOVE_ALL_CONTROL_SAMPLES
+        requests.
+      
+      * dds/DCPS/transport/framework/TransportSendStrategy.h:
+      * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+      
+        Corrected a logging message.
+        
+      * dds/DCPS/Service_Participant.h:
+      
+        Added deactivate_object template function so the delete_* can
+        call it to deactivate the object from poa and cause the deletion
+        of the servant.
+        
+      * dds/DCPS/PublisherImpl.cpp:
+      * dds/DCPS/SubscriberImpl.cpp:
+      * dds/DCPS/DomainParticipantImpl.cpp:
+
+        Added deactivate_object() call in delete_*() functions.
+   
+      * DevGuideExamples/DDS/Messenger/pub.ini:
+      
+        Added keep_link configuration.
+        
+      * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+      * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+      
+        Removed the get_matched_publications() call since datareader
+        servant is destroyed when delete_datareader() is called.
+
 Thu Aug 24 18:12:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin\DCPS\CPPTemplate.pm:

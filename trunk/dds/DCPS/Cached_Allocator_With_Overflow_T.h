@@ -103,7 +103,7 @@ namespace TAO
               {
                 if (allocs_from_heap_ == 1 && DCPS_debug_level >= 2)
                   ACE_DEBUG((LM_DEBUG,
-                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
+                      "(%P|%t) Cached_Allocator_With_Overflow::malloc %x"
                          " %d heap allocs with %d outstanding\n",
                          this, this->allocs_from_heap_,
                          this->allocs_from_heap_ - this->frees_to_heap_));

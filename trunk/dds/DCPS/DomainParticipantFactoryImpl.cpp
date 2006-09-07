@@ -311,6 +311,8 @@ namespace TAO
       // Decrease ref count when the servant is removed from map.
       the_servant->_remove_ref ();  
       
+      deactivate_object < ::DDS::DomainParticipant_ptr > (a_participant);
+
       return ::DDS::RETCODE_OK;
     }
 

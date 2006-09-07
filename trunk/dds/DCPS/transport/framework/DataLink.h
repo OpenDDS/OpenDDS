@@ -162,6 +162,11 @@ namespace TAO
         void send_i(TransportQueueElement* element);
         void send_stop_i();
 
+        int remove_sample_i(const DataSampleListElement* sample, 
+                            bool dropped_by_transport);
+
+        void remove_all_control_msgs_i(RepoId pub_id);
+
   private:
 
        /// Helper function to output the enum as a string to help debugging.
@@ -205,9 +210,6 @@ namespace TAO
         /// A (smart) pointer to the TransportImpl that created this DataLink.
         TransportImpl_rch impl_;
 
-        /// The transport send strategy object for this DataLink.
-        TransportSendStrategy_rch send_strategy_;
-
         /// The id for this DataLink
         ACE_UINT64 id_;
 
@@ -215,6 +217,12 @@ namespace TAO
         /// object is created when the thread_per_connection configuration is
         /// true. It only dedicate to this datalink.
         ThreadPerConnectionSendTask* thr_per_con_send_task_;
+
+    protected:
+
+        /// The transport send strategy object for this DataLink.
+        TransportSendStrategy_rch send_strategy_;
+
     };
 
   }  /* namespace DCPS */

@@ -10,7 +10,7 @@
 #include  "dds/DCPS/transport/framework/TransportSendElement.h"
 #include  "tao/debug.h"
 
-
+#include  "Serializer.h"
 namespace TAO
 {
   namespace DCPS
@@ -32,6 +32,14 @@ namespace TAO
       shutdown_ (false),
       next_handle_(1)
     {
+
+      if (DCPS_debug_level >= 2)
+      {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)WriteDataContainer sample_list_element_allocator %x with %d chunks\n",
+          &sample_list_element_allocator_, n_chunks_));
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)WriteDataContainer transport_send_element_allocator %x with %d chunks\n",
+          &transport_send_element_allocator_, n_chunks_));
+      }
     }
 
     
@@ -362,7 +370,7 @@ namespace TAO
           ACE_ERROR((LM_ERROR, 
                      ACE_TEXT("(%P|%t) ERROR: ")
                      ACE_TEXT("WriteDataContainer::data_delivered, ")
-                     ACE_TEXT("The dropped sample is not in sending_data_ and ")
+                     ACE_TEXT("The delivered sample is not in sending_data_ and ")
                      ACE_TEXT("released_data_ list.\n")));
         }          
 //remove fix this one
