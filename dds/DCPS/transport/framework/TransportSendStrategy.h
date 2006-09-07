@@ -100,7 +100,10 @@ namespace TAO
 
         /// This is called whenver the connection is lost and reconnect fails.
         /// It removes all samples in the backpressure queue and packet queue.
-        void terminate_send ();
+        void terminate_send (bool graceful_disconnecting = false);
+
+        /// Clear queued messages and messages in current packet.
+        void clear ();
 
         /// Let the subclass stop.
         virtual void stop_i() = 0;
@@ -273,6 +276,7 @@ namespace TAO
 
         /// Used for delayed notifications when performing work.
         TransportQueueElement** delayed_delivered_notification_queue_;
+        SendMode* delayed_notification_mode_;
         size_t num_delayed_notifications_;
 
         /// Allocator for header data block.
@@ -292,6 +296,8 @@ namespace TAO
         TransportReplacedElementAllocator replaced_element_allocator_;
 
         TransportConfiguration_rch config_;
+
+        bool graceful_disconnecting_;
 
 //remove these are only for debugging: DUMP_FOR_PACKET_INFO
         protected:

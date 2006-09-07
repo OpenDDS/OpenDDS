@@ -310,8 +310,7 @@ namespace TAO
    
     typedef TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX> TAO_SERVICE_PARTICIPANT;
 
-#if (__GNUC__ > 3)
-#else
+#if ! defined (__GNUC__) || (__GNUC__ < 4)
     TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Service_Participant, TAO_SYNCH_MUTEX)  
 #endif
 
@@ -396,6 +395,23 @@ namespace TAO
       ACE_CHECK_RETURN(T::_nil ());
       return the_obj;
     }	
+
+    template <class T>
+    void deactivate_object (
+      T obj
+      ACE_ENV_ARG_DECL
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
+    {
+      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+      PortableServer::ObjectId_var oid =
+        poa->reference_to_id (obj ACE_ENV_ARG_PARAMETER);
+      ACE_CHECK;
+      poa->deactivate_object (oid.in () ACE_ENV_ARG_PARAMETER);
+      ACE_CHECK;
+    }
 
   } // namespace DCPS
 } // namespace TAO

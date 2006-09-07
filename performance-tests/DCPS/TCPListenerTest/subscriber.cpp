@@ -382,15 +382,6 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
       dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
 
-      ::DDS::InstanceHandleSeq handles;
-      while (1)
-      {
-        ACE_OS::sleep(1);
-        the_dr->get_matched_publications(handles);
-        if (handles.length() == 0)
-          break;
-      }
-
       TheTransportFactory->release();
 
       TheServiceParticipant->shutdown (); 

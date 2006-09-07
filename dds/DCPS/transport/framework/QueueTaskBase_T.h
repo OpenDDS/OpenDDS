@@ -17,7 +17,6 @@
 #include "ace/Unbounded_Queue.h"
 #include "ace/INET_Addr.h"
 
-
 namespace TAO
 {
 
@@ -64,7 +63,9 @@ namespace TAO
 
         int result = this->queue_.enqueue_tail (req);
         if (result == 0)
+        {
           this->work_available_.signal();
+        }
         else
           ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::add %p\n", "enqueue_tail"));
 
@@ -119,17 +120,23 @@ namespace TAO
           {
             GuardType guard(this->lock_);
             if (this->queue_.is_empty())
+            {
               this->work_available_.wait ();
+            }
 
             if (this->shutdown_initiated_)
               break;
 
             int result = queue_.dequeue_head (req);
-
             if(result != 0)
             {
-              ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::svc %p\n", 
-                "dequeue_head"));
+              //I'm not sure why this thread got more signals than actual signals
+              //when using thread_per_connection and the user application thread 
+              //send requests without interval. We just need ignore the dequeue
+              //failure.
+              //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::svc  %p\n", 
+              //  "dequeue_head"));
+              continue;
             }
           }
 

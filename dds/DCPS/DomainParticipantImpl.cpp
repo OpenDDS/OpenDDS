@@ -196,6 +196,8 @@ namespace TAO
           // from publisher set.
           the_servant->_remove_ref ();  
       
+          deactivate_object < ::DDS::Publisher_ptr > (p);
+
           return ::DDS::RETCODE_OK;
         }
     }
@@ -357,6 +359,7 @@ namespace TAO
           // from subscriber set.
           the_servant->_remove_ref ();  
       
+          deactivate_object <::DDS::Subscriber_ptr > (s);
           return ::DDS::RETCODE_OK;
         }
     }
@@ -639,6 +642,7 @@ namespace TAO
               // from the topic map.
               the_topic_servant->_remove_ref ();  
 
+              deactivate_object < ::DDS::Topic_ptr > (a_topic);
              }
 
          }

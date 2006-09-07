@@ -34,6 +34,14 @@ TAO::DCPS::DataLinkSet::DataLinkSet()
 {
   DBG_ENTRY("DataLinkSet","DataLinkSet");
   map_ = new MapType (ACE_Allocator::instance ());
+
+  if (DCPS_debug_level >= 2) 
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet map_entry_allocator %x with %d chunks \n",
+      &map_entry_allocator_, NUM_HASH_MAP_ENTRY_CHUNKS));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
+      &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
+  }
 }
 
 
