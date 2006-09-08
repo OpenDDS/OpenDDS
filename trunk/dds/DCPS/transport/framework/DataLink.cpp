@@ -42,7 +42,6 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 TAO::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY("DataLink","~DataLink");
-
   if (this->thr_per_con_send_task_ != 0)
     delete this->thr_per_con_send_task_;
 }

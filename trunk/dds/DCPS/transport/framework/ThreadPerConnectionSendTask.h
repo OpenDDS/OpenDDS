@@ -34,7 +34,7 @@ namespace TAO
     struct SendRequest
     {
       SendStrategyOpType op_;
-      void* element_;
+      TransportQueueElement* element_;
     };
 
     /**
