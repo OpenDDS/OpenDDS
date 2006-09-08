@@ -162,11 +162,6 @@ namespace TAO
         void send_i(TransportQueueElement* element);
         void send_stop_i();
 
-        int remove_sample_i(const DataSampleListElement* sample, 
-                            bool dropped_by_transport);
-
-        void remove_all_control_msgs_i(RepoId pub_id);
-
   private:
 
        /// Helper function to output the enum as a string to help debugging.

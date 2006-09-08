@@ -97,24 +97,7 @@ TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
 {
   DBG_ENTRY("DataLink","remove_sample");
   ACE_UNUSED_ARG (dropped_by_transport);
-
-  if (this->thr_per_con_send_task_ != 0)
-  {
-    SendRequest req;
-    req.op_ = REMOVE_SAMPLE;
-    req.element_ = reinterpret_cast <void*> (&sample);
-    return this->thr_per_con_send_task_->add (req);
-  }
-  else
-    return this->remove_sample_i (sample, dropped_by_transport);
-}
-
-ACE_INLINE int
-TAO::DCPS::DataLink::remove_sample_i(const DataSampleListElement* sample, 
-                                     bool dropped_by_transport)
-{
-  DBG_ENTRY("DataLink","remove_sample_i");
-  ACE_UNUSED_ARG (dropped_by_transport);
+  
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
   return this->send_strategy_->remove_sample(sample);
@@ -126,22 +109,6 @@ TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 {
   DBG_ENTRY("DataLink","remove_all_control_msgs");
 
-  if (this->thr_per_con_send_task_ != 0)
-  {
-    SendRequest req;
-    req.op_ = REMOVE_ALL_CONTROL_SAMPLES;
-    req.element_ = reinterpret_cast <void*> (new RepoId(pub_id));
-    this->thr_per_con_send_task_->add (req);
-  }
-  else
-    this->remove_all_control_msgs_i (pub_id);
-}
-
-
-ACE_INLINE void
-TAO::DCPS::DataLink::remove_all_control_msgs_i(RepoId pub_id)
-{
-  DBG_ENTRY("DataLink","remove_all_control_msgs_i");
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
   this->send_strategy_->remove_all_control_msgs(pub_id);

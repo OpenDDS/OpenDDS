@@ -1,3 +1,26 @@
+Thu Sep  8 06:19:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+      * dds\DCPS\transport\framework\DataLink.h:
+      * dds\DCPS\transport\framework\DataLink.cpp:
+      * dds\DCPS\transport\framework\DataLink.inl:
+      * dds\DCPS\transport\framework\ThreadPerConnectionSendTask.h:
+      * dds\DCPS\transport\framework\ThreadPerConnectionSendTask.cpp:
+
+        Made remove_sample() and remove_all_control_msgs() not handled by
+        the thread per connection task. This would avoid the access violation
+        when the data_delivered is called after sample is moved to release_data
+        list and before send strategy remove_sample() is called.
+        
+      * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+      
+        Made data_delievered/data_dropped call delayed in a few places to handle
+        the writer lock and send strategy lock acquired in reverse order when
+        thread_per_connection is enabled.
+        Fixed a bug in send_stop() that cause crash when the header_.length > 0 
+        but elems_ is empty.
+        Fixed a bug in remove_sample() that should return when the sample is removed
+        from queue.
+
 Thu Sep  7 15:26:52 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
       * dds/DCPS/DomainParticipantImpl.cpp:
