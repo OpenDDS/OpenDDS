@@ -108,6 +108,8 @@ namespace TAO
         /// Let the subclass stop.
         virtual void stop_i() = 0;
 
+        void link_released (bool flag);
+
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,
@@ -298,6 +300,8 @@ namespace TAO
         TransportConfiguration_rch config_;
 
         bool graceful_disconnecting_;
+
+        bool link_released_;
 
 //remove these are only for debugging: DUMP_FOR_PACKET_INFO
         protected:

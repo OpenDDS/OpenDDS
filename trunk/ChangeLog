@@ -1,3 +1,28 @@
+Mon Sep 11 07:13:48 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+      * dds\DCPS\transport\framework\DataLink.cpp:
+      
+        Fixed a problem that send or send_stop could happen after the datalink
+        call send strategy to clear samples when keep_link=1.
+        
+      * dds\DCPS\transport\framework\TransportInterface.cpp:
+      
+        Fixed a problem that the send_start could send on a nil datalink. 
+        The problem is the send() could find the local_id with an empty 
+        datalink set because a datalink insertion to local_map_ was completed 
+        by two calls in add_associations().
+            this->local_map_.find_or_create_set()
+            local_set->insert_link() 
+        To fix this problem, the two calls above was replaced by a single
+        call this->local_map_.insert_link().
+                
+      * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+      * dds\DCPS\transport\framework\TransportSendStrategy.inl:
+      * dds\DCPS\transport\framework\TransportSendStrategy.h:
+    
+        Added new methods to handle the send() calls after clear()
+        is called when keep_link=1.
+    
 Thu Sep  8 06:19:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
       * dds\DCPS\transport\framework\DataLink.h:
