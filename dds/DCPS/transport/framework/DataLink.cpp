@@ -63,9 +63,10 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   int sub_result      = 0;
   int pub_undo_result = 0;
 
+  this->send_strategy_->link_released (false);
+
   {
     GuardType guard(this->lock_);
-
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
     pub_result = this->pub_map_.insert(publisher_id,subscriber_id,0);
@@ -141,6 +142,8 @@ TAO::DCPS::DataLink::make_reservation
   int pub_result      = 0;
   int sub_undo_result = 0;
 
+  this->send_strategy_->link_released (false);
+
   {
     GuardType guard(this->lock_);
 
@@ -171,6 +174,8 @@ TAO::DCPS::DataLink::make_reservation
 
     // We can release our lock_ now.
   }
+
+  this->send_strategy_->link_released (false);
 
   // We only get to here when an error occurred somewhere along the way.
   // None of this needs the lock_ to be acquired.
@@ -279,6 +284,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
         }
       else
         {
+          this->send_strategy_->link_released (true);
           this->send_strategy_->clear ();
         }
     }

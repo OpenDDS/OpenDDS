@@ -48,7 +48,8 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     header_db_allocator_(1),
     header_mb_allocator_(2),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
-    graceful_disconnecting_ (false)
+    graceful_disconnecting_ (false),
+    link_released_ (false)
 {
   DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
 
@@ -800,289 +801,301 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
   {
     GuardType guard(this->lock_);
 
-    if (this->mode_ == MODE_TERMINATED && ! this->graceful_disconnecting_)
+    if (this->link_released_)
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
-          "graceful disconnecting, so discard message.\n"));
-        bool dropped_by_transport = true;
-        element->data_dropped (dropped_by_transport);
-        return;
-      }
-
-    size_t element_length = element->msg()->total_length();
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Send element msg() has total_length() == [%d].\n",
-              element_length));
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "this->max_header_size_ == [%d].\n",
-              this->max_header_size_));
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "this->max_size_ == [%d].\n",
-              this->max_size_));
-
-  //MJM: Make this an ASSERT so that it gets removed for performance runs.
-
-    // Really an assert.  We can't accept any element that wouldn't fit into
-    // a transport packet by itself (ie, it would be the only element in the
-    // packet).
-    if (this->max_header_size_ + element_length > this->max_size_)
-      {
-        ACE_ERROR((LM_ERROR,
-                  "(%P|%t) ERROR: Element too large - won't fit into packet.\n"));
-        return;
-      }
-
-    // Check the mode_ to see if we simply put the element on the queue.
-    if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)));
-
-        this->queue_->put(element);
-        if (this->mode_ != MODE_SUSPEND)
-          this->synch_->work_available();
-        return;
-      }
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "this->mode_ == MODE_DIRECT.\n"));
-
-    // We are in the MODE_DIRECT send mode.  When in this mode, the send()
-    // calls will "build up" the transport packet to be sent directly when it
-    // reaches the optimal size, contains the maximum number of samples, etc.
-
-    // We need to check if the current element (the arg passed-in to this
-    // send() method) should be appended to the transport packet, or if the
-    // transport packet should be sent (directly) first, dealing with the
-    // current element afterwards.
-
-    // We will decide to send the packet as it is now, under two circumstances:
-    //
-    //    Either:
-    //
-    //    (1) The current element won't fit into the current packet since it
-    //        would violate the max_packet_size_.
-    //
-    //    -OR-
-    //
-    //    (2) There is at least one element already in the current packet,
-    //        and the current element says that it must be sent in an
-    //        exclusive packet (ie, in a packet all by itself).
-    //
-    int element_requires_exclusive_packet = element->requires_exclusive_packet();
-
-  //MJM: This entire conditional needs to be eliminated for performance
-  //MJM: runs. Conditional compilation section maybe?
-    if (element_requires_exclusive_packet)
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "The element DOES require an exclusive packet.\n"));
+        delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
+        delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
+        ++ num_delayed_notifications_;
       }
     else
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "The element does NOT require an exclusive packet.\n"));
-      }
-
-    if ((this->max_header_size_ +
-        this->header_.length_  +
-        element_length           > this->max_size_) ||
-        ((this->elems_->size() != 0) && (element_requires_exclusive_packet == 1)))
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Element won't fit in current packet - send current "
-                  "packet (directly) now.\n"));
-
-        // Send the current packet, and deal with the current element
-        // afterwards.
-        this->direct_send();
-
-        // Now check to see if we flipped into MODE_QUEUE, which would mean
-        // that the direct_send() experienced backpressure, and the
-        // packet was only partially sent.  If this has happened, we deal with
-        // the current element by placing it on the queue (and then we are done).
-        //
-        // Otherwise, if the mode_ is still MODE_DIRECT, we can just
-        // "drop" through to the next step in the logic where we append the
-        // current element to the current packet.
-  //MJM: But we don't want to append an exclusive thingie to a packet (or
-  //MJM: a thingie to an exclusive packet either), right?
-        if (this->mode_ == MODE_QUEUE)
-          {
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                      "We experienced backpressure on that direct send, as "
-                      "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  Queue elem and leave.\n"));
-            this->queue_->put(element);
-            this->synch_->work_available();
-            return;
-          }
-      }
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Start the 'append elem' to current packet logic.\n"));
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Put element into current packet elems_.\n"));
-
-    // Now that we know the current element should go into the current
-    // packet, we can just go ahead and "append" the current element to
-    // the current packet.
-
-    // Add the current element to the collection of packet elements.
-    this->elems_->put(element);
-  //MJM: I am not sure that this works when either the previous element or
-  //MJM: the current (new) element is a exclusive one.  This would only
-  //MJM: happen if the previous packet (if any) was not completely sent
-  //MJM: just prior to this spot.
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Before, the header_.length_ == [%d].\n",
-              this->header_.length_));
-
-    // Adjust the header_.length_ to account for the length of the element.
-    this->header_.length_ += element_length;
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "After adding element's length, the header_.length_ == [%d].\n",
-              this->header_.length_));
-
-    // The current packet now contains the current element.  We need to
-    // check to see if the conditions are such that we should go ahead and
-    // attempt to send the packet "directly" now, or if we can just leave
-    // and send the current packet later (in another send() call or in a
-    // send_stop() call).
-
-    // There are three conditions that will cause us to attempt to send the
-    // packet (directly) right now.
-    //
-    //   (1) The current packet has the maximum number of samples per packet.
-    //   (2) The current packet's total length exceeds the optimum packet size.
-    //   (3) The current element (currently part of the packet elems_)
-    //       requires an exclusive packet.
-    //
-  //MJM: Should probably check >= max_samples_ here.  Belts/suspenders thing.
-    if ((this->elems_->size() == this->max_samples_)                            ||
-        (this->max_header_size_ + this->header_.length_ > this->optimum_size_) ||
-        (element_requires_exclusive_packet == 1))
-  //MJM: I think that I need to think about the exclusive cases here.
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Now the current packet looks full - send it (directly).\n"));
-        this->direct_send();
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Back from the direct_send() attempt.\n"));
-  //MJM: This following conditional needs to be lost for performance runs
-  //MJM: as well.
-        if (this->mode_ == MODE_QUEUE)
-          {
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                      "And we flipped into MODE_QUEUE as a result of the "
-                      "direct_send() call.\n"));
-          }
-        else
-          {
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                      "And we stayed in the MODE_DIRECT as a result of the "
-                      "direct_send() call.\n"));
-          }
-      }
-      }
-
-      this->send_delayed_notifications ();
-  }
-
-
-  void
-  TAO::DCPS::TransportSendStrategy::send_stop()
-  {
-    DBG_ENTRY("TransportSendStrategy","send_stop");
     {
-      GuardType guard(this->lock_);
-
-    //MJM: Make it an assert for the performance runs to lose it.
-      if (this->start_counter_ == 0)
-        {
-          // This is an indication of a logic error.  This is more of an assert.
-          ACE_ERROR((LM_ERROR,
-                    "(%P|%t) ERROR: Received unexpected send_stop() call.\n"));
-          return;
-        }
-
-      --this->start_counter_;
-
-      if (this->start_counter_ != 0)
-        {
-          // This wasn't the last send_stop() that we are expecting.  We only
-          // really honor the first send_start() and the last send_stop().
-          // We can return without doing anything else in this case.
-          return;
-        }
-
       if (this->mode_ == MODE_TERMINATED && ! this->graceful_disconnecting_)
         {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "TransportSendStrategy::send_stop: dont try to send current packet "
-            "since mode is MODE_TERMINATED and not in graceful disconnecting.\n"));
+            "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
+            "graceful disconnecting, so discard message.\n"));
+          bool dropped_by_transport = true;
+          element->data_dropped (dropped_by_transport);
           return;
         }
 
+      size_t element_length = element->msg()->total_length();
+
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "This is an 'important' send_stop() event since our "
-                "start_counter_ is 0.\n"));
+                "Send element msg() has total_length() == [%d].\n",
+                element_length));
 
-      // We just caused the start_counter_ to become zero.  This
-      // means that we aren't expecting another send() or send_stop() at any
-      // time in the near future (ie, it isn't imminent).
-    //MJM: It means that the publisher(s) have indicated a desire to push
-    //MJM: all the data just sent out to the remote ends.
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "this->max_header_size_ == [%d].\n",
+                this->max_header_size_));
 
-      // If our mode_ is currently MODE_QUEUE or MODE_SUSPEND, then we don't have
-      // anything to do here because samples have already been going to the
-      // queue.  We only need to do something if the mode_ is
-      // MODE_DIRECT.  It means that we may have some sample(s) in the
-      // current packet that have never been sent.  This is our
-      // opportunity to send the current packet directly if this is the case.
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "this->max_size_ == [%d].\n",
+                this->max_size_));
+
+    //MJM: Make this an ASSERT so that it gets removed for performance runs.
+
+      // Really an assert.  We can't accept any element that wouldn't fit into
+      // a transport packet by itself (ie, it would be the only element in the
+      // packet).
+      if (this->max_header_size_ + element_length > this->max_size_)
+        {
+          ACE_ERROR((LM_ERROR,
+                    "(%P|%t) ERROR: Element too large - won't fit into packet.\n"));
+          return;
+        }
+
+      // Check the mode_ to see if we simply put the element on the queue.
       if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
         {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "But since we are in %s, we don't have to do "
-                    "anything more in this important send_stop().\n",
-                    mode_as_str(this->mode_)));
-          // We don't do anything if we are in MODE_QUEUE.  Just leave.
+            "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)));
+
+          this->queue_->put(element);
+          if (this->mode_ != MODE_SUSPEND)
+            this->synch_->work_available();
           return;
         }
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We are in MODE_DIRECT in an important send_stop() - "
-                "header_.length_ == [%d].\n", this->header_.length_));
+                "this->mode_ == MODE_DIRECT.\n"));
 
-      // Only attempt to send the current packet (directly) if the current
-      // packet actually contains something (it could be empty).
-      if (this->header_.length_ > 0 && this->elems_->size () > 0)
+      // We are in the MODE_DIRECT send mode.  When in this mode, the send()
+      // calls will "build up" the transport packet to be sent directly when it
+      // reaches the optimal size, contains the maximum number of samples, etc.
+
+      // We need to check if the current element (the arg passed-in to this
+      // send() method) should be appended to the transport packet, or if the
+      // transport packet should be sent (directly) first, dealing with the
+      // current element afterwards.
+
+      // We will decide to send the packet as it is now, under two circumstances:
+      //
+      //    Either:
+      //
+      //    (1) The current element won't fit into the current packet since it
+      //        would violate the max_packet_size_.
+      //
+      //    -OR-
+      //
+      //    (2) There is at least one element already in the current packet,
+      //        and the current element says that it must be sent in an
+      //        exclusive packet (ie, in a packet all by itself).
+      //
+      int element_requires_exclusive_packet = element->requires_exclusive_packet();
+
+    //MJM: This entire conditional needs to be eliminated for performance
+    //MJM: runs. Conditional compilation section maybe?
+      if (element_requires_exclusive_packet)
         {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "There something in the current packet - attempt to send "
-                    "it (directly) now.\n"));
-          this->direct_send();
+                    "The element DOES require an exclusive packet.\n"));
+        }
+      else
+        {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "Back from the attempt to send leftover packet directly.\n"));
-    //MJM: Another conditionally lost conditional, ay.
+                    "The element does NOT require an exclusive packet.\n"));
+        }
+
+      if ((this->max_header_size_ +
+          this->header_.length_  +
+          element_length           > this->max_size_) ||
+          ((this->elems_->size() != 0) && (element_requires_exclusive_packet == 1)))
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Element won't fit in current packet - send current "
+                    "packet (directly) now.\n"));
+
+          // Send the current packet, and deal with the current element
+          // afterwards.
+          this->direct_send();
+
+          // Now check to see if we flipped into MODE_QUEUE, which would mean
+          // that the direct_send() experienced backpressure, and the
+          // packet was only partially sent.  If this has happened, we deal with
+          // the current element by placing it on the queue (and then we are done).
+          //
+          // Otherwise, if the mode_ is still MODE_DIRECT, we can just
+          // "drop" through to the next step in the logic where we append the
+          // current element to the current packet.
+    //MJM: But we don't want to append an exclusive thingie to a packet (or
+    //MJM: a thingie to an exclusive packet either), right?
           if (this->mode_ == MODE_QUEUE)
             {
               VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                        "But we flipped into MODE_QUEUE as a result.\n"));
+                        "We experienced backpressure on that direct send, as "
+                        "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  Queue elem and leave.\n"));
+              this->queue_->put(element);
+              this->synch_->work_available();
+              return;
+            }
+        }
+
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Start the 'append elem' to current packet logic.\n"));
+
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Put element into current packet elems_.\n"));
+
+      // Now that we know the current element should go into the current
+      // packet, we can just go ahead and "append" the current element to
+      // the current packet.
+
+      // Add the current element to the collection of packet elements.
+      this->elems_->put(element);
+    //MJM: I am not sure that this works when either the previous element or
+    //MJM: the current (new) element is a exclusive one.  This would only
+    //MJM: happen if the previous packet (if any) was not completely sent
+    //MJM: just prior to this spot.
+
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Before, the header_.length_ == [%d].\n",
+                this->header_.length_));
+
+      // Adjust the header_.length_ to account for the length of the element.
+      this->header_.length_ += element_length;
+
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "After adding element's length, the header_.length_ == [%d].\n",
+                this->header_.length_));
+
+      // The current packet now contains the current element.  We need to
+      // check to see if the conditions are such that we should go ahead and
+      // attempt to send the packet "directly" now, or if we can just leave
+      // and send the current packet later (in another send() call or in a
+      // send_stop() call).
+
+      // There are three conditions that will cause us to attempt to send the
+      // packet (directly) right now.
+      //
+      //   (1) The current packet has the maximum number of samples per packet.
+      //   (2) The current packet's total length exceeds the optimum packet size.
+      //   (3) The current element (currently part of the packet elems_)
+      //       requires an exclusive packet.
+      //
+    //MJM: Should probably check >= max_samples_ here.  Belts/suspenders thing.
+      if ((this->elems_->size() == this->max_samples_)                            ||
+          (this->max_header_size_ + this->header_.length_ > this->optimum_size_) ||
+          (element_requires_exclusive_packet == 1))
+    //MJM: I think that I need to think about the exclusive cases here.
+        {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Now the current packet looks full - send it (directly).\n"));
+          this->direct_send();
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Back from the direct_send() attempt.\n"));
+    //MJM: This following conditional needs to be lost for performance runs
+    //MJM: as well.
+          if (this->mode_ == MODE_QUEUE)
+            {
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                        "And we flipped into MODE_QUEUE as a result of the "
+                        "direct_send() call.\n"));
             }
           else
             {
               VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                        "And we stayed in the MODE_DIRECT.\n"));
+                        "And we stayed in the MODE_DIRECT as a result of the "
+                        "direct_send() call.\n"));
             }
         }
-    }
+     }
+  }
+
+    this->send_delayed_notifications ();
+}
+
+
+void
+TAO::DCPS::TransportSendStrategy::send_stop()
+{
+  DBG_ENTRY("TransportSendStrategy","send_stop");
+  {
+    GuardType guard(this->lock_);
+    
+    if (this->link_released_)
+        return;
+
+  //MJM: Make it an assert for the performance runs to lose it.
+    if (this->start_counter_ == 0)
+      {
+        // This is an indication of a logic error.  This is more of an assert.
+        ACE_ERROR((LM_ERROR,
+                  "(%P|%t) ERROR: Received unexpected send_stop() call.\n"));
+        return;
+      }
+
+    --this->start_counter_;
+
+    if (this->start_counter_ != 0)
+      {
+        // This wasn't the last send_stop() that we are expecting.  We only
+        // really honor the first send_start() and the last send_stop().
+        // We can return without doing anything else in this case.
+        return;
+      }
+
+    if (this->mode_ == MODE_TERMINATED && ! this->graceful_disconnecting_)
+      {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          "TransportSendStrategy::send_stop: dont try to send current packet "
+          "since mode is MODE_TERMINATED and not in graceful disconnecting.\n"));
+        return;
+      }
+
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "This is an 'important' send_stop() event since our "
+              "start_counter_ is 0.\n"));
+
+    // We just caused the start_counter_ to become zero.  This
+    // means that we aren't expecting another send() or send_stop() at any
+    // time in the near future (ie, it isn't imminent).
+  //MJM: It means that the publisher(s) have indicated a desire to push
+  //MJM: all the data just sent out to the remote ends.
+
+    // If our mode_ is currently MODE_QUEUE or MODE_SUSPEND, then we don't have
+    // anything to do here because samples have already been going to the
+    // queue.  We only need to do something if the mode_ is
+    // MODE_DIRECT.  It means that we may have some sample(s) in the
+    // current packet that have never been sent.  This is our
+    // opportunity to send the current packet directly if this is the case.
+    if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
+      {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "But since we are in %s, we don't have to do "
+                  "anything more in this important send_stop().\n",
+                  mode_as_str(this->mode_)));
+        // We don't do anything if we are in MODE_QUEUE.  Just leave.
+        return;
+      }
+
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "We are in MODE_DIRECT in an important send_stop() - "
+              "header_.length_ == [%d].\n", this->header_.length_));
+
+    // Only attempt to send the current packet (directly) if the current
+    // packet actually contains something (it could be empty).
+    if (this->header_.length_ > 0 && this->elems_->size () > 0)
+      {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "There something in the current packet - attempt to send "
+                  "it (directly) now.\n"));
+        this->direct_send();
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Back from the attempt to send leftover packet directly.\n"));
+  //MJM: Another conditionally lost conditional, ay.
+        if (this->mode_ == MODE_QUEUE)
+          {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                      "But we flipped into MODE_QUEUE as a result.\n"));
+          }
+        else
+          {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                      "And we stayed in the MODE_DIRECT.\n"));
+          }
+      }
+  }
 
   this->send_delayed_notifications ();
 }

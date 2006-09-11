@@ -59,9 +59,19 @@ TAO::DCPS::TransportSendStrategy::send_start()
   DBG_ENTRY("TransportSendStrategy","send_start");
 
   GuardType guard(this->lock_);
-  ++this->start_counter_;
+  if (! this->link_released_)
+    ++this->start_counter_;
 }
 
+
+ACE_INLINE void
+TAO::DCPS::TransportSendStrategy::link_released (bool flag)
+{
+  DBG_ENTRY("TransportSendStrategy","link_released");
+
+  GuardType guard(this->lock_);
+  this->link_released_ = flag;
+}
 
 
 ACE_INLINE void 

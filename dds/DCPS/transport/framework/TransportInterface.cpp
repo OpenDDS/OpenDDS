@@ -163,19 +163,6 @@ TAO::DCPS::TransportInterface::add_associations
 //MJM: protected as an atomic operation, no?  So what are we doing
 //MJM: besides bumping the ref count?
 
-  // Obtain (via find_or_create_set) the local DataLinkSet just once for
-  // this entire method.
-  DataLinkSet_rch local_set = this->local_map_.find_or_create_set(local_id);
-
-  if (local_set.is_nil())
-    {
-      // find_or_create_set failure
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed to find or create a DataLinkSet for "
-                        "local side of association [%s %d].\n",
-                        local_id_str,local_id),
-                       -1);
-    }
 
   // We need to acquire the reservation lock from the TransportImpl object.
   // Once we have acquired the lock, we know that other TransportInterface
@@ -267,7 +254,7 @@ TAO::DCPS::TransportInterface::add_associations
       // of 0 means that the insert_link() succeeded, and a result of 1 means
       // that the local_id already has an existing reservation with the
       // DataLink.  This is expected to happen.
-      if (local_set->insert_link(link.in()) != -1)
+      if (this->local_map_.insert_link(local_id, link.in()) != -1)
         {
           // Now that we know the local_set contains the new DataLink,
           // we need to get the new DataLink into a remote_set within
@@ -298,7 +285,7 @@ TAO::DCPS::TransportInterface::add_associations
           // The local_set->insert_link() failed.
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: Failed to insert DataLink into "
-                     "DataLinkSet for local [%s %d].\n",
+                     "local_map_ for local [%s %d].\n",
                      local_id_str,local_id));
         }
 
