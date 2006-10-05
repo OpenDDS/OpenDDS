@@ -24,7 +24,7 @@ tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN
 tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN
 tests/DCPS/FooTest3_0/run_test.pl reenqueue_all: !DCPS_MIN
-tests/DCPS/FooTest3_1/run_test.pl 
+tests/DCPS/FooTest3_1/run_test.pl
 tests/DCPS/FooTest3_1/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest3_1/run_test.pl mw: !DCPS_MIN
 tests/DCPS/FooTest3_1/run_test.pl bp_remove: !DCPS_MIN
@@ -63,7 +63,7 @@ tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl
-tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC 
+tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl give_addrs: !DCPS_MIN
 tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN
@@ -71,6 +71,7 @@ tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
+tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN
