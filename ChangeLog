@@ -1,3 +1,11 @@
+Thu Oct  5 22:33:44 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+          Restored earlier(correct) test wait time.
+
+        * tests/DCPS/Reconnect/subscriber.cpp:
+          Minor fix to display correct option character.
+
 Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Reconnect/README:

@@ -56,7 +56,7 @@ int parse_args (int argc, char *argv[])
         break;
       case 'r':
         num_reads_deviation = ACE_OS::atoi (get_opts.opt_arg ());
-        break;      
+        break;
       case 'i':
         read_delay_ms = ACE_OS::atoi (get_opts.opt_arg ());
         break;
@@ -75,7 +75,7 @@ int parse_args (int argc, char *argv[])
                            "-d <num_reads_deviation> "
                            "-i <read_delay_ms> "
                            "-l <expected_lost_sub_notification> "
-                           "-t <end_with_publisher> "
+                           "-e <end_with_publisher> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
     // Initialize the transport
     TAO::DCPS::TransportImpl_rch tcp_impl =
       TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::TAO::DCPS::AUTO_CONFIG);
-    
+
     // Create the subscriber and attach to the corresponding
     // transport.
     DDS::Subscriber_var sub =
@@ -227,16 +227,16 @@ int main (int argc, char *argv[])
         if (writers_completed != 0) {
           if (end_with_publisher)
           {
-            // Since we are in the "bp_timeout" test case that publisher 
-            // close connection when backpressure last longer than 
+            // Since we are in the "bp_timeout" test case that publisher
+            // close connection when backpressure last longer than
             // max_output_pause_period, the publisher ends as it finishes
-            // sending. As the subscriber sees the publisher is done, it 
-            // changes the read_delay_ms to 0 so it can read all received 
+            // sending. As the subscriber sees the publisher is done, it
+            // changes the read_delay_ms to 0 so it can read all received
             // messages and them announce it completed.
 
             int old_read_delay_ms = read_delay_ms;
             read_delay_ms = 0;
-            // Give time to finish reading. 
+            // Give time to finish reading.
             ACE_OS::sleep (old_read_delay_ms/1000 * 2);
             break;
           }
@@ -284,7 +284,7 @@ int main (int argc, char *argv[])
   if (actual_lost_sub_notification != expected_lost_sub_notification)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_subscription_lost called %d times "
-      "and expected %d times\n", actual_lost_sub_notification, 
+      "and expected %d times\n", actual_lost_sub_notification,
       expected_lost_sub_notification));
     return 1;
   }
