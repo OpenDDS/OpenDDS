@@ -1,28 +1,40 @@
+Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/Reconnect/README:
+          Create a README for this test.
+
+        * tests/DCPS/Reconnect/run_test.pl:
+        * bin/dcps_tests.lst:
+          Adding a new regression test to capture a failing scenario. The
+          Subscriber is killed (simulating a crash) after
+          initialization. The Publisher then crashes during its
+          initialization.
+
 Mon Sep 11 07:13:48 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
       * dds\DCPS\transport\framework\DataLink.cpp:
-      
+
         Fixed a problem that send or send_stop could happen after the datalink
         call send strategy to clear samples when keep_link=1.
-        
+
       * dds\DCPS\transport\framework\TransportInterface.cpp:
-      
-        Fixed a problem that the send_start could send on a nil datalink. 
-        The problem is the send() could find the local_id with an empty 
-        datalink set because a datalink insertion to local_map_ was completed 
+
+        Fixed a problem that the send_start could send on a nil datalink.
+        The problem is the send() could find the local_id with an empty
+        datalink set because a datalink insertion to local_map_ was completed
         by two calls in add_associations().
             this->local_map_.find_or_create_set()
-            local_set->insert_link() 
+            local_set->insert_link()
         To fix this problem, the two calls above was replaced by a single
         call this->local_map_.insert_link().
-                
+
       * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
       * dds\DCPS\transport\framework\TransportSendStrategy.inl:
       * dds\DCPS\transport\framework\TransportSendStrategy.h:
-    
+
         Added new methods to handle the send() calls after clear()
         is called when keep_link=1.
-    
+
 Thu Sep  8 06:19:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
       * dds\DCPS\transport\framework\DataLink.h:
@@ -35,13 +47,13 @@ Thu Sep  8 06:19:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         the thread per connection task. This would avoid the access violation
         when the data_delivered is called after sample is moved to release_data
         list and before send strategy remove_sample() is called.
-        
+
       * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
-      
+
         Made data_delievered/data_dropped call delayed in a few places to handle
         the writer lock and send strategy lock acquired in reverse order when
         thread_per_connection is enabled.
-        Fixed a bug in send_stop() that cause crash when the header_.length > 0 
+        Fixed a bug in send_stop() that cause crash when the header_.length > 0
         but elems_ is empty.
         Fixed a bug in remove_sample() that should return when the sample is removed
         from queue.
@@ -52,7 +64,7 @@ Thu Sep  7 15:26:52 UTC 2006  Yan Dai  <dai_y@ociweb.com>
       * dds/DCPS/transport/framework/DataLink.inl:
       * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
 
-        Fixed some compilation errors( due to <: and reinterpret_cast int to void*) 
+        Fixed some compilation errors( due to <: and reinterpret_cast int to void*)
         on gcc compiler.
 
 Wed Sep  7 06:59:35 UTC 2006  Yan Dai  <dai_y@ociweb.com>
@@ -60,109 +72,109 @@ Wed Sep  7 06:59:35 UTC 2006  Yan Dai  <dai_y@ociweb.com>
       The main changes are: (See RT8999)
         - Made the DCPS entity servants deleted upon delete_*()
           call instead of upon orb shutdown. This would make the create/delete
-          DCPS entity multiple times in a single process without shutdown 
-          Service Participant. 
+          DCPS entity multiple times in a single process without shutdown
+          Service Participant.
         - Added keep_link configuration to indicate whether a datalink should
-          be maintained when all associations are removed. This would allow 
+          be maintained when all associations are removed. This would allow
           the datareader/datawriter reconnect repeatedly using the same
           connection.
-        
+
       * dds/DCPS/WriteDataContainer.cpp:
       * dds/DCPS/transport/framework/DataLinkSet.cpp:
 
         Added logging for cached allocator information.
-        
+
       * dds/DCPS/DomainParticipantFactoryImpl.cpp:
       * dds/DCPS/transport/framework/TransportImpl.cpp:
 
         Added guard to protect unregistration of subscription.
-        
+
       * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-      
+
         Made send_graceful_disconnect_message() call notify the
         send strategy terminate send except the graceful disconnect
         message.
-        
+
       * dds/DCPS/transport/framework/DataLink.h:
       * dds/DCPS/transport/framework/DataLink.cpp:
       * dds/DCPS/transport/framework/DataLink.inl:
 
-        Made the release_reservations() not release datalink when 
+        Made the release_reservations() not release datalink when
         all associations are removed if keep_link is configured to be on.
         Made the remove_sample() and remove_all_control_msgs_i() handled
         by ThreadPerConnectionSendTask when thread_per_connection is
-        enabled. This makes the send() and remove_sample() be handled 
+        enabled. This makes the send() and remove_sample() be handled
         sequentially.
 
       * dds/DCPS/transport/framework/TransportConfiguration.h:
       * dds/DCPS/transport/framework/TransportConfiguration.cpp:
       * dds/DCPS/transport/framework/TransportConfiguration.inl:
 
-        Added a new configuration - "keep_link", which indicates if the 
-        data link should be maintained when all associations are removed. 
-        The default value (0) means the link will be released as the 
+        Added a new configuration - "keep_link", which indicates if the
+        data link should be maintained when all associations are removed.
+        The default value (0) means the link will be released as the
         last association is removed from the link.
 
       * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-      
+
         Added delayed_notification_mode_ status so the delayed notification
         will know if it's a data_delievered or data_dropped.
         Added clear() function to clean up the elements referenced by this
         datalink. This would let the datalink be reused when keep_link is
         on.
-        
+
       * dds/DCPS/transport/framework/QueueTaskBase_T.h:
-      
-        Commented error log when the dequeue_head failed. 
+
+        Commented error log when the dequeue_head failed.
         I'm not sure why this thread got more signals than actual signals
-        when using thread_per_connection and the user application thread 
+        when using thread_per_connection and the user application thread
         send requests without interval.
-        
+
       * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
       * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
-      
+
         Made this task handle the REMOVE_SAMPLE and REMOVE_ALL_CONTROL_SAMPLES
         requests.
-      
+
       * dds/DCPS/transport/framework/TransportSendStrategy.h:
       * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
-      
+
         Corrected a logging message.
-        
+
       * dds/DCPS/Service_Participant.h:
-      
+
         Added deactivate_object template function so the delete_* can
         call it to deactivate the object from poa and cause the deletion
         of the servant.
-        
+
       * dds/DCPS/PublisherImpl.cpp:
       * dds/DCPS/SubscriberImpl.cpp:
       * dds/DCPS/DomainParticipantImpl.cpp:
 
         Added deactivate_object() call in delete_*() functions.
-   
+
       * DevGuideExamples/DDS/Messenger/pub.ini:
-      
+
         Added keep_link configuration.
-        
+
       * DevGuideExamples/DDS/Messenger/subscriber.cpp:
       * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
-      
+
         Removed the get_matched_publications() call since datareader
         servant is destroyed when delete_datareader() is called.
 
 Thu Aug 24 18:12:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * bin\DCPS\CPPTemplate.pm:
-        
-          Corrected number of chunks for message block allocator in a 
+
+          Corrected number of chunks for message block allocator in a
           logging message.
-        
+
         * dds\DCPS\transport\framework\TransportImpl.cpp:
 
           Corrected the DataReaderImpl/DataWriterImpl reference hold
           by TransportImpl. This fixed the memory leak of datawriter.
-          
+
 Sun Aug 13 19:17:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           These changes supported the default transport id.
@@ -172,17 +184,17 @@ Sun Aug 13 19:17:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           be configured by the users. [See RT 8497]
 
         * dds\DCPS\transport\framework\TransportDefs.h:
-        
-          Added definition for DEFAULT_SIMPLE_TCP_ID and 
+
+          Added definition for DEFAULT_SIMPLE_TCP_ID and
           DEFAULT_SIMPLE_UDP_ID.
-         
+
         * dds\DCPS\transport\framework\TransportConfiguration.cpp:
         * dds\DCPS\transport\simpleTCP\SimpleTcpConfiguration.cpp:
         * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
-        
-          Increased the size of the section array in load() so it has  
+
+          Increased the size of the section array in load() so it has
           enough space for a big transport id.
-        
+
         * dds\DCPS\transport\framework\TransportFactory.cpp:
 
           Made the load_transport_configuration() check configuration load
@@ -197,12 +209,12 @@ Fri Aug 11 18:13:54 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TheTransportFactory.h:
         * dds/DCPS/Service_Participant.h:
 
-	        Worked around with the compilation problems on DDS gcc 4.x build with
-	        DOC version TAO. The problem is the ACE_EXPORT_SINGLETON_DECLARE
-	        new definition was added to config-g++-common.h in DOC version 
-	        which causes the template instantiation inside namespace errors.
-	        To work around this problem the TAO_DDSDCPS_SINGLETON_DECLARE
-	        is commented for gcc 4.x builds.
+                Worked around with the compilation problems on DDS gcc 4.x build with
+                DOC version TAO. The problem is the ACE_EXPORT_SINGLETON_DECLARE
+                new definition was added to config-g++-common.h in DOC version
+                which causes the template instantiation inside namespace errors.
+                To work around this problem the TAO_DDSDCPS_SINGLETON_DECLARE
+                is commented for gcc 4.x builds.
 
 Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
