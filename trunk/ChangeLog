@@ -1,3 +1,13 @@
+Fri Oct  6 22:25:25 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+          The Reconnection Task belongs to the Connection object and hence
+          should be cleaned up by it before exiting. This fixes a race
+          condition which was causing application cores (rt 9123).
+
+        * tests/DCPS/Reconnect/run_test.pl:
+          Further fixes to the regression test added in:
+          Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
 Fri Oct  6 14:58:05 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:

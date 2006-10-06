@@ -169,17 +169,17 @@ if ($kill_subscriber == 0)
 }
 
 $PublisherResult = $Publisher->WaitKill (30);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
 if ($kill_subscriber != 0 && $PublisherResult == 0) {
     # writing out to STDOUT as these tests redirect STDERR to a log file.
     # The nightly script parses STDERR to detect test failures.
     print STDOUT "ERROR: Publisher crashed\n";
     $status = 1;
 }
+elsif ($kill_subscriber == 0 &&  $PublisherResult != 0) {
+    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    $status = 1;
+}
+
 
 $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
