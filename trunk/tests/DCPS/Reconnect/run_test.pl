@@ -86,8 +86,8 @@ unlink $publisher_ready;
 unlink $testoutputfilename;
 
 # Save the output to check after execution
-#open(SAVEERR, ">&STDERR");
-#open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
+open(SAVEERR, ">&STDERR");
+open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
@@ -111,12 +111,11 @@ $Subscriber->Spawn ();
 
 if ($kill_subscriber > 0)
 {
-# Simulate a crashed subscriber by killing it.
-    #$Subscriber->WaitKill (5);
-    $Subscriber->Wait (5);
-    $Subscriber->Kill ();
+    # Simulate a crashed subscriber by killing it.
+    sleep (5); # Let subscriber initialize
+    $Subscriber->Kill (0); # Crash it.
 
-    print "Subscriber crash before Publisher initialization.\n\n";
+    print STDOUT "Subscriber crash before Publisher initialization.\n\n";
 }
 
 print $Publisher->CommandLine () . "\n";
@@ -175,6 +174,12 @@ if ($PublisherResult != 0) {
     $status = 1;
 }
 
+if ($kill_subscriber != 0 && $PublisherResult == 0) {
+    # writing out to STDOUT as these tests redirect STDERR to a log file.
+    # The nightly script parses STDERR to detect test failures.
+    print STDOUT "ERROR: Publisher crashed\n";
+    $status = 1;
+}
 
 $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {

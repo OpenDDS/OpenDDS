@@ -1,3 +1,9 @@
+Fri Oct  6 14:58:05 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+          Additional fixes to the regression test added in:
+          Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
+
 Thu Oct  5 22:33:44 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
