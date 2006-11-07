@@ -1,3 +1,25 @@
+Tue Nov  7 16:35:53 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/sub_init_loop:
+        * tests/DCPS/sub_init_loop/Messenger.idl:
+        * tests/DCPS/sub_init_loop/README:
+        * tests/DCPS/sub_init_loop/Writer.h:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/domain_ids:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/repo.conf:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/sub_init_loop/sub.ini:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+          New stress test. This test iterates repeatedly in the subscriber
+          initialization loop. This is a stress test that emerged in
+          scenarios seen in rt 9123.
+
+        * bin/dcps_tests.lst:
+          Add new test to nightly tests list.
+
 Fri Oct  6 22:25:25 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:

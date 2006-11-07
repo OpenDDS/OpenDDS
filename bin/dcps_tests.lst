@@ -72,6 +72,7 @@ tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
+tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN
