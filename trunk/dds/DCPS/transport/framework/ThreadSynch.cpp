@@ -12,7 +12,7 @@
 
 TAO::DCPS::ThreadSynch::~ThreadSynch()
 {
-  DBG_ENTRY("ThreadSynch","~ThreadSynch");
+  DBG_ENTRY_LVL("ThreadSynch","~ThreadSynch",5);
   delete this->resource_;
 }
 
@@ -20,7 +20,7 @@ TAO::DCPS::ThreadSynch::~ThreadSynch()
 int
 TAO::DCPS::ThreadSynch::register_worker_i()
 {
-  DBG_ENTRY("ThreadSynch","register_worker_i");
+  DBG_ENTRY_LVL("ThreadSynch","register_worker_i",5);
   // Default implementation is to do nothing here.  Subclass may override.
   return 0;
 }
@@ -29,7 +29,7 @@ TAO::DCPS::ThreadSynch::register_worker_i()
 void
 TAO::DCPS::ThreadSynch::unregister_worker_i()
 {
-  DBG_ENTRY("ThreadSynch","unregister_worker_i");
+  DBG_ENTRY_LVL("ThreadSynch","unregister_worker_i",5);
   // Default implementation is to do nothing here.  Subclass may override.
 }
 

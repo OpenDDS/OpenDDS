@@ -12,6 +12,6 @@
 
 TAO::DCPS::ReceiveListenerSet::~ReceiveListenerSet()
 {
-  DBG_ENTRY("ReceiveListenerSet","~ReceiveListenerSet");
+  DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",5);
 }
 

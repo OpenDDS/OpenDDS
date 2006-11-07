@@ -11,12 +11,12 @@
 #include  "dds/DdsDcpsDomainC.h"
 #include  "dds/DdsDcpsTopicC.h"
 #include  "dds/DCPS/transport/framework/TransportSendListener.h"
-#include  "WriteDataContainer.h" 
+#include  "WriteDataContainer.h"
 #include  "Definitions.h"
 #include  "DataSampleList.h"
 #include  "DataSampleHeader.h"
 #include  "TopicImpl.h"
-#include  "AssociationData.h" 
+#include  "AssociationData.h"
 
 #include  "ace/Event_Handler.h"
 
@@ -24,9 +24,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace TAO
 {
-  namespace DCPS 
+  namespace DCPS
   {
     class PublisherImpl;
     class DomainParticipantImpl;
@@ -34,25 +34,25 @@ namespace TAO
     /**
     * @class DataWriterImpl
     *
-    * @brief Implements the ::TAO::DCPS::DataWriterRemote interfaces and 
+    * @brief Implements the ::TAO::DCPS::DataWriterRemote interfaces and
     *        ::DDS::DataWrite interfaces.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of  
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
-    * 
-    * This class must be inherited by the type-specific datawriter which 
+    *
+    * This class must be inherited by the type-specific datawriter which
     * is specific to the data-type associated with the topic.
-    * 
-    * @note: This class is responsiable for allocating memory for the 
-    *        header message block 
-    *        (MessageBlock + DataBlock + DataSampleHeader) and the 
+    *
+    * @note: This class is responsiable for allocating memory for the
+    *        header message block
+    *        (MessageBlock + DataBlock + DataSampleHeader) and the
     *        DataSampleListElement.
-    *        The data-type datawriter is responsiable for allocating 
+    *        The data-type datawriter is responsiable for allocating
     *        memory for the sample data message block.
-    *        (e.g. MessageBlock + DataBlock + Foo data). But it gives 
+    *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
     *        up ownership to this WriteDataContainer.
     */
-    class TAO_DdsDcps_Export DataWriterImpl 
+    class TAO_DdsDcps_Export DataWriterImpl
       : public virtual POA_TAO::DCPS::DataWriterRemote,
         public virtual EntityImpl,
         public virtual TransportSendListener,
@@ -61,10 +61,10 @@ namespace TAO
       //public virtual TAO::DCPS::DataWriterLocal
     {
     public:
-      ///Constructor 
+      ///Constructor
       DataWriterImpl (void);
-      
-      ///Destructor 
+
+      ///Destructor
       virtual ~DataWriterImpl (void);
 
     virtual ::DDS::ReturnCode_t set_qos (
@@ -178,7 +178,7 @@ namespace TAO
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
-      
+
     virtual void add_associations (
         ::TAO::DCPS::RepoId yourId,
         const ReaderAssociationSeq & readers
@@ -212,7 +212,7 @@ namespace TAO
     void cleanup ();
 
     /**
-     * Initialize the data members. 
+     * Initialize the data members.
      */
     virtual void init (
         ::DDS::Topic_ptr                       topic,
@@ -230,12 +230,12 @@ namespace TAO
       ));
 
     /**
-     * Delegate to the WriteDataContainer to register and tell 
+     * Delegate to the WriteDataContainer to register and tell
      * the transport to broadcast the registered instance.
      */
     ::DDS::ReturnCode_t
       register_instance (
-        ::DDS::InstanceHandle_t& handle, 
+        ::DDS::InstanceHandle_t& handle,
         DataSample* data,
         const ::DDS::Time_t & source_timestamp
         ACE_ENV_ARG_DECL
@@ -246,7 +246,7 @@ namespace TAO
 
 
     /**
-     * Delegate to the WriteDataContainer to unregister and tell 
+     * Delegate to the WriteDataContainer to unregister and tell
      * the transport to broadcast the unregistered instance.
      */
     ::DDS::ReturnCode_t unregister (
@@ -275,7 +275,7 @@ namespace TAO
 
     /**
     * Delegate to the WriteDataContainer to dispose all data samples
-    * for a given instance and tell the transport to broadcast the 
+    * for a given instance and tell the transport to broadcast the
     * disposed instance.
     */
     ::DDS::ReturnCode_t dispose (
@@ -291,7 +291,7 @@ namespace TAO
     * Return the number of samples for a given instance.
     */
     ::DDS::ReturnCode_t num_samples (
-      ::DDS::InstanceHandle_t handle, 
+      ::DDS::InstanceHandle_t handle,
       size_t&                 size
     );
 
@@ -301,11 +301,11 @@ namespace TAO
     DataSampleList get_unsent_data ();
 
     /**
-    * Cache the publication repository id after adding 
+    * Cache the publication repository id after adding
     * datawriter/publication to repository.
     */
     void set_publication_id (RepoId publication_id);
-     
+
     /**
     * Accessor of the repository id of this datawriter/publication.
     */
@@ -313,12 +313,12 @@ namespace TAO
 
     /**
     * Delegate to WriteDataContainer to unregister all instances.
-    */ 
+    */
     void unregister_all ();
 
     /**
     * This is called by transport to notify that the sample is
-    * delivered and it is delegated to WriteDataContainer 
+    * delivered and it is delegated to WriteDataContainer
     * to adjust the internal data sample threads.
     */
     void data_delivered(DataSampleListElement* sample);
@@ -328,27 +328,27 @@ namespace TAO
     * message is delivered.
     */
     void control_delivered(ACE_Message_Block* sample);
-        
+
     /**
     * Accessor of the cached publisher servant.
     */
     PublisherImpl* get_publisher_servant ();
-    
+
     /**
     * Accessor of the associated topic name.
     */
     const char* get_topic_name ();
 
     /**
-    * This method is called when there is no more space in the 
+    * This method is called when there is no more space in the
     * instance sample list for a non-blocking write. It requests
     * the transport to drop the oldest sample.
     * The dropped_by_transport parameter will be passed all way to the transport
-    * and is used when the data_dropped() is called back. 
+    * and is used when the data_dropped() is called back.
     * See WriterDataContainer::data_dropped() comment for the dropped_by_transport
     * parameter.
     */
-    void remove_sample(DataSampleListElement* element, bool dropped_by_transport = false); 
+    void remove_sample(DataSampleListElement* element, bool dropped_by_transport = false);
 
     /**
     * This mothod is called by transport to notify the instance
@@ -356,7 +356,7 @@ namespace TAO
     * to update the internal list.
     */
     void data_dropped (DataSampleListElement* element, bool dropped_by_transport);
-   
+
 
     /**
     * This is called by transport to notify that the control
@@ -367,7 +367,7 @@ namespace TAO
 
     /**
     * Tell transport to remove all control messages requested
-    * by this datawriter. 
+    * by this datawriter.
     * This is called during datawriter shutdown.
     */
     int remove_all_control_msgs();
@@ -376,15 +376,17 @@ namespace TAO
     /**
     * Accessor of the WriterDataContainer's lock.
     */
+      // ciju: Seems this is no longer being used.
+      // Was wrong. Still required.
     ACE_INLINE
     ACE_Recursive_Thread_Mutex&      get_lock ()
     {
       return data_container_->lock_;
     }
-        
+
     /**
     * This method is called when an instance is unregistered from the
-    * WriteDataContainer. 
+    * WriteDataContainer.
     * The subclass needs provide the implementation to unregister the
     * instance from its own map.
     */
@@ -394,7 +396,7 @@ namespace TAO
     * This is used to retrieve the listener for a certain status change.
     * If this datawriter has a registered listener and the status kind
     * is in the listener mask then the listener is returned.
-    * Otherwise, the query for the listener is propagated up to the 
+    * Otherwise, the query for the listener is propagated up to the
     * factory/publisher.
     */
     ::POA_DDS::DataWriterListener* listener_for (::DDS::StatusKind kind);
@@ -411,15 +413,15 @@ namespace TAO
     void notify_publication_disconnected (const ReaderIdSeq& subids);
     void notify_publication_reconnected (const ReaderIdSeq& subids);
     void notify_publication_lost (const ReaderIdSeq& subids);
- 
+
     /// Statistics counter.
     int         data_dropped_count_;
     int         data_delivered_count_;
     int         control_dropped_count_;
     int         control_delivered_count_;
 
-    /// Called by transport after transport received the FYULLY_ASSOCIATED 
-    /// ack from the associated subscriber. 
+    /// Called by transport after transport received the FYULLY_ASSOCIATED
+    /// ack from the associated subscriber.
     void fully_associated (
       ::TAO::DCPS::RepoId     yourId,
       size_t                  num_remote_associations,
@@ -449,24 +451,24 @@ namespace TAO
 
   private:
 
-      /** This method create a header message block and chain with 
-      * the registered sample. The header contains the information 
+      /** This method create a header message block and chain with
+      * the registered sample. The header contains the information
       * needed. e.g. message id, length of whole message...
       * The fast allocator is not used for the header.
       */
       ACE_Message_Block*
-      create_control_message (enum MessageId message_id, 
+      create_control_message (enum MessageId message_id,
                               ACE_Message_Block* data,
                               const ::DDS::Time_t& source_timestamp);
 
-      /** This method create a header message block and chain with 
-      * the sample data. The header contains the information 
+      /** This method create a header message block and chain with
+      * the sample data. The header contains the information
       * needed. e.g. message id, length of whole message...
       * The fast allocator is used to allocate the message block,
-      * data block and header. 
+      * data block and header.
       */
       ::DDS::ReturnCode_t
-      create_sample_data_message (DataSample* data, 
+      create_sample_data_message (DataSample* data,
                                   ::DDS::InstanceHandle_t instance_handle,
                                   ACE_Message_Block*& message,
                                   const ::DDS::Time_t& source_timestamp);
@@ -475,7 +477,7 @@ namespace TAO
       void send_liveliness (const ACE_Time_Value& now);
 
       /// Convert the subscription repo ids to the subscription handle.
-      void repo_ids_to_instance_handles (const ReaderIdSeq& ids, 
+      void repo_ids_to_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
       /// The name of associated topic.
@@ -491,7 +493,7 @@ namespace TAO
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
       ::DDS::StatusKindMask           listener_mask_;
-      /// Used to notify the entity for relevant events. 
+      /// Used to notify the entity for relevant events.
       ::DDS::DataWriterListener_var   listener_;
       /// The datawriter listener servant.
       ::POA_DDS::DataWriterListener*  fast_listener_;
@@ -504,7 +506,7 @@ namespace TAO
       PublisherImpl*                  publisher_servant_;
       /// The object reference of the publisher.
       ::DDS::Publisher_var            publisher_objref_;
-      /// The object reference of the remote datawriter. 
+      /// The object reference of the remote datawriter.
       DataWriterRemote_var            dw_remote_objref_;
       /// The repository id of this datawriter/publication.
       PublicationId                   publication_id_;
@@ -513,7 +515,7 @@ namespace TAO
       SequenceNumber                  sequence_number_;
       /// The sample data container.
       WriteDataContainer*             data_container_;
-      /// The lock to protect the activate subscriptions 
+      /// The lock to protect the activate subscriptions
       /// and status changes.
       ACE_Recursive_Thread_Mutex                lock_;
       /// The list of active subscriptions.
@@ -526,9 +528,9 @@ namespace TAO
       ::DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
       ::DDS::PublicationMatchStatus       publication_match_status_ ;
 
-      // TODO: 
+      // TODO:
       // The publication_lost_status_ and publication_reconnecting_status_
-      // are left here for future use when we add get_publication_lost_status() and 
+      // are left here for future use when we add get_publication_lost_status() and
       // get_publication_reconnecting_status() methods.
       // Statistics of the lost publications due to lost connection.
       PublicationLostStatus               publication_lost_status_;
@@ -542,14 +544,14 @@ namespace TAO
       /// The header data allocator.
       DataSampleHeaderAllocator* header_allocator_;
 
-      /// The orb's reactor to be used to register the liveliness 
+      /// The orb's reactor to be used to register the liveliness
       /// timer.
       ACE_Reactor*               reactor_;
       /// The time interval for sending liveliness message.
       ACE_Time_Value             liveliness_check_interval_;
       /// Timestamp of last write/dispose/assert_liveliness.
       ACE_Time_Value             last_liveliness_activity_time_;
-      /// The flag indicates whether the liveliness timer is scheduled and 
+      /// The flag indicates whether the liveliness timer is scheduled and
       /// needs be cancelled.
       bool                       cancel_timer_;
 

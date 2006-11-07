@@ -6,7 +6,7 @@
 ACE_INLINE int
 TAO::DCPS::TransportSendStrategy::start()
 {
-  DBG_ENTRY("TransportSendStrategy","start");
+  DBG_ENTRY_LVL("TransportSendStrategy","start",5);
 
   GuardType guard(this->lock_);
 
@@ -34,7 +34,7 @@ TAO::DCPS::TransportSendStrategy::start()
 ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::stop()
 {
-  DBG_ENTRY("TransportSendStrategy","stop");
+  DBG_ENTRY_LVL("TransportSendStrategy","stop",5);
 
   GuardType guard(this->lock_);
 //MJM: Why are we guarding this?  The refcount decrement is already
@@ -56,7 +56,7 @@ TAO::DCPS::TransportSendStrategy::stop()
 ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::send_start()
 {
-  DBG_ENTRY("TransportSendStrategy","send_start");
+  DBG_ENTRY_LVL("TransportSendStrategy","send_start",5);
 
   GuardType guard(this->lock_);
   if (! this->link_released_)
@@ -67,17 +67,17 @@ TAO::DCPS::TransportSendStrategy::send_start()
 ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::link_released (bool flag)
 {
-  DBG_ENTRY("TransportSendStrategy","link_released");
+  DBG_ENTRY_LVL("TransportSendStrategy","link_released",5);
 
   GuardType guard(this->lock_);
   this->link_released_ = flag;
 }
 
 
-ACE_INLINE void 
+ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::relink (bool)
 {
-  DBG_ENTRY("TransportSendStrategy","relink");
+  DBG_ENTRY_LVL("TransportSendStrategy","relink",5);
   // The subsclass needs implement this function for re-establishing
   // the link upon send failure.
 }
@@ -86,7 +86,7 @@ TAO::DCPS::TransportSendStrategy::relink (bool)
 ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::suspend_send ()
 {
-  DBG_ENTRY("TransportSendStrategy","suspend_send");
+  DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",5);
   GuardType guard(this->lock_);
 
   if (this->mode_ != MODE_SUSPEND)
@@ -97,22 +97,22 @@ TAO::DCPS::TransportSendStrategy::suspend_send ()
 }
 
 
-ACE_INLINE void        
+ACE_INLINE void
 TAO::DCPS::TransportSendStrategy::resume_send ()
 {
-  DBG_ENTRY("TransportSendStrategy","resume_send");
+  DBG_ENTRY_LVL("TransportSendStrategy","resume_send",5);
   GuardType guard(this->lock_);
-  // If this send strategy is reused when the connection is reestablished, then 
+  // If this send strategy is reused when the connection is reestablished, then
   // we need re-initialize the mode_ and mode_before_suspend_.
   if (this->mode_ == MODE_TERMINATED)
     {
-      this->header_.length_ = 0; 
-      this->pkt_chain_ = 0; 
-      this->header_complete_ = 0; 
-      this->start_counter_ = 0; 
+      this->header_.length_ = 0;
+      this->pkt_chain_ = 0;
+      this->header_complete_ = 0;
+      this->start_counter_ = 0;
       this->mode_ = MODE_DIRECT;
       this->mode_before_suspend_ = MODE_NOT_SET;
-      this->num_delayed_notifications_ = 0; 
+      this->num_delayed_notifications_ = 0;
     }
   else if (this->mode_before_suspend_ == MODE_NOT_SET)
     {
@@ -126,7 +126,7 @@ TAO::DCPS::TransportSendStrategy::resume_send ()
 }
 
 
-ACE_INLINE const char* 
+ACE_INLINE const char*
 TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
 {
   static const char* SendModeStr[] = { "MODE_NOT_SET",

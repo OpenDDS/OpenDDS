@@ -16,12 +16,12 @@
 /// TransportImpl actually), and "assign it" the provided impl_id as
 /// its unique "instance" identifier.  This identifier can be passed into
 /// the TransportFactory's obtain() method to obtain a reference (counted)
-/// to the TransportImpl object.  This method will fail with a 
+/// to the TransportImpl object.  This method will fail with a
 /// Transport::Duplicate exception if the impl_id is already known to the
 /// TransportFactory as being assigned to a previously created instance.
 ///
-/// The type_id value is used to find the already registered TransportImplFactory 
-/// object (actually a concrete subclass) or create a new TransportImplFactory 
+/// The type_id value is used to find the already registered TransportImplFactory
+/// object (actually a concrete subclass) or create a new TransportImplFactory
 /// object and bind to the impl_type_map_.
 ///
 /// If the TransportImplFactory object (the one registered with the type_id)
@@ -35,7 +35,7 @@
 TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
 {
-  DBG_ENTRY("TransportFactory","create_transport_impl_i");
+  DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",5);
 
   TransportImplFactory_rch impl_factory = this->get_or_create_factory (type_id);
 
@@ -142,9 +142,9 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
 }
 
 
-int 
+int
 TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Heap& cf)
-{ 
+{
   int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
@@ -153,15 +153,15 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
   for (int index = 0;
        (status = cf.enumerate_sections (root, index, sect_name)) == 0;
        ++index) {
-      if (ACE_OS::strncasecmp (sect_name.c_str (), 
-                                   TRANSPORT_SECTION_NAME_PREFIX, 
+      if (ACE_OS::strncasecmp (sect_name.c_str (),
+                                   TRANSPORT_SECTION_NAME_PREFIX,
                                    TRANSPORT_SECTION_NAME_PREFIX_LEN) == 0)
       { // found a [transport_impl_<id>] section
-        TransportIdType transport_id 
+        TransportIdType transport_id
           = static_cast <TransportIdType> (ACE_OS::atoi (sect_name.substr (TRANSPORT_SECTION_NAME_PREFIX_LEN).c_str ()));
         ACE_Configuration_Section_Key sect;
         if (cf.open_section (root, sect_name.c_str (), 0, sect) != 0)
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: "
                              "failed to open section %s\n"),
                              sect_name.c_str ()),
@@ -174,7 +174,7 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
 
           if (transport_type == "")
           {
-            ACE_ERROR_RETURN ((LM_ERROR, 
+            ACE_ERROR_RETURN ((LM_ERROR,
                               ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: "
                               "missing transport_type in \"%s\" section.\n"),
                               sect_name.c_str ()),
@@ -184,7 +184,7 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
           {
             // Create a TransportConfiguration object and load the transport configuration in
             // ACE_Configuration_Heap to the TransportConfiguration object.
-            TransportConfiguration_rch config 
+            TransportConfiguration_rch config
               = this->create_configuration (transport_id, transport_type);
             if (config->load (transport_id, cf) == -1)
               return -1;
@@ -197,7 +197,7 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
 
 
 TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id, 
+TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
                                                     bool auto_configure)
 {
   TransportConfiguration_rch config = this->get_configuration (transport_id);
@@ -207,7 +207,7 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 
 
 TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id, 
+TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
                                                     ACE_CString transport_type,
                                                     bool auto_configure)
 {
@@ -217,18 +217,18 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
       ACE_THROW (CORBA::BAD_PARAM ());
     }
 
-  TransportImpl_rch trans_impl 
+  TransportImpl_rch trans_impl
     = this->create_transport_impl_i (transport_id, transport_type);
 
   if (auto_configure)
     {
-      TransportConfiguration_rch config 
+      TransportConfiguration_rch config
         = this->get_or_create_configuration (transport_id, transport_type);
 
       if (transport_type != config->transport_type_)
         {
           ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t)TransportFactory::create_transport_impl transport_type"
-                                " conflict - provided %s configured %s\n"), transport_type.c_str(), 
+                                " conflict - provided %s configured %s\n"), transport_type.c_str(),
                                 config->transport_type_.c_str ()));
           ACE_THROW (Transport::ConfigurationConflict ());
         }
@@ -236,11 +236,11 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
       trans_impl->configure (config.in ());
     }
 
-  return trans_impl;            
+  return trans_impl;
 }
 
 
-TAO::DCPS::TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch
 TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
 {
   TransportConfiguration_rch config;
@@ -257,12 +257,12 @@ TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
                             transport_id));
       ACE_THROW (Transport::NotConfigured ());
     }
-  
+
   return config;
 }
 
 
-TAO::DCPS::TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch
 TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
                                                    ACE_CString transport_type)
 {
@@ -273,7 +273,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
       result = generator_map_.find (transport_type, generator);
     }
 
-  if (result != 0) 
+  if (result != 0)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t)TransportFactory::create_configuration: "
@@ -288,7 +288,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
 }
 
 
-TAO::DCPS::TransportConfiguration_rch 
+TAO::DCPS::TransportConfiguration_rch
 TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transport_id,
                                                           ACE_CString transport_type)
 {
@@ -311,7 +311,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
       if (transport_type != config->transport_type_)
         {
           ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_configuration transport_type "
-                                "conflict - provided %s configured %s\n", transport_type.c_str(), 
+                                "conflict - provided %s configured %s\n", transport_type.c_str(),
                                 config->transport_type_.c_str ()));
           ACE_THROW (Transport::ConfigurationConflict ());
         }
@@ -322,7 +322,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
 }
 
 
-TAO::DCPS::TransportImplFactory_rch 
+TAO::DCPS::TransportImplFactory_rch
 TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 {
   if (factory_id == "")
@@ -339,7 +339,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
     }
   if (result == 0)
     return factory;
- 
+
   TransportGenerator_rch generator;
   {
     GuardType guard(this->lock_);
@@ -376,15 +376,15 @@ TAO::DCPS::TransportFactory::register_simpletcp ()
                  ACE_TEXT("(%P|%t)TransportFactory::register_simpletcp no memory\n")));
       return;
     }
-  this->register_generator ("SimpleTcp", generator); 
+  this->register_generator ("SimpleTcp", generator);
 }
 
 
-void 
-TAO::DCPS::TransportFactory::register_generator (const char* type, 
+void
+TAO::DCPS::TransportFactory::register_generator (const char* type,
                                                  TransportGenerator* generator)
 {
-  DBG_ENTRY("TransportFactory","register_generator");
+  DBG_ENTRY_LVL("TransportFactory","register_generator",5);
   // We take ownership (reasons explained above) of the impl_factory
   // immediately using a (local variable) smart pointer.
   TransportGenerator_rch generator_rch = generator;
@@ -432,7 +432,7 @@ void
 TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
                                               TransportImplFactory_rch factory)
 {
-  DBG_ENTRY("TransportFactory","register_factory");
+  DBG_ENTRY_LVL("TransportFactory","register_factory",5);
 
   int result;
 
@@ -468,7 +468,7 @@ void
 TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transport_id,
                                                     TransportConfiguration_rch  config)
 {
-  DBG_ENTRY("TransportFactory","register_configuration");
+  DBG_ENTRY_LVL("TransportFactory","register_configuration",5);
 
   int result;
 
@@ -503,7 +503,7 @@ TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transp
 TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::obtain(TransportIdType impl_id)
 {
-  DBG_ENTRY("TransportFactory","obtain");
+  DBG_ENTRY_LVL("TransportFactory","obtain",5);
   TransportImpl_rch impl;
 
   // Use separate scope for guard

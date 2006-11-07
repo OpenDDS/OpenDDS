@@ -11,7 +11,7 @@
 ACE_INLINE
 TAO::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 {
-  DBG_ENTRY("SimpleUdpTransport","SimpleUdpTransport");
+  DBG_ENTRY_LVL("SimpleUdpTransport","SimpleUdpTransport",5);
   this->socket_ = new SimpleUdpSocket();
   this->socket_->_add_ref() ;
 }
@@ -22,7 +22,7 @@ TAO::DCPS::SimpleUdpTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY("SimpleUdpTransport","deliver_sample");
+  DBG_ENTRY_LVL("SimpleUdpTransport","deliver_sample",5);
 
   SimpleUdpDataLink_rch link;
 
@@ -42,7 +42,7 @@ TAO::DCPS::SimpleUdpTransport::deliver_sample
 }
 
 
-ACE_INLINE bool 
+ACE_INLINE bool
 TAO::DCPS::SimpleUdpTransport::acked (RepoId)
 {
   return true;

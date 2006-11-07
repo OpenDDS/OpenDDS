@@ -48,9 +48,11 @@ namespace TAO
         DataLink(TransportImpl* impl);
         virtual ~DataLink();
 
+      // ciju: Called by TransportImpl
         /// This is for a remote subscriber_id and local publisher_id
         int make_reservation(RepoId subscriber_id, RepoId publisher_id);
 
+      // ciju: Called by TransportImpl
         /// This is for a remote publisher_id and a local subscriber_id.
         /// The TransportReceiveListener is associated with the local
         /// subscriber_id.
@@ -58,6 +60,7 @@ namespace TAO
                              RepoId                    subscriber_id,
                              TransportReceiveListener* receive_listener);
 
+      // ciju: Called by LinkSet with locks held
         /// This will release reservations that were made by one of the
         /// make_reservation() methods.  All we know is that the supplied
         /// RepoId is considered to be a remote id.  It could be a
@@ -65,14 +68,15 @@ namespace TAO
         void release_reservations(RepoId          remote_id,
                                   DataLinkSetMap& released_locals);
 
-        /// A hook for the concrete transport to do something special on 
-        /// subscriber side after both add_associations is received and 
+        /// A hook for the concrete transport to do something special on
+        /// subscriber side after both add_associations is received and
         /// the connection is established.
         virtual void fully_associated ();
 
+      // ciju: Called by LinkSet with locks held
         /// Called by the TransportInterface objects that reference this
         /// DataLink.  Used by the TransportInterface to send a sample,
-        /// or to send a control message. These functions either give the 
+        /// or to send a control message. These functions either give the
         /// request to the PerThreadConnectionSendTask when thread_per_connection
         /// configuration is true or just simply delegate to the send strategy.
         void send_start();
@@ -81,6 +85,7 @@ namespace TAO
 //MJM: We may want to change these to be enable/disable instead of start/stop.
 //MJM: No real reason, but the semantics may be easier to understand?
 
+      // ciju: Called by LinkSet with locks held
         /// This method is essentially an "undo_send()" method.  It's goal
         /// is to remove all traces of the sample from this DataLink (if
         /// the sample is even known to the DataLink).
@@ -91,6 +96,7 @@ namespace TAO
         /// did).
         int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
+      // ciju: Called by LinkSet with locks held
         void remove_all_control_msgs(RepoId pub_id);
 
         /// This is called by our TransportReceiveStrategy object when it
@@ -115,7 +121,7 @@ namespace TAO
         /// the concrete DataLink to do anything necessary.
         virtual void pre_stop_i ();
 
-        /// This is called on subscriber side to serialize the 
+        /// This is called on subscriber side to serialize the
         /// associated publication and subscriptions.
         ACE_Message_Block* marshal_acks (bool byte_order);
 
@@ -155,8 +161,8 @@ namespace TAO
 
         friend class ThreadPerConnectionSendTask;
 
-        /// The implementation of the functions that accomplish the 
-        /// sample or control message delivery. IThey just simply 
+        /// The implementation of the functions that accomplish the
+        /// sample or control message delivery. IThey just simply
         /// delegate to the send strategy.
         void send_start_i();
         void send_i(TransportQueueElement* element);
@@ -181,7 +187,6 @@ namespace TAO
                                   DataLinkSetMap&     released_subscribers);
 
         typedef ACE_SYNCH_MUTEX     LockType;
-        typedef ACE_Guard<LockType> GuardType;
 
 
         /// The lock_ protects the pub_map_ and sub_map_ data members.
@@ -208,15 +213,19 @@ namespace TAO
         /// The id for this DataLink
         ACE_UINT64 id_;
 
-        /// The task used to do the sending. This ThreadPerConnectionSendTask 
+        /// The task used to do the sending. This ThreadPerConnectionSendTask
         /// object is created when the thread_per_connection configuration is
         /// true. It only dedicate to this datalink.
         ThreadPerConnectionSendTask* thr_per_con_send_task_;
 
     protected:
 
+      typedef ACE_Guard<LockType> GuardType;
+
         /// The transport send strategy object for this DataLink.
         TransportSendStrategy_rch send_strategy_;
+
+      LockType strategy_lock_;
 
     };
 

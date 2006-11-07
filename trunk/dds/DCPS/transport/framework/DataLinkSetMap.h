@@ -37,6 +37,7 @@ namespace TAO
         /// Will return nil (0) for failure.
         DataLinkSet* find_set(RepoId id);
 
+      // ciju: Called with TransportImpl Reservation lock held
         /// This method will do the find_or_create_set(id), followed by
         /// an insert() call on the DataLinkSet (the one that was
         /// found or created for us).  A -1 is returned if there are
@@ -46,6 +47,7 @@ namespace TAO
         /// REMEMBER: This really means find_or_create_set_then_insert_link()
         int insert_link(RepoId id, DataLink* link);
 
+      // ciju: Called with TransportImpl Reservation lock held
         /// Used by the TransportInterface when this map is regarded as
         /// the "remote map".
         ///
@@ -59,11 +61,13 @@ namespace TAO
                                   const RepoId*   remote_ids,
                                   DataLinkSetMap& released_locals);
 
+      // ciju: Called with TransportImpl Reservation lock held
         /// Called when the TransportInterface is detaching from the
         /// TransportImpl (as opposed to the other way around when the
         /// TransportImpl is detaching from the TransportInterface).
         void release_all_reservations();
 
+      // ciju: Called with TransportImpl Reservation lock held
         /// Used by the TransportInterface when this map is regarded as
         /// the "local map".
         ///
@@ -88,7 +92,7 @@ namespace TAO
                                         ACE_Equal_To<RepoId>,
                                         ACE_Null_Mutex>        MapType;
 
-        LockType lock_;
+      LockType map_lock_; // This lock is explicitly for this->map_ protection
         MapType  map_;
     };
 

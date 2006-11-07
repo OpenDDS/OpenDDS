@@ -12,14 +12,14 @@
 
 TAO::DCPS::RepoIdSetMap::~RepoIdSetMap()
 {
-  DBG_ENTRY("RepoIdSetMap","~RepoIdSetMap");
+  DBG_ENTRY_LVL("RepoIdSetMap","~RepoIdSetMap",5);
 }
 
 
 int
 TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 {
-  DBG_ENTRY("RepoIdSetMap","insert");
+  DBG_ENTRY_LVL("RepoIdSetMap","insert",5);
   RepoIdSet_rch id_set = this->find_or_create(key);
 
   if (id_set.is_nil())
@@ -46,7 +46,7 @@ TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
     {
       // It could be already bound, but we accept it since the subscriber
       // could send the acks for the same id multiple times.
-      
+
       // Success.  Leave now.
       return 0;
     }
@@ -74,7 +74,7 @@ TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 int
 TAO::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 {
-  DBG_ENTRY("RepoIdSetMap","remove");
+  DBG_ENTRY_LVL("RepoIdSetMap","remove",5);
   RepoIdSet_rch id_set;
 
   int result = this->map_.find(key,id_set);
@@ -85,7 +85,7 @@ TAO::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Unable to locate RepoIdSet for key %d.\n",
                         key),
-                       -1);  
+                       -1);
     }
 
   // Now we can attempt to remove the value RepoId from the id_set.
@@ -98,7 +98,7 @@ TAO::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
                         "(%P|%t) ERROR: RepoIdSet for key %d does not contain "
                         "value %d.\n",
                         key, value),
-                       -1);  
+                       -1);
     }
 
   return 0;
@@ -109,7 +109,7 @@ TAO::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 TAO::DCPS::RepoIdSet*
 TAO::DCPS::RepoIdSetMap::remove_set(RepoId key)
 {
-  DBG_ENTRY("RepoIdSetMap","remove_set");
+  DBG_ENTRY_LVL("RepoIdSetMap","remove_set",5);
   RepoIdSet_rch value;
 
   if (this->map_.unbind(key,value) != 0)
@@ -126,7 +126,7 @@ int
 TAO::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
                                            RepoId publisher_id)
 {
-  DBG_ENTRY("RepoIdSetMap","release_publisher");
+  DBG_ENTRY_LVL("RepoIdSetMap","release_publisher",5);
   RepoIdSet_rch id_set;
 
   if (this->map_.find(subscriber_id, id_set) != 0)
@@ -152,9 +152,9 @@ TAO::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
 ACE_Message_Block*
 TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
 {
-  DBG_ENTRY("RepoIdSetMap","marshal");
+  DBG_ENTRY_LVL("RepoIdSetMap","marshal",5);
   ACE_Message_Block* data = 0;
-  
+
   ACE_NEW_RETURN (data,
     ACE_Message_Block(this->marshaled_size (),
     ACE_Message_Block::MB_DATA,
@@ -168,7 +168,7 @@ TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
     0,
     0),
     0);
-  
+
   TAO::DCPS::Serializer writer(data, byte_order);
   writer << this->size ();
 
@@ -187,10 +187,10 @@ TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
 
 
 
-bool 
+bool
 TAO::DCPS::RepoIdSetMap::equal (RepoIdSetMap& map, RepoId id)
 {
-  DBG_ENTRY("RepoIdSetMap","equal");
+  DBG_ENTRY_LVL("RepoIdSetMap","equal",5);
 
   RepoIdSet_rch given_id_set = map.find (id);
   RepoIdSet_rch this_id_set = this->find (id);
@@ -201,13 +201,13 @@ TAO::DCPS::RepoIdSetMap::equal (RepoIdSetMap& map, RepoId id)
   }
 
   return false;
-}  
+}
 
 
 int
 TAO::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
 {
-  DBG_ENTRY("RepoIdSetMap","demarshal");
+  DBG_ENTRY_LVL("RepoIdSetMap","demarshal",5);
 
   TAO::DCPS::Serializer reader( acks, byte_order);
 
@@ -242,8 +242,8 @@ TAO::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
 void
 TAO::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
 {
-  DBG_ENTRY("RepoIdSetMap","get_keys");
-  
+  DBG_ENTRY_LVL("RepoIdSetMap","get_keys",5);
+
   MapType::ENTRY* entry;
 
     for (MapType::ITERATOR itr(this->map_);

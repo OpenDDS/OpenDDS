@@ -31,15 +31,18 @@ namespace TAO
         DataLinkSet();
         virtual ~DataLinkSet();
 
+      // ciju: Called with lock held in DataLinkSetMap
         // Returns 0 for success, -1 for failure, and 1 for failure due
         // to duplicate entry (link is already a member of the set).
         int insert_link(DataLink* link);
 
+      // ciju: Called with lock held in DataLinkSetMap
         /// This method is called to remove a set of DataLinks from this set
         /// (ie, set subtraction: this set minus released_set).
         /// Returns the num elems in the set after attempting the operation.
         ssize_t remove_links(DataLinkSet* released_set);
 
+      // ciju: Called with lock held in DataLinkSetMap
         /// Remove all reservations involving the remote_id from each
         /// DataLink in this set.  The supplied 'released' map will be
         /// updated with all of the local_id to DataLink reservations that
@@ -47,18 +50,23 @@ namespace TAO
         void release_reservations(RepoId          remote_id,
                                   DataLinkSetMap& released_locals);
 
+      // ciju: This method was called without any locks held from TransportInterface.
         /// Send to each DataLink in the set.
         void send(DataSampleListElement* sample);
 
         /// Send control message to each DataLink in the set.
+      // ciju: This is called without any locks held held from TransportInterface.
         SendControlStatus send_control(RepoId                 pub_id,
                                        TransportSendListener* listener,
                                        ACE_Message_Block*     msg);
 
+      // ciju: This method was called without any locks held held from TransportInterface.
         int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
+      // ciju: This method was called without any locks held held from TransportInterface.
         int remove_all_control_msgs(RepoId pub_id);
 
+      // ciju: This method was called without any locks held held from TransportInterface.
         /// This will do several things, including adding to the membership
         /// of the send_links_ set.  Any DataLinks added to the send_links_
         /// set will be also told about the send_start() event.  Those
@@ -68,6 +76,7 @@ namespace TAO
         /// send_links_ set.
         void send_start(DataLinkSet* link_set);
 
+      // ciju: This method was called without any locks held held from TransportInterface.
         /// This will inform each DataLink in the set about the send_stop()
         /// event.  It will then clear the send_links_ set.
         void send_stop();
@@ -75,19 +84,26 @@ namespace TAO
 
       private:
 
+      typedef ACE_SYNCH_MUTEX     LockType;
+      typedef ACE_Guard<LockType> GuardType;
+
         typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
                                             DataLink_rch>            MapType;
         typedef Cached_Allocator_With_Overflow<MapType::ENTRY,
                                                ACE_Null_Mutex>       MapEntryAllocator ;
-        
+
         /// Allocator for MapType::ENTRY.
         MapEntryAllocator map_entry_allocator_;
-        
+
         /// Hash map for DataLinks.
         MapType*  map_;
-        
+
         /// Allocator for TransportSendControlElement.
         TransportSendControlElementAllocator send_control_element_allocator_;
+
+      /// This lock will protect critical sections of code that play a
+      /// role in the sending of data.
+      LockType lock_;
     };
 
   }  /* namespace DCPS */

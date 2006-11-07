@@ -12,7 +12,7 @@ TAO::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
   : worker_(0),
     resource_(resource)
 {
-  DBG_ENTRY("ThreadSynch","ThreadSynch");
+  DBG_ENTRY_LVL("ThreadSynch","ThreadSynch",5);
 }
 
 
@@ -20,7 +20,7 @@ TAO::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
 ACE_INLINE int
 TAO::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
 {
-  DBG_ENTRY("ThreadSynch","register_worker");
+  DBG_ENTRY_LVL("ThreadSynch","register_worker",5);
   this->worker_ = worker;
   return this->register_worker_i();
 }
@@ -29,7 +29,7 @@ TAO::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
 ACE_INLINE void
 TAO::DCPS::ThreadSynch::unregister_worker()
 {
-  DBG_ENTRY("ThreadSynch","unregister_worker");
+  DBG_ENTRY_LVL("ThreadSynch","unregister_worker",5);
   this->unregister_worker_i();
   this->worker_ = 0;
   delete this->resource_;
@@ -40,7 +40,7 @@ TAO::DCPS::ThreadSynch::unregister_worker()
 ACE_INLINE TAO::DCPS::ThreadSynchWorker::WorkOutcome
 TAO::DCPS::ThreadSynch::perform_work()
 {
-  DBG_ENTRY("ThreadSynch","perform_work");
+  DBG_ENTRY_LVL("ThreadSynch","perform_work",5);
 
   if (this->worker_ == 0)
     {
@@ -54,7 +54,7 @@ TAO::DCPS::ThreadSynch::perform_work()
 ACE_INLINE int
 TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
 {
-  DBG_ENTRY("ThreadSynch","wait_on_clogged_resource");
+  DBG_ENTRY_LVL("ThreadSynch","wait_on_clogged_resource",5);
 
   int result = -1;
 

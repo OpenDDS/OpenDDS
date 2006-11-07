@@ -10,7 +10,7 @@ TAO::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
   : count_(initial_count),
     dropped_(false)
 {
-  DBG_ENTRY("TransportQueueElement","TransportQueueElement");
+  DBG_ENTRY_LVL("TransportQueueElement","TransportQueueElement",5);
 }
 
 
@@ -19,7 +19,7 @@ bool
 TAO::DCPS::TransportQueueElement::operator==
                                      (const ACE_Message_Block* sample) const
 {
-  DBG_ENTRY("TransportQueueElement","operator==");
+  DBG_ENTRY_LVL("TransportQueueElement","operator==",5);
   return (sample->rd_ptr() == this->msg()->rd_ptr());
 }
 
@@ -28,7 +28,7 @@ ACE_INLINE
 void
 TAO::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
-  DBG_ENTRY("TransportQueueElement","data_dropped");
+  DBG_ENTRY_LVL("TransportQueueElement","data_dropped",5);
   this->dropped_ = true;
   this->decision_made(dropped_by_transport);
 }
@@ -38,7 +38,7 @@ ACE_INLINE
 void
 TAO::DCPS::TransportQueueElement::data_delivered()
 {
-  DBG_ENTRY("TransportQueueElement","data_delivered");
+  DBG_ENTRY_LVL("TransportQueueElement","data_delivered",5);
   bool dropped = false;
   this->decision_made(dropped);
 }
@@ -48,7 +48,7 @@ ACE_INLINE
 void
 TAO::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 {
-  DBG_ENTRY("TransportQueueElement","decision_made");
+  DBG_ENTRY_LVL("TransportQueueElement","decision_made",5);
 
   int new_count;
 

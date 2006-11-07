@@ -14,11 +14,11 @@
 
 TAO::DCPS::TransportConfiguration::~TransportConfiguration()
 {
-  DBG_ENTRY("TransportConfiguration","~TransportConfiguration");
+  DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",5);
   delete this->send_thread_strategy_;
 }
 
-int 
+int
 TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configuration_Heap& cf)
 {
   char section [50];
@@ -26,7 +26,7 @@ TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configur
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key sect;
   if (cf.open_section (root, section, 0, sect) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("Failed to open section: %s\n"), section),
                        -1);
   GET_CONFIG_VALUE (cf, sect, "swap_bytes", this->swap_bytes_, bool)

@@ -14,7 +14,7 @@ TAO::DCPS::TransportReactorTask::TransportReactorTask()
   : state_ (STATE_NOT_RUNNING),
     condition_(this->lock_)
 {
-  DBG_ENTRY("TransportReactorTask","TransportReactorTask");
+  DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",5);
   // Set our reactor pointer to a new reactor object.
   this->reactor_ = new ACE_Reactor();
 }
@@ -22,7 +22,7 @@ TAO::DCPS::TransportReactorTask::TransportReactorTask()
 
 TAO::DCPS::TransportReactorTask::~TransportReactorTask()
 {
-  DBG_ENTRY("TransportReactorTask","~TransportReactorTask");
+  DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",5);
   delete this->reactor_;
 }
 
@@ -30,7 +30,7 @@ TAO::DCPS::TransportReactorTask::~TransportReactorTask()
 int
 TAO::DCPS::TransportReactorTask::open(void*)
 {
-  DBG_ENTRY("TransportReactorTask","open");
+  DBG_ENTRY_LVL("TransportReactorTask","open",5);
 
   GuardType guard(this->lock_);
 
@@ -70,7 +70,7 @@ TAO::DCPS::TransportReactorTask::open(void*)
 int
 TAO::DCPS::TransportReactorTask::svc()
 {
-  DBG_ENTRY("TransportReactorTask","svc");
+  DBG_ENTRY_LVL("TransportReactorTask","svc",5);
 
   // First off - We need to obtain our own reference to ourselves such
   // that we don't get deleted while still running in our own thread.
@@ -107,8 +107,8 @@ TAO::DCPS::TransportReactorTask::svc()
 //MJM: indicate whether or not to terminate.  But I can think of no
 //MJM: reason to have anything in the conditional, so just expire.
 //MJM: Nevermind.
-  try 
-  {      
+  try
+  {
     // Tell the reactor to handle events.
     this->reactor_->run_reactor_event_loop ();
   }
@@ -117,7 +117,7 @@ TAO::DCPS::TransportReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: TransportReactorTask::svc caught exception.\n"));
   }
- 
+
   return 0;
 }
 
@@ -125,15 +125,15 @@ TAO::DCPS::TransportReactorTask::svc()
 int
 TAO::DCPS::TransportReactorTask::close(u_long flags)
 {
-  DBG_ENTRY("TransportReactorTask","close");
+  DBG_ENTRY_LVL("TransportReactorTask","close",5);
   ACE_UNUSED_ARG (flags);
   // This is called after the reactor threads exit.
-  // We should not set state here since we are not 
+  // We should not set state here since we are not
   // sure how many reactor threads we will use.
-  // If there is one reactor thread then we should 
-  // set the state so the stop will not call 
+  // If there is one reactor thread then we should
+  // set the state so the stop will not call
   // end_reactor_event_loop.
-  // If there are multiple reactor threads, we still 
+  // If there are multiple reactor threads, we still
   // need call end_reactor_event_loop in stop() while
   // one reactor thread already exited.
 //MJM: Right.
@@ -146,7 +146,7 @@ TAO::DCPS::TransportReactorTask::close(u_long flags)
 void
 TAO::DCPS::TransportReactorTask::stop()
 {
-  DBG_ENTRY("TransportReactorTask","stop");
+  DBG_ENTRY_LVL("TransportReactorTask","stop",5);
   {
     GuardType guard(this->lock_);
     if (this->state_ == STATE_NOT_RUNNING)

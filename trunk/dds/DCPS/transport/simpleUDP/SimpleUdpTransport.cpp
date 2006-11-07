@@ -16,7 +16,7 @@
 
 TAO::DCPS::SimpleUdpTransport::~SimpleUdpTransport()
 {
-  DBG_ENTRY("SimpleUdpTransport","~SimpleUdpTransport");
+  DBG_ENTRY_LVL("SimpleUdpTransport","~SimpleUdpTransport",5);
 }
 
 
@@ -25,7 +25,7 @@ TAO::DCPS::SimpleUdpTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
                           int                           connect_as_publisher)
 {
-  DBG_ENTRY("SimpleUdpTransport","find_or_create_datalink");
+  DBG_ENTRY_LVL("SimpleUdpTransport","find_or_create_datalink",5);
 
   // For UDP, we don't care why we are connecting.
   ACE_UNUSED_ARG(connect_as_publisher);
@@ -89,7 +89,7 @@ TAO::DCPS::SimpleUdpTransport::find_or_create_datalink
 int
 TAO::DCPS::SimpleUdpTransport::configure_i(TransportConfiguration* config)
 {
-  DBG_ENTRY("SimpleUdpTransport","configure_i");
+  DBG_ENTRY_LVL("SimpleUdpTransport","configure_i",5);
 
   // Downcast the config argument to a SimpleUdpConfiguration*
   SimpleUdpConfiguration* udp_config = ACE_static_cast(SimpleUdpConfiguration*,
@@ -133,7 +133,7 @@ TAO::DCPS::SimpleUdpTransport::configure_i(TransportConfiguration* config)
 
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
-                        this->local_address_.get_host_addr (), 
+                        this->local_address_.get_host_addr (),
                         this->local_address_.get_port_number (),
                         "open"),
                        -1);
@@ -175,7 +175,7 @@ TAO::DCPS::SimpleUdpTransport::configure_i(TransportConfiguration* config)
 void
 TAO::DCPS::SimpleUdpTransport::shutdown_i()
 {
-  DBG_ENTRY("SimpleUdpTransport","shutdown_i");
+  DBG_ENTRY_LVL("SimpleUdpTransport","shutdown_i",5);
 
   // Stop the receive strategy
   this->receive_strategy_->stop();
@@ -219,7 +219,7 @@ int
 TAO::DCPS::SimpleUdpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY("SimpleUdpTransport","connection_info_i");
+  DBG_ENTRY_LVL("SimpleUdpTransport","connection_info_i",5);
 
   NetworkAddress network_order_address(this->local_address_);
 
@@ -238,7 +238,7 @@ TAO::DCPS::SimpleUdpTransport::connection_info_i
 void
 TAO::DCPS::SimpleUdpTransport::release_datalink_i(DataLink* link)
 {
-  DBG_ENTRY("SimpleUdpTransport","release_datalink_i");
+  DBG_ENTRY_LVL("SimpleUdpTransport","release_datalink_i",5);
 
   SimpleUdpDataLink* udp_link = ACE_static_cast(SimpleUdpDataLink*,link);
 

@@ -15,7 +15,7 @@
 
 TAO::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
 {
-  DBG_ENTRY("RemoveAllVisitor","~RemoveAllVisitor");
+  DBG_ENTRY_LVL("RemoveAllVisitor","~RemoveAllVisitor",5);
 }
 
 
@@ -23,10 +23,10 @@ int
 TAO::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
                                            int&                   remove)
 {
-  DBG_ENTRY("RemoveAllVisitor","visit_element");
+  DBG_ENTRY_LVL("RemoveAllVisitor","visit_element",5);
 
-  // Always remove the element passed in. Always set the remove flag 
-  // to true (1).  The BasicQueue<T> will perform the actual removal 
+  // Always remove the element passed in. Always set the remove flag
+  // to true (1).  The BasicQueue<T> will perform the actual removal
   // once we return from this method.
   remove = 1;
 

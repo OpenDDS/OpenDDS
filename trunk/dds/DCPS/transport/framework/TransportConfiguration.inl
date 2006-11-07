@@ -26,7 +26,7 @@ TAO::DCPS::TransportConfiguration::TransportConfiguration()
     thread_per_connection_ (0),
     keep_link_ (0)
 {
-  DBG_ENTRY("TransportConfiguration","TransportConfiguration");
+  DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",5);
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
   this->adjust_config_value ();
 }
@@ -60,7 +60,7 @@ TAO::DCPS::TransportConfiguration::send_thread_strategy()
 
 
 ACE_INLINE
-void 
+void
 TAO::DCPS::TransportConfiguration::adjust_config_value ()
 {
   // Ensure that the number of samples put into the packet does
@@ -69,8 +69,8 @@ TAO::DCPS::TransportConfiguration::adjust_config_value ()
   if ((2 * max_samples_per_packet_ + 1) > MAX_SEND_BLOCKS)
   {
     max_samples_per_packet_ = (MAX_SEND_BLOCKS + 1) / 2 - 1;
-    ACE_DEBUG ((LM_WARNING,                                                    
-                ACE_TEXT ("(%P|%t)\"max_samples_per_packet\" is adjusted from %u to %u\n"),    
-                old_value, max_samples_per_packet_));                                               
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("(%P|%t)\"max_samples_per_packet\" is adjusted from %u to %u\n"),
+                old_value, max_samples_per_packet_));
   }
 }

@@ -15,7 +15,7 @@
 
 TAO::DCPS::TransportImpl::~TransportImpl()
 {
-  DBG_ENTRY("TransportImpl","~TransportImpl");
+  DBG_ENTRY_LVL("TransportImpl","~TransportImpl",5);
   {
     PublicationObjectMap::ENTRY* entry;
     for (PublicationObjectMap::ITERATOR itr(dw_map_);
@@ -25,7 +25,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
       entry->int_id_->_remove_ref ();
     }
   }
-	
+
   {
     SubscriptionObjectMap::ENTRY* entry;
     for (SubscriptionObjectMap::ITERATOR itr(dr_map_);
@@ -41,7 +41,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
 void
 TAO::DCPS::TransportImpl::shutdown()
 {
-  DBG_ENTRY("TransportImpl","shutdown");
+  DBG_ENTRY_LVL("TransportImpl","shutdown",5);
 
   this->pre_shutdown_i();
 
@@ -160,7 +160,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
                          receive_listener);
 
   // This is called on the subscriber side to let the concrete
-  // datalink to do some necessary work such as SimpleTcp will 
+  // datalink to do some necessary work such as SimpleTcp will
   // send the FULLY_ASSOCIATED ack to the publisher.
   link->fully_associated ();
 
@@ -174,7 +174,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
 TAO::DCPS::AttachStatus
 TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 {
-  DBG_ENTRY("TransportImpl","attach_interface");
+  DBG_ENTRY_LVL("TransportImpl","attach_interface",5);
 
   GuardType guard(this->lock_);
 
@@ -205,11 +205,11 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 }
 
 
-int 
-TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id, 
+int
+TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
                                                 TAO::DCPS::DataWriterImpl* dw)
 {
-  DBG_ENTRY("TransportImpl","register_publication");
+  DBG_ENTRY_LVL("TransportImpl","register_publication",5);
   GuardType guard(this->lock_);
 
   int ret = this->dw_map_.bind (pub_id, dw);
@@ -218,7 +218,7 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
       dw->_add_ref ();
     }
 
-  // It's possiable this function is called after the 
+  // It's possiable this function is called after the
   // add_association is handled and also the FULLY_ASSOCIATED
   // ack is received by the publisher side, we need check the
   // map to see if it's the case. If it is,the datawriter will be
@@ -232,10 +232,10 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
 }
 
 
-int 
+int
 TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
 {
-  DBG_ENTRY("TransportImpl","unregister_publication");
+  DBG_ENTRY_LVL("TransportImpl","unregister_publication",5);
   GuardType guard(this->lock_);
   DataWriterImpl* dw = 0;
   int result = this->dw_map_.unbind (pub_id, dw);
@@ -246,10 +246,10 @@ TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
 }
 
 
-TAO::DCPS::DataWriterImpl* 
+TAO::DCPS::DataWriterImpl*
 TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id)
 {
-  DBG_ENTRY("TransportImpl","find_publication");
+  DBG_ENTRY_LVL("TransportImpl","find_publication",5);
   GuardType guard(this->lock_);
   TAO::DCPS::DataWriterImpl* dw = 0;
   if (this->dw_map_.find (pub_id, dw) == -1)
@@ -264,11 +264,11 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id)
 }
 
 
-int 
-TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id, 
+int
+TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
                                                  TAO::DCPS::DataReaderImpl* dr)
 {
-  DBG_ENTRY("TransportImpl","register_subscription");
+  DBG_ENTRY_LVL("TransportImpl","register_subscription",5);
   GuardType guard(this->lock_);
 
   int ret = this->dr_map_.bind (sub_id, dr);
@@ -281,25 +281,25 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
 }
 
 
-int 
+int
 TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 {
-  DBG_ENTRY("TransportImpl","unregister_subscription");
+  DBG_ENTRY_LVL("TransportImpl","unregister_subscription",5);
   GuardType guard(this->lock_);
 
   DataReaderImpl* dr = 0;
   int result = this->dr_map_.unbind (sub_id, dr);
   if (dr != 0)
     dr->_remove_ref ();
-  
+
   return result;
 }
 
 
-TAO::DCPS::DataReaderImpl* 
+TAO::DCPS::DataReaderImpl*
 TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id)
 {
-  DBG_ENTRY("TransportImpl","find_subscription");
+  DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
   GuardType guard(this->lock_);
   TAO::DCPS::DataReaderImpl* dr = 0;
   if (this->dr_map_.find (sub_id, dr) == -1)
@@ -319,7 +319,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
                                                    size_t                  num_remote_associations,
                                                    const AssociationData*  remote_associations)
 {
-  DBG_ENTRY("TransportImpl","add_pending_association");
+  DBG_ENTRY_LVL("TransportImpl","add_pending_association",5);
 
   GuardType guard(this->lock_);
 
@@ -328,7 +328,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
   {
     if (this->pending_sub_map_.insert (pub_id, remote_associations [i].remote_id_) != 0)
       return 0;
-  } 
+  }
 
   AssociationInfo info;
   info.num_associations_ = num_remote_associations;
@@ -337,7 +337,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 
   // Cache the Association data so it can be used for the callback
   // to notify datawriter on_publication_match.
-  
+
   PendingAssociationsMap::ENTRY* entry;
   if (this->pending_association_sub_map_.find (pub_id, entry) == 0)
     entry->int_id_->push_back (info);
@@ -353,15 +353,15 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 
   if (this->acked (pub_id))
     this->fully_associated (pub_id);
-  
+
   return 0;
 }
 
 
-int 
+int
 TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
 {
-  DBG_ENTRY("TransportImpl","demarshal");
+  DBG_ENTRY_LVL("TransportImpl","demarshal",5);
 
   int status = this->acked_sub_map_.demarshal (acks, byte_order);
   if (status == -1)
@@ -372,9 +372,9 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
   GuardType guard(this->lock_);
 
   RepoIdSet acked_pubs;
-  
+
   this->acked_sub_map_.get_keys (acked_pubs);
-  
+
   RepoIdSet::MapType::ENTRY* entry;
 
   for (RepoIdSet::MapType::ITERATOR itr(acked_pubs.map ());
@@ -394,7 +394,7 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
 void
 TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 {
-  DBG_ENTRY("TransportImpl","fully_associated");
+  DBG_ENTRY_LVL("TransportImpl","fully_associated",5);
 
   TAO::DCPS::DataWriterImpl* dw = 0;
   int ret = this->dw_map_.find (pub_id, dw);
@@ -407,8 +407,8 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
   {
     for (size_t i = 0; i < len; ++i)
     {
-      dw->fully_associated (pub_id, 
-      (*remote_associations)[i].num_associations_, 
+      dw->fully_associated (pub_id,
+      (*remote_associations)[i].num_associations_,
       (*remote_associations)[i].association_data_);
     }
     this->pending_sub_map_.remove_set (pub_id);

@@ -13,7 +13,7 @@ TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
   : handle_(connection->peer().get_handle()),
     max_output_pause_period_ (max_output_pause_period)
 {
-  DBG_ENTRY("SimpleTcpSynchResource","SimpleTcpSynchResource");
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","SimpleTcpSynchResource",5);
 
   // Keep our own "copy" of the reference to the connection.
   connection->_add_ref();
@@ -23,15 +23,15 @@ TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
 
 TAO::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
 {
-  DBG_ENTRY("SimpleTcpSynchResource","~SimpleTcpSynchResource");
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","~SimpleTcpSynchResource",5);
 }
 
 
 int
 TAO::DCPS::SimpleTcpSynchResource::wait_to_unclog()
 {
-  DBG_ENTRY("SimpleTcpSynchResource","wait_to_unclog");
- 
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","wait_to_unclog",5);
+
   ACE_Time_Value* timeout = 0;
   if (this->max_output_pause_period_ != ACE_Time_Value::zero)
     timeout = &this->max_output_pause_period_;

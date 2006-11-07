@@ -7,6 +7,6 @@
 ACE_INLINE
 TAO::DCPS::SimpleTcpFactory::SimpleTcpFactory()
 {
-  DBG_ENTRY("SimpleTcpFactory","SimpleTcpFactory");
+  DBG_ENTRY_LVL("SimpleTcpFactory","SimpleTcpFactory",5);
 }
 

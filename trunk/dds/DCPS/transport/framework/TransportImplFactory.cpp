@@ -12,14 +12,14 @@
 
 TAO::DCPS::TransportImplFactory::~TransportImplFactory()
 {
-  DBG_ENTRY("TransportImplFactory","~TransportImplFactory");
+  DBG_ENTRY_LVL("TransportImplFactory","~TransportImplFactory",5);
 }
 
 
 int
 TAO::DCPS::TransportImplFactory::requires_reactor() const
 {
-  DBG_ENTRY("TransportImplFactory","requires_reactor");
+  DBG_ENTRY_LVL("TransportImplFactory","requires_reactor",5);
   // Return "false" (aka 0).
   return 0;
 }

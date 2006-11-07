@@ -11,7 +11,7 @@
 ACE_INLINE void
 TAO::DCPS::DataLink::send_start()
 {
-  DBG_ENTRY("DataLink","send_start");
+  DBG_ENTRY_LVL("DataLink","send_start",5);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -28,10 +28,20 @@ TAO::DCPS::DataLink::send_start()
 ACE_INLINE void
 TAO::DCPS::DataLink::send_start_i()
 {
-  DBG_ENTRY("DataLink","send_start_i");
+  DBG_ENTRY_LVL("DataLink","send_start_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
-  this->send_strategy_->send_start();
+
+  TransportSendStrategy_rch strategy;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    strategy->send_start();
+  }
 }
 
 
@@ -40,7 +50,7 @@ TAO::DCPS::DataLink::send_start_i()
 ACE_INLINE void
 TAO::DCPS::DataLink::send(TransportQueueElement* element)
 {
-  DBG_ENTRY("DataLink","send");
+  DBG_ENTRY_LVL("DataLink","send",5);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -57,17 +67,27 @@ TAO::DCPS::DataLink::send(TransportQueueElement* element)
 ACE_INLINE void
 TAO::DCPS::DataLink::send_i(TransportQueueElement* element)
 {
-  DBG_ENTRY("DataLink","send_i");
+  DBG_ENTRY_LVL("DataLink","send_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
-  this->send_strategy_->send(element);
+
+  TransportSendStrategy_rch strategy;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    strategy->send(element);
+  }
 }
 
 
 ACE_INLINE void
 TAO::DCPS::DataLink::send_stop()
 {
-  DBG_ENTRY("DataLink","send_stop");
+  DBG_ENTRY_LVL("DataLink","send_stop",5);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -84,34 +104,66 @@ TAO::DCPS::DataLink::send_stop()
 ACE_INLINE void
 TAO::DCPS::DataLink::send_stop_i()
 {
-  DBG_ENTRY("DataLink","send_stop_i");
+  DBG_ENTRY_LVL("DataLink","send_stop_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
-  this->send_strategy_->send_stop();
+
+  TransportSendStrategy_rch strategy = 0;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    strategy->send_stop();
+  }
 }
 
 
 ACE_INLINE int
-TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample, 
+TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
                                    bool dropped_by_transport)
 {
-  DBG_ENTRY("DataLink","remove_sample");
+  DBG_ENTRY_LVL("DataLink","remove_sample",5);
   ACE_UNUSED_ARG (dropped_by_transport);
-  
+
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
-  return this->send_strategy_->remove_sample(sample);
+
+  TransportSendStrategy_rch strategy;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    return strategy->remove_sample(sample);
+  }
+
+  return -1;
 }
 
 
 ACE_INLINE void
 TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY("DataLink","remove_all_control_msgs");
+  DBG_ENTRY_LVL("DataLink","remove_all_control_msgs",5);
 
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
-  this->send_strategy_->remove_all_control_msgs(pub_id);
+
+  TransportSendStrategy_rch strategy;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    strategy->remove_all_control_msgs(pub_id);
+  }
 }
 
 
@@ -123,7 +175,7 @@ TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 ACE_INLINE TAO::DCPS::DataLinkIdType
 TAO::DCPS::DataLink::id() const
 {
-  DBG_ENTRY("DataLink","id");
+  DBG_ENTRY_LVL("DataLink","id",5);
   return id_;
 }
 
@@ -132,13 +184,13 @@ ACE_INLINE int
 TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
                            TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY("DataLink","start");
+  DBG_ENTRY_LVL("DataLink","start",5);
 
   // We assume that the send_strategy is not NULL, but the receive_strategy
   // is allowed to be NULL.
 
   // Keep a "copy" of the send_strategy.
-  send_strategy->_add_ref();
+  send_strategy->_add_ref(); //ciju: why do this? Cause the ptr was from a .in() and not a .retrn()
   TransportSendStrategy_rch ss = send_strategy;
 
   // Keep a "copy" of the receive_strategy (if there is one).
@@ -146,7 +198,7 @@ TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
   if (receive_strategy != 0)
     {
-      receive_strategy->_add_ref();
+      receive_strategy->_add_ref(); //ciju: Why do this? Same reason as above
       rs = receive_strategy;
     }
 
@@ -171,15 +223,18 @@ TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
   // We started both strategy objects.  Save them to data members since
   // we will now take ownership of them.
-  this->send_strategy_    = ss._retn();
-  this->receive_strategy_ = rs._retn();
+  {
+    GuardType guard(this->strategy_lock_);
 
+    this->send_strategy_    = ss._retn();
+    this->receive_strategy_ = rs._retn();
+  }
   return 0;
 }
 
 
 ACE_INLINE
-const char* 
+const char*
 TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
 {
   static const char* NoticeStr[] = { "DISCONNECTED",
@@ -192,12 +247,8 @@ TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
 
 
 ACE_INLINE
-void 
+void
 TAO::DCPS::DataLink::fully_associated ()
 {
   //noop
 }
-
-
-
-

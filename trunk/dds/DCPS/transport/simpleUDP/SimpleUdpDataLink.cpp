@@ -13,7 +13,7 @@
 
 TAO::DCPS::SimpleUdpDataLink::~SimpleUdpDataLink()
 {
-  DBG_ENTRY("SimpleUdpDataLink","~SimpleUdpDataLink");
+  DBG_ENTRY_LVL("SimpleUdpDataLink","~SimpleUdpDataLink",5);
 }
 
 
@@ -21,7 +21,7 @@ TAO::DCPS::SimpleUdpDataLink::~SimpleUdpDataLink()
 void
 TAO::DCPS::SimpleUdpDataLink::stop_i()
 {
-  DBG_ENTRY("SimpleUdpDataLink","stop_i");
+  DBG_ENTRY_LVL("SimpleUdpDataLink","stop_i",5);
 
   // Nothing to do here.
 }

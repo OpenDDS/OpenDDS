@@ -28,7 +28,7 @@ namespace TAO
 {
   namespace DCPS
   {
-    
+
     DataReaderImpl::DataReaderImpl (void) :
         rd_allocator_(0),
         qos_ (TheServiceParticipant->initial_DataReaderQos ()),
@@ -70,7 +70,7 @@ namespace TAO
         subscription_match_status_.total_count_change = 0 ;
         subscription_match_status_.last_publication_handle =
             ::DDS::HANDLE_NIL ;
-        
+
         sample_lost_status_.total_count = 0 ;
         sample_lost_status_.total_count_change = 0 ;
 
@@ -80,8 +80,8 @@ namespace TAO
             ::DDS::REJECTED_BY_INSTANCE_LIMIT ;
         sample_rejected_status_.last_instance_handle = ::DDS::HANDLE_NIL ;
      }
-      
-    // This method is called when there are no longer any reference to the 
+
+    // This method is called when there are no longer any reference to the
     // the servant.
     DataReaderImpl::~DataReaderImpl (void)
       {
@@ -105,11 +105,11 @@ namespace TAO
 
           ACE_UNUSED_ARG (num_handlers);
         }
-               
+
       topic_servant_->remove_entity_ref ();
     }
 
-     
+
     void DataReaderImpl::init (
         TopicImpl*         a_topic,
         const ::DDS::DataReaderQos &  qos,
@@ -134,7 +134,7 @@ namespace TAO
 #if !defined (DDS_HAS_MINIMUM_BIT)
       is_bit_ = ACE_OS::strcmp (topic_name.in (), BUILT_IN_PARTICIPANT_TOPIC) == 0
                 || ACE_OS::strcmp (topic_name.in (), BUILT_IN_TOPIC_TOPIC) == 0
-                || ACE_OS::strcmp (topic_name.in (), BUILT_IN_SUBSCRIPTION_TOPIC) == 0 
+                || ACE_OS::strcmp (topic_name.in (), BUILT_IN_SUBSCRIPTION_TOPIC) == 0
                 || ACE_OS::strcmp (topic_name.in (), BUILT_IN_PUBLICATION_TOPIC) == 0;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -143,8 +143,8 @@ namespace TAO
 
       if (! CORBA::is_nil (listener_.in()))
         {
-          fast_listener_ = reference_to_servant<POA_DDS::DataReaderListener, 
-                                                DDS::DataReaderListener_ptr> 
+          fast_listener_ = reference_to_servant<POA_DDS::DataReaderListener,
+                                                DDS::DataReaderListener_ptr>
                               (listener_.in() ACE_ENV_ARG_PARAMETER);
           ACE_CHECK;
         }
@@ -153,14 +153,14 @@ namespace TAO
       domain_id_ =
             participant_servant_->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_CHECK;
-      
+
       topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
 
       subscriber_servant_ = subscriber ;
       subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
       subscriber_servant_->_add_ref ();
       dr_remote_objref_  = ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref);
-     
+
       initialized_ = true;
     }
 
@@ -177,7 +177,7 @@ namespace TAO
 
       if (entity_deleted_ == true)
         {
-          if (DCPS_debug_level >= 1) 
+          if (DCPS_debug_level >= 1)
             ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DataReaderImpl::add_associations")
                       ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
@@ -255,7 +255,7 @@ namespace TAO
             // this call will start the timer if it is not already set
             ACE_Time_Value now = ACE_OS::gettimeofday ();
             if (DCPS_debug_level >= 5)
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                         "(%P|%t) DataReaderImpl::add_associations"
                         " Starting/resetting liveliness timer for reader %d\n",
                         subscription_id_ ));
@@ -265,7 +265,7 @@ namespace TAO
 
         // add associations to the transport before using
         // Built-In Topic support and telling the listener.
-        this->subscriber_servant_->add_associations(writers, this, qos_) ;    
+        this->subscriber_servant_->add_associations(writers, this, qos_) ;
       }
 
       if (! is_bit_)
@@ -279,7 +279,7 @@ namespace TAO
               wr_ids[i] = writers[i].writerId;
             }
 
-          // TBD: Remove the condition check after we change to default support 
+          // TBD: Remove the condition check after we change to default support
           //      builtin topics.
           if (TheServiceParticipant->get_BIT () == true)
             {
@@ -290,11 +290,11 @@ namespace TAO
                             WriterIdSeq > hh;
 
               ::DDS::ReturnCode_t ret =
-                hh.repo_ids_to_instance_handles(participant_servant_, 
+                hh.repo_ids_to_instance_handles(participant_servant_,
                                               BUILT_IN_PUBLICATION_TOPIC,
-                                              wr_ids, 
+                                              wr_ids,
                                               handles);
-         
+
               if (ret != ::DDS::RETCODE_OK)
                 {
                   ACE_ERROR ((LM_ERROR,
@@ -314,7 +314,7 @@ namespace TAO
             }
       }
 
-      ::POA_DDS::DataReaderListener* listener 
+      ::POA_DDS::DataReaderListener* listener
         = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
 
       ::DDS::SubscriptionMatchStatus subscription_match_status;
@@ -326,19 +326,19 @@ namespace TAO
 
       for (CORBA::ULong i = 0; i < wr_len; i++)
         {
-          subscription_match_status_.total_count ++; 
+          subscription_match_status_.total_count ++;
           subscription_match_status_.total_count_change ++;
           publication_handles_[pub_len + i] = handles[i];
           subscription_match_status_.last_publication_handle = handles[i];
         }
 
       set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
-        
+
       subscription_match_status = subscription_match_status_;
 
       if (listener != 0)
         {
-          listener->on_subscription_match (dr_remote_objref_.in (), 
+          listener->on_subscription_match (dr_remote_objref_.in (),
                                            subscription_match_status
                                            ACE_ENV_ARG_PARAMETER);
           ACE_CHECK;
@@ -366,7 +366,7 @@ namespace TAO
 
         if (! is_bit_)
           {
-            // TBD: Remove the condition check after we change to default support 
+            // TBD: Remove the condition check after we change to default support
             //      builtin topics.
             if (TheServiceParticipant->get_BIT () == true)
               {
@@ -376,12 +376,12 @@ namespace TAO
                             ::DDS::PublicationBuiltinTopicDataSeq,
                             WriterIdSeq > hh;
 
-                ::DDS::ReturnCode_t ret 
-                  = hh.repo_ids_to_instance_handles(participant_servant_, 
+                ::DDS::ReturnCode_t ret
+                  = hh.repo_ids_to_instance_handles(participant_servant_,
                                                   BUILT_IN_PUBLICATION_TOPIC,
-                                                  writers, 
+                                                  writers,
                                                   handles);
-         
+
                 if (ret != ::DDS::RETCODE_OK)
                   {
                     ACE_ERROR ((LM_ERROR,
@@ -474,8 +474,8 @@ namespace TAO
         for (CORBA::ULong wr_index = 0; wr_index < wr_len; wr_index++)
           {
 
-            for (CORBA::ULong pubed_index = 0; 
-                 pubed_index < pubed_len; 
+            for (CORBA::ULong pubed_index = 0;
+                 pubed_index < pubed_len;
                  pubed_index++)
               {
                  if (publication_handles_[pubed_index] == handles[wr_index])
@@ -483,7 +483,7 @@ namespace TAO
                     // move last element to this position.
                     if (pubed_index < pubed_len - 1)
                       {
-                        publication_handles_[pubed_index] 
+                        publication_handles_[pubed_index]
                         = publication_handles_[pubed_len - 1];
                       }
                     pubed_len --;
@@ -547,7 +547,7 @@ namespace TAO
         CORBA::SystemException
       ))
       {
-        ::POA_DDS::DataReaderListener* listener 
+        ::POA_DDS::DataReaderListener* listener
           = listener_for (::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
         ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
@@ -562,13 +562,13 @@ namespace TAO
         requested_incompatible_qos_status_.last_policy_id =
             status.last_policy_id;
         requested_incompatible_qos_status_.policies = status.policies;
-          
+
         if (listener != 0)
           {
 
-            listener->on_requested_incompatible_qos (dr_remote_objref_.in (), 
+            listener->on_requested_incompatible_qos (dr_remote_objref_.in (),
                 requested_incompatible_qos_status_);
-            
+
             ACE_CHECK;
 
             // TBD - why does the spec say to change total_count_change but not
@@ -587,13 +587,13 @@ namespace TAO
         CORBA::SystemException
       ))
       {
-        if (DCPS_debug_level >= 2) 
+        if (DCPS_debug_level >= 2)
           ACE_DEBUG ((LM_DEBUG,
                      ACE_TEXT("(%P|%t) ")
                      ACE_TEXT("DataReaderImpl::delete_contained_entities\n")));
         return ::DDS::RETCODE_OK;
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::set_qos (
         const ::DDS::DataReaderQos & qos
         ACE_ENV_ARG_DECL
@@ -604,7 +604,7 @@ namespace TAO
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
-          if (enabled_.value()) 
+          if (enabled_.value())
           {
             if (! Qos_Helper::changeable (qos_, qos))
             {
@@ -624,12 +624,12 @@ namespace TAO
             }
           return ::DDS::RETCODE_OK;
         }
-        else 
+        else
         {
           return ::DDS::RETCODE_INCONSISTENT_POLICY;
         }
       }
-      
+
     void DataReaderImpl::get_qos (
         ::DDS::DataReaderQos & qos
         ACE_ENV_ARG_DECL
@@ -640,7 +640,7 @@ namespace TAO
       {
         qos = qos_ ;
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::set_listener (
         ::DDS::DataReaderListener_ptr a_listener,
         ::DDS::StatusKindMask mask
@@ -653,14 +653,14 @@ namespace TAO
         listener_mask_ = mask;
         //note: OK to duplicate  and reference_to_servant a nil object ref
         listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
-        fast_listener_ 
-          = reference_to_servant< ::POA_DDS::DataReaderListener, 
-                                  ::DDS::DataReaderListener_ptr > 
+        fast_listener_
+          = reference_to_servant< ::POA_DDS::DataReaderListener,
+                                  ::DDS::DataReaderListener_ptr >
             (listener_.in () ACE_ENV_ARG_PARAMETER);
         ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
         return ::DDS::RETCODE_OK;
       }
-      
+
     ::DDS::DataReaderListener_ptr DataReaderImpl::get_listener (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -681,7 +681,7 @@ namespace TAO
       {
         return ::DDS::TopicDescription::_duplicate (topic_desc_.in ()) ;
       }
-      
+
     ::DDS::Subscriber_ptr DataReaderImpl::get_subscriber (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -691,7 +691,7 @@ namespace TAO
       {
         return ::DDS::Subscriber::_duplicate (subscriber_objref_.in ());
       }
-      
+
     ::DDS::SampleRejectedStatus DataReaderImpl::get_sample_rejected_status (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -706,7 +706,7 @@ namespace TAO
         sample_rejected_status_.total_count_change = 0;
         return status;
       }
-      
+
     ::DDS::LivelinessChangedStatus DataReaderImpl::get_liveliness_changed_status (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -726,7 +726,7 @@ namespace TAO
 
         return status ;
       }
-      
+
     ::DDS::RequestedDeadlineMissedStatus
           DataReaderImpl::get_requested_deadline_missed_status (
         ACE_ENV_SINGLE_ARG_DECL
@@ -744,7 +744,7 @@ namespace TAO
         requested_deadline_missed_status_.total_count_change = 0 ;
         return status ;
       }
-      
+
     ::DDS::RequestedIncompatibleQosStatus * DataReaderImpl::get_requested_incompatible_qos_status (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -756,13 +756,13 @@ namespace TAO
 
         set_status_changed_flag(::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
                                 false);
-        ::DDS::RequestedIncompatibleQosStatus* status 
+        ::DDS::RequestedIncompatibleQosStatus* status
           = new ::DDS::RequestedIncompatibleQosStatus;
         *status = requested_incompatible_qos_status_;
         requested_incompatible_qos_status_.total_count_change = 0 ;
         return status;
       }
-      
+
     ::DDS::SubscriptionMatchStatus DataReaderImpl::get_subscription_match_status (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -778,7 +778,7 @@ namespace TAO
 
         return status  ;
       }
-      
+
     ::DDS::SampleLostStatus DataReaderImpl::get_sample_lost_status (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -793,7 +793,7 @@ namespace TAO
         sample_lost_status_.total_count_change = 0;
         return status;
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::wait_for_historical_data (
         const ::DDS::Duration_t & max_wait
         ACE_ENV_ARG_DECL
@@ -806,7 +806,7 @@ namespace TAO
         // Add your implementation here
         return 0;
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::get_matched_publications (
         ::DDS::InstanceHandleSeq & publication_handles
         ACE_ENV_ARG_DECL
@@ -832,7 +832,7 @@ namespace TAO
 
         return ::DDS::RETCODE_OK;
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::get_matched_publication_data (
         ::DDS::PublicationBuiltinTopicData & publication_data,
         ::DDS::InstanceHandle_t publication_handle
@@ -862,10 +862,10 @@ namespace TAO
 
         ::DDS::PublicationBuiltinTopicDataSeq data;
 
-        ::DDS::ReturnCode_t ret 
-          = hh.instance_handle_to_bit_data(participant_servant_, 
-                                           BUILT_IN_PUBLICATION_TOPIC, 
-                                           publication_handle, 
+        ::DDS::ReturnCode_t ret
+          = hh.instance_handle_to_bit_data(participant_servant_,
+                                           BUILT_IN_PUBLICATION_TOPIC,
+                                           publication_handle,
                                            data);
         if (ret == ::DDS::RETCODE_OK)
           {
@@ -878,7 +878,7 @@ namespace TAO
         return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
       }
-      
+
     ::DDS::ReturnCode_t DataReaderImpl::enable (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -888,7 +888,7 @@ namespace TAO
       {
         if (qos_.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS)
           {
-            // The spec says qos_.history.depth is "has no effect" 
+            // The spec says qos_.history.depth is "has no effect"
             // when history.kind = KEEP_ALL so use max_samples_per_instance
             depth_ = qos_.resource_limits.max_samples_per_instance;
           }
@@ -920,7 +920,7 @@ namespace TAO
         //Note: the QoS used to set n_chunks_ is Changable=No so
         // it is OK that we cannot change the size of our allocators.
         rd_allocator_ = new ReceivedDataAllocator(n_chunks_) ;
-        if (DCPS_debug_level >= 2) 
+        if (DCPS_debug_level >= 2)
           ACE_DEBUG((LM_DEBUG,"(%P|%t) DataReaderImpl::enable"
                      " Cached_Allocator_With_Overflow %x with %d chunks\n",
                       rd_allocator_, n_chunks_));
@@ -937,7 +937,7 @@ namespace TAO
         this->set_enabled () ;
 
         CORBA::String_var name = topic_servant_->get_name ();
- 
+
         subscriber_servant_->reader_enabled(dr_remote_objref_.in (),
                                             name.in(),
                                             topic_servant_->get_id()
@@ -946,7 +946,7 @@ namespace TAO
 
         return ::DDS::RETCODE_OK;
       }
-      
+
     ::DDS::StatusKindMask DataReaderImpl::get_status_changes (
         ACE_ENV_SINGLE_ARG_DECL
       )
@@ -963,7 +963,7 @@ namespace TAO
       }
 
 
-      void 
+      void
       DataReaderImpl::writer_activity(PublicationId writer_id)
       {
         // caller should have the sample_lock_ !!!
@@ -1035,7 +1035,7 @@ namespace TAO
       {
         return subscriber_servant_;
       }
-      
+
       RepoId DataReaderImpl::get_subscription_id() const
       {
         return subscription_id_;
@@ -1065,12 +1065,12 @@ namespace TAO
               return true ;
             }
           }
-        } 
+        }
         return false ;
       }
-           
+
       bool DataReaderImpl::have_view_states(
-            ::DDS::ViewStateMask view_states) const 
+            ::DDS::ViewStateMask view_states) const
       {
         //!!! caller should have acquired sample_lock_
         for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
@@ -1131,31 +1131,31 @@ namespace TAO
           info_seq[i].sample_rank = count - (i - start_idx + 1) ;
 
           // generation_rank =
-          //    (MRSIC.disposed_generation_count + 
+          //    (MRSIC.disposed_generation_count +
           //     MRSIC.no_writers_generation_count)
-          //  - (S.disposed_generation_count + 
+          //  - (S.disposed_generation_count +
           //     S.no_writers_generation_count)
           //
           //  info_seq[end_idx] == MRSIC
-          //  info_seq[i].generation_rank == 
-          //      (S.disposed_generation_count + 
-          //      (S.no_writers_generation_count) -- calculated in 
+          //  info_seq[i].generation_rank ==
+          //      (S.disposed_generation_count +
+          //      (S.no_writers_generation_count) -- calculated in
           //            InstanceState::sample_info
-         
+
           info_seq[i].generation_rank =
               (info_seq[end_idx].disposed_generation_count +
                info_seq[end_idx].no_writers_generation_count) -
               info_seq[i].generation_rank ;
 
           // absolute_generation_rank =
-          //     (MRS.disposed_generation_count + 
+          //     (MRS.disposed_generation_count +
           //      MRS.no_writers_generation_count)
-          //   - (S.disposed_generation_count + 
+          //   - (S.disposed_generation_count +
           //      S.no_writers_generation_count)
           //
           // ptr == MRS
-          // info_seq[i].absolute_generation_rank == 
-          //    (S.disposed_generation_count + 
+          // info_seq[i].absolute_generation_rank ==
+          //    (S.disposed_generation_count +
           //     S.no_writers_generation_count)-- calculated in
           //            InstanceState::sample_info
           //
@@ -1174,9 +1174,9 @@ namespace TAO
         sample_info.sample_rank = 0 ;
 
         // generation_rank =
-        //    (MRSIC.disposed_generation_count + 
+        //    (MRSIC.disposed_generation_count +
         //     MRSIC.no_writers_generation_count)
-        //  - (S.disposed_generation_count + 
+        //  - (S.disposed_generation_count +
         //     S.no_writers_generation_count)
         //
         sample_info.generation_rank =
@@ -1185,9 +1185,9 @@ namespace TAO
             sample_info.generation_rank ;
 
         // absolute_generation_rank =
-        //     (MRS.disposed_generation_count + 
+        //     (MRS.disposed_generation_count +
         //      MRS.no_writers_generation_count)
-        //   - (S.disposed_generation_count + 
+        //   - (S.disposed_generation_count +
         //      S.no_writers_generation_count)
         //
         sample_info.absolute_generation_rank =
@@ -1208,11 +1208,11 @@ namespace TAO
 
           count += ptr->rcvd_sample_.size_ ;
         }
-        
+
         return count ;
       }
 
-    int 
+    int
     DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
                                     const void *arg)
     {
@@ -1226,12 +1226,12 @@ namespace TAO
       if (liveliness_timer_id_ != -1)
         {
           this->_remove_ref();
-      
+
           if (arg == this)
             {
 
               if (DCPS_debug_level >= 5)
-                ACE_DEBUG((LM_DEBUG, 
+                ACE_DEBUG((LM_DEBUG,
                           "(%P|%t) DataReaderImpl::handle_timeout"
                           " canceling timer for reader %d\n",
                           subscription_id_ ));
@@ -1243,15 +1243,15 @@ namespace TAO
                   // this could fail becaue the reactor's call and
                   // the add_associations' call to this could overlap
                   // so it is not a failure.
-                  ACE_DEBUG((LM_DEBUG, 
+                  ACE_DEBUG((LM_DEBUG,
                     ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout, ")
                     ACE_TEXT(" %p. \n"), "cancel_timer" ));
                 }
               liveliness_timer_id_ = -1;
             }
         }
-      
-      ACE_Time_Value smallest(ACE_Time_Value::max_time) ; 
+
+      ACE_Time_Value smallest(ACE_Time_Value::max_time) ;
       ACE_Time_Value next_absolute ;
       WriterMapType::ENTRY* entry;
       int alive_writers = 0;
@@ -1271,12 +1271,12 @@ namespace TAO
               if (next_absolute < smallest)
                 {
                   smallest = next_absolute;
-                } 
+                }
             }
         }
 
       if (DCPS_debug_level >= 5)
-        ACE_DEBUG((LM_DEBUG, 
+        ACE_DEBUG((LM_DEBUG,
                     "(%P|%t) %T DataReaderImpl::handle_timeout"
                     " reader %d has %d live writers; from_reator=%d\n",
                     subscription_id_, alive_writers, arg == this ? 0 : 1));
@@ -1289,7 +1289,7 @@ namespace TAO
             relative = next_absolute - now;
           else
             relative = ACE_Time_Value(0,1); // ASAP
-        
+
           liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
           if (liveliness_timer_id_ == -1)
             {
@@ -1307,7 +1307,7 @@ namespace TAO
         // but be sure we don't try to cancel the timer later.
         liveliness_timer_id_ = -1;
       }
-    
+
       return 0;
     }
 
@@ -1328,11 +1328,11 @@ namespace TAO
     {
       if (DCPS_debug_level >= 5)
         ACE_DEBUG((LM_DEBUG,"(%P|%t) WriterInfo::WriterInfo"
-                  " added writer %d to reader %d", 
+                  " added writer %d to reader %d",
                   writer_id_, reader_->subscription_id_));
     }
 
-    ACE_Time_Value 
+    ACE_Time_Value
     TAO::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
     {
       ACE_Time_Value expires_at = ACE_Time_Value::max_time;
@@ -1341,7 +1341,7 @@ namespace TAO
           expires_at = this->last_liveliness_activity_time_ +
             reader_->liveliness_lease_duration_ ;
           if (expires_at <= now)
-            { 
+            {
               is_alive_ = 0;
               // let all instances know this write is not alive.
               reader_->writer_became_dead(writer_id_, now);
@@ -1358,9 +1358,9 @@ namespace TAO
       ACE_UNUSED_ARG(when) ;
       if (DCPS_debug_level >= 5)
         ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) DataReaderImpl::writer_became_alive writer %d to reader %d\n", 
+                  "(%P|%t) DataReaderImpl::writer_became_alive writer %d to reader %d\n",
                   this->subscription_id_, writer_id));
-      
+
       // caller should already have the samples_lock_ !!!
 
       // NOTE: each instance will change to ALIVE_STATE when they recieve a sample
@@ -1423,7 +1423,7 @@ namespace TAO
     {
       if (DCPS_debug_level >= 5)
         ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) DataReaderImpl::writer_became_dead writer %d to reader %d\n", 
+                  "(%P|%t) DataReaderImpl::writer_became_dead writer %d to reader %d\n",
                   this->subscription_id_, writer_id));
 
       // caller should already have the samples_lock_ !!!
@@ -1505,7 +1505,7 @@ namespace TAO
       //!!! caller should have acquired sample_lock_
       sample_lost_status_ = status ;
     }
-   
+
 
     void
     DataReaderImpl::set_sample_rejected_status(
@@ -1533,10 +1533,10 @@ namespace TAO
       SubscriptionInstance* instance = 0;
       if (0 != instances_.find(handle, instance))
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataReaderImpl::get_handle_instance, ")
-                      ACE_TEXT("lookup for %d failed\n"), 
+                      ACE_TEXT("lookup for %d failed\n"),
                       handle));
         } // if (0 != instances_.find(handle, instance))
       return instance;
@@ -1550,66 +1550,66 @@ namespace TAO
     }
 
 
-    void 
+    void
     DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
     {
-      DBG_ENTRY("DataReaderImpl","notify_subscription_disconnected");
+      DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",5);
       SubscriptionLostStatus status;
 
       this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
       // is given to this DataReader then narrow() fails.
-      DataReaderListener_var the_listener 
+      DataReaderListener_var the_listener
         = DataReaderListener::_narrow (this->listener_.in ());
       if (! CORBA::is_nil (the_listener.in ()))
         the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
-                                            status); 
+                                            status);
     }
 
 
-    void 
+    void
     DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
     {
-      DBG_ENTRY("DataReaderImpl","notify_subscription_reconnected");
+      DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_reconnected",5);
       SubscriptionLostStatus status;
 
       this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
       // is given to this DataReader then narrow() fails.
-      DataReaderListener_var the_listener 
+      DataReaderListener_var the_listener
         = DataReaderListener::_narrow (this->listener_.in ());
       if (! CORBA::is_nil (the_listener.in ()))
         the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
-                                            status); 
+                                            status);
     }
 
 
-    void 
+    void
     DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
     {
-      DBG_ENTRY("DataReaderImpl","notify_subscription_lost");
+      DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",5);
       SubscriptionLostStatus status;
 
       this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
       // is given to this DataReader then narrow() fails.
-      DataReaderListener_var the_listener 
+      DataReaderListener_var the_listener
         = DataReaderListener::_narrow (this->listener_.in ());
       if (! CORBA::is_nil (the_listener.in ()))
         the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
-                                            status); 
+                                            status);
     }
 
-    
-    void 
-    DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids, 
+
+    void
+    DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids,
                                                   ::DDS::InstanceHandleSeq & hdls)
     {
       CORBA::ULong cur_sz = ids.length ();
-      // TBD: Remove the condition check after we change to default support 
+      // TBD: Remove the condition check after we change to default support
       //      builtin topics.
       if (TheServiceParticipant->get_BIT () == true)
         {
@@ -1619,12 +1619,12 @@ namespace TAO
                         ::DDS::PublicationBuiltinTopicDataSeq,
                         WriterIdSeq > hh;
 
-          ::DDS::ReturnCode_t ret 
-            = hh.repo_ids_to_instance_handles(participant_servant_, 
-                                              BUILT_IN_PUBLICATION_TOPIC, 
-                                              ids, 
+          ::DDS::ReturnCode_t ret
+            = hh.repo_ids_to_instance_handles(participant_servant_,
+                                              BUILT_IN_PUBLICATION_TOPIC,
+                                              ids,
                                               hdls);
-          
+
           if (ret != ::DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR,

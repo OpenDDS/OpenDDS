@@ -9,7 +9,7 @@
 #include  "SimpleTcpSendStrategy.h"
 #include  "dds/DCPS/transport/framework/TransportControlElement.h"
 #include  "dds/DCPS/DataSampleHeader.h"
-
+#include "ace/Log_Msg.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpDataLink.inl"
@@ -23,7 +23,7 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
 {
-  DBG_ENTRY("SimpleTcpDataLink","SimpleTcpDataLink");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","SimpleTcpDataLink",5);
   transport_impl->_add_ref ();
   this->transport_ = transport_impl;
 }
@@ -31,7 +31,7 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
 
 TAO::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 {
-  DBG_ENTRY("SimpleTcpDataLink","~SimpleTcpDataLink");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","~SimpleTcpDataLink",5);
 }
 
 
@@ -44,10 +44,10 @@ TAO::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 void
 TAO::DCPS::SimpleTcpDataLink::stop_i()
 {
-  DBG_ENTRY("SimpleTcpDataLink","stop_i");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","stop_i",5);
 
   if (!this->connection_.is_nil())
-    {      
+    {
       // Tell the connection object to disconnect.
       this->connection_->disconnect();
 
@@ -60,24 +60,28 @@ TAO::DCPS::SimpleTcpDataLink::stop_i()
 void
 TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
-  DBG_ENTRY("SimpleTcpDataLink","pre_stop_i");
- 
+  DBG_ENTRY_LVL("SimpleTcpDataLink","pre_stop_i",5);
+
   DataLink::pre_stop_i();
 
-  SimpleTcpReceiveStrategy * rs 
+  SimpleTcpReceiveStrategy * rs
     = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
 
-  // If we received the GRACEFUL_DISCONNECT message from peer before we
-  // initiate the disconnecting of the datalink, then we will not send 
-  // the GRACEFUL_DISCONNECT message to the peer.
-  bool disconnected = rs->gracefully_disconnected ();
-
-  if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_
-    && ! disconnected)
+  if (rs != NULL)
     {
-      this->send_graceful_disconnect_message ();
-      this->graceful_disconnect_sent_ = true;
+      // If we received the GRACEFUL_DISCONNECT message from peer before we
+      // initiate the disconnecting of the datalink, then we will not send
+      // the GRACEFUL_DISCONNECT message to the peer.
+      bool disconnected = rs->gracefully_disconnected ();
+
+      if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_
+    && ! disconnected)
+  {
+    this->send_graceful_disconnect_message ();
+    this->graceful_disconnect_sent_ = true;
+  }
     }
+
   if (!this->connection_.is_nil())
     {
       this->connection_->shutdown ();
@@ -93,7 +97,7 @@ TAO::DCPS::SimpleTcpDataLink::connect
                                   TransportSendStrategy*    send_strategy,
                                   TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY("SimpleTcpDataLink","connect");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","connect",5);
 
   // Sanity check - cannot connect() if we are already connected.
   if (!this->connection_.is_nil())
@@ -129,13 +133,13 @@ TAO::DCPS::SimpleTcpDataLink::connect
 
 
 /// Associate the new connection object with this datalink object.
-/// The states of the "old" connection object are copied to the new 
-/// connection object and the "old" connection object is replaced by 
+/// The states of the "old" connection object are copied to the new
+/// connection object and the "old" connection object is replaced by
 /// the new connection object.
 int
 TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpDataLink","reconnect");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","reconnect",5);
 
   // Sanity check - the connection should exist already since we are reconnecting.
   if (this->connection_.is_nil())
@@ -150,7 +154,7 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
   this->connection_->transfer (connection);
   this->connection_ = connection;
 
-  SimpleTcpReceiveStrategy* rs 
+  SimpleTcpReceiveStrategy* rs
     = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
 
   if (rs == 0)
@@ -166,25 +170,25 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 
 
 
-void 
+void
 TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 {
-  DBG_ENTRY("SimpleTcpDataLink","send_graceful_disconnect_message");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","send_graceful_disconnect_message",5);
 
   this->send_strategy_->terminate_send (true);
 
-  DataSampleHeader header_data; 
+  DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = GRACEFUL_DISCONNECT;
 
   // Other data in the DataSampleHeader are not necessary set. The bogus values
   // can be used.
 
-  //header_data.byte_order_ 
+  //header_data.byte_order_
   //  = this->transport_->get_configuration()->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
-  //::DDS::Time_t source_timestamp 
+  //::DDS::Time_t source_timestamp
   //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
@@ -193,10 +197,10 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 
   // TODO:
   // It seems a bug in the transport implementation that the receiving side can
-  // not receive the message when the message has no sample data and is sent 
+  // not receive the message when the message has no sample data and is sent
   // in a single packet.
 
-  // To work arround this problem, I have to add bogus data to chain with the 
+  // To work arround this problem, I have to add bogus data to chain with the
   // DataSampleHeader to make the receiving work.
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size ();
@@ -230,7 +234,7 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
     0,
     0));
 
-  message << header_data;    
+  message << header_data;
 
   TransportControlElement* send_element = 0;
 
@@ -244,24 +248,24 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 }
 
 
-void 
+void
 TAO::DCPS::SimpleTcpDataLink::fully_associated ()
 {
-  DBG_ENTRY("SimpleTcpDataLink","fully_associated");
+  DBG_ENTRY_LVL("SimpleTcpDataLink","fully_associated",5);
 
   bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
-  DataSampleHeader header_data; 
+  DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = FULLY_ASSOCIATED;
 
   // Other data in the DataSampleHeader are not necessary set. The bogus values
   // can be used.
 
-  header_data.byte_order_ 
+  header_data.byte_order_
     = swap_byte ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
-  //::DDS::Time_t source_timestamp 
+  //::DDS::Time_t source_timestamp
   //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
@@ -287,8 +291,8 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
     ACE_Time_Value::max_time,
     0,
     0));
-  
-  message << header_data;   
+
+  message << header_data;
 
   TransportControlElement* send_element = 0;
 
@@ -300,10 +304,3 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
 
   delete send_element;
 }
-
-
-
-
-
-
-

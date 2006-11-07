@@ -7,14 +7,14 @@
 ACE_INLINE
 TAO::DCPS::RepoIdSetMap::RepoIdSetMap()
 {
-  DBG_ENTRY("RepoIdSetMap","RepoIdSetMap");
+  DBG_ENTRY_LVL("RepoIdSetMap","RepoIdSetMap",5);
 }
 
 
 ACE_INLINE TAO::DCPS::RepoIdSet*
 TAO::DCPS::RepoIdSetMap::find(RepoId key)
 {
-  DBG_ENTRY("RepoIdSetMap","find");
+  DBG_ENTRY_LVL("RepoIdSetMap","find",5);
   RepoIdSet_rch value;
 
   if (this->map_.find(key, value) != 0)
@@ -29,7 +29,7 @@ TAO::DCPS::RepoIdSetMap::find(RepoId key)
 ACE_INLINE size_t
 TAO::DCPS::RepoIdSetMap::size() const
 {
-  DBG_ENTRY("RepoIdSetMap","size");
+  DBG_ENTRY_LVL("RepoIdSetMap","size",5);
   return this->map_.current_size();
 }
 
@@ -37,7 +37,7 @@ TAO::DCPS::RepoIdSetMap::size() const
 ACE_INLINE TAO::DCPS::RepoIdSet*
 TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 {
-  DBG_ENTRY("RepoIdSetMap","find_or_create");
+  DBG_ENTRY_LVL("RepoIdSetMap","find_or_create",5);
   RepoIdSet_rch value;
 
   if (this->map_.find(key, value) != 0)
@@ -75,14 +75,14 @@ TAO::DCPS::RepoIdSetMap::map() const
 }
 
 
-ACE_INLINE size_t 
+ACE_INLINE size_t
 TAO::DCPS::RepoIdSetMap::marshaled_size ()
 {
-  DBG_ENTRY("RepoIdSetMap","marshaled_size");
+  DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",5);
 
   // serialize len for the map size and set size information.
   size_t size = (this->size () + 1) * sizeof (size_t);
-  
+
   size_t num_ids = 0;
   MapType::ENTRY* entry;
 

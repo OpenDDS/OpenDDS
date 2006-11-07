@@ -8,7 +8,7 @@
 ACE_INLINE
 TAO::DCPS::TransportImplFactory::TransportImplFactory()
 {
-  DBG_ENTRY("TransportImplFactory","TransportImplFactory");
+  DBG_ENTRY_LVL("TransportImplFactory","TransportImplFactory",5);
 }
 
 

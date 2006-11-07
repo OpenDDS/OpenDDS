@@ -14,7 +14,7 @@
 ACE_INLINE void
 TAO::DCPS::SimpleTcpConnection::disconnect()
 {
-  DBG_ENTRY("SimpleTcpConnection","disconnect");
+  DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",5);
   this->peer().close();
   this->connected_ = false;
 }
@@ -25,7 +25,7 @@ TAO::DCPS::SimpleTcpConnection::disconnect()
 ACE_INLINE void
 TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
 {
-  DBG_ENTRY("SimpleTcpConnection","remove_receive_strategy");
+  DBG_ENTRY_LVL("SimpleTcpConnection","remove_receive_strategy",5);
 
   this->receive_strategy_ = 0;
 }
@@ -34,7 +34,7 @@ TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
 ACE_INLINE void
 TAO::DCPS::SimpleTcpConnection::remove_send_strategy()
 {
-  DBG_ENTRY("SimpleTcpConnection","remove_send_strategy");
+  DBG_ENTRY_LVL("SimpleTcpConnection","remove_send_strategy",5);
 
   this->send_strategy_ = 0;
 }
@@ -63,7 +63,7 @@ TAO::DCPS::SimpleTcpConnection::set_datalink (TAO::DCPS::SimpleTcpDataLink* link
 }
 
 
-ACE_INLINE ACE_INET_Addr 
+ACE_INLINE ACE_INET_Addr
 TAO::DCPS::SimpleTcpConnection::get_remote_address ()
 {
   return this->remote_address_;

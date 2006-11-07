@@ -13,20 +13,20 @@ TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
   TAO::DCPS::SimpleTcpConnection* connection)
   : connection_ (connection)
 {
-  DBG_ENTRY("SimpleTcpReconnectTask","SimpleTcpReconnectTask");
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","SimpleTcpReconnectTask",5);
 }
 
 
 TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 {
-  DBG_ENTRY("SimpleTcpReconnectTask","~SimpleTcpReconnectTask");
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","~SimpleTcpReconnectTask",5);
 }
 
 
 
 void TAO::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
 {
-  DBG_ENTRY("SimpleTcpReconnectTask","execute");
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",5);
 
   if (op == DO_RECONNECT)
     this->connection_->reconnect ();

@@ -13,7 +13,7 @@ TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
     max_output_pause_period_ (0),
     passive_reconnect_duration_(2000)
 {
-  DBG_ENTRY("SimpleTcpConfiguration","SimpleTcpConfiguration");
+  DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",5);
 
   transport_type_ = "SimpleTcp";
 

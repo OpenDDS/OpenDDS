@@ -11,9 +11,9 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace TAO
 {
-  namespace DCPS 
+  namespace DCPS
   {
     /**
     * @class Dynamic_Cached_Allocator_With_Overflow
@@ -58,7 +58,7 @@ namespace TAO
           }
         // Put into free list using placement contructor, no real memory
         // allocation in the above <new>.
-                  
+
         // Remember end of the pool.
         last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size_);
       }
@@ -87,11 +87,11 @@ namespace TAO
         // ACE_Cached_Mem_Pool_Node's internal structure arranged.
         void* rtn = this->free_list_.remove ()->addr ();
 
-        if (0 == rtn) 
+        if (0 == rtn)
           {
             rtn = ACE_reinterpret_cast (void*, new char[chunk_size_]);
             allocs_from_heap_++;
-            if (DCPS_debug_level >= 2) 
+            if (DCPS_debug_level >= 2)
               {
                 if (allocs_from_heap_ == 1 && DCPS_debug_level >= 2)
                   ACE_DEBUG((LM_DEBUG,
@@ -109,7 +109,7 @@ namespace TAO
                             this->allocs_from_heap_ - this->frees_to_heap_));
               }
           }
-        else 
+        else
           {
             allocs_from_pool_++;
             if (DCPS_debug_level >= 6)
@@ -153,8 +153,8 @@ namespace TAO
       /// Return a chunk of memory back to free list cache.
       void free (void * ptr)
       {
-        if (ptr < ACE_reinterpret_cast (void*, pool_) || 
-            ptr > ACE_reinterpret_cast (void*, last_)) 
+        if (ptr < ACE_reinterpret_cast (void*, pool_) ||
+            ptr > ACE_reinterpret_cast (void*, last_))
           {
             char* tmp = ACE_reinterpret_cast (char *, ptr);
             delete []tmp;
@@ -216,8 +216,8 @@ namespace TAO
       /** How many chunks are available at this time.
       */
       size_t available() { return free_list_.size(); };
-    
-      /// number of allocations from the heap. 
+
+      /// number of allocations from the heap.
       u_long allocs_from_heap_;
       /// number of allocations from the pool.
       u_long allocs_from_pool_;
@@ -230,7 +230,7 @@ namespace TAO
       /// we can clear things up later.
       char *pool_;
 
-      /// The end of the pool.  
+      /// The end of the pool.
       char *last_;
 
       /// Maintain a cached memory free list. We use @c char as template

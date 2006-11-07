@@ -12,6 +12,6 @@ TAO::DCPS::TransportSendElement::TransportSendElement
     element_(sample),
     allocator_(allocator)
 {
-  DBG_ENTRY("TransportSendElement","TransportSendElement");
+  DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",5);
 }
 

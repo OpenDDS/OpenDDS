@@ -131,10 +131,10 @@ namespace TAO
             if(result != 0)
             {
               //I'm not sure why this thread got more signals than actual signals
-              //when using thread_per_connection and the user application thread 
+              //when using thread_per_connection and the user application thread
               //send requests without interval. We just need ignore the dequeue
               //failure.
-              //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::svc  %p\n", 
+              //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::svc  %p\n",
               //  "dequeue_head"));
               continue;
             }
@@ -169,11 +169,11 @@ namespace TAO
         if (this->opened_ && this->thr_id_ != ACE_OS::thr_self ())
           this->wait ();
 
-        return 0; 
+        return 0;
       }
 
 
-      /// The subclass should implement this function to handle the 
+      /// The subclass should implement this function to handle the
       /// dequeued request.
       virtual void execute (T& req) = 0;
 

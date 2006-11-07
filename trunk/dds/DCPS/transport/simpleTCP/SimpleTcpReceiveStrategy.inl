@@ -8,7 +8,7 @@
 ACE_INLINE ACE_Reactor*
 TAO::DCPS::SimpleTcpReceiveStrategy::get_reactor()
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","get_reactor");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","get_reactor",5);
   return this->reactor_task_->get_reactor ();
 }
 

@@ -7,6 +7,6 @@
 ACE_INLINE
 TAO::DCPS::ThreadSynchStrategy::ThreadSynchStrategy()
 {
-  DBG_ENTRY("ThreadSynchStrategy","ThreadSynchStrategy");
+  DBG_ENTRY_LVL("ThreadSynchStrategy","ThreadSynchStrategy",5);
 }
 

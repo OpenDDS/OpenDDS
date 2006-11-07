@@ -22,15 +22,17 @@ TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
     connections_updated_(this->connections_lock_),
     con_checker_ (new SimpleTcpConnectionReplaceTask(this))
 {
-  DBG_ENTRY("SimpleTcpTransport","SimpleTcpTransport");
+  DBG_ENTRY_LVL("SimpleTcpTransport","SimpleTcpTransport",5);
 }
 
 
 
 TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 {
-  DBG_ENTRY("SimpleTcpTransport","~SimpleTcpTransport");
+  DBG_ENTRY_LVL("SimpleTcpTransport","~SimpleTcpTransport",5);
   delete acceptor_;
+
+  con_checker_->close (1); // This could potentially fix a race condition
   delete con_checker_;
 }
 
@@ -53,7 +55,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
                           int                           connect_as_publisher)
 {
-  DBG_ENTRY("SimpleTcpTransport","find_or_create_datalink");
+  DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",5);
 
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress* network_order_address =
@@ -77,7 +79,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
           if (con->reconnect (on_new_association) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
-                "(%P|%t) ERROR: Unable to reconnect to remote %s:%d.\n", 
+                "(%P|%t) ERROR: Unable to reconnect to remote %s:%d.\n",
                 remote_address.get_host_addr (),
                 remote_address.get_port_number ()),
                 0);
@@ -155,7 +157,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 int
 TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 {
-  DBG_ENTRY("SimpleTcpTransport","configure_i");
+  DBG_ENTRY_LVL("SimpleTcpTransport","configure_i",5);
 
   // Downcast the config argument to a SimpleTcpConfiguration*
   SimpleTcpConfiguration* tcp_config = ACE_static_cast(SimpleTcpConfiguration*,
@@ -187,7 +189,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   tcp_config->_add_ref();
   this->tcp_config_ = tcp_config;
 
-  
+
   // If the IP address in the INET_Addr is the INADDR_ANY address,
   // then force the actual IP address to be used by initializing a new
   // INET_Addr with the hostname from the original one.  If that fails
@@ -234,7 +236,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Acceptor failed to open %s:%d: %p\n",
-                        cfg->local_address_.get_host_addr (), 
+                        cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
                         "open"),
                        -1);
@@ -270,8 +272,8 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 void
 TAO::DCPS::SimpleTcpTransport::pre_shutdown_i()
 {
-  DBG_ENTRY("SimpleTcpTransport","pre_shutdown_i");
-  
+  DBG_ENTRY_LVL("SimpleTcpTransport","pre_shutdown_i",5);
+
   GuardType guard(this->links_lock_);
 
   AddrLinkMap::ENTRY* entry;
@@ -288,8 +290,8 @@ TAO::DCPS::SimpleTcpTransport::pre_shutdown_i()
 void
 TAO::DCPS::SimpleTcpTransport::shutdown_i()
 {
-  DBG_ENTRY("SimpleTcpTransport","shutdown_i");
-  
+  DBG_ENTRY_LVL("SimpleTcpTransport","shutdown_i",5);
+
   // Don't accept any more connections.
   this->acceptor_->close();
   this->acceptor_->transport_shutdown ();
@@ -343,7 +345,7 @@ int
 TAO::DCPS::SimpleTcpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY("SimpleTcpTransport","connection_info_i");
+  DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",5);
 
   NetworkAddress network_order_address(this->tcp_config_->local_address_);
 
@@ -361,7 +363,7 @@ TAO::DCPS::SimpleTcpTransport::connection_info_i
 void
 TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 {
-  DBG_ENTRY("SimpleTcpTransport","release_datalink_i");
+  DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",5);
 
   SimpleTcpDataLink* tcp_link = ACE_static_cast(SimpleTcpDataLink*,link);
 
@@ -409,7 +411,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpTransport","passive_connection");
+  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",5);
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
@@ -441,7 +443,7 @@ TAO::DCPS::SimpleTcpTransport::make_active_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY("SimpleTcpTransport","make_active_connection");
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_active_connection",5);
 
   // Create the connection object here.
   SimpleTcpConnection_rch connection = new SimpleTcpConnection();
@@ -463,7 +465,7 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY("SimpleTcpTransport","make_passive_connection");
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",5);
 
   SimpleTcpConnection_rch connection;
 
@@ -494,18 +496,18 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
                                         (SimpleTcpDataLink*   link,
                                          SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpTransport","connect_datalink");
+  DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",5);
 
   ACE_Time_Value max_output_pause_period(this->tcp_config_->max_output_pause_period_/1000,
-                                         this->tcp_config_->max_output_pause_period_%1000*1000); 
-  TransportSendStrategy_rch send_strategy = 
+                                         this->tcp_config_->max_output_pause_period_%1000*1000);
+  TransportSendStrategy_rch send_strategy =
              new SimpleTcpSendStrategy(link,
                                        this->tcp_config_.in(),
                                        connection,
                                        new SimpleTcpSynchResource(connection,
                                                                   max_output_pause_period));
 
-  TransportReceiveStrategy_rch receive_strategy = 
+  TransportReceiveStrategy_rch receive_strategy =
                        new SimpleTcpReceiveStrategy(link,
                                                     connection,
                                                     this->reactor_task_.in());
@@ -528,7 +530,7 @@ int
 TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
                                            SimpleTcpConnection_rch connection)
 {
-  DBG_ENTRY("SimpleTcpTransport","fresh_link");
+  DBG_ENTRY_LVL("SimpleTcpTransport","fresh_link",5);
 
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);
@@ -543,5 +545,3 @@ TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_addres
 
   return 0;
 }
-
-

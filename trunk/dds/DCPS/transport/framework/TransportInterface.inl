@@ -16,7 +16,7 @@ ACE_INLINE
 TAO::DCPS::TransportInterface::TransportInterface()
   : swap_bytes_(0)
 {
-  DBG_ENTRY("TransportInterface","TransportInterface");
+  DBG_ENTRY_LVL("TransportInterface","TransportInterface",5);
   this->send_links_ = new DataLinkSet();
 }
 
@@ -30,7 +30,7 @@ TAO::DCPS::TransportInterface::TransportInterface()
 ACE_INLINE const TAO::DCPS::TransportInterfaceInfo&
 TAO::DCPS::TransportInterface::connection_info() const
 {
-  DBG_ENTRY("TransportInterface","connection_info");
+  DBG_ENTRY_LVL("TransportInterface","connection_info",5);
   return this->connection_info_;
 }
 
@@ -38,7 +38,7 @@ TAO::DCPS::TransportInterface::connection_info() const
 ACE_INLINE int
 TAO::DCPS::TransportInterface::swap_bytes() const
 {
-  DBG_ENTRY("TransportInterface","swap_bytes");
+  DBG_ENTRY_LVL("TransportInterface","swap_bytes",5);
   return this->swap_bytes_;
 }
 
@@ -48,7 +48,7 @@ TAO::DCPS::TransportInterface::send_control(RepoId                 pub_id,
                                             TransportSendListener* listener,
                                             ACE_Message_Block*     msg)
 {
-  DBG_ENTRY("TransportInterface","send_control");
+  DBG_ENTRY_LVL("TransportInterface","send_control",5);
 
   DataLinkSet_rch pub_links = this->local_map_.find_set(pub_id);
 
@@ -80,7 +80,16 @@ TAO::DCPS::TransportInterface::remove_sample
                                      (const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
-  DBG_ENTRY("TransportInterface","remove_sample");
+  DBG_ENTRY_LVL("TransportInterface","remove_sample",5);
+
+  // ciju: After discussions with Tim B., we feel strongly feel that
+  // this section should be protected with some sort of locking mechanism.
+  // The pub_links could become invalid anyytime after the find_set().
+  // I believe it best to use the TransportInterface lock to protect
+  // this area.
+
+  // ciju: The lock isn't necessary. The DataLinkSet is ref counted and therefore
+  // isn't going anywhere untill this method exits.
 
   DataLinkSet_rch pub_links =
                         this->local_map_.find_set(sample->publication_id_);
@@ -110,7 +119,7 @@ TAO::DCPS::TransportInterface::remove_sample
 ACE_INLINE int
 TAO::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY("TransportInterface","remove_all_control_msgs");
+  DBG_ENTRY_LVL("TransportInterface","remove_all_control_msgs",5);
 
   DataLinkSet_rch pub_links = this->local_map_.find_set(pub_id);
 
@@ -132,7 +141,7 @@ TAO::DCPS::TransportInterface::add_subscriptions
                                      ssize_t                size,
                                      const AssociationData* subscriptions)
 {
-  DBG_ENTRY("TransportInterface","add_subscriptions");
+  DBG_ENTRY_LVL("TransportInterface","add_subscriptions",5);
   // Delegate to generic add_associations operation
   return this->add_associations(publisher_id,
                                 priority,
@@ -151,7 +160,7 @@ TAO::DCPS::TransportInterface::add_publications
                                     ssize_t                   size,
                                     const AssociationData*    publications)
 {
-  DBG_ENTRY("TransportInterface","add_publications");
+  DBG_ENTRY_LVL("TransportInterface","add_publications",5);
   // Delegate to generic add_associations operation
   return this->add_associations(subscriber_id,
                                 priority,
@@ -166,7 +175,7 @@ TAO::DCPS::TransportInterface::add_publications
 ACE_INLINE void
 TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
 {
-  DBG_ENTRY("TransportInterface","send");
+  DBG_ENTRY_LVL("TransportInterface","send",5);
 
   DataSampleListElement* cur = samples.head_;
 
@@ -223,6 +232,7 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
   // The reason that the send_links_ set is cleared is because we continually
   // reuse the same send_links_ object over and over for each call to this
   // send method.
+
   this->send_links_->send_stop();
 }
 
@@ -232,5 +242,3 @@ TAO::DCPS::TransportInterface::get_transport_impl ()
 {
   return this->impl_;
 }
-
-

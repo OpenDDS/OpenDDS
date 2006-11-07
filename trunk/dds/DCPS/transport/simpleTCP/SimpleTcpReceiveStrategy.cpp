@@ -18,7 +18,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
                                          SimpleTcpConnection*  connection,
                                          TransportReactorTask* task)
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","SimpleTcpReceiveStrategy");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","SimpleTcpReceiveStrategy",5);
 
   // Keep a "copy" of the reference to the DataLink for ourselves.
   link->_add_ref();
@@ -36,7 +36,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
 
 TAO::DCPS::SimpleTcpReceiveStrategy::~SimpleTcpReceiveStrategy()
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","~SimpleTcpReceiveStrategy");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","~SimpleTcpReceiveStrategy",5);
 }
 
 
@@ -46,7 +46,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::receive_bytes
                                               int   n,
                                               ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","receive_bytes");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","receive_bytes",5);
 
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
@@ -77,7 +77,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
       VDBG((LM_DEBUG, "(%P|%t) DBG:  received FULLY_ASSOCIATED \n"));
 
       SimpleTcpTransport_rch transport = this->link_->get_transport_impl();
-      transport->demarshal_acks (sample.sample_, 
+      transport->demarshal_acks (sample.sample_,
                                  sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
     }
   else
@@ -88,7 +88,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
 int
 TAO::DCPS::SimpleTcpReceiveStrategy::start_i()
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","start_i");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","start_i",5);
 
   // Tell the SimpleTcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
@@ -116,12 +116,12 @@ TAO::DCPS::SimpleTcpReceiveStrategy::start_i()
 
 
 // This is called by the datalink object to associate with the "new" connection object.
-// The "old" connection object is unregistered with the reactor and the "new" connection 
+// The "old" connection object is unregistered with the reactor and the "new" connection
 // object is registered for receiving.
 int
 TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","reset");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","reset",5);
 
   // Sanity check - this connection is passed in from the constructor and
   // it should not be nil.
@@ -132,7 +132,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
                         "should not be nil.\n"),
                        -1);
     }
-  
+
   if (this->connection_.in () == connection)
     {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -157,7 +157,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
   // Replace with a new connection.
   connection->_add_ref ();
   this->connection_ = connection;
-  
+
   // Tell the SimpleTcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The SimpleTcpConnection object will make a "copy" of the
@@ -186,7 +186,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 void
 TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","stop_i");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","stop_i",5);
 
   this->reactor_task_->get_reactor()->remove_handler
                                              (this->connection_.in(),
@@ -205,9 +205,6 @@ TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
 void
 TAO::DCPS::SimpleTcpReceiveStrategy::relink (bool do_suspend)
 {
-  DBG_ENTRY("SimpleTcpReceiveStrategy","relink");
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","relink",5);
   this->connection_->relink (do_suspend);
 }
-
-
-

@@ -14,7 +14,7 @@ TAO::DCPS::SimpleUdpSendStrategy::SimpleUdpSendStrategy
   : TransportSendStrategy(config,0),
     addr_(remote_address)
 {
-  DBG_ENTRY("SimpleUdpSendStrategy","SimpleUdpSendStrategy");
+  DBG_ENTRY_LVL("SimpleUdpSendStrategy","SimpleUdpSendStrategy",5);
 
   // Keep a "copy" of the reference to the SimpleUdpSocket object
   // for ourselves.
@@ -27,7 +27,7 @@ ACE_INLINE
 void
 TAO::DCPS::SimpleUdpSendStrategy::stop_i()
 {
-  DBG_ENTRY("SimpleUdpSendStrategy","stop_i");
+  DBG_ENTRY_LVL("SimpleUdpSendStrategy","stop_i",5);
   //TODO: noop
 }
 
