@@ -13,13 +13,13 @@
 
 TAO::DCPS::TransportInterface::~TransportInterface()
 {
-  DBG_ENTRY("TransportInterface","~TransportInterface");
+  DBG_ENTRY_LVL("TransportInterface","~TransportInterface",5);
 }
 
 void
 TAO::DCPS::TransportInterface::transport_detached_i()
 {
-  DBG_ENTRY("TransportInterface","transport_detached_i");
+  DBG_ENTRY_LVL("TransportInterface","transport_detached_i",5);
   // Subclass should override if interested in the "transport detached event".
 }
 
@@ -29,40 +29,43 @@ TAO::DCPS::TransportInterface::transport_detached_i()
 TAO::DCPS::AttachStatus
 TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 {
-  DBG_ENTRY("TransportInterface","attach_transport");
-  GuardType guard(this->lock_);
+  DBG_ENTRY_LVL("TransportInterface","attach_transport",5);
 
-  if (!this->impl_.is_nil())
-    {
-      // This TransportInterface object is currently attached to
-      // a TransportImpl.
-      return ATTACH_BAD_TRANSPORT;
-    }
+  { // guard scope
+    GuardType guard(this->lock_);
 
-  // Ask the impl for the swap_bytes() value, and cache the answer in
-  // a data member (this->swap_bytes_) so that we don't have to ask
-  // the impl for it anymore.
-  this->swap_bytes_ = impl->swap_bytes();
-//MJM: Of course the OO way would be to have a mutator and do it thus:
-//MJM:   this->swap_bytes( impl->swap_bytes());
+    if (!this->impl_.is_nil())
+      {
+  // This TransportInterface object is currently attached to
+  // a TransportImpl.
+  return ATTACH_BAD_TRANSPORT;
+      }
 
-  // Ask the impl for the connection_info() value, and cache the answer in
-  // a data member (this->connection_info_) so that we don't have to ask
-  // the impl for it anymore.
-  impl->connection_info(this->connection_info_);
+    // Ask the impl for the swap_bytes() value, and cache the answer in
+    // a data member (this->swap_bytes_) so that we don't have to ask
+    // the impl for it anymore.
+    this->swap_bytes_ = impl->swap_bytes();
+    //MJM: Of course the OO way would be to have a mutator and do it thus:
+    //MJM:   this->swap_bytes( impl->swap_bytes());
 
-  // Attempt to attach ourselves to the TransportImpl object now.
-  if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT)
-    {
-      // The TransportImpl didn't accept our attachment for some reason.
-      return ATTACH_BAD_TRANSPORT;
-    }
+    // Ask the impl for the connection_info() value, and cache the answer in
+    // a data member (this->connection_info_) so that we don't have to ask
+    // the impl for it anymore.
+    impl->connection_info(this->connection_info_);
 
-  // Now the TransportImpl object knows about us.  Let's remember the
-  // TransportImpl object by saving a "copy" of the reference to our
-  // impl_ data member.
-  impl->_add_ref();
-  this->impl_ = impl;
+    // Attempt to attach ourselves to the TransportImpl object now.
+    if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT)
+      {
+  // The TransportImpl didn't accept our attachment for some reason.
+  return ATTACH_BAD_TRANSPORT;
+      }
+
+    // Now the TransportImpl object knows about us.  Let's remember the
+    // TransportImpl object by saving a "copy" of the reference to our
+    // impl_ data member.
+    impl->_add_ref();
+    this->impl_ = impl;
+  }
 
   return ATTACH_OK;
 }
@@ -85,7 +88,7 @@ TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 void
 TAO::DCPS::TransportInterface::detach_transport()
 {
-  DBG_ENTRY("TransportInterface","detach_transport");
+  DBG_ENTRY_LVL("TransportInterface","detach_transport",5);
   TransportImpl_rch impl;
 
   {
@@ -108,7 +111,7 @@ TAO::DCPS::TransportInterface::detach_transport()
 
     this->remote_map_.release_all_reservations();
     this->local_map_.release_all_reservations();
-//MJM: Althgough these are not currently implemented, right?
+    //MJM: Althgough these are not currently implemented, right?
   }
 
   // Tell the (detached) TransportImpl object that it should detach
@@ -140,176 +143,164 @@ TAO::DCPS::TransportInterface::add_associations
                           const AssociationData*    remote_associations,
                           TransportReceiveListener* receive_listener)
 {
-  DBG_ENTRY("TransportInterface","add_associations");
-  // We are going to need to obtain our own local "copy" (reference counted)
-  // of our TransportImpl object while we have the lock.
-  TransportImpl_rch impl;
+  DBG_ENTRY_LVL("TransportInterface","add_associations",5);
 
-  {
-    GuardType guard(this->lock_);
-
-    if (this->impl_.is_nil())
-      {
-        // There is no TransportImpl object - the transport must have
-        // been detached.  Return the failure code.
-        return -1;
-      }
-
-    // We have a TransportImpl object.  Make our own "copy" so that we
-    // can release our lock_.
-    impl = this->impl_;
-  }
-//MJM: I do not understand why this lock is required.  The refcount is
-//MJM: protected as an atomic operation, no?  So what are we doing
-//MJM: besides bumping the ref count?
-
-
-  // We need to acquire the reservation lock from the TransportImpl object.
-  // Once we have acquired the lock, we know that other TransportInterface
-  // objects that share our TransportImpl object will not be able to
-  // add or remove reservations at the same time as us.
-  TransportImpl::ReservationGuardType guard(impl->reservation_lock());
-
-  for (size_t i = 0; i < num_remote_associations; ++i)
+  if (this->impl_.is_nil())
     {
-      RepoId remote_id = remote_associations[i].remote_id_;
-
-      DataLink_rch link;
-
-      // There are two ways to reserve the DataLink -- as a local publisher,
-      // or as a local subscriber.  If the receive_listener argument is
-      // a NULL pointer (0), then use the local publisher version.  Otherwise,
-      // use the local subscriber version.
-      if (receive_listener == 0)
-        {
-          VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
-            local_id, remote_id));
-          // Local publisher, remote subscriber.
-          link = impl->reserve_datalink(remote_associations[i].remote_data_,
-                                        remote_id,
-                                        local_id,
-                                        priority);
-        }
-      else
-        {
-          VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
-            local_id, remote_id));
-          // Local subscriber, remote publisher.
-          link = impl->reserve_datalink(remote_associations[i].remote_data_,
-                                        remote_id,
-                                        local_id,
-                                        receive_listener,
-                                        priority);
-        }
-
-      if (link.is_nil())
-        {
-          // reserve_datalink failure
-          ACE_ERROR_RETURN((LM_ERROR,
-                            "(%P|%t) ERROR: Failed to reserve a DataLink with the "
-                            "TransportImpl for association from local "
-                            "[%s %d] to remote [%s %d].\n",
-                            local_id_str,local_id,
-                            remote_id_str,remote_id),
-                           -1);
-        }
-
-      // At this point, the DataLink knows about our association.
-
-//MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
-
-//MJM: The logic from here to the end of the loop needs to be broken out
-//MJM: and moved to another method.  That method should collect up all
-//MJM: of the new connections.  When they _all_ have been established,
-//MJM: then this routine can move forward.  In the meantime, after this
-//MJM: method has made all of the reserve_datalink() calls, it should
-//MJM: then wait on a condition that indicates that _all_ of the
-//MJM: datalinks are available.
-
-//MJM: It is then the responsibility of the datalinks to not report
-//MJM: their successful connection until both sides have checked in.
-//MJM: This means adding some additional traffic during connection
-//MJM: establishment.  See the datalink details for more info.
-
-//MJM: Hmm...
-//MJM: 1) make another method to do the rest of the registration
-//MJM:    code here.
-//MJM: 2) Make that method aware of how many datalinks need to
-//MJM:    be established.
-//MJM: 3) After that many links have been established, signal the
-//MJM:    condition.
-//MJM: 4) Have this method wait() on the signal() after all the
-//MJM:    reserve_datalinks() calls have been made.
-
-//MJM: What remains is to add a ready protocol to the connection
-//MJM: establishment.
-
-//MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
-
-      // Now we need to update the local_map_ to associate the local_id
-      // with the new DataLink.  We do this by inserting the DataLink into
-      // the local_set that we found (or created) earlier.
-
-      // We consider a result of 1 or 0 to indicate success here.  A result
-      // of 0 means that the insert_link() succeeded, and a result of 1 means
-      // that the local_id already has an existing reservation with the
-      // DataLink.  This is expected to happen.
-      if (this->local_map_.insert_link(local_id, link.in()) != -1)
-        {
-          // Now that we know the local_set contains the new DataLink,
-          // we need to get the new DataLink into a remote_set within
-          // our remote_map_.
-
-          if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
-            {
-              // Ok.  We are done handling the current association.
-              // This means we can continue the loop and go on to
-              // the next association.
-              continue;
-            }
-          else
-            {
-              // The remote_set->insert_link() failed.
-              ACE_ERROR((LM_ERROR,
-                         "(%P|%t) ERROR: Failed to insert DataLink into remote_map_ "
-                         "(DataLinkSetMap) for remote [%s %d].\n",
-                         remote_id_str,remote_id));
-            }
-
-          // "Undo" logic due to error would go here.
-          //   * We would need to undo the local_set->insert_link() operation.
-//MJM: Make it so.
-        }
-      else
-        {
-          // The local_set->insert_link() failed.
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to insert DataLink into "
-                     "local_map_ for local [%s %d].\n",
-                     local_id_str,local_id));
-        }
-
-      // "Undo" logic due to error would go here.
-      //   * We would need to undo the impl->reserve_datalink() operation.
-      //   * We also would need to iterate over the remote_assocations that
-      //     have worked thus far, and nuke them.
-//MJM: Right.
-//MJM: We will need to make sure that we do _not_ leave the transport in
-//MJM: a funky state after a failure to associate.  This will probably
-//MJM: be a fairly common occurance in some environments.
-
-      // Only failure conditions will cause the logic to get here.
+      // There is no TransportImpl object - the transport must have
+      // been detached.  Return the failure code.
       return -1;
     }
 
-  if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
   {
-    if (this->impl_->add_pending_association (local_id, 
-                                              num_remote_associations, 
-                                              remote_associations) != 0)
-      return -1;
-  }
-  // We completed everything without a problem.
+    // We need to acquire the reservation lock from the TransportImpl object.
+    // Once we have acquired the lock, we know that other TransportInterface
+    // objects that share our TransportImpl object will not be able to
+    // add or remove reservations at the same time as us.
+    TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
+
+    for (size_t i = 0; i < num_remote_associations; ++i)
+      {
+  RepoId remote_id = remote_associations[i].remote_id_;
+
+  DataLink_rch link;
+
+  // There are two ways to reserve the DataLink -- as a local publisher,
+  // or as a local subscriber.  If the receive_listener argument is
+  // a NULL pointer (0), then use the local publisher version.  Otherwise,
+  // use the local subscriber version.
+  if (receive_listener == 0)
+    {
+      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
+      local_id, remote_id));
+      // Local publisher, remote subscriber.
+      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+             remote_id,
+             local_id,
+             priority);
+    }
+  else
+    {
+      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
+      local_id, remote_id));
+      // Local subscriber, remote publisher.
+      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+             remote_id,
+             local_id,
+             receive_listener,
+             priority);
+    }
+
+  if (link.is_nil())
+    {
+      // reserve_datalink failure
+      ACE_ERROR_RETURN((LM_ERROR,
+            "(%P|%t) ERROR: Failed to reserve a DataLink with the "
+            "TransportImpl for association from local "
+            "[%s %d] to remote [%s %d].\n",
+            local_id_str,local_id,
+            remote_id_str,remote_id),
+           -1);
+    }
+
+  // At this point, the DataLink knows about our association.
+
+  //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
+
+  //MJM: The logic from here to the end of the loop needs to be broken out
+  //MJM: and moved to another method.  That method should collect up all
+  //MJM: of the new connections.  When they _all_ have been established,
+  //MJM: then this routine can move forward.  In the meantime, after this
+  //MJM: method has made all of the reserve_datalink() calls, it should
+  //MJM: then wait on a condition that indicates that _all_ of the
+  //MJM: datalinks are available.
+
+  //MJM: It is then the responsibility of the datalinks to not report
+  //MJM: their successful connection until both sides have checked in.
+  //MJM: This means adding some additional traffic during connection
+  //MJM: establishment.  See the datalink details for more info.
+
+  //MJM: Hmm...
+  //MJM: 1) make another method to do the rest of the registration
+  //MJM:    code here.
+  //MJM: 2) Make that method aware of how many datalinks need to
+  //MJM:    be established.
+  //MJM: 3) After that many links have been established, signal the
+  //MJM:    condition.
+  //MJM: 4) Have this method wait() on the signal() after all the
+  //MJM:    reserve_datalinks() calls have been made.
+
+  //MJM: What remains is to add a ready protocol to the connection
+  //MJM: establishment.
+
+  //MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
+
+  // Now we need to update the local_map_ to associate the local_id
+  // with the new DataLink.  We do this by inserting the DataLink into
+  // the local_set that we found (or created) earlier.
+
+  // We consider a result of 1 or 0 to indicate success here.  A result
+  // of 0 means that the insert_link() succeeded, and a result of 1 means
+  // that the local_id already has an existing reservation with the
+  // DataLink.  This is expected to happen.
+  if (this->local_map_.insert_link(local_id, link.in()) != -1)
+    {
+      // Now that we know the local_set contains the new DataLink,
+      // we need to get the new DataLink into a remote_set within
+      // our remote_map_.
+
+      if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
+        {
+    // Ok.  We are done handling the current association.
+    // This means we can continue the loop and go on to
+    // the next association.
+    continue;
+        }
+      else
+        {
+    // The remote_set->insert_link() failed.
+    ACE_ERROR((LM_ERROR,
+         "(%P|%t) ERROR: Failed to insert DataLink into remote_map_ "
+         "(DataLinkSetMap) for remote [%s %d].\n",
+         remote_id_str,remote_id));
+        }
+
+      // "Undo" logic due to error would go here.
+      //   * We would need to undo the local_set->insert_link() operation.
+      //MJM: Make it so.
+    }
+  else
+    {
+      // The local_set->insert_link() failed.
+      ACE_ERROR((LM_ERROR,
+           "(%P|%t) ERROR: Failed to insert DataLink into "
+           "local_map_ for local [%s %d].\n",
+           local_id_str,local_id));
+    }
+
+  // "Undo" logic due to error would go here.
+  //   * We would need to undo the impl->reserve_datalink() operation.
+  //   * We also would need to iterate over the remote_assocations that
+  //     have worked thus far, and nuke them.
+  //MJM: Right.
+  //MJM: We will need to make sure that we do _not_ leave the transport in
+  //MJM: a funky state after a failure to associate.  This will probably
+  //MJM: be a fairly common occurance in some environments.
+
+  // Only failure conditions will cause the logic to get here.
+  return -1;
+      }
+
+    if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
+      {
+  if (this->impl_->add_pending_association (local_id,
+              num_remote_associations,
+              remote_associations) != 0)
+    return -1;
+      }
+    // We completed everything without a problem.
+  } // guard scope
+
   return 0;
 }
 
@@ -318,21 +309,24 @@ void
 TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
                                                    const RepoId* remote_ids)
 {
-  DBG_ENTRY("TransportInterface","remove_associations");
-  // We need to perform the remove_associations logic while we know that
-  // no other TransportInterface objects (that share our TransportImpl)
-  // will be able to add or remove associations.
-  TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
+  DBG_ENTRY_LVL("TransportInterface","remove_associations",5);
 
   DataLinkSetMap released_locals;
 
-  // Ask the remote_map_ to do the dirty work.  It will also populate
-  // the supplied DataLinkSetMap (released_locals) with any local_id to link_id
-  // associations that are no longer valid following this remove operation.
-  this->remote_map_.release_reservations(size,remote_ids,released_locals);
+  { // guard scope
+    // We need to perform the remove_associations logic while we know that
+    // no other TransportInterface objects (that share our TransportImpl)
+    // will be able to add or remove associations.
+    TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
-  // Now we need to ask our local_map_ to remove any released_locals.
-  this->local_map_.remove_released(released_locals);
+    // Ask the remote_map_ to do the dirty work.  It will also populate
+    // the supplied DataLinkSetMap (released_locals) with any local_id to link_id
+    // associations that are no longer valid following this remove operation.
+    this->remote_map_.release_reservations(size,remote_ids,released_locals);
+
+    // Now we need to ask our local_map_ to remove any released_locals.
+    this->local_map_.remove_released(released_locals);
+  }
 }
 
 
@@ -342,7 +336,7 @@ TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
 void
 TAO::DCPS::TransportInterface::transport_detached()
 {
-  DBG_ENTRY("TransportInterface","transport_detached");
+  DBG_ENTRY_LVL("TransportInterface","transport_detached",5);
   {
     GuardType guard(this->lock_);
 
@@ -368,4 +362,3 @@ TAO::DCPS::TransportInterface::transport_detached()
   // implementation of the transport_detached_i() method.
   this->transport_detached_i();
 }
-

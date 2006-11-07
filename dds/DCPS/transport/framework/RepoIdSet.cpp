@@ -12,13 +12,13 @@
 
 TAO::DCPS::RepoIdSet::~RepoIdSet()
 {
-  DBG_ENTRY("RepoIdSet","~RepoIdSet");
+  DBG_ENTRY_LVL("RepoIdSet","~RepoIdSet",5);
 }
 
 void
 TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
 {
-  DBG_ENTRY("RepoIdSet","serialize");
+  DBG_ENTRY_LVL("RepoIdSet","serialize",5);
   serializer << this->size ();
   MapType::ENTRY* entry;
 
@@ -31,11 +31,11 @@ TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
 }
 
 
-bool 
+bool
 TAO::DCPS::RepoIdSet::equal (RepoIdSet& map)
 {
-  DBG_ENTRY("RepoIdSet","equal");
-  
+  DBG_ENTRY_LVL("RepoIdSet","equal",5);
+
   if (this->size () == map.size () && this->size () > 0)
   {
     MapType::ENTRY* entry;
@@ -51,7 +51,7 @@ TAO::DCPS::RepoIdSet::equal (RepoIdSet& map)
 
     return true;
   }
-      
+
   return false;
-}  
+}
 

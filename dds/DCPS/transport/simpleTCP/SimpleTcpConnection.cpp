@@ -40,7 +40,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   last_reconnect_attempted_ (ACE_Time_Value::zero),
   shutdown_ (false)
 {
-  DBG_ENTRY("SimpleTcpConnection","SimpleTcpConnection");
+  DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",5);
 
   // Open the reconnect task
   if (this->reconnect_task_.open ())
@@ -53,7 +53,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 
 TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
-  DBG_ENTRY("SimpleTcpConnection","~SimpleTcpConnection");
+  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",5);
 
   // Remove the reference of the old connection object
   // or the reference of new connection object.
@@ -73,7 +73,7 @@ void
 TAO::DCPS::SimpleTcpConnection::set_receive_strategy
                                  (TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY("SimpleTcpConnection","set_receive_strategy");
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",5);
 
   // Make a "copy" for ourselves
   receive_strategy->_add_ref();
@@ -85,7 +85,7 @@ void
 TAO::DCPS::SimpleTcpConnection::set_send_strategy
                                  (SimpleTcpSendStrategy* send_strategy)
 {
-  DBG_ENTRY("SimpleTcpConnection","set_send_strategy");
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",5);
 
   // Make a "copy" for ourselves
   send_strategy->_add_ref();
@@ -96,7 +96,7 @@ TAO::DCPS::SimpleTcpConnection::set_send_strategy
 int
 TAO::DCPS::SimpleTcpConnection::open(void* arg)
 {
-  DBG_ENTRY("SimpleTcpConnection","open");
+  DBG_ENTRY_LVL("SimpleTcpConnection","open",5);
 
   // A safety check - This should not happen since the is_connector_
   // defaults to true and open() is called after the ACE_Aceptor
@@ -203,7 +203,7 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
 int
 TAO::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 {
-  DBG_ENTRY("SimpleTcpConnection","handle_input");
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",5);
 
   TransportReceiveStrategy_rch rs = this->receive_strategy_;
 
@@ -219,7 +219,7 @@ TAO::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 int
 TAO::DCPS::SimpleTcpConnection::close(u_long)
 {
-  DBG_ENTRY("SimpleTcpConnection","close");
+  DBG_ENTRY_LVL("SimpleTcpConnection","close",5);
 
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
@@ -233,7 +233,7 @@ TAO::DCPS::SimpleTcpConnection::close(u_long)
 int
 TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  DBG_ENTRY("SimpleTcpConnection","handle_close");
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",5);
 
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
@@ -301,7 +301,7 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
                                      const ACE_INET_Addr& local_address,
                                      SimpleTcpConfiguration_rch tcp_config)
 {
-  DBG_ENTRY("SimpleTcpConnection","active_establishment");
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_establishment",5);
 
   // Cache these values for reconnecting.
   this->remote_address_ = remote_address;
@@ -376,7 +376,7 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
 int
 TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
-  DBG_ENTRY("SimpleTcpConnection","reconnect");
+  DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",5);
 
   if (on_new_association)
     return this->active_reconnect_on_new_association ();
@@ -394,7 +394,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 int
 TAO::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 {
-  DBG_ENTRY("SimpleTcpConnection","active_reconnect_on_new_association");
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",5);
   GuardType guard (this->reconnect_lock_);
 
   if (this->connected_ == true)
@@ -417,7 +417,7 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 int
 TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 {
-  DBG_ENTRY("SimpleTcpConnection","passive_reconnect_i");
+  DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",5);
   GuardType guard (this->reconnect_lock_);
 
   // The passive_reconnect_timer_id_ is used as flag to allow the timer scheduled just once.
@@ -468,7 +468,7 @@ TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 int
 TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
 {
-  DBG_ENTRY("SimpleTcpConnection","active_reconnect_i");
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",5);
 
   GuardType guard (this->reconnect_lock_);
   int ret = -1;
@@ -569,7 +569,7 @@ int
 TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
-  DBG_ENTRY("SimpleTcpConnection","handle_timeout");
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",5);
 
   this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
   GuardType guard (this->reconnect_lock_);
@@ -611,7 +611,7 @@ TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
 void
 TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY("SimpleTcpConnection","transfer");
+  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",5);
 
   GuardType guard (this->reconnect_lock_);
 
@@ -703,7 +703,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 void
 TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 {
-  DBG_ENTRY("SimpleTcpConnection","notify_lost_on_backpressure_timeout");
+  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",5);
   bool notify_lost = false;
   {
     GuardType guard (this->reconnect_lock_);
@@ -730,7 +730,7 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 void
 TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
-  DBG_ENTRY("SimpleTcpConnection","relink");
+  DBG_ENTRY_LVL("SimpleTcpConnection","relink",5);
 
   if (do_suspend && ! this->send_strategy_.is_nil ())
     this->send_strategy_->suspend_send ();
@@ -742,7 +742,7 @@ TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 void
 TAO::DCPS::SimpleTcpConnection::shutdown ()
 {
-  DBG_ENTRY("SimpleTcpConnection","shutdown");
+  DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",5);
   this->shutdown_ = true;
 
   this->reconnect_task_.close (1);

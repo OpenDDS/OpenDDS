@@ -11,7 +11,7 @@
 
 TAO::DCPS::ReceiveListenerSetMap::~ReceiveListenerSetMap()
 {
-  DBG_ENTRY("ReceiveListenerSetMap","~ReceiveListenerSetMap");
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","~ReceiveListenerSetMap",5);
 }
 
 
@@ -21,7 +21,7 @@ TAO::DCPS::ReceiveListenerSetMap::insert
                                  RepoId                    subscriber_id,
                                  TransportReceiveListener* receive_listener)
 {
-  DBG_ENTRY("ReceiveListenerSetMap","insert");
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",5);
   ReceiveListenerSet_rch listener_set = this->find_or_create(publisher_id);
 
   if (listener_set.is_nil())
@@ -84,7 +84,7 @@ int
 TAO::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
                                          RepoId subscriber_id)
 {
-  DBG_ENTRY("ReceiveListenerSetMap","remove");
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",5);
   ReceiveListenerSet_rch listener_set;
 
   if (this->map_.find(publisher_id, listener_set) != 0)
@@ -131,7 +131,7 @@ int
 TAO::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
                                                      RepoId subscriber_id)
 {
-  DBG_ENTRY("ReceiveListenerSetMap","release_subscriber");
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",5);
   ReceiveListenerSet_rch listener_set;
 
   if (this->map_.find(publisher_id, listener_set) != 0)

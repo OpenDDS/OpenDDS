@@ -17,7 +17,7 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                       SimpleTcpSynchResource* synch_resource)
   : TransportSendStrategy(config, synch_resource)
 {
-  DBG_ENTRY("SimpleTcpSendStrategy","SimpleTcpSendStrategy");
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",5);
 
   // Keep a "copy" of the connection reference for ourselves
   connection->_add_ref();
@@ -34,14 +34,14 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
 
 TAO::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {
-  DBG_ENTRY("SimpleTcpSendStrategy","~SimpleTcpSendStrategy");
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",5);
 }
 
 
 ssize_t
 TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
-  DBG_ENTRY("SimpleTcpSendStrategy","send_bytes");
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",5);
 
   int val = 0;
   ACE_HANDLE handle = this->connection_->peer().get_handle();
@@ -72,7 +72,7 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 
           // try to get the application to core when "Bad Address" is returned
           // by looking at the iovec
-          for (int ii = 0; ii < n; ii++) 
+          for (int ii = 0; ii < n; ii++)
             {
               ACE_ERROR((LM_ERROR, "send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
                 ii, iov[ii].iov_len, iov[ii].iov_base ));
@@ -89,17 +89,17 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 }
 
 
-void 
+void
 TAO::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
-  DBG_ENTRY("SimpleTcpSendStrategy","relink");
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",5);
   this->connection_->relink (do_suspend);
 }
 
 void
 TAO::DCPS::SimpleTcpSendStrategy::stop_i()
 {
-  DBG_ENTRY("SimpleTcpSendStrategy","stop_i");
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",5);
 
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.

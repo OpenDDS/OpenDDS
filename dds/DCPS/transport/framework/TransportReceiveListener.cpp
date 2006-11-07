@@ -13,12 +13,12 @@
 
 TAO::DCPS::TransportReceiveListener::TransportReceiveListener()
 {
-  DBG_ENTRY("TransportReceiveListener","TransportReceiveListener");
+  DBG_ENTRY_LVL("TransportReceiveListener","TransportReceiveListener",5);
 }
 
 
 TAO::DCPS::TransportReceiveListener::~TransportReceiveListener()
 {
-  DBG_ENTRY("TransportReceiveListener","~TransportReceiveListener");
+  DBG_ENTRY_LVL("TransportReceiveListener","~TransportReceiveListener",5);
 }
 

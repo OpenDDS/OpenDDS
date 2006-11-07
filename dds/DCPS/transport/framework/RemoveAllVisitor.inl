@@ -9,14 +9,14 @@ TAO::DCPS::RemoveAllVisitor::RemoveAllVisitor()
   : status_(0),
     removed_bytes_(0)
 {
-  DBG_ENTRY("RemoveAllVisitor","RemoveAllVisitor");
+  DBG_ENTRY_LVL("RemoveAllVisitor","RemoveAllVisitor",5);
 }
 
 
 ACE_INLINE int
 TAO::DCPS::RemoveAllVisitor::status() const
 {
-  DBG_ENTRY("RemoveAllVisitor","status");
+  DBG_ENTRY_LVL("RemoveAllVisitor","status",5);
   return this->status_;
 }
 
@@ -24,7 +24,7 @@ TAO::DCPS::RemoveAllVisitor::status() const
 ACE_INLINE int
 TAO::DCPS::RemoveAllVisitor::removed_bytes() const
 {
-  DBG_ENTRY("RemoveAllVisitor","removed_bytes");
+  DBG_ENTRY_LVL("RemoveAllVisitor","removed_bytes",5);
   return this->removed_bytes_;
 }
 

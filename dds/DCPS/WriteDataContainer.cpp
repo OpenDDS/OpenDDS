@@ -20,7 +20,7 @@ namespace TAO
       bool           should_block ,
       ACE_Time_Value max_blocking_time,
       size_t         n_chunks
-    ) 
+    )
     : depth_ (depth),
       should_block_ (should_block),
       max_blocking_time_ (max_blocking_time),
@@ -42,19 +42,19 @@ namespace TAO
       }
     }
 
-    
+
     WriteDataContainer::~WriteDataContainer()
     {
       if (! shutdown_)
         {
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: ")
                      ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
                      ACE_TEXT("The container has not be cleaned.\n")));
         }
     }
 
-    
+
     // This method preassumes that instance list has space for this sample.
     ::DDS::ReturnCode_t
     WriteDataContainer::enqueue(
@@ -65,16 +65,16 @@ namespace TAO
       PublicationInstance* instance =
             get_handle_instance (instance_handle);
       // Extract the instance queue.
-      DataSampleList& instance_list = instance->samples_;        
+      DataSampleList& instance_list = instance->samples_;
 
       //
       // Enqueue to the next_send_sample_ thread of unsent_data_
-      // will link samples with the next_sample/previous_sample and 
-      // also next_send_sample_. 
+      // will link samples with the next_sample/previous_sample and
+      // also next_send_sample_.
       // This would save time when we actually send the data.
-      
+
       unsent_data_.enqueue_tail_next_send_sample (sample);
- 
+
       //
       // Add this sample to the INSTANCE scope list.
       instance_list.enqueue_tail_next_instance_sample (sample);
@@ -85,9 +85,9 @@ namespace TAO
     ::DDS::ReturnCode_t
     WriteDataContainer::reenqueue_all(DataWriterImpl* writer)
     {
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                        guard, 
-                        this->lock_, 
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        guard,
+                        this->lock_,
                         ::DDS::RETCODE_ERROR);
 
       while (sending_data_.size_ > 0)
@@ -116,7 +116,7 @@ namespace TAO
       ))
     {
       PublicationInstance* instance;
-     
+
       if (instance_handle == ::DDS::HANDLE_NIL)
         {
           // registered the instance for the first time.
@@ -130,10 +130,10 @@ namespace TAO
 
           if (0 != insert_attempt)
             {
-              ACE_ERROR ((LM_ERROR, 
+              ACE_ERROR ((LM_ERROR,
                                  ACE_TEXT("(%P|%t) ERROR: ")
                                  ACE_TEXT("WriteDataContainer::register_instance, ")
-                                 ACE_TEXT("failed to insert instance handle=%X\n"), 
+                                 ACE_TEXT("failed to insert instance handle=%X\n"),
                                  instance));
               delete instance;
               return ::DDS::RETCODE_ERROR;
@@ -146,7 +146,7 @@ namespace TAO
 
           if (0 != find_attempt)
             {
-              ACE_ERROR ((LM_ERROR, 
+              ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("WriteDataContainer::register_instance, ")
                           ACE_TEXT("The provided instance handle=%X is not a valid"
@@ -183,7 +183,7 @@ namespace TAO
 
       if (0 != find_attempt)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("WriteDataContainer::unregister, ")
                              ACE_TEXT("The instance(handle=%X) is not registered yet.\n"),
@@ -220,7 +220,7 @@ namespace TAO
 
       if (0 != find_attempt)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("WriteDataContainer::dispose, ")
                              ACE_TEXT("The instance(handle=%X) is not registered yet.\n"),
@@ -238,7 +238,7 @@ namespace TAO
       // of being sent should be removed or not.
       // The advantage of calling remove_sample() on them is that the
       // cached allocator memory for them is freed.  The disadvantage
-      // is that the slow reader may see multiple disposes without 
+      // is that the slow reader may see multiple disposes without
       // any write sample between them and hence not temporarily move into the
       // Alive state.
       // We have choosen to NOT remove the sending samples.
@@ -247,8 +247,8 @@ namespace TAO
 
       while (instance_list.size_ > 0)
         {
-          bool released = false; 
-          ::DDS::ReturnCode_t ret 
+          bool released = false;
+          ::DDS::ReturnCode_t ret
             = remove_oldest_sample (instance_list, released);
           ACE_UNUSED_ARG (released);
 
@@ -261,15 +261,15 @@ namespace TAO
       return ::DDS::RETCODE_OK;
     }
 
-    ::DDS::ReturnCode_t 
+    ::DDS::ReturnCode_t
     WriteDataContainer::num_samples (
-        ::DDS::InstanceHandle_t handle, 
+        ::DDS::InstanceHandle_t handle,
         size_t&                 size
       )
     {
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                        guard, 
-                        this->lock_, 
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        guard,
+                        this->lock_,
                         ::DDS::RETCODE_ERROR);
       PublicationInstance* instance = 0;
 
@@ -295,9 +295,9 @@ namespace TAO
       // during enqueue.
       //
       DataSampleList list = this->unsent_data_ ;
-      
+
       //
-      // The unsent_data_ already linked with the  
+      // The unsent_data_ already linked with the
       // next_send_sample during enqueue.
       // Append the unsent_data_ to current sending_data_
       // list.
@@ -331,16 +331,16 @@ namespace TAO
     void
     WriteDataContainer::data_delivered (DataSampleListElement* sample)
     {
-      ACE_GUARD (ACE_Recursive_Thread_Mutex, 
-                 guard, 
+      ACE_GUARD (ACE_Recursive_Thread_Mutex,
+                 guard,
                  this->lock_);
-     
+
 
       // Delivered samples _must_ be on sending_data_ or released_data_
-      // list. If it is not found in one of the lists, an invariant 
-      // exception is declared. 
+      // list. If it is not found in one of the lists, an invariant
+      // exception is declared.
 
-      // The element now needs to be removed from the sending_data_ 
+      // The element now needs to be removed from the sending_data_
       // list, and appended to the end of the sent_data_ list.
 
       bool in_release_list = false;
@@ -354,8 +354,8 @@ namespace TAO
       //
       // Search the released_data_ list last.  Data is moved to this list
       // when it is removed from the sample list, but it is still in used
-      // by transport.  We are now been notified by transport, so we can 
-      // now release the element in that list (and remove it from the list, 
+      // by transport.  We are now been notified by transport, so we can
+      // now release the element in that list (and remove it from the list,
       // of course).
       //
       else if (released_data_.dequeue_next_sample (sample))
@@ -363,19 +363,19 @@ namespace TAO
           // We will release it.
           in_release_list = true;
        }
-      else  
+      else
         {
-          // The sample is neither in the sending_data_ nor the 
+          // The sample is neither in the sending_data_ nor the
           // released_data_.
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: ")
                      ACE_TEXT("WriteDataContainer::data_delivered, ")
                      ACE_TEXT("The delivered sample is not in sending_data_ and ")
                      ACE_TEXT("released_data_ list.\n")));
-        }          
+        }
 //remove fix this one
       PublicationInstance* instance = sample->handle_;
-      
+
       if (instance->waiting_list_.head_ != 0)
         {
           if (! in_release_list)
@@ -384,7 +384,7 @@ namespace TAO
               // and release.
               if (instance->samples_.dequeue_next_instance_sample(sample) == false)
                 {
-                  ACE_ERROR((LM_ERROR, 
+                  ACE_ERROR((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("WriteDataContainer::data_delivered, ")
                              ACE_TEXT("dequeue_next_instance_sample from instance ")
@@ -394,12 +394,12 @@ namespace TAO
             }
           // Mark the first waiting sample will be next to add to instance
           // list.
-          instance->waiting_list_.head_->space_available_ = true;      
+          instance->waiting_list_.head_->space_available_ = true;
           // Remove this waiting sample from waiting list.
           DataSampleListElement* stale = 0;
           if (instance->waiting_list_.dequeue_head_next_instance_sample (stale) == false)
             {
-              ACE_ERROR((LM_ERROR, 
+              ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("WriteDataContainer::data_delivered, ")
                           ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
@@ -414,9 +414,9 @@ namespace TAO
               sent_data_.enqueue_tail_next_sample (sample);
             }
         }
-      
+
       if (in_release_list )
-        {          
+        {
           release_buffer( sample) ;
         }
 
@@ -429,9 +429,9 @@ namespace TAO
     }
 
 
-    void 
+    void
     WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by_transport)
-    {    
+    {
       // If the transport initiates the data dropping, we need do same thing
       // as data_delivered. e.g. remove the sample from the internal list
       // and the instance list.
@@ -440,59 +440,59 @@ namespace TAO
           this->data_delivered (sample);
           return;
         }
-    
-      //In current implementation, the data_dropped call results 
-      //from the remove_sample, hence it's called in the same 
-      //thread that calls remove_sample which is already guarded.  
-      //But we might use this method for the transport to tell lost
-      //samples due to lost connection. In that case we need to 
-      //acquire lock here. 
 
-      ACE_GUARD (ACE_Recursive_Thread_Mutex, 
-                 guard, 
+      //In current implementation, the data_dropped call results
+      //from the remove_sample, hence it's called in the same
+      //thread that calls remove_sample which is already guarded.
+      //But we might use this method for the transport to tell lost
+      //samples due to lost connection. In that case we need to
+      //acquire lock here.
+
+      ACE_GUARD (ACE_Recursive_Thread_Mutex,
+                 guard,
                  this->lock_);
 
       // This is called by the transport to notify that the data sample
       // was dropped from transport. It is the result of remove_sample.
-      
+
       // The dropped sample is either in released_data_ list or
       // sending_data_ list. Otherwise an exception will be raised.
       //
-      // We are now been notified by transport, so we can 
-      // now release the sample from released_data_ list and 
+      // We are now been notified by transport, so we can
+      // now release the sample from released_data_ list and
       // keep the sample from the sending_data_ list still in
       // sample list since we will send it.
 
       if (sending_data_.dequeue_next_send_sample (sample) == true)
         {
             // else: The data_dropped is called as a result of remove_sample()
-            // called from reenqueue_all() which supports the TRANSIENT_LOCAL 
+            // called from reenqueue_all() which supports the TRANSIENT_LOCAL
             // qos. The samples that are sending by transport are dropped from
             // transport and will be moved to the unsent list for resend.
             unsent_data_.enqueue_tail_next_send_sample (sample);
-        }          
+        }
       else if (released_data_.dequeue_next_sample (sample) == true)
         {
-          // The remove_sample is requested when sample list size  
-          // reaches limit. In this case, the oldest sample is 
+          // The remove_sample is requested when sample list size
+          // reaches limit. In this case, the oldest sample is
           // moved to released_data_ already.
           release_buffer (sample);
         }
       else
         {
-          // The sample is neither in not in the 
+          // The sample is neither in not in the
           // released_data_ list.
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: ")
                      ACE_TEXT("WriteDataContainer::data_dropped, ")
                      ACE_TEXT("The dropped sample is not in released_data_ list.\n")));
-        }          
+        }
     }
 
-    
+
     ::DDS::ReturnCode_t
     WriteDataContainer::remove_oldest_sample (
-      DataSampleList& instance_list, 
+      DataSampleList& instance_list,
       bool& released)
     {
       DataSampleListElement* stale = 0;
@@ -501,7 +501,7 @@ namespace TAO
       //
       if (instance_list.dequeue_head_next_instance_sample (stale) == false)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: ")
                               ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
                               ACE_TEXT("dequeue_head_next_instance_sample failed\n")),
@@ -524,7 +524,7 @@ namespace TAO
       // Locate the head of the list that the stale data is in.
       //
       DataSampleListElement* head = stale ;
-      while( head->previous_sample_ != 0) 
+      while( head->previous_sample_ != 0)
         {
           head = head->previous_sample_ ;
         }
@@ -532,14 +532,14 @@ namespace TAO
       //
       // Identify the list that the stale data is in.
       // The stale data should be in one of the sent_data_, sending_data_
-      // or unsent_data_. It should not be in released_data_ list since 
-      // this function is the only place a sample is moved from 
+      // or unsent_data_. It should not be in released_data_ list since
+      // this function is the only place a sample is moved from
       // sending_data_ to released_data_ list.
 
       // Remove the element from the internal list.
       bool result = false;
 
-      if( head == this->sending_data_.head_) 
+      if( head == this->sending_data_.head_)
         {
           //
           // Move the element to the released_data_ list since it is still
@@ -549,7 +549,7 @@ namespace TAO
           released_data_.enqueue_tail_next_sample (stale);
           released = false;
         }
-      else if( head == this->sent_data_.head_)         
+      else if( head == this->sent_data_.head_)
         {
           //
           // No one is using the data sample, so we can release it back to
@@ -569,9 +569,9 @@ namespace TAO
           release_buffer(stale) ;
           released = true;
         }
-      else 
-        { 
-          ACE_ERROR_RETURN ((LM_ERROR, 
+      else
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: ")
                               ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
                               ACE_TEXT("The oldest sample is not in any internal list.\n")),
@@ -580,7 +580,7 @@ namespace TAO
 
       if (result == false)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
                              ACE_TEXT("dequeue_next_sample from internal list failed.\n")),
@@ -592,11 +592,11 @@ namespace TAO
 
     ::DDS::ReturnCode_t
     WriteDataContainer::obtain_buffer (
-        DataSampleListElement*& element, 
+        DataSampleListElement*& element,
         ::DDS::InstanceHandle_t handle,
         DataWriterImpl*         writer)
     {
-      PublicationInstance* instance = 
+      PublicationInstance* instance =
             get_handle_instance (handle);
 
       ACE_NEW_MALLOC_RETURN (element,
@@ -616,11 +616,11 @@ namespace TAO
 
       bool oldest_released = true;
       DataSampleListElement* stale = instance_list.head_;
-      // Release the oldest sample if the size reaches the max size of 
+      // Release the oldest sample if the size reaches the max size of
       // the sample list.
       if (instance_list.size_ > depth_)
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::obtain_buffer, ")
                       ACE_TEXT("The instance list size %d exceeds depth %d\n"),
@@ -629,7 +629,7 @@ namespace TAO
         }
       else if (instance_list.size_ == depth_)
         {
-          // The remove_oldest_sample removes the oldest sample from 
+          // The remove_oldest_sample removes the oldest sample from
           // instance list and removes it from the internal lists.
           ret = remove_oldest_sample (instance_list, oldest_released);
         }
@@ -640,25 +640,25 @@ namespace TAO
           return ret;
         }
 
-      // Each write/enqueue just writes one element and hence the number 
-      // of samples will reach the size of sample list at some point. 
+      // Each write/enqueue just writes one element and hence the number
+      // of samples will reach the size of sample list at some point.
       // We need remove enough to accomodate the new element.
 
       if (should_block_)
         {
           // Need wait when waiting list is not empty or the oldest sample
           // is still being used.
-          bool need_wait 
+          bool need_wait
             = instance->waiting_list_.head_ != 0 || ! oldest_released ? true : false;
 
-          if (need_wait) 
+          if (need_wait)
             {
               // Add the newly allocated sample to waiting list.
               instance->waiting_list_.enqueue_tail_next_instance_sample (element);
 
               // wait for all "released" samples to be delivered
-              // Timeout value from Qos.RELIBBILITY.max_blocking_time 
-              ACE_Time_Value abs_timeout 
+              // Timeout value from Qos.RELIBBILITY.max_blocking_time
+              ACE_Time_Value abs_timeout
                 = ACE_OS::gettimeofday () + max_blocking_time_;
 
 
@@ -675,13 +675,13 @@ namespace TAO
                            break;
                         } // else continue wait
                     }
-                  else 
+                  else
                     {
-                      // Remove from the waiting list if wait() timed out or return 
+                      // Remove from the waiting list if wait() timed out or return
                       // other errors.
                       if (instance->waiting_list_.dequeue_next_instance_sample (element) == false)
                         {
-                          ACE_ERROR_RETURN ((LM_ERROR, 
+                          ACE_ERROR_RETURN ((LM_ERROR,
                                             ACE_TEXT("(%P|%t) ERROR: ")
                                             ACE_TEXT("WriteDataContainer::obtain_buffer, ")
                                             ACE_TEXT("dequeue_next_instance_sample from waiting ")
@@ -689,7 +689,7 @@ namespace TAO
                                             ::DDS::RETCODE_ERROR);
                         }
 
-                      if (errno == ETIME) 
+                      if (errno == ETIME)
                         {
                           ret = ::DDS::RETCODE_TIMEOUT;
                         }
@@ -703,12 +703,12 @@ namespace TAO
                 }
             }
         }
-      else 
+      else
         {
           if (! oldest_released)
             {
-              // The oldest sample is still being used by the transport, 
-              // then we need force the Transport to drop the oldest sample. 
+              // The oldest sample is still being used by the transport,
+              // then we need force the Transport to drop the oldest sample.
               // The transport will call data_dropped to remove the oldest
               // sample from the released_data_ list.
               writer->remove_sample (stale);
@@ -736,7 +736,7 @@ namespace TAO
     WriteDataContainer::unregister_all (DataWriterImpl* writer)
     {
       shutdown_ = true;
-      
+
       // Tell transport remove all control messages currently
       // transport is processing.
       int result = writer->remove_all_control_msgs ();
@@ -748,7 +748,7 @@ namespace TAO
           // transport is processing.
           writer->remove_sample (sending_data_.head_);
         }
- 
+
       // Broadcast to wake up all waiting threads.
       if (waiting_on_release_)
         {
@@ -758,17 +758,17 @@ namespace TAO
       ::DDS::ReturnCode_t ret;
       DataSample* registered_sample;
       PublicationInstanceMapType::iterator it = instances_.begin ();
-   
+
       while (it != instances_.end ())
         {
           // Release the instance data.
-          ret = dispose ((*it).ext_id_, registered_sample, false); 
+          ret = dispose ((*it).ext_id_, registered_sample, false);
           if (ret != ::DDS::RETCODE_OK)
             {
-              ACE_ERROR((LM_ERROR, 
+              ACE_ERROR((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("WriteDataContainer::unregister_all, ")
-                         ACE_TEXT("dispose instance %X failed\n"), 
+                         ACE_TEXT("dispose instance %X failed\n"),
                          (*it).ext_id_));
             }
 
@@ -776,25 +776,25 @@ namespace TAO
           ret = unregister ((*it).ext_id_, registered_sample, writer, false);
           if (ret != ::DDS::RETCODE_OK)
             {
-              ACE_ERROR ((LM_ERROR, 
+              ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("WriteDataContainer::unregister_all, ")
-                          ACE_TEXT("unregister instance %X failed\n"), 
+                          ACE_TEXT("unregister instance %X failed\n"),
                           (*it).ext_id_));
-            }    
+            }
 
           PublicationInstance* instance = (*it).int_id_;
 
           delete instance;
 
-          // Get the next iterator before erase the instance handle.      
+          // Get the next iterator before erase the instance handle.
           PublicationInstanceMapType::iterator it_next = it;
           it_next ++;
           // Remove the instance from the instance list.
           instances_.unbind ((*it).ext_id_);
           it = it_next;
         }
-      
+
       ACE_UNUSED_ARG (registered_sample);
     }
 
@@ -805,10 +805,10 @@ namespace TAO
         PublicationInstance* instance = 0;
         if (0 != instances_.find(handle, instance))
           {
-            ACE_ERROR ((LM_ERROR, 
+            ACE_ERROR ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("WriteDataContainer::get_handle_instance, ")
-                        ACE_TEXT("lookup for %d failed\n"), 
+                        ACE_TEXT("lookup for %d failed\n"),
                         handle));
           }
 
@@ -819,8 +819,8 @@ namespace TAO
     ::DDS::InstanceHandle_t
     WriteDataContainer::get_next_handle ()
     {
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                        guard, 
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        guard,
                         this->lock_,
                         0);
       return next_handle_++;
@@ -828,5 +828,3 @@ namespace TAO
 
   } // namespace TAO
 } // namespace DCPS
-
-

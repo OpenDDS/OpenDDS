@@ -10,20 +10,20 @@ TAO::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* m
 : TransportQueueElement(0),
   msg_ (msg_block)
 {
-  DBG_ENTRY("TransportControlElement","TransportControlElement");
+  DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",5);
 }
 
 
 TAO::DCPS::TransportControlElement::~TransportControlElement()
 {
-  DBG_ENTRY("TransportControlElement","~TransportControlElement");
+  DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",5);
 }
 
 
 bool
 TAO::DCPS::TransportControlElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY("TransportControlElement","requires_exclusive_packet");
+  DBG_ENTRY_LVL("TransportControlElement","requires_exclusive_packet",5);
   return true;
 }
 
@@ -38,21 +38,21 @@ TAO::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
 void
 TAO::DCPS::TransportControlElement::data_delivered()
 {
-  DBG_ENTRY("TransportSendControlElement","data_delivered");
+  DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",5);
 }
 
 
-TAO::DCPS::RepoId 
-TAO::DCPS::TransportControlElement::publication_id() const 
+TAO::DCPS::RepoId
+TAO::DCPS::TransportControlElement::publication_id() const
 {
-  return 0; 
+  return 0;
 }
 
 
-const ACE_Message_Block* 
-TAO::DCPS::TransportControlElement::msg() const 
+const ACE_Message_Block*
+TAO::DCPS::TransportControlElement::msg() const
 {
-  return this->msg_; 
+  return this->msg_;
 }
 
 

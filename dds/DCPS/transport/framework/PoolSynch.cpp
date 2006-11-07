@@ -14,7 +14,7 @@
 
 TAO::DCPS::PoolSynch::~PoolSynch()
 {
-  DBG_ENTRY("PoolSynch","~PoolSynch");
+  DBG_ENTRY_LVL("PoolSynch","~PoolSynch",5);
   // TBD
 }
 
@@ -22,7 +22,7 @@ TAO::DCPS::PoolSynch::~PoolSynch()
 void
 TAO::DCPS::PoolSynch::work_available()
 {
-  DBG_ENTRY("PoolSynch","work_available");
+  DBG_ENTRY_LVL("PoolSynch","work_available",5);
   // TBD
 }
 
@@ -30,6 +30,6 @@ TAO::DCPS::PoolSynch::work_available()
 void
 TAO::DCPS::PoolSynch::unregister_worker_i()
 {
-  DBG_ENTRY("PoolSynch","unregister_worker_i");
+  DBG_ENTRY_LVL("PoolSynch","unregister_worker_i",5);
   // TBD
 }

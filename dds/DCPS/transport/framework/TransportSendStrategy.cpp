@@ -22,12 +22,12 @@
 //TBD: The number of chunks of the replace element allocator
 //     is hard coded for now. This will be configurable when
 //     we implement the dds configurations. This value should
-//     be the number of marshalled DataSampleHeader that a 
+//     be the number of marshalled DataSampleHeader that a
 //     packet could contain.
 #define NUM_REPLACED_ELEMENT_CHUNKS 20
 
 // I think 2 chunks for the header message block is enough
-// - one for the original copy and one for duplicate which 
+// - one for the original copy and one for duplicate which
 // occurs every packet and is released after packet is sent.
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
@@ -38,20 +38,28 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
     queue_(new QueueType (config->queue_messages_per_pool_,config->queue_initial_pools_)),
+    //not_yet_pac_q_(new QueueType (1,config->max_samples_per_packet_)),
+    //not_yet_pac_q_len_ (0),
+    max_header_size_ (0),
+    header_block_ (0),
     elems_(new QueueType (1,config->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(0),
     start_counter_(0),
     mode_(MODE_DIRECT),
     mode_before_suspend_(MODE_NOT_SET),
+    delayed_delivered_notification_queue_ (0),
+    delayed_notification_mode_ (0),
     num_delayed_notifications_(0),
     header_db_allocator_(1),
     header_mb_allocator_(2),
+    synch_ (0),
+    lock_ (),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
     graceful_disconnecting_ (false),
-    link_released_ (false)
+    link_released_ (true)
 {
-  DBG_ENTRY("TransportSendStrategy","TransportSendStrategy");
+  DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",5);
 
   config->_add_ref ();
   this->config_ = config;
@@ -67,11 +75,11 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
   if (DCPS_debug_level >= 2)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy header_db_allocator %x with 1 chunks\n",
-      &header_db_allocator_));
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy header_mb_allocator %x with 2 chunks\n", 
-      &header_mb_allocator_));
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy replaced_element_allocator %x with %d chunks\n", 
-      &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
+    &header_db_allocator_));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy header_mb_allocator %x with 2 chunks\n",
+    &header_mb_allocator_));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
+    &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
   // Create the header_block_ that is used to hold the marshalled
@@ -98,7 +106,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
 
 TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
-  DBG_ENTRY("TransportSendStrategy","~TransportSendStrategy");
+  DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",5);
 
   // We created the header_block_ in our ctor, so we should release() it.
 //MJM: blech.
@@ -126,7 +134,7 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 TAO::DCPS::TransportSendStrategy::WorkOutcome
 TAO::DCPS::TransportSendStrategy::perform_work()
 {
-  DBG_ENTRY("TransportSendStrategy","perform_work");
+  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",5);
 
   SendPacketOutcome outcome;
 
@@ -158,7 +166,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     // WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we really don't
     // see a need for it to call our perform_work() again (at least not
     // right now).
-    if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND) 
+    if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND)
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Entered perform_work() and mode_ is %s - just return "
@@ -174,7 +182,8 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     // packet.  When we find the current packet in the "partially sent" state,
     // we will not touch the queue_ - we will just try to send the unsent
     // bytes in the current (partially sent) packet.
-    if (this->header_.length_ == 0)
+    size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
+    if (header_length == 0)
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "The current packet doesn't have any unsent bytes - we "
@@ -280,7 +289,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                  "We lost our connection, or had some fatal connection "
                  "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"));
-          
+
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                     "Now flip to MODE_SUSPEND before we try to reconnect.\n"));
 
@@ -361,7 +370,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                                                    (ssize_t num_bytes_sent,
                                                     UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY("TransportSendStrategy","adjust_packet_after_send");
+  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Adjusting the current packet because %d bytes of the packet "
@@ -529,23 +538,32 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
                              "regarding its fate - data_delivered().\n"));
 
                   // Inform the element that the data has been delivered.
-                  if (delay_notification == NOTIFY_IMMEADIATELY)
-                    {
-                      if (this->mode_ == MODE_TERMINATED)
-                        {
-                          bool dropped_by_transport = true;
-                          element->data_dropped (dropped_by_transport);
-                        }
-                      else
-                        element->data_delivered();
-                    }
-                  else if (delay_notification == DELAY_NOTIFICATION)
-                    {
-                      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
-                      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-                      ++ num_delayed_notifications_;
-                    }
- 
+
+      // ciju: We need to release this->lock_ before
+      // calling data_dropped/data_delivered. Else we have a potential
+      // deadlock in our hands.
+        if (delay_notification == NOTIFY_IMMEADIATELY)
+          {
+      if (this->mode_ == MODE_TERMINATED)
+        {
+          this->lock_.remove (); // Release and reacquire the lock
+          element->data_dropped (true);
+          this->lock_.acquire_write ();
+        }
+      else
+        {
+          this->lock_.remove (); // Release and reacquire the lock
+          element->data_delivered();
+          this->lock_.acquire_write ();
+        }
+          }
+        else if (delay_notification == DELAY_NOTIFICATION)
+          {
+      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
+      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
+      ++num_delayed_notifications_;
+          }
+
                   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                              "Peek at the next element in the packet "
                              "elems_.\n"));
@@ -644,7 +662,16 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
           num_bytes_left = 0;
         }
     }
-
+  /*
+  if (delay_notification == NOTIFY_IMMEADIATELY)
+    {
+      if (this->num_delayed_notifications_ > 0) {
+  this->lock_.remove (); // Release and reacquire the lock
+  this->send_delayed_notifications ();
+  this->lock_.acquire_write ();
+      }
+    }
+  */
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The 'num_bytes_left' loop has completed.\n"));
 
@@ -674,46 +701,43 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
   return rc;
 }
 
-void 
+void
 TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
-  size_t num_delayed_notifications = 0;
-  TransportQueueElement** samples = 0;
-  SendMode* modes = 0;
+  DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",5);
 
-  {
-    GuardType guard(this->lock_);
+  size_t num_delayed_notifications = this->num_delayed_notifications_;
 
-    num_delayed_notifications = this->num_delayed_notifications_;
+  GuardType guard(this->lock_);
 
-    if (num_delayed_notifications > 0)
-    {
-      samples = new TransportQueueElement* [num_delayed_notifications];
-      modes = new SendMode[num_delayed_notifications];
-      for (size_t i = 0; i < num_delayed_notifications; i++)
-      {
-        samples[i] = delayed_delivered_notification_queue_[i];
-        modes[i] = delayed_notification_mode_[i];
-      }
-       
-      num_delayed_notifications_ = 0;
-    }
+  if (num_delayed_notifications <= 0) {
+    return;
   }
-    
-      
+
+  TransportQueueElement* samples [num_delayed_notifications];
+  SendMode modes [num_delayed_notifications];
+
+  for (size_t i = 0; i < num_delayed_notifications; i++)
+    {
+      samples[i] = delayed_delivered_notification_queue_[i];
+      modes[i] = delayed_notification_mode_[i];
+    }
+
+  this->num_delayed_notifications_ = 0;
+
+  // ciju: The below needs to be done with the guard released. Else
+  // we have a potential deadlock with the WriteDataContainer.
+  guard.release ();
+
   for (size_t i = 0; i < num_delayed_notifications; i++)
   {
     if (modes[i] == MODE_TERMINATED)
     {
-      bool dropped_by_transport = true;
-      samples[i]->data_dropped (dropped_by_transport);
+      samples[i]->data_dropped (true);
     }
     else
       samples[i]->data_delivered();
   }
-
-  delete [] samples;
-  delete [] modes;
 }
 
 
@@ -721,18 +745,18 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 void
 TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 {
-  DBG_ENTRY("TransportSendStrategy","terminate_send");
+  DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                     "Now graceful_disconnecting=%d and flip to MODE_TERMINATED "));
 
   {
     GuardType guard(this->lock_);
-        
+
     this->graceful_disconnecting_ = graceful_disconnecting;
     this->mode_ = MODE_TERMINATED;
   }
-    
+
   this->clear ();
 }
 
@@ -740,10 +764,11 @@ TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 void
 TAO::DCPS::TransportSendStrategy::clear ()
 {
-  QueueType* elems;
-  QueueType* queue;
+  QueueType* elems = 0;
+  QueueType* queue = 0;
   {
     GuardType guard(this->lock_);
+
     if (this->header_.length_ > 0)
       {
         // Clear the messages in the pkt_chain_ that is partially sent.
@@ -767,10 +792,10 @@ TAO::DCPS::TransportSendStrategy::clear ()
     queue = this->queue_;
     this->queue_ = new QueueType (1,this->config_->max_samples_per_packet_);
 
-    this->header_.length_ = 0; 
-    this->pkt_chain_ = 0; 
-    this->header_complete_ = 0; 
-    this->start_counter_ = 0; 
+    this->header_.length_ = 0;
+    this->pkt_chain_ = 0;
+    this->header_complete_ = 0;
+    this->start_counter_ = 0;
     this->mode_ = MODE_DIRECT;
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
@@ -781,7 +806,7 @@ TAO::DCPS::TransportSendStrategy::clear ()
   // We need remove the queued elements outside the lock,
   // otherwise we have a deadlock situation when remove vistor
   // calls the data_droped on each dropped elements.
-  
+
   // Clear all samples in queue.
   RemoveAllVisitor remove_all_visitor;
 
@@ -796,7 +821,7 @@ TAO::DCPS::TransportSendStrategy::clear ()
 void
 TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
 {
-  DBG_ENTRY("TransportSendStrategy","send");
+  DBG_ENTRY_LVL("TransportSendStrategy","send",5);
 
   {
     GuardType guard(this->lock_);
@@ -805,7 +830,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
       {
         delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
         delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-        ++ num_delayed_notifications_;
+        ++num_delayed_notifications_;
       }
     else
     {
@@ -814,8 +839,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
             "graceful disconnecting, so discard message.\n"));
-          bool dropped_by_transport = true;
-          element->data_dropped (dropped_by_transport);
+          element->data_dropped (true);
           return;
         }
 
@@ -854,6 +878,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
           this->queue_->put(element);
           if (this->mode_ != MODE_SUSPEND)
             this->synch_->work_available();
+
           return;
         }
 
@@ -906,6 +931,18 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
                     "Element won't fit in current packet - send current "
                     "packet (directly) now.\n"));
 
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "max_header_size_: %d, header_.length_: %d, element_length: %d\n"
+    , this->max_header_size_, this->header_.length_, element_length));
+
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "Tot possible length: %d, max_len: %d\n"
+    , this->max_header_size_ + this->header_.length_  + element_length
+    , this->max_size_));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "current elem size: %d\n"
+    , this->elems_->size()));
+
           // Send the current packet, and deal with the current element
           // afterwards.
           this->direct_send();
@@ -920,6 +957,10 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
           // current element to the current packet.
     //MJM: But we don't want to append an exclusive thingie to a packet (or
     //MJM: a thingie to an exclusive packet either), right?
+
+    //ciju: I guess the logic is that any other mode is an error
+    // which will be dealt with later. For now just push in the element
+    // into the current packet.
           if (this->mode_ == MODE_QUEUE)
             {
               VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -943,6 +984,8 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
 
       // Add the current element to the collection of packet elements.
       this->elems_->put(element);
+      //this->not_yet_pac_q_->put(element);
+
     //MJM: I am not sure that this works when either the previous element or
     //MJM: the current (new) element is a exclusive one.  This would only
     //MJM: happen if the previous packet (if any) was not completely sent
@@ -954,10 +997,12 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
 
       // Adjust the header_.length_ to account for the length of the element.
       this->header_.length_ += element_length;
+      size_t header_length = this->header_.length_;// + element_length;
+      //this->not_yet_pac_q_len_ += element_length;
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "After adding element's length, the header_.length_ == [%d].\n",
-                this->header_.length_));
+      "After adding element's length, the header_.length_ == [%d].\n",
+      header_length));
 
       // The current packet now contains the current element.  We need to
       // check to see if the conditions are such that we should go ahead and
@@ -974,8 +1019,9 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
       //       requires an exclusive packet.
       //
     //MJM: Should probably check >= max_samples_ here.  Belts/suspenders thing.
-      if ((this->elems_->size() == this->max_samples_)                            ||
-          (this->max_header_size_ + this->header_.length_ > this->optimum_size_) ||
+      //if ((this->elems_->size()+this->not_yet_pac_q_->size() >= this->max_samples_) ||
+      if ((this->elems_->size() >= this->max_samples_) ||
+          (this->max_header_size_ + header_length > this->optimum_size_) ||
           (element_requires_exclusive_packet == 1))
     //MJM: I think that I need to think about the exclusive cases here.
         {
@@ -999,20 +1045,42 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
                         "direct_send() call.\n"));
             }
         }
+      else
+  {
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "Packet not sent. Send conditions weren't satisfied.\n"));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "elems_->size(): %d, max_samples_: %d\n", this->elems_->size(), this->max_samples_));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "header_size_: %d, optimum_size_:%d\n"
+    , this->max_header_size_ + header_length
+    , this->optimum_size_));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "element_requires_exclusive_packet: %d\n", element_requires_exclusive_packet));
+
+    if (this->mode_ == MODE_QUEUE) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      "We flipped into MODE_QUEUE.\n"));
+    }
+    else {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      "We stayed in MODE_DIRECT.\n"));
+          }
+  }
      }
   }
 
-    this->send_delayed_notifications ();
+  this->send_delayed_notifications ();
 }
 
 
 void
 TAO::DCPS::TransportSendStrategy::send_stop()
 {
-  DBG_ENTRY("TransportSendStrategy","send_stop");
+  DBG_ENTRY_LVL("TransportSendStrategy","send_stop",5);
   {
     GuardType guard(this->lock_);
-    
+
     if (this->link_released_)
         return;
 
@@ -1055,7 +1123,9 @@ TAO::DCPS::TransportSendStrategy::send_stop()
 
     // If our mode_ is currently MODE_QUEUE or MODE_SUSPEND, then we don't have
     // anything to do here because samples have already been going to the
-    // queue.  We only need to do something if the mode_ is
+    // queue.
+
+    // We only need to do something if the mode_ is
     // MODE_DIRECT.  It means that we may have some sample(s) in the
     // current packet that have never been sent.  This is our
     // opportunity to send the current packet directly if this is the case.
@@ -1069,13 +1139,16 @@ TAO::DCPS::TransportSendStrategy::send_stop()
         return;
       }
 
+    size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "We are in MODE_DIRECT in an important send_stop() - "
-              "header_.length_ == [%d].\n", this->header_.length_));
+              "header_.length_ == [%d].\n", header_length));
 
     // Only attempt to send the current packet (directly) if the current
     // packet actually contains something (it could be empty).
-    if (this->header_.length_ > 0 && this->elems_->size () > 0)
+    if ((header_length > 0) &&
+  //(this->elems_->size ()+this->not_yet_pac_q_->size() > 0))
+  (this->elems_->size () > 0))
       {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "There something in the current packet - attempt to send "
@@ -1100,40 +1173,46 @@ TAO::DCPS::TransportSendStrategy::send_stop()
   this->send_delayed_notifications ();
 }
 
-
 int
-TAO::DCPS::TransportSendStrategy::remove_sample
-                                    (const DataSampleListElement* sample)
+TAO::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
+               PacketRemoveVisitor& pac_rem_vis)
 {
-  DBG_ENTRY("TransportSendStrategy","remove_sample");
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",5);
 
   GuardType guard(this->lock_);
 
-  QueueRemoveVisitor remove_element_visitor(sample->sample_);
+  int status = 0;
 
-  if (this->mode_ == MODE_DIRECT)
+  //ciju: Tim had the idea that we could do the following check
+  // if ((this->mode_ == MODE_DIRECT) ||
+  //     ((this->pkt_chain_ == 0) && (queue_ == empty)))
+  // then we can assume that the sample can be safely removed (no need for
+  // replacement) from the elems_ queue.
+  if ((this->mode_ == MODE_DIRECT)
+    || ((this->pkt_chain_ == 0) && (this->queue_->size() == 0)))
   {
+    //ciju: I believe this is the only mode where a safe
+    // assumption can be made that the samples
+    // in the elems_ queue aren't part of a packet.
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
       "The mode is MODE_DIRECT.\n"));
 
-    this->elems_->accept_remove_visitor(remove_element_visitor);
+    this->elems_->accept_remove_visitor(simple_rem_vis);
 
-    int status = remove_element_visitor.status();
+    status = simple_rem_vis.status();
 
     if (status == 1)
     {
-      // The sample was found (and removed) by the visitor.
-      // Adjust our header_.length_ to account for the removed bytes.
-      this->header_.length_ -= remove_element_visitor.removed_bytes();
+      this->header_.length_ -= simple_rem_vis.removed_bytes();
     }
 
     if (status == -1)
     {
+      // ciju: This isn't a fatal error as this could simply mean that the
+      //  sample was *sent* in another thread. Maybe. Change the
+      //  terrorizing message.
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "The RemoveElementVisitor encountered a fatal error.\n"));
-      // This means that the visitor encountered some fatal error along
-      // the way (and it already reported something to the log).
-      // Return our failure code.
+        "The RemoveElementVisitor encountered a fatal error in elems_.\n"));
       return -1;
     }
 
@@ -1149,9 +1228,9 @@ TAO::DCPS::TransportSendStrategy::remove_sample
 
   // First we will attempt to remove the element from the queue_,
   // in case it is "stuck" in there.
-  this->queue_->accept_remove_visitor(remove_element_visitor);
+  this->queue_->accept_remove_visitor(simple_rem_vis);
 
-  int status = remove_element_visitor.status();
+  status = simple_rem_vis.status();
 
   if (status == 1)
     {
@@ -1166,7 +1245,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
   if (status == -1)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The RemoveElementVisitor encountered a fatal error.\n"));
+            "The RemoveElementVisitor encountered a fatal error in queue_.\n"));
       // This means that the visitor encountered some fatal error along
       // the way (and it already reported something to the log).
       // Return our failure code.
@@ -1184,34 +1263,28 @@ TAO::DCPS::TransportSendStrategy::remove_sample
   // since the packet is likely in a "partially sent" state, and the
   // sample may still be contributing unsent bytes in the pkt_chain_.
 
-  // Construct a PacketRemoveVisitor object.
-  PacketRemoveVisitor remove_from_packet_visitor(sample->sample_,
-                                                 this->pkt_chain_,
-                                                 this->header_block_,
-                                                 this->replaced_element_allocator_);
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Visit our elems_ with the PacketRemoveVisitor.\n"));
+  "Visit our elems_ with the PacketRemoveVisitor.\n"));
 
   // Let it visit our elems_ collection as a "replace" visitor.
-  this->elems_->accept_replace_visitor(remove_from_packet_visitor);
+  this->elems_->accept_replace_visitor (pac_rem_vis);
 
-  status = remove_from_packet_visitor.status();
+  status = pac_rem_vis.status();
 
   if (status == -1)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The PacketRemoveVisitor encountered a fatal error.\n"));
+      "The PacketRemoveVisitor encountered a fatal error.\n"));
     }
   else if (status == 1)
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The PacketRemoveVisitor found the sample and removed it.\n"));
+      "The PacketRemoveVisitor found the sample and removed it.\n"));
     }
   else
     {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The PacketRemoveVisitor didn't find the sample.\n"));
+      "The PacketRemoveVisitor didn't find the sample.\n"));
     }
 
   // Return -1 only if the visitor's status() returns -1. Otherwise, return 0.
@@ -1219,84 +1292,44 @@ TAO::DCPS::TransportSendStrategy::remove_sample
 }
 
 
+int
+TAO::DCPS::TransportSendStrategy::remove_sample
+                                    (const DataSampleListElement* sample)
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",5);
+
+  QueueRemoveVisitor remove_element_visitor(sample->sample_);
+  PacketRemoveVisitor remove_from_packet_visitor(sample->sample_,
+             this->pkt_chain_,
+             this->header_block_,
+             this->replaced_element_allocator_);
+
+  return remove_sample_i (remove_element_visitor,
+      remove_from_packet_visitor);
+}
+
+
 void
 TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY("TransportSendStrategy","remove_all_control_msgs");
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",5);
 
   GuardType guard(this->lock_);
 
   QueueRemoveVisitor remove_element_visitor(pub_id);
-
-  if (this->mode_ == MODE_DIRECT)
-    {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The mode is MODE_DIRECT.\n"));
-
-      this->elems_->accept_remove_visitor(remove_element_visitor);
-
-      int status = remove_element_visitor.status();
-
-      if (status == 1)
-        {
-          // Adjust our header_.length_ to account for the removed bytes.
-          this->header_.length_ -= remove_element_visitor.removed_bytes();
-        }
-
-      // Now we can return.
-      return;
-    }
-
-  // We now know that this->mode_ == MODE_QUEUE.
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "The mode is MODE_QUEUE.\n"));
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Visit the queue_ with the RemoveElementVisitor.\n"));
-
-  // First we will attempt to remove the element from the queue_,
-  // in case it is "stuck" in there.
-  this->queue_->accept_remove_visitor(remove_element_visitor);
-
-  int status = remove_element_visitor.status();
-
-  if (status == -1)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: QueueRemoveVisitor encountered fatal error.\n"));
-    }
-
-  // Now we need to turn our attention to the current transport packet,
-  // since the packet is likely in a "partially sent" state, and there
-  // may still be control samples from our pub_id_ that are contributing
-  // unsent bytes in the pkt_chain_.
-
-  // Construct a PacketRemoveVisitor object.
   PacketRemoveVisitor remove_from_packet_visitor(pub_id,
                                                  this->pkt_chain_,
                                                  this->header_block_,
                                                  this->replaced_element_allocator_);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Visit our elems_ with the PacketRemoveVisitor.\n"));
-
-  // Let it visit our elems_ collection as a "replace" visitor.
-  this->elems_->accept_replace_visitor(remove_from_packet_visitor);
-
-  status = remove_from_packet_visitor.status();
-
-  if (status == -1)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: PacketRemoveVisitor encountered fatal error.\n"));
-    }
+  remove_sample_i (remove_element_visitor,
+     remove_from_packet_visitor);
 }
-
-
 
 void
 TAO::DCPS::TransportSendStrategy::direct_send()
 {
-  DBG_ENTRY("TransportSendStrategy","direct_send");
+  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Prepare the current packet for a direct send attempt.\n"));
@@ -1307,12 +1340,27 @@ TAO::DCPS::TransportSendStrategy::direct_send()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Now attempt to send the packet.\n"));
 
- 
-  // We will try resend the packet if the send() fails and then connection 
+
+  // We will try resend the packet if the send() fails and then connection
   // is re-established.
   while (1)
     {
-      UseDelayedNotification when = NOTIFY_IMMEADIATELY;
+      // ciju: I have changed the default. Immediate notification
+      // path enters the Data Store with the local locks held. This
+      // can lead to deadlocks often. I have added temporary fixes
+      // for the immediate notification, but they don't guarantee
+      // deadlock prevention. The flaw is in the design and
+      // my solution is just best effort in the given context.
+      /* ChangeLog comment
+   In TransportSendStrategy set DELAY_NOTIFICATION to be default
+   for direct_send(). This could delay things a bit in the normal
+   case but doing an immediate notification has been observed to
+   deadlock in the DCPS layer in stress conditions. This occurs
+   when the data_deliverd () call winds its way from the transport
+   to DCPS layer while another thread is winding its way up.
+      */
+      //UseDelayedNotification when = NOTIFY_IMMEADIATELY;
+      UseDelayedNotification when = DELAY_NOTIFICATION;
 
       // If the thread per connection is used we can not hold the send stratagy lock
       // and try to call data_delivered since the DataWriterImpl::remove_sample()
@@ -1324,7 +1372,7 @@ TAO::DCPS::TransportSendStrategy::direct_send()
       SendPacketOutcome outcome = this->send_packet(when);
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "The outcome of the send_packet() was %d.\n", outcome));
+      "The outcome of the send_packet() was %d.\n", outcome));
 
       if ((outcome == OUTCOME_BACKPRESSURE) ||
           (outcome == OUTCOME_PARTIAL_SEND))
@@ -1372,20 +1420,20 @@ TAO::DCPS::TransportSendStrategy::direct_send()
           else
             {
               // Try send the packet again since the connection is re-established.
-              continue; 
+              continue;
             }
-      }
-    else
-      {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "The outcome of the send_packet() must have been "
-                  "OUTCOME_COMPLETE_SEND.\n"));
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "So, we will just stay in MODE_DIRECT.\n"));
-      }
-    
-    break;
   }
+      else
+  {
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "The outcome of the send_packet() must have been "
+    "OUTCOME_COMPLETE_SEND.\n"));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+    "So, we will just stay in MODE_DIRECT.\n"));
+  }
+
+      break;
+    }
 
   // We stay in MODE_DIRECT mode if we didn't encounter any backpressure.
   return;
@@ -1395,7 +1443,7 @@ TAO::DCPS::TransportSendStrategy::direct_send()
 void
 TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 {
-  DBG_ENTRY("TransportSendStrategy","get_packet_elems_from_queue");
+  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",5);
 
   TransportQueueElement* element = this->queue_->peek();
 
@@ -1467,8 +1515,19 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 void
 TAO::DCPS::TransportSendStrategy::prepare_packet()
 {
-  DBG_ENTRY("TransportSendStrategy","prepare_packet");
-
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",5);
+  /*
+  // Shift elements from not_yet_pac_q_ to queue_
+  // This is where the intermediary elements finally become
+  // part of a concrete packet.
+  for (TransportQueueElement *tmp = this->not_yet_pac_q_->get();
+       tmp != NULL;
+       tmp = this->not_yet_pac_q_->get()) {
+    this->elems_->put (tmp);
+  }
+  this->header_.length_ += this->not_yet_pac_q_len_;
+  this->not_yet_pac_q_len_ = 0;
+  */
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Marshall the packet header.\n"));
 
@@ -1516,7 +1575,7 @@ TAO::DCPS::TransportSendStrategy::prepare_packet()
 TAO::DCPS::TransportSendStrategy::SendPacketOutcome
 TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY("TransportSendStrategy","send_packet");
+  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Populate the iovec array using the pkt_chain_.\n"));
@@ -1612,5 +1671,3 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 
   return OUTCOME_PARTIAL_SEND;
 }
-
-

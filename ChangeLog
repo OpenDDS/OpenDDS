@@ -1,3 +1,151 @@
+Tue Nov  7 22:08:50 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.inl:
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+          cosmetic fixes (spaces / new lines)
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+          Added code comments.
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Add locks to protect shared data.
+          Better usage of locks and reference counting, rather than hold
+          locks for extended invocations.
+          In TransportSendStrategy set DELAY_NOTIFICATION to be default
+          for direct_send(). This could delay things a bit in the normal
+          case but doing an immediate notification has been observed to
+          deadlock in the DCPS layer in stress conditions. This occurs
+          when the data_deliverd () call winds its way from the transport
+          to DCPS layer while another thread is winding its way up.
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+          Renamed lock_ to map_lock_ to make it self-documenting.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+          The EntryExit class does a run-time check before initializing
+          any data members.
+          Use a set size array, rather than ACE_CString data members.
+          Defined a set of macros for logging levels. This allows logs
+          above a sepecified level to be compiled out. This coupled with
+          the run-time check should speed up things. The new design tries
+          to minimize the performnace hit of logging.
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Defined a set of macros for logging levels. This allows logs
+          above a sepecified level to be compiled out.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/NullSynch.inl:
+        * dds/DCPS/transport/framework/NullSynch.cpp:
+        * dds/DCPS/transport/framework/NullSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PoolSynch.inl:
+        * dds/DCPS/transport/framework/PoolSynch.cpp:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImplFactory.inl:
+        * dds/DCPS/transport/framework/TransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+          Logging macro usage modified.
+
+        * dds/DdsDcpsDomain.idl:
+          cosmetic fixes
+
 Tue Nov  7 16:35:53 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/sub_init_loop:

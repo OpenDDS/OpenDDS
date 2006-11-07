@@ -8,7 +8,7 @@
 ACE_INLINE
 TAO::DCPS::ReceiveListenerSet::ReceiveListenerSet()
 {
-  DBG_ENTRY("ReceiveListenerSet","ReceiveListenerSet");
+  DBG_ENTRY_LVL("ReceiveListenerSet","ReceiveListenerSet",5);
 }
 
 
@@ -16,7 +16,7 @@ ACE_INLINE int
 TAO::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
                                       TransportReceiveListener* listener)
 {
-  DBG_ENTRY("ReceiveListenerSet","insert");
+  DBG_ENTRY_LVL("ReceiveListenerSet","insert",5);
   return this->map_.bind(subscriber_id, listener);
 }
 
@@ -24,7 +24,7 @@ TAO::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
 ACE_INLINE int
 TAO::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 {
-  DBG_ENTRY("ReceiveListenerSet","remove");
+  DBG_ENTRY_LVL("ReceiveListenerSet","remove",5);
   if (this->map_.unbind(subscriber_id) != 0)
     {
       ACE_ERROR_RETURN((LM_DEBUG,
@@ -40,7 +40,7 @@ TAO::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 ACE_INLINE ssize_t
 TAO::DCPS::ReceiveListenerSet::size() const
 {
-  DBG_ENTRY("ReceiveListenerSet","size");
+  DBG_ENTRY_LVL("ReceiveListenerSet","size",5);
   return this->map_.current_size();
 }
 
@@ -48,7 +48,7 @@ TAO::DCPS::ReceiveListenerSet::size() const
 ACE_INLINE void
 TAO::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
 {
-  DBG_ENTRY("ReceiveListenerSet","data_received");
+  DBG_ENTRY_LVL("ReceiveListenerSet","data_received",5);
   MapType::ENTRY* entry;
 
   char* ptr = sample.sample_->rd_ptr ();

@@ -19,9 +19,10 @@ TAO::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0)
 {
-  DBG_ENTRY("TransportReceiveStrategy","TransportReceiveStrategy");
+  //ACE_DEBUG ((LM_DEBUG, "(%P|%t) %@ TransportReceiveStrategy::TransportReceiveStrategy\n", this));
+  DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",5);
 
-  if (DCPS_debug_level >= 2) 
+  if (DCPS_debug_level >= 2)
     {
       ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-mb"
                      " Cached_Allocator_With_Overflow %x with %d chunks\n",
@@ -42,7 +43,9 @@ TAO::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
 
 TAO::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
-  DBG_ENTRY("TransportReceiveStrategy","~TransportReceiveStrategy");
+  //ACE_DEBUG ((LM_DEBUG, "(%P|%t) TransportReceiveStrategy::~TransportReceiveStrategy\n"));
+  //fflush (stdout);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",5);
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -55,7 +58,7 @@ TAO::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 int
 TAO::DCPS::TransportReceiveStrategy::handle_input()
 {
-  DBG_ENTRY("TransportReceiveStrategy","handle_input");
+  DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",5);
 
   //
   // What we will be doing here:
@@ -141,7 +144,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
           for (size_t ii =0; ii < RECEIVE_BUFFERS; ii++)
             {
               if ( (0 != this->receive_buffers_[ii]) &&
-                    (this->receive_buffers_[ii]->cont() == 
+                    (this->receive_buffers_[ii]->cont() ==
                        this->receive_buffers_[ index]) )
                 {
                   this->receive_buffers_[ii]->cont(0);
@@ -236,7 +239,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
   //
   iovec iov[ RECEIVE_BUFFERS] ;
   size_t vec_index = 0 ;
-	size_t current = this->buffer_index_;
+  size_t current = this->buffer_index_;
   for( index = 0 ;
        index < RECEIVE_BUFFERS ;
        ++index, current = this->successor_index( current)
@@ -295,7 +298,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                       ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
                       ACE_TEXT("with data link detected: %p.\n"),
                       "receive_bytes"));
-  
+
       // The relink() will handle the connection to the ReconnectTask to do
       // the reconnect so this reactor thread will not be block.
       this->relink ();
@@ -312,7 +315,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
   // Adjust the message block chain pointers to account for the new
   // data.
   //
-	size_t  bytes = bytes_remaining;
+  size_t  bytes = bytes_remaining;
   for( index = this->buffer_index_ ;
        bytes > 0 ;
        index = this->successor_index( index)
@@ -454,7 +457,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
             if (::TAO::DCPS::Transport_debug_level)
               {
                 char xbuffer[4096];
-                int xbytes = 
+                int xbytes =
                         this->receive_buffers_[this->buffer_index_]->length();
                 if (xbytes > 8) { xbytes = 8; }
                 ACE::format_hexdump
@@ -814,6 +817,3 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
   //
   return 0 ;
 }
-
-
-

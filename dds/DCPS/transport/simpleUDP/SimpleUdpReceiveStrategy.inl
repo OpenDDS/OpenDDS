@@ -14,7 +14,7 @@ TAO::DCPS::SimpleUdpReceiveStrategy::SimpleUdpReceiveStrategy
                                          SimpleUdpSocket*      socket,
                                          TransportReactorTask* task)
 {
-  DBG_ENTRY("SimpleUdpReceiveStrategy","SimpleUdpReceiveStrategy");
+  DBG_ENTRY_LVL("SimpleUdpReceiveStrategy","SimpleUdpReceiveStrategy",5);
 
   // Keep copies of the references for ourselves
   transport->_add_ref();

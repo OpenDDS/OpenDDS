@@ -27,7 +27,7 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     previous_block_(0),
     replaced_element_allocator_(allocator)
 {
-  DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
+  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",5);
 }
 
 
@@ -45,13 +45,13 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     previous_block_(0),
     replaced_element_allocator_(allocator)
 {
-  DBG_ENTRY("PacketRemoveVisitor","PacketRemoveVisitor");
+  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",5);
 }
 
 
 TAO::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
 {
-  DBG_ENTRY("PacketRemoveVisitor","~PacketRemoveVisitor");
+  DBG_ENTRY_LVL("PacketRemoveVisitor","~PacketRemoveVisitor",5);
 }
 
 
@@ -59,7 +59,7 @@ int
 TAO::DCPS::PacketRemoveVisitor::visit_element_ref
                                             (TransportQueueElement*& element)
 {
-  DBG_ENTRY("PacketRemoveVisitor","visit_element_ref");
+  DBG_ENTRY_LVL("PacketRemoveVisitor","visit_element_ref",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Obtain the element_blocks using element->msg()\n"));
@@ -339,7 +339,7 @@ TAO::DCPS::PacketRemoveVisitor::visit_element_ref
       //       this->previous_block_ is 0), or it is a chain that starts
       //       with the head_ block (the first block from the unsent packet
       //       chain), and ends with the this->previous_block_.
-      // 
+      //
       //   (2) original_blocks points to the first block (from the unsent
       //       packet chain) that was contributed by the sample (that we
       //       need to replace).
@@ -370,24 +370,24 @@ TAO::DCPS::PacketRemoveVisitor::visit_element_ref
             orig_elem));
 
       // Create the replacement element for the original element.
-      // Optimize - use cached allocator 
-      // This is really a copy of ACE_NEW_MALLOC_RETURN, but I can 
-      // not simply use the ACE_NEW_MALLOC_RETURN macro because I have to 
+      // Optimize - use cached allocator
+      // This is really a copy of ACE_NEW_MALLOC_RETURN, but I can
+      // not simply use the ACE_NEW_MALLOC_RETURN macro because I have to
       // set the status that indicates the error.
       element = (TransportQueueElement*)replaced_element_allocator_.malloc();
-      if (element == 0) 
-        { 
+      if (element == 0)
+        {
           errno = ENOMEM;
           // Set the status to indicate a fatal error occurred.
           this->status_ = -1;
           // Stop vistation now.
-          return 0;    
+          return 0;
         }
-      else 
-        { 
+      else
+        {
           (void) new (element) TransportReplacedElement(orig_elem,
-                                                        &replaced_element_allocator_); 
-        } 
+                                                        &replaced_element_allocator_);
+        }
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "The new TransportReplacedElement is [%0x]\n",

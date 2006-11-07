@@ -12,14 +12,14 @@
 
 TAO::DCPS::PerConnectionSynch::~PerConnectionSynch()
 {
-  DBG_ENTRY("PerConnectionSynch","~PerConnectionSynch");
+  DBG_ENTRY_LVL("PerConnectionSynch","~PerConnectionSynch",5);
 }
 
 
 void
 TAO::DCPS::PerConnectionSynch::work_available()
 {
-  DBG_ENTRY("PerConnectionSynch","work_available");
+  DBG_ENTRY_LVL("PerConnectionSynch","work_available",5);
   GuardType guard(this->lock_);
   this->work_available_ = 1;
   this->condition_.signal();
@@ -29,7 +29,7 @@ TAO::DCPS::PerConnectionSynch::work_available()
 int
 TAO::DCPS::PerConnectionSynch::open(void*)
 {
-  DBG_ENTRY("PerConnectionSynch","open");
+  DBG_ENTRY_LVL("PerConnectionSynch","open",5);
   // Activate this object to start a new thread that will call
   // our svc() method, and then our close() method.
   this->shutdown_ = 0;
@@ -40,7 +40,7 @@ TAO::DCPS::PerConnectionSynch::open(void*)
 int
 TAO::DCPS::PerConnectionSynch::svc()
 {
-  DBG_ENTRY("PerConnectionSynch","svc");
+  DBG_ENTRY_LVL("PerConnectionSynch","svc",5);
 
   ThreadSynchWorker::WorkOutcome work_outcome =
                                ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
@@ -134,7 +134,7 @@ TAO::DCPS::PerConnectionSynch::svc()
 int
 TAO::DCPS::PerConnectionSynch::close(u_long)
 {
-  DBG_ENTRY("PerConnectionSynch","close");
+  DBG_ENTRY_LVL("PerConnectionSynch","close",5);
   return 0;
 }
 
@@ -142,7 +142,7 @@ TAO::DCPS::PerConnectionSynch::close(u_long)
 int
 TAO::DCPS::PerConnectionSynch::register_worker_i()
 {
-  DBG_ENTRY("PerConnectionSynch","register_worker_i");
+  DBG_ENTRY_LVL("PerConnectionSynch","register_worker_i",5);
   return this->open(0);
 }
 
@@ -150,7 +150,7 @@ TAO::DCPS::PerConnectionSynch::register_worker_i()
 void
 TAO::DCPS::PerConnectionSynch::unregister_worker_i()
 {
-  DBG_ENTRY("PerConnectionSynch","unregister_worker_i");
+  DBG_ENTRY_LVL("PerConnectionSynch","unregister_worker_i",5);
   // It is at this point that we need to stop the thread that
   // was activated when our open() method was called.
   {

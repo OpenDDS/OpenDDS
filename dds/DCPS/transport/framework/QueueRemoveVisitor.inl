@@ -12,7 +12,7 @@ TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
     status_(0),
     removed_bytes_(0)
 {
-  DBG_ENTRY("QueueRemoveVisitor","QueueRemoveVisitor");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","QueueRemoveVisitor",5);
 }
 
 ACE_INLINE
@@ -22,7 +22,7 @@ TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
     status_(0),
     removed_bytes_(0)
 {
-  DBG_ENTRY("QueueRemoveVisitor","QueueRemoveVisitor");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","QueueRemoveVisitor",5);
 }
 
 
@@ -30,7 +30,7 @@ TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
 ACE_INLINE int
 TAO::DCPS::QueueRemoveVisitor::status() const
 {
-  DBG_ENTRY("QueueRemoveVisitor","status");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","status",5);
   return this->status_;
 }
 
@@ -38,7 +38,7 @@ TAO::DCPS::QueueRemoveVisitor::status() const
 ACE_INLINE int
 TAO::DCPS::QueueRemoveVisitor::removed_bytes() const
 {
-  DBG_ENTRY("QueueRemoveVisitor","removed_bytes");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","removed_bytes",5);
   return this->removed_bytes_;
 }
 

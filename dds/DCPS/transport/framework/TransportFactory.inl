@@ -14,14 +14,14 @@
 ACE_INLINE
 TAO::DCPS::TransportFactory::TransportFactory()
 {
-  DBG_ENTRY("TransportFactory","TransportFactory");
+  DBG_ENTRY_LVL("TransportFactory","TransportFactory",5);
   this->register_simpletcp ();
 }
 
 ACE_INLINE
 TAO::DCPS::TransportFactory::~TransportFactory()
 {
-  DBG_ENTRY("TransportFactory","~TransportFactory");
+  DBG_ENTRY_LVL("TransportFactory","~TransportFactory",5);
   // Since our maps hold smart pointers, we don't have to iterate over them
   // and release references.  The map destructors will cause the smart
   // pointers to destruct, and that will release the references for us.

@@ -12,11 +12,11 @@
 
 TAO::DCPS::SimpleTcpConfiguration::~SimpleTcpConfiguration()
 {
-  DBG_ENTRY("SimpleTcpConfiguration","~SimpleTcpConfiguration");
+  DBG_ENTRY_LVL("SimpleTcpConfiguration","~SimpleTcpConfiguration",5);
 }
 
-int 
-TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id, 
+int
+TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
                                          ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.
@@ -28,13 +28,13 @@ TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
     }
 
   TransportConfiguration::load (id, cf);
-  
+
   char section [50];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
   if (cf.open_section (root, section, 0, trans_sect) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("Failed to open section \"%s\" \n"), section),
                        -1);
 
@@ -42,25 +42,25 @@ TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_STRING_VALUE (cf, trans_sect, "local_address", local_address);
   if (local_address != "")
   {
-    this->local_address_.set (local_address.c_str ());              
-  }  
+    this->local_address_.set (local_address.c_str ());
+  }
 
-  GET_CONFIG_VALUE (cf, trans_sect, "enable_nagle_algorithm", 
+  GET_CONFIG_VALUE (cf, trans_sect, "enable_nagle_algorithm",
     this->enable_nagle_algorithm_, bool)
 
-  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_initial_delay", 
+  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_initial_delay",
     this->conn_retry_initial_delay_, int)
 
-  GET_CONFIG_DOUBLE_VALUE (cf, trans_sect, "conn_retry_backoff_multiplier", 
+  GET_CONFIG_DOUBLE_VALUE (cf, trans_sect, "conn_retry_backoff_multiplier",
     this->conn_retry_backoff_multiplier_)
 
-  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_attempts", 
+  GET_CONFIG_VALUE (cf, trans_sect, "conn_retry_attempts",
     this->conn_retry_attempts_, int)
 
-  GET_CONFIG_VALUE (cf, trans_sect, "passive_reconnect_duration", 
+  GET_CONFIG_VALUE (cf, trans_sect, "passive_reconnect_duration",
     this->passive_reconnect_duration_, int)
 
-  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period", 
+  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period",
     this->max_output_pause_period_, int)
 
   return 0;

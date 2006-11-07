@@ -12,14 +12,14 @@
 
 TAO::DCPS::BuildChainVisitor::~BuildChainVisitor()
 {
-  DBG_ENTRY("BuildChainVisitor","~BuildChainVisitor");
+  DBG_ENTRY_LVL("BuildChainVisitor","~BuildChainVisitor",5);
 }
 
 
 int
 TAO::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
 {
-  DBG_ENTRY("BuildChainVisitor","visit_element");
+  DBG_ENTRY_LVL("BuildChainVisitor","visit_element",5);
 
   if (this->head_ == 0)
     {

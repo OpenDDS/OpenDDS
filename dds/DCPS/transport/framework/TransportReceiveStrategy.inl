@@ -8,7 +8,7 @@
 ACE_INLINE int
 TAO::DCPS::TransportReceiveStrategy::start()
 {
-  DBG_ENTRY("TransportReceiveStrategy","start");
+  DBG_ENTRY_LVL("TransportReceiveStrategy","start",5);
   return this->start_i();
 }
 
@@ -16,7 +16,7 @@ TAO::DCPS::TransportReceiveStrategy::start()
 ACE_INLINE void
 TAO::DCPS::TransportReceiveStrategy::stop()
 {
-  DBG_ENTRY("TransportReceiveStrategy","stop");
+  DBG_ENTRY_LVL("TransportReceiveStrategy","stop",5);
   this->stop_i();
 }
 
@@ -28,9 +28,9 @@ TAO::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
 }
 
 
-ACE_INLINE void 
+ACE_INLINE void
 TAO::DCPS::TransportReceiveStrategy::relink (bool)
 {
   // The subsclass needs implement this function for re-establishing
-  // the link upon recv failure.  
+  // the link upon recv failure.
 }

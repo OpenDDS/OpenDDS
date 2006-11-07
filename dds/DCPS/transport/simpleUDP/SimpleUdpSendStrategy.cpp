@@ -12,14 +12,14 @@
 
 TAO::DCPS::SimpleUdpSendStrategy::~SimpleUdpSendStrategy()
 {
-  DBG_ENTRY("SimpleUdpSendStrategy","~SimpleUdpSendStrategy");
+  DBG_ENTRY_LVL("SimpleUdpSendStrategy","~SimpleUdpSendStrategy",5);
 }
 
 
 ssize_t
 TAO::DCPS::SimpleUdpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
-  DBG_ENTRY("SimpleUdpSendStrategy","send_bytes");
+  DBG_ENTRY_LVL("SimpleUdpSendStrategy","send_bytes",5);
 
   // We never experience backpressure with UDP so we never set the bp flag
   // to true.

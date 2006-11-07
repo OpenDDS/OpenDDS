@@ -25,7 +25,7 @@
 TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 : thr_per_con_send_task_ (0)
 {
-  DBG_ENTRY("DataLink","DataLink");
+  DBG_ENTRY_LVL("DataLink","DataLink",5);
 
   impl->_add_ref();
   this->impl_ = impl;
@@ -41,7 +41,8 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 
 TAO::DCPS::DataLink::~DataLink()
 {
-  DBG_ENTRY("DataLink","~DataLink");
+  DBG_ENTRY_LVL("DataLink","~DataLink",5);
+
   if (this->thr_per_con_send_task_ != 0)
     delete this->thr_per_con_send_task_;
 }
@@ -63,7 +64,12 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   int sub_result      = 0;
   int pub_undo_result = 0;
 
-  this->send_strategy_->link_released (false);
+  {
+    GuardType guard (this->strategy_lock_);
+    if (!this->send_strategy_.is_nil()) {
+      this->send_strategy_->link_released (false);
+    }
+  }
 
   {
     GuardType guard(this->lock_);
@@ -142,7 +148,12 @@ TAO::DCPS::DataLink::make_reservation
   int pub_result      = 0;
   int sub_undo_result = 0;
 
-  this->send_strategy_->link_released (false);
+  {
+    GuardType guard (this->strategy_lock_);
+    if (!this->send_strategy_.is_nil()) {
+      this->send_strategy_->link_released (false);
+    }
+  }
 
   {
     GuardType guard(this->lock_);
@@ -175,7 +186,7 @@ TAO::DCPS::DataLink::make_reservation
     // We can release our lock_ now.
   }
 
-  this->send_strategy_->link_released (false);
+  //this->send_strategy_->link_released (false);
 
   // We only get to here when an error occurred somewhere along the way.
   // None of this needs the lock_ to be acquired.
@@ -224,7 +235,8 @@ void
 TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
                                           DataLinkSetMap& released_locals)
 {
-  DBG_ENTRY("DataLink","release_reservations");
+  DBG_ENTRY_LVL("DataLink","release_reservations",5);
+
   GuardType guard(this->lock_);
 
   // See if the remote_id is a publisher_id.
@@ -245,18 +257,22 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
         }
       else
         {
+    //guard.release ();
           // The remote_id is a subscriber_id.
           this->release_remote_subscriber(remote_id,
                                           id_set.in(),
                                           released_locals);
+    //guard.acquire ();
         }
     }
   else
     {
+      //guard.release ();
       // The remote_id is a publisher_id.
       this->release_remote_publisher(remote_id,
                                      listener_set.in(),
                                      released_locals);
+      //guard.acquire ();
     }
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
@@ -267,25 +283,41 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
           this->impl_->release_datalink(this);
           this->impl_ = 0;
 
-          if (!this->send_strategy_.is_nil())
-            {
-              this->send_strategy_->stop();
-              this->send_strategy_ = 0;
-            }
+    TransportSendStrategy_rch send_strategy = 0;
+    TransportReceiveStrategy_rch recv_strategy = 0;
+    {
+      GuardType guard2(this->strategy_lock_);
 
-          if (!this->receive_strategy_.is_nil())
-            {
-              this->receive_strategy_->stop();
-              this->receive_strategy_ = 0;
-            }
+      if (!this->send_strategy_.is_nil())
+        {
+    send_strategy =  this->send_strategy_; // save copy
+    this->send_strategy_ = 0;
+        }
+
+      if (!this->receive_strategy_.is_nil())
+        {
+    recv_strategy = this->receive_strategy_; // save copy
+    this->receive_strategy_ = 0;
+        }
+    }
+    if (!send_strategy.is_nil()) {
+      send_strategy->stop();
+    }
+    if (!recv_strategy.is_nil()) {
+      recv_strategy->stop();
+    }
 
           // Tell our subclass to handle a "stop" event.
           this->stop_i();
         }
       else
         {
-          this->send_strategy_->link_released (true);
-          this->send_strategy_->clear ();
+    GuardType guard2(this->strategy_lock_);
+    if (!this->send_strategy_.is_nil())
+      {
+        this->send_strategy_->link_released (true);
+        this->send_strategy_->clear ();
+      }
         }
     }
 }
@@ -297,7 +329,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 int
 TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 {
-  DBG_ENTRY("DataLink","data_received");
+  DBG_ENTRY_LVL("DataLink","data_received",5);
 
   // Which remote publisher sent this message?
   RepoId publisher_id = sample.header_.publication_id_;
@@ -330,13 +362,14 @@ TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 
 /// No locking needed because the caller (release_reservations()) should
 /// have already acquired our lock_.
+// Ciju: Don't believe a guard is necessary here
 void
 TAO::DCPS::DataLink::release_remote_subscriber
                                         (RepoId          subscriber_id,
                                          RepoIdSet*      pubid_set,
                                          DataLinkSetMap& released_publishers)
 {
-  DBG_ENTRY("DataLink","release_remote_subscriber");
+  DBG_ENTRY_LVL("DataLink","release_remote_subscriber",5);
   RepoIdSet::MapType::ENTRY* entry;
 
   for (RepoIdSet::MapType::ITERATOR itr(pubid_set->map());
@@ -359,13 +392,14 @@ TAO::DCPS::DataLink::release_remote_subscriber
 
 /// No locking needed because the caller (release_reservations()) should
 /// have already acquired our lock_.
+// Ciju: Don't believe a guard is necessary here
 void
 TAO::DCPS::DataLink::release_remote_publisher
                                   (RepoId              publisher_id,
                                    ReceiveListenerSet* listener_set,
                                    DataLinkSetMap&     released_subscribers)
 {
-  DBG_ENTRY("DataLink","release_remote_publisher");
+  DBG_ENTRY_LVL("DataLink","release_remote_publisher",5);
   ReceiveListenerSet::MapType::ENTRY* entry;
 
   for (ReceiveListenerSet::MapType::ITERATOR itr(listener_set->map());
@@ -392,7 +426,7 @@ TAO::DCPS::DataLink::get_next_datalink_id ()
   static ACE_UINT64 next_id = 0;
   static LockType lock;
 
-  DBG_ENTRY("DataLink","get_next_datalink_id");
+  DBG_ENTRY_LVL("DataLink","get_next_datalink_id",5);
 
   ACE_UINT64 id;
   {
@@ -400,7 +434,7 @@ TAO::DCPS::DataLink::get_next_datalink_id ()
     id = next_id++;
     if (0 == next_id)
     {
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DataLink::get_next_datalink_id has rolled over and is reusing ids!\n") ));
     }
   }
@@ -412,20 +446,23 @@ TAO::DCPS::DataLink::get_next_datalink_id ()
 void
 TAO::DCPS::DataLink::transport_shutdown()
 {
-  DBG_ENTRY("DataLink","transport_shutdown");
+  DBG_ENTRY_LVL("DataLink","transport_shutdown",5);
 
-  // Stop the TransportSendStrategy and the TransportReceiveStrategy.
-  if (!this->send_strategy_.is_nil())
-    {
-      this->send_strategy_->stop();
-      this->send_strategy_ = 0;
-    }
+  {
+    GuardType guard(this->strategy_lock_);
+    // Stop the TransportSendStrategy and the TransportReceiveStrategy.
+    if (!this->send_strategy_.is_nil())
+      {
+  this->send_strategy_->stop();
+  this->send_strategy_ = 0;
+      }
 
-  if (!this->receive_strategy_.is_nil())
-    {
-      this->receive_strategy_->stop();
-      this->receive_strategy_ = 0;
-    }
+    if (!this->receive_strategy_.is_nil())
+      {
+  this->receive_strategy_->stop();
+  this->receive_strategy_ = 0;
+      }
+  }
 
   // Tell our subclass about the "stop" event.
   this->stop_i();
@@ -438,11 +475,11 @@ TAO::DCPS::DataLink::transport_shutdown()
 void
 TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 {
-  DBG_ENTRY("DataLink","notify");
+  DBG_ENTRY_LVL("DataLink","notify",5);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG: DataLink %X notify %s\n", this,
     connection_notice_as_str(notice)));
-  
+
   GuardType guard(this->lock_);
   {
     ReceiveListenerSetMap::MapType & map = this->pub_map_.map ();
@@ -459,7 +496,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify pub %d %s \n", 
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify pub %d %s \n",
                   entry->ext_id_, connection_notice_as_str(notice)));
               }
             ReceiveListenerSet_rch subset = entry->int_id_;
@@ -496,7 +533,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify  not notify pub %d %s \n", 
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify  not notify pub %d %s \n",
                   entry->ext_id_, connection_notice_as_str(notice)));
               }
           }
@@ -521,7 +558,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify sub %d %s \n", 
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify sub %d %s \n",
                 entry->ext_id_, connection_notice_as_str(notice)));
               }
             RepoIdSet_rch pubset = entry->int_id_;
@@ -552,13 +589,13 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             default:
               ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: DataLink::notify  unknown notice to datareader\n"));
               break;
-            }           
+            }
           }
         else
           {
             if (TAO_debug_level > 0)
               {
-                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify not notify sub %d subscription lost \n", 
+                ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify not notify sub %d subscription lost \n",
                   entry->ext_id_));
               }
 
@@ -581,14 +618,6 @@ TAO::DCPS::DataLink::pre_stop_i()
 ACE_Message_Block*
 TAO::DCPS::DataLink::marshal_acks (bool byte_order)
 {
-  DBG_ENTRY("DataLink","marshal_acks");
+  DBG_ENTRY_LVL("DataLink","marshal_acks",5);
   return this->sub_map_.marshal (byte_order);
 }
-
-
-
-
-
-
-
-

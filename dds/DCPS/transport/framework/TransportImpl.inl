@@ -12,13 +12,13 @@
 ACE_INLINE
 TAO::DCPS::TransportImpl::TransportImpl()
 {
-  DBG_ENTRY("TransportImpl","TransportImpl");
+  DBG_ENTRY_LVL("TransportImpl","TransportImpl",5);
 }
 
 ACE_INLINE int
 TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
 {
-  DBG_ENTRY("TransportImpl","configure");
+  DBG_ENTRY_LVL("TransportImpl","configure",5);
 
   GuardType guard(this->lock_);
 
@@ -67,7 +67,7 @@ TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
 ACE_INLINE TAO::DCPS::TransportReactorTask*
 TAO::DCPS::TransportImpl::reactor_task()
 {
-  DBG_ENTRY("TransportImpl","reactor_task");
+  DBG_ENTRY_LVL("TransportImpl","reactor_task",5);
   TransportReactorTask_rch task = this->reactor_task_;
   return task._retn();
 }
@@ -76,7 +76,7 @@ TAO::DCPS::TransportImpl::reactor_task()
 ACE_INLINE int
 TAO::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 {
-  DBG_ENTRY("TransportImpl","set_reactor");
+  DBG_ENTRY_LVL("TransportImpl","set_reactor",5);
 
   GuardType guard(this->lock_);
 
@@ -102,7 +102,7 @@ TAO::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 ACE_INLINE void
 TAO::DCPS::TransportImpl::release_datalink(DataLink* link)
 {
-  DBG_ENTRY("TransportImpl","release_datalink");
+  DBG_ENTRY_LVL("TransportImpl","release_datalink",5);
 
   // Delegate to our subclass.
   this->release_datalink_i(link);
@@ -115,7 +115,7 @@ TAO::DCPS::TransportImpl::release_datalink(DataLink* link)
 ACE_INLINE void
 TAO::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
 {
-  DBG_ENTRY("TransportImpl","detach_interface");
+  DBG_ENTRY_LVL("TransportImpl","detach_interface",5);
 
   GuardType guard(this->lock_);
 
@@ -148,7 +148,7 @@ ACE_INLINE int
 TAO::DCPS::TransportImpl::connection_info
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY("TransportImpl","connection_info");
+  DBG_ENTRY_LVL("TransportImpl","connection_info",5);
 
   GuardType guard(this->lock_);
 
@@ -171,7 +171,7 @@ TAO::DCPS::TransportImpl::connection_info
 ACE_INLINE int
 TAO::DCPS::TransportImpl::swap_bytes() const
 {
-  DBG_ENTRY("TransportImpl","swap_bytes");
+  DBG_ENTRY_LVL("TransportImpl","swap_bytes",5);
 
   GuardType guard(this->lock_);
 

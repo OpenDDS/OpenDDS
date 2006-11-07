@@ -7,6 +7,6 @@
 ACE_INLINE
 TAO::DCPS::ThreadSynchWorker::ThreadSynchWorker()
 {
-  DBG_ENTRY("ThreadSynchWorker","ThreadSynchWorker");
+  DBG_ENTRY_LVL("ThreadSynchWorker","ThreadSynchWorker",5);
 }
 

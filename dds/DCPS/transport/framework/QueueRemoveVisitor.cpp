@@ -15,7 +15,7 @@
 
 TAO::DCPS::QueueRemoveVisitor::~QueueRemoveVisitor()
 {
-  DBG_ENTRY("QueueRemoveVisitor","~QueueRemoveVisitor");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","~QueueRemoveVisitor",5);
 }
 
 
@@ -23,7 +23,7 @@ int
 TAO::DCPS::QueueRemoveVisitor::visit_element(TransportQueueElement* element,
                                              int&                   remove)
 {
-  DBG_ENTRY("QueueRemoveVisitor","visit_element");
+  DBG_ENTRY_LVL("QueueRemoveVisitor","visit_element",5);
 
   if (((this->sample_ != 0) && (*element == this->sample_)) ||
       ((this->sample_ == 0) && (element->is_control(this->pub_id_))))

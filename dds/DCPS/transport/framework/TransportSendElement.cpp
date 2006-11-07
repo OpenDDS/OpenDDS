@@ -13,14 +13,14 @@
 
 TAO::DCPS::TransportSendElement::~TransportSendElement()
 {
-  DBG_ENTRY("TransportSendElement","~TransportSendElement");
+  DBG_ENTRY_LVL("TransportSendElement","~TransportSendElement",5);
 }
 
 
 void
 TAO::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 {
-  DBG_ENTRY("TransportSendElement","release_element");
+  DBG_ENTRY_LVL("TransportSendElement","release_element",5);
 
   if (this->was_dropped())
     {
@@ -41,7 +41,7 @@ TAO::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 TAO::DCPS::RepoId
 TAO::DCPS::TransportSendElement::publication_id() const
 {
-  DBG_ENTRY("TransportSendElement","publication_id");
+  DBG_ENTRY_LVL("TransportSendElement","publication_id",5);
   return this->element_->publication_id_;
 }
 
@@ -49,7 +49,7 @@ TAO::DCPS::TransportSendElement::publication_id() const
 const ACE_Message_Block*
 TAO::DCPS::TransportSendElement::msg() const
 {
-  DBG_ENTRY("TransportSendElement","msg");
+  DBG_ENTRY_LVL("TransportSendElement","msg",5);
   return this->element_->sample_;
 }
 

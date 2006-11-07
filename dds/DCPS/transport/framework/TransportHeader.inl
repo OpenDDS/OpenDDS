@@ -61,7 +61,7 @@ ACE_INLINE
 size_t
 TAO::DCPS::TransportHeader::max_marshaled_size()
 {
-  DBG_ENTRY("TransportHeader","max_marshaled_size");
+  DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",5);
   // Representation takes no extra space for encoding.
   return sizeof(this->byte_order_) + sizeof(this->packet_id_) + sizeof(this->length_) ;
 }
@@ -71,7 +71,7 @@ ACE_INLINE
 bool
 TAO::DCPS::TransportHeader::valid() const
 {
-  DBG_ENTRY("TransportHeader","valid");
+  DBG_ENTRY_LVL("TransportHeader","valid",5);
 
   const char* valid_bytes = reinterpret_cast<const char*>(supported_id_);
   const char* check_bytes = reinterpret_cast<const char*>(this->packet_id_);
@@ -95,7 +95,7 @@ ACE_INLINE
 void
 TAO::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 {
-  DBG_ENTRY("TransportHeader","init");
+  DBG_ENTRY_LVL("TransportHeader","init",5);
 
   TAO::DCPS::Serializer reader(buffer);
 

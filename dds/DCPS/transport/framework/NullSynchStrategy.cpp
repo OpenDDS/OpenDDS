@@ -10,13 +10,13 @@
 
 TAO::DCPS::NullSynchStrategy::NullSynchStrategy()
 {
-  DBG_ENTRY("NullSynchStrategy","NullSynchStrategy");
+  DBG_ENTRY_LVL("NullSynchStrategy","NullSynchStrategy",5);
 }
 
 
 TAO::DCPS::NullSynchStrategy::~NullSynchStrategy()
 {
-  DBG_ENTRY("NullSynchStrategy","~NullSynchStrategy");
+  DBG_ENTRY_LVL("NullSynchStrategy","~NullSynchStrategy",5);
 }
 
 
@@ -24,7 +24,7 @@ TAO::DCPS::ThreadSynch*
 TAO::DCPS::NullSynchStrategy::create_synch_object
                                        (ThreadSynchResource* synch_resource)
 {
-  DBG_ENTRY("NullSynchStrategy","create_synch_object");
+  DBG_ENTRY_LVL("NullSynchStrategy","create_synch_object",5);
 
   if (synch_resource != 0)
     {

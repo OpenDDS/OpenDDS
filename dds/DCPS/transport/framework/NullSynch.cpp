@@ -12,14 +12,14 @@
 
 TAO::DCPS::NullSynch::~NullSynch()
 {
-  DBG_ENTRY("NullSynch","~NullSynch");
+  DBG_ENTRY_LVL("NullSynch","~NullSynch",5);
 }
 
 
 void
 TAO::DCPS::NullSynch::work_available()
 {
-  DBG_ENTRY("NullSynch","work_available");
+  DBG_ENTRY_LVL("NullSynch","work_available",5);
 
   ACE_ERROR((LM_ERROR,
              "(%P|%t) INTERNAL ERROR - NullSynch::work_available() "

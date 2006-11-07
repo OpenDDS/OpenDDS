@@ -12,6 +12,6 @@
 
 TAO::DCPS::ThreadSynchResource::~ThreadSynchResource()
 {
-  DBG_ENTRY("ThreadSynchResource","~ThreadSynchResource");
+  DBG_ENTRY_LVL("ThreadSynchResource","~ThreadSynchResource",5);
 }
 

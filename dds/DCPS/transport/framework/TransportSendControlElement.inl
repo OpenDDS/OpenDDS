@@ -17,6 +17,6 @@ TAO::DCPS::TransportSendControlElement::TransportSendControlElement
     msg_(msg_block),
     allocator_(allocator)
 {
-  DBG_ENTRY("TransportSendControlElement","TransportSendControlElement");
+  DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",5);
 }
 

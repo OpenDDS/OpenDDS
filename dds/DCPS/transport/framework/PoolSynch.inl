@@ -10,7 +10,7 @@ TAO::DCPS::PoolSynch::PoolSynch(PoolSynchStrategy* strategy,
   : ThreadSynch(synch_resource),
     strategy_(strategy)
 {
-  DBG_ENTRY("PoolSynch","PoolSynch");
+  DBG_ENTRY_LVL("PoolSynch","PoolSynch",5);
   // TBD
 }
 

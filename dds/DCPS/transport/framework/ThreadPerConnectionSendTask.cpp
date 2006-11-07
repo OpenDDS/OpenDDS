@@ -13,20 +13,20 @@ TAO::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
   TAO::DCPS::DataLink* link)
   : link_ (link)
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","ThreadPerConnectionSendTask");
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","ThreadPerConnectionSendTask",5);
 }
 
 
 TAO::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask");
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",5);
 }
 
 
 
 void TAO::DCPS::ThreadPerConnectionSendTask::execute (SendRequest& req)
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","execute");
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","execute",5);
 
   switch (req.op_)
   {

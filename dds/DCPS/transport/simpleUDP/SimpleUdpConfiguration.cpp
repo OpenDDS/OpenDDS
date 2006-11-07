@@ -12,11 +12,11 @@
 
 TAO::DCPS::SimpleUdpConfiguration::~SimpleUdpConfiguration()
 {
-  DBG_ENTRY("SimpleUdpConfiguration","~SimpleUdpConfiguration");
+  DBG_ENTRY_LVL("SimpleUdpConfiguration","~SimpleUdpConfiguration",5);
 }
 
-int 
-TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id, 
+int
+TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
                                          ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.
@@ -30,13 +30,13 @@ TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   // Call the base class method through 'this' to help VC6 figure out
   // what to do.
   this->TransportConfiguration::load (id, cf);
-  
+
   char section [50];
   ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
   if (cf.open_section (root, section, 0, trans_sect) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("Failed to open section: section %s\n"), section),
                        -1);
 
@@ -44,8 +44,8 @@ TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_STRING_VALUE (cf, trans_sect, "local_address", local_address);
   if (local_address != "")
   {
-    this->local_address_.set (local_address.c_str ());              
-  }  
+    this->local_address_.set (local_address.c_str ());
+  }
 
   return 0;
 }

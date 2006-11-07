@@ -9,25 +9,32 @@
 ACE_INLINE void
 TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
-  DBG_ENTRY("DataLinkSet","send");
+  DBG_ENTRY_LVL("DataLinkSet","send",5);
   TransportSendElement* send_element = 0;
   //Optimized - use cached allocator.
-  ACE_NEW_MALLOC(send_element,
-                 (TransportSendElement*)sample->transport_send_element_allocator_->malloc(),
-                 TransportSendElement(this->map_->current_size(),
-                                      sample,
-                                      sample->transport_send_element_allocator_));
-                        
 
-  MapType::ENTRY* entry;
+  { // guard scope
+    GuardType guard(this->lock_);
 
-  for (MapType::ITERATOR itr(*map_);
-       itr.next(entry);
-       itr.advance())
-    {
-      // Tell the DataLink to send it.
-      entry->int_id_->send(send_element);
-    }
+    ACE_NEW_MALLOC(send_element,
+       (TransportSendElement*)sample->transport_send_element_allocator_->malloc(),
+       TransportSendElement (this->map_->current_size(),
+           sample,
+           sample->transport_send_element_allocator_));
+
+    MapType::ENTRY* entry;
+
+    for (MapType::ITERATOR itr(*map_);
+   itr.next(entry);
+   itr.advance())
+      {
+  // Bump up the DataLink ref count
+  RcHandle<DataLink> data_link (entry->int_id_);
+
+  // Tell the DataLink to send it.
+  entry->int_id_->send(send_element);
+      }
+  }
 }
 
 
@@ -36,57 +43,65 @@ TAO::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
                                      TransportSendListener* listener,
                                      ACE_Message_Block*     msg)
 {
-  DBG_ENTRY("DataLinkSet","send_control");
+  DBG_ENTRY_LVL("DataLinkSet","send_control",5);
   //Optimized - use cached allocator.
   TransportSendControlElement* send_element = 0;
 
-  ACE_NEW_MALLOC_RETURN(send_element,
-                        (TransportSendControlElement*)send_control_element_allocator_.malloc(),
-                        TransportSendControlElement(this->map_->current_size(),
-                                                    pub_id,
-                                                    listener,
-                                                    msg,
-                                                    &send_control_element_allocator_),
-                                                    SEND_CONTROL_ERROR);
+  { // guard scope
+    GuardType guard(this->lock_);
+
+    ACE_NEW_MALLOC_RETURN(send_element,
+        (TransportSendControlElement*)send_control_element_allocator_.malloc(),
+        TransportSendControlElement(this->map_->current_size(),
+                  pub_id,
+                  listener,
+                  msg,
+                  &send_control_element_allocator_),
+        SEND_CONTROL_ERROR);
 
 
 
-  MapType::ENTRY* entry;
+    MapType::ENTRY* entry;
 
-  for (MapType::ITERATOR itr(*map_);
-       itr.next(entry);
-       itr.advance())
-    {
-      entry->int_id_->send_start();
-      entry->int_id_->send(send_element);
-      entry->int_id_->send_stop();
-    }
+    for (MapType::ITERATOR itr(*map_);
+   itr.next(entry);
+   itr.advance())
+      {
+  entry->int_id_->send_start();
+  entry->int_id_->send(send_element);
+  entry->int_id_->send_stop();
+      }
+  }
 
   return SEND_CONTROL_OK;
 }
 
 
 ACE_INLINE int
-TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample, 
+TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
-  DBG_ENTRY("DataLinkSet","remove_sample");
+  DBG_ENTRY_LVL("DataLinkSet","remove_sample",5);
   int status = 0;
 
   MapType::ENTRY* entry;
 
-  for (MapType::ITERATOR itr(*map_);
-       itr.next(entry);
-       itr.advance())
+  {
+    GuardType guard(this->lock_);
+
+    for (MapType::ITERATOR itr(*map_);
+   itr.next(entry);
+   itr.advance())
+      {
+  // Tell the current DataLink to remove_sample.
+  if (entry->int_id_->remove_sample(sample, dropped_by_transport) != 0)
     {
-      // Tell the current DataLink to remove_sample.
-      if (entry->int_id_->remove_sample(sample, dropped_by_transport) != 0)
-        {
-          // Still go on to all of the DataLinks.  But we will make sure
-          // to return the error status when we finally leave.
-          status = -1;
-        }
+      // Still go on to all of the DataLinks.  But we will make sure
+      // to return the error status when we finally leave.
+      status = -1;
     }
+      }
+  }
 
   return status;
 }
@@ -95,9 +110,11 @@ TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
 ACE_INLINE int
 TAO::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY("DataLinkSet","remove_all_control_msgs");
+  DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",5);
 
   MapType::ENTRY* entry;
+
+  GuardType guard(this->lock_);
 
   for (MapType::ITERATOR itr(*map_);
        itr.next(entry);
@@ -120,8 +137,10 @@ TAO::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 ACE_INLINE void
 TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
-  DBG_ENTRY("DataLinkSet","send_start");
+  DBG_ENTRY_LVL("DataLinkSet","send_start",5);
   MapType::ENTRY* entry;
+
+  GuardType guard(this->lock_);
 
   for (MapType::ITERATOR itr(*(link_set->map_));
        itr.next(entry);
@@ -155,9 +174,11 @@ TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 ACE_INLINE void
 TAO::DCPS::DataLinkSet::send_stop()
 {
-  DBG_ENTRY("DataLinkSet","send_stop");
+  DBG_ENTRY_LVL("DataLinkSet","send_stop",5);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
   MapType::ENTRY* entry;
+
+  GuardType guard(this->lock_);
 
   for (MapType::ITERATOR itr(*map_);
        itr.next(entry);
@@ -167,4 +188,3 @@ TAO::DCPS::DataLinkSet::send_stop()
       this->map_->unbind (entry->ext_id_, &map_entry_allocator_);
     }
 }
-

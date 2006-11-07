@@ -13,14 +13,14 @@
 
 TAO::DCPS::TransportSendControlElement::~TransportSendControlElement()
 {
-  DBG_ENTRY("TransportSendControlElement","~TransportSendControlElement");
+  DBG_ENTRY_LVL("TransportSendControlElement","~TransportSendControlElement",5);
 }
 
 
 bool
 TAO::DCPS::TransportSendControlElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY("TransportSendControlElement","requires_exclusive_packet");
+  DBG_ENTRY_LVL("TransportSendControlElement","requires_exclusive_packet",5);
   return true;
 }
 
@@ -30,7 +30,7 @@ TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transpor
 {
   ACE_UNUSED_ARG (dropped_by_transport);
 
-  DBG_ENTRY("TransportSendControlElement","release_element");
+  DBG_ENTRY_LVL("TransportSendControlElement","release_element",5);
 
   if (this->was_dropped())
     {
@@ -40,7 +40,7 @@ TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transpor
     {
       this->listener_->control_delivered(this->msg_);
     }
-    
+
   if (allocator_)
     {
       allocator_->free (this);
@@ -51,7 +51,7 @@ TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transpor
 TAO::DCPS::RepoId
 TAO::DCPS::TransportSendControlElement::publication_id() const
 {
-  DBG_ENTRY("TransportSendControlElement","publication_id");
+  DBG_ENTRY_LVL("TransportSendControlElement","publication_id",5);
   return this->publisher_id_;
 }
 
@@ -59,7 +59,7 @@ TAO::DCPS::TransportSendControlElement::publication_id() const
 const ACE_Message_Block*
 TAO::DCPS::TransportSendControlElement::msg() const
 {
-  DBG_ENTRY("TransportSendControlElement","msg");
+  DBG_ENTRY_LVL("TransportSendControlElement","msg",5);
   return this->msg_;
 }
 

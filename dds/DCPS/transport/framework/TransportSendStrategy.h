@@ -26,7 +26,8 @@ namespace TAO
     class ThreadSynchResource;
     class TransportQueueElement;
     struct DataSampleListElement;
-
+    class QueueRemoveVisitor;
+    class PacketRemoveVisitor;
 
     class TAO_DdsDcps_Export TransportSendStrategy
       : public RcObject<ACE_SYNCH_MUTEX>,
@@ -143,6 +144,9 @@ namespace TAO
           DELAY_NOTIFICATION
         };
 
+      int remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
+         PacketRemoveVisitor& pac_rem_vis);
+
         /// Called from send() when it is time to attempt to send our
         /// current packet to the socket while in MODE_DIRECT mode_.
         /// If backpressure occurs, our current packet will be adjusted
@@ -222,7 +226,14 @@ namespace TAO
         /// Used during backpressure situations to hold samples that have
         /// not yet been made to be part of a transport packet, and are
         /// completely unsent.
+      /// Also used as a bucket for packets which still have to become
+      /// part of a packet.
         QueueType* queue_;
+
+      /// This queue holds elements which haven't yet become part of
+      /// a packet.
+      //QueueType* not_yet_pac_q_;
+      //size_t not_yet_pac_q_len_;
 
         /// Current transport packet header.
         TransportHeader header_;

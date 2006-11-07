@@ -26,6 +26,6 @@ ACE_INLINE
 void
 TAO::DCPS::NetworkAddress::to_addr(ACE_INET_Addr& addr)
 {
-  DBG_ENTRY("NetworkAddress","to_addr");
+  DBG_ENTRY_LVL("NetworkAddress","to_addr",5);
   addr.set(this->port_, this->ip_, 0);
 }

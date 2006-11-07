@@ -8,7 +8,7 @@
 ACE_INLINE
 TAO::DCPS::RepoIdSet::RepoIdSet()
 {
-  DBG_ENTRY("RepoIdSet","RepoIdSet");
+  DBG_ENTRY_LVL("RepoIdSet","RepoIdSet",5);
 }
 
 
@@ -16,7 +16,7 @@ TAO::DCPS::RepoIdSet::RepoIdSet()
 ACE_INLINE int
 TAO::DCPS::RepoIdSet::insert_id(RepoId id)
 {
-  DBG_ENTRY("RepoIdSet","insert_id");
+  DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
   return this->map_.bind(id, id);
 }
 
@@ -24,7 +24,7 @@ TAO::DCPS::RepoIdSet::insert_id(RepoId id)
 ACE_INLINE int
 TAO::DCPS::RepoIdSet::remove_id(RepoId id)
 {
-  DBG_ENTRY("RepoIdSet","remove_id");
+  DBG_ENTRY_LVL("RepoIdSet","remove_id",5);
   int result = this->map_.unbind(id);
 
   if (result != 0)
@@ -39,7 +39,7 @@ TAO::DCPS::RepoIdSet::remove_id(RepoId id)
 ACE_INLINE size_t
 TAO::DCPS::RepoIdSet::size() const
 {
-  DBG_ENTRY("RepoIdSet","size");
+  DBG_ENTRY_LVL("RepoIdSet","size",5);
   return this->map_.current_size();
 }
 
