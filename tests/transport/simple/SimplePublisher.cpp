@@ -55,7 +55,7 @@ SimplePublisher::init(TAO::DCPS::TransportIdType          transport_id,
   if (status != TAO::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
-      std::string status_str;
+      ACE_TString status_str;
 
       switch (status)
         {

@@ -36,14 +36,14 @@ static int init_reader_tranport ()
   if (using_udp)
     {
       reader_transport_impl =
-          TheTransportFactory->create_transport_impl (SUB_TRAFFIC, 
+          TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleUdp",
                                                       TAO::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config 
+      TAO::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
-      
-      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config 
+
+      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config
         = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
@@ -73,10 +73,10 @@ static int init_reader_tranport ()
                                                       "SimpleTcp",
                                                       TAO::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config 
+      TAO::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
-      
-      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+
+      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
         = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
@@ -105,47 +105,47 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -t use_take?1:0             defaults to 0 
+    //  -t use_take?1:0             defaults to 0
     //  -i num_ops_per_thread       defaults to 1
     //  -l num_unlively_periods     defaults to 10
-    //  -r num_datareaders          defaults to 1 
+    //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -s sub transport address    defaults to localhost:23456
     //  -z                          verbose transport debug
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_ops_per_thread = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-l")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-l")) != 0)
     {
       num_unlively_periods = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
     {
       use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0)
     {
       reader_address_str = currentArg;
       reader_address_given = 1;
@@ -165,7 +165,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -197,16 +197,16 @@ int main (int argc, char *argv[])
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
-      ::Mine::FooTypeSupport_var fts = 
+      ::Mine::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                         ::Mine::FooTypeSupportImpl, 
+                                         ::Mine::FooTypeSupportImpl,
                                          ::Mine::FooTypeSupport_ptr >(fts_servant);
       ACE_TRY_CHECK;
 
-      ::DDS::DomainParticipant_var dp = 
-        dpf->create_participant(MY_DOMAIN, 
-                                PARTICIPANT_QOS_DEFAULT, 
-                                ::DDS::DomainParticipantListener::_nil() 
+      ::DDS::DomainParticipant_var dp =
+        dpf->create_participant(MY_DOMAIN,
+                                PARTICIPANT_QOS_DEFAULT,
+                                ::DDS::DomainParticipantListener::_nil()
                                 ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if (CORBA::is_nil (dp.in ()))
@@ -218,8 +218,8 @@ int main (int argc, char *argv[])
 
       if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("Failed to register the FooTypeSupport.")));
           return 1;
         }
 
@@ -227,16 +227,16 @@ int main (int argc, char *argv[])
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
-      
+
       topic_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
 
       topic_qos.history.depth = history_depth;
 
-      ::DDS::Topic_var topic = 
-        dp->create_topic (MY_TOPIC, 
-                          MY_TYPE, 
-                          topic_qos, 
+      ::DDS::Topic_var topic =
+        dp->create_topic (MY_TOPIC,
+                          MY_TYPE,
+                          topic_qos,
                           ::DDS::TopicListener::_nil()
                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl 
+      ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
                               (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -298,7 +298,7 @@ int main (int argc, char *argv[])
       if (attach_status != TAO::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
-          std::string status_str;
+          ACE_TString status_str;
 
           switch (attach_status)
             {
@@ -331,7 +331,7 @@ int main (int argc, char *argv[])
       dr_qos.history.depth = history_depth  ;
       dr_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
-      
+
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
@@ -349,7 +349,7 @@ int main (int argc, char *argv[])
       ACE_CHECK;
 
       ::DDS::DataReader_var dr ;
-      
+
       dr = sub->create_datareader(description.in (),
                                   dr_qos,
                                   drl.in ()
@@ -376,7 +376,7 @@ int main (int argc, char *argv[])
 
       ACE_OS::fclose(readers_ready);
       ACE_OS::fclose(writers_ready);
-      
+
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T Publisher is ready\n") ));
 
       // Indicate that the subscriber is done
@@ -422,7 +422,7 @@ int main (int argc, char *argv[])
                      drl_servant.no_writers_generation_count()) ;
       ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-      if ((drl_servant.liveliness_changed_count() != 2 + 2 * num_unlively_periods) || 
+      if ((drl_servant.liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
         (drl_servant.no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
         // if use take then the instance had "no samples" when it got NO_WRITERS and
@@ -430,7 +430,7 @@ int main (int argc, char *argv[])
         // no_writers_generation_count should = 0.
         ACE_ERROR ((LM_ERROR,
            ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
-          return 1; 
+          return 1;
       }
 
     }
@@ -448,7 +448,7 @@ int main (int argc, char *argv[])
     }
   ACE_ENDTRY;
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.
   //       Otherwise cleanup after main() will encount access vilation.
   reader_transport_impl = 0;

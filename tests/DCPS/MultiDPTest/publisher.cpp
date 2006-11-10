@@ -41,30 +41,30 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -i num_samples_per_instance    defaults to 1 
-    //  -w num_datawriters          defaults to 1 
+    //  -i num_samples_per_instance    defaults to 1
+    //  -w num_datawriters          defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -p pub transport address    defaults to localhost:23456
     //  -z length of float sequence in data type   defaults to 10
     //  -v                          verbose transport debug
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
     {
       writer_address_str = currentArg;
       writer_address_given = 1;
@@ -75,7 +75,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -88,9 +88,9 @@ int parse_args (int argc, char *argv[])
 void init (ACE_ENV_SINGLE_ARG_DECL)
 {
   participant
-    = dpf->create_participant(domain_id, 
-                              PARTICIPANT_QOS_DEFAULT, 
-                              ::DDS::DomainParticipantListener::_nil() 
+    = dpf->create_participant(domain_id,
+                              PARTICIPANT_QOS_DEFAULT,
+                              ::DDS::DomainParticipantListener::_nil()
                               ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
   if (CORBA::is_nil (participant.in ()))
@@ -100,7 +100,7 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
       ACE_THROW(TestException ());
     }
 
-  ::Mine::FooTypeSupportImpl* fts_servant 
+  ::Mine::FooTypeSupportImpl* fts_servant
     = new ::Mine::FooTypeSupportImpl();
   PortableServer::ServantBase_var safe_servant = fts_servant;
 
@@ -114,10 +114,10 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
   participant->get_default_topic_qos(topic_qos);
   ACE_CHECK;
 
-  topic[0] 
-    = participant->create_topic (topic_name[0], 
-                                  type_name, 
-                                  topic_qos, 
+  topic[0]
+    = participant->create_topic (topic_name[0],
+                                  type_name,
+                                  topic_qos,
                                   ::DDS::TopicListener::_nil()
                                   ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
@@ -128,10 +128,10 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
       ACE_THROW (TestException ());
     }
 
-  topic[1] 
-    = participant->create_topic (topic_name[1], 
-                                  type_name, 
-                                  topic_qos, 
+  topic[1]
+    = participant->create_topic (topic_name[1],
+                                  type_name,
+                                  topic_qos,
                                   ::DDS::TopicListener::_nil()
                                   ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
@@ -142,17 +142,17 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
       ACE_THROW (TestException ());
     }
 
-  writer_impl 
+  writer_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                  "SimpleTcp", 
+                                                  "SimpleTcp",
                                                   TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-  
+
   if (writer_address_given)
     {
       ACE_INET_Addr writer_address (writer_address_str.c_str ());
@@ -181,7 +181,7 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
     }
 
   // Attach the publisher to the transport.
-  ::TAO::DCPS::PublisherImpl* pub_impl 
+  ::TAO::DCPS::PublisherImpl* pub_impl
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                          ::DDS::Publisher_ptr>
                           (publisher.in () ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -201,7 +201,7 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
   if (attach_status != TAO::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
-      std::string status_str;
+      ACE_TString status_str;
 
       switch (attach_status)
         {
@@ -230,13 +230,13 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
   ::DDS::DataWriterQos dw_qos;
   publisher->get_default_datawriter_qos (dw_qos);
 
-  // Make it KEEP_ALL history so we can verify the received  
+  // Make it KEEP_ALL history so we can verify the received
   // data without dropping.
   dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
   dw_qos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
   dw_qos.reliability.max_blocking_time.sec = 0;
-  dw_qos.reliability.max_blocking_time.nanosec = 0; 
+  dw_qos.reliability.max_blocking_time.nanosec = 0;
 
   for (int i = 0; i < 2; ++i)
     {
@@ -254,7 +254,7 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
         }
 
       writers[i] = new Writer (datawriter[i].in (), i);
-    } 
+    }
 }
 
 void shutdown ()
@@ -269,7 +269,7 @@ void shutdown ()
   datawriter[0] = ::DDS::DataWriter::_nil ();
   datawriter[1] = ::DDS::DataWriter::_nil ();
 
-  TheServiceParticipant->shutdown (); 
+  TheServiceParticipant->shutdown ();
 }
 
 
@@ -318,7 +318,7 @@ int main (int argc, char *argv[])
             writers[i]->start ();
           }
       }
-  
+
       int timeout_writes = 0;
       bool writers_finished = false;
 
@@ -409,7 +409,3 @@ int main (int argc, char *argv[])
   shutdown ();
   return status;
 }
-
-
-
-

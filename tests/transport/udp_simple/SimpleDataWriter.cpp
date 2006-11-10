@@ -46,7 +46,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // We just send one message.
 
   // This is what goes in the "Data Block".
-  std::string data = "Hello World!";
+  ACE_TString data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
   TAO::DCPS::DataSampleHeader header;

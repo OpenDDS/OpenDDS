@@ -21,8 +21,8 @@
 #include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -47,8 +47,8 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
     //  -d history.depth            defaults to 1
@@ -64,8 +64,8 @@ int parse_args (int argc, char *argv[])
     //  -v                          verbose transport debug
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0)
     {
       //Maximum two addresses.
       static size_t i = 0;
@@ -73,12 +73,12 @@ int parse_args (int argc, char *argv[])
       i++;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -88,7 +88,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -99,70 +99,70 @@ int parse_args (int argc, char *argv[])
 
 
 void init_dcps_objects (int i)
-{ 
-  participant[i] = 
-    dpf->create_participant(domain_id, 
-                            PARTICIPANT_QOS_DEFAULT, 
-                            ::DDS::DomainParticipantListener::_nil() 
+{
+  participant[i] =
+    dpf->create_participant(domain_id,
+                            PARTICIPANT_QOS_DEFAULT,
+                            ::DDS::DomainParticipantListener::_nil()
                             ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
   if (CORBA::is_nil (participant[i].in ()))
     {
       ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) create_participant failed.\n")));
-      ACE_THROW (TestException ()); 
+      ACE_THROW (TestException ());
     }
 
-  ::Mine::FooTypeSupportImpl* fts_servant 
+  ::Mine::FooTypeSupportImpl* fts_servant
     = new ::Mine::FooTypeSupportImpl();
   PortableServer::ServantBase_var safe_servant = fts_servant;
 
-  ::Mine::FooTypeSupportImpl* another_fts_servant 
+  ::Mine::FooTypeSupportImpl* another_fts_servant
     = new ::Mine::FooTypeSupportImpl();
   PortableServer::ServantBase_var another_safe_servant = another_fts_servant;
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant[i].in (), type_name))
   {
-    ACE_ERROR ((LM_ERROR, 
-      ACE_TEXT ("Failed to register the FooNoTypeTypeSupport."))); 
-    ACE_THROW (TestException ());      
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT ("Failed to register the FooNoTypeTypeSupport.")));
+    ACE_THROW (TestException ());
   }
 
   // Test if different TypeSupport instances of the same TypeSupport type can register
   // with the same type name within the same domain participant.
   if (::DDS::RETCODE_OK != another_fts_servant->register_type(participant[i].in (), type_name))
   {
-    ACE_ERROR ((LM_ERROR, 
-      ACE_TEXT ("Failed to register the FooNoTypeTypeSupport."))); 
-    ACE_THROW (TestException ());      
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT ("Failed to register the FooNoTypeTypeSupport.")));
+    ACE_THROW (TestException ());
   }
 
   ::DDS::TopicQos topic_qos;
   participant[i]->get_default_topic_qos(topic_qos);
-  
-  topic[i] 
-    = participant[i]->create_topic(topic_name[i], 
-                                type_name, 
-                                topic_qos, 
+
+  topic[i]
+    = participant[i]->create_topic(topic_name[i],
+                                type_name,
+                                topic_qos,
                                 ::DDS::TopicListener::_nil()
                                 ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
   if (CORBA::is_nil (topic[i].in ()))
     {
-      ACE_ERROR ((LM_ERROR, 
-        ACE_TEXT ("Failed to create_topic."))); 
-      ACE_THROW (TestException ());      
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("Failed to create_topic.")));
+      ACE_THROW (TestException ());
     }
 
-  reader_impl[i] 
+  reader_impl[i]
     = TheTransportFactory->create_transport_impl (transport_id[i],
-                                                  "SimpleTcp", 
+                                                  "SimpleTcp",
                                                   TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config 
+  TAO::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (transport_id[i], "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   if (reader_address_str[i] != "")
@@ -177,7 +177,7 @@ void init_dcps_objects (int i)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) init_reader_tranport: subscriber TCP ")
       ACE_TEXT(" Failed to configure the transport.\n")));
-    ACE_THROW (TestException ()); 
+    ACE_THROW (TestException ());
   }
 
   subscriber[i] = participant[i]->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
@@ -186,13 +186,13 @@ void init_dcps_objects (int i)
   ACE_TRY_CHECK;
   if (CORBA::is_nil (subscriber[i].in ()))
     {
-      ACE_ERROR ((LM_ERROR, 
-        ACE_TEXT ("Failed to create_subscriber."))); 
-      ACE_THROW (TestException ()); 
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("Failed to create_subscriber.")));
+      ACE_THROW (TestException ());
     }
 
   // Attach the subscriber to the transport.
-  ::TAO::DCPS::SubscriberImpl* sub_impl 
+  ::TAO::DCPS::SubscriberImpl* sub_impl
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                          ::DDS::Subscriber_ptr>
                           (subscriber[i].in () ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -202,7 +202,7 @@ void init_dcps_objects (int i)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Failed to obtain subscriber servant\n")));
-      ACE_THROW (TestException ()); 
+      ACE_THROW (TestException ());
     }
 
   TAO::DCPS::AttachStatus attach_status;
@@ -213,7 +213,7 @@ void init_dcps_objects (int i)
   if (attach_status != TAO::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
-      std::string status_str;
+      ACE_TString status_str;
 
       switch (attach_status)
         {
@@ -235,15 +235,15 @@ void init_dcps_objects (int i)
                   ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
                   ACE_TEXT("AttachStatus == %s\n"),
                   status_str.c_str()));
-      ACE_THROW (TestException ()); 
+      ACE_THROW (TestException ());
     }
-    
+
         // Create the Datareaders
     ::DDS::DataReaderQos dr_qos;
     subscriber[i]->get_default_datareader_qos (dr_qos);
 
     ::DDS::TopicDescription_var description
-      = participant[i]->lookup_topicdescription(topic_name[i] 
+      = participant[i]->lookup_topicdescription(topic_name[i]
                                                 ACE_ENV_ARG_PARAMETER);
     ACE_TRY_CHECK;
     // create the datareader.
@@ -257,8 +257,8 @@ void init_dcps_objects (int i)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) create_datareader failed.\n")));
-        ACE_THROW (TestException ()); 
-      }  
+        ACE_THROW (TestException ());
+      }
 }
 
 
@@ -269,7 +269,7 @@ void init_listener()
     DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
     PortableServer::ServantBase_var safe_servant = listener_servant;
 
-    PortableServer::POA_var poa 
+    PortableServer::POA_var poa
       = TheServiceParticipant->the_poa ();
 
     CORBA::Object_var obj
@@ -277,15 +277,15 @@ void init_listener()
                                   ACE_ENV_ARG_PARAMETER);
     ACE_TRY_CHECK;
 
-    listener[i]  
+    listener[i]
       = ::DDS::DataReaderListener::_narrow (obj.in ()
                                             ACE_ENV_ARG_PARAMETER);
     ACE_TRY_CHECK;
 
     if (CORBA::is_nil (listener[i].in ()))
       {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil."))); 
-        ACE_THROW (TestException ());      
+        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil.")));
+        ACE_THROW (TestException ());
       }
   }
 }
@@ -294,7 +294,7 @@ void shutdown ()
 {
   TheTransportFactory->release();
 
-  dpf = 0; 
+  dpf = 0;
   participant[0] = 0;
   participant[1] = 0;
   topic[0] = 0;
@@ -308,7 +308,7 @@ void shutdown ()
   datareader[0] = 0;
   datareader[1] = 0;
 
-  TheServiceParticipant->shutdown (); 
+  TheServiceParticipant->shutdown ();
 }
 
 
@@ -350,12 +350,12 @@ int main (int argc, char *argv[])
       ACE_OS::fclose(readers_ready);
       ACE_OS::fclose(writers_ready);
 
-      int expected 
+      int expected
         = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
       FILE* writers_completed = 0;
       int timeout_writes = 0;
-    
+
       while ( num_reads < expected)
         {
           // Get the number of the timed out writes from publisher so we
@@ -363,17 +363,17 @@ int main (int argc, char *argv[])
           // the blocking timeout test will never exit from this loop.
           if (writers_completed == 0)
             {
-              writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));          
+              writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
               if (writers_completed != 0)
-                { 
-                  //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));          
+                {
+                  //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
                   fscanf (writers_completed, "%d\n", &timeout_writes);
                   expected -= timeout_writes;
                   ACE_DEBUG((LM_DEBUG,
                              ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d\n"),
                              timeout_writes, expected));
                 }
-              
+
             }
           ACE_OS::sleep (1);
         }
@@ -392,7 +392,7 @@ int main (int argc, char *argv[])
           ACE_Time_Value small(0,250000);
           ACE_OS::sleep (small);
           writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
-        } 
+        }
 
       ACE_OS::fclose(readers_completed);
       ACE_OS::fclose(writers_completed);
