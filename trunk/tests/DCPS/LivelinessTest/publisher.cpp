@@ -40,10 +40,10 @@ static int init_writer_tranport ()
           TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleUdp",
                                                       TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch writer_config 
+      TAO::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
-      
-      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
+
+      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config
         = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
@@ -68,14 +68,14 @@ static int init_writer_tranport ()
   else
     {
       writer_transport_impl =
-          TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+          TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleTcp",
                                                       TAO::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config 
+      TAO::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
-      
-      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+
+      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
         = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
       if (writer_address_given)
@@ -125,9 +125,9 @@ public:
 
     ACE_Reactor* reactor ;
     reactor = orb->orb_core()->reactor();
-    
-    if (reactor->schedule_timer(this, 
-                                0, 
+
+    if (reactor->schedule_timer(this,
+                                0,
                                 ACE_Time_Value(0,1)) == -1)
     {
       ACE_ERROR ((LM_ERROR,
@@ -157,41 +157,41 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -i num_ops_per_thread       defaults to 1 
+    //  -i num_ops_per_thread       defaults to 1
     //  -l num_unlively_periods     defaults to 10
-    //  -w num_datawriters          defaults to 1 
+    //  -w num_datawriters          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -p pub transport address    defaults to localhost:23456
     //  -z                          verbose transport debug
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_ops_per_thread = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-l")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-l")) != 0)
     {
       num_unlively_periods = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
     {
       writer_address_str = currentArg;
       writer_address_given = 1;
@@ -211,7 +211,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -241,16 +241,16 @@ int main (int argc, char *argv[])
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
-      ::Mine::FooTypeSupport_var fts = 
+      ::Mine::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                         ::Mine::FooTypeSupportImpl, 
+                                         ::Mine::FooTypeSupportImpl,
                                          ::Mine::FooTypeSupport_ptr >(fts_servant);
       ACE_TRY_CHECK;
 
-      ::DDS::DomainParticipant_var dp = 
-        dpf->create_participant(MY_DOMAIN, 
-                                PARTICIPANT_QOS_DEFAULT, 
-                                ::DDS::DomainParticipantListener::_nil() 
+      ::DDS::DomainParticipant_var dp =
+        dpf->create_participant(MY_DOMAIN,
+                                PARTICIPANT_QOS_DEFAULT,
+                                ::DDS::DomainParticipantListener::_nil()
                                 ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if (CORBA::is_nil (dp.in ()))
@@ -262,8 +262,8 @@ int main (int argc, char *argv[])
 
       if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("Failed to register the FooTypeSupport.")));
           return 1;
         }
 
@@ -271,16 +271,16 @@ int main (int argc, char *argv[])
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
-      
+
       topic_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
 
       topic_qos.history.depth = history_depth;
 
-      ::DDS::Topic_var topic = 
-        dp->create_topic (MY_TOPIC, 
-                          MY_TYPE, 
-                          topic_qos, 
+      ::DDS::Topic_var topic =
+        dp->create_topic (MY_TOPIC,
+                          MY_TYPE,
+                          topic_qos,
                           ::DDS::TopicListener::_nil()
                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -311,7 +311,7 @@ int main (int argc, char *argv[])
       }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl 
+      ::TAO::DCPS::PublisherImpl* pub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                              ::DDS::Publisher_ptr>
                               (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
       if (attach_status != TAO::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
-          std::string status_str;
+          ACE_TString status_str;
 
           switch (attach_status)
             {
@@ -404,17 +404,17 @@ int main (int argc, char *argv[])
 
       ReactorCtrl rc ;
 
-      // stop the Service_Participant reactor so LIVELINESS.kind=AUTOMATIC does not 
-      // send out an automatic liveliness control message when sleeping in the loop 
+      // stop the Service_Participant reactor so LIVELINESS.kind=AUTOMATIC does not
+      // send out an automatic liveliness control message when sleeping in the loop
       // below.
       rc.pause() ;
 
-      Writer* writer = new Writer(dw.in (), 
+      Writer* writer = new Writer(dw.in (),
                                 1,
                                 num_ops_per_thread);
 
       for (int i = 0 ; i < num_unlively_periods ; i++)
-        { 
+        {
           writer->run_test (i);
 
           // 3 ensures that we will detect when an DataReader detects
@@ -422,7 +422,7 @@ int main (int argc, char *argv[])
           ACE_OS::sleep (3 * LEASE_DURATION_SEC);
         }
       writer->run_test (num_unlively_periods);
-      
+
       rc.resume() ;
 
       bool writers_finished = false;
@@ -444,7 +444,7 @@ int main (int argc, char *argv[])
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR Unable to create publisher completed file\n")));
         }
-      
+
 
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T waiting for readers to finish\n") ));
 
@@ -473,7 +473,7 @@ int main (int argc, char *argv[])
       dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
 
       TheTransportFactory->release();
-      TheServiceParticipant->shutdown (); 
+      TheServiceParticipant->shutdown ();
 
     }
   ACE_CATCH (TestException,ex)
@@ -490,7 +490,7 @@ int main (int argc, char *argv[])
     }
   ACE_ENDTRY;
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.
   //       Otherwise cleanup after main() will encount access vilation.
   writer_transport_impl = 0;

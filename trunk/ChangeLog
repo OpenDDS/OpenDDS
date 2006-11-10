@@ -1,3 +1,23 @@
+Fri Nov 10 18:59:48 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+          Fixed missing system header includes.
+
 Tue Nov  7 22:08:50 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/Cached_Allocator_With_Overflow_T.h:

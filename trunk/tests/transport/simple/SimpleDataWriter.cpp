@@ -46,7 +46,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // We just send one message.
 
   // This is what goes in the "Data Block".
-  std::string data = "Hello World!";
+  ACE_TString data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
   TAO::DCPS::DataSampleHeader header;
@@ -127,7 +127,7 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;
@@ -151,7 +151,7 @@ SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;

@@ -24,9 +24,6 @@
 
 #include "ace/Arg_Shifter.h"
 
-
-
-
 #include "common.h"
 
 /// parse the command line arguments
@@ -35,12 +32,12 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -i num_samples_per_instance    defaults to 1 
-    //  -w num_datawriters          defaults to 1 
+    //  -i num_samples_per_instance    defaults to 1
+    //  -w num_datawriters          defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
@@ -56,33 +53,33 @@ int parse_args (int argc, char *argv[])
     //  -v                          verbose transport debug
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-w")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-w")) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
     {
       writer_address_str = currentArg;
       writer_address_given = 1;
@@ -97,27 +94,27 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-z")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-z")) != 0)
     {
       sequence_length = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-y")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-y")) != 0)
     {
       op_interval_ms = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0)
     {
       blocking_ms = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
     {
       no_key = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-f")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-f")) != 0)
     {
       mixed_trans = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -137,7 +134,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -151,7 +148,7 @@ int parse_args (int argc, char *argv[])
 ::DDS::Publisher_ptr
 create_publisher (::DDS::DomainParticipant_ptr participant,
                   int                          attach_to_udp)
-{  
+{
   ::DDS::Publisher_var pub;
 
   ACE_TRY_NEW_ENV
@@ -170,7 +167,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl 
+      ::TAO::DCPS::PublisherImpl* pub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                              ::DDS::Publisher_ptr>
                               (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
@@ -199,7 +196,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
       if (attach_status != TAO::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
-          std::string status_str;
+          ACE_TString status_str;
 
           switch (attach_status)
             {
@@ -260,9 +257,9 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
       participant
-        = dpf->create_participant(MY_DOMAIN, 
-                                  PARTICIPANT_QOS_DEFAULT, 
-                                  ::DDS::DomainParticipantListener::_nil() 
+        = dpf->create_participant(MY_DOMAIN,
+                                  PARTICIPANT_QOS_DEFAULT,
+                                  ::DDS::DomainParticipantListener::_nil()
                                   ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if (CORBA::is_nil (participant.in ()))
@@ -274,7 +271,7 @@ int main (int argc, char *argv[])
 
       if (no_key)
         {
-          ::Mine::FooNoKeyTypeSupportImpl* nokey_fts_servant 
+          ::Mine::FooNoKeyTypeSupportImpl* nokey_fts_servant
             = new ::Mine::FooNoKeyTypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = nokey_fts_servant;
 
@@ -284,9 +281,9 @@ int main (int argc, char *argv[])
               ACE_THROW (TestException ());
             }
         }
-      else 
+      else
         {
-          ::Mine::FooTypeSupportImpl* fts_servant 
+          ::Mine::FooTypeSupportImpl* fts_servant
             = new ::Mine::FooTypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
@@ -299,7 +296,7 @@ int main (int argc, char *argv[])
 
       if (mixed_trans)
         {
-          ::Mine::FooTypeSupportImpl* fts_servant 
+          ::Mine::FooTypeSupportImpl* fts_servant
             = new ::Mine::FooTypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
@@ -312,11 +309,11 @@ int main (int argc, char *argv[])
 
       ::DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
-      
-      ::DDS::Topic_var topic 
-        = participant->create_topic (MY_TOPIC, 
-                                     MY_TYPE, 
-                                     topic_qos, 
+
+      ::DDS::Topic_var topic
+        = participant->create_topic (MY_TOPIC,
+                                     MY_TYPE,
+                                     topic_qos,
                                      ::DDS::TopicListener::_nil()
                                      ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -330,9 +327,9 @@ int main (int argc, char *argv[])
       ::DDS::Topic_var topic1;
       if (mixed_trans)
         {
-          topic1 = participant->create_topic (MY_TOPIC_FOR_UDP, 
-                                              MY_TYPE_FOR_UDP, 
-                                              topic_qos, 
+          topic1 = participant->create_topic (MY_TOPIC_FOR_UDP,
+                                              MY_TYPE_FOR_UDP,
+                                              topic_qos,
                                               ::DDS::TopicListener::_nil()
                                               ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
@@ -350,7 +347,7 @@ int main (int argc, char *argv[])
                       ACE_TEXT("(%P|%t) init_writer_tranport failed.\n")));
           ACE_THROW (TestException ());
         }
-      
+
       int attach_to_udp = using_udp;
       // Create the default publisher
       ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp);
@@ -380,7 +377,7 @@ int main (int argc, char *argv[])
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
 
-      // Make it KEEP_ALL history so we can verify the received  
+      // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
       dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
@@ -389,7 +386,7 @@ int main (int argc, char *argv[])
       dw_qos.reliability.max_blocking_time.sec = blocking_ms/1000;
       dw_qos.reliability.max_blocking_time.nanosec = blocking_ms%1000 * 1000000;
       // The history depth is only used for KEEP_LAST.
-      //dw_qos.history.depth = history_depth  ;  
+      //dw_qos.history.depth = history_depth  ;
 
       ::DDS::DataWriter_var* dw = new ::DDS::DataWriter_var[num_datawriters];
       Writer** writers = new Writer*[num_datawriters];
@@ -405,7 +402,7 @@ int main (int argc, char *argv[])
             {
               attach_to_udp = ! attach_to_udp;
               the_pub = pub1;
-              the_topic = topic1; 
+              the_topic = topic1;
             }
           dw[i] = the_pub->create_datawriter(the_topic.in (),
                                              dw_qos,
@@ -421,8 +418,8 @@ int main (int argc, char *argv[])
             }
 
           writers[i] = new Writer (dw[i].in (), i);
-        } 
-  
+        }
+
       // Indicate that the publisher is ready
       FILE* writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_LIB_TEXT("w"));
       if (writers_ready == 0)
@@ -452,7 +449,7 @@ int main (int argc, char *argv[])
             writers[i]->start ();
           }
       }
-  
+
       int timeout_writes = 0;
       bool writers_finished = false;
 
@@ -544,15 +541,11 @@ int main (int argc, char *argv[])
   ACE_ENDTRY;
 
   TheTransportFactory->release();
-  TheServiceParticipant->shutdown (); 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  TheServiceParticipant->shutdown ();
+  // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.
   //       Otherwise cleanup after main() will encount access vilation.
   writer_tcp_impl = 0;
   writer_udp_impl = 0;
   return status;
 }
-
-
-
-
