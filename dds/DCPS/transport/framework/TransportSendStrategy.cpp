@@ -14,6 +14,7 @@
 #include  "TransportDefs.h"
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
+#include  <vector>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
@@ -708,14 +709,14 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 
   size_t num_delayed_notifications = this->num_delayed_notifications_;
 
-  GuardType guard(this->lock_);
-
-  if (num_delayed_notifications <= 0) {
+  if (num_delayed_notifications == 0) {
     return;
   }
 
-  TransportQueueElement* samples [num_delayed_notifications];
-  SendMode modes [num_delayed_notifications];
+  GuardType guard(this->lock_);
+
+  std::vector<TransportQueueElement*> samples(num_delayed_notifications);
+  std::vector<SendMode> modes(num_delayed_notifications);
 
   for (size_t i = 0; i < num_delayed_notifications; i++)
     {
