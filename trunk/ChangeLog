@@ -1,3 +1,10 @@
+Mon Nov 13 12:32:18 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          An array can not be allocated with a non-static constant (except
+          with gcc).  We use a vector instead of an array.
+
 Fri Nov 10 18:59:48 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
