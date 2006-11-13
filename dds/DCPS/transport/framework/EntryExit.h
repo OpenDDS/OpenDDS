@@ -12,15 +12,10 @@
 #if DDS_BLD_DEBUG_LEVEL > 0
 
 #undef DBG_ENTRY
-#undef DBG_SUB_ENTRY
 #undef DBG_ENTRY_LVL
 
-// deprecated
-#define DBG_ENTRY(CNAME,MNAME) \
+#define DBG_ENTRY_CORE(CNAME,MNAME) \
 EntryExit dbg_0(CNAME,MNAME)
-
-#define DBG_SUB_ENTRY(CNAME,MNAME,INUM) \
-EntryExit dbg_##INUM (CNAME,MNAME,INUM)
 
 #define DBG_ENTRY0(CNAME,MNAME)
 #define DBG_ENTRY1(CNAME,MNAME)
@@ -32,35 +27,45 @@ EntryExit dbg_##INUM (CNAME,MNAME,INUM)
 #if DDS_BLD_DEBUG_LEVEL >=1
 #undef DBG_ENTRY1
 #define DBG_ENTRY1(CNAME,MNAME) \
-DBG_ENTRY(CNAME,MNAME)
+DBG_ENTRY_CORE(CNAME,MNAME)
 #endif
 
 #if DDS_BLD_DEBUG_LEVEL >=2
 #undef DBG_ENTRY2
 #define DBG_ENTRY2(CNAME,MNAME) \
-DBG_ENTRY(CNAME,MNAME)
+DBG_ENTRY_CORE(CNAME,MNAME)
 #endif
 
 #if DDS_BLD_DEBUG_LEVEL >=3
 #undef DBG_ENTRY3
 #define DBG_ENTRY3(CNAME,MNAME) \
-DBG_ENTRY(CNAME,MNAME)
+DBG_ENTRY_CORE(CNAME,MNAME)
 #endif
 
 #if DDS_BLD_DEBUG_LEVEL >=4
 #undef DBG_ENTRY4
 #define DBG_ENTRY4(CNAME,MNAME) \
-DBG_ENTRY(CNAME,MNAME)
+DBG_ENTRY_CORE(CNAME,MNAME)
 #endif
 
 #if DDS_BLD_DEBUG_LEVEL >=5
 #undef DBG_ENTRY5
 #define DBG_ENTRY5(CNAME,MNAME) \
-DBG_ENTRY(CNAME,MNAME)
+DBG_ENTRY_CORE(CNAME,MNAME)
+
+#undef DBG_SUB_ENTRY
+#define DBG_SUB_ENTRY(CNAME,MNAME,INUM) \
+EntryExit dbg_##INUM (CNAME,MNAME,INUM)
+
 #endif
 
 #define DBG_ENTRY_LVL(CNAME,MNAME,DBG_LVL) \
 DBG_ENTRY##DBG_LVL(CNAME,MNAME)
+
+// deprecated
+#define DBG_ENTRY(CNAME,MNAME) \
+DBG_ENTRY_LVL(CNAME,MNAME,5)
+
 
 #endif // #if DDS_BLD_DEBUG_LEVEL > 0
 
@@ -82,29 +87,25 @@ class EntryExit
     if (this->num_ == 0) {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s()]\n"
       , this->class_, this->method_));
-      //VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s()]\n"
-      //, this->class_, this->method_), 1);
     }
     else {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s():%d]\n"
-          , this->class_, this->method_, this->num_), 1);
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s():%d]\n"
+      , this->class_, this->method_, this->num_));
     }
   }
     };
 
     ~EntryExit()
     {
-       if (::TAO::DCPS::Transport_debug_level == 1)
+      if (::TAO::DCPS::Transport_debug_level == 1)
   {
     if (this->num_ == 0) {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s()]\n"
       , this->class_, this->method_));
-      //VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s()]\n"
-      //, this->class_, this->method_), 1);
     }
     else {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s():%d]\n"
-          , this->class_, this->method_, this->num_), 1);
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s():%d]\n"
+      , this->class_, this->method_, this->num_));
     }
   }
     };

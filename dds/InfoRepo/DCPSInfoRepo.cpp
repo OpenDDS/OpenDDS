@@ -12,9 +12,13 @@
 #include "ace/Arg_Shifter.h"
 
 
-static const char * ior_file = "repo.ior";
-static const char * domain_file = "domain_ids";
-static const char * listen_address_str = "localhost:2839"; // = 0xB17
+static ACE_TString ior_file (ACE_TEXT("repo.ior"));
+static ACE_TString domain_file (ACE_TEXT("domain_ids"));
+static ACE_TString listen_address_str (ACE_TEXT("localhost:2839")); // = 0xB17
+
+//static const char * ior_file = "repo.ior";
+//static const char * domain_file = "domain_ids";
+//static const char * listen_address_str = "localhost:2839"; // = 0xB17
 static int listen_address_given = 0;
 static bool use_bits = true;
 
@@ -51,17 +55,17 @@ parse_args (int argc,
           listen_address_given = 1;
           arg_shifter.consume_arg();
         }
-      else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0) 
+      else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0)
         {
           ::domain_file = current_arg;
           arg_shifter.consume_arg ();
         }
-      else if ((current_arg = arg_shifter.get_the_parameter("-o")) != 0) 
+      else if ((current_arg = arg_shifter.get_the_parameter("-o")) != 0)
         {
           ::ior_file = current_arg;
           arg_shifter.consume_arg ();
         }
-      else if (arg_shifter.cur_arg_strncasecmp("-NOBITS") == 0) 
+      else if (arg_shifter.cur_arg_strncasecmp("-NOBITS") == 0)
         {
           ::use_bits = false;
           arg_shifter.consume_arg ();
@@ -92,9 +96,9 @@ parse_args (int argc,
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
- 
+
   ACE_DEBUG((LM_DEBUG,"(%P|%t) %T Repo main\n")); //REMOVE
- 
+
   ACE_DECLARE_NEW_CORBA_ENV;
   ACE_TRY
     {
@@ -150,7 +154,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ACE_TRY_CHECK;
         }
 
-      PortableServer::ObjectId_var oid = 
+      PortableServer::ObjectId_var oid =
         PortableServer::string_to_ObjectId ("InfoRepo");
       poa->activate_object_with_id (oid.in (),
                                     &info
@@ -182,12 +186,12 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                     ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
-      if (::use_bits) 
+      if (::use_bits)
         {
-          ACE_INET_Addr address (::listen_address_str);
+          ACE_INET_Addr address (::listen_address_str.c_str());
           if (0 != info.init_transport(listen_address_given, address))
             {
-              ACE_ERROR_RETURN((LM_ERROR, 
+              ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
                                -1);
             }
@@ -195,7 +199,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Load the domains _after_ initializing the participant factory and initializing
       // the transport
-      if (0 >= info.load_domains(::domain_file, ::use_bits))
+      if (0 >= info.load_domains(::domain_file.c_str(), ::use_bits))
         {
           //ACE_ERROR_RETURN((LM_ERROR, "ERROR: Failed to load any domains!\n"), -1);
         }
@@ -217,15 +221,20 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ACE_TRY_CHECK;
         }
 
-      FILE * file = ACE_OS::fopen (::ior_file, "w");
-      ACE_OS::fprintf (file, "%s", objref_str.in ());
-      ACE_OS::fclose (file);
+      FILE * file = ACE_OS::fopen (::ior_file.c_str(), "w");
+      if (file != NULL)
+  {
+    ACE_OS::fprintf (file, "%s", objref_str.in ());
+    ACE_OS::fclose (file);
 
+    orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
+    ACE_TRY_CHECK;
+  }
+      else {
+  ACE_ERROR((LM_ERROR, "ERROR: Unable to open IOR file: %s\n", ::ior_file.c_str()));
+      }
 
-      orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
-
-      TheServiceParticipant->shutdown (); 
+      TheServiceParticipant->shutdown ();
 
       orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
       ACE_TRY_CHECK;

@@ -52,8 +52,8 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
     delayed_delivered_notification_queue_ (0),
     delayed_notification_mode_ (0),
     num_delayed_notifications_(0),
-    header_db_allocator_(1),
     header_mb_allocator_(2),
+    header_db_allocator_(1),
     synch_ (0),
     lock_ (),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
@@ -702,6 +702,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
   return rc;
 }
 
+
 void
 TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
@@ -709,36 +710,63 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 
   size_t num_delayed_notifications = this->num_delayed_notifications_;
 
-  if (num_delayed_notifications == 0) {
-    return;
-  }
+  TransportQueueElement* sample;
+  SendMode mode;
 
-  GuardType guard(this->lock_);
+  TransportQueueElement** samples = NULL;
+  SendMode* modes = NULL;
 
-  std::vector<TransportQueueElement*> samples(num_delayed_notifications);
-  std::vector<SendMode> modes(num_delayed_notifications);
-
-  for (size_t i = 0; i < num_delayed_notifications; i++)
-    {
-      samples[i] = delayed_delivered_notification_queue_[i];
-      modes[i] = delayed_notification_mode_[i];
-    }
-
-  this->num_delayed_notifications_ = 0;
-
-  // ciju: The below needs to be done with the guard released. Else
-  // we have a potential deadlock with the WriteDataContainer.
-  guard.release ();
-
-  for (size_t i = 0; i < num_delayed_notifications; i++)
   {
-    if (modes[i] == MODE_TERMINATED)
-    {
-      samples[i]->data_dropped (true);
+    GuardType guard(this->lock_);
+
+    if (num_delayed_notifications <= 0) {
+      return;
+    }
+    else if (num_delayed_notifications == 1) {
+      // Optimization for the most common case.
+      sample = delayed_delivered_notification_queue_ [0];
+      mode = delayed_notification_mode_ [0];
     }
     else
-      samples[i]->data_delivered();
+      {
+        samples = new TransportQueueElement* [num_delayed_notifications];
+        modes = new SendMode[num_delayed_notifications];
+
+        for (size_t i = 0; i < num_delayed_notifications; i++)
+          {
+            samples[i] = delayed_delivered_notification_queue_[i];
+            modes[i] = delayed_notification_mode_[i];
+          }
+      }
+
+    this->num_delayed_notifications_ = 0;
   }
+
+  if (modes == NULL)
+    {
+      // optimization for the common case
+      if (mode == MODE_TERMINATED) {
+        sample->data_dropped (true);
+      }
+      else {
+        sample->data_delivered();
+      }
+    }
+  else
+    {
+      for (size_t i = 0; i < num_delayed_notifications; i++)
+        {
+          if (modes[i] == MODE_TERMINATED) {
+            samples[i]->data_dropped (true);
+          }
+          else {
+            samples[i]->data_delivered();
+          }
+        }
+
+      delete [] samples;
+      delete [] modes;
+    }
 }
 
 

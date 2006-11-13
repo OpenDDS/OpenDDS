@@ -29,11 +29,11 @@ void TAO::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
   DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",5);
 
   if (op == DO_RECONNECT)
-    this->connection_->reconnect ();
+    {
+      if (this->connection_->reconnect () == -1) {
+  this->connection_->shutdown ();
+      }
+    }
   else
     ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::svc unknown operation %d\n", op));
 }
-
-
-
-
