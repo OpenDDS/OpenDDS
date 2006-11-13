@@ -122,6 +122,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
+      DBG_ENTRY_LVL ("DataWriterImpl","init", 5);
       topic_objref_ = ::DDS::Topic::_duplicate (topic);
       topic_servant_ = topic_servant;
       topic_servant_->_add_ref ();

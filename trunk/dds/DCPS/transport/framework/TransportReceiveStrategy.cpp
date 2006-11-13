@@ -305,6 +305,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
 
       // Close connection anyway.
       return -1;
+      // Returning -1 takes the handle out of the reactor read mask.
     }
 
   VDBG((LM_DEBUG,"(%P|%t) DBG:   "

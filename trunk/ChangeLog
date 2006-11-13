@@ -1,3 +1,32 @@
+Mon Nov 13 16:55:56 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Add new log messages.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Modifications to set all old-style debug statements to low
+          priority.
+
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+          Changed log level.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+          Decoment behavior.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+          The allocators were of the wrong types. Fixed them.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Fixed an array initialization problem for non-GNU compilers.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+          If ReConnect task fails to reconnect, it needed to inform the
+          Connection object.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Fixed build problems from missing header files.
+
 Mon Nov 13 12:32:18 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

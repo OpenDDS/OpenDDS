@@ -200,9 +200,9 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
           // NOTE: This is the "local publisher id is not currently
           //       associated with any remote subscriber ids" case.
 
-          VDBG((LM_DEBUG,"(%P|%t) DBG: "
+          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: "
                "TransportInterface::send no links for %d\n",
-               cur->publication_id_));
+               cur->publication_id_),5);
 
           // We tell the send_listener_ that all of the remote subscriber ids
           // that wanted the data (all zero of them) have indeed received
