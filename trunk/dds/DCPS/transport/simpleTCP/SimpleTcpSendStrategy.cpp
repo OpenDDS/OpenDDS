@@ -3,11 +3,11 @@
 // $Id$
 
 #include  "DCPS/DdsDcps_pch.h"
+#include  "SimpleTcpConnection.h"
 #include  "SimpleTcpSendStrategy.h"
 #include  "SimpleTcpTransport.h"
 #include  "SimpleTcpConfiguration.h"
 #include  "SimpleTcpSynchResource.h"
-#include  "SimpleTcpConnection.h"
 #include  "SimpleTcpDataLink.h"
 
 TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy

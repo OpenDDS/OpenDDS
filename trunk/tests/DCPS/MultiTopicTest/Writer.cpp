@@ -76,7 +76,7 @@ Writer::svc ()
         foo.x = -1;
         foo.y = -1;
 
-        foo.key = ACE_OS::thr_self ();
+        foo.key = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
     
         ::Mine::Foo1DataWriter_var foo_dw 
             = ::Mine::Foo1DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
@@ -107,7 +107,7 @@ Writer::svc ()
       {
         ::T2::Foo2 foo;
 
-        foo.key = ACE_OS::thr_self ();
+        foo.key = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
     
         ::Mine::Foo2DataWriter_var foo_dw 
             = ::Mine::Foo2DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
@@ -140,7 +140,7 @@ Writer::svc ()
       {
         ::T3::Foo3 foo;
 
-        foo.key = ACE_OS::thr_self ();
+        foo.key = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
     
         ::Mine::Foo3DataWriter_var foo_dw 
             = ::Mine::Foo3DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);

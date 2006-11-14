@@ -18,7 +18,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   writer_id_ (writer_id),
   handle_ (-1)
 {
-  registered_foo_.a_long_value = ACE_OS::thr_self ();
+  registered_foo_.a_long_value = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
   registered_foo_.sample_sequence = -1;
   registered_foo_.handle_value = -1;
   registered_foo_.writer_id = writer_id_;
@@ -67,7 +67,7 @@ Writer::svc ()
     ::Xyz::Foo foo;
     // Use the thread id as a_long_value which is used as key in the 
     // FooTest3.
-    foo.a_long_value = ACE_OS::thr_self ();
+    foo.a_long_value = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
     foo.sample_sequence = -1;
     foo.handle_value = -1;
     foo.writer_id = writer_id_;
