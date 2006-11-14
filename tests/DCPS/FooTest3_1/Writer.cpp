@@ -82,7 +82,7 @@ Writer::svc ()
     if (multiple_instances_ == 1) 
     {
       // Use the thread id as the instance key.
-      foo.a_long_value = ACE_OS::thr_self ();
+      foo.a_long_value = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
     }
     else 
     {
