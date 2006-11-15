@@ -10,6 +10,7 @@
 #include  "ace/OS.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include  "ace/sstring.h"
 
 
 SimpleDataWriter::SimpleDataWriter()
