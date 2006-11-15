@@ -7,6 +7,7 @@
 #include  "TestException.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include  "ace/sstring.h"
 
 
 SimplePublisher::SimplePublisher()

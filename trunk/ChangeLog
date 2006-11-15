@@ -1,3 +1,15 @@
+Wed Nov 15 14:07:44 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * tests\DCPS\FooTest3_0\SimpleSubscriber.cpp:
+        * tests\transport\udp_simple\SimplePublisher.cpp:
+        * tests\transport\udp_simple\SimpleSubscriber.cpp:
+        * tests\transport\udp_simple\SimpleDataWriter.cpp:
+        * tests\transport\simple\SimplePublisher.cpp:
+        * tests\transport\simple\SimpleSubscriber.cpp:
+        * tests\transport\simple\SimpleDataWriter.cpp:
+
+          Added missing includes to fix compilation errors on windows.
+          
 Wed Nov 15 15:47:31 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
 
         * tests/DCPS/FooTest3/Writer.cpp:
