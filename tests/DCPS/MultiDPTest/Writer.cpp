@@ -41,7 +41,7 @@ template<class DT, class DW, class DW_var>
     foo.y = (float)writer_id;
     
     // Use the thread id as the instance key.
-    foo.data_source = reinterpret_cast<CORBA::Long> (ACE_OS::thr_self ());
+    foo.data_source = (CORBA::Long) (ACE_OS::thr_self ());
     
     DW_var foo_dw 
       = DW::_narrow(writer ACE_ENV_ARG_PARAMETER);
