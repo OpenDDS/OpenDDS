@@ -1,3 +1,16 @@
+Wed Nov 15 15:47:31 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
+
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+          Changed the reinterpret cast required by
+          Green Hills compiler to C-style, since the
+          Visual Studio compiler didn't like it.
+
 Tue Nov 14 15:36:59 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
