@@ -319,7 +319,7 @@ int main (int argc, char *argv[])
       if (attach_status != TAO::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
-          std::string status_str;
+          const char* status_str = "";
 
           switch (attach_status)
             {
@@ -340,7 +340,7 @@ int main (int argc, char *argv[])
           ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT(" %P|%t ERROR: Failed to attach to the transport. ")
                             ACE_TEXT("AttachStatus == %s\n"),
-                            status_str.c_str()),
+                            status_str),
                             1);
         }
 
