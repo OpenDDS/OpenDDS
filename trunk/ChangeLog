@@ -1,3 +1,15 @@
+Thu Nov 16 15:36:47 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
+
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+
+          Switched from using std::string to const char*.  A simple const
+          char* was all that was needed for the ACE_ERROR_RETURN message.
+
 Wed Nov 15 14:07:44 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests\DCPS\FooTest3_0\SimpleSubscriber.cpp:
