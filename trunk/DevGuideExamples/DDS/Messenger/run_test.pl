@@ -11,8 +11,13 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
+$pub_opts = "-DCPSConfigFile pub.ini";
+$sub_opts = "-DCPSConfigFile sub.ini";
 if ($ARGV[0] eq 'udp') {
-  $svc_conf = " -ORBSvcConf udp.conf ";
+    $opts =  "-ORBSvcConf udp.conf -t udp";
+    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
+    #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
 
 
@@ -23,8 +28,8 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", "$svc_conf -DCPSConfigFile sub.ini");
-$Publisher = new PerlACE::Process ("publisher", "$svc_conf -DCPSConfigFile pub.ini");
+$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
+$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

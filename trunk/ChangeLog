@@ -1,3 +1,19 @@
+Fri Nov 17 18:04:25 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DDS/Messenger/sub_udp.ini:
+          Add udp specific pub/sub configuration files.
+
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+          Modifications to pass transport specific options to pub/sub.
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+          Add transport selection option.
+
+        * DevGuideExamples/DDS/Messenger/sub.ini:
+        * DevGuideExamples/DDS/Messenger/pub.ini:
+          Remove dangling spaces.
 Thu Nov 16 15:36:47 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
@@ -21,7 +37,7 @@ Wed Nov 15 14:07:44 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * tests\transport\simple\SimpleDataWriter.cpp:
 
           Added missing includes to fix compilation errors on windows.
-          
+
 Wed Nov 15 15:47:31 GMT 2006  Rich Seibel<seibel_r@ociweb.com>
 
         * tests/DCPS/FooTest3/Writer.cpp:
