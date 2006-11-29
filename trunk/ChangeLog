@@ -1,3 +1,14 @@
+Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ocieb.com>
+
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+          Changed header file case. Fixed case-insensitive builds.
+
 Fri Nov 17 18:04:25 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/pub_udp.ini:
@@ -14,6 +25,7 @@ Fri Nov 17 18:04:25 UTC 2006  Ciju John  <johnc@ociweb.com>
         * DevGuideExamples/DDS/Messenger/sub.ini:
         * DevGuideExamples/DDS/Messenger/pub.ini:
           Remove dangling spaces.
+
 Thu Nov 16 15:36:47 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
         * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:

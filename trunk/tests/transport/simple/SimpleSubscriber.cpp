@@ -8,7 +8,7 @@
 #include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include  "ace/sstring.h"
+#include  "ace/SString.h"
 
 
 SimpleSubscriber::SimpleSubscriber()
