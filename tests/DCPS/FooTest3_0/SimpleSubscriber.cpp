@@ -6,7 +6,7 @@
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "dds/DCPS/transport/framework/TransportInterface.h"
 #include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include  "ace/sstring.h"
+#include  "ace/SString.h"
 
 
 SimpleSubscriber::SimpleSubscriber()
