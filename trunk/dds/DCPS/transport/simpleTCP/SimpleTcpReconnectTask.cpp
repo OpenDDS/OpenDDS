@@ -26,12 +26,12 @@ TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 
 void TAO::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
 {
-  DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",5);
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",1);
 
   if (op == DO_RECONNECT)
     {
       if (this->connection_->reconnect () == -1) {
-  this->connection_->shutdown ();
+  this->connection_->tear_link ();
       }
     }
   else

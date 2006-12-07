@@ -175,7 +175,7 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","send_graceful_disconnect_message",5);
 
-  this->send_strategy_->terminate_send (true);
+  //this->send_strategy_->terminate_send (true);
 
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
@@ -241,6 +241,11 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
   ACE_NEW(send_element, TransportControlElement(message));
 
   this->send_i (send_element);
+
+  // First send disconnect message, then terminate the DataLink.
+  // We need to terminate before deleting the element
+  // as the element could still be held up the congestion queue.
+  this->send_strategy_->terminate_send (true);
 
   message->release ();
 

@@ -101,7 +101,7 @@ namespace TAO
         LockType lock_;
 
         /// Counts the number of outstanding sub-loans.
-        int count_;
+      int sub_loan_count_;
 
         /// Flag flipped to true if any DataLink dropped the sample.
         bool dropped_;

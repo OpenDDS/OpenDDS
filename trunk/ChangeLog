@@ -1,3 +1,112 @@
+Thu Dec  7 15:18:32 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+          New API release_resources (called by concrete transport
+          object upon DataLink disconnection). This just forwards the
+          message to the TransportImpl object.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+          A dedicated task belonging to the TransportImpl object. The
+          TransportImpl adds safe (ref counted) DataLinks to the task. The
+          task then cleans up any resources associated with the
+          DataLink. This mechanism (top level dedicated thread) was
+          preffered as we were able to reuse most of the
+          remove_association logic even though the triger is comming up
+          from the transport-specific ReConnection logic.
+
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+          Initialize the TransportControlElement with loan count of 1
+          (instead of 0 as before). This is because the Control Element is
+          to be sent to only one DataLink.
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Change Default debug level to 1.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+          Change find_publication/find_subscription API to optionally
+          return a safe copy (ref incremented) of the target
+          DataWriter/DataReader. This prevents the DataWriter getting
+          wipped out during a send.
+          New API release_link_resources (called by shutdown
+          DataLink). This bumps up the DataLink ref count and adds it to
+          the DataLinkCleanup task (which in turn cleans up DataLink
+          resources).
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+          Change variable names to better reflect usage. Also take out the
+          loan count assert in production code.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Fix race condition in 'send_delayed_notifications'. The delayed
+          notification count was being read outside the guard. This could
+          change before guard acquisition. Now the read is done after
+          guard acquisition.
+          Change clear API to accept an optional next SendMode. The
+          default is still MODE_DIRECT.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+          New configuration option 'passive_connect_duration' to set
+          timeout on initial passive connection establishment. Setting
+          this prevents deadlock when the InfoRepo directs us to connect
+          with a bogus/dead publisher.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+          The reconnect task gets cleaned up in the Connection object
+          destructor, no need for shutdown() to cleanup. The shutdown
+          cleanup was a temporary fix (for cleaning threads) to deal with
+          subscriber crashes. Now we have a dedicated top-level thread to
+          cleanup any associated DataLink resources upon subscriber
+          crash. This will cleanup the Connection object as well as the
+          associated Reconnect task.
+          Added new API (called by the reconnect task) to inform the
+          DataLink regards loss of its connection.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+          Fix race-condition in sending graceful disconnect message. If
+          mode is 'queue', the heap element will get queued and a race
+          begins as to which thread (worker thread/ORB thread) will delete
+          the element. Now DataLink gets terminated right after sending
+          the graceful disconnect message. Once the DataLink is
+          terminated the worker thread bows out of the race and the
+          element can be safely deleted by the original creator (ORB
+          thread).
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+          Add entry-exit debug macro
+
+        * dds/DCPS/RcObject_T.h:
+          Comment out a debugging accessor function.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+          cosmetic changes
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+          Add passive connection timeout logic
+
+        * dds/DdsDcps.mpc:
+          Add DataLinkCleanupTask.* files.
+
 Wed Nov 29 17:09:30 UTC 2006  Ciju John  <johnc@ocieb.com>
 
         * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:

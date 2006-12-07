@@ -15,6 +15,7 @@
 //borland #include  "TransportReceiveStrategy.h"
 #include  "TransportReceiveStrategy_rch.h"
 #include  "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+
 #include  "ace/Synch.h"
 
 
@@ -34,6 +35,8 @@ namespace TAO
 
     class TAO_DdsDcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
     {
+      friend class DataLinkCleanupTask;
+
       public:
 
         enum ConnectionNotice{
@@ -124,6 +127,11 @@ namespace TAO
         /// This is called on subscriber side to serialize the
         /// associated publication and subscriptions.
         ACE_Message_Block* marshal_acks (bool byte_order);
+
+      // Call-back from the concrete transport object.
+      // The connection has been broken. No locks are being held.
+      bool release_resources ();
+
 
        protected:
 

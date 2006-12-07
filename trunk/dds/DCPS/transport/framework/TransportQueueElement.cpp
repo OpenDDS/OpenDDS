@@ -11,7 +11,7 @@
 
 TAO::DCPS::TransportQueueElement::~TransportQueueElement()
 {
-  DBG_ENTRY_LVL("TransportQueueElement","~TransportQueueElement",5);
+  DBG_ENTRY_LVL("TransportQueueElement","~TransportQueueElement",1);
 }
 
 

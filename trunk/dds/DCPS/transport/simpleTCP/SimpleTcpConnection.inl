@@ -68,5 +68,3 @@ TAO::DCPS::SimpleTcpConnection::get_remote_address ()
 {
   return this->remote_address_;
 }
-
-

@@ -53,7 +53,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 
 TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",1);
 
   // Remove the reference of the old connection object
   // or the reference of new connection object.
@@ -63,7 +63,7 @@ TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
   // The Reconnect task belongs to the Connection object.
   // Cleanup before leaving the house.
   this->reconnect_task_.close (1);
-  this->reconnect_task_.wait ();
+  //this->reconnect_task_.wait ();
 }
 
 
@@ -219,7 +219,7 @@ TAO::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 int
 TAO::DCPS::SimpleTcpConnection::close(u_long)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","close",1);
 
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
@@ -233,7 +233,7 @@ TAO::DCPS::SimpleTcpConnection::close(u_long)
 int
 TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",1);
 
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
@@ -468,7 +468,7 @@ TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 int
 TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",1);
 
   GuardType guard (this->reconnect_lock_);
   int ret = -1;
@@ -611,7 +611,7 @@ TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
 void
 TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",1);
 
   GuardType guard (this->reconnect_lock_);
 
@@ -703,7 +703,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 void
 TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",1);
   bool notify_lost = false;
   {
     GuardType guard (this->reconnect_lock_);
@@ -737,6 +737,15 @@ TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 
   ReconnectOpType op = DO_RECONNECT;
   this->reconnect_task_.add (op);
+}
+
+bool
+TAO::DCPS::SimpleTcpConnection::tear_link ()
+{
+  DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",1);
+
+  return this->link_->release_resources ();
+
 }
 
 void

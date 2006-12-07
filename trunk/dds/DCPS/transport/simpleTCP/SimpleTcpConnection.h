@@ -106,6 +106,11 @@ namespace TAO
 
         void  relink (bool do_suspend);
 
+      /// Called by the reconnect task to inform us that the
+      /// link (& any associated data can be torn down.
+      /// This call is done with no DCPS/transport locks held.
+      bool tear_link ();
+
         void shutdown ();
 
       private:

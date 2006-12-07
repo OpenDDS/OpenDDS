@@ -57,7 +57,12 @@ namespace TAO
               }
           }
 
-
+      /*
+  long ref_count () const
+  {
+  return this->ref_count_.value();
+  }
+      */
       protected:
 
         RcObject(ACE_Allocator* allocator = 0)

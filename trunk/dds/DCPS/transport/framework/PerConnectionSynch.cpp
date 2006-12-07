@@ -80,8 +80,8 @@ TAO::DCPS::PerConnectionSynch::svc()
         // Maybe we have been asked to shutdown_ the svc() loop.
         if (this->shutdown_ == 1)
           {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                       "Honoring the shutdown request.\n"));
+            VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+                       "Honoring the shutdown request.\n"), 5);
             // We are honoring the request to shutdown_ the svc() loop.
             break;
           }
@@ -89,14 +89,14 @@ TAO::DCPS::PerConnectionSynch::svc()
         // perform_work().
         if (work_outcome == ThreadSynchWorker::WORK_OUTCOME_BROKEN_RESOURCE)
           {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                       "Fatal error - Broken SynchResounce.\n"));
+            VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+                       "Fatal error - Broken SynchResounce.\n"), 5);
             // Stop the svc() loop.
             break;
           }
 
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                   "Reset our work_available_ flag to 0, and release lock.\n"));
+        VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+                   "Reset our work_available_ flag to 0, and release lock.\n"), 5);
 
         // Set our work_available_ flag to false (0) before we release the
         // lock so that we will only count any work_available() calls that
@@ -106,12 +106,13 @@ TAO::DCPS::PerConnectionSynch::svc()
 
       if (work_outcome == ThreadSynchWorker::WORK_OUTCOME_ClOGGED_RESOURCE)
         {
+    VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   Need to wait for clogged resources to open up.\n"), 5);
           // Ask the ThreadSynchResource to block us until the clog situation
           // clears up.
           if (this->wait_on_clogged_resource() == -1)
             {
-              VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                        "Fatal error - wait_on_clogged_resource fails.\n"));
+              VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+                        "Fatal error - wait_on_clogged_resource fails.\n"), 5);
               break;
             }
         }
@@ -123,8 +124,8 @@ TAO::DCPS::PerConnectionSynch::svc()
       // us if it completed with more work to still be performed (or not).
       work_outcome = this->perform_work();
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                 "call to perform_work() returned %d\n",work_outcome));
+      VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+                 "call to perform_work() returned %d\n",work_outcome), 5);
     }
 
   return 0;

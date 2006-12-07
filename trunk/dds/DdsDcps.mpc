@@ -97,7 +97,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/ReceivedDataElementList.cpp
     DCPS/Registered_Data_Types.cpp
     DCPS/Serializer.cpp
-    DCPS/Service_Participant.cpp  
+    DCPS/Service_Participant.cpp
     DCPS/SubscriberImpl.cpp
     DCPS/TopicDescriptionImpl.cpp
     DCPS/TopicImpl.cpp
@@ -119,7 +119,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     SubscriptionBuiltinTopicDataTypeSupportS.cpp
     TopicBuiltinTopicDataTypeSupportC.cpp
     TopicBuiltinTopicDataTypeSupportS.cpp
-    
+
 
     DCPS/transport/framework/BuildChainVisitor.cpp
     DCPS/transport/framework/DataLink.cpp
@@ -152,6 +152,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/TransportGenerator.cpp
     DCPS/transport/framework/TransportHeader.cpp
     DCPS/transport/framework/TransportImpl.cpp
+    DCPS/transport/framework/DataLinkCleanupTask.cpp
     DCPS/transport/framework/TransportImplFactory.cpp
     DCPS/transport/framework/TransportInterface.cpp
     DCPS/transport/framework/TransportQueueElement.cpp
@@ -178,7 +179,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp
   }
 
-  Inline_Files {  
+  Inline_Files {
       // Why does MPC only add XXXBuiltinTopicDataTypeSupportS_T.inl to a project?
     ParticipantBuiltinTopicDataTypeSupportC.inl
     ParticipantBuiltinTopicDataTypeSupportS.inl
@@ -189,7 +190,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     TopicBuiltinTopicDataTypeSupportC.inl
     TopicBuiltinTopicDataTypeSupportS.inl
   }
-  
+
   Template_Files {
     DCPS/Cached_Allocator_With_Overflow_T.h
     DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h

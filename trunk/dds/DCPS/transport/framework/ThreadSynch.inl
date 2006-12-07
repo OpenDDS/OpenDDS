@@ -54,7 +54,7 @@ TAO::DCPS::ThreadSynch::perform_work()
 ACE_INLINE int
 TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
 {
-  DBG_ENTRY_LVL("ThreadSynch","wait_on_clogged_resource",5);
+  DBG_ENTRY_LVL("ThreadSynch","wait_on_clogged_resource",1);
 
   int result = -1;
 
@@ -72,5 +72,3 @@ TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
 
   return result;
 }
-
-
