@@ -135,19 +135,21 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 TAO::DCPS::TransportSendStrategy::WorkOutcome
 TAO::DCPS::TransportSendStrategy::perform_work()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",1);
 
   SendPacketOutcome outcome;
 
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
 
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %s\n", mode_as_str (this->mode_)), 5);
+
     if (this->mode_ == MODE_TERMINATED)
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "Entered perform_work() and mode_ is MODE_TERMINATED - "
                   "we lost connection and could not reconnect, just return "
-                  "WORK_OUTCOME_BROKEN_RESOURCE.\n"));
+                  "WORK_OUTCOME_BROKEN_RESOURCE.\n"), 5);
         return WORK_OUTCOME_BROKEN_RESOURCE;
       }
 
@@ -169,9 +171,9 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     // right now).
     if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND)
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "Entered perform_work() and mode_ is %s - just return "
-                  "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str (this->mode_)));
+                  "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str (this->mode_)), 5);
         return WORK_OUTCOME_NO_MORE_TO_DO;
       }
 
@@ -186,10 +188,10 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
     if (header_length == 0)
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "The current packet doesn't have any unsent bytes - we "
                   "need to 'populate' the current packet with elems from "
-                  "the queue.\n"));
+                  "the queue.\n"), 5);
 
         // The current packet is "empty".  Build up the current packet using
         // elements from the queue_, and prepare the current packet to be sent.
@@ -198,17 +200,17 @@ TAO::DCPS::TransportSendStrategy::perform_work()
         // there is actually something on the queue_ to build from.
         if (this->queue_->size() == 0)
           {
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                       "But the queue is empty.  We have cleared the "
-                      "backpressure situation.\n"));
+                      "backpressure situation.\n"),5);
             // We are here because the queue_ is empty, and there isn't
             // any "partial packet" bytes left to send.  We have overcome
             // the backpressure situation and don't have anything to do
             // right now.
 
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                       "Flip mode to MODE_DIRECT, and return "
-                      "WORK_OUTCOME_NO_MORE_TO_DO.\n"));
+                      "WORK_OUTCOME_NO_MORE_TO_DO.\n"), 5);
 
             // Flip the mode back to MODE_DIRECT.
             this->mode_ = MODE_DIRECT;
@@ -218,31 +220,31 @@ TAO::DCPS::TransportSendStrategy::perform_work()
             return WORK_OUTCOME_NO_MORE_TO_DO;
           }
 
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "There is at least one elem in the queue - get the packet "
-                  "elems from the queue.\n"));
+                  "elems from the queue.\n"), 5);
 
         // There is stuff in the queue_ if we get to this point in the logic.
         // Build-up the current packet using element(s) from the queue_.
         this->get_packet_elems_from_queue();
 
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Prepare the packet from the packet elems_.\n"));
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Prepare the packet from the packet elems_.\n"), 5);
 
         // Now we can prepare the new packet to be sent.
         this->prepare_packet();
 
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Packet has been prepared from packet elems_.\n"));
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Packet has been prepared from packet elems_.\n"), 5);
       }
     else
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "We have a current packet that still has unsent bytes.\n"));
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We have a current packet that still has unsent bytes.\n"), 5);
       }
 
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Attempt to send the current packet.\n"));
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+              "Attempt to send the current packet.\n"), 5);
 
 
     // Now we can attempt to send the current packet - whether it is
@@ -256,14 +258,17 @@ TAO::DCPS::TransportSendStrategy::perform_work()
     // is now empty, then we've cleared the backpressure situation.
     if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0))
       {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "Flip the mode to MODE_DIRECT, and then return "
-                  "WORK_OUTCOME_NO_MORE_TO_DO.\n"));
+                  "WORK_OUTCOME_NO_MORE_TO_DO.\n"), 5);
 
         // Revert back to MODE_DIRECT mode.
         this->mode_ = MODE_DIRECT;
       }
   } // End of scope for guard(this->lock_);
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+  "The outcome of the send_packet() was %d.\n", outcome), 5);
 
   // Notify the Elements that were sent.
   this->send_delayed_notifications();
@@ -272,74 +277,77 @@ TAO::DCPS::TransportSendStrategy::perform_work()
   // is now empty, then we've cleared the backpressure situation.
   if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0))
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                  "We sent the whole packet, and there is nothing left on "
-                 "the queue now.\n"));
+                 "the queue now.\n"), 5);
 
       // Return WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we
       // don't desire another call to this perform_work() method.
       return WORK_OUTCOME_NO_MORE_TO_DO;
     }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
              "We still have unsent bytes in the current packet AND/OR there "
-             "are still elements in the queue.\n"));
+             "are still elements in the queue.\n"), 5);
 
   if ((outcome == OUTCOME_PEER_LOST) || (outcome == OUTCOME_SEND_ERROR))
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                  "We lost our connection, or had some fatal connection "
-                 "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"));
+                 "error.  Return WORK_OUTCOME_BROKEN_RESOURCE.\n"), 5);
 
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "Now flip to MODE_SUSPEND before we try to reconnect.\n"));
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);
 
       bool do_suspend = true;
       this->relink (do_suspend);
 
       if (this->mode_ == MODE_SUSPEND)
         {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "The reconnect has not done yet and we are still in MODE_SUSPEND. "
-                    "Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"));
+                    "Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"), 5);
           // Return WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we
           // don't desire another call to this perform_work() method.
           return WORK_OUTCOME_NO_MORE_TO_DO;
         }
       else if (this->mode_ == MODE_TERMINATED)
         {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Reconnect failed, now we are in MODE_TERMINATED\n"));
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+            "Reconnect failed, now we are in MODE_TERMINATED\n"), 5);
           return WORK_OUTCOME_BROKEN_RESOURCE;
         }
       else
         {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+        "Reconnect succeeded, Notify synch thread of work "
+        "availablity.\n"), 5);
           // If the datalink is re-established then notify the synch
           // thread to perform work.
           this->synch_->work_available();
         }
     }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "We still have an 'unbroken' connection.\n"));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+             "We still have an 'unbroken' connection.\n"), 5);
 
   if (outcome == OUTCOME_BACKPRESSURE)
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                  "We experienced backpressure on our attempt to send the "
-                 "packet.  Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"));
+                 "packet.  Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"), 5);
       // We have a "clogged resource".
       return WORK_OUTCOME_ClOGGED_RESOURCE;
     }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "We may have sent the whole current packet, but still have "
-             "elements on the queue.\n"));
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Or, we may have only partially sent the current packet.\n"));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+      "We may have sent the whole current packet, but still have "
+      "elements on the queue.\n"), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+      "Or, we may have only partially sent the current packet.\n"), 5);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Either way, we return WORK_OUTCOME_MORE_TO_DO now.\n"));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+      "Either way, we return WORK_OUTCOME_MORE_TO_DO now.\n"), 5);
 
   // We may have had an OUTCOME_COMPLETE_SEND, but there is still stuff
   // in the queue_ to be sent.  *OR* we have have had an OUTCOME_PARTIAL_SEND,
@@ -543,27 +551,27 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
       // ciju: We need to release this->lock_ before
       // calling data_dropped/data_delivered. Else we have a potential
       // deadlock in our hands.
-        if (delay_notification == NOTIFY_IMMEADIATELY)
-          {
-      if (this->mode_ == MODE_TERMINATED)
+      if (delay_notification == NOTIFY_IMMEADIATELY)
         {
-          this->lock_.remove (); // Release and reacquire the lock
-          element->data_dropped (true);
-          this->lock_.acquire_write ();
+          if (this->mode_ == MODE_TERMINATED)
+      {
+        this->lock_.remove (); // Release and reacquire the lock
+        element->data_dropped (true);
+        this->lock_.acquire_write ();
+      }
+          else
+      {
+        this->lock_.remove (); // Release and reacquire the lock
+        element->data_delivered();
+        this->lock_.acquire_write ();
+      }
         }
-      else
+      else if (delay_notification == DELAY_NOTIFICATION)
         {
-          this->lock_.remove (); // Release and reacquire the lock
-          element->data_delivered();
-          this->lock_.acquire_write ();
+          delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
+          delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
+          ++num_delayed_notifications_;
         }
-          }
-        else if (delay_notification == DELAY_NOTIFICATION)
-          {
-      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
-      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-      ++num_delayed_notifications_;
-          }
 
                   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                              "Peek at the next element in the packet "
@@ -663,16 +671,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
           num_bytes_left = 0;
         }
     }
-  /*
-  if (delay_notification == NOTIFY_IMMEADIATELY)
-    {
-      if (this->num_delayed_notifications_ > 0) {
-  this->lock_.remove (); // Release and reacquire the lock
-  this->send_delayed_notifications ();
-  this->lock_.acquire_write ();
-      }
-    }
-  */
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The 'num_bytes_left' loop has completed.\n"));
 
@@ -708,25 +707,31 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",5);
 
-  size_t num_delayed_notifications = this->num_delayed_notifications_;
-
-  TransportQueueElement* sample;
-  SendMode mode;
+  TransportQueueElement* sample = NULL;
+  SendMode mode = MODE_NOT_SET;
 
   TransportQueueElement** samples = NULL;
   SendMode* modes = NULL;
 
+  size_t num_delayed_notifications = 0;
+
   {
     GuardType guard(this->lock_);
+
+    num_delayed_notifications = this->num_delayed_notifications_;
 
     if (num_delayed_notifications <= 0) {
       return;
     }
-    else if (num_delayed_notifications == 1) {
-      // Optimization for the most common case.
-      sample = delayed_delivered_notification_queue_ [0];
-      mode = delayed_notification_mode_ [0];
-    }
+    else if (num_delayed_notifications == 1)
+      {
+  // Optimization for the most common case.
+  sample = delayed_delivered_notification_queue_ [0];
+  mode = delayed_notification_mode_ [0];
+
+  delayed_delivered_notification_queue_ [0] = NULL;
+  delayed_notification_mode_ [0] = MODE_NOT_SET;
+      }
     else
       {
         samples = new TransportQueueElement* [num_delayed_notifications];
@@ -736,6 +741,9 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
           {
             samples[i] = delayed_delivered_notification_queue_[i];
             modes[i] = delayed_notification_mode_[i];
+
+      delayed_delivered_notification_queue_[i] = NULL;
+      delayed_notification_mode_[i] = MODE_NOT_SET;
           }
       }
 
@@ -779,20 +787,21 @@ TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                     "Now graceful_disconnecting=%d and flip to MODE_TERMINATED "));
 
+  this->clear (MODE_TERMINATED);
+
   {
     GuardType guard(this->lock_);
 
     this->graceful_disconnecting_ = graceful_disconnecting;
-    this->mode_ = MODE_TERMINATED;
   }
-
-  this->clear ();
 }
 
 
 void
-TAO::DCPS::TransportSendStrategy::clear ()
+TAO::DCPS::TransportSendStrategy::clear (SendMode mode)
 {
+  DBG_ENTRY_LVL("TransportSendStrategy","clear",5);
+
   QueueType* elems = 0;
   QueueType* queue = 0;
   {
@@ -825,7 +834,7 @@ TAO::DCPS::TransportSendStrategy::clear ()
     this->pkt_chain_ = 0;
     this->header_complete_ = 0;
     this->start_counter_ = 0;
-    this->mode_ = MODE_DIRECT;
+    this->mode_ = mode;
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
 
@@ -901,8 +910,8 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
       // Check the mode_ to see if we simply put the element on the queue.
       if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND)
         {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)));
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+            "this->mode_ == %s, so queue elem and leave.\n", mode_as_str (this->mode_)), 5);
 
           this->queue_->put(element);
           if (this->mode_ != MODE_SUSPEND)
@@ -992,9 +1001,10 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element)
     // into the current packet.
           if (this->mode_ == MODE_QUEUE)
             {
-              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                         "We experienced backpressure on that direct send, as "
-                        "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  Queue elem and leave.\n"));
+                        "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  "
+      "Queue elem and leave.\n"), 5);
               this->queue_->put(element);
               this->synch_->work_available();
               return;
@@ -1406,12 +1416,12 @@ TAO::DCPS::TransportSendStrategy::direct_send()
       if ((outcome == OUTCOME_BACKPRESSURE) ||
           (outcome == OUTCOME_PARTIAL_SEND))
         {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "The outcome of the send_packet() was either "
-                    "OUTCOME_BACKPRESSURE or OUTCOME_PARTIAL_SEND.\n"));
+                    "OUTCOME_BACKPRESSURE or OUTCOME_PARTIAL_SEND.\n"), 5);
 
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "Flip into the MODE_QUEUE mode_.\n"));
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Flip into the MODE_QUEUE mode_.\n"), 5);
 
           // We encountered backpressure, or only sent part of the packet.
           this->mode_ = MODE_QUEUE;
@@ -1606,8 +1616,8 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_packet",5);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Populate the iovec array using the pkt_chain_.\n"));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+             "Populate the iovec array using the pkt_chain_.\n"), 5);
 
   iovec iov[MAX_SEND_BLOCKS];
 
@@ -1623,49 +1633,49 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
       block = block->cont();
     }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
              "There are [%d] number of entries in the iovec array.\n",
-             num_blocks));
+             num_blocks), 5);
 
   // Get our subclass to do this next step, since it is the one that knows
   // how to really do this part.
   int bp_flag = 0;
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Attempt to send_bytes() now.\n"));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+             "Attempt to send_bytes() now.\n"), 5);
 
   ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp_flag);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
              "The send_bytes() said that num_bytes_sent == [%d].\n",
-             num_bytes_sent));
+             num_bytes_sent), 5);
 
   if (num_bytes_sent == 0)
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "Since num_bytes_sent == 0, return OUTCOME_PEER_LOST.\n"));
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+    "Since num_bytes_sent == 0, return OUTCOME_PEER_LOST.\n"), 5);
       // This means that the peer has disconnected.
       return OUTCOME_PEER_LOST;
     }
 
   if (num_bytes_sent < 0)
     {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                 "Since num_bytes_sent < 0, check the backpressure flag.\n"));
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+                 "Since num_bytes_sent < 0, check the backpressure flag.\n"), 5);
 
       // Check for backpressure...
       if (bp_flag == 1)
         {
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                      "Since backpressure flag is true, return "
-                     "OUTCOME_BACKPRESSURE.\n"));
+                     "OUTCOME_BACKPRESSURE.\n"), 5);
           // Ok.  Not really an error - just backpressure.
           return OUTCOME_BACKPRESSURE;
         }
 
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                  "Since backpressure flag is false, return "
-                 "OUTCOME_SEND_ERROR.\n"));
+                 "OUTCOME_SEND_ERROR.\n"), 5);
 
 
       // Not backpressure - it's a real error.
@@ -1678,9 +1688,9 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
     }
 
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
              "Since num_bytes_sent > 0, adjust the packet to account for "
-             "the bytes that did get sent.\n"));
+      "the bytes that did get sent.\n"),5);
 
   // We sent some bytes - adjust the current packet (elems_ and pkt_chain_)
   // to account for the bytes that have been sent.

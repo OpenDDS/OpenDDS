@@ -60,9 +60,11 @@ TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_VALUE (cf, trans_sect, "passive_reconnect_duration",
     this->passive_reconnect_duration_, int)
 
+    GET_CONFIG_VALUE (cf, trans_sect, "passive_connect_duration",
+          this->passive_connect_duration_, unsigned int)
+
   GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period",
     this->max_output_pause_period_, int)
 
   return 0;
 }
-

@@ -11,7 +11,8 @@ TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
     conn_retry_backoff_multiplier_(2.0),
     conn_retry_attempts_(3),
     max_output_pause_period_ (0),
-    passive_reconnect_duration_(2000)
+    passive_reconnect_duration_(2000),
+    passive_connect_duration_ (0)
 {
   DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",5);
 
@@ -23,4 +24,3 @@ TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
     ACE_ERROR((LM_ERROR,"(%P|%t) ERROR: "
        "SimpleTcpConfiguration::SimpleTcpConfiguration could not set default addr\n"));
 }
-

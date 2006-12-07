@@ -101,12 +101,10 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
   if (this->links_.bind(remote_address,link) != 0)
     {
       // We failed to bind the new DataLink into our links_ map.
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Unable to bind new SimpleTcpDataLink to "
-                 "SimpleTcpTransport in links_ map.\n"));
-
       // On error, we return a NULL pointer.
-      return 0;
+      ACE_ERROR_RETURN((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to bind new SimpleTcpDataLink to "
+                 "SimpleTcpTransport in links_ map.\n"), 0);
     }
 
   // Now we need to attempt to establish a connection for the DataLink.
@@ -469,22 +467,41 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
 
   SimpleTcpConnection_rch connection;
 
+  ACE_Auto_Ptr<ACE_Time_Value> timeout;
+  if (this->tcp_config_->passive_connect_duration_ == 0) {
+    timeout.reset ();
+  }
+  else {
+    timeout.reset (new ACE_Time_Value (this->tcp_config_->passive_connect_duration_/1000,
+               this->tcp_config_->passive_connect_duration_%1000 * 1000));
+    *timeout += ACE_OS::gettimeofday ();
+  }
+
+  VDBG_LVL ((LM_DEBUG, "(%P|%t) DBG:   "
+       "Passive conect timeout: %d milliseconds.\n",
+       this->tcp_config_->passive_connect_duration_), 5);
+
   // Look in our connections_ map to see if the passive connection
   // has already been established for the remote_address.  If so, we
   // will extract it from the connections_ map and give it to the link.
   {
     GuardType guard(this->connections_lock_);
-    while (this->connections_.unbind(remote_address,connection) != 0)
+    while (true)
       {
-        // There is no connection object waiting for us (yet).
-        // We need to wait on the connections_updated_ condition
-        // and then re-attempt to extract our connection.
-        this->connections_updated_.wait();
+  this->connections_updated_.wait (timeout.get());
 
-        // TBD SOON - Check to see if we we woke up because the Transport
-        //            is shutting down.  If so, return a -1 now.
+  if (this->connections_.unbind(remote_address,connection) == 0) {
+    // break out and continue with connection establishment
+    break;
+  }
+
+  ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n")
+        , -1);
       }
   }
+
+  // TBD SOON - Check to see if we we woke up because the Transport
+  //            is shutting down.  If so, return a -1 now.
 
   return this->connect_datalink(link, connection.in());
 }

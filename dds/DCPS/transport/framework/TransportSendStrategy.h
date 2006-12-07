@@ -15,7 +15,6 @@
 
 #include  "ace/Synch.h"
 
-
 namespace TAO
 {
 
@@ -103,8 +102,7 @@ namespace TAO
         /// It removes all samples in the backpressure queue and packet queue.
         void terminate_send (bool graceful_disconnecting = false);
 
-        /// Clear queued messages and messages in current packet.
-        void clear ();
+      // Moved clear() declaration below as Enums can't be foward declared.
 
         /// Let the subclass stop.
         virtual void stop_i() = 0;
@@ -195,7 +193,7 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        enum SendMode {
+        enum SendMode{
           // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so
           // we can check if the resume_send is paired with suspend_send.
           MODE_NOT_SET,
@@ -210,6 +208,18 @@ namespace TAO
           // reconnect.
           MODE_TERMINATED
         };
+
+    public:
+      /// Clear queued messages and messages in current packet.
+      // The API now has a defaulted mode (the default is the same as
+      // as the earlier hard-coded value).
+      // Clear locks the local mutex. In certain situations its
+      // important to set the new mode in the clear itself.
+      // Since the default is the earlier hard-coded value, this
+      // shouldn't have any impact.
+      void clear (SendMode mode = MODE_DIRECT);
+
+    private:
 
         /// Helper function to debugging.
         static const char* mode_as_str (SendMode mode);
@@ -314,7 +324,7 @@ namespace TAO
 
         bool link_released_;
 
-//remove these are only for debugging: DUMP_FOR_PACKET_INFO
+      //remove these are only for debugging: DUMP_FOR_PACKET_INFO
         protected:
     ACE_Message_Block*    dup_pkt_chain;
     ACE_Message_Block*    act_pkt_chain_ptr;

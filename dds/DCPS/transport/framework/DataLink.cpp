@@ -41,7 +41,7 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 
 TAO::DCPS::DataLink::~DataLink()
 {
-  DBG_ENTRY_LVL("DataLink","~DataLink",5);
+  DBG_ENTRY_LVL("DataLink","~DataLink",1);
 
   if (this->thr_per_con_send_task_ != 0)
     delete this->thr_per_con_send_task_;
@@ -59,7 +59,7 @@ int
 TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
                                       RepoId publisher_id)   /* local */
 {
-  DBG_SUB_ENTRY("DataLink","make_reservation",1);
+  DBG_SUB_ENTRY("DataLink","make_reservation",5);
   int pub_result      = 0;
   int sub_result      = 0;
   int pub_undo_result = 0;
@@ -252,7 +252,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
         {
           // We don't know about the remote_id.
           ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: Unable to locate remote_id (%d) in pub_map_ "
+         "(%P|%t) ERROR: Unable to locate remote_id (%d) in pub_map_ "
                      "or sub_map_.\n", remote_id));
         }
       else
@@ -307,8 +307,8 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
       recv_strategy->stop();
     }
 
-          // Tell our subclass to handle a "stop" event.
-          this->stop_i();
+    // Tell our subclass to handle a "stop" event.
+    this->stop_i();
         }
       else
         {
@@ -620,4 +620,13 @@ TAO::DCPS::DataLink::marshal_acks (bool byte_order)
 {
   DBG_ENTRY_LVL("DataLink","marshal_acks",5);
   return this->sub_map_.marshal (byte_order);
+}
+
+bool
+TAO::DCPS::DataLink::release_resources ()
+{
+  DBG_ENTRY_LVL("DataLink", "release_resources", 5);
+
+  return impl_->release_link_resources (this);
+  return true;
 }

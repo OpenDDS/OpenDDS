@@ -11,6 +11,7 @@
 
 ACE_INLINE
 TAO::DCPS::TransportImpl::TransportImpl()
+  : dl_clean_task_ (this)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",5);
 }
@@ -42,20 +43,29 @@ TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
 //MJM: configure a new one...
 
   // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config) == 0)
-    {
-      // Our subclass accepted the configuration attempt.
+  if (this->configure_i(config) == -1) {
+    // The subclass rejected the configuration attempt.
+    ACE_ERROR_RETURN((LM_ERROR,
+          "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
+         -1);
+  }
 
-      // Save off a "copy" of the reference for ourselves.
-      config->_add_ref();
-      this->config_ = config;
+  // Our subclass accepted the configuration attempt.
+  // Save off a "copy" of the reference for ourselves.
+  config->_add_ref();
+  this->config_ = config;
 
-      // Success.
-      return 0;
-    }
+  // Open the DL Cleanup task
+  // We depend upon the existing config logic to ensure the
+  // DL Cleanup task is opened only once
+  if (this->dl_clean_task_.open ()) {
+    ACE_ERROR_RETURN ((LM_ERROR,
+           "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
+           "open"), -1);
+  }
 
-  // The subclass rejected the configuration attempt.
-  return -1;
+  // Success.
+  return 0;
 }
 
 

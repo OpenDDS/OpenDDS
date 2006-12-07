@@ -289,7 +289,7 @@ TAO::DCPS::TransportInterface::add_associations
 
   // Only failure conditions will cause the logic to get here.
   return -1;
-      }
+      } // for scope
 
     if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
       {

@@ -65,6 +65,8 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
                                  (ReceivedDataSample&  sample,
                                   const ACE_INET_Addr& remote_address)
 {
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","deliver_sample",5);
+
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT)

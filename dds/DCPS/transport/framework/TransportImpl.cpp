@@ -35,6 +35,11 @@ TAO::DCPS::TransportImpl::~TransportImpl()
       entry->int_id_->_remove_ref ();
     }
   }
+
+  // The DL Cleanup task belongs to the Transportimpl object.
+  // Cleanup before leaving the house.
+  this->dl_clean_task_.close (1);
+  this->dl_clean_task_.wait ();
 }
 
 
@@ -102,7 +107,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
   // then the connection establishment logic will treat the local endpoint
   // as a publisher.  This knowledge dictates whether a passive or active
   // connection establishment procedure should be followed.
-  DataLink_rch link = this->find_or_create_datalink(remote_subscriber_info,1);
+  DataLink_rch link = this->find_or_create_datalink(remote_subscriber_info, 1);
 
   if (link.is_nil())
     {
@@ -247,7 +252,7 @@ TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
 
 
 TAO::DCPS::DataWriterImpl*
-TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id)
+TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_publication",5);
   GuardType guard(this->lock_);
@@ -260,6 +265,11 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id)
             "not found\n", pub_id));
         }
     }
+
+  if (safe_cpy) {
+    dw->_add_ref ();
+  }
+
   return dw;
 }
 
@@ -297,7 +307,7 @@ TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 
 
 TAO::DCPS::DataReaderImpl*
-TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id)
+TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
   GuardType guard(this->lock_);
@@ -310,6 +320,11 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id)
             sub_id));
         }
     }
+
+  if (safe_cpy) {
+    dr->_add_ref ();
+  }
+
   return dr;
 }
 
@@ -428,4 +443,17 @@ bool
 TAO::DCPS::TransportImpl::acked (RepoId pub_id)
 {
   return this->pending_sub_map_.equal (this->acked_sub_map_, pub_id);
+}
+
+bool
+TAO::DCPS::TransportImpl::release_link_resources (DataLink* link)
+{
+  DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 1);
+
+  // Create a smart pointer without ownership (bumps up ref count)
+  DataLink_rch dl (link, false);
+
+  dl_clean_task_.add (dl);
+
+  return true;
 }

@@ -11,6 +11,7 @@
 #include  "tao/debug.h"
 
 #include  "Serializer.h"
+
 namespace TAO
 {
   namespace DCPS
@@ -115,7 +116,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
-      PublicationInstance* instance;
+      PublicationInstance* instance = NULL;
 
       if (instance_handle == ::DDS::HANDLE_NIL)
         {
@@ -631,12 +632,12 @@ namespace TAO
         {
           // The remove_oldest_sample removes the oldest sample from
           // instance list and removes it from the internal lists.
-          ret = remove_oldest_sample (instance_list, oldest_released);
+          ret = this->remove_oldest_sample (instance_list, oldest_released);
         }
 
       if ( ret != ::DDS::RETCODE_OK)
         {
-          release_buffer (element);
+          this->release_buffer (element);
           return ret;
         }
 

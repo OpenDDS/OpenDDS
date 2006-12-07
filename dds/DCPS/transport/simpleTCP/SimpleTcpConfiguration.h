@@ -21,7 +21,7 @@ namespace TAO
 
         SimpleTcpConfiguration();
         virtual ~SimpleTcpConfiguration();
-        virtual int load (const TransportIdType& id, 
+        virtual int load (const TransportIdType& id,
                           ACE_Configuration_Heap& cf);
 
         /// Describes the local endpoint to be used to accept
@@ -30,7 +30,7 @@ namespace TAO
 
         bool enable_nagle_algorithm_;
 
-        /// The initial retry delay in milliseconds. 
+        /// The initial retry delay in milliseconds.
         /// The first connection retry will be when the loss of connection
         /// is detected.  The second try will be after this delay.
         /// The default is 500 miliseconds.
@@ -46,25 +46,31 @@ namespace TAO
         /// The default value is 2.0.
         double conn_retry_backoff_multiplier_;
 
-        /// Number of attemps to reconnect before giving up and calling 
+        /// Number of attemps to reconnect before giving up and calling
         /// on_publication_lost() and on_subscription_lost() callbacks.
         /// The default is 3.
         int conn_retry_attempts_;
 
         /// Maximum period (in milliseconds) of not being able to send queued
         /// messages. If there are samples queued and no output for longer
-        /// than this period then the connection will be closed and on_*_lost() 
-        /// callbacks will be called. If the value is zero, the default, then 
+        /// than this period then the connection will be closed and on_*_lost()
+        /// callbacks will be called. If the value is zero, the default, then
         /// this check will not be made.
         int max_output_pause_period_;
 
         /// The time period in milliseconds for the acceptor side
         /// of a connection to wait for the connection to be reconnected.
-        /// If not reconnected within this period then 
-        /// on_publication_lost() and on_subscription_lost() callbacks 
+        /// If not reconnected within this period then
+        /// on_publication_lost() and on_subscription_lost() callbacks
         /// will be called.
         /// The default is 2 seconds (2000 millseconds).
         int passive_reconnect_duration_;
+
+      /// The time period in milliseconds for the acceptor side
+      /// of a connection to wait for the connection.
+      /// The default is 0 (wait forever)
+      /// This currently doesn't apply to passive reconnections.
+      unsigned long passive_connect_duration_;
     };
 
   } /* namespace DCPS */

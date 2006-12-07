@@ -56,9 +56,9 @@ namespace TAO
 
           domains_.unbind_all();
 
-          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesIter = 
+          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesIter =
             typeSupports.begin();
-          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesEnd = 
+          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesEnd =
             typeSupports.end();
 
           while (typesEnd != typesIter)
@@ -81,7 +81,7 @@ namespace TAO
       POA_TAO::DCPS::TypeSupport_ptr the_type)
     {
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
-      TypeSupportHash*  supportHash;
+      TypeSupportHash*  supportHash = NULL;
 
       if (0 == domains_.find(reinterpret_cast <void*> (domain_participant), supportHash))
         {
@@ -94,15 +94,15 @@ namespace TAO
             }
           else if (1 == lookup)
             {
-              POA_TAO::DCPS::TypeSupport_ptr currentType;
+              POA_TAO::DCPS::TypeSupport_ptr currentType = NULL;
               if ( 0 == supportHash->find(type_name, currentType) )
                 {
                   // Allow different TypeSupport instances of the same TypeSupport
-                  // type register with the same type name in the same 
+                  // type register with the same type name in the same
                   // domain pariticipant. The second (and subsequent) registrations
                   // will be ignored.
                   CORBA::String_var the_type_name = the_type->get_type_name();
-                  CORBA::String_var current_type_name = currentType->get_type_name(); 
+                  CORBA::String_var current_type_name = currentType->get_type_name();
                   if (ACE_OS::strcmp (the_type_name.in (), current_type_name.in ()) == 0)
                     {
                       retCode = ::DDS::RETCODE_OK;
@@ -139,7 +139,7 @@ namespace TAO
     {
       POA_TAO::DCPS::TypeSupport_ptr typeSupport = 0;
 
-      TypeSupportHash*  supportHash;
+      TypeSupportHash*  supportHash = NULL;
 
       if (0 == domains_.find(reinterpret_cast<void*> (domain_participant), supportHash))
         {
@@ -164,11 +164,11 @@ namespace TAO
 
 template class TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>;
 
-template class ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;  
+template class ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
 template class ACE_Hash_Map_Iterator <ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
 template class ACE_Hash_Map_Entry<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr>;
 
-template class ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_NULL_SYNCH>;  
+template class ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_NULL_SYNCH>;
 template class ACE_Hash_Map_Iterator <::DDS::DomainId_t, TypeSupportHash*, ACE_NULL_SYNCH>;
 template class ACE_Hash_Map_Entry<::DDS::DomainId_t, TypeSupportHash*>;
 
@@ -180,11 +180,11 @@ template class ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>;
 
 #pragma instantiate TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>
 
-#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;  
+#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Iterator <ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Entry<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr>;
 
-#pragma instantiate ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX>;  
+#pragma instantiate ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Iterator <::DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Entry<::DDS::DomainId_t, TypeSupportHash*>;
 
@@ -193,4 +193,3 @@ template class ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>;
 #pragma instantiate ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>
 
 #endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-

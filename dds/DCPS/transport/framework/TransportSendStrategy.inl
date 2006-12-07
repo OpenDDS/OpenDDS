@@ -8,14 +8,12 @@ TAO::DCPS::TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",5);
 
-  GuardType guard(this->lock_);
-
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
   // to give a "copy" of a reference to ourselves to the synch_ object here.
   // We will do the reverse when we unregister ourselves (as a worker) from
   // the synch_ object.
-//MJM: The synch thingie knows to not "delete" us, right?
+  //MJM: The synch thingie knows to not "delete" us, right?
   this->_add_ref();
   if (this->synch_->register_worker(this) == -1)
     {
@@ -36,17 +34,17 @@ TAO::DCPS::TransportSendStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","stop",5);
 
-  GuardType guard(this->lock_);
-//MJM: Why are we guarding this?  The refcount decrement is already
-//MJM: guarded.  Is unregister guarded, or does it need to be?
-
   this->synch_->unregister_worker();
 
   // Since we gave the synch_ a "copy" of a reference to ourselves, we need
   // to take it back now.
   this->_remove_ref();
 
-  this->stop_i ();
+  {
+    GuardType guard(this->lock_);
+
+    this->stop_i ();
+  }
 
   // TBD SOON - What about all of the samples that may still be stuck in
   //            our queue_ and/or elems_?
@@ -138,5 +136,3 @@ TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
 
   return SendModeStr [mode];
 }
-
-

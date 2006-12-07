@@ -7,7 +7,7 @@
 
 
 TAO::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)
-: TransportQueueElement(0),
+: TransportQueueElement(1),
   msg_ (msg_block)
 {
   DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",5);
@@ -54,5 +54,3 @@ TAO::DCPS::TransportControlElement::msg() const
 {
   return this->msg_;
 }
-
-

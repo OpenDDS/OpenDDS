@@ -14,6 +14,7 @@
 //borland #include  "TransportReactorTask.h"
 #include  "TransportReactorTask_rch.h"
 #include  "RepoIdSetMap.h"
+#include "DataLinkCleanupTask.h"
 #include  "ace/Hash_Map_Manager.h"
 #include  "ace/Synch.h"
 #include  "ace/Vector_T.h"
@@ -65,7 +66,9 @@ namespace TAO
 
         /// Called by the DataLink to find the registered datawriter
         /// for the lost publication notification.
-        DataWriterImpl* find_publication (RepoId pub_id);
+      /// If a safe copy (safe_cpy) is requested, the callee is responsible
+      /// for bumping down the ref count.
+        DataWriterImpl* find_publication (RepoId pub_id, bool safe_cpy = false);
 
         /// Called by the SubscriberImpl to register datareader upon
         /// datareader creation.
@@ -77,7 +80,9 @@ namespace TAO
 
         /// Called by the DataLink to find the registered datareader
         /// for the lost subscription notification.
-        DataReaderImpl* find_subscription (RepoId sub_id);
+      /// If a safe copy (safe_cpy) is requested, the callee is responsible
+      /// for bumping down the ref count.
+        DataReaderImpl* find_subscription (RepoId sub_id, bool safe_cpy = false);
 
         /// Called when the receive strategy received the FULLY_ASSOCIATED
         /// message.
@@ -86,6 +91,11 @@ namespace TAO
         /// Return true if all the subscriptions to a datawriter are
         /// acknowledged, otherwise return false.
         virtual bool acked (RepoId pub_id);
+
+      /// Callback from teh DataLink to clean up any associated resources.
+      /// This usually is done when the DataLink is lost. The call is made with
+      /// no transport/DCPS locks held.
+      bool release_link_resources (DataLink* link);
 
       protected:
 
@@ -216,23 +226,23 @@ protected:
 
 
         /// Called on publisher side as the last step of the add_associations().
-        /// The pending publications are added to the pending_sub_map_ 
+        /// The pending publications are added to the pending_sub_map_
         /// and the association data are cached to pending_association_sub_map_.
-        /// If the transport already received the FULLY_ASSOCIATED acks from 
-        /// subscribers then the transport will notify the datawriter fully 
+        /// If the transport already received the FULLY_ASSOCIATED acks from
+        /// subscribers then the transport will notify the datawriter fully
         /// association and the associations will be
         /// removed from the pending associations cache.
         int add_pending_association (RepoId  pub_id,
                                      size_t                  num_remote_associations,
                                      const AssociationData*  subs);
 
-        
+
 private:
 
 
-        /// This method is called when the FULLY_ASSOCIATED ack of the pending 
-        /// associations is received. If the datawriter is registered, the 
-        /// datawriter will be notified, otherwise the status of the pending 
+        /// This method is called when the FULLY_ASSOCIATED ack of the pending
+        /// associations is received. If the datawriter is registered, the
+        /// datawriter will be notified, otherwise the status of the pending
         /// associations will be marked as FULLTY_ASSOCIATED.
         void fully_associated (RepoId pub_id);
 
@@ -283,7 +293,7 @@ private:
         /// The collection of the DataWriterImpl objects that are created by
         /// the PublisherImpl currently "attached" to this TransportImpl.
         PublicationObjectMap  dw_map_;
-        
+
         /// The collection of the DataWriterImpl objects that are created by
         /// the SubscriberImpl currently "attached" to this TransportImpl.
         SubscriptionObjectMap dr_map_;
@@ -307,19 +317,22 @@ private:
         /// subclass (of TransportImpl) doesn't require a reactor.
         TransportReactorTask_rch reactor_task_;
 
-        
+
         /// These are used by the publisher side.
 
-        /// pubid -> pending associations (remote sub id, association data, 
+        /// pubid -> pending associations (remote sub id, association data,
         /// association status) map.
         PendingAssociationsMap pending_association_sub_map_;
 
-        /// Fully association acknowledged map. pubid -> *subid 
+        /// Fully association acknowledged map. pubid -> *subid
         RepoIdSetMap acked_sub_map_;
-        
+
         /// Pending association map. pubid -> *subid
         RepoIdSetMap pending_sub_map_;
-        
+
+      /// smart ptr to the associated DL cleanup task
+      DataLinkCleanupTask dl_clean_task_;
+
     };
 
   } /* namespace DCPS */

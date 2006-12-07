@@ -10,11 +10,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#define DDS_BLD_DEBUG_LEVEL 1
-
 // Build debug level
 #ifndef DDS_BLD_DEBUG_LEVEL
-#define DDS_BLD_DEBUG_LEVEL 0 // range: 0-5; 0 being lowest
+#define DDS_BLD_DEBUG_LEVEL 1 // range: 0-5; 0 being lowest
 #endif
 
 
