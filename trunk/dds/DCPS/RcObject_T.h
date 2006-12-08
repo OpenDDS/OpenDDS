@@ -21,66 +21,66 @@ namespace TAO
     template <typename T>
     class TAO_DdsDcps_Export RcObject
     {
-      public:
+    public:
 
-        virtual ~RcObject()
-          {
-          }
+      virtual ~RcObject()
+      {
+      }
 
-        virtual void _add_ref()
-          {
-            ++this->ref_count_;
-          }
+      virtual void _add_ref()
+      {
+  ++this->ref_count_;
+      }
 
-        virtual void _remove_ref()
-          {
-            long new_count = --this->ref_count_;
+      virtual void _remove_ref()
+      {
+  long new_count = --this->ref_count_;
 
-            if (new_count == 0)
-              {
-                // No need to protect the allocator with a lock since this
-                // is the last reference to this object, and thus only one
-                // thread will be doing this final _remove_ref().
-                ACE_Allocator* allocator = this->allocator_;
-                this->allocator_ = 0;
+  if (new_count == 0)
+    {
+      // No need to protect the allocator with a lock since this
+      // is the last reference to this object, and thus only one
+      // thread will be doing this final _remove_ref().
+      ACE_Allocator* allocator = this->allocator_;
+      this->allocator_ = 0;
 
-                if (allocator)
-                  {
-                    ACE_DES_FREE (this,
-                                  allocator->free,
-                                  RcObject<T> );
-                  }
-                else
-                  {
-                    delete this;
-                  }
-              }
-          }
+      if (allocator)
+        {
+    ACE_DES_FREE (this,
+            allocator->free,
+            RcObject<T> );
+        }
+      else
+        {
+    delete this;
+        }
+    }
+      }
 
-      /*
-  long ref_count () const
-  {
+      /// This accessor is purely for debugging purposes
+      long ref_count () const
+      {
   return this->ref_count_.value();
-  }
-      */
-      protected:
+      }
 
-        RcObject(ACE_Allocator* allocator = 0)
-          : ref_count_(1), allocator_(allocator)
-          {
-          }
+    protected:
+
+      RcObject(ACE_Allocator* allocator = 0)
+  : ref_count_(1), allocator_(allocator)
+      {
+      }
 
 
-      private:
+    private:
 
-        ACE_Atomic_Op<T, long> ref_count_;
-        ACE_Allocator*         allocator_;
+      ACE_Atomic_Op<T, long> ref_count_;
+      ACE_Allocator*         allocator_;
 
-        // Turning these off.  I don't think they should be used for
-        // objects that would be reference counted.  Maybe a copy_from()
-        // method instead (if needed).
-        RcObject(const RcObject&);
-        RcObject& operator=(const RcObject&);
+      // Turning these off.  I don't think they should be used for
+      // objects that would be reference counted.  Maybe a copy_from()
+      // method instead (if needed).
+      RcObject(const RcObject&);
+      RcObject& operator=(const RcObject&);
     };
 
   }

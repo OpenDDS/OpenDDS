@@ -142,6 +142,7 @@ project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
     DCPS/transport/framework/RemoveAllVisitor.cpp
     DCPS/transport/framework/TheTransportFactory.cpp
     DCPS/transport/framework/ThreadPerConnectionSendTask.cpp
+    DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp
     DCPS/transport/framework/ThreadSynch.cpp
     DCPS/transport/framework/ThreadSynchResource.cpp
     DCPS/transport/framework/ThreadSynchStrategy.cpp

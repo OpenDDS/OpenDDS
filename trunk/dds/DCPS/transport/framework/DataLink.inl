@@ -15,10 +15,7 @@ TAO::DCPS::DataLink::send_start()
 
   if (this->thr_per_con_send_task_ != 0)
   {
-    SendRequest req;
-    req.op_ = SEND_START;
-    req.element_ = 0;
-    this->thr_per_con_send_task_->add (req);
+    this->thr_per_con_send_task_->add_request (SEND_START);
   }
   else
     this->send_start_i ();
@@ -54,10 +51,7 @@ TAO::DCPS::DataLink::send(TransportQueueElement* element)
 
   if (this->thr_per_con_send_task_ != 0)
   {
-    SendRequest req;
-    req.op_ = SEND;
-    req.element_ = element;
-    this->thr_per_con_send_task_->add (req);
+    this->thr_per_con_send_task_->add_request (SEND, element);
   }
   else
     this->send_i (element);
@@ -91,10 +85,7 @@ TAO::DCPS::DataLink::send_stop()
 
   if (this->thr_per_con_send_task_ != 0)
   {
-    SendRequest req;
-    req.op_ = SEND_STOP;
-    req.element_ = 0;
-    this->thr_per_con_send_task_->add (req);
+    this->thr_per_con_send_task_->add_request (SEND_STOP);
   }
   else
     this->send_stop_i ();
@@ -138,11 +129,24 @@ TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
     strategy = this->send_strategy_;
   }
 
-  if (!strategy.is_nil()) {
-    return strategy->remove_sample(sample);
-  }
+   int status = -1;
 
-  return -1;
+   // Remove the sample from thread per connection queue and then
+   // delegate to send strategy.
+   if (this->thr_per_con_send_task_ != 0)
+   {
+     status = this->thr_per_con_send_task_->remove_sample (sample);
+   }
+
+   if (status == 1)
+   {
+     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+       "Removed sample from ThreadPerConnection queue.\n"));
+   }
+   else if (!strategy.is_nil()) // not exist on thread per connectio queue.
+      return strategy->remove_sample(sample);
+
+  return 0;
 }
 
 
