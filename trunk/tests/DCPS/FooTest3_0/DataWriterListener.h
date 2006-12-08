@@ -15,12 +15,12 @@
 class DataWriterListenerImpl : public virtual POA_TAO::DCPS::DataWriterListener
 {
 public:
-  //Constructor 
+  //Constructor
   DataWriterListenerImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~DataWriterListenerImpl (void);
-  
+
 
 
 virtual void on_offered_deadline_missed (
@@ -85,6 +85,14 @@ virtual void on_publication_lost (
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ));
+
+virtual void on_connection_deleted (
+    ::DDS::DataWriter_ptr writer
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ));
+
 };
 
 

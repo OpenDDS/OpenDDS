@@ -1605,6 +1605,19 @@ namespace TAO
 
 
     void
+    DataReaderImpl::notify_connection_deleted ()
+    {
+      DBG_ENTRY_LVL("DataReaderImpl","notify_connection_deleted",5);
+
+      // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+      // is given to this DataWriter then narrow() fails.
+      DataReaderListener_var the_listener = DataReaderListener::_narrow (this->listener_.in ());
+
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_connection_deleted (this->dr_remote_objref_.in ());
+    }
+
+    void
     DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids,
                                                   ::DDS::InstanceHandleSeq & hdls)
     {

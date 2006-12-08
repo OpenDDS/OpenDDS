@@ -30,14 +30,14 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace TAO
 {
-  namespace DCPS 
+  namespace DCPS
   {
     class SubscriberImpl;
     class DomainParticipantImpl;
     class SubscriptionInstance ;
-    
+
     typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
@@ -81,17 +81,17 @@ namespace TAO
     /**
     * @class DataReaderImpl
     *
-    * @brief Implements the ::TAO::DCPS::ReaderRemote interfaces and 
+    * @brief Implements the ::TAO::DCPS::ReaderRemote interfaces and
     *        ::DDS::DataReader interfaces.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of  
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
-    * 
-    * This class must be inherited by the type-specific datareader which 
+    *
+    * This class must be inherited by the type-specific datareader which
     * is specific to the data-type associated with the topic.
     *
     */
-    class TAO_DdsDcps_Export DataReaderImpl 
+    class TAO_DdsDcps_Export DataReaderImpl
       : public virtual POA_TAO::DCPS::DataReaderRemote,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
@@ -104,13 +104,13 @@ namespace TAO
                                       ACE_Hash< ::DDS::InstanceHandle_t>,
                                       ACE_Equal_To< ::DDS::InstanceHandle_t>,
                                       ACE_Null_Mutex>        SubscriptionInstanceMapType;
- 
-      //Constructor 
+
+      //Constructor
       DataReaderImpl (void);
-      
-      //Destructor 
+
+      //Destructor
       virtual ~DataReaderImpl (void);
-      
+
 
       virtual void add_associations (
           ::TAO::DCPS::RepoId yourId,
@@ -142,12 +142,12 @@ namespace TAO
     * This is used to retrieve the listener for a certain status change.
     * If this datareader has a registered listener and the status kind
     * is in the listener mask then the listener is returned.
-    * Otherwise, the query for the listener is propagated up to the 
+    * Otherwise, the query for the listener is propagated up to the
     * factory/subscriber.
     */
     ::POA_DDS::DataReaderListener* listener_for (::DDS::StatusKind kind);
 
-    
+
     /// Handle the assert liveliness timeout.
     virtual int handle_timeout (const ACE_Time_Value &tv,
                                 const void *arg);
@@ -315,7 +315,7 @@ namespace TAO
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
-      
+
       /// update liveliness info for this writer.
       void writer_activity(PublicationId writer_id);
 
@@ -351,6 +351,7 @@ namespace TAO
       void notify_subscription_disconnected (const WriterIdSeq& pubids);
       void notify_subscription_reconnected (const WriterIdSeq& pubids);
       void notify_subscription_lost (const WriterIdSeq& pubids);
+      void notify_connection_deleted ();
 
     protected:
 
@@ -370,7 +371,7 @@ namespace TAO
                        ReceivedDataElement *ptr) ;
 
       CORBA::Long total_samples() const ;
-      
+
       void set_sample_lost_status(const ::DDS::SampleLostStatus& status) ;
       void set_sample_rejected_status(
               const ::DDS::SampleRejectedStatus& status) ;
@@ -391,7 +392,7 @@ namespace TAO
 
       ReceivedDataAllocator          *rd_allocator_ ;
       ::DDS::DataReaderQos            qos_;
-      
+
       ::DDS::SampleRejectedStatus sample_rejected_status_;
       ::DDS::SampleLostStatus sample_lost_status_;
 
@@ -401,9 +402,9 @@ namespace TAO
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t         next_handle_;
     private:
-          
+
       /// Convert the publication repo ids to the publication handle.
-      void repo_ids_to_instance_handles (const WriterIdSeq& ids, 
+      void repo_ids_to_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
       friend class WriterInfo;
@@ -433,9 +434,9 @@ namespace TAO
       ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_ ;
       ::DDS::SubscriptionMatchStatus        subscription_match_status_ ;
 
-      // TODO: 
+      // TODO:
       // The subscription_lost_status_ and subscription_reconnecting_status_
-      // are left here for future use when we add get_subscription_lost_status() and 
+      // are left here for future use when we add get_subscription_lost_status() and
       // get_subscription_reconnecting_status() methods.
       // Statistics of the lost subscriptions due to lost connection.
       SubscriptionLostStatus               subscription_lost_status_;
@@ -443,14 +444,14 @@ namespace TAO
       // SubscriptionReconnectingStatus       subscription_reconnecting_status_;
 
 
-      /// The orb's reactor to be used to register the liveliness 
+      /// The orb's reactor to be used to register the liveliness
       /// timer.
       ACE_Reactor*               reactor_;
       /// The time interval for checking liveliness.
       ACE_Time_Value             liveliness_lease_duration_;
       /// liveliness timer id; -1 if no timer is set
       int liveliness_timer_id_;
-      
+
       /// Flag indicates that this datareader is a builtin topic
       /// datareader.
       bool                       is_bit_;

@@ -12,143 +12,143 @@ module DDS {
    interface Publisher;
 
    interface DataWriterListener : Listener {
-		void on_offered_deadline_missed(
-			in DataWriter writer,
-			in OfferedDeadlineMissedStatus status);
+    void on_offered_deadline_missed(
+      in DataWriter writer,
+      in OfferedDeadlineMissedStatus status);
 
-		void on_offered_incompatible_qos(
-			in DataWriter writer,
-			in OfferedIncompatibleQosStatus status);
+    void on_offered_incompatible_qos(
+      in DataWriter writer,
+      in OfferedIncompatibleQosStatus status);
 
-		void on_liveliness_lost(
-			in DataWriter writer,
-			in LivelinessLostStatus status);
+    void on_liveliness_lost(
+      in DataWriter writer,
+      in LivelinessLostStatus status);
 
-		void on_publication_match(
-			in DataWriter writer,
-			in PublicationMatchStatus status);
-		};
+    void on_publication_match(
+      in DataWriter writer,
+      in PublicationMatchStatus status);
+    };
 
     interface PublisherListener : DataWriterListener {
-	};
+  };
 
 
    interface DataWriter : Entity {
-		// InstanceHandle_t register(
-		//		in Data instance_data);
-		// InstanceHandle_t register_w_timestamp(
-		//		in Data instance_data,
-		//		in Time_t source_timestamp);
-		// ReturnCode_t unregister(
-		//		in Data instance_data,
-		//		in InstanceHandle_t handle);
-		// ReturnCode_t unregister_w_timestamp(
-		//		in Data instance_data,
-		//		in InstanceHandle_t handle,
-		//		in Time_t source_timestamp);
-		// ReturnCode_t write(
-		//		in Data instance_data,
-		//		in InstanceHandle_t handle);
-		// ReturnCode_t write_w_timestamp(
-		//		in Data instance_data,
-		//		in InstanceHandle_t handle,
-		//		in Time_t source_timestamp);
-		// ReturnCode_t dispose(
-		//		in Data instance_data,
-		//		in InstanceHandle_t instance_handle);
-		// ReturnCode_t dispose_w_timestamp(
-		//		in Data instance_data,
-		//		in InstanceHandle_t instance_handle,
-		//		in Time_t source_timestamp);
-		// ReturnCode_t get_key_value(
-		//		inout Data key_holder,
-		//		in InstanceHandle_t handle);
+    // InstanceHandle_t register(
+    //		in Data instance_data);
+    // InstanceHandle_t register_w_timestamp(
+    //		in Data instance_data,
+    //		in Time_t source_timestamp);
+    // ReturnCode_t unregister(
+    //		in Data instance_data,
+    //		in InstanceHandle_t handle);
+    // ReturnCode_t unregister_w_timestamp(
+    //		in Data instance_data,
+    //		in InstanceHandle_t handle,
+    //		in Time_t source_timestamp);
+    // ReturnCode_t write(
+    //		in Data instance_data,
+    //		in InstanceHandle_t handle);
+    // ReturnCode_t write_w_timestamp(
+    //		in Data instance_data,
+    //		in InstanceHandle_t handle,
+    //		in Time_t source_timestamp);
+    // ReturnCode_t dispose(
+    //		in Data instance_data,
+    //		in InstanceHandle_t instance_handle);
+    // ReturnCode_t dispose_w_timestamp(
+    //		in Data instance_data,
+    //		in InstanceHandle_t instance_handle,
+    //		in Time_t source_timestamp);
+    // ReturnCode_t get_key_value(
+    //		inout Data key_holder,
+    //		in InstanceHandle_t handle);
 
-		ReturnCode_t set_qos(
-			in DataWriterQos qos);
+    ReturnCode_t set_qos(
+      in DataWriterQos qos);
 
-		void get_qos(inout DataWriterQos qos);
+    void get_qos(inout DataWriterQos qos);
 
-		ReturnCode_t set_listener(
-			in DataWriterListener a_listener, 
-			in StatusKindMask mask);
+    ReturnCode_t set_listener(
+      in DataWriterListener a_listener,
+      in StatusKindMask mask);
 
-		DataWriterListener get_listener();
-		
-		Topic get_topic();
-		
-		Publisher get_publisher();
+    DataWriterListener get_listener();
 
-		// Access the status
-		LivelinessLostStatus 
-			get_liveliness_lost_status();
-		
-		OfferedDeadlineMissedStatus
-			get_offered_deadline_missed_status();
-		
-		OfferedIncompatibleQosStatus
-			get_offered_incompatible_qos_status();
-		
-		PublicationMatchStatus
-			get_publication_match_status();
-		
-		void assert_liveliness();
+    Topic get_topic();
 
-		ReturnCode_t get_matched_subscriptions(
-			inout InstanceHandleSeq subscription_handles);
+    Publisher get_publisher();
 
-		ReturnCode_t get_matched_subscription_data(
-			inout SubscriptionBuiltinTopicData subscription_data,
-			in InstanceHandle_t subscription_handle);
-		};
+    // Access the status
+    LivelinessLostStatus
+      get_liveliness_lost_status();
+
+    OfferedDeadlineMissedStatus
+      get_offered_deadline_missed_status();
+
+    OfferedIncompatibleQosStatus
+      get_offered_incompatible_qos_status();
+
+    PublicationMatchStatus
+      get_publication_match_status();
+
+    void assert_liveliness();
+
+    ReturnCode_t get_matched_subscriptions(
+      inout InstanceHandleSeq subscription_handles);
+
+    ReturnCode_t get_matched_subscription_data(
+      inout SubscriptionBuiltinTopicData subscription_data,
+      in InstanceHandle_t subscription_handle);
+    };
 
     // ----------------------------------------------------------------------
     interface Publisher : Entity {
-		DataWriter create_datawriter(
-			in Topic a_topic, 
-			in DataWriterQos qos,
-			in DataWriterListener a_listener);
+    DataWriter create_datawriter(
+      in Topic a_topic,
+      in DataWriterQos qos,
+      in DataWriterListener a_listener);
 
-		ReturnCode_t delete_datawriter(
-			in DataWriter a_datawriter);
-		
-		DataWriter lookup_datawriter(
-			in string topic_name);
-		
-		ReturnCode_t delete_contained_entities();
-		
-		ReturnCode_t set_qos(
-			in PublisherQos qos);
-		
-		void get_qos(
-			inout PublisherQos qos);
+    ReturnCode_t delete_datawriter(
+      in DataWriter a_datawriter);
 
-		ReturnCode_t set_listener(
-			in PublisherListener a_listener, 
-			in StatusKindMask mask);
-		
-		PublisherListener get_listener();
-		
-		ReturnCode_t suspend_publications();
-		
-		ReturnCode_t resume_publications();
-		
-		ReturnCode_t begin_coherent_changes();
-		
-		ReturnCode_t end_coherent_changes();
-		
-		DomainParticipant get_participant();
-		
-		ReturnCode_t set_default_datawriter_qos(
-			in DataWriterQos qos);
-		
-		void get_default_datawriter_qos(
-			inout DataWriterQos qos);
+    DataWriter lookup_datawriter(
+      in string topic_name);
 
-		ReturnCode_t copy_from_topic_qos(
-			inout DataWriterQos a_datawriter_qos,
-			in TopicQos a_topic_qos);
-		};
+    ReturnCode_t delete_contained_entities();
+
+    ReturnCode_t set_qos(
+      in PublisherQos qos);
+
+    void get_qos(
+      inout PublisherQos qos);
+
+    ReturnCode_t set_listener(
+      in PublisherListener a_listener,
+      in StatusKindMask mask);
+
+    PublisherListener get_listener();
+
+    ReturnCode_t suspend_publications();
+
+    ReturnCode_t resume_publications();
+
+    ReturnCode_t begin_coherent_changes();
+
+    ReturnCode_t end_coherent_changes();
+
+    DomainParticipant get_participant();
+
+    ReturnCode_t set_default_datawriter_qos(
+      in DataWriterQos qos);
+
+    void get_default_datawriter_qos(
+      inout DataWriterQos qos);
+
+    ReturnCode_t copy_from_topic_qos(
+      inout DataWriterQos a_datawriter_qos,
+      in TopicQos a_topic_qos);
+    };
 
 };
 
@@ -161,10 +161,11 @@ module TAO {
 
     typedef PublicationLostStatus PublicationDisconnectedStatus;
     typedef PublicationLostStatus PublicationReconnectedStatus;
+    typedef PublicationLostStatus DisassociationStatus;
 
     interface DataWriterListener : ::DDS::DataWriterListener {
 
-      // Called when a connection failure has been detected 
+      // Called when a connection failure has been detected
       // and there are still associations using the connection
       // after the configurable graceful_disconnected_period.
       void on_publication_disconnected(
@@ -185,6 +186,13 @@ module TAO {
       void on_publication_lost(
         in ::DDS::DataWriter writer,
         in PublicationLostStatus status);
+
+      // called when the connection object is cleaned up and
+      // the reconnect thread exits.
+      // This hook is added for testing the reconnect thread
+      // leaking problem when the subscriber crashes.
+      void on_connection_deleted(
+        in ::DDS::DataWriter writer);
     };
 
   }; // End of module DCPS

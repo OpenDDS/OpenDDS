@@ -130,3 +130,9 @@ void DataReaderListenerImpl::on_subscription_lost (
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
 
+void DataReaderListenerImpl::on_connection_deleted (
+  DDS::DataReader_ptr)
+  throw (CORBA::SystemException)
+{
+  cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
+}

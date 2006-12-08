@@ -9,6 +9,7 @@
 
 extern int num_reads_before_crash;
 extern int actual_lost_pub_notification;
+extern int num_deleted_connections;
 
 // Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl()
@@ -133,3 +134,18 @@ void DataWriterListenerImpl::on_publication_lost (
     //  "(%P|%t)on_publication_lost reader %d \n", status.subscription_handles[i]));
   }
 }
+
+
+void DataWriterListenerImpl::on_connection_deleted (
+  ::DDS::DataWriter_ptr
+  ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+  ::CORBA::SystemException
+  ))
+{
+  ++ num_deleted_connections;
+
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+}
+

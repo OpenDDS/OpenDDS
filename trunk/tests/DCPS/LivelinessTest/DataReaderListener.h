@@ -15,12 +15,12 @@
 class DataReaderListenerImpl : public virtual POA_TAO::DCPS::DataReaderListener
 {
 public:
-  //Constructor 
+  //Constructor
   DataReaderListenerImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~DataReaderListenerImpl (void);
-  
+
   virtual void on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
@@ -64,14 +64,14 @@ public:
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ));
-  
+
   virtual void on_data_available(
     ::DDS::DataReader_ptr reader
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ));
-  
+
   virtual void on_sample_lost(
     ::DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status
@@ -107,6 +107,13 @@ public:
       CORBA::SystemException
     ));
 
+  virtual void on_connection_deleted (
+    ::DDS::DataReader_ptr
+    ACE_ENV_ARG_DECL_WITH_DEFAULTS
+    )
+    ACE_THROW_SPEC ((
+    ::CORBA::SystemException
+    ));
 
   int liveliness_changed_count() const { return liveliness_changed_count_ ; }
   void reset_liveliness_changed_count(){ liveliness_changed_count_ = 0 ; }

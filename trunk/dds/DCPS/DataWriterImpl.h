@@ -413,6 +413,7 @@ namespace TAO
     void notify_publication_disconnected (const ReaderIdSeq& subids);
     void notify_publication_reconnected (const ReaderIdSeq& subids);
     void notify_publication_lost (const ReaderIdSeq& subids);
+    void notify_connection_deleted ();
 
     /// Statistics counter.
     int         data_dropped_count_;

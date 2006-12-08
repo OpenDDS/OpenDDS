@@ -427,8 +427,6 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
     // that are wait()'ing on the connections_updated_ condition to check
     // the connections_ map again.
 
-    VDBG_LVL ((LM_DEBUG, "Broadcasting condition %@.\n"
-         , &this->connections_updated_), 1);
     this->connections_updated_.broadcast();
   }
 
@@ -489,11 +487,6 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
     GuardType guard(this->connections_lock_);
     while (true)
       {
-  VDBG_LVL ((LM_DEBUG, "Current connections count: %d.\n"
-       , this->connections_.current_size ()), 1);
-  VDBG_LVL ((LM_DEBUG, "Waiting on condition %@.\n"
-       , &this->connections_updated_), 1);
-
   if ((abs_timeout != ACE_Time_Value::zero)
       && (abs_timeout <= ACE_OS::gettimeofday ())) {
     ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n")

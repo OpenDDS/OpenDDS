@@ -79,6 +79,10 @@ public:
   )
   throw (CORBA::SystemException);
 
+  virtual void on_connection_deleted (
+  DDS::DataReader_ptr)
+  throw (CORBA::SystemException);
+
   long num_reads() const {
     return num_reads_;
   }

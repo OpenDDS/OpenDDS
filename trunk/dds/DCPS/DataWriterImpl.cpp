@@ -1469,6 +1469,19 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
 
 
 void
+DataWriterImpl::notify_connection_deleted ()
+{
+  DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",5);
+
+  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+  // is given to this DataWriter then narrow() fails.
+  DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+
+  if (! CORBA::is_nil (the_listener.in ()))
+    the_listener->on_connection_deleted (this->dw_remote_objref_.in ());
+}
+
+void
 DataWriterImpl::repo_ids_to_instance_handles (const ReaderIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
