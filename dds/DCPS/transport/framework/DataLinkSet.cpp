@@ -28,20 +28,20 @@
 #define NUM_HASH_MAP_ENTRY_CHUNKS 20
 
 TAO::DCPS::DataLinkSet::DataLinkSet()
-: map_entry_allocator_(NUM_HASH_MAP_ENTRY_CHUNKS),
-  map_(0),
-  send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
+  : map_entry_allocator_(NUM_HASH_MAP_ENTRY_CHUNKS),
+    map_(0),
+    send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",5);
   map_ = new MapType (ACE_Allocator::instance ());
 
   if (DCPS_debug_level >= 2)
-  {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet map_entry_allocator %x with %d chunks \n",
+    {
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet map_entry_allocator %x with %d chunks \n",
       &map_entry_allocator_, NUM_HASH_MAP_ENTRY_CHUNKS));
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
       &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
-  }
+    }
 }
 
 

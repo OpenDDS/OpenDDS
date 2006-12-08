@@ -51,7 +51,6 @@ TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
       return 0;
     }
 
-
   // Deal with possibility that the id_set just got created - just for us.
   // If so, we need to "undo" the creation.
   if (id_set->size() == 0)
@@ -253,4 +252,3 @@ TAO::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
       keys.insert_id (entry->ext_id_);
     }
 }
-

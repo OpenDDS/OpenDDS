@@ -409,7 +409,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",1);
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
@@ -426,6 +426,9 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
     // Regardless of the outcome of the bind operation, let's tell any threads
     // that are wait()'ing on the connections_updated_ condition to check
     // the connections_ map again.
+
+    VDBG_LVL ((LM_DEBUG, "Broadcasting condition %@.\n"
+         , &this->connections_updated_), 1);
     this->connections_updated_.broadcast();
   }
 
@@ -463,19 +466,17 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",1);
 
   SimpleTcpConnection_rch connection;
 
-  ACE_Auto_Ptr<ACE_Time_Value> timeout;
-  if (this->tcp_config_->passive_connect_duration_ == 0) {
-    timeout.reset ();
-  }
-  else {
-    timeout.reset (new ACE_Time_Value (this->tcp_config_->passive_connect_duration_/1000,
-               this->tcp_config_->passive_connect_duration_%1000 * 1000));
-    *timeout += ACE_OS::gettimeofday ();
-  }
+  ACE_Time_Value abs_timeout (0);
+  if (this->tcp_config_->passive_connect_duration_ != 0)
+    {
+      abs_timeout.set (this->tcp_config_->passive_connect_duration_/1000,
+       this->tcp_config_->passive_connect_duration_%1000 * 1000);
+      abs_timeout += ACE_OS::gettimeofday ();
+    }
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t) DBG:   "
        "Passive conect timeout: %d milliseconds.\n",
@@ -488,15 +489,30 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
     GuardType guard(this->connections_lock_);
     while (true)
       {
-  this->connections_updated_.wait (timeout.get());
+  VDBG_LVL ((LM_DEBUG, "Current connections count: %d.\n"
+       , this->connections_.current_size ()), 1);
+  VDBG_LVL ((LM_DEBUG, "Waiting on condition %@.\n"
+       , &this->connections_updated_), 1);
 
+  if ((abs_timeout != ACE_Time_Value::zero)
+      && (abs_timeout <= ACE_OS::gettimeofday ())) {
+    ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n")
+          , -1);
+  }
+
+  // check if theres already a connection waiting
   if (this->connections_.unbind(remote_address,connection) == 0) {
     // break out and continue with connection establishment
     break;
   }
 
-  ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n")
-        , -1);
+  // Now lets wait for an update
+  if (abs_timeout == ACE_Time_Value::zero) {
+    this->connections_updated_.wait (0);
+  }
+  else {
+    this->connections_updated_.wait (&abs_timeout);
+  }
       }
   }
 

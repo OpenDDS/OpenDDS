@@ -25,7 +25,7 @@
 TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 : thr_per_con_send_task_ (0)
 {
-  DBG_ENTRY_LVL("DataLink","DataLink",5);
+  DBG_ENTRY_LVL("DataLink","DataLink",1);
 
   impl->_add_ref();
   this->impl_ = impl;
@@ -35,7 +35,9 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
   if (this->impl_->config_->thread_per_connection_)
   {
     this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask (this);
-    this->thr_per_con_send_task_->open ();
+    if (this->thr_per_con_send_task_->open () == -1) {
+      ACE_ERROR((LM_ERROR, "(%P|%t)DataLink: failed to open ThreadPerConnectionSendTask\n"));
+    }
   }
 }
 
@@ -44,7 +46,10 @@ TAO::DCPS::DataLink::~DataLink()
   DBG_ENTRY_LVL("DataLink","~DataLink",1);
 
   if (this->thr_per_con_send_task_ != 0)
-    delete this->thr_per_con_send_task_;
+    {
+      this->thr_per_con_send_task_->close (1);
+      delete this->thr_per_con_send_task_;
+    }
 }
 
 

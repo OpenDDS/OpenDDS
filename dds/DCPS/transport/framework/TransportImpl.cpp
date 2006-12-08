@@ -426,8 +426,8 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
       (*remote_associations)[i].num_associations_,
       (*remote_associations)[i].association_data_);
     }
-    this->pending_sub_map_.remove_set (pub_id);
-    this->acked_sub_map_.remove_set (pub_id);
+    RepoIdSet_rch tmp = this->pending_sub_map_.remove_set (pub_id);
+    tmp = this->acked_sub_map_.remove_set (pub_id);
     delete remote_associations;
     this->pending_association_sub_map_.unbind (pub_id);
   }
