@@ -64,6 +64,10 @@ TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
   // Cleanup before leaving the house.
   this->reconnect_task_.close (1);
   //this->reconnect_task_.wait ();
+
+  if (!this->link_.is_nil()) {
+    this->link_->notify_connection_deleted ();
+  }
 }
 
 

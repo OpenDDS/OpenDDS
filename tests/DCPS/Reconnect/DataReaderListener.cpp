@@ -172,3 +172,15 @@ void DataReaderListenerImpl::on_subscription_lost (
     //  "(%P|%t)on_subscription_lost  writer %d \n", status.publication_handles[i]));
   }
 }
+
+
+void DataReaderListenerImpl::on_connection_deleted (
+  ::DDS::DataReader_ptr
+  ACE_ENV_ARG_DECL_WITH_DEFAULTS
+  )
+  ACE_THROW_SPEC ((
+  ::CORBA::SystemException
+  ))
+{
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+}

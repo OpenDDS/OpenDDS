@@ -31,7 +31,7 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-  
+
   virtual void on_offered_incompatible_qos (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::OfferedIncompatibleQosStatus & status
@@ -40,7 +40,7 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-  
+
   virtual void on_liveliness_lost (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::LivelinessLostStatus & status
@@ -49,7 +49,7 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-  
+
   virtual void on_publication_match (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::PublicationMatchStatus & status
@@ -80,6 +80,14 @@ public:
   virtual void on_publication_lost (
     ::DDS::DataWriter_ptr writer,
     const ::TAO::DCPS::PublicationLostStatus & status
+    ACE_ENV_ARG_DECL_WITH_DEFAULTS
+    )
+    ACE_THROW_SPEC ((
+    ::CORBA::SystemException
+    ));
+
+  virtual void on_connection_deleted (
+    ::DDS::DataWriter_ptr writer
     ACE_ENV_ARG_DECL_WITH_DEFAULTS
     )
     ACE_THROW_SPEC ((

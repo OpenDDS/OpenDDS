@@ -286,7 +286,10 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
         {
           this->pre_stop_i ();
           this->impl_->release_datalink(this);
-          this->impl_ = 0;
+    // The TransportImpl ptr should be cleaned in the dstr.
+    // This link will be used as a callback after the actual
+    // connection is closed.
+          //this->impl_ = 0;
 
     TransportSendStrategy_rch send_strategy = 0;
     TransportReceiveStrategy_rch recv_strategy = 0;
@@ -390,6 +393,10 @@ TAO::DCPS::DataLink::release_remote_subscriber
           // This means that this release() operation has caused the
           // publisher_id to no longer be associated with *any* subscribers.
           released_publishers.insert_link(publisher_id,this);
+          {
+            GuardType guard(this->released_local_lock_);
+            released_local_pubs_.insert_id (publisher_id);
+          }
         }
     }
 }
@@ -419,6 +426,10 @@ TAO::DCPS::DataLink::release_remote_publisher
           // This means that this release() operation has caused the
           // subscriber_id to no longer be associated with *any* publishers.
           released_subscribers.insert_link(subscriber_id,this);
+          {
+            GuardType guard(this->released_local_lock_);
+            released_local_subs_.insert_id (subscriber_id);
+          }
         }
     }
 }
@@ -606,6 +617,51 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
           }
       }
+  }
+}
+
+
+void
+TAO::DCPS::DataLink::notify_connection_deleted ()
+{
+  GuardType guard(this->released_local_lock_);
+
+  RepoIdSet::MapType& pmap = released_local_pubs_.map ();
+  RepoIdSet::MapType::ENTRY* pentry;
+  for (RepoIdSet::MapType::ITERATOR itr(pmap);
+    itr.next(pentry);
+    itr.advance())
+  {
+    DataWriterImpl* dw = this->impl_->find_publication(pentry->ext_id_);
+    if (dw != 0)
+    {
+      if (TAO_debug_level > 0)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify pub %d "
+          "connection deleted \n", pentry->ext_id_));
+      }
+
+      dw->notify_connection_deleted ();
+    }
+  }
+
+  RepoIdSet::MapType& smap = released_local_subs_.map ();
+  RepoIdSet::MapType::ENTRY* sentry;
+  for (RepoIdSet::MapType::ITERATOR itr(smap);
+    itr.next(sentry);
+    itr.advance())
+  {
+    DataReaderImpl* dr = this->impl_->find_subscription(sentry->ext_id_);
+    if (dr != 0)
+    {
+      if (TAO_debug_level > 0)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify sub %d "
+          "connection deleted \n", sentry->ext_id_));
+      }
+
+      dr->notify_connection_deleted ();
+    }
   }
 }
 

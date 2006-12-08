@@ -120,6 +120,8 @@ namespace TAO
         /// will notify the corresponding listener.
         void notify (enum ConnectionNotice notice);
 
+        void notify_connection_deleted ();
+
         /// Called before release the datalink or before shutdown to let
         /// the concrete DataLink to do anything necessary.
         virtual void pre_stop_i ();
@@ -225,6 +227,11 @@ namespace TAO
         /// object is created when the thread_per_connection configuration is
         /// true. It only dedicate to this datalink.
         ThreadPerConnectionSendTask* thr_per_con_send_task_;
+
+        RepoIdSet released_local_pubs_;
+        RepoIdSet released_local_subs_;
+
+        LockType released_local_lock_;
 
     protected:
 

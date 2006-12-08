@@ -22,6 +22,7 @@ $lost_publication_callback = 0;
 $lost_subscription_callback = 0;
 $end_with_publisher = 0;
 $kill_subscriber = 0;
+$expected_deleted_connections = 1;
 
 if ($ARGV[0] eq 'restart_sub') {
   # Increase the number of messages so that the publisher will last
@@ -38,6 +39,7 @@ if ($ARGV[0] eq 'restart_sub') {
   # because we do not know how many messages are lost. We give a deviation on the
   # number of expected messages.
   $num_reads_deviation = 2;
+  $expected_deleted_connections = 2;
 }
 elsif ($ARGV[0] eq 'restart_pub') {
   $restart_delay = 10;
@@ -96,7 +98,7 @@ $Subscriber = new PerlACE::Process ("subscriber",
           . " -i $read_delay_ms -l $lost_subscription_callback -e $end_with_publisher");
 $Publisher = new PerlACE::Process ("publisher",
           "-DCPSConfigFile pub.ini -a $num_writes_before_crash -n $num_writes "
-          . "-i $write_delay_ms -l $lost_publication_callback");
+          . "-i $write_delay_ms -l $lost_publication_callback -d $expected_deleted_connections");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

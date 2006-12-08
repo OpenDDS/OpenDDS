@@ -1,3 +1,47 @@
+Fri Dec  8 22:31:28 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        The DataWriter & DataReader Listener now have an additional
+          callback API 'on_connection_deleted'. This gets invoked when the
+          assiciated connection gets closed. This patch was contributed by
+          Yan Dai.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+          Add new Listner callback 'on_connection_deleted'.
+
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+          The concrete Listeners needs to implement the new
+          'on_connection_deleted' method. The reconnect test 'restart_pub'
+          tests the the new connection closure callback.
+
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+          Cleaning up debugging messages.
+
 Fri Dec  8 19:38:39 UTC 2006  Ciju John  <johnc@ociweb.com>
 
           Rework thread-per-connection (TPC) to be able to remove

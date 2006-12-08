@@ -33,12 +33,13 @@ int num_writes = 10;
 int write_delay_ms = 1000;
 int expected_lost_pub_notification = 0;
 int actual_lost_pub_notification = 0;
-
+int expected_deleted_connections = 1;
+int num_deleted_connections = 0;
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "va:n:i:l:");
+  ACE_Get_Opt get_opts (argc, argv, "va:n:i:l:d:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -59,6 +60,9 @@ int parse_args (int argc, char *argv[])
       case 'l':
         expected_lost_pub_notification = ACE_OS::atoi (get_opts.opt_arg ());
         break;
+      case 'd':
+        expected_deleted_connections = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -67,6 +71,7 @@ int parse_args (int argc, char *argv[])
                            "-n <num_writers> "
                            "-i <write_delay_ms> "
                            "-l <expected_lost_pub_notification> "
+                           "-d <expected_deleted_connections> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -101,7 +106,7 @@ int main (int argc, char *argv[]) {
       cerr << "register_type failed." << endl;
       exit(1);
     }
-  
+
     CORBA::String_var type_name = servant->get_type_name ();
 
     DDS::TopicQos topic_qos;
@@ -117,7 +122,7 @@ int main (int argc, char *argv[]) {
     }
 
     TAO::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
                                                   ::TAO::DCPS::AUTO_CONFIG);
 
     DDS::Publisher_var pub =
@@ -130,7 +135,7 @@ int main (int argc, char *argv[]) {
 
     // Attach the publisher to the transport.
     TAO::DCPS::PublisherImpl* pub_impl =
-      ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl, 
+      ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl,
                                          DDS::Publisher_ptr>(pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
@@ -173,7 +178,7 @@ int main (int argc, char *argv[]) {
     // Create the datawriter
     DDS::DataWriterQos dw_qos;
     pub->get_default_datawriter_qos (dw_qos);
-    // Make it KEEP_ALL history so we can verify the received  
+    // Make it KEEP_ALL history so we can verify the received
     // data without dropping.
     dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
     dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
@@ -235,8 +240,8 @@ int main (int argc, char *argv[]) {
 
     writer->end ();
     delete writer;
-    
-    // Sleep a while before shutdown to avoid the problem of repository 
+
+    // Sleep a while before shutdown to avoid the problem of repository
     // crashes when it handles both remove_association from subscriber
     // and publisher at the same time.
     // Cleanup
@@ -255,8 +260,16 @@ int main (int argc, char *argv[]) {
   if (actual_lost_pub_notification != expected_lost_pub_notification)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_publication_lost called %d times "
-      "and expected %d times\n", actual_lost_pub_notification, 
+      "and expected %d times\n", actual_lost_pub_notification,
       expected_lost_pub_notification));
+    return 1;
+  }
+
+  if (num_deleted_connections != expected_deleted_connections)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_connection_deleted called %d times "
+      "and expected %d times\n", num_deleted_connections,
+      expected_deleted_connections));
     return 1;
   }
 
