@@ -1,3 +1,11 @@
+Fri Dec  8 23:21:17 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * DDS_TAO.mwc:
+        
+          New file, which will pull in all ACE+TAO dependencies
+          needed to build the TAO_DDS middleware and put them
+          in a single build.
+
 Fri Dec  8 22:31:28 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         The DataWriter & DataReader Listener now have an additional
