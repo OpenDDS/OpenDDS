@@ -749,7 +749,6 @@ TAO::DCPS::SimpleTcpConnection::tear_link ()
   DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",1);
 
   return this->link_->release_resources ();
-
 }
 
 void

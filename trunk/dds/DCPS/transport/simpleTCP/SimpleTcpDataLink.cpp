@@ -246,10 +246,6 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
   // We need to terminate before deleting the element
   // as the element could still be held up the congestion queue.
   this->send_strategy_->terminate_send (true);
-
-  message->release ();
-
-  delete send_element;
 }
 
 
@@ -304,8 +300,4 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
   ACE_NEW(send_element, TransportControlElement(message));
 
   this->send_i (send_element);
-
-  message->release ();
-
-  delete send_element;
 }

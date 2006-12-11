@@ -1,7 +1,22 @@
+Mon Dec 11 23:18:37 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+          The TransportControlElement is now responsible for its own life
+          cycle management. TransportQueueElements cleanup needs to be
+          thread-aware.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Was missing one of the variable length parameters.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+          cosmetic changes
+
 Fri Dec  8 23:21:17 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * DDS_TAO.mwc:
-        
+
           New file, which will pull in all ACE+TAO dependencies
           needed to build the TAO_DDS middleware and put them
           in a single build.
