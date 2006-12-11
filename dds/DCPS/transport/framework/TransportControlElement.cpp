@@ -32,6 +32,14 @@ void
 TAO::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);
+
+  if (msg_) {
+    msg_->release ();
+  }
+
+  // This element is guaranteed to be heap-based. The DCPS layer passes
+  // a ptr to this object to the transport layer, hense the guarantee.
+  delete this;
 }
 
 
