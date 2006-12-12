@@ -1,3 +1,14 @@
+Tue Dec 12 16:55:39 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcpsexe.mpb:
+        * MPC/config/dcpsexe_with_udp.mpb:
+        
+          Moved these file from the top-level DDS directory,
+          into the new path, to make them consistent with
+          the location of similar files in TAO and CIAO.
+
 Mon Dec 11 23:18:37 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
