@@ -613,17 +613,6 @@ namespace TAO
               //TBD - mark the TopicImpl as deleted and make it 
               //      reject calls to the TopicImpl.
              
-              // note: this will destroy the TopicImpl if there are no
-              // client object reference to it.
-              if (topics_.unbind(topic_name.in ()) == -1)
-                {
-                  ACE_ERROR_RETURN ((LM_ERROR, 
-                                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                                    ACE_TEXT("%p \n"),
-                                    ACE_TEXT("unbind")),
-                                    ::DDS::RETCODE_ERROR);
-                }
-               
               TopicStatus status 
                 = repository_->remove_topic (the_dp_servant->get_domain_id (),
                                               the_dp_servant->get_id (),
@@ -643,8 +632,21 @@ namespace TAO
               the_topic_servant->_remove_ref ();  
 
               deactivate_object < ::DDS::Topic_ptr > (a_topic);
-             }
 
+              // note: this will destroy the TopicImpl if there are no
+              // client object reference to it.
+              if (topics_.unbind(topic_name.in ()) == -1)
+                {
+                  ACE_ERROR_RETURN ((LM_ERROR, 
+                                    ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+                                    ACE_TEXT("%p \n"),
+                                    ACE_TEXT("unbind")),
+                                    ::DDS::RETCODE_ERROR);
+                }
+              else
+                return ::DDS::RETCODE_OK;
+
+            }
          }
       }
       ACE_CATCH (CORBA::SystemException, sysex)

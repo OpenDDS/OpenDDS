@@ -1,3 +1,11 @@
+Fri Dec 15 22:24:07 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\DomainParticipantImpl.cpp:
+        
+          Made the topic object reference removed from map after deactivated
+          from poa.  This would fix access violation in FooTest5 (during 
+          DomainParticipantImpl::delete_contained_entities()).
+          
 Fri Dec 15 18:11:14 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
