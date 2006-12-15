@@ -124,7 +124,9 @@ int main(int argc, char *argv[])
          TAO::DCPS::SimpleUdpConfiguration* udp_config 
            = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
-         udp_config->local_address_.set("localhost:12367");
+         std::string addrStr(ACE_LOCALHOST);
+         addrStr += ":12367";
+         udp_config->local_address_.set(addrStr.c_str ());
          pub_tcp_impl->configure (config.in ());
        }
 
@@ -177,7 +179,9 @@ int main(int argc, char *argv[])
          TAO::DCPS::SimpleUdpConfiguration* udp_config 
            = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
-         udp_config->local_address_.set("localhost:1237");
+         std::string addrStr(ACE_LOCALHOST);
+         addrStr += ":1237";
+         udp_config->local_address_.set(addrStr.c_str ());
          sub_tcp_impl->configure(config.in());
        }
 

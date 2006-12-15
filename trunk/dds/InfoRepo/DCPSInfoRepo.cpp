@@ -14,7 +14,7 @@
 
 static ACE_TString ior_file (ACE_TEXT("repo.ior"));
 static ACE_TString domain_file (ACE_TEXT("domain_ids"));
-static ACE_TString listen_address_str (ACE_TEXT("localhost:2839")); // = 0xB17
+static ACE_TString listen_address_str; //(ACE_TEXT("localhost:2839")); // = 0xB17
 
 //static const char * ior_file = "repo.ior";
 //static const char * domain_file = "domain_ids";
@@ -43,6 +43,9 @@ parse_args (int argc,
             ACE_TCHAR *argv[]
             ACE_ENV_ARG_DECL)
 {
+  listen_address_str = ACE_LOCALHOST;
+  listen_address_str += ":2839";
+
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   const char* current_arg = 0;

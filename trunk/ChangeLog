@@ -1,3 +1,14 @@
+Fri Dec 15 18:11:14 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
+        * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
+        * tests\DCPS\FooTest5_0\main.cpp:
+        * dds\InfoRepo\DCPSInfoRepo.cpp:
+        * dds\DCPS\Service_Participant.cpp:
+
+          Replaced localhost with ACE_LOCALHOST to support platforms that do 
+          not support name resolutions.
+
 Tue Dec 12 16:55:39 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * MPC/config/dcps_ts_defaults.mpb:
