@@ -554,7 +554,7 @@ namespace TAO
       // localhost will only work for DCPSInfo on the same machine.
       // Don't specify an address to an OS picked address is used.
       tcp_config->local_address_
-        = ACE_INET_Addr (bit_transport_port_, "localhost");
+        = ACE_INET_Addr (bit_transport_port_, ACE_LOCALHOST);
 
       if (bit_transport_impl_->configure(config.in()) != 0)
         {

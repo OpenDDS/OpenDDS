@@ -29,8 +29,8 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-const char * reader_address_str = "localhost:16701";
-const char * writer_address_str = "localhost:29803";
+std::string reader_address_str; // = "localhost:16701";
+std::string writer_address_str; // = "localhost:29803";
 int reader_address_given = 0;
 int writer_address_given = 0;
 
@@ -88,7 +88,7 @@ int init_tranport ()
         }
 
 
-      ACE_INET_Addr reader_address (reader_address_str);
+      ACE_INET_Addr reader_address (reader_address_str.c_str ());
       reader_udp_config->local_address_ = reader_address;
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
@@ -114,7 +114,7 @@ int init_tranport ()
 
       if (reader_address_given)
         {
-          ACE_INET_Addr reader_address (reader_address_str);
+          ACE_INET_Addr reader_address (reader_address_str.c_str ());
           reader_tcp_config->local_address_ = reader_address;
         }
         // else use default address - OS assigned.
@@ -149,7 +149,7 @@ int init_tranport ()
           return 12;
         }
 
-      ACE_INET_Addr writer_address (writer_address_str);
+      ACE_INET_Addr writer_address (writer_address_str.c_str ());
       writer_udp_config->local_address_ = writer_address;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
@@ -174,7 +174,7 @@ int init_tranport ()
       
       if (writer_address_given)
         {
-          ACE_INET_Addr writer_address (writer_address_str);
+          ACE_INET_Addr writer_address (writer_address_str.c_str());
           writer_tcp_config->local_address_ = writer_address;
         }
         // else use default address - OS assigned.
@@ -218,6 +218,11 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
+  reader_address_str = ACE_LOCALHOST;
+  reader_address_str += ":16701";
+  writer_address_str = ACE_LOCALHOST;
+  writer_address_str += ":29803";
+
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
