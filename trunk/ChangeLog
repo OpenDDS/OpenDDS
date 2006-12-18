@@ -1,11 +1,16 @@
+Mon Dec 18 18:10:11 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/main.cpp:
+	  Add missing header file.
+
 Fri Dec 15 22:24:07 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\DomainParticipantImpl.cpp:
-        
+
           Made the topic object reference removed from map after deactivated
-          from poa.  This would fix access violation in FooTest5 (during 
+          from poa.  This would fix access violation in FooTest5 (during
           DomainParticipantImpl::delete_contained_entities()).
-          
+
 Fri Dec 15 18:11:14 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
@@ -14,7 +19,7 @@ Fri Dec 15 18:11:14 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         * dds\InfoRepo\DCPSInfoRepo.cpp:
         * dds\DCPS\Service_Participant.cpp:
 
-          Replaced localhost with ACE_LOCALHOST to support platforms that do 
+          Replaced localhost with ACE_LOCALHOST to support platforms that do
           not support name resolutions.
 
 Tue Dec 12 16:55:39 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
@@ -23,7 +28,7 @@ Tue Dec 12 16:55:39 UTC 2006  Jeff Parsons <j.parsons@vanderbilt.edu>
         * MPC/config/dcps.mpb:
         * MPC/config/dcpsexe.mpb:
         * MPC/config/dcpsexe_with_udp.mpb:
-        
+
           Moved these file from the top-level DDS directory,
           into the new path, to make them consistent with
           the location of similar files in TAO and CIAO.
