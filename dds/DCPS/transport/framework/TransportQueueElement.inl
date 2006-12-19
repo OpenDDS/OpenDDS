@@ -64,7 +64,8 @@ TAO::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 
       // The queue elements are released to its cached allocator
       // in release_element() call.
-      return this->release_element(dropped_by_transport);
+      this->release_element(dropped_by_transport);
+      return;
     }
 
   // ciju: The sub_loan_count_ has been observed to drop below zero.
