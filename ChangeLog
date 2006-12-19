@@ -1,3 +1,10 @@
+Tue Dec 19 17:59:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+
+          Fixed an include file dependency problem on vc71 DOC build.
+          
 Tue Dec 19 16:53:06 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/subscriber.cpp:
