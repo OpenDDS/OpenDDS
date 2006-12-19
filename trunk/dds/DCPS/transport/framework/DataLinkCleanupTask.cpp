@@ -8,7 +8,6 @@
 #include  "DCPS/DataWriterImpl.h"
 #include  "DCPS/DataReaderImpl.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
-#include  "dds/DCPS/transport/framework/DataLink.h"
 #include "TransportImpl.h"
 
 TAO::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)
