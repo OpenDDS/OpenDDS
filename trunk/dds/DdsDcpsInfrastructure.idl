@@ -2,7 +2,7 @@
 // $Id$
 #ifndef TAO_DDS_DCPS_INFRASTRUCTURE_IDL
 #define TAO_DDS_DCPS_INFRASTRUCTURE_IDL
-    
+
 
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_TYPE_NATIVE long
@@ -25,6 +25,9 @@
 //#define DATAWRITER_QOS_USE_TOPIC_QOS
 //#define DATAREADER_QOS_USE_TOPIC_QOS
 
+// The below include is needed to bypass a vc71/vc8/intel c++ bug
+// dealing with base template exports
+#include "tao/StringSeq.pidl"
 
 module DDS {
 
@@ -148,7 +151,7 @@ module DDS {
 		};
 
     typedef sequence<QosPolicyCount> QosPolicyCountSeq;
-    
+
     struct OfferedIncompatibleQosStatus {
 		long total_count;
 		long total_count_change;
@@ -226,7 +229,7 @@ module DDS {
     typedef unsigned long InstanceStateMask;
     const InstanceStateMask ANY_INSTANCE_STATE = 0xffff;
     const InstanceStateMask NOT_ALIVE_INSTANCE_STATE= 0x006;
-   
+
     // ----------------------------------------------------------------------
     // Qos
     // ----------------------------------------------------------------------
@@ -313,7 +316,7 @@ module DDS {
 		TOPIC_PRESENTATION_QOS,
 		GROUP_PRESENTATION_QOS
 		};
- 
+
     struct PresentationQosPolicy {
 		PresentationQosPolicyAccessScopeKind access_scope;
 		boolean coherent_access;
@@ -323,7 +326,7 @@ module DDS {
     struct DeadlineQosPolicy {
 		Duration_t period;
 		};
-   
+
     struct LatencyBudgetQosPolicy {
 		Duration_t duration;
 		};
@@ -346,7 +349,7 @@ module DDS {
 		MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
 		MANUAL_BY_TOPIC_LIVELINESS_QOS
 		};
- 
+
     struct LivelinessQosPolicy {
 		LivelinessQosPolicyKind kind;
 		Duration_t lease_duration;
@@ -355,7 +358,7 @@ module DDS {
     struct TimeBasedFilterQosPolicy {
 		Duration_t minimum_separation;
 		};
-   
+
     struct PartitionQosPolicy {
 		StringSeq name;
 		};
@@ -364,7 +367,7 @@ module DDS {
 		BEST_EFFORT_RELIABILITY_QOS,
 		RELIABLE_RELIABILITY_QOS
 		};
- 
+
     struct ReliabilityQosPolicy {
 		ReliabilityQosPolicyKind kind;
 		Duration_t max_blocking_time;
@@ -383,12 +386,12 @@ module DDS {
 		KEEP_LAST_HISTORY_QOS,
 		KEEP_ALL_HISTORY_QOS
 		};
- 
+
     struct HistoryQosPolicy {
 		HistoryQosPolicyKind kind;
 		long depth;
 		};
- 
+
     struct ResourceLimitsQosPolicy {
 		long max_samples;
 		long max_instances;
@@ -398,7 +401,7 @@ module DDS {
     struct EntityFactoryQosPolicy {
 		boolean autoenable_created_entities;
 		};
-   
+
     struct WriterDataLifecycleQosPolicy {
 		boolean autodispose_unregistered_instances;
 		};
@@ -442,7 +445,7 @@ module DDS {
 		OwnershipStrengthQosPolicy ownership_strength;
 		WriterDataLifecycleQosPolicy writer_data_lifecycle;
 		};
- 
+
     struct PublisherQos {
 		PresentationQosPolicy presentation;
 		PartitionQosPolicy partition;
@@ -463,7 +466,7 @@ module DDS {
 		TimeBasedFilterQosPolicy time_based_filter;
 		ReaderDataLifecycleQosPolicy reader_data_lifecycle;
 		};
- 
+
     struct SubscriberQos {
 		PresentationQosPolicy presentation;
 		PartitionQosPolicy partition;
@@ -549,7 +552,7 @@ module DDS {
     interface Entity {
                 // ReturnCode_t set_qos(in EntityQos qos);
                 // void get_qos(inout EntityQos qos);
-                // ReturnCode_t set_listener(in Listener l, 
+                // ReturnCode_t set_listener(in Listener l,
                 //                           in StatusKindMask mask);
                 // Listener get_listener();
 
@@ -557,8 +560,8 @@ module DDS {
 
     StatusKindMask get_status_changes();
 		};
-    
-    
+
+
     struct SampleInfo {
 		SampleStateKind sample_state;
 		ViewStateKind view_state;
