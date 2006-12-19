@@ -1,3 +1,10 @@
+Tue Dec 19 22:09:09 UTC 2006  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          Fixed compilation errors that return a value to a void return 
+          function.
+          
 Tue Dec 19 17:59:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
