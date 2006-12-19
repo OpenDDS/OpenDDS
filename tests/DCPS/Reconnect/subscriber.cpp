@@ -259,13 +259,11 @@ int main (int argc, char *argv[])
     }
     ACE_OS::fclose(readers_completed);
 
-    // Wait for the publisher to finish
-    while (writers_completed == 0) {
-      ACE_Time_Value small(0,250000);
-      ACE_OS::sleep (small);
-      writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-    }
-    ACE_OS::fclose(writers_completed);
+    // Wait for 5 seconds to (>passive_reconnect_duration) 
+    // to give transport time to detect the connection lost due to 
+    // backpressure timeout before shutdown the datareader.
+    if (end_with_publisher)
+      ACE_OS::sleep (5);
 
     if (!CORBA::is_nil (participant.in ())) {
       participant->delete_contained_entities();
