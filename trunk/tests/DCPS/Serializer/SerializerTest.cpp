@@ -61,18 +61,18 @@ parse_args (int argc,
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
   while (arg_shifter.is_anything_left ())
-  {
-    const char *currentArg = 0;
+    {
+      const char *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
-    {
-      arg_shifter.consume_arg ();
+      if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+	{
+	  arg_shifter.consume_arg ();
+	}
+      else
+	{
+	  arg_shifter.ignore_arg ();
+	}
     }
-    else
-    {
-      arg_shifter.ignore_arg ();
-    }
-  }
 }
 
 #include <iostream>
@@ -214,7 +214,7 @@ checkValues( const Values& expected, const Values& observed)
   }
   if( expected.longdoubleValue != observed.longdoubleValue) {
     std::cout << "longdouble values not correct after insertion and extraction." << std::endl ;
-//    std::cout << "(expected: " << expected.longdoubleValue << ", observed: " << observed.longdoubleValue << ")." << std::endl ;
+    //    std::cout << "(expected: " << expected.longdoubleValue << ", observed: " << observed.longdoubleValue << ")." << std::endl ;
     failed = true;
   }
   if( expected.longlongValue   != observed.longlongValue) {
@@ -421,13 +421,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 #if ACE_SIZEOF_LONG_DOUBLE == 16
                       0x89abcdef01234567,
 #else
-                      {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff},
+                      {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff}},
 #endif
                       0x1a,
                       0xb2,
-                      const_cast<char *>(string),
+		      const_cast<ACE_CDR::Char *>(string),
                       wstring
-                    } ;
+  } ;
   Values observed ;
   Values observed_swapped ;
 
@@ -449,7 +449,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 #if ACE_SIZEOF_LONG_DOUBLE == 16
     expectedArray.longdoubleValue[i] = 0x89abcdef01234567;
 #else
-    ACE_CDR::LongDouble ldarray = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+    ACE_CDR::LongDouble ldarray = {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff}};
     expectedArray.longdoubleValue[i] = ldarray;
 #endif
     expectedArray.charValue[i] = (0xff&i);
@@ -499,12 +499,12 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   testchain->release() ;
 
   if (failed)
-  {
-    std::cerr << std::endl << "SerializerTest FAILED" << std::endl;
-  }
+    {
+      std::cerr << std::endl << "SerializerTest FAILED" << std::endl;
+    }
   else
-  {
-    std::cout << std::endl << "SerializerTest PASSED" << std::endl;
-  }
+    {
+      std::cout << std::endl << "SerializerTest PASSED" << std::endl;
+    }
   return failed;
 }

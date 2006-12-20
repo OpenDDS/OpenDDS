@@ -1,27 +1,32 @@
+Wed Dec 20 16:16:03 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+          Extra set of paranthesis needed to remove gcc warning.
+
 Tue Dec 19 22:09:09 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportQueueElement.inl:
 
-          Fixed compilation errors that return a value to a void return 
+          Fixed compilation errors that return a value to a void return
           function.
-          
+
 Tue Dec 19 17:59:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
         * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
 
           Fixed an include file dependency problem on vc71 DOC build.
-          
+
 Tue Dec 19 16:53:06 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/subscriber.cpp:
-        
-          Made subscriber wait for 5 seconds (>passive_reconnect_duration) 
-          to give transport time to detect the connection lost due to 
+
+          Made subscriber wait for 5 seconds (>passive_reconnect_duration)
+          to give transport time to detect the connection lost due to
           backpressure timeout before shutdown the datareader. This should fix
           the bp_timeout test failure on not receiving the subscription lost
           callback.
-          
+
 Tue Dec 19 15:58:47 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
