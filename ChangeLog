@@ -1,3 +1,8 @@
+Wed Dec 20 16:29:36 UTC 2006  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+	  Fixed gcc warnings. Uninitialized variables.
+
 Wed Dec 20 16:16:03 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Serializer/SerializerTest.cpp:
