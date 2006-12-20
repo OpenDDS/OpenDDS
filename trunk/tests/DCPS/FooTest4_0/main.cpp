@@ -36,30 +36,30 @@ int parse_args (int argc, char *argv[])
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -t use_take?1:0           defaults to 0 
-    //  -i num_reads_per_thread   defaults to 1 
-    //  -r num_datareaders         defaults to 1 
+    //  -t use_take?1:0           defaults to 0
+    //  -i num_reads_per_thread   defaults to 1
+    //  -r num_datareaders         defaults to 1
     //  -m multiple_instances?1:0  defaults to 0
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth           defaults to 1
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -84,16 +84,16 @@ int main (int argc, char *argv[])
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
-      ::Mine::FooTypeSupport_var fts = 
+      ::Mine::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                         ::Mine::FooTypeSupportImpl, 
+                                         ::Mine::FooTypeSupportImpl,
                                          ::Mine::FooTypeSupport_ptr >(fts_servant);
       ACE_TRY_CHECK;
 
-      ::DDS::DomainParticipant_var dp = 
-        dpf->create_participant(MY_DOMAIN, 
-                                PARTICIPANT_QOS_DEFAULT, 
-                                ::DDS::DomainParticipantListener::_nil() 
+      ::DDS::DomainParticipant_var dp =
+        dpf->create_participant(MY_DOMAIN,
+                                PARTICIPANT_QOS_DEFAULT,
+                                ::DDS::DomainParticipantListener::_nil()
                                 ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if (CORBA::is_nil (dp.in ()))
@@ -105,8 +105,8 @@ int main (int argc, char *argv[])
 
       if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("Failed to register the FooTypeSupport.")));
           return 1;
         }
 
@@ -114,16 +114,16 @@ int main (int argc, char *argv[])
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
-      
+
       topic_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
 
       topic_qos.history.depth = history_depth;
 
-      ::DDS::Topic_var topic = 
-        dp->create_topic (MY_TOPIC, 
-                          MY_TYPE, 
-                          topic_qos, 
+      ::DDS::Topic_var topic =
+        dp->create_topic (MY_TOPIC,
+                          MY_TYPE,
+                          topic_qos,
                           ::DDS::TopicListener::_nil()
                           ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
@@ -131,21 +131,24 @@ int main (int argc, char *argv[])
       {
         return 1 ;
       }
-      
+
       Reader* reader ;
       Writer* writer  ;
 
       SampleInfoMap si_map ;
-      ::DDS::SampleInfo si ;
-        
+      ::DDS::SampleInfo si ={::DDS::NOT_READ_SAMPLE_STATE, ::DDS::NOT_NEW_VIEW_STATE
+			     , ::DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE
+			     , {0, 0}, ::DDS::HANDLE_NIL
+			     , 0, 0, 0, 0, 0};
+
       reader = new Reader(dp.in (), history_depth, max_samples_per_instance) ;
-     
+
       ACE_OS::sleep(5) ; // why???
 
       writer = new Writer(dp.in (), topic.in (), history_depth, max_samples_per_instance) ;
-     
+
       ACE_OS::sleep(5) ; // why???
-      
+
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
       si.view_state = ::DDS::NEW_VIEW_STATE ;
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE;
@@ -158,7 +161,7 @@ int main (int argc, char *argv[])
 
       writer->test1 ();
       reader->read (si_map);
-     
+
       ACE_OS::sleep(1) ; // why???
 
       si_map['A'].sample_state = ::DDS::READ_SAMPLE_STATE ;
@@ -199,11 +202,11 @@ int main (int argc, char *argv[])
       si.generation_rank = 0;
       si.absolute_generation_rank = 0;
       si_map['Q'] = si ;
-      
+
       writer->test2 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
-     
+
       ACE_OS::sleep(1) ; // why???
 
       si_map['A'].sample_state = ::DDS::READ_SAMPLE_STATE ;
@@ -271,7 +274,7 @@ int main (int argc, char *argv[])
       si_map['Q'].sample_rank = 0 ;
       si_map['Q'].generation_rank = 0 ;
       si_map['Q'].absolute_generation_rank = 0 ;
-  
+
       writer->test3 ();
       ACE_OS::sleep(5) ;
       reader->read (si_map);
@@ -280,13 +283,13 @@ int main (int argc, char *argv[])
       delete reader;
 
 //---------------------------------------------------------------------
-        
+
       reader = new Reader(dp.in (), history_depth, max_samples_per_instance) ;
 
       ACE_OS::sleep(5) ; // why???
 
       writer = new Writer(dp.in (), topic.in (), history_depth, max_samples_per_instance) ;
-     
+
       ACE_OS::sleep(5) ; // why???
 
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
@@ -298,7 +301,7 @@ int main (int argc, char *argv[])
       si.generation_rank = 0 ;
       si.absolute_generation_rank = 0 ;
       si_map['c'] = si ;
-  
+
       writer->test4 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
@@ -334,13 +337,13 @@ int main (int argc, char *argv[])
       si.generation_rank =  0 ;
       si.absolute_generation_rank = 0 ;
       si_map['d'] = si ;
-     
+
       writer->test5 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
-     
+
       ACE_OS::sleep(1) ; // why???
-                                    
+
       si_map['c'].sample_state = ::DDS::READ_SAMPLE_STATE ;
       si_map['c'].view_state = ::DDS::NOT_NEW_VIEW_STATE ;
       si_map['c'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
@@ -368,7 +371,7 @@ int main (int argc, char *argv[])
       si.generation_rank = 0 ;
       si.absolute_generation_rank = 0 ;
       si_map['e'] = si ;
- 
+
       writer->test6 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
@@ -377,20 +380,20 @@ int main (int argc, char *argv[])
       delete reader;
 
 //---------------------------------------------------------------------
-        
+
       reader = new Reader(dp.in (), 1, 1) ;
-     
+
       ACE_OS::sleep(5) ; // why???
 
       writer = new Writer(dp.in (), topic.in (), history_depth, max_samples_per_instance) ;
-     
+
       ACE_OS::sleep(5) ; // why???
 
       writer->test5 ();
       writer->test6 ();
 
       ACE_OS::sleep(1) ;
-  
+
       si_map['d'].sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
       si_map['d'].view_state = ::DDS::NEW_VIEW_STATE ;
       si_map['d'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
@@ -411,7 +414,7 @@ int main (int argc, char *argv[])
       dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
 
       TheTransportFactory->release();
-      TheServiceParticipant->shutdown (); 
+      TheServiceParticipant->shutdown ();
 
     }
   ACE_CATCH (TestException,ex)
