@@ -1,3 +1,11 @@
+Tue Jan  2 22:43:33 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+        
+          Removed the reference of the reader_transport_impl and 
+          writer_transport_impl before shutdown the transport.
+          This would fix access violation on windows.
+        
 Wed Dec 20 16:29:36 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
