@@ -413,6 +413,9 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
       dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
 
+      writer_transport_impl = 0;
+      reader_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
