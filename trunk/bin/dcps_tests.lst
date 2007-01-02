@@ -74,11 +74,13 @@ tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
 
-tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
-tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN
-tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN
-tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN
-tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN
+# Commented builtin topic since they are not well implemented.
+ 
+#tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN
 
 tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
