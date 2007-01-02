@@ -1,3 +1,10 @@
+Tue Jan  2 22:55:40 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+          
+          Excluded builtin topic tests from nightly builds since they 
+          are not well implemented. 
+
 Tue Jan  2 22:43:33 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
