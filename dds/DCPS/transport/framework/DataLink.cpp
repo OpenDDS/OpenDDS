@@ -647,9 +647,9 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
 
   RepoIdSet::MapType& smap = released_local_subs_.map ();
   RepoIdSet::MapType::ENTRY* sentry;
-  for (RepoIdSet::MapType::ITERATOR itr(smap);
-    itr.next(sentry);
-    itr.advance())
+  for (RepoIdSet::MapType::ITERATOR itr2(smap);
+    itr2.next(sentry);
+    itr2.advance())
   {
     DataReaderImpl* dr = this->impl_->find_subscription(sentry->ext_id_);
     if (dr != 0)
