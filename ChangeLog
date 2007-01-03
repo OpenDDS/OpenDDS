@@ -1,3 +1,9 @@
+Wed Jan  3 17:20:08 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        
+          Fixed the iterator redefinition compilation error on vc6 build.
+          
 Tue Jan  2 22:55:40 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
