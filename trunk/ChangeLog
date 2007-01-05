@@ -1,3 +1,24 @@
+Fri Jan  5 22:06:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+        
+        This fixed the problem that default transport id does not work.
+        [See RT8497].
+        
+        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
+        * dds\DCPS\transport\framework\TransportFactory.h:
+        * dds\DCPS\transport\framework\TransportFactory.cpp:
+        
+          Added default transport id (TransportIdType) parameter to 
+          register_generator() so the transport configuation with
+          the default transport ID (DEFAULT_SIMPLE_TCP_ID or
+          DEFAULT_SIMPLE_UDP_ID) will be registered. 
+          
+        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
+        * DevGuideExamples\DDS\Messenger\publisher.cpp:
+        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        
+          Added default transport id test. The "run_test.pl default"
+          tests this bug fix.
+
 Thu Jan  4 18:54:17 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\BasicQueueLinkAllocator_T.h:

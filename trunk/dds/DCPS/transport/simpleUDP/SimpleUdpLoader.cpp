@@ -43,7 +43,9 @@ TAO_DCPS_SimpleUdpLoader::init (int argc,
             ACE_NEW_RETURN (generator,
                             TAO::DCPS::SimpleUdpGenerator (),
                             -1);
-            TheTransportFactory->register_generator (type, generator); 
+            TheTransportFactory->register_generator (TAO::DCPS::DEFAULT_SIMPLE_UDP_ID,
+                                                     type, 
+                                                     generator); 
           }
       }
     else
