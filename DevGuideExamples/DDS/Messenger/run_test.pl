@@ -19,6 +19,10 @@ if ($ARGV[0] eq 'udp') {
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
     #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
+elsif ($ARGV[0] eq 'default') {
+    $pub_opts = "-t default";
+    $sub_opts = "-t default";
+}
 
 
 $domains_file = PerlACE::LocalFile ("domain_ids");

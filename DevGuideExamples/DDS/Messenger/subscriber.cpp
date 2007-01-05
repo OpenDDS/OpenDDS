@@ -35,25 +35,28 @@ parse_args (int argc, char *argv[])
   int c;
 
   while ((c = get_opts ()) != -1)
-    {
-      switch (c)
   {
-  case 't':
-    if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
-      transport_impl_id = 2;
+    switch (c)
+    {
+    case 't':
+      if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
+        transport_impl_id = 2;
+      }
+      // test with DEFAULT_SIMPLE_TCP_ID.
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default") == 0) {
+        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
+      }
+      break;
+    case '?':
+    default:
+      ACE_ERROR_RETURN ((LM_ERROR,
+        "usage:  %s "
+        "-t <tcp/udp/default> "
+        "\n",
+        argv [0]),
+        -1);
     }
-    break;
-
-  case '?':
-  default:
-    ACE_ERROR_RETURN ((LM_ERROR,
-           "usage:  %s "
-           "-t <tcp/udp> "
-           "\n",
-           argv [0]),
-          -1);
   }
-    }
   // Indicates sucessful parsing of the command line
   return 0;
 }

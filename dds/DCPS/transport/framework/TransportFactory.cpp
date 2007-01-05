@@ -376,12 +376,13 @@ TAO::DCPS::TransportFactory::register_simpletcp ()
                  ACE_TEXT("(%P|%t)TransportFactory::register_simpletcp no memory\n")));
       return;
     }
-  this->register_generator ("SimpleTcp", generator);
+  this->register_generator (TAO::DCPS::DEFAULT_SIMPLE_TCP_ID, "SimpleTcp", generator);
 }
 
 
 void
-TAO::DCPS::TransportFactory::register_generator (const char* type,
+TAO::DCPS::TransportFactory::register_generator (TransportIdType default_trans_id,
+                                                 const char* type,
                                                  TransportGenerator* generator)
 {
   DBG_ENTRY_LVL("TransportFactory","register_generator",5);
@@ -416,6 +417,9 @@ TAO::DCPS::TransportFactory::register_generator (const char* type,
                  type));
       ACE_THROW (Transport::MiscProblem());
     }
+
+   TransportConfiguration_rch config
+              = create_configuration (default_trans_id, type);
 }
 
 /// This method is a bit unusual in regards to the way it treats the

@@ -52,7 +52,9 @@ namespace TAO
         /// library creates a concrete transport generator and register with TransportFactory singleton.
         /// Special Note: Caller is "giving away" the generator to
         ///               this TransportFactory.
-        void register_generator (const char* name, TransportGenerator* generator);
+        void register_generator (TransportIdType default_trans_id,
+                                 const char* name, 
+                                 TransportGenerator* generator);
 
         /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory
         /// object which uses hash map to cache those configuration. This is called by the
