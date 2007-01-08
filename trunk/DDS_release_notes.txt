@@ -1,3 +1,49 @@
+Version 1.0 of TAO DDS.
+
+New to this version are the following changes:
+
+- Moved mpb files from the top-level DDS directory,
+  into MPC/config, to make them consistent with
+  the location of similar files in TAO and CIAO.
+  Now the TAO version has to have an 
+  $ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg to
+  make MPC run success for DDS.
+
+- Fixed memory grow in the thread-per-connection when datawriter writes too 
+  fast and continuously requests remove_sample. The problem is the samples 
+  in thread-per-connection queue are not removed and cause memory grow. 
+
+- Supported the datareader and datawriter restart up without shutdown transport.
+  
+  Made the DCPS entity servants deleted upon delete_*()
+  call instead of upon orb shutdown. This would make the create/delete
+  DCPS entity multiple times in a single process without shutdown
+  Service Participant.
+  
+  The reconnect thread and connection object memory leaking problem was fixed. 
+  A dedicated task belonging to the TransportImpl object is used to clean up 
+  any resources associated with the DataLink. 
+
+  Added keep_link configuration to indicate whether a datalink should
+  be maintained when all associations are removed. This would allow
+  the datareader/datawriter restart in same endpoint reconnect reuse 
+  the same connection.
+
+- Fixed a problem that the send_start could send on a nil datalink.
+  The problem is a datalink insertion and finding are not sychnorized.
+
+- Supported the default transport id for SimpleTcp and SimpleUdp.
+  The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for
+  DEFAULT_<transport>_CONFIG values. Each specific transport
+  has its default id in that range such as DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00
+  and DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01. Note the default transports can not
+  be configured by the users. 
+
+- Added on_connection_deleted to TAO::DCPS::DataWriterListener/DataReaderListener 
+  for testing connection object memory leak.
+
+=========================================================================
+
 Version 0.9 of TAO DDS.
 
 New to this version are the following changes:
@@ -59,7 +105,7 @@ New to this version are the following changes:
       [Details] test FAILED. Please see the /tao_builds/taoadmin/BETA/ACE_wrappers/TAO/DDS/tests/DCPS/Reconnect/test.log for details.
       [Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with status 2    
     
-      
+=========================================================================
       
 Version 0.8 of TAO DDS.
 
