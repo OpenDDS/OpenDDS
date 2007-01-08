@@ -1219,8 +1219,6 @@ TAO::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_re
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",5);
 
-  GuardType guard(this->lock_);
-
   int status = 0;
 
   //ciju: Tim had the idea that we could do the following check
@@ -1337,6 +1335,8 @@ TAO::DCPS::TransportSendStrategy::remove_sample
 (const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",5);
+
+  GuardType guard(this->lock_);
 
   QueueRemoveVisitor remove_element_visitor(sample->sample_);
   PacketRemoveVisitor remove_from_packet_visitor(sample->sample_,
