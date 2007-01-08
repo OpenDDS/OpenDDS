@@ -1,3 +1,16 @@
+Mon Jan  8 18:37:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleTCP\SimpleTcpDataLink.cpp:
+        * dds\DCPS\transport\framework\TransportSendStrategy.inl:
+
+          Made the terminate_send() called before send graceful 
+          disconnect message in 
+          SimpleTcpDataLink::send_graceful_disconnect_message() and
+          made TransportSendStrategy::suspend_send() not reset the
+          suspend state when it's already in terminate state. This 
+          should fix some race condition when terminate_send() is 
+          called before sending disconnect message.
+          
 Mon Jan  8 17:46:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
