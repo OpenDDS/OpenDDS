@@ -87,7 +87,7 @@ TAO::DCPS::TransportSendStrategy::suspend_send ()
   DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",5);
   GuardType guard(this->lock_);
 
-  if (this->mode_ != MODE_SUSPEND)
+  if (this->mode_ != MODE_TERMINATED && this->mode_ != MODE_SUSPEND)
     {
       this->mode_before_suspend_ = this->mode_;
       this->mode_ = MODE_SUSPEND;
