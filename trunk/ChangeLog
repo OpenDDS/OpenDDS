@@ -1,3 +1,11 @@
+Mon Jan  8 21:09:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+        
+          Fixed the recursively acquiring non-recursive lock problem
+          in remove_all_control_msgs (). To fix it, move the lock
+          from remove_sample_i() to the caller functions.
+
 Mon Jan  8 18:37:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleTCP\SimpleTcpDataLink.cpp:
