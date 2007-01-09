@@ -61,14 +61,13 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  CORBA::String_var tn;
   if (type_name == 0 || type_name[0] == '\0')
-     tn = this->get_type_name ();
+     this->type_name_ = this->get_type_name();
   else
-     tn = CORBA::string_dup (type_name);
+     this->type_name_ = CORBA::string_dup (type_name);
 
   return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
-                                                           tn.in (),
+                                                           this->type_name_.in (),
                                                            this);
 }
 
@@ -81,7 +80,10 @@ char *
     CORBA::SystemException
   ))
 {
-  return CORBA::string_dup (this->_interface_repository_id());
+  if (this->type_name_ == NULL)
+    return CORBA::string_dup (this->_interface_repository_id());
+  else
+    return CORBA::string_dup (this->type_name_.in ());
 }
 
 
