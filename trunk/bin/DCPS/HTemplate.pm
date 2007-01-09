@@ -95,6 +95,9 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+    
+  private:
+    CORBA::String_var type_name_;
 };
 <%NAMESPACEEND%>
 
