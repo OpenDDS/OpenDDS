@@ -1,7 +1,12 @@
+Tue Jan  9 15:29:59 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * PROBLEM-REPORT-FORM:
+	  Adding a DDS specific PROBLEM-REPORT-FORM.
+
 Mon Jan  8 21:09:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
-        
+
           Fixed the recursively acquiring non-recursive lock problem
           in remove_all_control_msgs (). To fix it, move the lock
           from remove_sample_i() to the caller functions.
@@ -11,14 +16,14 @@ Mon Jan  8 18:37:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\simpleTCP\SimpleTcpDataLink.cpp:
         * dds\DCPS\transport\framework\TransportSendStrategy.inl:
 
-          Made the terminate_send() called before send graceful 
-          disconnect message in 
+          Made the terminate_send() called before send graceful
+          disconnect message in
           SimpleTcpDataLink::send_graceful_disconnect_message() and
           made TransportSendStrategy::suspend_send() not reset the
-          suspend state when it's already in terminate state. This 
-          should fix some race condition when terminate_send() is 
+          suspend state when it's already in terminate state. This
+          should fix some race condition when terminate_send() is
           called before sending disconnect message.
-          
+
 Mon Jan  8 17:46:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -26,54 +31,54 @@ Mon Jan  8 17:46:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           Added most changes made after 0.9 to release notes.
 
 Fri Jan  5 22:06:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
-        
+
         This fixed the problem that default transport id does not work.
         [See RT8497].
-        
+
         * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
         * dds\DCPS\transport\framework\TransportFactory.h:
         * dds\DCPS\transport\framework\TransportFactory.cpp:
-        
-          Added default transport id (TransportIdType) parameter to 
+
+          Added default transport id (TransportIdType) parameter to
           register_generator() so the transport configuation with
           the default transport ID (DEFAULT_SIMPLE_TCP_ID or
-          DEFAULT_SIMPLE_UDP_ID) will be registered. 
-          
+          DEFAULT_SIMPLE_UDP_ID) will be registered.
+
         * DevGuideExamples\DDS\Messenger\subscriber.cpp:
         * DevGuideExamples\DDS\Messenger\publisher.cpp:
         * DevGuideExamples\DDS\Messenger\run_test.pl:
-        
+
           Added default transport id test. The "run_test.pl default"
           tests this bug fix.
 
 Thu Jan  4 18:54:17 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\BasicQueueLinkAllocator_T.h:
-        
-          Added missing header to fix the compilation errors on DOC 
+
+          Added missing header to fix the compilation errors on DOC
           latest BETA build.
 
 Wed Jan  3 17:20:08 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
-        
+
           Fixed the iterator redefinition compilation error on vc6 build.
-          
+
 Tue Jan  2 22:55:40 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
-          
-          Excluded builtin topic tests from nightly builds since they 
-          are not well implemented. 
+
+          Excluded builtin topic tests from nightly builds since they
+          are not well implemented.
 
 Tue Jan  2 22:43:33 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
-        
-          Removed the reference of the reader_transport_impl and 
+
+          Removed the reference of the reader_transport_impl and
           writer_transport_impl before shutdown the transport.
           This would fix access violation on windows.
-        
+
 Wed Dec 20 16:29:36 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
