@@ -1,3 +1,10 @@
+Tue Jan  9 21:45:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
+        * DevGuideExamples\DDS\Messenger\publisher.cpp:
+
+          Removed file based sychnorization code and fixed indentation.
+
 Tue Jan  9 20:40:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
