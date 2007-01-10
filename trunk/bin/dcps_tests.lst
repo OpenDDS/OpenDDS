@@ -54,6 +54,7 @@ tests/DCPS/FooTest4_0/run_test.pl
 
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN !STATIC
+tests/DCPS/FooTest5/run_test.pl mcast: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN

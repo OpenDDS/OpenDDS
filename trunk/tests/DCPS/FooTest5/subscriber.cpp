@@ -43,6 +43,7 @@ int parse_args (int argc, char *argv[])
     //  -d history.depth            defaults to 1
     //  -s sub transport address    defaults to localhost:23456
     //  -u using_udp                defaults to 0 - using TCP
+    //  -c using_mcast              defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -w num_datawriters          defaults to 1
@@ -82,12 +83,27 @@ int parse_args (int argc, char *argv[])
       reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    {
+      multicast_group_address_str = currentArg;
+      multicast_group_address_given = 1;
+      arg_shifter.consume_arg ();
+    }
     else if ((currentArg = arg_shifter.get_the_parameter("-u")) != 0)
     {
       using_udp = ACE_OS::atoi (currentArg);
       if (using_udp == 1)
       {
         ACE_DEBUG((LM_DEBUG, "Subscriber Using UDP transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    {
+      using_mcast = ACE_OS::atoi (currentArg);
+      if (using_mcast == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Subscriber Using MCAST transport.\n"));
       }
       arg_shifter.consume_arg();
     }
@@ -146,6 +162,13 @@ int parse_args (int argc, char *argv[])
       arg_shifter.ignore_arg ();
     }
   }
+
+  if ((using_udp != 0 || mixed_trans != 0) && using_mcast != 0)
+  {
+    using_mcast = 0;
+    ACE_DEBUG((LM_DEBUG, "Subscriber NOT using MCAST transport.\n"));
+  }
+
   // Indicates sucessful parsing of the command line
   return 0;
 }
@@ -153,7 +176,8 @@ int parse_args (int argc, char *argv[])
 
 ::DDS::Subscriber_ptr
 create_subscriber (::DDS::DomainParticipant_ptr participant,
-                   int                          attach_to_udp)
+                   int                          attach_to_udp,
+                   int                          attach_to_mcast)
 {
 
   // Create the subscriber
@@ -192,6 +216,11 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
           attach_status = sub_impl->attach_transport(reader_udp_impl.in());
+        }
+      else if (attach_to_mcast)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to mcast \n")));
+          attach_status = sub_impl->attach_transport(reader_mcast_impl.in());
         }
       else
         {
@@ -385,11 +414,12 @@ int main (int argc, char *argv[])
         }
 
       int attach_to_udp = using_udp;
+      int attach_to_mcast = using_mcast;
 
       // Create the subscriber and attach to the corresponding
       // transport.
       ::DDS::Subscriber_var sub
-        = create_subscriber(participant.in (), attach_to_udp);
+        = create_subscriber(participant.in (), attach_to_udp, attach_to_mcast);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -402,7 +432,7 @@ int main (int argc, char *argv[])
         {
           // Create the subscriber with a different transport from previous
           // subscriber.
-          sub1 = create_subscriber(participant.in (), ! attach_to_udp);
+          sub1 = create_subscriber(participant.in (), ! attach_to_udp, attach_to_mcast);
           if (CORBA::is_nil (sub1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
@@ -600,5 +630,6 @@ int main (int argc, char *argv[])
   //       Otherwise cleanup after main() will encount access vilation.
   reader_tcp_impl = 0;
   reader_udp_impl = 0;
+  reader_mcast_impl = 0;
   return status;
 }
