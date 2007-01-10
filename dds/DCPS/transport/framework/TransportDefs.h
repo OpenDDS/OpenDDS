@@ -135,6 +135,7 @@ namespace TAO
     //       defined here.
     const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
     const TransportIdType DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01;
+    const TransportIdType DEFAULT_SIMPLE_MCAST_ID = 0xFFFFFF02;
 
     /// Return code type for send_control() operations.
     enum SendControlStatus

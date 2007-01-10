@@ -1,3 +1,59 @@
+Wed Jan 10 21:00:07 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * MPC/config/dcpsexe_with_mcast.mpb:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/simpleMCAST:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.mpc:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastGenerator.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastGenerator.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastLoader.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastLoader.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_export.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_pch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_pch.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Added a multicast transport to DDS.  This is an unreliable
+          transport and has 3 configuration parameters of interest,
+          local_address_, multicast_group_address_, and receiver_.
+
+          See the FooTest5 changes for information about how to configure
+          publishers and subscribers to use multicast.
+
 Tue Jan  9 21:45:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples\DDS\Messenger\subscriber.cpp:

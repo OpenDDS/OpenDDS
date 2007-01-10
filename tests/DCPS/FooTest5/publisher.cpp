@@ -43,6 +43,7 @@ int parse_args (int argc, char *argv[])
     //  -d history.depth            defaults to 1
     //  -p pub transport address    defaults to localhost:23456
     //  -u using udp flag           defaults to 0 - using TCP
+    //  -c using mcast flag         defaults to 0 - using TCP
     //  -z length of float sequence in data type   defaults to 10
     //  -y write operation interval                defaults to 0
     //  -b blocking timeout in milliseconds        defaults to 0
@@ -94,6 +95,15 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    {
+      using_mcast = ACE_OS::atoi (currentArg);
+      if (using_mcast == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Publisher Using MCAST transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
     else if ((currentArg = arg_shifter.get_the_parameter("-z")) != 0)
     {
       sequence_length = ACE_OS::atoi (currentArg);
@@ -140,6 +150,12 @@ int parse_args (int argc, char *argv[])
     }
   }
 
+  if ((using_udp != 0 || mixed_trans != 0) && using_mcast != 0)
+  {
+    using_mcast = 0;
+    ACE_DEBUG((LM_DEBUG, "Publisher NOT using MCAST transport.\n"));
+  }
+
   // Indicates sucessful parsing of the command line
   return 0;
 }
@@ -147,7 +163,8 @@ int parse_args (int argc, char *argv[])
 
 ::DDS::Publisher_ptr
 create_publisher (::DDS::DomainParticipant_ptr participant,
-                  int                          attach_to_udp)
+                  int                          attach_to_udp,
+                  int                          attach_to_mcast)
 {
   ::DDS::Publisher_var pub;
 
@@ -186,6 +203,11 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
           attach_status = pub_impl->attach_transport(writer_udp_impl.in());
+        }
+      else if (attach_to_mcast)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to mcast \n")));
+          attach_status = pub_impl->attach_transport(writer_mcast_impl.in());
         }
       else
         {
@@ -349,8 +371,9 @@ int main (int argc, char *argv[])
         }
 
       int attach_to_udp = using_udp;
+      int attach_to_mcast = using_mcast;
       // Create the default publisher
-      ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp);
+      ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp, attach_to_mcast);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -363,7 +386,7 @@ int main (int argc, char *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant.in (), ! attach_to_udp);
+          pub1 = create_publisher(participant.in (), ! attach_to_udp, attach_to_mcast);
 
           if (CORBA::is_nil (pub1.in ()))
             {
@@ -547,5 +570,6 @@ int main (int argc, char *argv[])
   //       Otherwise cleanup after main() will encount access vilation.
   writer_tcp_impl = 0;
   writer_udp_impl = 0;
+  writer_mcast_impl = 0;
   return status;
 }

@@ -83,7 +83,7 @@ template<class DT, class DW, class DW_var>
         }
       }
 
-      if (using_udp)
+      if (using_udp || using_mcast)
       {
         // Delay between sends to avoid dropping.
         static ACE_Time_Value delay(op_interval_ms/1000, 

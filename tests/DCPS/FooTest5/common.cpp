@@ -11,15 +11,20 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h"
 
 
 const char* MY_TOPIC    = "foo";
 const char* MY_TOPIC_FOR_UDP = "fooudp";
+const char* MY_TOPIC_FOR_MCAST = "foomcast";
 const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
+const char* MY_TYPE_FOR_MCAST = "FooMcast";
 const char * reader_address_str = "";
+const char * multicast_group_address_str = "";
 const char * writer_address_str = "";
 int reader_address_given = 0;
+int multicast_group_address_given = 0;
 int writer_address_given = 0;
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
@@ -33,6 +38,7 @@ int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 int history_depth = 1;
 // default to using TCP
 int using_udp = 0;
+int using_mcast = 0;
 int sequence_length = 10;
 int no_key = 0;
 InstanceDataMap results;
@@ -43,8 +49,10 @@ int mixed_trans = 0;
 
 TAO::DCPS::TransportImpl_rch reader_tcp_impl;
 TAO::DCPS::TransportImpl_rch reader_udp_impl;
+TAO::DCPS::TransportImpl_rch reader_mcast_impl;
 TAO::DCPS::TransportImpl_rch writer_tcp_impl;
 TAO::DCPS::TransportImpl_rch writer_udp_impl;
+TAO::DCPS::TransportImpl_rch writer_mcast_impl;
 
 ACE_TString synch_file_dir;
 
@@ -88,6 +96,51 @@ int init_reader_tranport ()
         {
           ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) init_reader_tranport: sub UDP")
+                    ACE_TEXT(" Failed to configure the transport.\n")));
+          status = 1;
+        }
+    }
+
+  if (using_mcast)
+    {
+      reader_mcast_impl 
+        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_MCAST, 
+                                                      "SimpleMcast", 
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+      TAO::DCPS::TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC_MCAST, "SimpleMcast");
+
+      TAO::DCPS::SimpleMcastConfiguration* reader_mcast_config 
+        = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (reader_config.in ());
+
+      if (!reader_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
+                    ACE_TEXT(" Must specify an address for MCAST bind.\n")));
+          return 11;
+        }
+
+      if (!multicast_group_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
+                    ACE_TEXT(" Must specify an address for MCAST receipt.\n")));
+          return 11;
+        }
+
+
+
+      ACE_INET_Addr reader_address (reader_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      reader_mcast_config->local_address_ = reader_address;
+      reader_mcast_config->multicast_group_address_ = multicast_group_address;
+      reader_mcast_config->receiver_ = true;
+
+      if (reader_mcast_impl->configure(reader_config.in()) != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -159,6 +212,39 @@ int init_writer_tranport ()
         {
           ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) init_writer_tranport: pub UDP")
+                    ACE_TEXT(" Failed to configure the transport.\n")));
+          status = 1;
+        }
+    }
+
+  if (using_mcast)
+    {
+      writer_mcast_impl 
+        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_MCAST, 
+                                                      "SimpleMcast", 
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+
+      TAO::DCPS::TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_MCAST, "SimpleMcast");
+
+      TAO::DCPS::SimpleMcastConfiguration* writer_mcast_config 
+        = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
+      
+      if (!writer_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_writer_tranport: pub MCAST")
+                    ACE_TEXT(" Must specify an address for MCAST.\n")));
+          return 12;
+        }
+
+      ACE_INET_Addr writer_address (writer_address_str);
+      writer_mcast_config->multicast_group_address_ = writer_address;
+
+      if (writer_mcast_impl->configure(writer_config.in()) != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_writer_tranport: pub MCAST")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
