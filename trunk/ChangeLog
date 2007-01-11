@@ -1,3 +1,29 @@
+Thu Jan 11 15:50:48 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/mcast_simple:
+        * tests/transport/mcast_simple/DDS_transport_mcast_simple.mpc:
+        * tests/transport/mcast_simple/PubDriver.h:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/README:
+        * tests/transport/mcast_simple/SimpleDataReader.h:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SimpleDataWriter.h:
+        * tests/transport/mcast_simple/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple/SimplePublisher.h:
+        * tests/transport/mcast_simple/SimplePublisher.cpp:
+        * tests/transport/mcast_simple/SimpleSubscriber.h:
+        * tests/transport/mcast_simple/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple/SubDriver.h:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple/TestException.h:
+        * tests/transport/mcast_simple/mcast.conf:
+        * tests/transport/mcast_simple/pub_main.cpp:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/mcast_simple/sub_main.cpp:
+
+          Added the mcast_simple test.
+
 Thu Jan 11 15:07:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * bin/dcps_tests.lst:
