@@ -1,3 +1,15 @@
+Thu Jan 11 15:07:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added NOMCAST flag.
+
+Thu Jan 11 14:57:42 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Corrected use_mcast=1 to be 0 by default.
+
 Wed Jan 10 21:00:07 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * MPC/config/dcpsexe_with_mcast.mpb:
@@ -66,16 +78,16 @@ Tue Jan  9 20:40:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
 
-          Fixed a problem that the *TypeSupportImpl::get_type_name () 
+          Fixed a problem that the *TypeSupportImpl::get_type_name ()
           always returns the default type name (interface repository id).
           It should returns the name actually registered either from
-          the user (via register_type) or the default type name 
+          the user (via register_type) or the default type name
           (interface repository id).
-          
+
 Tue Jan  9 15:29:59 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * PROBLEM-REPORT-FORM:
-	  Adding a DDS specific PROBLEM-REPORT-FORM.
+          Adding a DDS specific PROBLEM-REPORT-FORM.
 
 Mon Jan  8 21:09:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
@@ -156,7 +168,7 @@ Tue Jan  2 22:43:33 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 Wed Dec 20 16:29:36 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
-	  Fixed gcc warnings. Uninitialized variables.
+          Fixed gcc warnings. Uninitialized variables.
 
 Wed Dec 20 16:16:03 UTC 2006  Ciju John  <johnc@ociweb.com>
 
@@ -190,13 +202,13 @@ Tue Dec 19 16:53:06 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 Tue Dec 19 15:58:47 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
-	  Include a TAO IDL to bypass a vc71/vc8/intel c++ issue with base
+          Include a TAO IDL to bypass a vc71/vc8/intel c++ issue with base
           template export.
 
 Mon Dec 18 18:10:11 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest5_0/main.cpp:
-	  Add missing header file.
+          Add missing header file.
 
 Fri Dec 15 22:24:07 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
