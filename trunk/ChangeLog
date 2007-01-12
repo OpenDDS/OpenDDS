@@ -1,3 +1,67 @@
+Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+	  In situations of repeated connection restablishment
+          from the subscriber, we seem to get some orphan messages
+          left behind in the system. When the system shuts down
+          due to the cleanup mechanism now in place we enter a
+          for-ever loop.
+          The problem is most probably due to missing error handling
+          somewhere in the element delivery path and fixing that is the
+          real solution as otherwise over time the internal buffers will
+          just fill up (currently only observed upon connection disruption).
+          For now I am putting this code which will trap and cleanup these
+          orphan messages at shutdown time.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+	  More granular locking to prevent deadlocks. Add locks to protect
+          the sub/pub maps.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+          Modify to print out the class ID (this).
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Simplify the top-level macro usage.
+
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+          If no more subscribers registered for a sub_id, remove the
+          ReceiveListeners.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+	  Cosmetic changes/Add debug messages.
+
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+          If unable to remove an element count it as a failure (return
+          -1).
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+          Modify API to make relinking an optional behaviour in trying to
+          send elements. In some circumstances (such as sending graceful
+          disconnect messages), we really don't care about relinking.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+          Use the modified API to turn off relinking in certain
+          circumstances.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Hard-code the 'RW' wait strategy directive. Deadlocks have been
+          observed to occur otherwise under stress conditions.
 Thu Jan 11 16:13:22 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -94,7 +94,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
                        RepoId                        publisher_id,
                        CORBA::Long                   priority)
 {
-  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",1);
+  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",5);
 
   // Not used right now - not sure how it would apply either.
   ACE_UNUSED_ARG(priority);
@@ -133,7 +133,7 @@ TAO::DCPS::TransportImpl::reserve_datalink
                        TransportReceiveListener*     receive_listener,
                        CORBA::Long                   priority)
 {
-  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",2);
+  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",5);
 
   // Not used right now - not sure how it would apply either.
   ACE_UNUSED_ARG(priority);
@@ -448,7 +448,7 @@ TAO::DCPS::TransportImpl::acked (RepoId pub_id)
 bool
 TAO::DCPS::TransportImpl::release_link_resources (DataLink* link)
 {
-  DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 1);
+  DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 5);
 
   // Create a smart pointer without ownership (bumps up ref count)
   DataLink_rch dl (link, false);

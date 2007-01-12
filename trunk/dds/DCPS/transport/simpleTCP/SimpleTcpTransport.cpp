@@ -64,11 +64,13 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
   ACE_INET_Addr remote_address;
   network_order_address->to_addr(remote_address);
 
-  // First, we have to try to find an existing (connected) DataLink
-  // that suits the caller's needs.
+  SimpleTcpDataLink_rch link;
+
+  { // guard scope
   GuardType guard(this->links_lock_);
 
-  SimpleTcpDataLink_rch link;
+    // First, we have to try to find an existing (connected) DataLink
+    // that suits the caller's needs.
 
   if (this->links_.find(remote_address,link) == 0)
     {
@@ -87,8 +89,13 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
         }
       // This means we found a suitable (and already connected) DataLink.
       // We can return it now since we are done.
+
+	VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
+		   " No need for passive connection establishment.\n"), 5);
+
       return link._retn();
     }
+  }
 
   // The "find" part of the find_or_create_datalink has been attempted, and
   // we failed to find a suitable DataLink.  This means we need to move on
@@ -96,6 +103,9 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 
   // Here is where we actually create the DataLink.
   link = new SimpleTcpDataLink(remote_address, this);
+
+  { // guard scope
+    GuardType guard(this->links_lock_);
 
   // Attempt to bind the SimpleTcpDataLink to our links_ map.
   if (this->links_.bind(remote_address,link) != 0)
@@ -106,6 +116,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
                  "(%P|%t) ERROR: Unable to bind new SimpleTcpDataLink to "
                  "SimpleTcpTransport in links_ map.\n"), 0);
     }
+  }
 
   // Now we need to attempt to establish a connection for the DataLink.
   int result;
@@ -135,6 +146,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 
   if (result != 0)
     {
+      GuardType guard(this->links_lock_);
       // Make sure that we unbind the link (that failed to establish a
       // connection) from our links_ map.  We intentionally ignore the
       // return code from the unbind() call since we know that we just
@@ -409,12 +421,15 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",1);
+  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",5);
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
   {
     GuardType guard(this->connections_lock_);
+
+    VDBG_LVL ((LM_DEBUG, "(%P|%t) # of bef connections: %d\n"
+	       , this->connections_.current_size()), 5);
 
     if (this->connections_.bind(remote_address,connection_obj) != 0)
       {
@@ -422,6 +437,9 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
                   "(%P|%t) ERROR: Unable to bind SimpleTcpConnection object "
                   "to the connections_ map.\n"));
       }
+
+    VDBG_LVL ((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n"
+	       , this->connections_.current_size()), 5);
 
     // Regardless of the outcome of the bind operation, let's tell any threads
     // that are wait()'ing on the connections_updated_ condition to check
@@ -464,7 +482,7 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
                                         (const ACE_INET_Addr& remote_address,
                                          SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",1);
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",5);
 
   SimpleTcpConnection_rch connection;
 
@@ -477,7 +495,7 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
     }
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t) DBG:   "
-       "Passive conect timeout: %d milliseconds.\n",
+       "Passive connect timeout: %d milliseconds (0 == forever).\n",
        this->tcp_config_->passive_connect_duration_), 5);
 
   // Look in our connections_ map to see if the passive connection
@@ -488,9 +506,12 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
     while (true)
       {
   if ((abs_timeout != ACE_Time_Value::zero)
-      && (abs_timeout <= ACE_OS::gettimeofday ())) {
-    ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n")
-          , -1);
+	    && (abs_timeout <= ACE_OS::gettimeofday ()))
+	  {
+	    // This doesn't necessarily represent an error.
+	    // It could just be a delay on teh remote side. More a QOS issue.
+	    VDBG_LVL ((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n"), 5);
+	    return -1;
   }
 
   // check if theres already a connection waiting

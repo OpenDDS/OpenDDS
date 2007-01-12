@@ -59,7 +59,7 @@ TAO::DCPS::DataLink::send(TransportQueueElement* element)
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_i(TransportQueueElement* element)
+TAO::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 {
   DBG_ENTRY_LVL("DataLink","send_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -73,7 +73,7 @@ TAO::DCPS::DataLink::send_i(TransportQueueElement* element)
   }
 
   if (!strategy.is_nil()) {
-    strategy->send(element);
+    strategy->send (element, relink);
   }
 }
 

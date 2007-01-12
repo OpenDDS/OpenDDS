@@ -27,7 +27,6 @@ TAO::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
 TAO::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",5);
-  VDBG_LVL ((LM_ERROR, "(%P|%t)  ~ThreadPerConnectionSendTask %@\n", this), 1);
 }
 
 
@@ -97,8 +96,7 @@ int TAO::DCPS::ThreadPerConnectionSendTask::open(void*)
 
 int TAO::DCPS::ThreadPerConnectionSendTask::svc()
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc", 1);
-  VDBG_LVL ((LM_ERROR, "(%P|%t)  ThreadPerConnectionSendTask::svc %@\n", this), 1);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc", 5);
 
   this->thr_id_ = ACE_OS::thr_self ();
 

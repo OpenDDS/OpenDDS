@@ -144,9 +144,10 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
   // Sanity check - the connection should exist already since we are reconnecting.
   if (this->connection_.is_nil())
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect old connection is nil.\n"),
-                       -1);
+      VDBG_LVL((LM_ERROR,
+                "(%P|%t) ERROR: SimpleTcpDataLink::reconnect old connection is nil.\n")
+               , 1);
+      return -1;
     }
 
   // Keep a "copy" of the reference to the connection object for ourselves.
@@ -242,12 +243,9 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 
   ACE_NEW(send_element, TransportControlElement(message));
 
-  this->send_i (send_element);
-
-  // First send disconnect message, then terminate the DataLink.
-  // We need to terminate before deleting the element
-  // as the element could still be held up the congestion queue.
-  //this->send_strategy_->terminate_send (true);
+  // I don't want to rebuild a connection in order to send
+  // a graceful disconnect message.
+  this->send_i (send_element, false);
 }
 
 

@@ -15,7 +15,7 @@
 #undef DBG_ENTRY_LVL
 
 #define DBG_ENTRY_CORE(CNAME,MNAME) \
-EntryExit dbg_0(CNAME,MNAME)
+EntryExit dbg_0(CNAME,MNAME,this)
 
 #define DBG_ENTRY0(CNAME,MNAME)
 #define DBG_ENTRY1(CNAME,MNAME)
@@ -71,50 +71,79 @@ DBG_ENTRY_LVL(CNAME,MNAME,5)
 
 class EntryExit
 {
-  public:
-
-    EntryExit(const char* className, const char* methodName, unsigned num = 0)
-      : num_ (num)
+ public:
+  EntryExit (const char* className, const char* methodName, void* addr, unsigned num = 0)
+    : num_ (num)
+    , addr_ (addr)
+    , addr_set_ (true)
     {
       // No processing unless debugging turned on.
       if (::TAO::DCPS::Transport_debug_level == 1)
-  {
-    class_[25] = method_[25] = 0;
+	{
+	  class_[25] = method_[25] = 0;
 
-    ACE_OS::strncpy (this->class_, className, 25);
-    ACE_OS::strncpy (this->method_, methodName, 25);
+	  ACE_OS::strncpy (this->class_, className, 25);
+	  ACE_OS::strncpy (this->method_, methodName, 25);
 
-    if (this->num_ == 0) {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s()]\n"
-      , this->class_, this->method_));
-    }
-    else {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s():%d]\n"
-      , this->class_, this->method_, this->num_));
-    }
-  }
+	  if (this->num_ == 0) {
+	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@]\n"
+			, this->class_, this->method_, this->addr_));
+	  }
+	  else {
+	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@ :%d]\n"
+			, this->class_, this->method_, this->addr_, this->num_));
+	  }
+	}
     };
 
-    ~EntryExit()
+  ~EntryExit()
     {
       if (::TAO::DCPS::Transport_debug_level == 1)
-  {
-    if (this->num_ == 0) {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s()]\n"
-      , this->class_, this->method_));
-    }
-    else {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s():%d]\n"
-      , this->class_, this->method_, this->num_));
-    }
-  }
+	{
+	  if (this->addr_set_)
+	    {
+	      if (this->num_ == 0) {
+		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@]\n"
+			    , this->class_, this->method_, this->addr_));
+	      }
+	      else {
+		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@:%d]\n"
+			    , this->class_, this->method_, this->addr_, this->num_));
+	      }
+	    }
+	  else
+	    {
+	      if (this->num_ == 0) {
+		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s()]\n"
+			    , this->class_, this->method_));
+	      }
+	      else {
+		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s():%d]\n"
+			    , this->class_, this->method_, this->num_));
+	      }
+	    }
+	}
     };
 
-  private:
+ private:
 
-    char class_[26];
-    char method_[26];
-    unsigned    num_;
+  char class_[26];
+  char method_[26];
+  unsigned    num_;
+  void *addr_;
+  bool addr_set_;
+
+  /*
+    Common code to be executed by all constructors
+  */
+  void ctr_init (const char* className, const char* methodName)
+    {
+      class_[25] = method_[25] = 0;
+
+      ACE_OS::strncpy (this->class_, className, 25);
+      ACE_OS::strncpy (this->method_, methodName, 25);
+    }
+
 };
 
 #endif  /* ENTRYEXIT_H */

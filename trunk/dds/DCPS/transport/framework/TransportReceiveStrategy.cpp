@@ -281,23 +281,23 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                                                 vec_index,
                                                 remote_address);
 
-  VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
              "recvv() return %d - we call this the bytes_remaining.\n",
-             bytes_remaining));
+            bytes_remaining), 5);
 
   if( bytes_remaining == 0 && this->gracefully_disconnected_)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n")),
-                       -1) ;
+      VDBG_LVL((LM_ERROR,
+                ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
+               ,1);
+      return -1;
     }
   else if((bytes_remaining == 0 && ! this->gracefully_disconnected_)
     || bytes_remaining < 0)
     {
-      ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+      VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
                       ACE_TEXT("with data link detected: %p.\n"),
-                      "receive_bytes"));
+                "receive_bytes"), 1);
 
       // The relink() will handle the connection to the ReconnectTask to do
       // the reconnect so this reactor thread will not be block.
@@ -308,9 +308,9 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
       // Returning -1 takes the handle out of the reactor read mask.
     }
 
-  VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
              "START Adjust the message block chain pointers to account for the "
-             "new data.\n"));
+            "new data.\n"), 5);
 
   //
   // Adjust the message block chain pointers to account for the new

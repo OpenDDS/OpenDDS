@@ -67,8 +67,8 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
         }
       else
         {
-          ACE_ERROR((LM_ERROR, "(%P|%t)SimpleTcpSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
-            "sendv", n));
+          VDBG_LVL((LM_ERROR, "(%P|%t) SimpleTcpSendStrategy::send_bytes: ERROR: %p iovec count: %d\n",
+		    "sendv", n),1);
 
           // try to get the application to core when "Bad Address" is returned
           // by looking at the iovec
@@ -80,8 +80,8 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
         }
     }
 
-  VDBG((LM_DEBUG,"DBG:   "
-             "The sendv() returned [%d].\n", result));
+  VDBG_LVL((LM_DEBUG,"DBG:   "
+	    "The sendv() returned [%d].\n", result), 5);
 
   ACE::restore_non_blocking_mode(handle, val);
 

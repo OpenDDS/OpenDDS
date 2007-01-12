@@ -175,7 +175,7 @@ namespace TAO
         /// sample or control message delivery. IThey just simply
         /// delegate to the send strategy.
         void send_start_i();
-        void send_i(TransportQueueElement* element);
+        void send_i(TransportQueueElement* element, bool relink = true);
         void send_stop_i();
 
   private:
@@ -203,7 +203,7 @@ namespace TAO
         /// We need this becuase this DataLink object could be called from
         /// more than one TransportInterface (and each could be driven by
         /// a different thread).
-        LockType lock_;
+      //LockType lock_;
 
         /// Map associating each publisher_id with a set of
         /// TransportReceiveListener objects (each with an associated
@@ -211,11 +211,15 @@ namespace TAO
         /// (aka, received) data samples.
         ReceiveListenerSetMap pub_map_;
 
+        LockType pub_map_lock_;
+
         /// Map associating each subscriber_id with the set of publisher_ids.
         /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
         /// each other, where we have a many (publishers) to many (subscribers)
         /// association being managed here.
         RepoIdSetMap sub_map_;
+
+        LockType sub_map_lock_;
 
         /// A (smart) pointer to the TransportImpl that created this DataLink.
         TransportImpl_rch impl_;
