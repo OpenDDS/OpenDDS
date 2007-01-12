@@ -146,9 +146,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt128ts_servant;
 
           ::Mine::Pt128TypeSupport_var pt128ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt128TypeSupport,
-                                            ::Mine::Pt128TypeSupportImpl, 
-                                            ::Mine::Pt128TypeSupport_ptr >(pt128ts_servant);
+            TAO::DCPS::servant_to_reference (pt128ts_servant ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
@@ -166,9 +164,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt512ts_servant;
 
           ::Mine::Pt512TypeSupport_var pt512ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt512TypeSupport,
-                                            ::Mine::Pt512TypeSupportImpl, 
-                                            ::Mine::Pt512TypeSupport_ptr >(pt512ts_servant);
+            TAO::DCPS::servant_to_reference (pt512ts_servant ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
@@ -186,9 +182,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
 
           ::Mine::Pt2048TypeSupport_var pt2048ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt2048TypeSupport,
-                                            ::Mine::Pt2048TypeSupportImpl, 
-                                            ::Mine::Pt2048TypeSupport_ptr >(pt2048ts_servant);
+            TAO::DCPS::servant_to_reference (pt2048ts_servant ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
@@ -206,9 +200,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
 
           ::Mine::Pt8192TypeSupport_var pt8192ts = 
-            TAO::DCPS::servant_to_reference< ::Mine::Pt8192TypeSupport,
-                                            ::Mine::Pt8192TypeSupportImpl, 
-                                            ::Mine::Pt8192TypeSupport_ptr >(pt8192ts_servant);
+            TAO::DCPS::servant_to_reference (pt8192ts_servant ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))

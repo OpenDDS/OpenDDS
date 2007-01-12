@@ -103,9 +103,7 @@ int init (int argc, ACE_TCHAR *argv[])
       PortableServer::ServantBase_var safe_servant = ts_servant;
 
       ::Mine::FooTypeSupport_var ts = 
-        TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                         ::Mine::FooTypeSupportImpl, 
-                                         ::Mine::FooTypeSupport_ptr >(ts_servant);
+        TAO::DCPS::servant_to_reference (ts_servant ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK != ts->register_type(participant.in (), TEST_TOPIC_TYPE))

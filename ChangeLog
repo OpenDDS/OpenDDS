@@ -1,3 +1,63 @@
+Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+	Re-worked the servant_to_reference function template in two ways:
+	A. Simplified template parameters so that they can always be deduced
+	from the argument passed in (pointer-to-servant).
+	B. Used explicit activation on the POA instead of implicit activation
+	this makes the DDS implementation compatible with CORBA/e-compact.
+	Please from now on, only use explicit activation of servants.  If you
+	are going to activate on the root POA of DDS's ORB (the normal case),
+	then just call TAO::DCPS::servant_to_reference() -- it will return the
+	typed _ptr.
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+	Updated uses of the old TAO::DCPS::servant_to_reference() (explicitly
+	listing three template parameters) to the new way (which deduces all
+	parameters automatically).  Also, changed cases where
+	poa->servant_to_reference() was used directly to instead use the nex
+	TAO::DCPS::servant_to_reference().
+
 Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         This fixed the problem describered in RT9711.
@@ -90,6 +150,7 @@ Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
         * dds/InfoRepo/DCPSInfoRepo.cpp:
           Hard-code the 'RW' wait strategy directive. Deadlocks have been
           observed to occur otherwise under stress conditions.
+
 Thu Jan 11 16:13:22 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * bin/dcps_tests.lst:

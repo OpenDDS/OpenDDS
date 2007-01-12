@@ -270,10 +270,7 @@ namespace TAO
                                   DomainParticipantFactoryImpl (),
                                   ::DDS::DomainParticipantFactory::_nil ());
 
-                  dp_factory_ = servant_to_reference<DDS::DomainParticipantFactory, 
-                                                     DomainParticipantFactoryImpl, 
-                                                     DDS::DomainParticipantFactory_ptr> 
-                                (dp_factory_servant_ ACE_ENV_ARG_PARAMETER);
+                  dp_factory_ = servant_to_reference (dp_factory_servant_ ACE_ENV_ARG_PARAMETER);
                   ACE_TRY_CHECK;
                   
                   // Give ownership to poa.

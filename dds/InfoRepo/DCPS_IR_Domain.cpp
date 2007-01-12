@@ -424,11 +424,7 @@ int DCPS_IR_Domain::init_built_in_topics()
       TAO_DCPS_DomainParticipantListener_i* listenerImpl =
         new TAO_DCPS_DomainParticipantListener_i;
 
-      bitParticipantListener_ = ::TAO::DCPS::servant_to_reference
-          < ::DDS::DomainParticipantListener,
-           TAO_DCPS_DomainParticipantListener_i,
-           ::DDS::DomainParticipantListener_ptr>
-         (listenerImpl);
+      bitParticipantListener_ = ::TAO::DCPS::servant_to_reference (listenerImpl);
 
       bitParticipant_ = 
         bitParticipantFactory_->create_participant(id_, 
@@ -495,10 +491,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant =
         new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
       ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport = 
-        TAO::DCPS::servant_to_reference< ::DDS::ParticipantBuiltinTopicDataTypeSupport,
-                                         ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl, 
-                                         ::DDS::ParticipantBuiltinTopicDataTypeSupport_ptr >
-                                         (participantTypeSupport_servant);
+        TAO::DCPS::servant_to_reference (participantTypeSupport_servant);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
@@ -532,10 +525,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
         new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
       ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport = 
-        TAO::DCPS::servant_to_reference< ::DDS::TopicBuiltinTopicDataTypeSupport,
-                                         ::DDS::TopicBuiltinTopicDataTypeSupportImpl, 
-                                         ::DDS::TopicBuiltinTopicDataTypeSupport_ptr >
-                                         (topicTypeSupport_servant);
+        TAO::DCPS::servant_to_reference (topicTypeSupport_servant);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
@@ -569,10 +559,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant =
         new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
       ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport = 
-        TAO::DCPS::servant_to_reference< ::DDS::SubscriptionBuiltinTopicDataTypeSupport,
-                                         ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl, 
-                                         ::DDS::SubscriptionBuiltinTopicDataTypeSupport_ptr >
-                                         (subscriptionTypeSupport_servant);
+        TAO::DCPS::servant_to_reference (subscriptionTypeSupport_servant);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
@@ -606,10 +593,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant =
         new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
       ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport = 
-        TAO::DCPS::servant_to_reference< ::DDS::PublicationBuiltinTopicDataTypeSupport,
-                                         ::DDS::PublicationBuiltinTopicDataTypeSupportImpl, 
-                                         ::DDS::PublicationBuiltinTopicDataTypeSupport_ptr >
-                                         (publicationTypeSupport_servant);
+        TAO::DCPS::servant_to_reference (publicationTypeSupport_servant);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=

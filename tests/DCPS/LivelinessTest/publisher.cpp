@@ -242,9 +242,7 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
       ::Mine::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                         ::Mine::FooTypeSupportImpl,
-                                         ::Mine::FooTypeSupport_ptr >(fts_servant);
+        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       ::DDS::DomainParticipant_var dp =

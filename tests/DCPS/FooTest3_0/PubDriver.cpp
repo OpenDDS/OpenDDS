@@ -236,9 +236,7 @@ PubDriver::initialize(int& argc, char *argv[])
    PortableServer::ServantBase_var safe_servant = fts_servant;
 
   ::Mine::FooTypeSupport_var fts = 
-    ::TAO::DCPS::servant_to_reference< ::Mine::FooTypeSupport,
-                                      ::Mine::FooTypeSupportImpl, 
-                                      ::Mine::FooTypeSupport_ptr >(fts_servant);
+    ::TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   participant_ = 
@@ -758,40 +756,28 @@ PubDriver::listener_test ()
 {
   // Create DomainParticipantListener, PublisherListener and 
   // DataWriterListener.
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-
   DomainParticipantListenerImpl* dpl_servant;
-  ACE_NEW (dpl_servant, 
+  ACE_NEW (dpl_servant,
            DomainParticipantListenerImpl());
 
-  CORBA::Object_var obj 
-    = poa->servant_to_reference(dpl_servant ACE_ENV_ARG_PARAMETER);
+  ::DDS::DomainParticipantListener_var dpl
+    = ::TAO::DCPS::servant_to_reference (dpl_servant ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
-  
-  ::DDS::DomainParticipantListener_var dpl 
-    = ::DDS::DomainParticipantListener::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
-  ACE_CHECK;
-  
+
   PublisherListenerImpl* pl_servant;
-  ACE_NEW (pl_servant, 
+  ACE_NEW (pl_servant,
            PublisherListenerImpl());
 
-  obj = poa->servant_to_reference(pl_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
-  
   ::DDS::PublisherListener_var pl
-    = ::DDS::PublisherListener::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
+    = ::TAO::DCPS::servant_to_reference (pl_servant ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   DataWriterListenerImpl* dwl_servant;
   ACE_NEW (dwl_servant, 
            DataWriterListenerImpl());
 
-  obj = poa->servant_to_reference(dwl_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
-  
   ::DDS::DataWriterListener_var dwl 
-    = ::DDS::DataWriterListener::_narrow (obj.in () ACE_ENV_ARG_PARAMETER); 
+    = ::TAO::DCPS::servant_to_reference (dwl_servant ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
   
   // Test set_listener/get_listener for DomainParticipant.

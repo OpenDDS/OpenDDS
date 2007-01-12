@@ -91,9 +91,7 @@ main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_dpListenerImpl = dpListenerImpl;
 
       ::DDS::DomainParticipantListener_var dpListener =
-        ::TAO::DCPS::servant_to_reference < ::DDS::DomainParticipantListener,
-                                            TAO_DCPS_DomainParticipantListener_i,
-                                            ::DDS::DomainParticipantListener_ptr> (dpListenerImpl ACE_ENV_ARG_PARAMETER);
+        ::TAO::DCPS::servant_to_reference (dpListenerImpl ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if ( CORBA::is_nil (dpListener.in()) )
         {

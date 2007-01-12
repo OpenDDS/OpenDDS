@@ -171,8 +171,8 @@ int main (int argc, char *argv[]) {
   }
   catch (CORBA::Exception& e)
     {
-      cerr << "Exception caught in main.cpp:" << endl
-     << e << endl;
+       cerr << "PUB: Exception caught in main.cpp:" << endl
+         << e << endl;
       exit(1);
     }
 

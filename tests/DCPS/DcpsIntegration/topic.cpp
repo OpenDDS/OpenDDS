@@ -76,9 +76,7 @@ main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_dpListenerImpl = dpListenerImpl;
 
       ::DDS::DomainParticipantListener_var dpListener =
-        ::TAO::DCPS::servant_to_reference < ::DDS::DomainParticipantListener,
-                                            TAO_DCPS_DomainParticipantListener_i,
-                                            ::DDS::DomainParticipantListener_ptr> (dpListenerImpl ACE_ENV_ARG_PARAMETER);
+        ::TAO::DCPS::servant_to_reference (dpListenerImpl ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if ( CORBA::is_nil (dpListener.in()) )
         {
@@ -107,7 +105,7 @@ main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_fts_servant = fts_servant;
 
       FooTypeSupport_var fts = 
-        TAO::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
+        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK != fts->register_type(participant.in (), TEST_TYPE_NAME))
@@ -316,9 +314,7 @@ main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_topicListenerImpl = topicListenerImpl;
 
       ::DDS::TopicListener_var topicListener =
-        ::TAO::DCPS::servant_to_reference < ::DDS::TopicListener,
-                                            TAO_DCPS_TopicListener_i,
-                                            ::DDS::TopicListener_ptr> (topicListenerImpl ACE_ENV_ARG_PARAMETER);
+        ::TAO::DCPS::servant_to_reference (topicListenerImpl ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
       if ( CORBA::is_nil (topicListener.in()) )
         {

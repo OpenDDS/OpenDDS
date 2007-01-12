@@ -106,10 +106,7 @@ namespace TAO
         }
       
       ::DDS::Publisher_ptr pub_obj 
-        = servant_to_reference<DDS::Publisher, 
-                               PublisherImpl, 
-                               DDS::Publisher_ptr> 
-              (pub ACE_ENV_ARG_PARAMETER);
+        = servant_to_reference (pub ACE_ENV_ARG_PARAMETER);
       ACE_CHECK_RETURN (::DDS::Publisher::_nil());
 
       // Give ownership to poa.
@@ -256,10 +253,7 @@ namespace TAO
         }
 
       ::DDS::Subscriber_ptr sub_obj 
-        = servant_to_reference<DDS::Subscriber, 
-                               SubscriberImpl, 
-                               DDS::Subscriber_ptr> 
-              (sub ACE_ENV_ARG_PARAMETER);
+        = servant_to_reference (sub ACE_ENV_ARG_PARAMETER);
       ACE_CHECK_RETURN (::DDS::Subscriber::_nil());
       
       // Give ownership to poa.
@@ -1525,10 +1519,7 @@ namespace TAO
           topic_servant->enable();
         }
 
-      ::DDS::Topic_ptr obj  = servant_to_reference<DDS::Topic, 
-                               TopicImpl, 
-                               DDS::Topic_ptr> 
-             (topic_servant ACE_ENV_ARG_PARAMETER);
+      ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant ACE_ENV_ARG_PARAMETER);
 
       ACE_CHECK_RETURN (::DDS::Topic::_nil());
 

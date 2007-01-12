@@ -457,17 +457,9 @@ int main (int argc, char *argv[])
       // activate the listener
       DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
 
-      PortableServer::POA_var poa
-        = TheServiceParticipant->the_poa ();
-
-      CORBA::Object_var obj
-        = poa->servant_to_reference(listener_servant
-                                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
-
       ::DDS::DataReaderListener_var listener
-        = ::DDS::DataReaderListener::_narrow (obj.in ()
-                                              ACE_ENV_ARG_PARAMETER);
+        = ::TAO::DCPS::servant_to_reference(listener_servant
+                                            ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
 
       if (CORBA::is_nil (listener.in ()))

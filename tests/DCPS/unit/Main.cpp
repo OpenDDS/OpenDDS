@@ -149,7 +149,7 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
 
 
   MyTypeSupport_var fts = 
-    TAO::DCPS::servant_to_reference<MyTypeSupport, MyTypeSupportImpl, MyTypeSupport_ptr>(fts_servant);
+    TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
   ACE_TRY_CHECK;
 
   if (::DDS::RETCODE_OK != fts->register_type(new_dp.in (), MY_TYPE))

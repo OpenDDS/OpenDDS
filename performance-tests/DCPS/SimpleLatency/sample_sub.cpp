@@ -203,10 +203,8 @@ int main(int argc, char *argv[])
 
        /* Create the listener for datareader */
        PubDataReaderListenerImpl  listener_servant;
-       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-       CORBA::Object_var obj = poa->servant_to_reference(&listener_servant);
        DDS::DataReaderListener_var listener =
-         DDS::DataReaderListener::_narrow (obj.in ());
+	     ::TAO::DCPS::servant_to_reference(&listener_servant);
 
 
        /* Create AckMessage datareader */
