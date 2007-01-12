@@ -102,10 +102,8 @@ char *
 
 
     ::TAO::DCPS::DataWriterRemote_ptr writer_obj
-        = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataWriterRemote,
-                                            <%TYPE%>DataWriterImpl,
-                                            TAO::DCPS::DataWriterRemote_ptr>
-              (writer_impl ACE_ENV_ARG_PARAMETER);
+        = ::TAO::DCPS::servant_to_reference (writer_impl
+                                             ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
 
     return writer_obj;
@@ -126,10 +124,8 @@ char *
 
 
     ::TAO::DCPS::DataReaderRemote_ptr reader_obj
-        = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataReaderRemote,
-                                            <%TYPE%>DataReaderImpl,
-                                            TAO::DCPS::DataReaderRemote_ptr>
-              (reader_impl ACE_ENV_ARG_PARAMETER);
+        = ::TAO::DCPS::servant_to_reference (reader_impl
+                                             ACE_ENV_ARG_PARAMETER);
     ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
 
     return reader_obj;
@@ -2040,9 +2036,7 @@ void
 //<%TYPE%>DataReaderImpl::get_datareaderremote_obj_ref ()
 //{
 //  ::TAO::DCPS::DataReaderRemote_ptr reader_obj
-//      = ::TAO::DCPS::servant_to_reference<TAO::DCPS::DataReaderRemote,
-//                                          <%TYPE%>DataReaderImpl,
-//                                          TAO::DCPS::DataReaderRemote_ptr>
+//      = ::TAO::DCPS::servant_to_reference
 //            (this ACE_ENV_ARG_PARAMETER);
 //  ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
 //

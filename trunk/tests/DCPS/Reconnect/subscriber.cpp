@@ -174,11 +174,9 @@ int main (int argc, char *argv[])
     }
 
     // activate the listener
-    DataReaderListenerImpl        listener_servant;
-    PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-    CORBA::Object_var obj = poa->servant_to_reference(&listener_servant);
+    DataReaderListenerImpl listener_servant;
     DDS::DataReaderListener_var listener =
-      DDS::DataReaderListener::_narrow (obj.in ());
+      ::TAO::DCPS::servant_to_reference (&listener_servant);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);

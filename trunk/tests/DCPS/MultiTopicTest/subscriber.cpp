@@ -231,11 +231,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo1TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts1 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo1TypeSupport,
-                                               ::Mine::Foo1TypeSupportImpl,
-                                               ::Mine::Foo1TypeSupport_ptr >
-              (fts_servant);
+          fts1 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 
@@ -245,11 +242,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo2TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts2 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo2TypeSupport,
-                                               ::Mine::Foo2TypeSupportImpl,
-                                               ::Mine::Foo2TypeSupport_ptr >
-              (fts_servant);
+          fts2 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 
@@ -259,11 +253,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo3TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts3 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo3TypeSupport,
-                                               ::Mine::Foo3TypeSupportImpl,
-                                               ::Mine::Foo3TypeSupport_ptr >
-              (fts_servant);
+          fts3 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 
@@ -501,54 +492,47 @@ int main (int argc, char *argv[])
       DataReaderListenerImpl2 drl_servant2 ;
       DataReaderListenerImpl3 drl_servant3 ;
 
-      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
       if (topics & TOPIC_T1)
         {
-          CORBA::Object_var obj = poa->servant_to_reference(&drl_servant1
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
-
           ::DDS::DataReaderListener_var drl
-              = ::DDS::DataReaderListener::_narrow (obj.in ()
+            = ::TAO::DCPS::servant_to_reference(&drl_servant1
                                                 ACE_ENV_ARG_PARAMETER);
           ACE_CHECK;
+
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
                                   drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
+          ACE_CHECK;
         }
 
       if (topics & TOPIC_T2)
         {
-          CORBA::Object_var obj = poa->servant_to_reference(&drl_servant2
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
-
           ::DDS::DataReaderListener_var drl
-              = ::DDS::DataReaderListener::_narrow (obj.in ()
+            = ::TAO::DCPS::servant_to_reference(&drl_servant2
                                                 ACE_ENV_ARG_PARAMETER);
           ACE_CHECK;
+
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
                                   drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
+          ACE_CHECK;
         }
 
       if (topics & TOPIC_T3)
         {
-          CORBA::Object_var obj = poa->servant_to_reference(&drl_servant3
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
-
           ::DDS::DataReaderListener_var drl
-              = ::DDS::DataReaderListener::_narrow (obj.in ()
+            = ::TAO::DCPS::servant_to_reference(&drl_servant3
                                                 ACE_ENV_ARG_PARAMETER);
           ACE_CHECK;
+
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
                                   drl.in ()
                                   ACE_ENV_ARG_PARAMETER);
+          ACE_CHECK;
         }
 /*
       // Indicate that the subscriber is ready

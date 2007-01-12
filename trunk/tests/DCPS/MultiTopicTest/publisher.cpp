@@ -224,11 +224,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo1TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts1 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo1TypeSupport,
-                                               ::Mine::Foo1TypeSupportImpl,
-                                               ::Mine::Foo1TypeSupport_ptr >
-              (fts_servant);
+          fts1 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 
@@ -238,11 +235,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo2TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts2 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo2TypeSupport,
-                                               ::Mine::Foo2TypeSupportImpl,
-                                               ::Mine::Foo2TypeSupport_ptr >
-              (fts_servant);
+          fts2 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 
@@ -252,11 +246,8 @@ int main (int argc, char *argv[])
               new ::Mine::Foo3TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts3 =
-              TAO::DCPS::servant_to_reference< ::Mine::Foo3TypeSupport,
-                                               ::Mine::Foo3TypeSupportImpl,
-                                               ::Mine::Foo3TypeSupport_ptr >
-              (fts_servant);
+          fts3 = TAO::DCPS::servant_to_reference (fts_servant
+                                                  ACE_ENV_ARG_PARAMETER);
           ACE_TRY_CHECK;
         }
 

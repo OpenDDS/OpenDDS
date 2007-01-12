@@ -76,14 +76,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   dr_qos.liveliness.lease_duration.sec = max_blocking_time.sec() ;
   dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-
-  CORBA::Object_var obj = poa->servant_to_reference(&drl_servant_
-      ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
-
   ::DDS::DataReaderListener_var drl
-      = ::DDS::DataReaderListener::_narrow (obj.in () ACE_ENV_ARG_PARAMETER);
+    = ::TAO::DCPS::servant_to_reference(&drl_servant_ ACE_ENV_ARG_PARAMETER);
   ACE_CHECK;
 
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),

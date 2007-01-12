@@ -96,8 +96,7 @@ namespace TAO
                       ::DDS::DomainParticipant::_nil ());
 
       ::DDS::DomainParticipant_ptr dp_obj 
-        = servant_to_reference<DDS::DomainParticipant, DomainParticipantImpl, DDS::DomainParticipant_ptr> 
-        (dp ACE_ENV_ARG_PARAMETER); 
+        = servant_to_reference (dp ACE_ENV_ARG_PARAMETER); 
       
       ACE_CHECK_RETURN(::DDS::DomainParticipant::_nil ());
 
