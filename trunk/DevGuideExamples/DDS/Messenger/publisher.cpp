@@ -37,8 +37,12 @@ parse_args (int argc, char *argv[])
         transport_impl_id = 2;
       }
       // test with DEFAULT_SIMPLE_TCP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
         transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
+      }
+      // test with DEFAULT_SIMPLE_UDP_ID.
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
+        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
       break;
     case '?':

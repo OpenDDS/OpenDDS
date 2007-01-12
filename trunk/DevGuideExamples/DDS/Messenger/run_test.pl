@@ -19,9 +19,14 @@ if ($ARGV[0] eq 'udp') {
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
     #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
-elsif ($ARGV[0] eq 'default') {
-    $pub_opts = "-t default";
-    $sub_opts = "-t default";
+elsif ($ARGV[0] eq 'default_tcp') {
+    $pub_opts = "-t default_tcp";
+    $sub_opts = "-t default_tcp";
+}
+elsif ($ARGV[0] eq 'default_udp') {
+    $opts =  "-ORBSvcConf udp.conf -t default_udp";
+    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
 
 

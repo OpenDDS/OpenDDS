@@ -97,3 +97,8 @@ performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN
 performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl: !DCPS_MIN
 performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 # Not running UDPListenerTest due to the machine dependent peformance of UDP.
+
+DevGuideExamples/DDS/Messenger/run_test.pl: !DCPS_MIN 
+DevGuideExamples/DDS/Messenger/run_test.pl udp: !DCPS_MIN !STATIC
+DevGuideExamples/DDS/Messenger/run_test.pl default_tcp: !DCPS_MIN 
+DevGuideExamples/DDS/Messenger/run_test.pl default_udp: !DCPS_MIN !STATIC

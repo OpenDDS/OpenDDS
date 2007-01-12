@@ -19,6 +19,14 @@
 #include  "ace/Hash_Map_Manager.h"
 #include  "ace/Synch.h"
 
+// Use this DISCOVER_UNIQUE_PORT_KLUDGE macro to guard the code related to 
+// the unique port discovery kludge.
+#define DISCOVER_UNIQUE_PORT_KLUDGE
+#ifdef DISCOVER_UNIQUE_PORT_KLUDGE
+#include  "ace/Acceptor.h"
+#include  "ace/SOCK_Acceptor.h"
+#include  "ace/Svc_Handler.h"
+#endif
 
 namespace TAO
 {
@@ -97,6 +105,15 @@ namespace TAO
         SimpleUdpSocket_rch socket_;
 
         ACE_INET_Addr local_address_;
+
+// Use the same mechinism as in SimpleTcp to discover the unique port.
+// This is a kludge.
+#ifdef DISCOVER_UNIQUE_PORT_KLUDGE
+
+        int discover_unique_address (ACE_INET_Addr& addr);
+        ACE_Acceptor< ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>,
+                 ACE_SOCK_ACCEPTOR> tcp_acceptor_;
+#endif
     };
 
   } /* namespace DCPS */
