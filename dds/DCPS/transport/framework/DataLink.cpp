@@ -25,7 +25,7 @@
 TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 : thr_per_con_send_task_ (0)
 {
-  DBG_ENTRY_LVL("DataLink","DataLink",1);
+  DBG_ENTRY_LVL("DataLink","DataLink",5);
 
   impl->_add_ref();
   this->impl_ = impl;
@@ -43,7 +43,7 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
 
 TAO::DCPS::DataLink::~DataLink()
 {
-  DBG_ENTRY_LVL("DataLink","~DataLink",1);
+  DBG_ENTRY_LVL("DataLink","~DataLink",5);
 
   if (this->thr_per_con_send_task_ != 0)
     {
@@ -77,15 +77,18 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   }
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(this->pub_map_lock_);
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
     pub_result = this->pub_map_.insert(publisher_id,subscriber_id,0);
+  }
 
     if (pub_result == 0)
       {
+      {
+        GuardType guard2(this->sub_map_lock_);
         sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
-
+      }
         if (sub_result == 0)
           {
             // Success!
@@ -93,6 +96,7 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
           }
         else
           {
+          GuardType guard(this->pub_map_lock_);
             // Since we failed to insert into into the sub_map_, and have
             // already inserted it in the pub_map_, we better attempt to
             // undo the insert that we did to the pub_map_.  Otherwise,
@@ -101,9 +105,6 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
                                                     subscriber_id);;
           }
       }
-
-    // We can release our lock_ now.
-  }
 
   // We only get to here when an error occurred somewhere along the way.
   // None of this needs the lock_ to be acquired.
@@ -161,17 +162,20 @@ TAO::DCPS::DataLink::make_reservation
   }
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(this->sub_map_lock_);
 
     // Update our sub_map_.
     sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
+  }
 
     if (sub_result == 0)
       {
+      {
+        GuardType guard(this->pub_map_lock_);
         pub_result = this->pub_map_.insert(publisher_id,
                                            subscriber_id,
                                            receive_listener);
-
+      }
         if (pub_result == 0)
           {
             // Success!
@@ -179,6 +183,7 @@ TAO::DCPS::DataLink::make_reservation
           }
         else
           {
+          GuardType guard(this->sub_map_lock_);
             // Since we failed to insert into into the pub_map_, and have
             // already inserted it in the sub_map_, we better attempt to
             // undo the insert that we did to the sub_map_.  Otherwise,
@@ -187,9 +192,6 @@ TAO::DCPS::DataLink::make_reservation
                                                     publisher_id);
           }
       }
-
-    // We can release our lock_ now.
-  }
 
   //this->send_strategy_->link_released (false);
 
@@ -242,16 +244,24 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 {
   DBG_ENTRY_LVL("DataLink","release_reservations",5);
 
-  GuardType guard(this->lock_);
-
   // See if the remote_id is a publisher_id.
-  ReceiveListenerSet_rch listener_set = this->pub_map_.remove_set(remote_id);
+  ReceiveListenerSet_rch listener_set;
+
+  {
+    GuardType guard(this->pub_map_lock_);
+    listener_set = this->pub_map_.remove_set(remote_id);
+  }
 
   if (listener_set.is_nil())
     {
       // The remote_id is not a publisher_id.
       // See if it is a subscriber_id by looking in our sub_map_.
-      RepoIdSet_rch id_set = this->sub_map_.remove_set(remote_id);
+      RepoIdSet_rch id_set;
+
+      {
+        GuardType guard(this->sub_map_lock_);
+        id_set = this->sub_map_.remove_set(remote_id);
+      }
 
       if (id_set.is_nil())
         {
@@ -262,6 +272,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
         }
       else
         {
+	  VDBG_LVL ((LM_DEBUG, "(%P|%t) The remote_id is a sub id.\n"), 5);
     //guard.release ();
           // The remote_id is a subscriber_id.
           this->release_remote_subscriber(remote_id,
@@ -272,6 +283,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
     }
   else
     {
+      VDBG_LVL ((LM_DEBUG, "(%P|%t) The remote_id is a pub id.\n"), 5);
       //guard.release ();
       // The remote_id is a publisher_id.
       this->release_remote_publisher(remote_id,
@@ -279,6 +291,9 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
                                      released_locals);
       //guard.acquire ();
     }
+
+  VDBG_LVL ((LM_DEBUG, "(%P|%t) maps tot size: %d.\n"
+	     , this->pub_map_.size() + this->sub_map_.size()), 5);
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
     {
@@ -342,12 +357,15 @@ TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
   // Which remote publisher sent this message?
   RepoId publisher_id = sample.header_.publication_id_;
 
-  GuardType guard(this->lock_);
-
   // Locate the set of TransportReceiveListeners associated with this
   // DataLink that are interested in hearing about any samples received
   // from the remote publisher_id.
-  ReceiveListenerSet_rch listener_set = this->pub_map_.find(publisher_id);
+  ReceiveListenerSet_rch listener_set;
+
+  {
+    GuardType guard(this->pub_map_lock_);
+    listener_set = this->pub_map_.find(publisher_id);
+  }
 
   if (listener_set.is_nil())
     {
@@ -496,8 +514,9 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
   VDBG((LM_DEBUG, "(%P|%t) DBG: DataLink %X notify %s\n", this,
     connection_notice_as_str(notice)));
 
-  GuardType guard(this->lock_);
   {
+    GuardType guard(this->pub_map_lock_);
+
     ReceiveListenerSetMap::MapType & map = this->pub_map_.map ();
 
     // Notify the datawriters registered with TransportImpl
@@ -558,6 +577,8 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
   }
 
   {
+    GuardType guard(this->sub_map_lock_);
+
     // Notify the datareaders registered with TransportImpl
     // the lost subscriptions due to a connection problem.
     RepoIdSetMap::MapType & map = this->sub_map_.map ();

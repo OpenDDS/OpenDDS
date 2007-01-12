@@ -51,7 +51,7 @@ namespace TAO
 
         /// Our DataLink has been requested by some particular
         /// TransportInterface to send the element.
-        void send(TransportQueueElement* element);
+        void send(TransportQueueElement* element, bool relink = true);
 
         /// Invoked after one or more send() invocations from a particular
         /// TransportInterface.
@@ -153,7 +153,7 @@ namespace TAO
         /// If no backpressure occurs (ie, the entire packet is sent), then
         /// our current packet will be "reset" to be an empty packet following
         /// the send.
-        void direct_send();
+        void direct_send( bool relink );
 
         /// This method is used while in MODE_QUEUE mode, and a new packet
         /// needs to be formulated using elements from the queue_.  This is

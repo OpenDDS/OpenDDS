@@ -143,8 +143,29 @@ TAO::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
   // Ignore the result
   ACE_UNUSED_ARG(result);
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) RepoId size: %d.\n", id_set->size()), 5);
   // Return 1 if set is empty, 0 if not empty.
-  return (id_set->size() == 0) ? 1 : 0;
+  //return (id_set->size() == 0) ? 1 : 0;
+
+  if (id_set->size() == 0)
+    {
+      if (this->map_.unbind(subscriber_id) != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Failed to remove an empty "
+                     "ReceiveListenerSet for publisher_id (%d).\n",
+                     publisher_id));
+        }
+
+      // We always return 1 if we know the publisher_id is no longer
+      // associated with any ReceiveListeners.
+      return 1;
+    }
+
+  // There are still ReceiveListeners associated with the publisher_id.
+  // We return a 0 in this case.
+  return 0;
+
 }
 
 

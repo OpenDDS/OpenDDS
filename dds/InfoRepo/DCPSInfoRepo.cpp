@@ -10,7 +10,7 @@
 
 #include "ace/Get_Opt.h"
 #include "ace/Arg_Shifter.h"
-
+#include "ace/Service_Config.h"
 
 static ACE_TString ior_file (ACE_TEXT("repo.ior"));
 static ACE_TString domain_file (ACE_TEXT("domain_ids"));
@@ -112,6 +112,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                             ""
                                             ACE_ENV_ARG_PARAMETER);
       ACE_TRY_CHECK;
+
+      // ciju: Hard-code the 'RW' wait strategy directive.
+      // Deadlocks have been observed to occur otherwise under stress conditions.
+      ACE_Service_Config::process_directive
+	(ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw ")
+	 ACE_TEXT("-ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked\""));
+      ACE_Service_Config::process_directive
+	(ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""));
 
       CORBA::Object_var obj =
         orb->resolve_initial_references ("RootPOA"

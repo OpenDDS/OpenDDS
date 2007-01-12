@@ -13,12 +13,12 @@
 TAO::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)
   : transportImpl_ (transportImpl)
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "DataLinkCleanupTask", 1);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "DataLinkCleanupTask", 5);
 }
 
 TAO::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "~DataLinkCleanupTask", 1);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "~DataLinkCleanupTask", 5);
 
   this->transportImpl_ = 0;
 }
@@ -26,7 +26,7 @@ TAO::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 void
 TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "execute", 1);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "execute", 5);
 
   // Assumes that the DataLink is safe for now.
   // ciju: I don't believe there are any thread issues here. If any

@@ -84,7 +84,7 @@ TAO::DCPS::TransportInterface::remove_sample
 
   // ciju: After discussions with Tim B., we feel strongly feel that
   // this section should be protected with some sort of locking mechanism.
-  // The pub_links could become invalid anyytime after the find_set().
+  // The pub_links could become invalid anytime after the find_set().
   // I believe it best to use the TransportInterface lock to protect
   // this area.
 
@@ -112,7 +112,7 @@ TAO::DCPS::TransportInterface::remove_sample
   // means we do nothing except return 0.
 //MJM: What is the use-case for this not being an error?  I am trying to
 //MJM: think of one, but have been unsuccessful so far.
-  return 0;
+  return -1;
 }
 
 
@@ -204,6 +204,8 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
                "TransportInterface::send no links for %d\n",
                cur->publication_id_),5);
 
+          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: No DataLinkSet found. Dropping %d elements.\n"
+                    , samples.size_), 5);
           // We tell the send_listener_ that all of the remote subscriber ids
           // that wanted the data (all zero of them) have indeed received
           // the data.
@@ -211,6 +213,9 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
         }
       else
         {
+          VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
+                    , cur), 5);
+
           // This will do several things, including adding to the membership
           // of the send_links_ set.  Any DataLinks added to the send_links_
           // set will be also told about the send_start() event.  Those

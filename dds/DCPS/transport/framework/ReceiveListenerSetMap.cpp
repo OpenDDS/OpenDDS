@@ -131,7 +131,7 @@ int
 TAO::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
                                                      RepoId subscriber_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",1);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",5);
   ReceiveListenerSet_rch listener_set;
 
   if (this->map_.find(publisher_id, listener_set) != 0)

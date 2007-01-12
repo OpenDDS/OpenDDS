@@ -16,21 +16,16 @@
 #endif
 
 
-#define TURN_ON_VERBOSE_DEBUG
-#define TURN_OFF_VERBOSE_DEBUG
+#define DDS_RUN_DEBUG_LEVEL ::TAO::DCPS::Transport_debug_level
+
+#define TURN_ON_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = DDS_BLD_DEBUG_LEVEL;
+#define TURN_OFF_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = 0;
 #define VDBG(DBG_ARGS)
 #define VDBG_CODE(LOGIC)
 #define VDBG_LVL(DBG_ARGS, LEVEL)
 
 
 #if DDS_BLD_DEBUG_LEVEL > 0
-
-// Run time debug level
-// TBD - Later we might have multiple levels of debug - like DCPS/debug.h
-#undef TURN_ON_VERBOSE_DEBUG
-#undef TURN_OFF_VERBOSE_DEBUG
-#define TURN_ON_VERBOSE_DEBUG  ::TAO::DCPS::Transport_debug_level = 1;
-#define TURN_OFF_VERBOSE_DEBUG ::TAO::DCPS::Transport_debug_level = 0;
 
 #define VDBG_CORE(DBG_ARGS) \
 if (::TAO::DCPS::Transport_debug_level) ACE_DEBUG(DBG_ARGS)

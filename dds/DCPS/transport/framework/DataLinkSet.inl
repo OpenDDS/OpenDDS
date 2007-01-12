@@ -10,6 +10,9 @@ ACE_INLINE void
 TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet","send",5);
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: DataLinkSet::send element %@.\n"
+            , sample), 5);
+
   TransportSendElement* send_element = 0;
   //Optimized - use cached allocator.
 
@@ -29,7 +32,12 @@ TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
    itr.advance())
       {
   // Bump up the DataLink ref count
-  RcHandle<DataLink> data_link (entry->int_id_);
+
+        // ciju: I don't see why this is necessary.
+        // Since the entry itself is ref-counted as long as the
+        // entry itself isn't removed, the DataLink should be safe.
+        // For now commenting it out.
+        //RcHandle<DataLink> data_link (entry->int_id_);
 
   // Tell the DataLink to send it.
   entry->int_id_->send(send_element);
