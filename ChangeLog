@@ -1,3 +1,31 @@
+Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        This fixed the problem describered in RT9711.
+        
+        * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
+        
+          Added the logging of the address provided to the peer in
+          SimpleTcpTransport::connection_info_i().
+          
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+
+          Applied the same mechanism as in SimpleTcp to discover the unique
+          port to use as the default SimpleUdp local_address configuration.
+          This is a kludge to fix the default SimpleUdp transport configuration
+          problem. Use DISCOVER_UNIQUE_PORT_KLUDGE macro to guard the kludge 
+          related code in case we find a better way to discover a unique port.
+          
+        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
+        * DevGuideExamples\DDS\Messenger\publisher.cpp:
+        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        
+          Added default SimpleTcp and SimpleUdp transport id test cases.
+           
+        * bin/dcps_tests.lst:
+
+          Added DevGuideExamples/DDS/Messenger tests.
+          
 Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
