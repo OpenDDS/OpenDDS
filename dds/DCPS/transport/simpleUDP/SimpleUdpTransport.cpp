@@ -119,8 +119,17 @@ TAO::DCPS::SimpleUdpTransport::configure_i(TransportConfiguration* config)
 
   // Make a "copy" of the reference for ourselves.
   udp_config->_add_ref();
-  this->udp_config_ = udp_config;
 
+#ifdef DISCOVER_UNIQUE_PORT_KLUDGE
+
+  if (udp_config->local_address_ == ACE_INET_Addr ())
+  {
+     if (discover_unique_address (udp_config->local_address_) == -1)
+       return -1;
+  }
+#endif
+
+  this->udp_config_ = udp_config;
   this->local_address_ = this->udp_config_->local_address_;
 
   // Open our socket using the local_address_ from our udp_config_ object.
@@ -177,6 +186,10 @@ TAO::DCPS::SimpleUdpTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","shutdown_i",5);
 
+#ifdef DISCOVER_UNIQUE_PORT_KLUDGE
+  this->tcp_acceptor_.close ();
+#endif
+
   // Stop the receive strategy
   this->receive_strategy_->stop();
 
@@ -220,6 +233,10 @@ TAO::DCPS::SimpleUdpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","connection_info_i",5);
+
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleUdpTransport::connection_info_i %s:%d\n", 
+    this->local_address_.get_host_addr (), 
+    this->local_address_.get_port_number ()));
 
   NetworkAddress network_order_address(this->local_address_);
 
@@ -267,3 +284,36 @@ TAO::DCPS::SimpleUdpTransport::release_datalink_i(DataLink* link)
     }
 }
 
+
+#ifdef DISCOVER_UNIQUE_PORT_KLUDGE
+
+int
+TAO::DCPS::SimpleUdpTransport::discover_unique_address (ACE_INET_Addr& addr)
+{
+  ACE_INET_Addr anyAddr;
+  anyAddr.set (anyAddr.get_port_number (), anyAddr.get_host_name ());
+
+  if (this->tcp_acceptor_.open(anyAddr, this->reactor_task_->get_reactor()) != 0)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      "(%P|%t) ERROR in SimpleUdpTransport::discover_unique_address(): "
+      "Acceptor failed to open %s:%d: %p\n",
+      anyAddr.get_host_addr (),
+      anyAddr.get_port_number (),
+      "open"),
+      -1);
+  }
+
+  if (this->tcp_acceptor_.acceptor ().get_local_addr (addr) != 0)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT ("(%P|%t) ERROR in SimpleUdpTransport::discover_unique_address ")
+      ACE_TEXT ("- %p"),
+      ACE_TEXT ("cannot get local addr\n")), 
+      -1);
+  }
+
+  return 0;
+}
+
+#endif

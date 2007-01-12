@@ -261,6 +261,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
                     ACE_TEXT ("- %p"),
                     ACE_TEXT ("cannot get local addr\n")));
     }
+
   unsigned short port = address.get_port_number ();
 
   // update this acceptor's copy.
@@ -273,8 +274,9 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
     {
       tcp_config->local_address_ = this->tcp_config_->local_address_;
     }
+  
   tcp_config->local_address_.set_port_number (port);
-
+  
   // Ahhh...  The sweet smell of success!
   return 0;
 }
@@ -356,7 +358,10 @@ TAO::DCPS::SimpleTcpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",5);
-
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s:%d\n", 
+    this->tcp_config_->local_address_.get_host_addr (), 
+    this->tcp_config_->local_address_.get_port_number ()));
+  
   NetworkAddress network_order_address(this->tcp_config_->local_address_);
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
