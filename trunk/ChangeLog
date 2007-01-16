@@ -1,3 +1,11 @@
+Tue Jan 16 20:54:22 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest5/common.cpp:
+
+          Fixed a mcast test problem that should not create a SimpleUdp
+          transport after created the SimpleMcast transport. However, this
+          is not the problem that mcast does not work on windows build.
+          
 Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
