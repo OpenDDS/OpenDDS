@@ -146,7 +146,7 @@ int init_reader_tranport ()
         }
     }
 
-  if (mixed_trans || ! using_udp)
+  else if (mixed_trans || ! using_udp)
     {
       reader_tcp_impl 
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_TCP,
@@ -250,7 +250,7 @@ int init_writer_tranport ()
         }
     }
 
-  if (mixed_trans || ! using_udp)
+  else if (mixed_trans || ! using_udp)
     {
       writer_tcp_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
