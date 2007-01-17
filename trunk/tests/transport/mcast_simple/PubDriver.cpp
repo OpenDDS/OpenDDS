@@ -164,7 +164,7 @@ PubDriver::init()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) pub_addr_.\n"));
 
-  mcast_config->local_address_ = this->if_addr_;
+  //mcast_config->local_address_ = this->if_addr_;
   mcast_config->multicast_group_address_ = this->pub_addr_;
 
 
