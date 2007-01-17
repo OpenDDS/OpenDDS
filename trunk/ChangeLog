@@ -1,17 +1,27 @@
+Wed Jan 17 19:44:54 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+	  Changed default passive_connect_duration to 10000 millisecs.
+
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+          Commented out some printouts which were outputting a lot of
+          nightly builds logs.
+
 Wed Jan 17 19:36:34 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests\transport\mcast_simple\PubDriver.cpp:
         * tests\transport\mcast_simple_n\PubDriver.cpp:
 
           Fixed the test failures on windows. It appears that we should not
-          specify the local_address for the publisher, it should use the 
-          default value, otherwise the subscriber will not receive the 
+          specify the local_address for the publisher, it should use the
+          default value, otherwise the subscriber will not receive the
           samples.
-          
+
 Wed Jan 17 17:39:49 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.inl:
-        
+
           Fixed the mcast test failure on windows. The receiver should
           call join() to the mcast group instead of just open with the
           mcast socket with the mcast group address.
@@ -23,7 +33,7 @@ Tue Jan 16 20:54:22 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           Fixed a mcast test problem that should not create a SimpleUdp
           transport after created the SimpleMcast transport. However, this
           is not the problem that mcast does not work on windows build.
-          
+
 Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
@@ -87,31 +97,31 @@ Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         This fixed the problem describered in RT9711.
-        
+
         * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
-        
+
           Added the logging of the address provided to the peer in
           SimpleTcpTransport::connection_info_i().
-          
+
         * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
         * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
 
           Applied the same mechanism as in SimpleTcp to discover the unique
           port to use as the default SimpleUdp local_address configuration.
           This is a kludge to fix the default SimpleUdp transport configuration
-          problem. Use DISCOVER_UNIQUE_PORT_KLUDGE macro to guard the kludge 
+          problem. Use DISCOVER_UNIQUE_PORT_KLUDGE macro to guard the kludge
           related code in case we find a better way to discover a unique port.
-          
+
         * DevGuideExamples\DDS\Messenger\subscriber.cpp:
         * DevGuideExamples\DDS\Messenger\publisher.cpp:
         * DevGuideExamples\DDS\Messenger\run_test.pl:
-        
+
           Added default SimpleTcp and SimpleUdp transport id test cases.
-           
+
         * bin/dcps_tests.lst:
 
           Added DevGuideExamples/DDS/Messenger tests.
-          
+
 Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

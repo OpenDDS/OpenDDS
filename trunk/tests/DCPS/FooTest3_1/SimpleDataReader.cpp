@@ -33,17 +33,20 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
 void
 SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-  
+  // Shouldn't be printing this all the time.
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
+
   ::TAO::DCPS::Serializer serializer (sample.sample_);
   ::Xyz::Foo foo;
   serializer >> foo;
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: a_long_value=%d handle_value=%d "
-    "sample_sequence=%d writer_id=%d\n", foo.a_long_value, foo.handle_value, 
-    foo.sample_sequence, foo.writer_id));
- 
+
+  // Shouldn't be printing this all the time.
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: a_long_value=%d handle_value=%d "
+  //"sample_sequence=%d writer_id=%d\n", foo.a_long_value, foo.handle_value,
+  //foo.sample_sequence, foo.writer_id));
+
   this->received_test_message_ ++;
-  
+
   if (receive_delay_msec_ > 0)
   {
     ACE_Time_Value delay (receive_delay_msec_/1000, receive_delay_msec_%1000 * 1000);
