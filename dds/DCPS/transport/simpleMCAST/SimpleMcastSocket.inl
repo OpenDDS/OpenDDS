@@ -32,8 +32,9 @@ TAO::DCPS::SimpleMcastSocket::open(const ACE_INET_Addr& local_address,
   }
   else
   {
-    result = this->socket_.open(this->multicast_group_address_);
+    result = this->socket_.join(this->multicast_group_address_);
   }
+
   return result;
 }
 
