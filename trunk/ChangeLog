@@ -5,7 +5,7 @@ Wed Jan 17 19:36:34 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
           Fixed the test failures on windows. It appears that we should not
           specify the local_address for the publisher, it should use the 
-          invalid value, otherwise the subscriber will not receive the 
+          default value, otherwise the subscriber will not receive the 
           samples.
           
 Wed Jan 17 17:39:49 UTC 2007  Yan Dai  <dai_y@ociweb.com>
