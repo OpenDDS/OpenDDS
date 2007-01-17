@@ -2,8 +2,8 @@
 #define ENTRYEXIT_H
 
 #include "TransportDebug.h"
-#include  "ace/Log_Msg.h"
-#include  "ace/OS_NS_unistd.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS_NS_string.h"
 
 #define DBG_ENTRY(CNAME,MNAME)
 #define DBG_SUB_ENTRY(CNAME,MNAME,INUM)

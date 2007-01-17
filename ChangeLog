@@ -1,7 +1,14 @@
+Wed Jan 17 23:31:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+
+	  Changed broken #include from "ace/OS_NS_unistd.h" to
+	  "ace/OS_NS_string.h" since that's where ACE_OS::strncpy() lives.
+
 Wed Jan 17 19:44:54 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
-	  Changed default passive_connect_duration to 10000 millisecs.
+          Changed default passive_connect_duration to 10000 millisecs.
 
         * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
         * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
@@ -37,15 +44,15 @@ Tue Jan 16 20:54:22 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
-	Re-worked the servant_to_reference function template in two ways:
-	A. Simplified template parameters so that they can always be deduced
-	from the argument passed in (pointer-to-servant).
-	B. Used explicit activation on the POA instead of implicit activation
-	this makes the DDS implementation compatible with CORBA/e-compact.
-	Please from now on, only use explicit activation of servants.  If you
-	are going to activate on the root POA of DDS's ORB (the normal case),
-	then just call TAO::DCPS::servant_to_reference() -- it will return the
-	typed _ptr.
+        Re-worked the servant_to_reference function template in two ways:
+        A. Simplified template parameters so that they can always be deduced
+        from the argument passed in (pointer-to-servant).
+        B. Used explicit activation on the POA instead of implicit activation
+        this makes the DDS implementation compatible with CORBA/e-compact.
+        Please from now on, only use explicit activation of servants.  If you
+        are going to activate on the root POA of DDS's ORB (the normal case),
+        then just call TAO::DCPS::servant_to_reference() -- it will return the
+        typed _ptr.
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
         * DevGuideExamples/DDS/Messenger/subscriber.cpp:
@@ -88,11 +95,11 @@ Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/SimpleFooTest/main.cpp:
         * tests/DCPS/unit/Main.cpp:
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
-	Updated uses of the old TAO::DCPS::servant_to_reference() (explicitly
-	listing three template parameters) to the new way (which deduces all
-	parameters automatically).  Also, changed cases where
-	poa->servant_to_reference() was used directly to instead use the nex
-	TAO::DCPS::servant_to_reference().
+        Updated uses of the old TAO::DCPS::servant_to_reference() (explicitly
+        listing three template parameters) to the new way (which deduces all
+        parameters automatically).  Also, changed cases where
+        poa->servant_to_reference() was used directly to instead use the nex
+        TAO::DCPS::servant_to_reference().
 
 Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
@@ -125,7 +132,7 @@ Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
-	  In situations of repeated connection restablishment
+          In situations of repeated connection restablishment
           from the subscriber, we seem to get some orphan messages
           left behind in the system. When the system shuts down
           due to the cleanup mechanism now in place we enter a
@@ -140,7 +147,7 @@ Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
         * dds/DCPS/transport/framework/DataLink.cpp:
-	  More granular locking to prevent deadlocks. Add locks to protect
+          More granular locking to prevent deadlocks. Add locks to protect
           the sub/pub maps.
 
         * dds/DCPS/transport/framework/EntryExit.h:
@@ -167,7 +174,7 @@ Fri Jan 12 16:20:48 UTC 2007  Ciju John  <johcn@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
-	  Cosmetic changes/Add debug messages.
+          Cosmetic changes/Add debug messages.
 
         * dds/DCPS/transport/framework/TransportInterface.inl:
           If unable to remove an element count it as a failure (return
