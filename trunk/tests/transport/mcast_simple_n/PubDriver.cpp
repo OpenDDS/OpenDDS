@@ -165,7 +165,7 @@ PubDriver::init()
   TAO::DCPS::SimpleMcastConfiguration* mcast_config 
     = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (config.in ());
 
-  mcast_config->local_address_ = this->if_addr_;
+  //mcast_config->local_address_ = this->if_addr_;
   mcast_config->multicast_group_address_ = this->pub_addr_;
 
   if (transport_impl->configure(config.in()) != 0)
