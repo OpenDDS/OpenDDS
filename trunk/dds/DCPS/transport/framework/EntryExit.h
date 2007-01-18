@@ -72,7 +72,7 @@ DBG_ENTRY_LVL(CNAME,MNAME,5)
 class EntryExit
 {
  public:
-  EntryExit (const char* className, const char* methodName, void* addr, unsigned num = 0)
+  EntryExit (const char* className, const char* methodName, const void* addr, unsigned num = 0)
     : num_ (num)
     , addr_ (addr)
     , addr_set_ (true)
@@ -130,7 +130,7 @@ class EntryExit
   char class_[26];
   char method_[26];
   unsigned    num_;
-  void *addr_;
+  const void *addr_;
   bool addr_set_;
 
   /*
