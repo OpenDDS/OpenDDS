@@ -1,3 +1,10 @@
+Thu Jan 18 22:24:58 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/EntryExit.h:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+	  Modify usage of Debug macros.
+
 Thu Jan 18 21:46:17 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
