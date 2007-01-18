@@ -8,8 +8,8 @@
 
 const ACE_CDR::Octet
 TAO::DCPS::TransportHeader::supported_id_[6]
-  = { 0x44, 0x43, 0x50, 0x53, 0x01, 0x00 } ;
-   //   D     C     P     S     1     0
+= { 0x44, 0x43, 0x50, 0x53, 0x01, 0x00 } ;
+//   D     C     P     S     1     0
 
 #if !defined (__ACE_INLINE__)
 # include "TransportHeader.inl"
@@ -22,7 +22,7 @@ TAO::DCPS::TransportHeader::supported_id_[6]
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block& buffer, TAO::DCPS::TransportHeader& value)
 {
-  DBG_SUB_ENTRY("TransportHeader","operator<<",1);
+  EntryExit dbg_1( "TransportHeader","operator<<", 0 );
 
   TAO::DCPS::Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet (value.byte_order_);
@@ -37,7 +37,7 @@ operator<<(ACE_Message_Block& buffer, TAO::DCPS::TransportHeader& value)
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block*& buffer, TAO::DCPS::TransportHeader& value)
 {
-  DBG_SUB_ENTRY("TransportHeader","operator<<",2);
+  EntryExit dbg_2( "TransportHeader","operator<<", 0 );
 
   TAO::DCPS::Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   writer << ACE_OutputCDR::from_octet (value.byte_order_);

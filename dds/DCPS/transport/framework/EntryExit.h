@@ -55,7 +55,7 @@ DBG_ENTRY_CORE(CNAME,MNAME)
 
 #undef DBG_SUB_ENTRY
 #define DBG_SUB_ENTRY(CNAME,MNAME,INUM) \
-EntryExit dbg_##INUM (CNAME,MNAME,INUM)
+EntryExit dbg_##INUM (CNAME,MNAME,this,INUM)
 
 #endif
 
