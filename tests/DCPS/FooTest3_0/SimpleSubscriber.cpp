@@ -8,11 +8,10 @@
 #include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include  "ace/SString.h"
 
-
 SimpleSubscriber::SimpleSubscriber()
-{
-}
-
+  : sub_id_ (0), num_publications_ (0)
+  , publications_ (0)
+{ }
 
 SimpleSubscriber::~SimpleSubscriber()
 {
@@ -21,13 +20,17 @@ SimpleSubscriber::~SimpleSubscriber()
 
 void
 SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
-                       TAO::DCPS::RepoId                   sub_id,
-                       ssize_t                             num_publications,
-                       const TAO::DCPS::AssociationData*   publications)
+		       TAO::DCPS::RepoId                   sub_id,
+		       ssize_t                             num_publications,
+		       const TAO::DCPS::AssociationData*   publications)
 {
+  this->sub_id_ = sub_id;
+  this->num_publications_ = num_publications;
+  this->publications_ = publications;
+
   // Obtain the transport.
   TAO::DCPS::TransportImpl_rch transport =
-                                    TheTransportFactory->obtain(transport_id);
+    TheTransportFactory->obtain(transport_id);
 
   if (transport.is_nil())
     {
@@ -48,18 +51,18 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
 
       switch (status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
-            break;
-          case TAO::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
-            break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
-            break;
-          default:
-            status_str = "Unknown Status";
-            break;
+	case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+	  status_str = "ATTACH_BAD_TRANSPORT";
+	  break;
+	case TAO::DCPS::ATTACH_ERROR:
+	  status_str = "ATTACH_ERROR";
+	  break;
+	case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+	  status_str = "ATTACH_INCOMPATIBLE_QOS";
+	  break;
+	default:
+	  status_str = "Unknown Status";
+	  break;
         }
 
       ACE_ERROR((LM_ERROR,
@@ -72,14 +75,18 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
 
   // Initialize our DataReader.
   this->reader_.init(sub_id);
+}
 
+void
+SimpleSubscriber::associate ()
+{
   // Add the association between the local sub_id and the remote pub_id
   // to the transport via the TransportInterface.
-  int result = this->add_publications(sub_id,
-                                      &this->reader_,
-                                      0,   /* priority */
-                                      num_publications,
-                                      publications);
+  int result = this->add_publications (this->sub_id_,
+				       &this->reader_,
+				       0,   /* priority */
+				       this->num_publications_,
+				       this->publications_);
 
   if (result != 0)
     {
@@ -88,7 +95,6 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
                  "TransportInterface.\n"));
       throw TestException();
     }
-
 }
 
 

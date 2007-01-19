@@ -13,30 +13,33 @@
 
 class SimpleSubscriber : public TAO::DCPS::TransportInterface
 {
-  public:
+public:
 
-    SimpleSubscriber();
-    virtual ~SimpleSubscriber();
+  SimpleSubscriber ();
+  virtual ~SimpleSubscriber();
 
-    void init(TAO::DCPS::TransportIdType          transport_id,
-              TAO::DCPS::RepoId                   sub_id,
-              ssize_t                             num_publications,
-              const TAO::DCPS::AssociationData*   publications);
+  void init (TAO::DCPS::TransportIdType          transport_id,
+             TAO::DCPS::RepoId                   sub_id,
+             ssize_t                             num_publications,
+             const TAO::DCPS::AssociationData*   publications);
 
-    /// Returns 0 if the data_received() has not been called/completed.
-    /// Returns 1 if the data_received() has been called, and all of
-    /// the TransportReceiveListeners have been told of the data_received().
-    int received_test_message() const;
+  void associate ();
 
+  /// Returns 0 if the data_received() has not been called/completed.
+  /// Returns 1 if the data_received() has been called, and all of
+  /// the TransportReceiveListeners have been told of the data_received().
+  int received_test_message() const;
 
-  protected:
+protected:
 
-    virtual void cleanup();
+  virtual void cleanup();
 
+private:
 
-  private:
-
-    SimpleDataReader reader_;
+  SimpleDataReader                    reader_;
+  TAO::DCPS::RepoId                   sub_id_;
+  ssize_t                             num_publications_;
+  const TAO::DCPS::AssociationData*   publications_;
 };
 
 #endif  /* SIMPLESUBSCRIBER_H */

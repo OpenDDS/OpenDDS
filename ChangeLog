@@ -1,9 +1,21 @@
+Fri Jan 19 23:29:49 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+          This test was randomly failing on some platforms because it
+          depended upon hard-cast time-outs. The changes make the test
+          more flexible and deterministic.
+
 Fri Jan 19 18:10:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests\DCPS\FooTest3_2\SimpleDataReader.cpp:
 
           Fixed a warning from a not used variable.
-          
+
 Fri Jan 19 18:00:56 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\Transient_Kludge.h:
