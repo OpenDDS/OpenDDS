@@ -45,10 +45,10 @@ SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
   //"sample_sequence=%d writer_id=%d \n", foo.a_long_value, foo.handle_value,
   //foo.sample_sequence, foo.writer_id));
 
-  CORBA::ULong len = foo.unbounded_data.length ();
-
   // Shouldn't be printing this all the time.
   /*
+    CORBA::ULong len = foo.unbounded_data.length ();
+
     for (CORBA::ULong i = 0; i < len; i ++)
     {
     ACE_DEBUG((LM_DEBUG, "(%P|%t)         unbounded_data[%d]=%f \n",
