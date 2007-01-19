@@ -1,3 +1,12 @@
+Fri Jan 19 18:00:56 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\Transient_Kludge.h:
+        * dds\DCPS\Registered_Data_Types.h:
+        * dds\DCPS\transport\framework\TheTransportFactory.h:
+
+          Fixed the compilation warning on VC6 because the __GNUC__
+          is used without checking if it's defined.
+
 Thu Jan 18 23:52:01 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
