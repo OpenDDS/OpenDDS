@@ -68,11 +68,6 @@ PubDriver::run(int& argc, char* argv[])
     {
       TheTransientKludge->enable (); 
 
-      // Let the subscriber catch up before we reenqueue_all.
-      // this value depends on how long the run_test waits before starting
-      // up the second subscriber.
-      ACE_OS::sleep (6);
-
       add_subscription (sub_id_, sub_addr_.c_str ());
       add_new_subscription_ = 0;
     }
@@ -443,8 +438,6 @@ PubDriver::initialize(int& argc, char *argv[])
 void
 PubDriver::end()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
-
   // Record samples been written in the Writer's data map.
   // Verify the number of instances and the number of samples 
   // written to the datawriter.
@@ -509,7 +502,16 @@ PubDriver::run()
   add_subscription (this->sub_id_, this->sub_addr_.c_str ());
 
   // Let the subscriber catch up before we broadcast.
-  ACE_OS::sleep (2);
+  ::DDS::InstanceHandleSeq handles;
+  while (1)
+    {
+      foo_datawriter_->get_matched_subscriptions(handles);
+      if (handles.length() > 0)
+        break;
+      else
+        ACE_OS::sleep(ACE_Time_Value(0,200000));
+    }
+  //ACE_OS::sleep (2);
   
   run_test (test_to_run_);
 }
