@@ -1,3 +1,9 @@
+Fri Jan 19 18:10:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests\DCPS\FooTest3_2\SimpleDataReader.cpp:
+
+          Fixed a warning from a not used variable.
+          
 Fri Jan 19 18:00:56 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\Transient_Kludge.h:
