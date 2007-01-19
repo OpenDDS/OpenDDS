@@ -67,8 +67,7 @@ namespace TAO
 
     typedef TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX> DATA_TYPES_REGISTER;
 
-    #if (__GNUC__ > 3)
-    #else
+    #if ! defined (__GNUC__) || (__GNUC__ < 4)
     TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Data_Types_Register, TAO_SYNCH_MUTEX)  
     #endif
 

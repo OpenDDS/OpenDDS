@@ -16,8 +16,8 @@ namespace TAO
     typedef TAO_Singleton<TransportFactory, TAO_SYNCH_MUTEX>
                                                  TRANSPORT_FACTORY_SINGLETON;
 
-    #if (__GNUC__ > 3)
-    #else
+    #if ! defined (__GNUC__) || (__GNUC__ < 4)
+
     TAO_DDSDCPS_SINGLETON_DECLARE(::TAO_Singleton,
                                   TransportFactory,
                                   TAO_SYNCH_MUTEX)  
