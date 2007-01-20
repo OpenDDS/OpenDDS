@@ -17,6 +17,7 @@ namespace TAO
   {
 
     class SimpleMcastConfiguration;
+    class SimpleMcastSynchResource;
 
     class SimpleMcast_Export SimpleMcastSendStrategy : public TransportSendStrategy
     {
@@ -24,7 +25,8 @@ namespace TAO
 
         SimpleMcastSendStrategy(SimpleMcastConfiguration* config,
                               const ACE_INET_Addr&    remote_address,
-                              SimpleMcastSocket*        socket);
+                              SimpleMcastSocket*        socket,
+                              SimpleMcastSynchResource* synch_resource);
         virtual ~SimpleMcastSendStrategy();
 
       protected:

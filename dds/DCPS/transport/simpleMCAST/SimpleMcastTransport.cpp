@@ -6,6 +6,7 @@
 #include  "SimpleMcastTransport.h"
 #include  "SimpleMcastSendStrategy.h"
 #include  "SimpleMcastReceiveStrategy.h"
+#include  "SimpleMcastSynchResource.h"
 #include  "dds/DCPS/transport/framework/NetworkAddress.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask.h"
 
@@ -74,7 +75,9 @@ TAO::DCPS::SimpleMcastTransport::find_or_create_datalink
   TransportSendStrategy_rch send_strategy =
                        new SimpleMcastSendStrategy(this->mcast_config_.in(),
                                                  remote_address,
-                                                 this->socket_.in());
+                                                 this->socket_.in(),
+                                                 new SimpleMcastSynchResource(
+                                                 this->socket_.in()));
 
   if (link->connect(send_strategy.in()) != 0)
     {
