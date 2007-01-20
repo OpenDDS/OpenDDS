@@ -1,3 +1,10 @@
+Fri Jan 20 00:25:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * performance-tests\DCPS\McastListenerTest\common.h:
+        
+          Fixed a compilation error on linux due to the incorrect 
+          include directory.
+
 Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
