@@ -38,4 +38,4 @@ namespace TAO
 
 } /* namespace TAO */
 
-#endif  /* TAO_DCPS_SIMPLETCPDATALINK_H */
+#endif  /* TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H */

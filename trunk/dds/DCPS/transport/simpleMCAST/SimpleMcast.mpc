@@ -20,6 +20,7 @@ project(SimpleMcast) : dcps {
     SimpleMcastSendStrategy.cpp
     SimpleMcastTransport.cpp
     SimpleMcastSocket.cpp
+    SimpleMcastSynchResource.cpp
   }
 
   Header_Files {

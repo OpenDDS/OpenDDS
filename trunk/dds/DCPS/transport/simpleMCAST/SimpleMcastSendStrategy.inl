@@ -3,6 +3,7 @@
 // $Id$
 #include  "SimpleMcastConfiguration.h"
 #include  "SimpleMcastSocket.h"
+#include  "SimpleMcastSynchResource.h"
 #include  "dds/DCPS/transport/framework/EntryExit.h"
 
 
@@ -10,8 +11,9 @@ ACE_INLINE
 TAO::DCPS::SimpleMcastSendStrategy::SimpleMcastSendStrategy
                                      (SimpleMcastConfiguration* config,
                                       const ACE_INET_Addr&    remote_address,
-                                      SimpleMcastSocket*        socket)
-  : TransportSendStrategy(config,0),
+                                      SimpleMcastSocket*        socket,
+                                      SimpleMcastSynchResource* synch_resource)
+  : TransportSendStrategy(config, synch_resource),
     addr_(remote_address)
 {
   DBG_ENTRY_LVL("SimpleMcastSendStrategy","SimpleMcastSendStrategy",5);

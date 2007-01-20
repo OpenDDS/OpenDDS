@@ -1,3 +1,44 @@
+Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast.mpc:
+        
+          New files added to handle backpressure case.
+        
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
+
+          Added backpressure detection and handling. The backpressure is 
+          observed with a "resource temporary unavailable" error. The same
+          mechanism as in SimpleTcp is used to detect the backpressure. 
+          Upon backpressure, the samples will be queued to the send strategy 
+          internal queue and wait for resource available and then send. 
+          
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+        
+          Corrected comment.
+          
+        * performance-tests\DCPS\McastListenerTest\common.h:
+        * performance-tests\DCPS\McastListenerTest\DataReaderListener.cpp:
+        * performance-tests\DCPS\McastListenerTest\DataReaderListener.h:
+        * performance-tests\DCPS\McastListenerTest\domain_ids:
+        * performance-tests\DCPS\McastListenerTest\mcast.conf:
+        * performance-tests\DCPS\McastListenerTest\McastListener.mpc:
+        * performance-tests\DCPS\McastListenerTest\publisher.cpp:
+        * performance-tests\DCPS\McastListenerTest\subscriber.cpp:
+        * performance-tests\DCPS\McastListenerTest\TestStats.h:
+        * performance-tests\DCPS\McastListenerTest\Writer.cpp:
+        * performance-tests\DCPS\McastListenerTest\Writer.h:
+        * performance-tests\DCPS\McastListenerTest\run_test-1p1s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-1p4s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-2p3s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
+
+          Added multicast performance tests.
+          
 Fri Jan 19 23:29:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
