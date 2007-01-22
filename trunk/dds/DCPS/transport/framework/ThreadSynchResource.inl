@@ -3,6 +3,7 @@
 // $Id$
 
 #include  "EntryExit.h"
+#include  "ace/ACE.h"
 
 ACE_INLINE
 TAO::DCPS::ThreadSynchResource::ThreadSynchResource(

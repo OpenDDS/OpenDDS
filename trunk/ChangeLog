@@ -1,3 +1,10 @@
+Mon Jan 22 23:50:46 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\framework\ThreadSynchResource.h:
+        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+
+          Added missing headers to fix the compilation error on linux.
+          
 Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
