@@ -34,6 +34,8 @@ namespace TAO
       protected:
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+        virtual ACE_HANDLE get_handle ();
+        virtual ssize_t send_bytes_i (const iovec iov[], int n);
 
         // Delegate to the connection object to re-establish
         // the connection.

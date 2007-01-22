@@ -6,6 +6,7 @@
 #include  "SimpleUdpTransport.h"
 #include  "SimpleUdpSendStrategy.h"
 #include  "SimpleUdpReceiveStrategy.h"
+#include  "SimpleUdpSynchResource.h"
 #include  "dds/DCPS/transport/framework/NetworkAddress.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask.h"
 
@@ -73,7 +74,9 @@ TAO::DCPS::SimpleUdpTransport::find_or_create_datalink
   TransportSendStrategy_rch send_strategy =
                        new SimpleUdpSendStrategy(this->udp_config_.in(),
                                                  remote_address,
-                                                 this->socket_.in());
+                                                 this->socket_.in(),
+                                                 new SimpleUdpSynchResource(
+                                                 this->socket_.in()));
 
   if (link->connect(send_strategy.in()) != 0)
     {

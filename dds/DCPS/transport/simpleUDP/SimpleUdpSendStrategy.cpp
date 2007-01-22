@@ -21,10 +21,20 @@ TAO::DCPS::SimpleUdpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
   DBG_ENTRY_LVL("SimpleUdpSendStrategy","send_bytes",5);
 
-  // We never experience backpressure with UDP so we never set the bp flag
-  // to true.
-  ACE_UNUSED_ARG(bp);
+  return this->non_blocking_send (iov, n, bp);
+}
 
+ACE_HANDLE 
+TAO::DCPS::SimpleUdpSendStrategy::get_handle ()
+{
+  return this->socket_->get_handle();
+}
+
+
+ssize_t 
+TAO::DCPS::SimpleUdpSendStrategy::send_bytes_i (const iovec iov[], int n)
+{
+  // It's unlikely the SimpleUdp has backpressure.  
   return this->socket_->send_bytes(iov, n, this->addr_);
 }
 
