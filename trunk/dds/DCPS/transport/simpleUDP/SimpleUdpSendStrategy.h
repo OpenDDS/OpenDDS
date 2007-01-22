@@ -17,6 +17,7 @@ namespace TAO
   {
 
     class SimpleUdpConfiguration;
+    class SimpleUdpSynchResource;
 
     class SimpleUdp_Export SimpleUdpSendStrategy : public TransportSendStrategy
     {
@@ -24,7 +25,8 @@ namespace TAO
 
         SimpleUdpSendStrategy(SimpleUdpConfiguration* config,
                               const ACE_INET_Addr&    remote_address,
-                              SimpleUdpSocket*        socket);
+                              SimpleUdpSocket*        socket,
+                              SimpleUdpSynchResource* resource);
         virtual ~SimpleUdpSendStrategy();
 
       protected:
@@ -32,6 +34,8 @@ namespace TAO
         virtual void stop_i();
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+        virtual ACE_HANDLE get_handle ();
+        virtual ssize_t send_bytes_i (const iovec iov[], int n);
 
 
       private:

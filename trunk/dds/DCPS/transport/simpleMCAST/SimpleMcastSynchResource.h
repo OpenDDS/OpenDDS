@@ -23,13 +23,9 @@ namespace TAO
         SimpleMcastSynchResource(SimpleMcastSocket*  socket);
         virtual ~SimpleMcastSynchResource();
 
-        virtual int wait_to_unclog();
-
-
       private:
 
         SimpleMcastSocket_rch socket_;
-        ACE_HANDLE handle_;
     };
 
   } /* namespace DCPS */

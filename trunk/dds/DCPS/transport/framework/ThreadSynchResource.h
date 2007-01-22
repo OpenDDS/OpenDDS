@@ -17,12 +17,17 @@ namespace TAO
 
         virtual ~ThreadSynchResource();
 
-        virtual int wait_to_unclog() = 0;
+        virtual int wait_to_unclog();
 
-
+     
       protected:
 
-        ThreadSynchResource();
+        virtual void notify_lost_on_backpressure_timeout ();
+
+        ThreadSynchResource(ACE_HANDLE handle, 
+                            ACE_Time_Value timeout = ACE_Time_Value::zero);
+        ACE_HANDLE handle_;
+        ACE_Time_Value timeout_;
     };
 
   } /* namespace DCPS */

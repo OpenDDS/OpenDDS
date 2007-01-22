@@ -1,3 +1,30 @@
+Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.cpp:
+        * dds\DCPS\transport\simpleUDP\SimplUdp.mpc:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
+        
+          Added backpressure detection even it's unlinkly happen.
+          
+        * dds\DCPS\transport\framework\ThreadSynchResource.h:
+        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+        * dds\DCPS\transport\framework\TransportSendStrategy.h:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSendStrategy.h:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSendStrategy.cpp:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
+        
+          Refactored the backpressure detection and handling code. 
+          
 Mon Jan 22 21:02:49 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:

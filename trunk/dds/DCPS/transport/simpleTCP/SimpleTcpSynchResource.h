@@ -24,14 +24,11 @@ namespace TAO
                                const ACE_Time_Value& max_output_pause_period);
         virtual ~SimpleTcpSynchResource();
 
-        virtual int wait_to_unclog();
-
+        virtual void notify_lost_on_backpressure_timeout ();
 
       private:
 
         SimpleTcpConnection_rch connection_;
-        ACE_HANDLE handle_;
-        ACE_Time_Value max_output_pause_period_;
     };
 
   } /* namespace DCPS */

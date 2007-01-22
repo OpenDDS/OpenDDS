@@ -34,6 +34,8 @@ namespace TAO
         virtual void stop_i();
 
         virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
+        virtual ACE_HANDLE get_handle ();
+        virtual ssize_t send_bytes_i (const iovec iov[], int n);
 
 
       private:

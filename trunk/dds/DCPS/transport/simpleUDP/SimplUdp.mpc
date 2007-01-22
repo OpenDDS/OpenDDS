@@ -20,6 +20,7 @@ project(SimpleUdp) : dcps {
     SimpleUdpSendStrategy.cpp
     SimpleUdpTransport.cpp
     SimpleUdpSocket.cpp
+    SimpleUdpSynchResource.cpp
   }
 
   Header_Files {
