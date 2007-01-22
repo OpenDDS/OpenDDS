@@ -1,3 +1,9 @@
+Mon Jan 22 20:55:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
+
+	  Fixed reading configuration value "receiver" from .ini file.
+
 Mon Jan 22 16:25:19 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
@@ -84,30 +90,30 @@ Fri Jan 19 18:00:56 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 Thu Jan 18 23:52:01 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
-	  Removed tabs.
+          Removed tabs.
 
 Thu Jan 18 22:24:58 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/EntryExit.h:
         * dds/DCPS/transport/framework/TransportHeader.cpp:
-	  Modify usage of Debug macros.
+          Modify usage of Debug macros.
 
 Thu Jan 18 21:46:17 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
-	  Cosmetic changes.
+          Cosmetic changes.
 
         * dds/DCPS/transport/framework/EntryExit.h:
-	  Some private members were logically constants. Made them
+          Some private members were logically constants. Made them
           explicit.
 
 Wed Jan 17 23:31:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/EntryExit.h:
 
-	  Changed broken #include from "ace/OS_NS_unistd.h" to
-	  "ace/OS_NS_string.h" since that's where ACE_OS::strncpy() lives.
+          Changed broken #include from "ace/OS_NS_unistd.h" to
+          "ace/OS_NS_string.h" since that's where ACE_OS::strncpy() lives.
 
 Wed Jan 17 19:44:54 UTC 2007  Ciju John  <johnc@ociweb.com>
 
