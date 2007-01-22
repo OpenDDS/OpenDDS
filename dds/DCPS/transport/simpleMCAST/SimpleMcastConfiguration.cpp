@@ -54,8 +54,7 @@ TAO::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
     this->multicast_group_address_.set (multicast_group_address.c_str ());
   }
 
-  bool receiver = false;
-  GET_CONFIG_VALUE (cf, trans_sect, "receiver", receiver, bool);
+  GET_CONFIG_VALUE (cf, trans_sect, "receiver", this->receiver_, bool);
 
   return 0;
 }
