@@ -511,7 +511,6 @@ PubDriver::run()
       else
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
-  //ACE_OS::sleep (2);
   
   run_test (test_to_run_);
 }
