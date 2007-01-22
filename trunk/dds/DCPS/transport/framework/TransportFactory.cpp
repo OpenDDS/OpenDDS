@@ -186,7 +186,7 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
             // ACE_Configuration_Heap to the TransportConfiguration object.
             TransportConfiguration_rch config
               = this->create_configuration (transport_id, transport_type);
-            if (config->load (transport_id, cf) == -1)
+            if (!config.is_nil () && config->load (transport_id, cf) == -1)
               return -1;
           }
         }
@@ -279,7 +279,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
         ACE_TEXT("(%P|%t)TransportFactory::create_configuration: "
         "transport_type=%s is not registered.\n"),
         transport_type.c_str ()));
-      ACE_THROW (Transport::NotFound());
+      return TransportConfiguration_rch ();
     }
 
   TransportConfiguration_rch config = generator->new_configuration ();

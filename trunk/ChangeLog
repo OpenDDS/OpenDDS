@@ -1,15 +1,25 @@
+Mon Jan 22 21:02:49 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+	  Allow configurations to specify a transport that is not in a loaded
+	  library.  This will print a warning to ACE_ERROR but will not fail
+	  until the user attempts to attach the transport to a reader/writer.
+	  This is useful for tests, we can now unify sub.ini and sub_udp.ini,
+	  for example.
+
 Mon Jan 22 20:55:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
 
-	  Fixed reading configuration value "receiver" from .ini file.
+          Fixed reading configuration value "receiver" from .ini file.
 
 Mon Jan 22 16:25:19 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest3_0/SubDriver.cpp:
         * tests/DCPS/FooTest3_0/run_test.pl:
-	  Replaced sleep commands with more concrete synchronization
+          Replaced sleep commands with more concrete synchronization
           strategies to add determinism to the test.
 
 Fri Jan 20 00:25:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
