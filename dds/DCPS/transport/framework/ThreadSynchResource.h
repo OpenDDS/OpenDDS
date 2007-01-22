@@ -5,6 +5,8 @@
 #define TAO_DCPS_THREADSYNCHRESOURCE_H
 
 #include  "dds/DCPS/dcps_export.h"
+#include  "ace/Time_Value.h"
+
 
 namespace TAO
 {
