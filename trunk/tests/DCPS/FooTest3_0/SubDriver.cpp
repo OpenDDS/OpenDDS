@@ -87,24 +87,25 @@ SubDriver::parse_args(int& argc, char* argv[])
 	  arg_shifter.consume_arg ();
 	}
       // A '-s' option
-      else if ((current_arg = arg_shifter.get_the_parameter("-s"))) {
-	if (got_s) {
-	  ACE_ERROR((LM_ERROR,
-		     "(%P|%t) Only one -s allowed on command-line.\n"));
-	  throw TestException();
+      else if ((current_arg = arg_shifter.get_the_parameter("-s")))
+	{
+	  if (got_s) {
+	    ACE_ERROR((LM_ERROR,
+		       "(%P|%t) Only one -s allowed on command-line.\n"));
+	    throw TestException();
+	  }
+
+	  int result = parse_sub_arg(current_arg);
+	  arg_shifter.consume_arg();
+
+	  if (result != 0) {
+	    ACE_ERROR((LM_ERROR,
+		       "(%P|%t) Failed to parse -s command-line arg.\n"));
+	    throw TestException();
+	  }
+
+	  got_s = true;
 	}
-
-	int result = parse_sub_arg(current_arg);
-	arg_shifter.consume_arg();
-
-	if (result != 0) {
-	  ACE_ERROR((LM_ERROR,
-		     "(%P|%t) Failed to parse -s command-line arg.\n"));
-	  throw TestException();
-	}
-
-	got_s = true;
-      }
       else if ((current_arg = arg_shifter.get_the_parameter("-a")) != 0)
 	{
 	  add_new_subscription_ = ACE_OS::atoi (current_arg);
@@ -124,8 +125,10 @@ SubDriver::parse_args(int& argc, char* argv[])
       else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
 	ACE_DEBUG((LM_DEBUG,
 		   "usage: %s "
-		   "-p pub_id:pub_host:pub_port -s sub_id:sub_host:sub_port\n",
-		   argv[0]));
+		   "-p pub_id:pub_host:pub_port\n"
+		   "-s sub_id:sub_host:sub_port\n"
+		   "-n Expected initial messages\n"
+		   , argv[0]));
 
 	arg_shifter.consume_arg();
 	throw TestException();
@@ -399,7 +402,9 @@ SubDriver::run()
   // Sleep before release transport so the connection will not go away.
   // This would avoid the problem of publisher sendv failure due to lost
   // connection during the shutdown period.
-  ACE_OS::sleep (shutdown_delay_secs_);
+  // ciju: Don't see the need for this. We know before hand how many
+  // messages to expect. No need for a general delay(sleep) here.
+  // ACE_OS::sleep (shutdown_delay_secs_);
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();

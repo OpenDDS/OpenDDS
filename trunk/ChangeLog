@@ -1,8 +1,16 @@
+Mon Jan 22 16:25:19 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+	  Replaced sleep commands with more concrete synchronization
+          strategies to add determinism to the test.
+
 Fri Jan 20 00:25:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests\DCPS\McastListenerTest\common.h:
-        
-          Fixed a compilation error on linux due to the incorrect 
+
+          Fixed a compilation error on linux due to the incorrect
           include directory.
 
 Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
@@ -10,24 +18,24 @@ Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
         * dds\DCPS\transport\simpleMCAST\SimpleMcast.mpc:
-        
+
           New files added to handle backpressure case.
-        
+
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.inl:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
 
-          Added backpressure detection and handling. The backpressure is 
+          Added backpressure detection and handling. The backpressure is
           observed with a "resource temporary unavailable" error. The same
-          mechanism as in SimpleTcp is used to detect the backpressure. 
-          Upon backpressure, the samples will be queued to the send strategy 
-          internal queue and wait for resource available and then send. 
-          
+          mechanism as in SimpleTcp is used to detect the backpressure.
+          Upon backpressure, the samples will be queued to the send strategy
+          internal queue and wait for resource available and then send.
+
         * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
-        
+
           Corrected comment.
-          
+
         * performance-tests\DCPS\McastListenerTest\common.h:
         * performance-tests\DCPS\McastListenerTest\DataReaderListener.cpp:
         * performance-tests\DCPS\McastListenerTest\DataReaderListener.h:
@@ -45,7 +53,7 @@ Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
 
           Added multicast performance tests.
-          
+
 Fri Jan 19 23:29:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:

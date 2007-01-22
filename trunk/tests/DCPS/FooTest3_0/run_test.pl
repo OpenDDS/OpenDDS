@@ -60,6 +60,9 @@ elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
     $shutdown_delay_secs=30;
     $shutdown_pub = 0;
     $num_subscribers = 2;
+
+    # The first reader will get 5 msgs in total
+    $num_writes = 5;
 }
 elsif ($ARGV[0] eq '') { # register test
     # default register test: 1 register and 2 writes.
@@ -125,7 +128,7 @@ $publisher->Spawn ();
 
 if ($num_subscribers == 2)
 {
-    sleep (10);
+    sleep (5);
 
     $shutdown_delay_secs=10;
     $sub_id = 2;
