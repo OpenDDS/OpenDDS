@@ -1,3 +1,10 @@
+Tue Jan 23 18:04:50 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+	  Fix memory leak. The delayed_delivered_notification_queue_ &
+          delayed_notification_mode_ weren't being freed up properly. Also
+          add check for array overrun.
+
 Tue Jan 23 17:17:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
@@ -9,18 +16,18 @@ Tue Jan 23 17:17:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\framework\ThreadSynchResource.inl:
 
           Corrected the timeout passed to handle_write_ready(). The
-          default timeout (ACE_Time_Value*) should be nil (wait forever) 
-          instead of a zero time value(not wait). This should 
+          default timeout (ACE_Time_Value*) should be nil (wait forever)
+          instead of a zero time value(not wait). This should
           fix the SimpleTcp performance test on handle_write_ready
           timed out.
-          
+
 Mon Jan 22 23:50:46 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\ThreadSynchResource.h:
         * dds\DCPS\transport\framework\ThreadSynchResource.inl:
 
           Added missing headers to fix the compilation error on linux.
-          
+
 Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
@@ -30,9 +37,9 @@ Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
         * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
         * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
-        
+
           Added backpressure detection even it's unlinkly happen.
-          
+
         * dds\DCPS\transport\framework\ThreadSynchResource.h:
         * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
         * dds\DCPS\transport\framework\ThreadSynchResource.inl:
@@ -45,9 +52,9 @@ Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
-        
-          Refactored the backpressure detection and handling code. 
-          
+
+          Refactored the backpressure detection and handling code.
+
 Mon Jan 22 21:02:49 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
