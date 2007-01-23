@@ -24,7 +24,7 @@ namespace TAO
      
       protected:
 
-        virtual void notify_lost_on_backpressure_timeout ();
+        virtual void notify_lost_on_backpressure_timeout () = 0;
 
         ThreadSynchResource(ACE_HANDLE handle);
         ACE_HANDLE handle_;

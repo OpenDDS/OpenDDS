@@ -39,6 +39,9 @@ namespace TAO
 
         virtual bool acked (RepoId pub_id);
 
+        void notify_lost_on_backpressure_timeout ();
+
+
       protected:
 
         virtual DataLink* find_or_create_datalink
@@ -54,7 +57,6 @@ namespace TAO
 
         /// Called by the DataLink to release itself.
         virtual void release_datalink_i(DataLink* link);
-
 
       private:
 

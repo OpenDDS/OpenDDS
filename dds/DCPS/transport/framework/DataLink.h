@@ -130,10 +130,13 @@ namespace TAO
         /// associated publication and subscriptions.
         ACE_Message_Block* marshal_acks (bool byte_order);
 
-      // Call-back from the concrete transport object.
-      // The connection has been broken. No locks are being held.
-      bool release_resources ();
+        // Call-back from the concrete transport object.
+        // The connection has been broken. No locks are being held.
+        bool release_resources ();
 
+        // Used by SimpleUdp and SimpleMcast to inform the send strategy to
+        // clear all unsent samples upon backpressure timed out.
+        void terminate_send ();
 
        protected:
 

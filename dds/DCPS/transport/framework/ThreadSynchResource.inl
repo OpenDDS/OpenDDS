@@ -37,9 +37,4 @@ TAO::DCPS::ThreadSynchResource::wait_to_unclog()
 }
 
 
-ACE_INLINE void 
-TAO::DCPS::ThreadSynchResource::notify_lost_on_backpressure_timeout ()
-{
-  //noop
-}
 

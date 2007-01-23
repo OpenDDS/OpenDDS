@@ -21,7 +21,7 @@ namespace TAO
       public:
 
         SimpleTcpSynchResource(SimpleTcpConnection*  connection,
-                               const int& max_output_pause_period_);
+                               const int& max_output_pause_period_ms);
         virtual ~SimpleTcpSynchResource();
 
         virtual void notify_lost_on_backpressure_timeout ();
