@@ -38,3 +38,12 @@ A basic system feature test:
                                 		  one using UDP.
                                 Two datareaders - one using TCP, 
                                 		  one using UDP. 
+
+
+Note: This test can optionally use the MCast transport.
+
+  run_test.pl mcast
+
+ The test is statically linked with the MCast transport library and static
+ initialization happens at process initialization (as opposed to run-time
+ dynamic linking & initialization).
