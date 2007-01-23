@@ -123,7 +123,14 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
       //MJM: thingie manage itself the way it sees fit.
     }
 
-  delete [] this->delayed_delivered_notification_queue_;
+  if (this->delayed_delivered_notification_queue_) {
+    delete [] this->delayed_delivered_notification_queue_;
+    this->delayed_delivered_notification_queue_ = 0;
+  }
+  if (this->delayed_notification_mode_) {
+    delete [] this->delayed_notification_mode_;
+    this->delayed_notification_mode_ = 0;
+  }
 
   if (this->elems_)
     delete this->elems_;
@@ -548,11 +555,24 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
 
                   // Inform the element that the data has been delivered.
 
-		  // ciju: We need to release this->lock_ before
-		  // calling data_dropped/data_delivered. Else we have a potential
-		  // deadlock in our hands.
-		  if (delay_notification == NOTIFY_IMMEADIATELY)
+                  if ((delay_notification == DELAY_NOTIFICATION) &&
+                      (num_delayed_notifications_ < max_samples_))
 		    {
+                      // If we can delay notification.
+		      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
+		      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
+		      ++num_delayed_notifications_;
+		    }
+                  else
+                    {
+                      // Ciju: If not, do a best effort immediate notification.
+                      // I have noticed instances of immediate notification producing
+                      // cores ocassionally. I believe the reason is
+                      // if (delay_notification == NOTIFY_IMMEADIATELY)
+
+                      // ciju: We need to release this->lock_ before
+                      // calling data_dropped/data_delivered. Else we have a potential
+                      // deadlock in our hands.
 		      if (this->mode_ == MODE_TERMINATED)
 			{
 			  this->lock_.remove (); // Release and reacquire the lock
@@ -565,12 +585,6 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
 			  element->data_delivered();
 			  this->lock_.acquire_write ();
 			}
-		    }
-		  else if (delay_notification == DELAY_NOTIFICATION)
-		    {
-		      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
-		      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-		      ++num_delayed_notifications_;
 		    }
 
                   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1730,7 +1744,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 }
 
 
-ssize_t 
+ssize_t
 TAO::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int n, int& bp)
 {
   int val = 0;
@@ -1777,5 +1791,3 @@ TAO::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int n, i
 
   return result;
 }
-
-
