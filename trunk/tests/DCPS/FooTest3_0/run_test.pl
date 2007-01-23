@@ -47,7 +47,7 @@ elsif ($ARGV[0] eq 'allocator') {
 }
 elsif ($ARGV[0] eq 'liveliness') {
     $test_to_run = 6;
-    $num_writes = 8;  # 1 register, 3 writes, 3 assert_liveliness, 2 liveliness message
+    $num_writes = 4;;  # 1 register, 3 writes
 }
 elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
     # 2 readers with default register test
