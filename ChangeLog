@@ -1,3 +1,22 @@
+Tue Jan 23 20:29:44 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/README:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+	  The test now statically links and configures the MCast transport.
+
+        * tests/transport/mcast_simple/DDS_transport_mcast_simple.mpc:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple/mcast.conf:
+          The test now dynamically links and configures the MCast library.
+
+        * bin/dcps_tests.lst:
+          MCast FooTest5 has been turned on and mcast_simple turned off
+          for static builds.
+
 Tue Jan 23 18:04:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

@@ -1,8 +1,5 @@
 #include "SubDriver.h"
 #include "TestException.h"
-// Include the SimpleMcast.h to make sure Initializer is created before the Service 
-// Configurator open service configure file.
-#include "dds/DCPS/transport/simpleMCAST/SimpleMcast.h"
 // Add the TransportImpl.h before TransportImpl_rch.h is included to  
 // resolve the build problem that the class is not defined when 
 // RcHandle<T> template is instantiated.

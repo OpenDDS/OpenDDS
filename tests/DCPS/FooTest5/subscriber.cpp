@@ -12,6 +12,10 @@
 
 #include "DataReaderListener.h"
 #include "TestException.h"
+// Include the SimpleMcast.h to make sure Initializer is created before the Service 
+// Configurator open service configure file.
+#include "dds/DCPS/transport/simpleMCAST/SimpleMcast.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
