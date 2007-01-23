@@ -6,11 +6,9 @@
 #include  "ace/ACE.h"
 
 ACE_INLINE
-TAO::DCPS::ThreadSynchResource::ThreadSynchResource(
-  ACE_HANDLE handle, 
-  ACE_Time_Value timeout)
+TAO::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
   : handle_ (handle),
-    timeout_ (timeout)
+    timeout_ (0)
 {
   DBG_ENTRY_LVL("ThreadSynchResource","ThreadSynchResource",5);
 }
@@ -20,7 +18,7 @@ TAO::DCPS::ThreadSynchResource::wait_to_unclog()
 {
   DBG_ENTRY_LVL("ThreadSynchResource","wait_to_unclog",5);
 
-  if (ACE::handle_write_ready(this->handle_, &this->timeout_) == -1)
+  if (ACE::handle_write_ready(this->handle_, this->timeout_) == -1)
     {
       if (errno == ETIME)
         {

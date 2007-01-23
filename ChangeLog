@@ -1,3 +1,19 @@
+Tue Jan 23 17:17:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.cpp:
+        * dds\DCPS\transport\simpleTCP\SimpleTcpConfiguration.inl:
+        * dds\DCPS\transport\framework\ThreadSynchResource.h:
+        * dds\DCPS\transport\framework\ThreadSynchResource.cpp:
+        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+
+          Corrected the timeout passed to handle_write_ready(). The
+          default timeout (ACE_Time_Value*) should be nil (wait forever) 
+          instead of a zero time value(not wait). This should 
+          fix the SimpleTcp performance test on handle_write_ready
+          timed out.
+          
 Mon Jan 22 23:50:46 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\ThreadSynchResource.h:

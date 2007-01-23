@@ -550,14 +550,12 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",5);
 
-  ACE_Time_Value max_output_pause_period(this->tcp_config_->max_output_pause_period_/1000,
-                                         this->tcp_config_->max_output_pause_period_%1000*1000);
   TransportSendStrategy_rch send_strategy =
     new SimpleTcpSendStrategy(link,
 			      this->tcp_config_.in(),
 			      connection,
 			      new SimpleTcpSynchResource(connection,
-							 max_output_pause_period));
+							 this->tcp_config_->max_output_pause_period_));
 
   TransportReceiveStrategy_rch receive_strategy =
     new SimpleTcpReceiveStrategy(link,
