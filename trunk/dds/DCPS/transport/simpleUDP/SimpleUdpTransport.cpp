@@ -9,6 +9,7 @@
 #include  "SimpleUdpSynchResource.h"
 #include  "dds/DCPS/transport/framework/NetworkAddress.h"
 #include  "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include  <vector>
 
 
 #if !defined (__ACE_INLINE__)
@@ -76,7 +77,9 @@ TAO::DCPS::SimpleUdpTransport::find_or_create_datalink
                                                  remote_address,
                                                  this->socket_.in(),
                                                  new SimpleUdpSynchResource(
-                                                 this->socket_.in()));
+                                                 this->socket_.in(),
+                                                 this,
+							                                   this->udp_config_->max_output_pause_period_));
 
   if (link->connect(send_strategy.in()) != 0)
     {
@@ -320,3 +323,33 @@ TAO::DCPS::SimpleUdpTransport::discover_unique_address (ACE_INET_Addr& addr)
 }
 
 #endif
+
+
+void
+TAO::DCPS::SimpleUdpTransport::notify_lost_on_backpressure_timeout ()
+{
+  typedef std::vector <SimpleUdpDataLink_rch> LinkVector;
+ 
+  LinkVector links;
+  {
+    GuardType guard(this->links_lock_);
+
+    AddrLinkMap::ENTRY* entry;
+
+    for (AddrLinkMap::ITERATOR itr(this->links_);
+         itr.next(entry);
+         itr.advance())
+      links.push_back (entry->int_id_);
+  }
+
+  LinkVector::iterator itr_end = links.end ();
+
+  for (LinkVector::iterator itr = links.begin ();
+    itr != itr_end;
+    ++ itr)
+  {
+    (*itr)->notify (DataLink::LOST);
+    (*itr)->terminate_send ();
+  }
+}
+

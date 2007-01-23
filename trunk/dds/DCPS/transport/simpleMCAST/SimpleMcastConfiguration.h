@@ -33,6 +33,13 @@ namespace TAO
 
         /// Are we a receiver?
         bool receiver_;
+
+        /// Maximum period (in milliseconds) of not being able to send queued
+        /// messages. If there are samples queued and no output for longer
+        /// than this period then the connection will be closed and on_*_lost()
+        /// callbacks will be called. If the value is zero, the default, then
+        /// this check will not be made.
+        int max_output_pause_period_;
     };
 
   } /* namespace DCPS */

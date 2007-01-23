@@ -14,7 +14,6 @@
 #include  "TransportDefs.h"
 #include  "dds/DCPS/DataSampleList.h"
 #include  "EntryExit.h"
-#include  <vector>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"

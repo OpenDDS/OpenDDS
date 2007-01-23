@@ -56,6 +56,9 @@ TAO::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
 
   GET_CONFIG_VALUE (cf, trans_sect, "receiver", this->receiver_, bool);
 
+  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period",
+    this->max_output_pause_period_, int);
+
   return 0;
 }
 

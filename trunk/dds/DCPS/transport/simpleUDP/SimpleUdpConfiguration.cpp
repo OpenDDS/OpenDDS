@@ -47,6 +47,9 @@ TAO::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
     this->local_address_.set (local_address.c_str ());
   }
 
+  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period",
+    this->max_output_pause_period_, int);
+
   return 0;
 }
 

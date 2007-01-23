@@ -1,3 +1,41 @@
+Tue Jan 23 22:01:54 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
+        * dds\DCPS\transport\framework\DataLink.h:
+        * dds\DCPS\transport\framework\ThreadSynchResource.h:
+        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+        * dds\DCPS\transport\framework\DataLink.inl:
+        
+          Supported notifications upon backpressure timed out.
+          The "max_output_pause_period" configuration is added to 
+          SimpleMcast and SimpleUdp as in SimpleTcp. This is the 
+          maximum period (in milliseconds) of not being able to send 
+          queued messages. If there are samples queued and no output
+          for longer than this period then the socket will be closed
+          and on_*_lost() callbacks will be called. If the value is 
+          zero, the default, then this check will not be made. 
+
+        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+
+          Removed a not needed include header.
+          
+        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+
+          Renamed a parameter in constructor.
+          
 Tue Jan 23 20:29:44 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest5/FooTest5.mpc:
