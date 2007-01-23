@@ -26,10 +26,9 @@ namespace TAO
 
         virtual void notify_lost_on_backpressure_timeout ();
 
-        ThreadSynchResource(ACE_HANDLE handle, 
-                            ACE_Time_Value timeout = ACE_Time_Value::zero);
+        ThreadSynchResource(ACE_HANDLE handle);
         ACE_HANDLE handle_;
-        ACE_Time_Value timeout_;
+        ACE_Time_Value* timeout_;
     };
 
   } /* namespace DCPS */

@@ -13,5 +13,6 @@
 TAO::DCPS::ThreadSynchResource::~ThreadSynchResource()
 {
   DBG_ENTRY_LVL("ThreadSynchResource","~ThreadSynchResource",5);
+  delete this->timeout_;
 }
 
