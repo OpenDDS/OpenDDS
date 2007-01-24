@@ -262,7 +262,7 @@ ACE_INLINE
 void 
 TAO::DCPS::DataLink::terminate_send ()
 {
-  return this->send_strategy_->terminate_send (false);
+  this->send_strategy_->terminate_send (false);
 }
 
 
