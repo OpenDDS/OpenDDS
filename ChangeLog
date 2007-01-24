@@ -1,3 +1,10 @@
+Wed Jan 24 16:02:58 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\framework\DataLink.inl:
+
+          Fixed a compilation error on vc6 build due to returning a value
+          in a void return function. 
+          
 Tue Jan 23 22:56:33 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
