@@ -1,3 +1,13 @@
+Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\Transient_Kludge.h:
+        * dds\DCPS\Registered_Data_Types.h:
+        * dds\DCPS\transport\framework\TheTransportFactory.h:
+        * dds\DCPS\Service_Participant.h:
+
+          Disabled warning "C4231: nonstandard extension used : 'extern' 
+          before template explicit instantiation" for VC6 builds.
+
 Thu Jan 25 17:26:52 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/SubDriver.cpp:
