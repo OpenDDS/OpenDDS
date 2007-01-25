@@ -378,8 +378,12 @@ SubDriver::run()
     {
       // Since the Subscriber is ready, no need for Publisher to
       // wait for Subscriber initialization.
+      // We still noticed failures on some machines. Since we don't
+      // have any means of controlling the delay on the re-enque
+      // messages, we will do a best effort and put a 5 sec sleep
+      // here for the subscriber to initialize all the way.
       pub_invoke_task.register_invocation (this->pub_driver_, this->sub_id_
-                                           , this->sub_addr_.c_str (), 0);
+                                           , this->sub_addr_.c_str (), 5);
     }
 
   this->subscriber_.associate ();
