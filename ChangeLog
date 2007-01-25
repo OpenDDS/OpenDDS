@@ -1,3 +1,11 @@
+Thu Jan 25 23:07:30 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/transport/simpleUDP/SimplUdp.mpc:
+          Removed this file.
+
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.mpc:
+	  Added this file.
+
 Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\Transient_Kludge.h:
@@ -5,7 +13,7 @@ Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\framework\TheTransportFactory.h:
         * dds\DCPS\Service_Participant.h:
 
-          Disabled warning "C4231: nonstandard extension used : 'extern' 
+          Disabled warning "C4231: nonstandard extension used : 'extern'
           before template explicit instantiation" for VC6 builds.
 
 Thu Jan 25 17:26:52 UTC 2007  Ciju John  <johnc@ociweb.com>
