@@ -7,6 +7,9 @@
 #include  "TransportFactory.h"
 #include  "tao/TAO_Singleton.h"
 
+#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200 
+# pragma warning( disable : 4231 )
+#endif
 
 namespace TAO
 {
