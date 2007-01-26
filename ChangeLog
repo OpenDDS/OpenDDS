@@ -1,3 +1,9 @@
+Fri Jan 26 20:03:11 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/Version.h:
+        * rules.dds.GNU:
+	  Add version file and rules specific to DDS.
+
 Thu Jan 25 23:07:30 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/simpleUDP/SimplUdp.mpc:
