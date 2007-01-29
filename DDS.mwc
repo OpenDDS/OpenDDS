@@ -1,6 +1,6 @@
 // $Id$
 
 workspace {
-  cmdline = -include $PWD
+  cmdline = -include $PWD/MPC/config
 }
 
