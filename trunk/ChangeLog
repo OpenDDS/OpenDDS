@@ -1,8 +1,15 @@
+Mon Jan 29 18:36:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+	  The .h file uses throw() instead of ACE_THROW_SPEC(()) therefore so
+	  should the .cpp file.  This eliminates a compile error when the macro
+	  ACE_HAS_NO_THROW_SPEC is on.
+
 Fri Jan 26 20:03:11 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/Version.h:
         * rules.dds.GNU:
-	  Add version file and rules specific to DDS.
+          Add version file and rules specific to DDS.
 
 Thu Jan 25 23:07:30 UTC 2007  Ciju John  <johnc@ociweb.com>
 
@@ -10,7 +17,7 @@ Thu Jan 25 23:07:30 UTC 2007  Ciju John  <johnc@ociweb.com>
           Removed this file.
 
         * dds/DCPS/transport/simpleUDP/SimpleUdp.mpc:
-	  Added this file.
+          Added this file.
 
 Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
@@ -25,7 +32,7 @@ Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 Thu Jan 25 17:26:52 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/FooTest3_0/SubDriver.cpp:
-	  reenqueue_all test failing on oslo.phx due to pub-sub
+          reenqueue_all test failing on oslo.phx due to pub-sub
           synchronization issues. Since we can't delay reenqueue messages
           the fix is to delay the Publisher invocation by 5 secs.
 
@@ -92,7 +99,7 @@ Tue Jan 23 20:29:44 UTC 2007  Ciju John  <johnc@ociweb.com>
         * tests/DCPS/FooTest5/mcast.conf:
         * tests/DCPS/FooTest5/publisher.cpp:
         * tests/DCPS/FooTest5/subscriber.cpp:
-	  The test now statically links and configures the MCast transport.
+          The test now statically links and configures the MCast transport.
 
         * tests/transport/mcast_simple/DDS_transport_mcast_simple.mpc:
         * tests/transport/mcast_simple/PubDriver.cpp:
@@ -107,7 +114,7 @@ Tue Jan 23 20:29:44 UTC 2007  Ciju John  <johnc@ociweb.com>
 Tue Jan 23 18:04:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-	  Fix memory leak. The delayed_delivered_notification_queue_ &
+          Fix memory leak. The delayed_delivered_notification_queue_ &
           delayed_notification_mode_ weren't being freed up properly. Also
           add check for array overrun.
 
@@ -165,11 +172,11 @@ Mon Jan 22 21:02:49 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
 
-	  Allow configurations to specify a transport that is not in a loaded
-	  library.  This will print a warning to ACE_ERROR but will not fail
-	  until the user attempts to attach the transport to a reader/writer.
-	  This is useful for tests, we can now unify sub.ini and sub_udp.ini,
-	  for example.
+          Allow configurations to specify a transport that is not in a loaded
+          library.  This will print a warning to ACE_ERROR but will not fail
+          until the user attempts to attach the transport to a reader/writer.
+          This is useful for tests, we can now unify sub.ini and sub_udp.ini,
+          for example.
 
 Mon Jan 22 20:55:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

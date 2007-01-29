@@ -175,12 +175,8 @@ void DataReaderListenerImpl::on_subscription_lost (
 
 
 void DataReaderListenerImpl::on_connection_deleted (
-  ::DDS::DataReader_ptr
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
-  )
-  ACE_THROW_SPEC ((
-  ::CORBA::SystemException
-  ))
+  ::DDS::DataReader_ptr)
+  throw (::CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
 }
