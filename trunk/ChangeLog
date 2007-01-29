@@ -1,9 +1,16 @@
+Mon Jan 29 19:19:53 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+	  Changed relative path to the .mpb files.  They have now moved to
+	  $DDS_ROOT/MPC/config.  This is required to build with older versions
+	  of the DOC group or OCI ACE+TAO.
+
 Mon Jan 29 18:36:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Reconnect/DataReaderListener.cpp:
-	  The .h file uses throw() instead of ACE_THROW_SPEC(()) therefore so
-	  should the .cpp file.  This eliminates a compile error when the macro
-	  ACE_HAS_NO_THROW_SPEC is on.
+          The .h file uses throw() instead of ACE_THROW_SPEC(()) therefore so
+          should the .cpp file.  This eliminates a compile error when the macro
+          ACE_HAS_NO_THROW_SPEC is on.
 
 Fri Jan 26 20:03:11 UTC 2007  Ciju John  <johnc@ociweb.com>
 
