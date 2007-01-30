@@ -1,8 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "EntryExit.h"
+#include "EntryExit.h"
 
+#include "ace/OS_NS_arpa_inet.h"
 
 ACE_INLINE
 TAO::DCPS::NetworkAddress::NetworkAddress()

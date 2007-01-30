@@ -7,7 +7,7 @@
 #   <%UPPERTYPE%>      - Uppercase version of <%TYPE%>
 #   <%MODULE%>         - Module containing the type.
 #   <%SCOPE%>          - Enclosing scope of type.
-#   <%POA%>            - POA scope to inherity from.
+#   <%POA%>            - POA scope to inherit from.
 #   <%EXPORT%>         - Export macro.
 #   <%NAMESPACESTART%> - Beginning of namespace.
 #   <%NAMESPACEEND%>   - End of namespace.
@@ -288,7 +288,7 @@ private:
    */
   ::DDS::ReturnCode_t get_or_create_instance_handle(
     DDS::InstanceHandle_t& handle,
-    ::<%SCOPE%><%TYPE%> instance_data,
+    const ::<%SCOPE%><%TYPE%>& instance_data,
     const ::DDS::Time_t & source_timestamp);
 
   /**
