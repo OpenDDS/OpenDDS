@@ -26,8 +26,10 @@ TAO::DCPS::SimpleTcpGenerator::new_factory()
 }
 
 TAO::DCPS::TransportConfiguration* 
-TAO::DCPS::SimpleTcpGenerator::new_configuration()
+TAO::DCPS::SimpleTcpGenerator::new_configuration(const TransportIdType id)
 {
+  ACE_UNUSED_ARG (id);
+
   SimpleTcpConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config, 
                  SimpleTcpConfiguration(), 
@@ -35,3 +37,9 @@ TAO::DCPS::SimpleTcpGenerator::new_configuration()
   return trans_config;
 }
 
+void 
+TAO::DCPS::SimpleTcpGenerator::default_transport_ids (TransportIdList & ids)
+{
+  ids.clear ();
+  ids.push_back (TAO::DCPS::DEFAULT_SIMPLE_TCP_ID);
+}

@@ -12,9 +12,9 @@
 
 #include "DataReaderListener.h"
 #include "TestException.h"
-// Include the SimpleMcast.h to make sure Initializer is created before the Service 
+// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service 
 // Configurator open service configure file.
-#include "dds/DCPS/transport/simpleMCAST/SimpleMcast.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"

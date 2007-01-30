@@ -36,6 +36,9 @@ parse_args (int argc, char *argv[])
       if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
         transport_impl_id = 2;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "mcast") == 0) {
+        transport_impl_id = 3;
+      }
       // test with DEFAULT_SIMPLE_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
         transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
@@ -43,6 +46,9 @@ parse_args (int argc, char *argv[])
       // test with DEFAULT_SIMPLE_UDP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
         transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_UDP_ID;
+      }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_mcast_pub") == 0) {
+        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
       }
       break;
     case '?':

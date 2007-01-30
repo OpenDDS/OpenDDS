@@ -4,11 +4,12 @@
 #ifndef TAO_DCPS_TRANSPORTDEFS_H
 #define TAO_DCPS_TRANSPORTDEFS_H
 
-#include  "ace/Basic_Types.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
 #include  "dds/DCPS/Definitions.h"
 #include  "dds/DCPS/debug.h"
+#include  "ace/Basic_Types.h"
+#include  <vector>
 
 class ACE_Message_Block ;
 class ACE_Data_Block ;
@@ -125,6 +126,7 @@ namespace TAO
 
     /// The TransportImpl instance ID type.
     typedef ACE_UINT32 TransportIdType;
+    typedef std::vector <TransportIdType> TransportIdList;
 
     /// Identifier type for DataLink objects.
     typedef ACE_UINT64  DataLinkIdType;
@@ -135,7 +137,8 @@ namespace TAO
     //       defined here.
     const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
     const TransportIdType DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01;
-    const TransportIdType DEFAULT_SIMPLE_MCAST_ID = 0xFFFFFF02;
+    const TransportIdType DEFAULT_SIMPLE_MCAST_PUB_ID = 0xFFFFFF02;
+    const TransportIdType DEFAULT_SIMPLE_MCAST_SUB_ID = 0xFFFFFF03;
 
     /// Return code type for send_control() operations.
     enum SendControlStatus

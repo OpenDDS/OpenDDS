@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 

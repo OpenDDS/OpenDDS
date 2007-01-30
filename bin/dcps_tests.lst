@@ -68,12 +68,12 @@ tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl give_addrs: !DCPS_MIN
 tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN
-tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN
-tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN
-tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN
-tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
-tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
-tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
+#tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN
+#tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN
+#tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN
+#tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
+#tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
+#tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
 
 # Commented builtin topic since they are not well implemented.
 
@@ -99,6 +99,8 @@ performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 # Not running UDPListenerTest due to the machine dependent peformance of UDP.
 
 DevGuideExamples/DDS/Messenger/run_test.pl: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl udp: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_test.pl default_tcp: !DCPS_MIN
+DevGuideExamples/DDS/Messenger/run_test.pl udp: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_test.pl default_udp: !DCPS_MIN !STATIC
+DevGuideExamples/DDS/Messenger/run_test.pl mcast: !DCPS_MIN !STATIC
+DevGuideExamples/DDS/Messenger/run_test.pl default_mcast: !DCPS_MIN !STATIC

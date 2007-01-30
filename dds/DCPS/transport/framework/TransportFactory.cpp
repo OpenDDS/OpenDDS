@@ -282,7 +282,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
       return TransportConfiguration_rch ();
     }
 
-  TransportConfiguration_rch config = generator->new_configuration ();
+  TransportConfiguration_rch config = generator->new_configuration (transport_id);
   this->register_configuration (transport_id, config);
   return config;
 }
@@ -376,13 +376,12 @@ TAO::DCPS::TransportFactory::register_simpletcp ()
                  ACE_TEXT("(%P|%t)TransportFactory::register_simpletcp no memory\n")));
       return;
     }
-  this->register_generator (TAO::DCPS::DEFAULT_SIMPLE_TCP_ID, "SimpleTcp", generator);
+  this->register_generator ("SimpleTcp", generator);
 }
 
 
 void
-TAO::DCPS::TransportFactory::register_generator (TransportIdType default_trans_id,
-                                                 const char* type,
+TAO::DCPS::TransportFactory::register_generator (const char* type,
                                                  TransportGenerator* generator)
 {
   DBG_ENTRY_LVL("TransportFactory","register_generator",5);
@@ -418,8 +417,17 @@ TAO::DCPS::TransportFactory::register_generator (TransportIdType default_trans_i
       ACE_THROW (Transport::MiscProblem());
     }
 
-   TransportConfiguration_rch config
-              = create_configuration (default_trans_id, type);
+   // Get the list of default transport. Some transports(e.g. SimpleMcast) have multiple default 
+   // transport ids.
+   TransportIdList default_ids;
+   generator_rch->default_transport_ids (default_ids);
+
+   // Create default transport configuration associated with the default id.
+   TransportIdList::iterator itEnd = default_ids.end ();
+   for (TransportIdList::iterator it = default_ids.begin (); it != itEnd; ++it)
+   {
+     TransportConfiguration_rch config = create_configuration (*it, type);
+   }
 }
 
 /// This method is a bit unusual in regards to the way it treats the
