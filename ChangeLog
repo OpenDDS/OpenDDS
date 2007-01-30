@@ -1,3 +1,9 @@
+Tue Jan 30 20:43:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\simpleUDP:
+        
+          Removed the empty directory.
+
 Tue Jan 30 19:10:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples\DDS\Messenger\pub_mcast.ini:
