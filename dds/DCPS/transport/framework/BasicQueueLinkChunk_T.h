@@ -4,8 +4,9 @@
 #ifndef TAO_DCPS_BASICQUEUELINKCHUNK_T_H
 #define TAO_DCPS_BASICQUEUELINKCHUNK_T_H
 
-#include  "BasicQueueLink_T.h"
+#include "BasicQueueLink_T.h"
 
+#include "ace/OS_NS_stdlib.h"
 
 namespace TAO
 {

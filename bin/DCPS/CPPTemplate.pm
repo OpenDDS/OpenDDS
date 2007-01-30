@@ -545,7 +545,7 @@ ACE_Message_Block*
 ::DDS::ReturnCode_t
  <%TYPE%>DataWriterImpl::get_or_create_instance_handle(
                 DDS::InstanceHandle_t& handle,
-                ::<%SCOPE%><%TYPE%> instance_data,
+                const ::<%SCOPE%><%TYPE%>& instance_data,
                 const ::DDS::Time_t & source_timestamp)
 {
   handle = ::TAO::DCPS::HANDLE_NIL;

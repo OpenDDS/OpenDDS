@@ -1,7 +1,17 @@
+Tue Jan 30 22:58:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+	  Pass the instance_data as const-reference since it may be very large.
+
+        * dds/DCPS/transport/framework/BasicQueueLinkChunk_T.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+	  Added #includes needed for an inline=0 build.
+
 Tue Jan 30 20:43:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\simpleUDP:
-        
+
           Removed the empty directory.
 
 Tue Jan 30 19:10:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
@@ -10,13 +20,13 @@ Tue Jan 30 19:10:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DevGuideExamples\DDS\Messenger\sub_mcast.ini:
 
           Added missing files.
-          
+
 Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         These changes refactored SimpleUdp and SimpleMcast (unreliable multicast)
-        and supported default transport ids for SimpleMcast. A new library 
+        and supported default transport ids for SimpleMcast. A new library
         - SimpleUnreliableDgram replaced the SimpleUdp and SimpleMcast.(See 9775)
-        
+
         * DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
         * DCPS\transport\simpleMCAST\SimpleMcastGenerator.h:
         * DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
@@ -88,42 +98,42 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSynchResource.h:
         * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.cpp:
         * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.inl:
-        
+
           Merged SimpleUdp and SimpleMcast transport together in SimpleUnreliableDgram library.
           The -type parameter in service configuration specifies which transport will register
           with the transport factory. A process can register both "SimpleUdp" and "SimpleMcast"
-          or one of the two transports via service configuration.       
-            
+          or one of the two transports via service configuration.
+
         * DCPS\transport\framework\TransportDefs.h:
-        
+
           Added two default id for SimpleMcast, one for subscriber (DEFAULT_SIMPLE_MCAST_SUB_ID)
           and one for publisher (DEFAULT_SIMPLE_MCAST_PUB_ID).
-          
+
         * DCPS\transport\framework\TransportGenerator.h:
         * DCPS\transport\simpleTCP\SimpleTcpGenerator.h:
         * DCPS\transport\simpleTCP\SimpleTcpGenerator.cpp:
-           
+
           Added default_transport_ids() function to support multiple default transport
           ids configuration registration and added transport id parameter to new_configuration()
           to provide different default configurations for the transport.
-        
+
         * DCPS\transport\framework\TransportFactory.h:
         * DCPS\transport\framework\TransportFactory.cpp:
-        
+
           Removed the default transport id parameter from the register_generator (). The default
           ids will be provided by generator via default_transport_ids(). Upon the transport library
           loading, the default transport configurations will be created and registered with the
           transport factory.
 
         * MPC\config\dcpsexe_with_unreliable_dgram.mpb:
-        
+
           Added the project base depend on SimpleUnreliableDgram lib.
-          
+
         * MPC\config\dcpsexe_with_mcast.mpb:
         * MPC\config\dcpsexe_with_udp.mpb:
-  
+
           Removed these files since we removed SimpleUdp and SimpleMcast lib.
-                  
+
         * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.h:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
         * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.h:
@@ -198,9 +208,9 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
         * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.inl:
         * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.cpp:
-                  
+
           Removed SimpleUdp and SimpleMcast directories.
-                
+
         * DevGuideExamples\DDS\Messenger\subscriber.cpp:
         * DevGuideExamples\DDS\Messenger\publisher.cpp:
         * DevGuideExamples\DDS\Messenger\run_test.pl:
@@ -208,7 +218,7 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DevGuideExamples\DDS\Messenger\udp.conf:
 
           Added mcast and default mcast test cases.
-                  
+
         * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
         * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
         * performance-tests\DCPS\McastListenerTest\mcast.conf:
@@ -243,20 +253,20 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * tests\transport\udp_simple_n\SubDriver.cpp:
         * tests\transport\udp_simple_n\DDS_transport_udp_simple_n.mpc:
         * tests\transport\udp_simple_n\udp.conf:
-        
+
           Updated tests that use the SimpleMcast and SimpleUdp libraries to
           use SimpleUnreliableDgram library.
-          
+
         * bin\dcps_tests.lst:
-         
+
           Added mcast and default mcast Messenger examples to nightly builds.
-          
+
 Mon Jan 29 19:19:53 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS.mwc:
-	  Changed relative path to the .mpb files.  They have now moved to
-	  $DDS_ROOT/MPC/config.  This is required to build with older versions
-	  of the DOC group or OCI ACE+TAO.
+          Changed relative path to the .mpb files.  They have now moved to
+          $DDS_ROOT/MPC/config.  This is required to build with older versions
+          of the DOC group or OCI ACE+TAO.
 
 Mon Jan 29 18:36:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
