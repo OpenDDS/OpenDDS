@@ -13,22 +13,37 @@ $status = 0;
 
 $pub_opts = "-DCPSConfigFile pub.ini";
 $sub_opts = "-DCPSConfigFile sub.ini";
+
 if ($ARGV[0] eq 'udp') {
     $opts =  "-ORBSvcConf udp.conf -t udp";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
     #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
+elsif ($ARGV[0] eq 'mcast') {
+    $opts =  "-ORBSvcConf mcast.conf -t mcast";
+    $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
+    #$svc_conf = " -ORBSvcConf mcast.conf -t mcast";
+}
 elsif ($ARGV[0] eq 'default_tcp') {
     $pub_opts = "-t default_tcp";
     $sub_opts = "-t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts =  "-ORBSvcConf udp.conf -t default_udp";
-    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
+    $opts =  "-ORBSvcConf udp.conf";
+    $pub_opts = "$opts -t default_udp";
+    $sub_opts = "$opts -t default_udp";
 }
-
+elsif ($ARGV[0] eq 'default_mcast') {
+    $opts =  "-ORBSvcConf mcast.conf";
+    $pub_opts = "$opts -t default_mcast_pub";
+    $sub_opts = "$opts -t default_mcast_sub";
+}
+elsif ($ARGV[0] ne '') {
+    print STDERR "ERROR: invalid test case\n";
+    exit 1;
+}
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");

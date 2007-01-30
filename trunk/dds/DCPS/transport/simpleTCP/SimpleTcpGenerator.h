@@ -28,7 +28,10 @@ namespace TAO
         virtual TransportImplFactory* new_factory();
 
         /// Provide a new SimpleTcpConfiguration instance.
-        virtual TransportConfiguration* new_configuration();
+        virtual TransportConfiguration* new_configuration(const TransportIdType id);
+        
+        /// Provide a list of default transport id.
+        virtual void default_transport_ids (TransportIdList & ids);
     };
 
   }

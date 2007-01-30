@@ -1,3 +1,243 @@
+Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        These changes refactored SimpleUdp and SimpleMcast (unreliable multicast)
+        and supported default transport ids for SimpleMcast. A new library 
+        - SimpleUnreliableDgram replaced the SimpleUdp and SimpleMcast.(See 9775)
+        
+        * DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
+        * DCPS\transport\simpleMCAST\SimpleMcastGenerator.h:
+        * DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
+        * DCPS\transport\simpleMCAST\SimpleMcastLoader.cpp:
+        * DCPS\transport\simpleMCAST\SimpleMcastGenerator.cpp:
+        * DCPS\transport\simpleUDP\SimpleUdpGenerator.cpp:
+        * DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
+        * DCPS\transport\simpleUDP\SimpleUdpGenerator.h:
+        * DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_pch.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpGenerator.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSynchResource.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.vcproj:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastGenerator.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration_rch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.mpc:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_pch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_export.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpGenerator.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport_rch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink_rch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket_rch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.inl:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport_rch.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleMcastGenerator.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSynchResource.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.cpp:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.inl:
+        
+          Merged SimpleUdp and SimpleMcast transport together in SimpleUnreliableDgram library.
+          The -type parameter in service configuration specifies which transport will register
+          with the transport factory. A process can register both "SimpleUdp" and "SimpleMcast"
+          or one of the two transports via service configuration.       
+            
+        * DCPS\transport\framework\TransportDefs.h:
+        
+          Added two default id for SimpleMcast, one for subscriber (DEFAULT_SIMPLE_MCAST_SUB_ID)
+          and one for publisher (DEFAULT_SIMPLE_MCAST_PUB_ID).
+          
+        * DCPS\transport\framework\TransportGenerator.h:
+        * DCPS\transport\simpleTCP\SimpleTcpGenerator.h:
+        * DCPS\transport\simpleTCP\SimpleTcpGenerator.cpp:
+           
+          Added default_transport_ids() function to support multiple default transport
+          ids configuration registration and added transport id parameter to new_configuration()
+          to provide different default configurations for the transport.
+        
+        * DCPS\transport\framework\TransportFactory.h:
+        * DCPS\transport\framework\TransportFactory.cpp:
+        
+          Removed the default transport id parameter from the register_generator (). The default
+          ids will be provided by generator via default_transport_ids(). Upon the transport library
+          loading, the default transport configurations will be created and registered with the
+          transport factory.
+
+        * MPC\config\dcpsexe_with_unreliable_dgram.mpb:
+        
+          Added the project base depend on SimpleUnreliableDgram lib.
+          
+        * MPC\config\dcpsexe_with_mcast.mpb:
+        * MPC\config\dcpsexe_with_udp.mpb:
+  
+          Removed these files since we removed SimpleUdp and SimpleMcast lib.
+                  
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration_rch.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastLoader.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast.mpc:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast_pch.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast_export.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink_rch.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket_rch.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastGenerator.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport_rch.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.inl:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastLoader.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast_pch.cpp:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcast.h:
+        * dds\DCPS\transport\simpleMCAST\SimpleMcastGenerator.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp.mpc:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp_pch.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpGenerator.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink_rch.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket_rch.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration_rch.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp_pch.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdp_export.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpGenerator.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport_rch.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.inl:
+        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.cpp:
+                  
+          Removed SimpleUdp and SimpleMcast directories.
+                
+        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
+        * DevGuideExamples\DDS\Messenger\publisher.cpp:
+        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        * DevGuideExamples\DDS\Messenger\mcast.conf        :
+        * DevGuideExamples\DDS\Messenger\udp.conf:
+
+          Added mcast and default mcast test cases.
+                  
+        * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
+        * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
+        * performance-tests\DCPS\McastListenerTest\mcast.conf:
+        * performance-tests\DCPS\McastListenerTest\common.h:
+        * performance-tests\DCPS\UDPListenerTest\udp.conf:
+        * performance-tests\DCPS\UDPListenerTest\common.h:
+        * performance-tests\DCPS\UDPNoKeyTest\udp.conf:
+        * performance-tests\DCPS\UDPNoKeyTest\common.h:
+        * tests\DCPS\MultiTopicTest\common.h:
+        * tests\DCPS\FooTest5_0\main.cpp:
+        * tests\DCPS\FooTest5_0\udp.conf:
+        * tests\DCPS\FooTest5\subscriber.cpp:
+        * tests\DCPS\FooTest5\FooTest5.mpc:
+        * tests\DCPS\FooTest5\mcast.conf:
+        * tests\DCPS\FooTest5\common.cpp:
+        * tests\DCPS\FooTest5\udp.conf:
+        * tests\DCPS\FooTest5\publisher.cpp:
+        * tests\DCPS\LivelinessTest\udp.conf:
+        * tests\DCPS\LivelinessTest\common.h:
+        * tests\transport\mcast_simple\PubDriver.cpp:
+        * tests\transport\mcast_simple\SubDriver.cpp:
+        * tests\transport\mcast_simple\mcast.conf:
+        * tests\transport\udp_simple\PubDriver.cpp:
+        * tests\transport\udp_simple\DDS_transport_udp_simple.mpc:
+        * tests\transport\udp_simple\SubDriver.cpp:
+        * tests\transport\udp_simple\udp.conf:
+        * tests\transport\mcast_simple_n\DDS_transport_mcast_simple_n.mpc:
+        * tests\transport\mcast_simple_n\PubDriver.cpp:
+        * tests\transport\mcast_simple_n\SubDriver.cpp:
+        * tests\transport\mcast_simple_n\mcast.conf:
+        * tests\transport\udp_simple_n\PubDriver.cpp:
+        * tests\transport\udp_simple_n\SubDriver.cpp:
+        * tests\transport\udp_simple_n\DDS_transport_udp_simple_n.mpc:
+        * tests\transport\udp_simple_n\udp.conf:
+        
+          Updated tests that use the SimpleMcast and SimpleUdp libraries to
+          use SimpleUnreliableDgram library.
+          
+        * bin\dcps_tests.lst:
+         
+          Added mcast and default mcast Messenger examples to nightly builds.
+          
 Mon Jan 29 19:19:53 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS.mwc:

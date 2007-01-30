@@ -1,4 +1,4 @@
-project(DcpsFooTest5Publisher): dcpsexe_with_mcast, portableserver {
+project(DcpsFooTest5Publisher): dcpsexe_with_unreliable_dgram, portableserver {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -13,7 +13,7 @@ project(DcpsFooTest5Publisher): dcpsexe_with_mcast, portableserver {
 }
 
 
-project(DcpsFooTest5Subscriber): dcpsexe_with_mcast, portableserver {
+project(DcpsFooTest5Subscriber): dcpsexe_with_unreliable_dgram, portableserver {
   exename   = subscriber
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

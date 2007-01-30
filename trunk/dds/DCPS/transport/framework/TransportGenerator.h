@@ -40,8 +40,9 @@ namespace TAO
 
         virtual TransportImplFactory* new_factory() = 0;
 
-        virtual TransportConfiguration* new_configuration() = 0;
+        virtual TransportConfiguration* new_configuration(const TransportIdType id) = 0;
         
+        virtual void default_transport_ids (TransportIdList & ids) = 0;
 
       protected:
 

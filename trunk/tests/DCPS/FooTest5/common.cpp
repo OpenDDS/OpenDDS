@@ -10,8 +10,8 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
-#include "dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
 
 
 const char* MY_TOPIC    = "foo";

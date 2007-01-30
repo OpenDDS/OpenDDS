@@ -20,7 +20,7 @@
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
