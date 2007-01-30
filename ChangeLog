@@ -1,3 +1,10 @@
+Tue Jan 30 19:10:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples\DDS\Messenger\pub_mcast.ini:
+        * DevGuideExamples\DDS\Messenger\sub_mcast.ini:
+
+          Added missing files.
+          
 Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         These changes refactored SimpleUdp and SimpleMcast (unreliable multicast)
