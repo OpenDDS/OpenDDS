@@ -4,7 +4,8 @@
 #ifndef TAO_DCPS_SIMPLETCPCONFIGURATION_H
 #define TAO_DCPS_SIMPLETCPCONFIGURATION_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include "SimpleTcp_export.h"
+
 #include  "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include  "ace/INET_Addr.h"
 
@@ -14,7 +15,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export SimpleTcpConfiguration
+    class SimpleTcp_Export SimpleTcpConfiguration
                                           : public TransportConfiguration
     {
       public:

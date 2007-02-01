@@ -13,6 +13,7 @@ use PerlACE::Run_Test;
 # Test parameters.
 #
 my $testTime = 60 ;
+$svc_config=" -ORBSvcConf ./tcp.conf ";
 
 #
 # Publisher parameters.
@@ -34,14 +35,14 @@ unlink $subreadyfile;
 # Subscriber command and arguments.
 #
 my $subscriberCmd  = "./simple_subscriber" ;
-my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $subscriberArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                    . "-s $subscriberId:$subscriberHost:$subscriberPort " ;
 
 #
 # Publisher command and arguments.
 #
 my $publisherCmd  = "./simple_publisher" ;
-my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $publisherArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$subscriberHost:$subscriberPort " ;
 
 #
@@ -76,4 +77,3 @@ die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( 5) ;
 unlink $subreadyfile;
 
 exit 0 ;
-

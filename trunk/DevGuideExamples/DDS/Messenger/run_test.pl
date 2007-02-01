@@ -11,8 +11,9 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-$pub_opts = "-DCPSConfigFile pub.ini";
-$sub_opts = "-DCPSConfigFile sub.ini";
+$opts =  "-ORBSvcConf tcp.conf";
+$pub_opts = "$opts -DCPSConfigFile pub.ini ";
+$sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
     $opts =  "-ORBSvcConf udp.conf -t udp";
@@ -27,8 +28,9 @@ elsif ($ARGV[0] eq 'mcast') {
     #$svc_conf = " -ORBSvcConf mcast.conf -t mcast";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $pub_opts = "-t default_tcp";
-    $sub_opts = "-t default_tcp";
+    $opts =  "-ORBSvcConf tcp.conf";
+    $pub_opts = "$opts -t default_tcp";
+    $sub_opts = "$opts -t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
     $opts =  "-ORBSvcConf udp.conf";

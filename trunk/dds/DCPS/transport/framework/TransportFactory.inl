@@ -7,7 +7,7 @@
 #include  "TransportReactorTask.h"
 #include  "TransportExceptions.h"
 #include  "TransportGenerator.h"
-#include  "dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.h"
+//#include  "dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.h"
 #include  "EntryExit.h"
 
 
@@ -15,7 +15,6 @@ ACE_INLINE
 TAO::DCPS::TransportFactory::TransportFactory()
 {
   DBG_ENTRY_LVL("TransportFactory","TransportFactory",5);
-  this->register_simpletcp ();
 }
 
 ACE_INLINE
@@ -26,5 +25,3 @@ TAO::DCPS::TransportFactory::~TransportFactory()
   // and release references.  The map destructors will cause the smart
   // pointers to destruct, and that will release the references for us.
 }
-
-

@@ -4,7 +4,8 @@
 #ifndef TAO_DCPS_SIMPLETCPFACTORY_H
 #define TAO_DCPS_SIMPLETCPFACTORY_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include "SimpleTcp_export.h"
+
 #include  "dds/DCPS/transport/framework/TransportImplFactory.h"
 
 class SimpleTcpTransport;
@@ -16,7 +17,7 @@ namespace TAO
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export SimpleTcpFactory : public TransportImplFactory
+    class SimpleTcp_Export SimpleTcpFactory : public TransportImplFactory
     {
       public:
 

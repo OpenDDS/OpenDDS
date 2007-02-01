@@ -33,13 +33,13 @@ $blocking_write=0;
 
 
 # multiple datawriters test
-if ($ARGV[0] eq 'mw') { 
-  $num_threads_to_write=2; 
-  $num_writers=2; 
+if ($ARGV[0] eq 'mw') {
+  $num_threads_to_write=2;
+  $num_writers=2;
 }
 # multiple datawriters test with blocking write
-elsif ($ARGV[0] eq 'mwb') {  
-  $num_writers=2; 
+elsif ($ARGV[0] eq 'mwb') {
+  $num_writers=2;
   $blocking_write=1;
 }
 #tbd: add test for message dropped due to the depth limit.
@@ -56,33 +56,36 @@ $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers + $num
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
 $pubdriver_ior = PerlACE::LocalFile ("pubdriver.ior");
-# The pub_id_fname can not be a full path because the 
-# pub_id_fname will be part of the parameter of the -p option 
+# The pub_id_fname can not be a full path because the
+# pub_id_fname will be part of the parameter of the -p option
 # which will be parsed using ':' delimiter.
 $pub_id_fname = "pub_id.txt";
 $pub_port = 5555;
 $sub_port = 6666;
 $sub_id = 1;
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             . " -d $domains_file -NOBITS");
 
-$publisher = new PerlACE::Process ("FooTest3NoKey_publisher", 
-                                   "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$publisher = new PerlACE::Process ("FooTest3NoKey_publisher"
+				   , "$svc_config"
+                                   . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                    . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
                                    . " -m $multiple_instance -i $num_writes_per_thread "
                                    . " -n $max_samples_per_instance -d $history_depth"
                                    . " -y $has_key -b $blocking_write -v $pubdriver_ior");
-  
+
 print $publisher->CommandLine(), "\n";
 
-$subscriber = new PerlACE::Process ("FooTest3NoKey_subscriber", 
-                                    "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+$subscriber = new PerlACE::Process ("FooTest3NoKey_subscriber"
+				    , "$svc_config"
+                                    . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                     . "-n $num_writes -v file://$pubdriver_ior");
 
 print $subscriber->CommandLine(), "\n";

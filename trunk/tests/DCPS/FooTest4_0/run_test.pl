@@ -14,7 +14,7 @@ $status = 0;
 PerlACE::add_lib_path('../FooType4');
 PerlACE::add_lib_path('../common');
 
-if ($ARGV[0] eq '') { 
+if ($ARGV[0] eq '') {
   #default test - single datareader single instance.
 }
 else {
@@ -25,17 +25,17 @@ else {
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBDebugLevel 1");
+                             . " -d $domains_file -ORBDebugLevel 1 -NOBITS");
 
-
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 
 # test multiple cases
-$parameters = " -z " ;
+$parameters = "$svc_config -z " ;
 $FooTest4 = new PerlACE::Process ("FooTest4_0", $parameters);
 print $FooTest4->CommandLine(), "\n";
 

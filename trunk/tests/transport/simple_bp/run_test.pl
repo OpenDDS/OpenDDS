@@ -16,6 +16,7 @@ use Getopt::Long qw( :config bundling) ;
 #
 my $testTime   = 60 ;
 my $iterations = 400 ;
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 
 #
 # Publisher parameters.
@@ -37,7 +38,7 @@ unlink $subreadyfile;
 # Parse the command line.
 #
 GetOptions(
-  "iterations|n=i" => \$iterations, 
+  "iterations|n=i" => \$iterations,
   "timeout|t=i"    => \$testTime,
   "publisher|p=i"  => \$publisherId,
   "subscriber|s=i" => \$subscriberId,
@@ -51,7 +52,7 @@ GetOptions(
 # Subscriber command and arguments.
 #
 my $subscriberCmd  = "./simple_subscriber" ;
-my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $subscriberArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                    . "-s $subscriberId:$subscriberHost:$subscriberPort "
                    . "-n $iterations " ;
 
@@ -59,7 +60,7 @@ my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
 # Publisher command and arguments.
 #
 my $publisherCmd  = "./simple_publisher" ;
-my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $publisherArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$subscriberHost:$subscriberPort "
                    . "-n $iterations " ;
 

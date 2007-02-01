@@ -22,14 +22,14 @@ $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
 
-# need $num_msgs_btwn_rec unread samples plus 20 for good measure 
+# need $num_msgs_btwn_rec unread samples plus 20 for good measure
 # (possibly allocated by not yet queue by the transport because of greedy read).
 $num_samples=$num_msgs_btwn_rec + 20;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
@@ -38,14 +38,15 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 $sub_parameters = "-DCPSConfigFile conf.ini -p $num_writers"
 #              . " -DCPSDebugLevel 6"
+   . "$svc_config"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
               . " -msi $num_samples -mxs $num_samples";
 #use -msi $num_messages to avoid rejected samples
-#use -mxs $num_messages to avoid using the heap 
+#use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
 
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
@@ -55,7 +56,8 @@ print $Subscriber->CommandLine(), "\n";
 #NOTE: above 1000 queue samples does not give any better performance.
 $pub_parameters = "-DCPSConfigFile conf.ini -p 1 -i $pub_writer_id"
 #              . " -DCPSDebugLevel 6"
-              . " -n $num_messages -d $data_size" 
+   . "$svc_config"
+              . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000";
 
 $Publisher = new PerlACE::Process ("publisher", $pub_parameters);

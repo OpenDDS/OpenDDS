@@ -6,6 +6,11 @@
 int
 main(int argc, char* argv[])
 {
+  // Need call the ORB_init to dynamically load the transport libs.
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "DDS_DCPS");
+
   ACE_LOG_MSG->priority_mask(LM_TRACE     |
                              LM_DEBUG     |
                              LM_INFO      |
