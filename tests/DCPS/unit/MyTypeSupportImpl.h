@@ -33,17 +33,16 @@ class MyTypeSupportImpl : public virtual POA_MyTypeSupport
 {
 
 public:
-  //Constructor 
+  //Constructor
   MyTypeSupportImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~MyTypeSupportImpl (void);
-  
+
 
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -51,21 +50,18 @@ public:
 
   virtual
   char * get_type_name (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -76,7 +72,6 @@ class MyDataReaderImpl :  public virtual TAO::DCPS::DataReaderImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -88,7 +83,6 @@ class MyDataWriterImpl :  public virtual TAO::DCPS::DataWriterImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException

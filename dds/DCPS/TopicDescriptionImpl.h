@@ -21,40 +21,37 @@ namespace TAO
     *
     * @brief Implements the ::DDS::TopicDescription interface.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of 
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     *
     */
-    class TAO_DdsDcps_Export TopicDescriptionImpl 
+    class TAO_DdsDcps_Export TopicDescriptionImpl
       : public virtual POA_DDS::TopicDescription
     {
     public:
-      //Constructor 
+      //Constructor
       TopicDescriptionImpl (const char*                    topic_name,
                             const char*                    type_name,
                             POA_TAO::DCPS::TypeSupport_ptr type_support,
                             ::DDS::DomainParticipant_ptr   participant);
-      
-      //Destructor 
+
+      //Destructor
       virtual ~TopicDescriptionImpl (void);
-      
+
 
       virtual char * get_type_name (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual char * get_name (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::DomainParticipant_ptr get_participant (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -62,7 +59,7 @@ namespace TAO
 
       /** This method is not defined in the IDL and is defined for
       *  internal use.
-      *  Return the type support of the topic. 
+      *  Return the type support of the topic.
       */
       POA_TAO::DCPS::TypeSupport_ptr get_type_support ();
 

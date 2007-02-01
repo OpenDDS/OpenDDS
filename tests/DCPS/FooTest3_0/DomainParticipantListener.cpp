@@ -9,16 +9,15 @@ extern int offered_incompatible_qos_called_on_dp;
 DomainParticipantListenerImpl::DomainParticipantListenerImpl (void)
   {
   }
-  
+
 // Implementation skeleton destructor
 DomainParticipantListenerImpl::~DomainParticipantListenerImpl (void)
   {
   }
-  
+
 void DomainParticipantListenerImpl::on_inconsistent_topic (
     ::DDS::Topic_ptr the_topic,
     const ::DDS::InconsistentTopicStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -28,10 +27,9 @@ void DomainParticipantListenerImpl::on_inconsistent_topic (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_data_on_readers (
     ::DDS::Subscriber_ptr subs
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -40,11 +38,10 @@ void DomainParticipantListenerImpl::on_data_on_readers (
     ACE_UNUSED_ARG(subs);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -54,11 +51,10 @@ void DomainParticipantListenerImpl::on_offered_deadline_missed (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -68,11 +64,10 @@ void DomainParticipantListenerImpl::on_offered_incompatible_qos (
     ACE_UNUSED_ARG(status);
      offered_incompatible_qos_called_on_dp ++;
   }
-  
+
 void DomainParticipantListenerImpl::on_liveliness_lost (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::LivelinessLostStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -82,11 +77,10 @@ void DomainParticipantListenerImpl::on_liveliness_lost (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_publication_match (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::PublicationMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -96,11 +90,10 @@ void DomainParticipantListenerImpl::on_publication_match (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -110,11 +103,10 @@ void DomainParticipantListenerImpl::on_requested_deadline_missed (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -124,11 +116,10 @@ void DomainParticipantListenerImpl::on_requested_incompatible_qos (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_sample_rejected (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SampleRejectedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -138,11 +129,10 @@ void DomainParticipantListenerImpl::on_sample_rejected (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -152,10 +142,9 @@ void DomainParticipantListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_data_available (
     ::DDS::DataReader_ptr reader
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -164,11 +153,10 @@ void DomainParticipantListenerImpl::on_data_available (
     ACE_UNUSED_ARG(reader);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -178,11 +166,10 @@ void DomainParticipantListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 void DomainParticipantListenerImpl::on_sample_lost (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SampleLostStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -192,5 +179,5 @@ void DomainParticipantListenerImpl::on_sample_lost (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-  
+
 

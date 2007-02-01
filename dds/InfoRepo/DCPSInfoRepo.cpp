@@ -40,8 +40,7 @@ usage (const ACE_TCHAR * cmd)
 
 void
 parse_args (int argc,
-            ACE_TCHAR *argv[]
-            ACE_ENV_ARG_DECL)
+            ACE_TCHAR *argv[])
 {
   listen_address_str = ACE_LOCALHOST;
   listen_address_str += ":2839";
@@ -102,16 +101,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   ACE_DEBUG((LM_DEBUG,"(%P|%t) %T Repo main\n")); //REMOVE
 
-  ACE_DECLARE_NEW_CORBA_ENV;
-  ACE_TRY
+  try
     {
       // The usual server side boilerplate code.
 
       CORBA::ORB_var orb = CORBA::ORB_init (argc,
                                             argv,
-                                            ""
-                                            ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                            "");
 
       // ciju: Hard-code the 'RW' wait strategy directive.
       // Deadlocks have been observed to occur otherwise under stress conditions.
@@ -122,21 +118,15 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 	(ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""));
 
       CORBA::Object_var obj =
-        orb->resolve_initial_references ("RootPOA"
-                                         ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        orb->resolve_initial_references ("RootPOA");
 
       PortableServer::POA_var root_poa =
-        PortableServer::POA::_narrow (obj.in ()
-                                      ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        PortableServer::POA::_narrow (obj.in ());
 
       PortableServer::POAManager_var poa_manager =
-        root_poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        root_poa->the_POAManager ();
 
-      poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      poa_manager->activate ();
 
       TAO_DDS_DCPSInfo_i info;
 
@@ -145,57 +135,42 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       CORBA::PolicyList policies (2);
       policies.length (2);
       policies[0] =
-        root_poa->create_id_assignment_policy (PortableServer::USER_ID
-                                               ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        root_poa->create_id_assignment_policy (PortableServer::USER_ID);
       policies[1] =
-        root_poa->create_lifespan_policy (PortableServer::PERSISTENT
-                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        root_poa->create_lifespan_policy (PortableServer::PERSISTENT);
       PortableServer::POA_var poa = root_poa->create_POA ("InfoRepo",
                                                           poa_manager.in (),
-                                                          policies
-                                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                          policies);
 
       // Creation of the new POAs over, so destroy the Policy_ptr's.
       for (CORBA::ULong i = 0; i < policies.length (); ++i)
         {
-          policies[i]->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          policies[i]->destroy ();
         }
 
       PortableServer::ObjectId_var oid =
         PortableServer::string_to_ObjectId ("InfoRepo");
       poa->activate_object_with_id (oid.in (),
-                                    &info
-                                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                    &info);
       obj = poa->id_to_reference(oid.in());
       TAO::DCPS::DCPSInfo_var info_repo = TAO::DCPS::DCPSInfo::_narrow(
-                      obj.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                      obj.in ());
 
       CORBA::String_var objref_str =
-        orb->object_to_string (info_repo.in ()
-                               ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        orb->object_to_string (info_repo.in ());
 
       TheServiceParticipant->set_ORB(orb.in());
       TheServiceParticipant->set_repo_ior(objref_str.in());
 
       // Initialize the DomainParticipantFactory
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
       // command line options.
 
       // Check the non-ORB arguments.
       ::parse_args (argc,
-                    argv
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                    argv);
 
       if (::use_bits)
         {
@@ -216,20 +191,17 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
       CORBA::Object_var table_object =
-        orb->resolve_initial_references ("IORTable" ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        orb->resolve_initial_references ("IORTable");
 
       IORTable::Table_var adapter =
-        IORTable::Table::_narrow (table_object.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        IORTable::Table::_narrow (table_object.in ());
       if (CORBA::is_nil (adapter.in ()))
         {
           ACE_ERROR ((LM_ERROR, "Nil IORTable\n"));
         }
       else
         {
-          adapter->bind ("DCPSInfoRepo", objref_str.in () ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          adapter->bind ("DCPSInfoRepo", objref_str.in ());
         }
 
       FILE * file = ACE_OS::fopen (::ior_file.c_str(), "w");
@@ -238,8 +210,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     ACE_OS::fprintf (file, "%s", objref_str.in ());
     ACE_OS::fclose (file);
 
-    orb->run (ACE_ENV_SINGLE_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+    orb->run ();
   }
       else {
   ACE_ERROR((LM_ERROR, "ERROR: Unable to open IOR file: %s\n", ::ior_file.c_str()));
@@ -247,17 +218,15 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       TheServiceParticipant->shutdown ();
 
-      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      orb->destroy ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "ERROR: ::DDS DCPS Info Repo caught exception");
+      ex._tao_print_exception (
+        "ERROR: ::DDS DCPS Info Repo caught exception");
 
       return -1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

@@ -13,41 +13,39 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace TAO
 {
-  namespace DCPS 
+  namespace DCPS
   {
     /**
     * @class EntityImpl
     *
-    * @brief Implements the ::TAO::DCPS::Entity 
+    * @brief Implements the ::TAO::DCPS::Entity
     *        interfaces.
     *
-    * This class is the base class of other servant classes. 
+    * This class is the base class of other servant classes.
     * e.g. DomainParticipantImpl, PublisherImpl ...
     */
-    class TAO_DdsDcps_Export EntityImpl 
+    class TAO_DdsDcps_Export EntityImpl
     : public virtual POA_DDS::Entity,
       public virtual PortableServer::RefCountServantBase
     {
     public:
-      ///Constructor 
+      ///Constructor
       EntityImpl ();
-      
-      ///Destructor 
+
+      ///Destructor
       virtual ~EntityImpl (void);
-      
+
 
 
     virtual ::DDS::ReturnCode_t set_enabled (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -60,7 +58,7 @@ namespace TAO
 
     protected:
 
-      void set_status_changed_flag (::DDS::StatusKind status, 
+      void set_status_changed_flag (::DDS::StatusKind status,
                                     bool status_changed_flag);
 
       /// The flag indicates the entity is enabled.
@@ -72,10 +70,10 @@ namespace TAO
       typedef bool StatusChangedFlag;
       typedef std::map< ::DDS::StatusKind, StatusChangedFlag > Statuses;
 
-      /// The map lists all status changed flag. 
-      /// The StatusChangedFlag becomes TRUE whenever the plain communication 
-      /// status changes and it is reset to FALSE each time the application 
-      /// accesses the plain communication status via the proper 
+      /// The map lists all status changed flag.
+      /// The StatusChangedFlag becomes TRUE whenever the plain communication
+      /// status changes and it is reset to FALSE each time the application
+      /// accesses the plain communication status via the proper
       /// get_<plain communication status> operation on the Entity.
       Statuses status_changes_;
     };

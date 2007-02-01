@@ -60,8 +60,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
       fast_listener_ =
 	reference_to_servant<POA_DDS::SubscriberListener,
 	DDS::SubscriberListener_ptr>
-	(listener_.in () ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+	(listener_.in ());
     }
 }
 
@@ -92,7 +91,6 @@ SubscriberImpl::create_datareader (
 				   ::DDS::TopicDescription_ptr a_topic_desc,
 				   const ::DDS::DataReaderQos & qos,
 				   ::DDS::DataReaderListener_ptr a_listener
-				   ACE_ENV_ARG_DECL
 				   )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -112,26 +110,21 @@ SubscriberImpl::create_datareader (
   TopicImpl* topic_servant =
     reference_to_servant<TopicImpl,
     DDS::TopicDescription_ptr>(
-			       a_topic_desc ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+			       a_topic_desc);
 
   if (qos == DATAREADER_QOS_DEFAULT)
     {
-      this->get_default_datareader_qos(dr_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+      this->get_default_datareader_qos(dr_qos);
     }
   else if (qos == DATAREADER_QOS_USE_TOPIC_QOS)
     {
       ::DDS::TopicQos topic_qos;
-      topic_servant->get_qos (topic_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+      topic_servant->get_qos (topic_qos);
 
-      this->get_default_datareader_qos(dr_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+      this->get_default_datareader_qos(dr_qos);
 
       this->copy_from_topic_qos (dr_qos,
-				 topic_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+				 topic_qos);
     }
   else
     {
@@ -174,8 +167,7 @@ SubscriberImpl::create_datareader (
 
   DataReaderImpl* dr_servant =
     reference_to_servant<DataReaderImpl, ::DDS::DataReader_ptr>
-    (dr_obj.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+    (dr_obj.in ());
 
   // Give ownership to poa.
   dr_servant->_remove_ref ();
@@ -183,8 +175,7 @@ SubscriberImpl::create_datareader (
   DomainParticipantImpl* participant =
     reference_to_servant<DomainParticipantImpl,
     ::DDS::DomainParticipant_ptr>(
-				  participant_objref_.in ()  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+				  participant_objref_.in ());
 
   dr_servant->init (topic_servant,
 		    dr_qos,
@@ -192,16 +183,13 @@ SubscriberImpl::create_datareader (
 		    participant,
 		    this,
 		    subscriber_objref_.in (),
-		    dr_obj.in ()
-		    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+		    dr_obj.in ());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1))
     {
       ::DDS::ReturnCode_t ret
-	  = dr_servant->enable (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataReader::_nil ());
+	  = dr_servant->enable ();
 
       if (ret != ::DDS::RETCODE_OK)
 	{
@@ -241,8 +229,7 @@ SubscriberImpl::create_datareader (
 
 
 ::DDS::ReturnCode_t
-SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader
-				   ACE_ENV_ARG_DECL)
+SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",5);
@@ -258,8 +245,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader
 
   DataReaderImpl* dr_servant
     = reference_to_servant <DataReaderImpl, ::DDS::DataReader_ptr>
-    (a_datareader ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (a_datareader);
 
   if (dr_servant->get_subscriber_servant () != this)
     {
@@ -294,30 +280,27 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader
   SubscriberDataReaderInfo* dr_info = it->second;
   RepoId subscription_id  = dr_info->subscription_id_ ;
 
-  ACE_TRY
+  try
     {
       this->repository_->remove_subscription(
 					     participant_->get_domain_id (),
 					     participant_->get_id (),
-					     subscription_id
-					     ACE_ENV_ARG_PARAMETER) ;
-      ACE_TRY_CHECK;
+					     subscription_id) ;
     }
-  ACE_CATCH (CORBA::SystemException, sysex)
+  catch (const CORBA::SystemException& sysex)
     {
-      ACE_PRINT_EXCEPTION (sysex,
-			   "ERROR: System Exception"
-			   " in SubscriberImpl::delete_datareader");
+      sysex._tao_print_exception (
+        "ERROR: System Exception"
+        " in SubscriberImpl::delete_datareader");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_CATCH (CORBA::UserException, userex)
+  catch (const CORBA::UserException& userex)
     {
-      ACE_PRINT_EXCEPTION (userex,
-			   "ERROR: User Exception"
-			   " in SubscriberImpl::delete_datareader");
+      userex._tao_print_exception (
+        "ERROR: User Exception"
+        " in SubscriberImpl::delete_datareader");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_ENDTRY;
 
   datareader_map_.erase(it) ;
 
@@ -364,7 +347,6 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader
 
 ::DDS::ReturnCode_t
 SubscriberImpl::delete_contained_entities (
-					   ACE_ENV_SINGLE_ARG_DECL
 					   )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -419,7 +401,6 @@ SubscriberImpl::delete_contained_entities (
 ::DDS::DataReader_ptr
 SubscriberImpl::lookup_datareader (
 				   const char * topic_name
-				   ACE_ENV_ARG_DECL
 				   )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -467,7 +448,6 @@ SubscriberImpl::get_datareaders (
 				 ::DDS::SampleStateMask sample_states,
 				 ::DDS::ViewStateMask view_states,
 				 ::DDS::InstanceStateMask instance_states
-				 ACE_ENV_ARG_DECL
 				 )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -498,7 +478,6 @@ SubscriberImpl::get_datareaders (
 
 void
 SubscriberImpl::notify_datareaders (
-				    ACE_ENV_SINGLE_ARG_DECL
 				    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -528,7 +507,6 @@ SubscriberImpl::notify_datareaders (
 ::DDS::ReturnCode_t
 SubscriberImpl::set_qos (
 			 const ::DDS::SubscriberQos & qos
-			 ACE_ENV_ARG_DECL
 			 )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -566,7 +544,6 @@ SubscriberImpl::set_qos (
 void
 SubscriberImpl::get_qos (
 			 ::DDS::SubscriberQos & qos
-			 ACE_ENV_ARG_DECL
 			 )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -580,7 +557,6 @@ SubscriberImpl::get_qos (
 SubscriberImpl::set_listener (
 			      ::DDS::SubscriberListener_ptr a_listener,
 			      ::DDS::StatusKindMask mask
-			      ACE_ENV_ARG_DECL
 			      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -592,15 +568,13 @@ SubscriberImpl::set_listener (
   fast_listener_
     = reference_to_servant< ::POA_DDS::SubscriberListener,
     ::DDS::SubscriberListener_ptr >
-    (listener_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
 
 ::DDS::SubscriberListener_ptr
 SubscriberImpl::get_listener (
-			      ACE_ENV_SINGLE_ARG_DECL
 			      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -612,7 +586,6 @@ SubscriberImpl::get_listener (
 
 ::DDS::ReturnCode_t
 SubscriberImpl::begin_access (
-			      ACE_ENV_SINGLE_ARG_DECL
 			      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -625,7 +598,6 @@ SubscriberImpl::begin_access (
 
 ::DDS::ReturnCode_t
 SubscriberImpl::end_access (
-			    ACE_ENV_SINGLE_ARG_DECL
 			    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -638,7 +610,6 @@ SubscriberImpl::end_access (
 
 ::DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant (
-				 ACE_ENV_SINGLE_ARG_DECL
 				 )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -651,7 +622,6 @@ SubscriberImpl::get_participant (
 ::DDS::ReturnCode_t
 SubscriberImpl::set_default_datareader_qos (
 					    const ::DDS::DataReaderQos & qos
-					    ACE_ENV_ARG_DECL
 					    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -672,7 +642,6 @@ SubscriberImpl::set_default_datareader_qos (
 void
 SubscriberImpl::get_default_datareader_qos (
 					    ::DDS::DataReaderQos & qos
-					    ACE_ENV_ARG_DECL
 					    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -686,7 +655,6 @@ SubscriberImpl::get_default_datareader_qos (
 SubscriberImpl::copy_from_topic_qos (
 				     ::DDS::DataReaderQos & a_datareader_qos,
 				     const ::DDS::TopicQos & a_topic_qos
-				     ACE_ENV_ARG_DECL
 				     )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -717,7 +685,6 @@ SubscriberImpl::copy_from_topic_qos (
 
 ::DDS::ReturnCode_t
 SubscriberImpl::enable (
-			ACE_ENV_SINGLE_ARG_DECL
 			)
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -739,7 +706,6 @@ SubscriberImpl::enable (
 
 ::DDS::StatusKindMask
 SubscriberImpl::get_status_changes (
-				    ACE_ENV_SINGLE_ARG_DECL
 				    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -785,7 +751,6 @@ SubscriberImpl::add_associations (
 				  const WriterAssociationSeq & writers,
 				  DataReaderImpl* reader,
 				  const ::DDS::DataReaderQos reader_qos
-				  ACE_ENV_ARG_DECL
 				  )
 {
   if (entity_deleted_ == true)
@@ -828,7 +793,6 @@ SubscriberImpl::add_associations (
 void
 SubscriberImpl::remove_associations(
 				    const WriterIdSeq& writers
-				    ACE_ENV_ARG_DECL
 				    )
 {
   /// Delegate to the (inherited) TransportInterface version.
@@ -850,7 +814,6 @@ SubscriberImpl::reader_enabled(
 			       DataReaderRemote_ptr     reader,
 			       const char*              topic_name,
 			       RepoId                   topic_id
-			       ACE_ENV_ARG_DECL
 			       )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -860,16 +823,14 @@ SubscriberImpl::reader_enabled(
   info->remote_reader_ = reader ;
   info->local_reader_
     = reference_to_servant<DataReaderImpl, DataReaderRemote_ptr>
-    (reader ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    (reader);
 
   info->topic_id_ = topic_id ;
 
-  ACE_TRY
+  try
     {
       ::DDS::DataReaderQos qos;
-      info->remote_reader_->get_qos(qos ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remote_reader_->get_qos(qos);
 
       TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
       info->subscription_id_
@@ -880,26 +841,23 @@ SubscriberImpl::reader_enabled(
 					      info->remote_reader_,
 					      qos,
 					      trans_conf_info,
-					      qos_
-					      ACE_ENV_ARG_PARAMETER) ;
-      ACE_TRY_CHECK;
+					      qos_) ;
       info->local_reader_->set_subscription_id (info->subscription_id_);
     }
-  ACE_CATCH (CORBA::SystemException, sysex)
+  catch (const CORBA::SystemException& sysex)
     {
-      ACE_PRINT_EXCEPTION (sysex,
-                           "ERROR: System Exception"
-                           " in SubscriberImpl::reader_enabled");
+      sysex._tao_print_exception (
+        "ERROR: System Exception"
+        " in SubscriberImpl::reader_enabled");
       return;
     }
-  ACE_CATCH (CORBA::UserException, userex)
+  catch (const CORBA::UserException& userex)
     {
-      ACE_PRINT_EXCEPTION (userex,
-                           "ERROR: User Exception"
-                           " in SubscriberImpl::reader_enabled");
+      userex._tao_print_exception (
+        "ERROR: User Exception"
+        " in SubscriberImpl::reader_enabled");
       return;
     }
-  ACE_ENDTRY;
 
   if (DCPS_debug_level >= 4)
     ACE_DEBUG ((LM_DEBUG,

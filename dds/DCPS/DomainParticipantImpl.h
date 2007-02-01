@@ -44,23 +44,23 @@ namespace TAO
     * @brief Implements the ::TAO::DCPS::DomainParticipant interfaces.
     *
     * This class acts as an entrypoint of the service and a factory
-    * for publisher, subscriber and topic. It also acts as a container 
+    * for publisher, subscriber and topic. It also acts as a container
     * for the publisher, subscriber and topic objects.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of  
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export DomainParticipantImpl 
+    class TAO_DdsDcps_Export DomainParticipantImpl
       : public virtual POA_DDS::DomainParticipant,
         public virtual TAO::DCPS::EntityImpl
     {
     public:
       typedef Objref_Servant_Pair <SubscriberImpl,
                                    ::DDS::Subscriber,
-                                   ::DDS::Subscriber_ptr, 
+                                   ::DDS::Subscriber_ptr,
                                    ::DDS::Subscriber_var > Subscriber_Pair;
       typedef Objref_Servant_Pair <PublisherImpl,
-                                   ::DDS::Publisher, 
+                                   ::DDS::Publisher,
                                    ::DDS::Publisher_ptr,
                                    ::DDS::Publisher_var > Publisher_Pair;
       typedef Objref_Servant_Pair <TopicImpl,
@@ -72,14 +72,14 @@ namespace TAO
       typedef ACE_Unbounded_Set_Iterator < Subscriber_Pair > SubscriberSet_Iterator;
       typedef ACE_Unbounded_Set < Publisher_Pair > PublisherSet;
       typedef ACE_Unbounded_Set_Iterator < Publisher_Pair > PublisherSet_Iterator;
-      
+
       struct RefCounted_Topic
       {
-        RefCounted_Topic () 
+        RefCounted_Topic ()
           : client_refs_ (0)
         {};
 
-        RefCounted_Topic (const Topic_Pair & pair) 
+        RefCounted_Topic (const Topic_Pair & pair)
           : pair_ (pair),
             client_refs_ (1)
         {};
@@ -90,24 +90,23 @@ namespace TAO
         CORBA::Long    client_refs_;
       };
 
-      typedef ACE_Hash_Map_Manager<ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap;  
+      typedef ACE_Hash_Map_Manager<ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap;
       typedef ACE_Hash_Map_Iterator < ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap_Iterator;
       typedef ACE_Hash_Map_Entry < ACE_CString, RefCounted_Topic> TopicMap_Entry;
 
-      ///Constructor 
+      ///Constructor
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
                              const RepoId&                        dp_id,
                              const ::DDS::DomainParticipantQos &  qos,
                              ::DDS::DomainParticipantListener_ptr a_listener);
-      
-      ///Destructor 
+
+      ///Destructor
       virtual ~DomainParticipantImpl (void);
-      
+
 
     virtual ::DDS::Publisher_ptr create_publisher (
       const ::DDS::PublisherQos & qos,
         ::DDS::PublisherListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -115,7 +114,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_publisher (
         ::DDS::Publisher_ptr p
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -124,7 +122,6 @@ namespace TAO
     virtual ::DDS::Subscriber_ptr create_subscriber (
         const ::DDS::SubscriberQos & qos,
         ::DDS::SubscriberListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -132,14 +129,12 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_subscriber (
         ::DDS::Subscriber_ptr s
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::Subscriber_ptr get_builtin_subscriber (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -150,7 +145,6 @@ namespace TAO
         const char * type_name,
         const ::DDS::TopicQos & qos,
         ::DDS::TopicListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -158,7 +152,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_topic (
         ::DDS::Topic_ptr a_topic
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -167,7 +160,6 @@ namespace TAO
     virtual ::DDS::Topic_ptr find_topic (
         const char * topic_name,
         const ::DDS::Duration_t & timeout
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -175,14 +167,12 @@ namespace TAO
 
     virtual ::DDS::TopicDescription_ptr lookup_topicdescription (
         const char * name
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t delete_contained_entities (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -190,7 +180,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::DomainParticipantQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -198,7 +187,6 @@ namespace TAO
 
     virtual void get_qos (
         ::DDS::DomainParticipantQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -207,14 +195,12 @@ namespace TAO
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::DomainParticipantListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::DomainParticipantListener_ptr get_listener (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -222,7 +208,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t ignore_participant (
         ::DDS::InstanceHandle_t handle
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -230,7 +215,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t ignore_topic (
         ::DDS::InstanceHandle_t handle
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -238,7 +222,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t ignore_publication (
         ::DDS::InstanceHandle_t handle
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -246,21 +229,18 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t ignore_subscription (
         ::DDS::InstanceHandle_t handle
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::DomainId_t get_domain_id (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual void assert_liveliness (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -268,7 +248,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_publisher_qos (
         const ::DDS::PublisherQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -276,7 +255,6 @@ namespace TAO
 
     virtual void get_default_publisher_qos (
         ::DDS::PublisherQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -284,7 +262,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_subscriber_qos (
         const ::DDS::SubscriberQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -292,7 +269,6 @@ namespace TAO
 
     virtual void get_default_subscriber_qos (
         ::DDS::SubscriberQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -300,7 +276,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_topic_qos (
         const ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -308,48 +283,45 @@ namespace TAO
 
     virtual void get_default_topic_qos (
         ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t enable (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
       /// Following methods are not the idl interfaces and are
-      /// local operations. 
+      /// local operations.
 
-      /** 
+      /**
       *  Return the id given by the DCPSInfo repositoy.
       */
       RepoId get_id ();
 
-      /** 
-      *  Associate the servant with the object reference. 
+      /**
+      *  Associate the servant with the object reference.
       *  This is required to pass to the topic servant.
       */
       void set_object_reference (const ::DDS::DomainParticipant_ptr& dp);
 
-      /** 
+      /**
       *  Check if the topic is used by any datareader or datawriter.
       */
       int is_clean () const;
 
       /**
       * This is used to retrieve the listener for a certain status change.
-      * If this DomainParticipant has a registered listener and the status 
+      * If this DomainParticipant has a registered listener and the status
       * kind is in the listener mask then the listener is returned.
       * Otherwise, return nil.
       */
@@ -358,24 +330,23 @@ namespace TAO
     private:
 
       /** The implementation of create_topic.
-      *   The TopicMap owns the reference bumped by narrow in the 
-      *   servant_to_reference and the returned topic is a duplicate 
+      *   The TopicMap owns the reference bumped by narrow in the
+      *   servant_to_reference and the returned topic is a duplicate
       *   topic in the TopicMap.
-      */  
+      */
       ::DDS::Topic_ptr create_topic_i (
-          const RepoId topic_id,   
+          const RepoId topic_id,
           const char * topic_name,
           const char * type_name,
           const ::DDS::TopicQos & qos,
           ::DDS::TopicListener_ptr a_listener
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
-      /** Delete the topic with option of whether the 
-       *  topic object reference should be removed. 
+      /** Delete the topic with option of whether the
+       *  topic object reference should be removed.
        */
       ::DDS::ReturnCode_t delete_topic_i (
          ::DDS::Topic_ptr a_topic,
@@ -399,10 +370,10 @@ namespace TAO
       ::DDS::PublisherQos    default_publisher_qos_;
       /// The default subscriber qos.
       ::DDS::SubscriberQos   default_subscriber_qos_;
-      
+
       /// The qos of this DomainParticipant.
       ::DDS::DomainParticipantQos           qos_;
-      /// Used to notify the entity for relevant events. 
+      /// Used to notify the entity for relevant events.
       ::DDS::DomainParticipantListener_var  listener_;
       /// The DomainParticipant listener servant.
       ::POA_DDS::DomainParticipantListener* fast_listener_;
@@ -413,7 +384,7 @@ namespace TAO
       ::DDS::DomainId_t                     domain_id_;
       /// This participant id given by DCPSInfo repository.
       RepoId                                dp_id_;
-      
+
       /// Collection of publishers.
       PublisherSet   publishers_;
       /// Collection of subscribers.
@@ -432,7 +403,7 @@ namespace TAO
       ::DDS::DomainParticipant_var participant_objref_;
 
       /// Object reference to the DCPSInfo.
-      DCPSInfo_var                 repository_; 
+      DCPSInfo_var                 repository_;
 
       /// The built in topic subscriber.
       ::DDS::Subscriber_var        bit_subscriber_;

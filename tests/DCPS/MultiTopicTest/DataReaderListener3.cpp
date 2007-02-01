@@ -16,9 +16,8 @@
     ACE_UNUSED_ARG(history_depth);
     ACE_UNUSED_ARG(using_udp);
 
-    ::Mine::Foo3DataReader_var foo_dr = 
-        ::Mine::Foo3DataReader::_narrow(reader
-                                       ACE_ENV_ARG_PARAMETER);
+    ::Mine::Foo3DataReader_var foo_dr =
+        ::Mine::Foo3DataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
       {
@@ -29,11 +28,11 @@
     ::Mine::Foo3DataReaderImpl* dr_servant =
       ::TAO::DCPS::reference_to_servant< ::Mine::Foo3DataReaderImpl,
                                          ::Mine::Foo3DataReader_ptr>
-            (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+            (foo_dr.in ());
 
     ::Mine::Foo3Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
-   
+
     DDS::ReturnCode_t status  ;
     status = dr_servant->read(foo, si,
                               num_ops_per_thread,

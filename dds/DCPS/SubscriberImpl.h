@@ -32,8 +32,8 @@ namespace TAO
     // Keep track of all the DataReaders attached to this
     // Subscriber
     struct  SubscriberDataReaderInfo
-    { 
-      DataReaderRemote_ptr        remote_reader_ ; 
+    {
+      DataReaderRemote_ptr        remote_reader_ ;
       DataReaderImpl*             local_reader_;
       RepoId                      topic_id_ ;
       RepoId                      subscription_id_ ;
@@ -49,27 +49,26 @@ namespace TAO
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
     //Class SubscriberImpl
-    class TAO_DdsDcps_Export SubscriberImpl 
+    class TAO_DdsDcps_Export SubscriberImpl
       : public virtual POA_DDS::Subscriber,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
     public:
 
-      //Constructor 
+      //Constructor
       SubscriberImpl (const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
                       DomainParticipantImpl*       participant,
                       ::DDS::DomainParticipant_ptr participant_objref);
-      
-      //Destructor 
+
+      //Destructor
       virtual ~SubscriberImpl (void);
 
       virtual ::DDS::DataReader_ptr create_datareader (
         ::DDS::TopicDescription_ptr a_topic_desc,
         const ::DDS::DataReaderQos & qos,
         ::DDS::DataReaderListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -77,14 +76,12 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_datareader (
         ::DDS::DataReader_ptr a_datareader
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t delete_contained_entities (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -92,7 +89,6 @@ namespace TAO
 
     virtual ::DDS::DataReader_ptr lookup_datareader (
         const char * topic_name
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -103,14 +99,12 @@ namespace TAO
         ::DDS::SampleStateMask sample_states,
         ::DDS::ViewStateMask view_states,
         ::DDS::InstanceStateMask instance_states
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual void notify_datareaders (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -118,7 +112,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::SubscriberQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -126,7 +119,6 @@ namespace TAO
 
     virtual void get_qos (
         ::DDS::SubscriberQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -135,35 +127,30 @@ namespace TAO
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::SubscriberListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::SubscriberListener_ptr get_listener (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t begin_access (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t end_access (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::DomainParticipant_ptr get_participant (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -171,7 +158,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_datareader_qos (
         const ::DDS::DataReaderQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -179,7 +165,6 @@ namespace TAO
 
     virtual void get_default_datareader_qos (
         ::DDS::DataReaderQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -188,21 +173,18 @@ namespace TAO
     virtual ::DDS::ReturnCode_t copy_from_topic_qos (
         ::DDS::DataReaderQos & a_datareader_qos,
         const ::DDS::TopicQos & a_topic_qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t enable (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -217,14 +199,12 @@ namespace TAO
     void add_associations (
                 const WriterAssociationSeq& writers,
                 DataReaderImpl* reader,
-                const ::DDS::DataReaderQos reader_qos
-                ACE_ENV_ARG_DECL) ;
+                const ::DDS::DataReaderQos reader_qos) ;
 
     void remove_associations(
-        const WriterIdSeq& writers 
-        ACE_ENV_ARG_DECL
+        const WriterIdSeq& writers
       ) ;
-    
+
     /*
      * Cache the subscriber's object reference.
      */
@@ -236,7 +216,6 @@ namespace TAO
     void reader_enabled(DataReaderRemote_ptr reader,
                         const char *topic_name,
                         RepoId topic_id
-                        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -250,7 +229,7 @@ namespace TAO
 
       ::DDS::SubscriberQos          qos_;
       ::DDS::DataReaderQos          default_datareader_qos_;
-      
+
       DDS::StatusKindMask           listener_mask_;
       ::DDS::SubscriberListener_var  listener_;
       ::POA_DDS::SubscriberListener* fast_listener_;

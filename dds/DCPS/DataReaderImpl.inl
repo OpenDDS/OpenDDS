@@ -4,8 +4,8 @@
 
 
 ACE_INLINE
-::DDS::DataReader_ptr 
-TAO::DCPS::DataReaderImpl::get_dr_obj_ref() { 
+::DDS::DataReader_ptr
+TAO::DCPS::DataReaderImpl::get_dr_obj_ref() {
 #if 1
   //TBD this may be faster than servant_to_reference - ?significantly?
   return ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref_.in ()) ;
@@ -14,12 +14,11 @@ TAO::DCPS::DataReaderImpl::get_dr_obj_ref() {
   // we don't really need the RemoteDataReader OR a DataReder OR will do.
   return this->get_datareaderremote_obj_ref ();
 #else
-  ::DDS::DataReader_ptr reader_obj 
-      = ::TAO::DCPS::servant_to_reference< ::DDS::DataReader, 
-                                           TAO::DCPS::DataReaderImpl, 
-                                           ::DDS::DataReader_ptr> 
-            (this ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataReader::_nil());
+  ::DDS::DataReader_ptr reader_obj
+      = ::TAO::DCPS::servant_to_reference< ::DDS::DataReader,
+                                           TAO::DCPS::DataReaderImpl,
+                                           ::DDS::DataReader_ptr>
+            (this);
   // TAO::DCPS::servant_to_reference narrowed so it has been dup'd
   return reader_obj;
 #endif
@@ -28,9 +27,9 @@ TAO::DCPS::DataReaderImpl::get_dr_obj_ref() {
 
 
 ACE_INLINE
-int 
+int
 TAO::DCPS::WriterInfo::received_activity (const ACE_Time_Value& when)
-{ 
+{
   last_liveliness_activity_time_ = when;
   if (!is_alive_)
     {

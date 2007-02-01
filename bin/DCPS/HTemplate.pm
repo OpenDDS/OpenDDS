@@ -47,55 +47,51 @@ sub contents { return <<'!EOT'
 <%NAMESPACESTART%>
 /** Servant for TypeSuport interface of <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of  
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  *
  */
-class <%EXPORT%> <%TYPE%>TypeSupportImpl 
-  : public virtual <%POA%><%TYPE%>TypeSupport, 
+class <%EXPORT%> <%TYPE%>TypeSupportImpl
+  : public virtual <%POA%><%TYPE%>TypeSupport,
     public virtual PortableServer::RefCountServantBase
 {
 public:
-  //Constructor 
+  //Constructor
   <%TYPE%>TypeSupportImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~<%TYPE%>TypeSupportImpl (void);
-  
+
   virtual
   DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   char * get_type_name (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-    
+
   virtual
   ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-    
+
   private:
     CORBA::String_var type_name_;
 };
@@ -105,66 +101,62 @@ public:
 
 /** Servant for DataWriter interface of the <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of  
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
-class <%EXPORT%> <%TYPE%>DataWriterImpl 
-  : public virtual <%POA%><%TYPE%>DataWriter, 
+class <%EXPORT%> <%TYPE%>DataWriterImpl
+  : public virtual <%POA%><%TYPE%>DataWriter,
     public virtual TAO::DCPS::DataWriterImpl,
     public virtual PortableServer::RefCountServantBase
 {
 public:
-  typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t, 
+  typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
 
-  //Constructor 
+  //Constructor
   <%TYPE%>DataWriterImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~<%TYPE%>DataWriterImpl (void);
-  
+
   virtual
   DDS::InstanceHandle_t _cxx_register (
       const ::<%SCOPE%><%TYPE%> & instance_data
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::InstanceHandle_t register_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t unregister (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t unregister_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
@@ -172,12 +164,11 @@ public:
   DDS::ReturnCode_t write (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
@@ -186,38 +177,34 @@ public:
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t dispose (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t dispose_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -237,18 +224,16 @@ public:
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
         TAO::DCPS::DataWriterRemote_ptr        dw_remote
-        ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
-  
+
   /**
    * Do parts of enable specific to the datatype.
    * Called by DataWriterImpl::enable().
-   */    
+   */
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -311,32 +296,31 @@ private:
 <%NAMESPACESTART%>
 /** Servant for DateReader interface of <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of  
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  *
  * @note zero-copy methods are specific to TAO but this is allowed by
  *       the DDS specification.
  *
  */
-class <%EXPORT%> <%TYPE%>DataReaderImpl 
-  : public virtual <%POA%><%TYPE%>DataReader, 
+class <%EXPORT%> <%TYPE%>DataReaderImpl
+  : public virtual <%POA%><%TYPE%>DataReader,
     public virtual TAO::DCPS::DataReaderImpl,
     public virtual PortableServer::RefCountServantBase
 {
 public:
-  typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t, 
+  typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Cached_Allocator_With_Overflow<<%SCOPE%><%TYPE%>, ACE_Null_Mutex>  DataAllocator;
-      
-  //Constructor 
+
+  //Constructor
   <%TYPE%>DataReaderImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~<%TYPE%>DataReaderImpl (void);
 
   virtual
   DDS::ReturnCode_t delete_contained_entities (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -355,7 +339,6 @@ public:
         TAO::DCPS::SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr                    subscriber_objref,
         TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
-        ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -364,9 +347,8 @@ public:
   /**
    * Do parts of enable specific to the datatype.
    * Called by DataReaderImpl::enable().
-   */    
+   */
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -380,12 +362,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   // zero-copy overloaded version
   virtual
   DDS::ReturnCode_t read (
@@ -395,7 +376,6 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -409,7 +389,6 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -423,32 +402,29 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t read_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
       ::DDS::SampleInfo & sample_info
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t take_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
       ::DDS::SampleInfo & sample_info
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t read_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
@@ -458,12 +434,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t take_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
@@ -473,12 +448,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t read_next_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
@@ -488,12 +462,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t take_next_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
@@ -503,38 +476,35 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t return_loan (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-  
+
   virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
- 
+
  protected:
- 
+
     virtual void demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;
-    
+
     virtual void dispose(const TAO::DCPS::ReceivedDataSample& sample) ;
-    
+
     //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 
   private:

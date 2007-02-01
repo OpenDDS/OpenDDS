@@ -26,7 +26,6 @@ public:
   virtual void on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -35,7 +34,6 @@ public:
  virtual void on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -44,7 +42,6 @@ public:
   virtual void on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -53,7 +50,6 @@ public:
   virtual void on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -85,7 +81,6 @@ public:
   virtual void on_subscription_disconnected (
       ::DDS::DataReader_ptr reader,
       const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
-      ACE_ENV_ARG_DECL_WITH_DEFAULTS
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -94,7 +89,6 @@ public:
   virtual void on_subscription_reconnected (
       ::DDS::DataReader_ptr reader,
       const ::TAO::DCPS::SubscriptionReconnectedStatus & status
-      ACE_ENV_ARG_DECL_WITH_DEFAULTS
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -103,7 +97,6 @@ public:
   virtual void on_subscription_lost (
       ::DDS::DataReader_ptr reader,
       const ::TAO::DCPS::SubscriptionLostStatus & status
-      ACE_ENV_ARG_DECL_WITH_DEFAULTS
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

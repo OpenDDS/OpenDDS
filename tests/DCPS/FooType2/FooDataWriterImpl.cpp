@@ -16,7 +16,7 @@ FooDataWriterImpl::FooDataWriterImpl (void)
   db_allocator_ (0)
 {
 }
-  
+
 // Implementation skeleton destructor
 FooDataWriterImpl::~FooDataWriterImpl (void)
 {
@@ -24,50 +24,47 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   delete mb_allocator_;
   delete db_allocator_;
 }
- 
-  
+
+
 ::DDS::InstanceHandle_t FooDataWriterImpl::_cxx_register (
     const Foo & instance_data
-    ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
     CORBA::SystemException
     ))
 {
-  ::DDS::Time_t source_timestamp 
+  ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return register_w_timestamp (instance_data, 
+  return register_w_timestamp (instance_data,
                                ::TAO::DCPS::HANDLE_NIL,
-                               source_timestamp
-                               ACE_ENV_ARG_PARAMETER);
+                               source_timestamp);
 }
-  
+
 ::DDS::InstanceHandle_t FooDataWriterImpl::register_w_timestamp (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t ,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                    guard, 
-                    get_lock (), 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
                     ::DDS::RETCODE_ERROR);
   ACE_Message_Block* marshalled;
-  int is_new = 0; 
-  ::DDS::InstanceHandle_t handle; 
-  ::DDS::ReturnCode_t ret 
-    = this->get_or_create_instance_handle(handle, 
-                                          instance_data, 
-                                          is_new, 
-                                          marshalled, 
+  int is_new = 0;
+  ::DDS::InstanceHandle_t handle;
+  ::DDS::ReturnCode_t ret
+    = this->get_or_create_instance_handle(handle,
+                                          instance_data,
+                                          is_new,
+                                          marshalled,
                                           source_timestamp);
   if (ret != ::DDS::RETCODE_OK)
   {
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("FooDataWriterImpl::register_w_timestamp, ")
                   ACE_TEXT("register failed error=%d.\n"),
@@ -80,42 +77,39 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 ::DDS::ReturnCode_t FooDataWriterImpl::unregister (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ::DDS::Time_t source_timestamp 
+  ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return unregister_w_timestamp (instance_data, 
-                                 handle, 
-                                 source_timestamp
-                                 ACE_ENV_ARG_PARAMETER);
+  return unregister_w_timestamp (instance_data,
+                                 handle,
+                                 source_timestamp);
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::unregister_w_timestamp (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                    guard, 
-                    get_lock (), 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
                     ::DDS::RETCODE_ERROR);
-  ::DDS::InstanceHandle_t registered_handle 
+  ::DDS::InstanceHandle_t registered_handle
       = this->get_instance_handle(instance_data);
 
   if(registered_handle == ::TAO::DCPS::HANDLE_NIL)
   {
-    // This case could be the instance is not registered yet or 
+    // This case could be the instance is not registered yet or
     // already unregistered.
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("FooDataWriterImpl::unregister, ")
                         ACE_TEXT("The instance is not registered.\n")),
@@ -123,7 +117,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   }
   else if (handle != ::TAO::DCPS::HANDLE_NIL && handle != registered_handle)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("FooDataWriterImpl::unregister, ")
                         ACE_TEXT("The given handle=%X is different from "
@@ -139,29 +133,26 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     return DataWriterImpl::unregister(handle, source_timestamp);
   }
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::write (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ::DDS::Time_t source_timestamp 
+  ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return write_w_timestamp (instance_data, 
-                            handle, 
-                            source_timestamp
-                            ACE_ENV_ARG_PARAMETER);
+  return write_w_timestamp (instance_data,
+                            handle,
+                            source_timestamp);
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::write_w_timestamp (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -171,23 +162,23 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   //  the contained data storage and interfaces.  This lock protects the
   //  marshaled data buffers as well as the instance data containers.
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                    guard, 
-                    get_lock (), 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
                     ::DDS::RETCODE_ERROR);
 
   ACE_Message_Block* marshalled;
-  int is_new = 0; 
-  ::DDS::InstanceHandle_t registered_handle; 
-  ::DDS::ReturnCode_t ret 
-    = this->get_or_create_instance_handle(registered_handle, 
-                                          instance_data, 
-                                          is_new, 
+  int is_new = 0;
+  ::DDS::InstanceHandle_t registered_handle;
+  ::DDS::ReturnCode_t ret
+    = this->get_or_create_instance_handle(registered_handle,
+                                          instance_data,
+                                          is_new,
                                           marshalled,
                                           source_timestamp);
   if (ret != ::DDS::RETCODE_OK)
   {
-    ACE_ERROR ((LM_ERROR, 
+    ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
                 ACE_TEXT("FooDataWriterImpl::write, ")
                 ACE_TEXT("register failed err=%d.\n"),
@@ -199,13 +190,13 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     // note: do not tell subscriber if there is an implicit registration.
     //    Subscriber must be able to handle a new instance without being
     //    told about it.
-    
+
     handle = registered_handle;
-  }  
-  
+  }
+
   if (handle == ::TAO::DCPS::HANDLE_NIL)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ")
                        ACE_TEXT("FooDataWriterImpl::write, ")
                        ACE_TEXT("The instance has not registered yet.")),
@@ -214,7 +205,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 
   if (handle != registered_handle)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ")
                        ACE_TEXT("FooDataWriterImpl::write, ")
                        ACE_TEXT("The given handle=%X is different from "
@@ -226,60 +217,57 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   marshalled = marshal (instance_data); // FOR_WRITE
   return DataWriterImpl::write(marshalled, handle, source_timestamp);
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::dispose (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ::DDS::Time_t source_timestamp 
+  ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return dispose_w_timestamp (instance_data, 
-                              handle, 
-                              source_timestamp
-                              ACE_ENV_ARG_PARAMETER);
+  return dispose_w_timestamp (instance_data,
+                              handle,
+                              source_timestamp);
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::dispose_w_timestamp (
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
 {
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                    guard, 
-                    get_lock (), 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
                     ::DDS::RETCODE_ERROR);
 
   ACE_Message_Block* marshalled;
-  ::DDS::InstanceHandle_t registered_handle 
+  ::DDS::InstanceHandle_t registered_handle
       = this->get_instance_handle(instance_data);
-  if(handle == ::TAO::DCPS::HANDLE_NIL) 
+  if(handle == ::TAO::DCPS::HANDLE_NIL)
   {
-    if (registered_handle == ::TAO::DCPS::HANDLE_NIL) 
+    if (registered_handle == ::TAO::DCPS::HANDLE_NIL)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
                           ACE_TEXT("FooDataWriterImpl::dispose, ")
                           ACE_TEXT("The handle is not registered yet.\n")),
                           ::DDS::RETCODE_ERROR);
     }
-    else 
+    else
     {
       handle = registered_handle;
     }
   }
-  else if(handle != registered_handle) 
+  else if(handle != registered_handle)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("FooDataWriterImpl::dispose, ")
                         ACE_TEXT("The given handle=%X is different from "
@@ -287,27 +275,26 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
-  
+
   marshalled = this->marshal (instance_data, 0);  // NOT_FOR_WRITE
-  
+
   return DataWriterImpl::dispose(handle, source_timestamp);
 }
-  
+
 ::DDS::ReturnCode_t FooDataWriterImpl::get_key_value (
     Foo & key_holder,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, 
-                      guard, 
-                      get_lock (), 
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      get_lock (),
                       ::DDS::RETCODE_ERROR);
     FooMap::iterator it;
-    for (it = instance_map_.begin (); 
+    for (it = instance_map_.begin ();
          it != instance_map_.end ();
          it ++)
     {
@@ -322,7 +309,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   }
 
 
-// Note: The FooDataWriter gives ownership of the marshalled data 
+// Note: The FooDataWriter gives ownership of the marshalled data
 //       to the WriteDataContainer.
 ACE_Message_Block*
  FooDataWriterImpl::marshal(
@@ -374,27 +361,27 @@ ACE_Message_Block*
 		Foo instance_data,
 		int& is_new,
 		ACE_Message_Block*& marshalled, // only if is_new==1
-                const ::DDS::Time_t & source_timestamp)    
+                const ::DDS::Time_t & source_timestamp)
 {
   handle = ::TAO::DCPS::HANDLE_NIL;
   FooMap::const_iterator it = instance_map_.find(instance_data);
- 
-  if (it == instance_map_.end()) 
+
+  if (it == instance_map_.end())
   {
     is_new = 1;
     // don't use fast allocator for registration.
     marshalled = this->marshal(instance_data, 0); //NOT_FOR_WRITE
-    
+
     // tell DataWriterLocal and Publisher about the instance.
-    ::DDS::ReturnCode_t ret 
+    ::DDS::ReturnCode_t ret
       = register_instance(handle, marshalled, source_timestamp);
     if (ret == ::DDS::RETCODE_OK)
     {
-      std::pair<FooMap::iterator, bool> pair 
+      std::pair<FooMap::iterator, bool> pair
           = instance_map_.insert(FooMap::value_type(instance_data, handle));
       if (pair.second == false)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                               ACE_TEXT("(%P|%t) "
                               "FooDataWriterImpl::get_or_create_instance_handle, ")
                               ACE_TEXT("insert Foo(key=%d) failed. \n"),
@@ -415,17 +402,17 @@ ACE_Message_Block*
   return ::DDS::RETCODE_OK;
 }
 
-::DDS::InstanceHandle_t 
+::DDS::InstanceHandle_t
  FooDataWriterImpl::get_instance_handle(
 		Foo instance_data)
 {
   FooMap::const_iterator it = instance_map_.find(instance_data);
- 
-  if (it == instance_map_.end()) 
+
+  if (it == instance_map_.end())
   {
     return ::TAO::DCPS::HANDLE_NIL;
   }
-  else 
+  else
   {
     return it->second;
   }
@@ -439,7 +426,6 @@ void FooDataWriterImpl::init (
       TAO::DCPS::PublisherImpl*              publisher,
       ::DDS::Publisher_ptr                   publisher_objref,
       TAO::DCPS::DataWriterRemote_ptr        dw_remote_objref
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -451,9 +437,7 @@ void FooDataWriterImpl::init (
                         participant,
                         publisher,
                         publisher_objref,
-                        dw_remote_objref
-                        ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                        dw_remote_objref);
 
   if (qos.resource_limits.max_samples == ::DDS::LENGTH_UNLIMITED)
   {
@@ -466,7 +450,7 @@ void FooDataWriterImpl::init (
 
 void FooDataWriterImpl::unregistered(::DDS::InstanceHandle_t   instance_handle)
 {
-  for (FooMap::iterator it = instance_map_.begin (); 
+  for (FooMap::iterator it = instance_map_.begin ();
     it != instance_map_.end ();
     it ++)
   {

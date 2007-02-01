@@ -103,14 +103,12 @@ void init_dcps_objects (int i)
   participant[i] =
     dpf->create_participant(domain_id,
                             PARTICIPANT_QOS_DEFAULT,
-                            ::DDS::DomainParticipantListener::_nil()
-                            ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                            ::DDS::DomainParticipantListener::_nil());
   if (CORBA::is_nil (participant[i].in ()))
     {
       ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) create_participant failed.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   ::Mine::FooTypeSupportImpl* fts_servant
@@ -125,7 +123,7 @@ void init_dcps_objects (int i)
   {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT ("Failed to register the FooNoTypeTypeSupport.")));
-    ACE_THROW (TestException ());
+    throw TestException ();
   }
 
   // Test if different TypeSupport instances of the same TypeSupport type can register
@@ -134,7 +132,7 @@ void init_dcps_objects (int i)
   {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT ("Failed to register the FooNoTypeTypeSupport.")));
-    ACE_THROW (TestException ());
+    throw TestException ();
   }
 
   ::DDS::TopicQos topic_qos;
@@ -144,14 +142,12 @@ void init_dcps_objects (int i)
     = participant[i]->create_topic(topic_name[i],
                                 type_name,
                                 topic_qos,
-                                ::DDS::TopicListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                                ::DDS::TopicListener::_nil());
   if (CORBA::is_nil (topic[i].in ()))
     {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT ("Failed to create_topic.")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   reader_impl[i]
@@ -177,32 +173,29 @@ void init_dcps_objects (int i)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) init_reader_tranport: subscriber TCP ")
       ACE_TEXT(" Failed to configure the transport.\n")));
-    ACE_THROW (TestException ());
+    throw TestException ();
   }
 
   subscriber[i] = participant[i]->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                          ::DDS::SubscriberListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                          ::DDS::SubscriberListener::_nil());
   if (CORBA::is_nil (subscriber[i].in ()))
     {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT ("Failed to create_subscriber.")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   // Attach the subscriber to the transport.
   ::TAO::DCPS::SubscriberImpl* sub_impl
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                          ::DDS::Subscriber_ptr>
-                          (subscriber[i].in () ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                          (subscriber[i].in ());
 
   if (0 == sub_impl)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Failed to obtain subscriber servant\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   TAO::DCPS::AttachStatus attach_status;
@@ -235,7 +228,7 @@ void init_dcps_objects (int i)
                   ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
                   ACE_TEXT("AttachStatus == %s\n"),
                   status_str.c_str()));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
         // Create the Datareaders
@@ -243,21 +236,17 @@ void init_dcps_objects (int i)
     subscriber[i]->get_default_datareader_qos (dr_qos);
 
     ::DDS::TopicDescription_var description
-      = participant[i]->lookup_topicdescription(topic_name[i]
-                                                ACE_ENV_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+      = participant[i]->lookup_topicdescription(topic_name[i]);
     // create the datareader.
     datareader[i] = subscriber[i]->create_datareader(description.in (),
                                               dr_qos,
-                                              listener[i].in ()
-                                              ACE_ENV_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+                                              listener[i].in ());
 
     if (CORBA::is_nil (datareader[i].in ()))
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) create_datareader failed.\n")));
-        ACE_THROW (TestException ());
+        throw TestException ();
       }
 }
 
@@ -269,14 +258,12 @@ void init_listener()
     DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
     PortableServer::ServantBase_var safe_servant = listener_servant;
 
-    listener[i] = ::TAO::DCPS::servant_to_reference(listener_servant
-                                                    ACE_ENV_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+    listener[i] = ::TAO::DCPS::servant_to_reference(listener_servant);
 
     if (CORBA::is_nil (listener[i].in ()))
       {
         ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil.")));
-        ACE_THROW (TestException ());
+        throw TestException ();
       }
   }
 }
@@ -307,7 +294,7 @@ int main (int argc, char *argv[])
 {
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
@@ -388,43 +375,37 @@ int main (int argc, char *argv[])
       ACE_OS::fclose(readers_completed);
       ACE_OS::fclose(writers_completed);
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));
       status = 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main ():");
+      ex._tao_print_exception ("Exception caught in main ():");
       status = 1;
     }
-  ACE_ENDTRY;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       for (int i = 0; i < 2; ++i)
       {
         if (! CORBA::is_nil (participant[i].in ()))
           {
-            participant[i]->delete_contained_entities(ACE_ENV_SINGLE_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            participant[i]->delete_contained_entities();
           }
         if (! CORBA::is_nil (dpf.in ()))
           {
-            dpf->delete_participant(participant[i].in () ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            dpf->delete_participant(participant[i].in ());
           }
       }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-        "Exception caught in cleanup.");
+      ex._tao_print_exception ("Exception caught in cleanup.");
       status = 1;
     }
-  ACE_ENDTRY;
 
   shutdown ();
 

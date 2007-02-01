@@ -37,7 +37,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     const char * topicName,
     const char * dataTypeName,
     const ::DDS::TopicQos & qos
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -75,7 +74,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
     CORBA::String_out dataTypeName,
     ::DDS::TopicQos_out qos,
     TAO::DCPS::RepoId_out topicId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -112,7 +110,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId topicId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -149,7 +146,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   ::DDS::DomainId_t domainId,
   TAO::DCPS::RepoId participantId,
   TAO::DCPS::RepoId topicId
-  ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
   CORBA::SystemException
@@ -178,7 +174,7 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
 
   return TAO::DCPS::ENABLED;
 }
-  
+
 
 TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     ::DDS::DomainId_t domainId,
@@ -188,7 +184,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     const ::DDS::DataWriterQos & qos,
     const TAO::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::PublisherQos & publisherQos
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -254,7 +249,6 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId publicationId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -295,7 +289,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     const ::DDS::DataReaderQos & qos,
     const TAO::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::SubscriberQos & subscriberQos
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -362,7 +355,6 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId subscriptionId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -396,7 +388,6 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
 TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     ::DDS::DomainId_t domain,
     const ::DDS::DomainParticipantQos & qos
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -440,7 +431,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId participantId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -471,7 +461,6 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId otherParticipantId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -495,13 +484,12 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
 
   domainPtr->remove_dead_participants();
 }
-  
+
 
 void TAO_DDS_DCPSInfo_i::ignore_topic (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId topicId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -526,13 +514,12 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
 
   domainPtr->remove_dead_participants();
 }
-  
+
 
 void TAO_DDS_DCPSInfo_i::ignore_subscription (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId subscriptionId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -563,7 +550,6 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId publicationId
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -679,22 +665,22 @@ int TAO_DDS_DCPSInfo_i::load_domains (const char* filename,
 }
 
 
-int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given, 
+int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
                                         const ACE_INET_Addr listen)
 {
   int status = 0;
-  
-  TAO::DCPS::TransportImpl_rch trans_impl 
-    = TheTransportFactory->create_transport_impl (TAO::DCPS::BIT_ALL_TRAFFIC, 
+
+  TAO::DCPS::TransportImpl_rch trans_impl
+    = TheTransportFactory->create_transport_impl (TAO::DCPS::BIT_ALL_TRAFFIC,
                                                   "SimpleTcp",
                                                   TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config 
-    = TheTransportFactory->get_or_create_configuration (TAO::DCPS::BIT_ALL_TRAFFIC, 
+  TAO::DCPS::TransportConfiguration_rch config
+    = TheTransportFactory->get_or_create_configuration (TAO::DCPS::BIT_ALL_TRAFFIC,
                                                         "SimpleTcp");
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
-      
+
   if (listen_address_given)
     tcp_config->local_address_ = listen;
 

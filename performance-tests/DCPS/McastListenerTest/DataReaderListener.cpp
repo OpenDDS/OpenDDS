@@ -17,12 +17,12 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
 ::DDS::ReturnCode_t read (::DDS::DataReader_ptr reader,
                           ACE_Array<bool>& pub_finished)
 {
-  R_ptr pt_dr 
-    = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
+  R_ptr pt_dr
+    = R::_narrow(reader);
 
   Rimpl* dr_servant =
       ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+              (pt_dr);
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
@@ -36,18 +36,16 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
     samples,
     infos,
     max_read_samples,
-    ::DDS::NOT_READ_SAMPLE_STATE, 
-    ::DDS::ANY_VIEW_STATE, 
-    ::DDS::ANY_INSTANCE_STATE
-    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (0);
+    ::DDS::NOT_READ_SAMPLE_STATE,
+    ::DDS::ANY_VIEW_STATE,
+    ::DDS::ANY_INSTANCE_STATE);
 
   if (status == ::DDS::RETCODE_OK)
     {
       size_t len = samples.length ();
       //for (unsigned i = 0; i < len; i ++)
       // ACE_DEBUG ((LM_DEBUG, "(%P|%t) received %d\n", samples[i].sequence_num));
-        
+
 
       if ((samples[len - 1].sequence_num == -1)
           || (samples[0].sequence_num == -1))
@@ -134,11 +132,10 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl\n")));
   }
 
-  
+
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -152,7 +149,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -162,11 +158,10 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
     ACE_UNUSED_ARG(status);
   }
 
-  
+
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -180,7 +175,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

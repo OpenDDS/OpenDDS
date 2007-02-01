@@ -120,12 +120,11 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO," %P|%t %T subscriber main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
@@ -137,9 +136,7 @@ int main (int argc, char *argv[])
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(TEST_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -156,8 +153,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt128ts_servant;
 
           ::Mine::Pt128TypeSupport_var pt128ts =
-            TAO::DCPS::servant_to_reference (pt128ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            TAO::DCPS::servant_to_reference (pt128ts_servant);
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -165,7 +161,6 @@ int main (int argc, char *argv[])
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 512:
@@ -174,8 +169,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt512ts_servant;
 
           ::Mine::Pt512TypeSupport_var pt512ts =
-            TAO::DCPS::servant_to_reference (pt512ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            TAO::DCPS::servant_to_reference (pt512ts_servant);
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -183,7 +177,6 @@ int main (int argc, char *argv[])
                           ACE_TEXT (" %P|%t ERROR:Failed to register the Pt512TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 2048:
@@ -192,8 +185,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
 
           ::Mine::Pt2048TypeSupport_var pt2048ts =
-            TAO::DCPS::servant_to_reference (pt2048ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            TAO::DCPS::servant_to_reference (pt2048ts_servant);
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -201,7 +193,6 @@ int main (int argc, char *argv[])
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 8192:
@@ -210,8 +201,7 @@ int main (int argc, char *argv[])
           PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
 
           ::Mine::Pt8192TypeSupport_var pt8192ts =
-            TAO::DCPS::servant_to_reference (pt8192ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            TAO::DCPS::servant_to_reference (pt8192ts_servant);
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -219,7 +209,6 @@ int main (int argc, char *argv[])
                           ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
       };
 
@@ -242,17 +231,14 @@ int main (int argc, char *argv[])
         dp->create_topic (TEST_TOPIC,
                           TEST_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(TEST_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        dp->lookup_topicdescription(TEST_TOPIC);
       if (CORBA::is_nil (description.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -264,9 +250,7 @@ int main (int argc, char *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -286,8 +270,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
-                              (sub.in()  ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in());
 
       if (0 == sub_impl)
       {
@@ -345,8 +328,7 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = dr_listener_impl;
 
       ::DDS::DataReaderListener_var dr_listener =
-        TAO::DCPS::servant_to_reference (dr_listener_impl ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (dr_listener_impl);
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -357,9 +339,7 @@ int main (int argc, char *argv[])
       ::DDS::DataReader_var  the_dr
                = sub->create_datareader(description.in() ,
                                         dr_qos,
-                                        dr_listener.in()
-                                        ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                        dr_listener.in());
 
       if (CORBA::is_nil (the_dr.in() ))
       {
@@ -377,10 +357,10 @@ int main (int argc, char *argv[])
       // clean up subscriber objects
       sub->delete_contained_entities() ;
 
-      dp->delete_subscriber(sub.in()  ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in());
 
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
 
@@ -389,13 +369,11 @@ int main (int argc, char *argv[])
       reader_transport_impl = 0;
       //reader_config = 0;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return status;
 }

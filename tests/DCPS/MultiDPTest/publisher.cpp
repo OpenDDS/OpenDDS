@@ -85,19 +85,17 @@ int parse_args (int argc, char *argv[])
   return 0;
 }
 
-void init (ACE_ENV_SINGLE_ARG_DECL)
+void init ()
 {
   participant
     = dpf->create_participant(domain_id,
                               PARTICIPANT_QOS_DEFAULT,
-                              ::DDS::DomainParticipantListener::_nil()
-                              ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                              ::DDS::DomainParticipantListener::_nil());
   if (CORBA::is_nil (participant.in ()))
     {
       ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) create_participant failed.\n")));
-      ACE_THROW(TestException ());
+      throw TestException ();
     }
 
   ::Mine::FooTypeSupportImpl* fts_servant
@@ -107,39 +105,34 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), type_name))
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   ::DDS::TopicQos topic_qos;
   participant->get_default_topic_qos(topic_qos);
-  ACE_CHECK;
 
   topic[0]
     = participant->create_topic (topic_name[0],
                                   type_name,
                                   topic_qos,
-                                  ::DDS::TopicListener::_nil()
-                                  ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                                  ::DDS::TopicListener::_nil());
   if (CORBA::is_nil (topic[0].in ()))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) create_topic failed.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   topic[1]
     = participant->create_topic (topic_name[1],
                                   type_name,
                                   topic_qos,
-                                  ::DDS::TopicListener::_nil()
-                                  ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                                  ::DDS::TopicListener::_nil());
   if (CORBA::is_nil (topic[1].in ()))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) create_topic failed.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   writer_impl
@@ -165,33 +158,30 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) init_writer_tranport: pub TCP")
                 ACE_TEXT(" Failed to configure the transport.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   // Create the default publisher
   publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                ::DDS::PublisherListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                                ::DDS::PublisherListener::_nil());
   if (CORBA::is_nil (publisher.in ()))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) create_publisher failed.\n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   // Attach the publisher to the transport.
   ::TAO::DCPS::PublisherImpl* pub_impl
     = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                          ::DDS::Publisher_ptr>
-                          (publisher.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+                          (publisher.in ());
 
   if (0 == pub_impl)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Failed to obtain publisher servant \n")));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
@@ -223,7 +213,7 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
                   ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
                   ACE_TEXT("AttachStatus == %s\n"),
                   status_str.c_str()));
-      ACE_THROW (TestException ());
+      throw TestException ();
     }
 
   // Create the datawriters
@@ -242,15 +232,13 @@ void init (ACE_ENV_SINGLE_ARG_DECL)
     {
       datawriter[i] = publisher->create_datawriter(topic[i].in (),
                                           dw_qos,
-                                          ::DDS::DataWriterListener::_nil()
-                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                          ::DDS::DataWriterListener::_nil());
 
       if (CORBA::is_nil (datawriter[i].in ()))
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       writers[i] = new Writer (datawriter[i].in (), i);
@@ -277,7 +265,7 @@ int main (int argc, char *argv[])
 {
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
@@ -369,42 +357,36 @@ int main (int argc, char *argv[])
           }
       }
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));
       status = 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main ():");
+      ex._tao_print_exception ("Exception caught in main ():");
       status = 1;
     }
-  ACE_ENDTRY;
 
 
-  ACE_TRY_NEW_ENV
+  try
     {
       if (! CORBA::is_nil (participant.in ()))
         {
-          participant->delete_contained_entities(ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          participant->delete_contained_entities();
         }
 
       if (! CORBA::is_nil (dpf.in ()))
         {
-          dpf->delete_participant(participant.in () ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          dpf->delete_participant(participant.in ());
         }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in cleanup.");
+      ex._tao_print_exception ("Exception caught in cleanup.");
       status = 1;
     }
-  ACE_ENDTRY;
 
   shutdown ();
   return status;

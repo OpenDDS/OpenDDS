@@ -38,18 +38,18 @@ typedef ACE_Map_Manager< ::DDS::DomainId_t, DCPS_IR_Domain*, ACE_Null_Mutex> DCP
  *
  * @brief Implementation of the DCPSInfo
  *
- * This is the Information Repository object.  Clients of 
+ * This is the Information Repository object.  Clients of
  * the system will use the CORBA reference of this object.
  */
 class  TAO_DDS_DCPSInfo_i : public virtual POA_TAO::DCPS::DCPSInfo
 {
 public:
-  //Constructor 
+  //Constructor
   TAO_DDS_DCPSInfo_i (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~TAO_DDS_DCPSInfo_i (void);
-  
+
   virtual TAO::DCPS::TopicStatus assert_topic (
       TAO::DCPS::RepoId_out topicId,
       ::DDS::DomainId_t domainId,
@@ -57,7 +57,6 @@ public:
       const char * topicName,
       const char * dataTypeName,
       const ::DDS::TopicQos & qos
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -71,7 +70,6 @@ public:
       CORBA::String_out dataTypeName,
       ::DDS::TopicQos_out qos,
       TAO::DCPS::RepoId_out topicId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -82,7 +80,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId topicId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -95,7 +92,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId topicId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -112,7 +108,6 @@ public:
       const ::DDS::DataWriterQos & qos,
       const TAO::DCPS::TransportInterfaceInfo & transInfo,
       const ::DDS::PublisherQos & publisherQos
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -125,7 +120,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId publicationId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -142,7 +136,6 @@ public:
       const ::DDS::DataReaderQos & qos,
       const TAO::DCPS::TransportInterfaceInfo & transInfo,
       const ::DDS::SubscriberQos & subscriberQos
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -155,7 +148,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId subscriptionId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -167,7 +159,6 @@ public:
   virtual TAO::DCPS::RepoId add_domain_participant (
       ::DDS::DomainId_t domain,
       const ::DDS::DomainParticipantQos & qos
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -177,7 +168,6 @@ public:
     virtual void remove_domain_participant (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -189,7 +179,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId otherParticipantId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -201,7 +190,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId topicId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -214,7 +202,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId subscriptionId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -227,7 +214,6 @@ public:
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId publicationId
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -235,7 +221,7 @@ public:
       , TAO::DCPS::Invalid_Participant
       , TAO::DCPS::Invalid_Publication
     ));
-  
+
   /// Called to load the domains
   /// returns the number of domains that were loaded.
   int load_domains (const char* filename, bool use_bit);

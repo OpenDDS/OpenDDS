@@ -101,10 +101,9 @@ int parse_args (int argc, char *argv[])
 
 int main (int argc, char *argv[])
 {
-  ACE_TRY_NEW_ENV
+  try
     {
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
@@ -115,15 +114,12 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
       ::Mine::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -138,7 +134,6 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -152,9 +147,7 @@ int main (int argc, char *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
@@ -162,9 +155,7 @@ int main (int argc, char *argv[])
 
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -176,8 +167,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
-                              (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in ());
 
       if (0 == sub_impl)
         {
@@ -235,13 +225,11 @@ int main (int argc, char *argv[])
 //    Test Subscriber unit tests
 //
       ::DDS::SubscriberQos sub_qos_got;
-      sub->get_qos (sub_qos_got ACE_ENV_ARG_PARAMETER);
+      sub->get_qos (sub_qos_got);
 
       ::DDS::SubscriberQos default_sub_qos;
-      dp->get_default_subscriber_qos (default_sub_qos
-                                      ACE_ENV_ARG_PARAMETER);
+      dp->get_default_subscriber_qos (default_sub_qos);
 
-      ACE_CHECK;
 
       //The SunOS compiler had problem resolving operator in a namespace.
       //To resolve the compilation errors, the operator is called explicitly.
@@ -256,7 +244,7 @@ int main (int argc, char *argv[])
       // This qos is not supported, so it's invalid qos.
       new_sub_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
-      ret = sub->set_qos (new_sub_qos ACE_ENV_ARG_PARAMETER);
+      ret = sub->set_qos (new_sub_qos);
       if (ret != ::DDS::RETCODE_INCONSISTENT_POLICY)
       {
         ACE_ERROR ((LM_ERROR,
@@ -265,8 +253,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::DomainParticipant_var participant
-        = sub->get_participant (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_CHECK;
+        = sub->get_participant ();
 
       if (dp.in () != participant.in ())
       {
@@ -276,8 +263,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::DataReaderQos default_dr_qos;
-      sub->get_default_datareader_qos (default_dr_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      sub->get_default_datareader_qos (default_dr_qos);
 
       ::DDS::DataReaderQos new_default_dr_qos = default_dr_qos;
       new_default_dr_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
@@ -291,8 +277,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        dp->lookup_topicdescription(MY_TOPIC);
       if (CORBA::is_nil (description.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -304,9 +289,7 @@ int main (int argc, char *argv[])
       ::DDS::DataReader_var datareader =
           sub->create_datareader(description.in (),
                                  DATAREADER_QOS_USE_TOPIC_QOS,
-                                 ::DDS::DataReaderListener::_nil()
-                                 ACE_ENV_ARG_PARAMETER) ;
-      ACE_CHECK;
+                                 ::DDS::DataReaderListener::_nil()) ;
 
       if (CORBA::is_nil (datareader.in ()))
       {
@@ -316,13 +299,11 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::DataReaderQos dr_qos_use_topic_qos;
-      datareader->get_qos (dr_qos_use_topic_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      datareader->get_qos (dr_qos_use_topic_qos);
 
       ::DDS::DataReaderQos copied_from_topic;
       sub->get_default_datareader_qos(copied_from_topic) ;
       ret = sub->copy_from_topic_qos (copied_from_topic, topic_qos);
-      ACE_CHECK;
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
@@ -340,8 +321,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::TopicDescription_var topic_description_got
-         = datareader->get_topicdescription (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_CHECK;
+         = datareader->get_topicdescription ();
 
       if (topic_description_got.in () != description.in ())
       {
@@ -351,8 +331,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::Subscriber_var sub_got
-          = datareader->get_subscriber (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_CHECK;
+          = datareader->get_subscriber ();
 
       if (sub_got.in () != sub.in ())
       {
@@ -362,8 +341,7 @@ int main (int argc, char *argv[])
       }
 
       ::DDS::DataReaderQos dr_qos_got;
-      datareader->get_qos (dr_qos_got ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      datareader->get_qos (dr_qos_got);
 
       ::DDS::DataReaderQos new_dr_qos = dr_qos_got;
 
@@ -371,8 +349,7 @@ int main (int argc, char *argv[])
       new_dr_qos.resource_limits.max_samples_per_instance = 2;
       new_dr_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-      ret = datareader->set_qos (new_dr_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      ret = datareader->set_qos (new_dr_qos);
 
       if (ret != ::DDS::RETCODE_INCONSISTENT_POLICY)
       {
@@ -382,7 +359,7 @@ int main (int argc, char *argv[])
       }
 
       // Delete the datareader.
-      sub->delete_datareader (datareader.in () ACE_ENV_ARG_PARAMETER);
+      sub->delete_datareader (datareader.in ());
 
 //---------------------------------------------------------------------
 
@@ -401,9 +378,7 @@ int main (int argc, char *argv[])
       {
         drs[i] = sub->create_datareader(description.in (),
                                         dr_qos,
-                                        ::DDS::DataReaderListener::_nil()
-                                        ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                                        ::DDS::DataReaderListener::_nil());
 
         if (CORBA::is_nil (drs[i].in ()))
         {
@@ -452,9 +427,7 @@ int main (int argc, char *argv[])
       {
         drs[i] = sub->create_datareader(description.in (),
                                         dr_qos,
-                                        ::DDS::DataReaderListener::_nil()
-                                        ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                                        ::DDS::DataReaderListener::_nil());
 
         if (CORBA::is_nil (drs[i].in ()))
         {
@@ -517,9 +490,7 @@ int main (int argc, char *argv[])
       {
         drs[i] = sub->create_datareader(description.in (),
                                         dr_qos,
-                                        ::DDS::DataReaderListener::_nil()
-                                        ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                                        ::DDS::DataReaderListener::_nil());
 
         if (CORBA::is_nil (drs[i].in ()))
         {
@@ -599,27 +570,25 @@ int main (int argc, char *argv[])
 
       sub->delete_contained_entities() ;
 
-      dp->delete_subscriber(sub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in ());
 
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
       TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

@@ -1,7 +1,7 @@
 #include "SubDriver.h"
 #include "TestException.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
@@ -74,7 +74,7 @@ SubDriver::parse_args(int& argc, char* argv[])
 
       got_p = true;
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       num_writes_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
@@ -98,12 +98,12 @@ SubDriver::parse_args(int& argc, char* argv[])
 
       got_s = true;
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-v")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-v")) != 0)
     {
       pub_driver_ior_ = current_arg;
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-l")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-l")) != 0)
     {
       receive_delay_msec_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
@@ -143,19 +143,17 @@ void
 SubDriver::init(int& argc, char* argv[])
 {
   // initialize the orb
-  orb_ = CORBA::ORB_init (argc, 
-                          argv, 
-                          "TAO_DDS_DCPS" 
-                          ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  orb_ = CORBA::ORB_init (argc,
+                          argv,
+                          "TAO_DDS_DCPS");
 
-  TAO::DCPS::TransportImpl_rch transport_impl 
+  TAO::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->sub_addr_;
@@ -175,29 +173,29 @@ SubDriver::run()
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
-              ACE_TEXT(" Wait for %s. \n"), 
+              ACE_TEXT(" Wait for %s. \n"),
               pub_id_fname_.c_str ()));
-    
+
   PublicationIds ids;
 
   // Wait for the publication id file created by the publisher.
   while (1)
   {
-    FILE* fp 
+    FILE* fp
       = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("r"));
     if (fp == 0)
     {
       ACE_OS::sleep (1);
     }
-    else 
-    { 
+    else
+    {
       ::TAO::DCPS::PublicationId pub_id = 0;
       while (fscanf (fp, "%d\n", &pub_id) != EOF)
       {
         ids.push_back (pub_id);
         ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
-              ACE_TEXT(" Got from %s: pub_id=%d. \n"), 
+              ACE_TEXT(" Got from %s: pub_id=%d. \n"),
               pub_id_fname_.c_str (),
               pub_id));
       }
@@ -207,20 +205,18 @@ SubDriver::run()
   }
 
   CORBA::Object_var object =
-    orb_->string_to_object (pub_driver_ior_.c_str () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    orb_->string_to_object (pub_driver_ior_.c_str ());
 
-  pub_driver_ = ::Test::TestPubDriver::_narrow (object.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  pub_driver_ = ::Test::TestPubDriver::_narrow (object.in ());
 
   TEST_CHECK (!CORBA::is_nil (pub_driver_.in ()));
 
   size_t num_publications = ids.size ();
 
   // Set up the publications.
-  TAO::DCPS::AssociationData* publications 
+  TAO::DCPS::AssociationData* publications
     = new TAO::DCPS::AssociationData[num_publications];
-  
+
 
   for (size_t i = 0; i < num_publications; i ++)
   {
@@ -228,7 +224,7 @@ SubDriver::run()
     publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
     TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
-    publications[i].remote_data_.data 
+    publications[i].remote_data_.data
       = TAO::DCPS::TransportInterfaceBLOB
                   (sizeof(TAO::DCPS::NetworkAddress),
                    sizeof(TAO::DCPS::NetworkAddress),
@@ -237,8 +233,8 @@ SubDriver::run()
 
   this->subscriber_.init(ALL_TRAFFIC,
                          this->sub_id_,
-                         num_publications, 
-                         publications, 
+                         num_publications,
+                         publications,
                          receive_delay_msec_);
 
   delete [] publications;
@@ -250,8 +246,8 @@ SubDriver::run()
 
   pub_driver_->shutdown ();
 
-  // Sleep before release transport so the connection will not go away. 
-  // This would avoid the problem of publisher sendv failure due to lost 
+  // Sleep before release transport so the connection will not go away.
+  // This would avoid the problem of publisher sendv failure due to lost
   // connection during the shutdown period.
   ACE_OS::sleep (5);
 

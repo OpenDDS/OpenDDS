@@ -20,7 +20,7 @@
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
 
-// Added unused arguments with default value to work around with vc6 
+// Added unused arguments with default value to work around with vc6
 // bug on template function instantiation.
 template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 ::DDS::ReturnCode_t read (TestStats* stats,
@@ -39,8 +39,8 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 {
 #endif
 
-  R_var pt_dr 
-    = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
+  R_var pt_dr
+    = R::_narrow(reader);
   if (CORBA::is_nil (pt_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -50,16 +50,16 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
   Rimpl* dr_servant =
       ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr.in() ACE_ENV_SINGLE_ARG_PARAMETER);
+              (pt_dr.in());
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
   ::DDS::SampleInfoSeq infos(max_read_samples);
 
-  // wait for data to become available 
+  // wait for data to become available
   // so we know to start reading
   if (!Reader::wait_for_data(subscriber, 10))
-    ACE_ERROR_RETURN((LM_ERROR, 
+    ACE_ERROR_RETURN((LM_ERROR,
       "ERROR: waited too long for the first sample\n"),
       -2);
 
@@ -68,7 +68,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
   int samples_recvd = 0;
   DDS::ReturnCode_t status;
   // initialize to zero.
-  ::DDS::SampleRejectedStatus rejected = 
+  ::DDS::SampleRejectedStatus rejected =
          dr_servant->get_sample_rejected_status ();
   ::DDS::SampleLostStatus lost =
          dr_servant->get_sample_lost_status ();
@@ -80,11 +80,10 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
         samples,
         infos,
         max_read_samples,
-        ::DDS::NOT_READ_SAMPLE_STATE, 
-        ::DDS::ANY_VIEW_STATE, 
-        ::DDS::ANY_INSTANCE_STATE
-        ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);//TBD do the right thing here.
+        ::DDS::NOT_READ_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ANY_INSTANCE_STATE);
+      //TBD do the right thing here.
 
 
       if (status == ::DDS::RETCODE_OK)
@@ -114,13 +113,13 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
             }
 
           // give the transport thread a chance to receive more and get the lock
-          ACE_OS::thr_yield (); 
+          ACE_OS::thr_yield ();
 
           if (0) //zero_reads % 10000 == 0)
             {
               ACE_DEBUG((LM_DEBUG,"passed %d zero reads\n", zero_reads));
               ACE_DEBUG((LM_DEBUG,"samples = %d reads = %d zero_reads =%d samples per read = %d\n",
-                stats->packet_count_, num_reads, zero_reads, 
+                stats->packet_count_, num_reads, zero_reads,
                 stats->packet_count_ /num_reads));
 
               ACE_ERROR((LM_ERROR,"ERROR: samples rejected = %d lost =%d !!!!!!\n",
@@ -131,11 +130,11 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
             {
               ACE_ERROR((LM_ERROR, "Too many zero_reads!!!!\n"));
               ACE_DEBUG((LM_DEBUG,"samples = %d reads = %d zero_reads =%d samples per read = %d\n",
-                stats->packet_count_, num_reads, zero_reads, 
+                stats->packet_count_, num_reads, zero_reads,
                 stats->packet_count_ /num_reads));
 
               ACE_ERROR((LM_ERROR,"ERROR: samples rejected = %d lost =%d read =%d total = %d !!!!!!\n",
-                rejected.total_count, 
+                rejected.total_count,
                 lost.total_count, samples_recvd,
                 rejected.total_count + lost.total_count + samples_recvd));
               ACE_OS::sleep(2);
@@ -151,7 +150,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
     }
 
   ACE_DEBUG((LM_DEBUG,"samples = %d reads = %d zero_reads =%d samples per read = %d\n",
-    stats->packet_count_, num_reads, zero_reads, 
+    stats->packet_count_, num_reads, zero_reads,
     stats->packet_count_ /num_reads));
 
   if (rejected.total_count > 0 || lost.total_count > 0)
@@ -170,9 +169,9 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
 
 Reader::Reader(::DDS::Subscriber_ptr subscriber,
-               ::DDS::DataReader_ptr reader, 
+               ::DDS::DataReader_ptr reader,
                int num_publishers,
-               int num_samples, 
+               int num_samples,
                int data_size)
 : subscriber_ (::DDS::Subscriber::_duplicate(subscriber)),
   reader_ (::DDS::DataReader::_duplicate(reader)),
@@ -184,23 +183,23 @@ Reader::Reader(::DDS::Subscriber_ptr subscriber,
 {
 }
 
-void 
+void
 Reader::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Reader::start \n")));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) Reader::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
     throw TestException ();
   }
 }
 
-void 
-Reader::end () 
+void
+Reader::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Reader::end \n")));
@@ -208,7 +207,7 @@ Reader::end ()
 }
 
 
-int 
+int
 Reader::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -221,7 +220,7 @@ Reader::svc ()
 
   DDS::ReturnCode_t status;
 
-  ACE_TRY_NEW_ENV
+  try
   {
 
     switch ( num_floats_per_sample_ )
@@ -298,13 +297,11 @@ Reader::svc ()
     };
 
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
     return 1;
   }
-  ACE_ENDTRY;
 
   finished_sending_ = true;
 
@@ -337,14 +334,14 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
         return 1;
 
       ACE_OS::sleep (small);
-      if (ACE_OS::gettimeofday () >= next_log) 
+      if (ACE_OS::gettimeofday () >= next_log)
         {
           ACE_DEBUG((LM_DEBUG,"%T Still waiting for data\n"));
           next_log = ACE_OS::gettimeofday () + ACE_Time_Value(5,0);
         }
     }
   return 0;
-} 
+}
 
 
 bool

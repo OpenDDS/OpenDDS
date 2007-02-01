@@ -37,7 +37,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -53,7 +52,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -69,7 +67,6 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -123,7 +120,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -159,8 +155,7 @@ void DataReaderListenerImpl::on_subscription_match (
   ))
   {
     ::Mine::FooDataReader_var foo_dr =
-        ::Mine::FooDataReader::_narrow(reader
-                                       ACE_ENV_ARG_PARAMETER);
+        ::Mine::FooDataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
       {
@@ -171,7 +166,7 @@ void DataReaderListenerImpl::on_subscription_match (
     ::Mine::FooDataReaderImpl* dr_servant =
         ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
                                            ::Mine::FooDataReader_ptr>
-            (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+            (foo_dr.in ());
 
     ::Mine::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
@@ -277,7 +272,6 @@ void DataReaderListenerImpl::on_subscription_match (
 
   void DataReaderListenerImpl::on_connection_deleted (
     ::DDS::DataReader_ptr
-    ACE_ENV_ARG_DECL_WITH_DEFAULTS
     )
     ACE_THROW_SPEC ((
     ::CORBA::SystemException

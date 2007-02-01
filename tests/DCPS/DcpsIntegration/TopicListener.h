@@ -19,7 +19,7 @@
 // Information about TAO is available at:
 //     http://www.cs.wustl.edu/~schmidt/TAO.html
 
-// TAO_IDL - Generated from 
+// TAO_IDL - Generated from
 // .\be\be_codegen.cpp:951
 
 #ifndef DDSDCPSTOPIC_LISTENER_I_H_
@@ -33,23 +33,22 @@
 
 
 //Class TAO_DCPS_TopicListener_i
-class TAO_DCPS_TopicListener_i 
+class TAO_DCPS_TopicListener_i
 : public virtual POA_DDS::TopicListener,
   public virtual PortableServer::RefCountServantBase
 {
 public:
-  //Constructor 
+  //Constructor
   TAO_DCPS_TopicListener_i (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~TAO_DCPS_TopicListener_i (void);
-  
+
 
 
 virtual void on_inconsistent_topic (
     ::DDS::Topic_ptr the_topic,
     const ::DDS::InconsistentTopicStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -57,7 +56,7 @@ virtual void on_inconsistent_topic (
 
 
 
-  ::DDS::InconsistentTopicStatus last_status_; 
+  ::DDS::InconsistentTopicStatus last_status_;
 
 };
 

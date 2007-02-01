@@ -18,19 +18,19 @@ template<class Tseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader)
 {
   // TWF: There is an optimization to the test by
-  // using a pointer to the known servant and 
+  // using a pointer to the known servant and
   // static_casting it to the servant
-  R_var var_dr 
-    = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
+  R_var var_dr
+    = R::_narrow(reader);
 
   R_ptr pt_dr = var_dr.ptr();
   Rimpl* dr_servant =
       ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr ACE_ENV_SINGLE_ARG_PARAMETER);
+              (pt_dr);
 
   if (subscriber_delay_msec)
     {
-      ACE_Time_Value delay ( subscriber_delay_msec / 1000, 
+      ACE_Time_Value delay ( subscriber_delay_msec / 1000,
                             (subscriber_delay_msec % 1000) * 1000);
       ACE_OS::sleep (delay);
     }
@@ -47,11 +47,9 @@ int read (::DDS::DataReader_ptr reader)
     samples,
     infos,
     max_read_samples,
-    ::DDS::NOT_READ_SAMPLE_STATE, 
-    ::DDS::ANY_VIEW_STATE, 
-    ::DDS::ANY_INSTANCE_STATE
-    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (0);
+    ::DDS::NOT_READ_SAMPLE_STATE,
+    ::DDS::ANY_VIEW_STATE,
+    ::DDS::ANY_INSTANCE_STATE);
 
   if (status == ::DDS::RETCODE_OK)
     {
@@ -119,11 +117,10 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl\n")));
   }
 
-  
+
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -137,7 +134,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -147,11 +143,10 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
     ACE_UNUSED_ARG(status);
   }
 
-  
+
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -166,7 +161,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -213,7 +207,7 @@ void DataReaderListenerImpl::on_data_available(
     total_samples_count_++;
 
     if (0 == total_samples_count_ % read_interval_)
-    {  
+    {
       // perform the read
       int samples_read = read_samples(reader);
       ACE_UNUSED_ARG(samples_read);

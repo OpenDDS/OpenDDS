@@ -19,7 +19,7 @@
 // Information about TAO is available at:
 //     http://www.cs.wustl.edu/~schmidt/TAO.html
 
-// TAO_IDL - Generated from 
+// TAO_IDL - Generated from
 // .\be\be_codegen.cpp:951
 
 #ifndef DCPSDATAWRITERI_H_
@@ -35,14 +35,13 @@
 class TAO_DDS_DCPSDataWriter_i : public virtual TAO::DCPS::DataWriterImpl
 {
 public:
-  //Constructor 
+  //Constructor
   TAO_DDS_DCPSDataWriter_i (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~TAO_DDS_DCPSDataWriter_i (void);
-  
+
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -53,7 +52,6 @@ public:
   virtual void add_associations (
       ::TAO::DCPS::RepoId yourId,
       const TAO::DCPS::ReaderAssociationSeq & readers
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -62,7 +60,6 @@ public:
   virtual void remove_associations (
       const TAO::DCPS::ReaderIdSeq & readers,
       ::CORBA::Boolean notify_lost
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -70,7 +67,6 @@ public:
 
   virtual void update_incompatible_qos (
       const TAO::DCPS::IncompatibleQosStatus & status
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

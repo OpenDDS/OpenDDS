@@ -310,7 +310,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
       if (remove_topic_description(description) != 0)
         {
           // An unknown error means that the description may still
-          // have the topic in its topic set. 
+          // have the topic in its topic set.
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("ERROR: Topic Description %s %s  ")
                      ACE_TEXT("was not correctly removed from Domain %d"),
@@ -403,44 +403,41 @@ int DCPS_IR_Domain::init_built_in_topics()
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT 
+  // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
   ::TAO::DCPS::TheTransientKludge->enable ();
 
   if (TAO_debug_level > 0)
     {
-      ACE_DEBUG((LM_DEBUG, 
+      ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("DCPS_IR_Domain::init_built_in_topics() ")
                 ACE_TEXT(" Initializing Built In Topics for domain %d\n"),
                 id_ ));
     }
 
-  ACE_TRY_NEW_ENV
+  try
     {
       bitParticipantFactory_ = TheParticipantFactory;
-      ACE_TRY_CHECK;
 
       TAO_DCPS_DomainParticipantListener_i* listenerImpl =
         new TAO_DCPS_DomainParticipantListener_i;
 
       bitParticipantListener_ = ::TAO::DCPS::servant_to_reference (listenerImpl);
 
-      bitParticipant_ = 
-        bitParticipantFactory_->create_participant(id_, 
-                                                   PARTICIPANT_QOS_DEFAULT, 
-                                                   bitParticipantListener_.in() 
-                                                   ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitParticipant_ =
+        bitParticipantFactory_->create_participant(id_,
+                                                   PARTICIPANT_QOS_DEFAULT,
+                                                   bitParticipantListener_.in());
       if (CORBA::is_nil (bitParticipant_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil DomainParticipant in ")
-                            ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")), 
+                            ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                             1);
         }
-      
+
       int transportResult = init_built_in_topics_transport();
       if (0 != transportResult)
         {
@@ -459,13 +456,11 @@ int DCPS_IR_Domain::init_built_in_topics()
           return datawritersResult;
         }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-        "ERROR: Exception caught in main.cpp:");
+      ex._tao_print_exception ("ERROR: Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   // enable the Built-In Topics
   useBIT_ = true;
@@ -481,7 +476,7 @@ int DCPS_IR_Domain::init_built_in_topics()
 int DCPS_IR_Domain::init_built_in_topics_topics()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  ACE_TRY_NEW_ENV
+  try
     {
       ::DDS::TopicQos topic_qos;
       bitParticipant_->get_default_topic_qos(topic_qos);
@@ -490,147 +485,130 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       // Participant topic
       ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant =
         new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
-      ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport = 
+      ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport =
         TAO::DCPS::servant_to_reference (participantTypeSupport_servant);
-      ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
           participantTypeSupport->register_type(bitParticipant_.in (),
                                                 ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport.")));
           return 1;
         }
-      ACE_TRY_CHECK;
 
-      bitParticipantTopic_ = 
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC, 
-                                       ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE, 
-                                       topic_qos, 
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitParticipantTopic_ =
+        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                       ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitParticipantTopic_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC), 
+                             ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
                             1);
         }
 
       // Topic topic
       ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
         new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
-      ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport = 
+      ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport =
         TAO::DCPS::servant_to_reference (topicTypeSupport_servant);
-      ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
           topicTypeSupport->register_type(bitParticipant_.in (),
                                           ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport.")));
           return 1;
         }
-      ACE_TRY_CHECK;
 
-      bitTopicTopic_ = 
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_TOPIC_TOPIC, 
-                                       ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE, 
-                                       topic_qos, 
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitTopicTopic_ =
+        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_TOPIC_TOPIC,
+                                       ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitTopicTopic_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC), 
+                             ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC),
                             1);
         }
 
       // Subscription topic
       ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant =
         new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
-      ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport = 
+      ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport =
         TAO::DCPS::servant_to_reference (subscriptionTypeSupport_servant);
-      ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
           subscriptionTypeSupport->register_type(bitParticipant_.in (),
                                                  ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport.")));
           return 1;
         }
-      ACE_TRY_CHECK;
 
-      bitSubscriptionTopic_ = 
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC, 
-                                       ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE, 
-                                       topic_qos, 
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitSubscriptionTopic_ =
+        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+                                       ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitSubscriptionTopic_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC), 
+                             ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
                             1);
         }
 
       // Publication topic
       ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant =
         new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
-      ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport = 
+      ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport =
         TAO::DCPS::servant_to_reference (publicationTypeSupport_servant);
-      ACE_TRY_CHECK;
 
       if (::DDS::RETCODE_OK !=
           publicationTypeSupport->register_type(bitParticipant_.in (),
                                                 ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport.")));
           return 1;
         }
-      ACE_TRY_CHECK;
 
-      bitPublicationTopic_ = 
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC, 
-                                       ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE, 
-                                       topic_qos, 
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitPublicationTopic_ =
+        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+                                       ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitPublicationTopic_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC), 
+                             ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC),
                             1);
         }
 
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+      ex._tao_print_exception (
         "ERROR: Exception caught in DCPS_IR_Domain::init_built_in_topics_topics:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 
@@ -645,7 +623,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 int DCPS_IR_Domain::init_built_in_topics_datawriters()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  ACE_TRY_NEW_ENV
+  try
     {
       ::DDS::DataWriter_var datawriter;
       ::DDS::DataWriterQos dw_qos;
@@ -655,16 +633,13 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       datawriter =
         bitPublisher_->create_datawriter(bitParticipantTopic_.in (),
                                          dw_qos,
-                                         ::DDS::DataWriterListener::_nil()
-                                         ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                         ::DDS::DataWriterListener::_nil());
 
-      bitParticipantDataWriter_ = 
-        ::DDS::ParticipantBuiltinTopicDataDataWriter::_narrow(datawriter.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitParticipantDataWriter_ =
+        ::DDS::ParticipantBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
       if (CORBA::is_nil (bitParticipantDataWriter_.in()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil DomainParticipant DataWriter from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
@@ -675,16 +650,13 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       datawriter =
         bitPublisher_->create_datawriter(bitTopicTopic_.in (),
                                           dw_qos,
-                                          ::DDS::DataWriterListener::_nil()
-                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                          ::DDS::DataWriterListener::_nil());
 
-      bitTopicDataWriter_ = 
-        ::DDS::TopicBuiltinTopicDataDataWriter::_narrow(datawriter.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitTopicDataWriter_ =
+        ::DDS::TopicBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
       if (CORBA::is_nil (bitTopicDataWriter_.in()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil Topic DataWriter from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
@@ -695,17 +667,14 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       datawriter =
         bitPublisher_->create_datawriter(bitSubscriptionTopic_.in (),
                                           dw_qos,
-                                          ::DDS::DataWriterListener::_nil()
-                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                          ::DDS::DataWriterListener::_nil());
 
-      bitSubscriptionDataWriter_ = 
+      bitSubscriptionDataWriter_ =
         ::DDS::SubscriptionBuiltinTopicDataDataWriter::_narrow(
-                        datawriter.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                        datawriter.in ());
       if (CORBA::is_nil (bitSubscriptionDataWriter_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil Subscription DataWriter from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
@@ -716,16 +685,13 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       datawriter =
         bitPublisher_->create_datawriter(bitPublicationTopic_.in (),
                                          dw_qos,
-                                         ::DDS::DataWriterListener::_nil()
-                                         ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                         ::DDS::DataWriterListener::_nil());
 
-      bitPublicationDataWriter_ = 
-        ::DDS::PublicationBuiltinTopicDataDataWriter::_narrow(datawriter.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      bitPublicationDataWriter_ =
+        ::DDS::PublicationBuiltinTopicDataDataWriter::_narrow(datawriter.in ());
       if (CORBA::is_nil (bitPublicationDataWriter_.in()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil Publication DataWriter from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
@@ -733,13 +699,12 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
         }
 
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+      ex._tao_print_exception (
         "ERROR: Exception caught in DCPS_IR_Domain::init_built_in_topics_datawriters:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 #else
@@ -753,7 +718,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
 int DCPS_IR_Domain::init_built_in_topics_transport ()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  ACE_TRY_NEW_ENV
+  try
     {
       transportImpl_ =
         TheTransportFactory->obtain(TAO::DCPS::BIT_ALL_TRAFFIC);
@@ -761,26 +726,23 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
       // Create the Publisher
       bitPublisher_ =
         bitParticipant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                          ::DDS::PublisherListener::_nil()
-                                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                          ::DDS::PublisherListener::_nil());
       if (CORBA::is_nil (bitPublisher_.in ()))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil Publisher from ")
-                            ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")), 
+                            ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                             1);
         }
 
       // Attach the Publisher with the TransportImpl.
-      ::TAO::DCPS::PublisherImpl* pubServant 
+      ::TAO::DCPS::PublisherImpl* pubServant
         = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-        (bitPublisher_.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        (bitPublisher_.in ());
 
-      TAO::DCPS::AttachStatus status 
-        = pubServant->attach_transport(transportImpl_.in()); 
+      TAO::DCPS::AttachStatus status
+        = pubServant->attach_transport(transportImpl_.in());
 
       if (status != TAO::DCPS::ATTACH_OK)
         {
@@ -809,13 +771,12 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
                             1);
         }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+      ex._tao_print_exception (
         "ERROR: Exception caught in DCPS_IR_Domain::init_built_in_topics_transport:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 #else
@@ -838,20 +799,20 @@ int DCPS_IR_Domain::cleanup_built_in_topics()
         {
           delDataWriterRetCode =
             bitPublisher_->delete_datawriter(
-                bitParticipantDataWriter_.in () ACE_ENV_ARG_PARAMETER);
+                bitParticipantDataWriter_.in ());
           delDataWriterRetCode =
             bitPublisher_->delete_datawriter(
-                bitTopicDataWriter_.in () ACE_ENV_ARG_PARAMETER);
+                bitTopicDataWriter_.in ());
           delDataWriterRetCode =
             bitPublisher_->delete_datawriter(
-                bitSubscriptionDataWriter_.in () ACE_ENV_ARG_PARAMETER);
+                bitSubscriptionDataWriter_.in ());
           delDataWriterRetCode =
             bitPublisher_->delete_datawriter(
-                bitPublicationDataWriter_.in () ACE_ENV_ARG_PARAMETER);
+                bitPublicationDataWriter_.in ());
 
           ::DDS::ReturnCode_t delPublisherRetCode =
             bitParticipant_->delete_publisher(
-                bitPublisher_.in () ACE_ENV_ARG_PARAMETER);
+                bitPublisher_.in ());
           ACE_UNUSED_ARG (delPublisherRetCode);
 
         } // if (0 != bitPublisher_)
@@ -861,16 +822,16 @@ int DCPS_IR_Domain::cleanup_built_in_topics()
         {
           ::DDS::ReturnCode_t delTopicRetCode;
           delTopicRetCode =
-            bitParticipant_->delete_topic(bitParticipantTopic_.in () ACE_ENV_ARG_PARAMETER);
+            bitParticipant_->delete_topic(bitParticipantTopic_.in ());
           delTopicRetCode =
-            bitParticipant_->delete_topic(bitTopicTopic_.in () ACE_ENV_ARG_PARAMETER);
+            bitParticipant_->delete_topic(bitTopicTopic_.in ());
           delTopicRetCode =
-            bitParticipant_->delete_topic(bitSubscriptionTopic_.in () ACE_ENV_ARG_PARAMETER);
+            bitParticipant_->delete_topic(bitSubscriptionTopic_.in ());
           delTopicRetCode =
-            bitParticipant_->delete_topic(bitPublicationTopic_.in () ACE_ENV_ARG_PARAMETER);
+            bitParticipant_->delete_topic(bitPublicationTopic_.in ());
 
           ::DDS::ReturnCode_t delParticipantRetCode =
-            bitParticipantFactory_->delete_participant(bitParticipant_.in () ACE_ENV_ARG_PARAMETER);
+            bitParticipantFactory_->delete_participant(bitParticipant_.in ());
           ACE_UNUSED_ARG (delParticipantRetCode);
         }
     }
@@ -1062,7 +1023,7 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
     {
       if (1 != participant->get_id())
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             const ::DDS::DomainParticipantQos* participantQos = participant->get_qos ();
 
@@ -1072,23 +1033,19 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
             data.key[2]= 0;
             data.user_data = participantQos->user_data;
 
-            ::DDS::InstanceHandle_t handle 
-              = bitParticipantDataWriter_->_cxx_register (data ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            ::DDS::InstanceHandle_t handle
+              = bitParticipantDataWriter_->_cxx_register (data);
 
             participant->set_handle(handle);
 
-            bitParticipantDataWriter_->write(data, 
-                                            handle 
-                                            ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            bitParticipantDataWriter_->write(data,
+                                            handle);
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::publish_topic_bit:");
           }
-          ACE_ENDTRY;
         }
       else
         {
@@ -1112,7 +1069,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
         topic->get_topic_description();
       const char* dataTypeName = desc->get_dataTypeName ();
 
-      bool isNotBIT = 
+      bool isNotBIT =
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
@@ -1120,7 +1077,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
 
       if ( isNotBIT )
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             const ::DDS::TopicQos* topicQos = topic->get_topic_qos ();
 
@@ -1143,23 +1100,19 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             data.ownership = topicQos->ownership;
             data.topic_data = topicQos->topic_data;
 
-            ::DDS::InstanceHandle_t handle 
-              = bitTopicDataWriter_->_cxx_register (data ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            ::DDS::InstanceHandle_t handle
+              = bitTopicDataWriter_->_cxx_register (data);
 
             topic->set_handle(handle);
 
-            bitTopicDataWriter_->write(data, 
-                                      handle 
-                                      ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            bitTopicDataWriter_->write(data,
+                                      handle);
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::publish_topic_bit:");
           }
-          ACE_ENDTRY;
         }
       else
         {
@@ -1183,7 +1136,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
       const char* dataTypeName = desc->get_dataTypeName ();
 
-      bool isNotBIT = 
+      bool isNotBIT =
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
@@ -1191,7 +1144,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
       if ( isNotBIT )
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             const ::DDS::DataReaderQos* readerQos = subscription->get_datareader_qos();
             const ::DDS::SubscriberQos* publisherQos = subscription->get_subscriber_qos ();
@@ -1221,23 +1174,19 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             data.topic_data = topicQos->topic_data;
             data.group_data = publisherQos->group_data;
 
-            ::DDS::InstanceHandle_t handle 
-              = bitSubscriptionDataWriter_->_cxx_register (data ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            ::DDS::InstanceHandle_t handle
+              = bitSubscriptionDataWriter_->_cxx_register (data);
 
             subscription->set_handle(handle);
 
-            bitSubscriptionDataWriter_->write(data, 
-                                              handle 
-                                              ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            bitSubscriptionDataWriter_->write(data,
+                                              handle);
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::publish_subscription_bit:");
           }
-          ACE_ENDTRY;
         }
       else
         {
@@ -1261,7 +1210,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
 
       const char* dataTypeName = desc->get_dataTypeName ();
 
-      bool isNotBIT = 
+      bool isNotBIT =
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
         ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
@@ -1269,7 +1218,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
 
       if ( isNotBIT )
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             const ::DDS::DataWriterQos* writerQos = publication->get_datawriter_qos();
             const ::DDS::PublisherQos* publisherQos = publication->get_publisher_qos ();
@@ -1298,24 +1247,20 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.topic_data = topicQos->topic_data;
             data.group_data = publisherQos->group_data;
 
-            ::DDS::InstanceHandle_t handle 
-              = bitPublicationDataWriter_->_cxx_register (data ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            ::DDS::InstanceHandle_t handle
+              = bitPublicationDataWriter_->_cxx_register (data);
 
             publication->set_handle(handle);
 
-            bitPublicationDataWriter_->write(data, 
-                                            handle 
-                                            ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            bitPublicationDataWriter_->write(data,
+                                            handle);
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::publish_publication_bit:");
           }
-          ACE_ENDTRY;
-        } 
+        }
       else
         {
           publication->set_bit_status(1);
@@ -1335,16 +1280,14 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
     {
       if ( ! participant->is_bit())
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             ::DDS::ParticipantBuiltinTopicData key_data;
             ::DDS::InstanceHandle_t handle = participant->get_handle();
 
             ::DDS::ReturnCode_t retGetKey
               = bitParticipantDataWriter_->get_key_value(key_data,
-                                                        handle
-                                                        ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                        handle);
 
             if (::DDS::RETCODE_OK != retGetKey)
               {
@@ -1360,9 +1303,7 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
 
             ::DDS::ReturnCode_t retDispose =
               bitParticipantDataWriter_->dispose(key_data,
-                                                handle
-                                                ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                handle);
             if (::DDS::RETCODE_OK != retDispose)
               {
                 ACE_ERROR((LM_ERROR,
@@ -1376,12 +1317,11 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
               }
 
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::dispose_participant_bit:");
           }
-          ACE_ENDTRY;
         }
     }
 #else
@@ -1398,16 +1338,14 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
     {
       if ( ! topic->is_bit())
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             ::DDS::TopicBuiltinTopicData key_data;
             ::DDS::InstanceHandle_t handle = topic->get_handle();
 
             ::DDS::ReturnCode_t retGetKey
               = bitTopicDataWriter_->get_key_value(key_data,
-                                                  handle
-                                                  ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                  handle);
 
             if (::DDS::RETCODE_OK != retGetKey)
               {
@@ -1423,9 +1361,7 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
 
             ::DDS::ReturnCode_t retDispose =
               bitTopicDataWriter_->dispose(key_data,
-                                          handle
-                                          ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                          handle);
             if (::DDS::RETCODE_OK != retDispose)
               {
                 ACE_ERROR((LM_ERROR,
@@ -1438,12 +1374,11 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
                           ));
               }
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::dispose_topic_bit:");
           }
-          ACE_ENDTRY;
         }
     }
 #else
@@ -1460,16 +1395,14 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
     {
       if ( ! subscription->is_bit() )
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             ::DDS::SubscriptionBuiltinTopicData key_data;
             ::DDS::InstanceHandle_t handle = subscription->get_handle();
 
             ::DDS::ReturnCode_t retGetKey
               = bitSubscriptionDataWriter_->get_key_value(key_data,
-                                                          handle
-                                                          ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                          handle);
 
             if (::DDS::RETCODE_OK != retGetKey)
               {
@@ -1485,9 +1418,7 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
 
             ::DDS::ReturnCode_t retDispose =
               bitSubscriptionDataWriter_->dispose(key_data,
-                                                  handle
-                                                  ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                  handle);
             if (::DDS::RETCODE_OK != retDispose)
               {
                 ACE_ERROR((LM_ERROR,
@@ -1501,12 +1432,11 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
               }
 
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::dispose_subscription_bit:");
           }
-          ACE_ENDTRY;
         }
     }
 #else
@@ -1523,14 +1453,13 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
     {
       if ( ! publication->is_bit())
         {
-          ACE_TRY_NEW_ENV
+          try
           {
             ::DDS::PublicationBuiltinTopicData key_data;
             ::DDS::InstanceHandle_t handle = publication->get_handle();
 
             ::DDS::ReturnCode_t retGetKey
-              = bitPublicationDataWriter_->get_key_value(key_data, handle ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+              = bitPublicationDataWriter_->get_key_value(key_data, handle);
 
             if (::DDS::RETCODE_OK != retGetKey)
               {
@@ -1546,9 +1475,7 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
 
             ::DDS::ReturnCode_t retDispose =
               bitPublicationDataWriter_->dispose(key_data,
-                                                handle
-                                                ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+                                                handle);
             if (::DDS::RETCODE_OK != retDispose)
               {
                 ACE_ERROR((LM_ERROR,
@@ -1562,12 +1489,11 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
               }
 
           }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
           {
-            ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+            ex._tao_print_exception (
               "ERROR: Exception caught in DCPS_IR_Domain::dispose_publication_bit:");
           }
-          ACE_ENDTRY;
         }
     }
 #else

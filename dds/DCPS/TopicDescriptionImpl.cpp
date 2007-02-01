@@ -35,9 +35,8 @@ namespace TAO
     }
 
 
-    char * 
+    char *
     TopicDescriptionImpl::get_type_name (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -47,9 +46,8 @@ namespace TAO
     }
 
 
-    char * 
+    char *
     TopicDescriptionImpl::get_name (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -59,9 +57,8 @@ namespace TAO
     }
 
 
-    ::DDS::DomainParticipant_ptr 
+    ::DDS::DomainParticipant_ptr
     TopicDescriptionImpl::get_participant (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -71,7 +68,7 @@ namespace TAO
     }
 
 
-    POA_TAO::DCPS::TypeSupport_ptr 
+    POA_TAO::DCPS::TypeSupport_ptr
     TopicDescriptionImpl::get_type_support ()
     {
       return type_support_;

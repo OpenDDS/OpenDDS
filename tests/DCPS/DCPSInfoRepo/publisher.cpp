@@ -12,27 +12,27 @@ int
 parse_args (int argc, char *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
     {
       ior = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-i") == 0) 
+    else if (arg_shifter.cur_arg_strncasecmp("-i") == 0)
     {
       ignore_entities = true;
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-q") == 0) 
+    else if (arg_shifter.cur_arg_strncasecmp("-q") == 0)
     {
       qos_tests = true;
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) 
+    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                           "usage:  %s "
@@ -44,7 +44,7 @@ parse_args (int argc, char *argv[])
                           argv [0]),
                         -1);
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -60,11 +60,10 @@ main (int argc, char *argv[])
   if (parse_args (argc, argv) != 0)
     return 1;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       CORBA::ORB_var orb =
-        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        CORBA::ORB_init (argc, argv, "");
 
       //Get reference to the RootPOA.
       CORBA::Object_var obj = orb->resolve_initial_references( "RootPOA" );
@@ -75,12 +74,10 @@ main (int argc, char *argv[])
       mgr->activate();
 
       CORBA::Object_var tmp =
-        orb->string_to_object (ior ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        orb->string_to_object (ior);
 
       TAO::DCPS::DCPSInfo_var info =
-        TAO::DCPS::DCPSInfo::_narrow (tmp.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::DCPSInfo::_narrow (tmp.in ());
 
       if (CORBA::is_nil (info.in ()))
         {
@@ -96,7 +93,6 @@ main (int argc, char *argv[])
       CORBA::Long domainId = 911;
 
       CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in());
-      ACE_TRY_CHECK;
       if (0 == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));
@@ -112,9 +108,7 @@ main (int argc, char *argv[])
                                                            dpId,
                                                            tname,
                                                            dname,
-                                                           topicQos.in()
-                                                           ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                           topicQos.in());
 
       if (topicStatus != TAO::DCPS::CREATED)
         {
@@ -125,8 +119,7 @@ main (int argc, char *argv[])
       TAO_DDS_DCPSDataWriter_i dwi;
       PortableServer::ObjectId_var oid = poa->activate_object( &dwi );
       obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataWriterRemote_var dw = TAO::DCPS::DataWriterRemote::_narrow(obj.in() ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      TAO::DCPS::DataWriterRemote_var dw = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
       if (CORBA::is_nil (dw.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
@@ -145,9 +138,7 @@ main (int argc, char *argv[])
                                                 dw.in(),
                                                 dwq.in(),
                                                 tii.in(),
-                                                pQos.in()
-                                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                pQos.in());
       if (0 == pubId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_publication failed!\n") ));
@@ -163,13 +154,11 @@ main (int argc, char *argv[])
                                                             dpId,
                                                             tname2,
                                                             dname2,
-                                                            topicQos2.in()
-                                                            ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                            topicQos2.in());
 
       if (topicStatus2 != TAO::DCPS::CONFLICTING_TYPENAME)
         {
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("Inconsistent topic creation did not fail with ")
                      ACE_TEXT("CONFLICTING_TYPENAME and returned %d"), topicStatus));
         }
@@ -178,25 +167,17 @@ main (int argc, char *argv[])
 
       if (ignore_entities)
         {
-          ACE_DEBUG((LM_INFO, 
+          ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 1 and 2\n") ));
           info->ignore_domain_participant(domainId, dpId, 1);
-          ACE_TRY_CHECK;
           info->ignore_topic(domainId, dpId, 1);
-          ACE_TRY_CHECK;
           info->ignore_publication(domainId, dpId, 1);
-          ACE_TRY_CHECK;
           info->ignore_subscription(domainId, dpId, 1);
-          ACE_TRY_CHECK;
 
           info->ignore_domain_participant(domainId, dpId, 2);
-          ACE_TRY_CHECK;
           info->ignore_topic(domainId, dpId, 2);
-          ACE_TRY_CHECK;
           info->ignore_publication(domainId, dpId, 2);
-          ACE_TRY_CHECK;
           info->ignore_subscription(domainId, dpId, 2);
-          ACE_TRY_CHECK;
         }
 
 
@@ -213,7 +194,6 @@ main (int argc, char *argv[])
       {
 
         dpIdAlmost = info->add_domain_participant(domainId, dpQos.in());
-        ACE_TRY_CHECK;
         if (0 == dpIdAlmost)
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant for qos test failed!\n") ));
@@ -225,9 +205,7 @@ main (int argc, char *argv[])
                                          dpIdAlmost,
                                          tname,
                                          dname,
-                                         topicQos.in()
-                                         ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                                         topicQos.in());
 
         if (topicStatus != TAO::DCPS::CREATED)
           {
@@ -239,8 +217,7 @@ main (int argc, char *argv[])
         // Add publication
         oid = poa->activate_object( dwiAlmost );
         obj = poa->id_to_reference( oid.in() );
-        dwAlmost = TAO::DCPS::DataWriterRemote::_narrow(obj.in() ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+        dwAlmost = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
         if (CORBA::is_nil (dwAlmost.in ()))
           {
             ACE_ERROR_RETURN ((LM_DEBUG,
@@ -257,9 +234,7 @@ main (int argc, char *argv[])
                                             dwAlmost.in(),
                                             dwqAlmost.in(),
                                             tii.in(),
-                                            pQos.in()
-                                            ACE_ENV_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                                            pQos.in());
         if (0 == pubId)
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("add_publication for qos test failed!\n") ));
@@ -271,61 +246,46 @@ main (int argc, char *argv[])
 
       // run the orb
       ACE_Time_Value run_time = ACE_Time_Value(15,0);
-      orb->run(run_time ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      orb->run(run_time);
 
       if (ignore_entities)
         {
-          ACE_DEBUG((LM_INFO, 
+          ACE_DEBUG((LM_INFO,
                      ACE_TEXT("Ignoring all entities with 3\n") ));
           info->ignore_domain_participant(domainId, dpId, 3);
-          ACE_TRY_CHECK;
           info->ignore_topic(domainId, dpId, 3);
-          ACE_TRY_CHECK;
           info->ignore_publication(domainId, dpId, 3);
-          ACE_TRY_CHECK;
           info->ignore_subscription(domainId, dpId, 3);
-          ACE_TRY_CHECK;
 
           run_time = ACE_Time_Value(15,0);
-          orb->run(run_time ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          orb->run(run_time);
         }
 
       if (qos_tests)
         {
           // remove all the qos test entities
-          info->remove_publication(domainId, dpIdAlmost, pubIdAlmost ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          info->remove_publication(domainId, dpIdAlmost, pubIdAlmost);
 
-          info->remove_topic(domainId, dpIdAlmost, topicIdAlmost ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          info->remove_topic(domainId, dpIdAlmost, topicIdAlmost);
 
-          info->remove_domain_participant(domainId, dpIdAlmost ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          info->remove_domain_participant(domainId, dpIdAlmost);
         }
 
 
       // remove all the entities
-      info->remove_publication(domainId, dpId, pubId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_publication(domainId, dpId, pubId);
 
-      info->remove_topic(domainId, dpId, topicId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_topic(domainId, dpId, topicId);
 
-      info->remove_domain_participant(domainId, dpId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_domain_participant(domainId, dpId);
       // clean up the orb
-      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      orb->destroy ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in publisher.cpp:");
+      ex._tao_print_exception ("Exception caught in publisher.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

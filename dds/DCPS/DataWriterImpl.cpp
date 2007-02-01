@@ -122,7 +122,6 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            ::DDS::Publisher_ptr                   publisher,
            TAO::DCPS::PublisherImpl*              publisher_servant,
            TAO::DCPS::DataWriterRemote_ptr        dw_remote
-           ACE_ENV_ARG_DECL
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -149,13 +148,11 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
     {
       fast_listener_ = reference_to_servant<POA_DDS::DataWriterListener,
   DDS::DataWriterListener_ptr>
-  (listener_.in() ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+  (listener_.in());
     }
   participant_servant_ = participant_servant;
   participant_servant_->_add_ref ();
-  domain_id_ = participant_servant_->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+  domain_id_ = participant_servant_->get_domain_id ();
 
   publisher_objref_  = ::DDS::Publisher::_duplicate (publisher);
   publisher_servant_ = publisher_servant;
@@ -168,7 +165,6 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
 void
 DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
            const ReaderAssociationSeq & readers
-           ACE_ENV_ARG_DECL
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -319,9 +315,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
   if (listener != 0)
     {
       listener->on_publication_match (dw_remote_objref_.in (),
-              publication_match_status_
-              ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+              publication_match_status_);
 
       // TBD - why does the spec say to change this but not
       // change the ChangeFlagStatus after a listener call?
@@ -336,7 +330,6 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 void
 DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
               ::CORBA::Boolean notify_lost
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -455,24 +448,22 @@ void DataWriterImpl::remove_all_associations ()
       readers[i] = readers_[i];
     }
 
-  ACE_TRY_NEW_ENV
+  try
     {
       if (0 < size)
   {
     CORBA::Boolean dont_notify_lost = 0;
-    this->remove_associations(readers, dont_notify_lost ACE_ENV_ARG_PARAMETER);
+    this->remove_associations(readers, dont_notify_lost);
   }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
     }
-  ACE_ENDTRY;
 }
 
 
 void
 DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus & status
-            ACE_ENV_ARG_DECL
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -492,9 +483,7 @@ DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus
   if (listener != 0)
     {
       listener->on_offered_incompatible_qos (dw_remote_objref_.in (),
-               offered_incompatible_qos_status_
-               ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+               offered_incompatible_qos_status_);
 
       // TBD - why does the spec say to change this but not
       // change the ChangeFlagStatus after a listener call?
@@ -505,7 +494,6 @@ DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus
 ::DDS::ReturnCode_t
 DataWriterImpl::set_qos (
        const ::DDS::DataWriterQos & qos
-       ACE_ENV_ARG_DECL
        )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -542,7 +530,6 @@ DataWriterImpl::set_qos (
 void
 DataWriterImpl::get_qos (
        ::DDS::DataWriterQos & qos
-       ACE_ENV_ARG_DECL
        )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -554,7 +541,6 @@ DataWriterImpl::get_qos (
 ::DDS::ReturnCode_t
 DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
              ::DDS::StatusKindMask mask
-             ACE_ENV_ARG_DECL
              )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -564,34 +550,33 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
   fast_listener_
     = reference_to_servant< ::POA_DDS::DataWriterListener,
     ::DDS::DataWriterListener_ptr >
-    (listener_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
 ::DDS::DataWriterListener_ptr
-DataWriterImpl::get_listener ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_listener ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::DataWriterListener::_duplicate (listener_.in ());
 }
 
 ::DDS::Topic_ptr
-DataWriterImpl::get_topic ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_topic ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::Topic::_duplicate (topic_objref_.in ());
 }
 
 ::DDS::Publisher_ptr
-DataWriterImpl::get_publisher ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_publisher ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::Publisher::_duplicate (publisher_objref_.in ());
 }
 
 ::DDS::LivelinessLostStatus
-DataWriterImpl::get_liveliness_lost_status ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_liveliness_lost_status ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -605,7 +590,7 @@ DataWriterImpl::get_liveliness_lost_status ( ACE_ENV_SINGLE_ARG_DECL )
 }
 
 ::DDS::OfferedDeadlineMissedStatus
-DataWriterImpl::get_offered_deadline_missed_status ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_offered_deadline_missed_status ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -619,7 +604,7 @@ DataWriterImpl::get_offered_deadline_missed_status ( ACE_ENV_SINGLE_ARG_DECL )
 }
 
 ::DDS::OfferedIncompatibleQosStatus *
-DataWriterImpl::get_offered_incompatible_qos_status ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_offered_incompatible_qos_status ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -635,7 +620,7 @@ DataWriterImpl::get_offered_incompatible_qos_status ( ACE_ENV_SINGLE_ARG_DECL )
 }
 
 ::DDS::PublicationMatchStatus
-DataWriterImpl::get_publication_match_status ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_publication_match_status ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -649,7 +634,7 @@ DataWriterImpl::get_publication_match_status ( ACE_ENV_SINGLE_ARG_DECL )
 }
 
 void
-DataWriterImpl::assert_liveliness ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::assert_liveliness ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   // This operation need only be used if the LIVELINESS setting
@@ -665,7 +650,6 @@ DataWriterImpl::assert_liveliness ( ACE_ENV_SINGLE_ARG_DECL )
 
 ::DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscriptions ( ::DDS::InstanceHandleSeq & subscription_handles
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -687,7 +671,6 @@ DataWriterImpl::get_matched_subscriptions ( ::DDS::InstanceHandleSeq & subscript
 ::DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicData & subscription_data,
             ::DDS::InstanceHandle_t subscription_handle
-            ACE_ENV_ARG_DECL
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -724,7 +707,7 @@ DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicD
 }
 
 ::DDS::ReturnCode_t
-DataWriterImpl::enable ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::enable ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   //TDB - check if factory is enabled and then enable all entities
@@ -845,18 +828,17 @@ DataWriterImpl::enable ( ACE_ENV_SINGLE_ARG_DECL )
 }
 
 ::DDS::StatusKindMask
-DataWriterImpl::get_status_changes ( ACE_ENV_SINGLE_ARG_DECL )
+DataWriterImpl::get_status_changes ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
-  return EntityImpl::get_status_changes (ACE_ENV_SINGLE_ARG_PARAMETER);
+  return EntityImpl::get_status_changes ();
 }
 
 ::DDS::ReturnCode_t
 DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
            DataSample* data,
            const ::DDS::Time_t & source_timestamp
-           ACE_ENV_ARG_DECL
            )
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
@@ -871,8 +853,7 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
 
   ::DDS::ReturnCode_t ret
       = this->data_container_->register_instance(handle,
-             data
-             ACE_ENV_ARG_PARAMETER) ;
+             data) ;
   if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -911,7 +892,6 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
 ::DDS::ReturnCode_t
 DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
            const ::DDS::Time_t & source_timestamp
-           ACE_ENV_ARG_DECL
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -930,9 +910,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
   ::DDS::ReturnCode_t ret
       = this->data_container_->unregister(handle,
             unregistered_sample_data,
-            this
-            ACE_ENV_ARG_PARAMETER) ;
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+            this) ;
 
   if (ret != ::DDS::RETCODE_OK)
     {
@@ -971,7 +949,6 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
 DataWriterImpl::write ( DataSample* data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
       )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1011,9 +988,7 @@ DataWriterImpl::write ( DataSample* data,
     }
 
   ret = this->data_container_->enqueue( element,
-          handle
-          ACE_ENV_ARG_PARAMETER) ;
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          handle) ;
 
   if (ret != ::DDS::RETCODE_OK)
     {
@@ -1030,7 +1005,6 @@ DataWriterImpl::write ( DataSample* data,
 
 ::DDS::ReturnCode_t DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
                 const ::DDS::Time_t & source_timestamp
-                ACE_ENV_ARG_DECL
                 )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1046,9 +1020,7 @@ DataWriterImpl::write ( DataSample* data,
   DataSample* registered_sample_data;
   ::DDS::ReturnCode_t ret
       = this->data_container_->dispose(handle,
-               registered_sample_data
-               ACE_ENV_ARG_PARAMETER) ;
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+               registered_sample_data) ;
 
   if (ret != ::DDS::RETCODE_OK)
     {

@@ -180,12 +180,11 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
 //      TheServiceParticipant->liveliness_factor(100) ;
 
@@ -198,15 +197,12 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
       ::Mine::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -221,7 +217,6 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -235,17 +230,14 @@ int main (int argc, char *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        dp->lookup_topicdescription(MY_TOPIC);
       if (CORBA::is_nil (description.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -258,9 +250,7 @@ int main (int argc, char *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -280,8 +270,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
-                              (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -336,16 +325,13 @@ int main (int argc, char *argv[])
       DataReaderListenerImpl drl_servant ;
 
       ::DDS::DataReaderListener_var drl
-        = ::TAO::DCPS::servant_to_reference(&drl_servant
-                                            ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+        = ::TAO::DCPS::servant_to_reference(&drl_servant);
 
       ::DDS::DataReader_var dr ;
 
       dr = sub->create_datareader(description.in (),
                                   dr_qos,
-                                  drl.in ()
-                                  ACE_ENV_ARG_PARAMETER);
+                                  drl.in ());
 
       // Indicate that the subscriber is ready
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("w"));
@@ -399,10 +385,10 @@ int main (int argc, char *argv[])
 
       sub->delete_contained_entities() ;
 
-      dp->delete_subscriber(sub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in ());
 
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
@@ -426,19 +412,17 @@ int main (int argc, char *argv[])
       }
 
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.

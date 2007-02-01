@@ -11,17 +11,17 @@ int
 parse_args (int argc, char *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
     {
       ior = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-?")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-?")) != 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                           "usage:  %s "
@@ -31,7 +31,7 @@ parse_args (int argc, char *argv[])
                           argv [0]),
                         -1);
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -43,11 +43,10 @@ parse_args (int argc, char *argv[])
 int
 main (int argc, char *argv[])
 {
-  ACE_TRY_NEW_ENV
+  try
     {
       CORBA::ORB_var orb =
-        CORBA::ORB_init (argc, argv, "" ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        CORBA::ORB_init (argc, argv, "");
 
       if (parse_args (argc, argv) != 0)
         return 1;
@@ -64,12 +63,10 @@ main (int argc, char *argv[])
       mgr->activate();
 
       CORBA::Object_var tmp =
-        orb->string_to_object (ior ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        orb->string_to_object (ior);
 
       TAO::DCPS::DCPSInfo_var info =
-        TAO::DCPS::DCPSInfo::_narrow (tmp.in () ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::DCPSInfo::_narrow (tmp.in ());
 
       if (CORBA::is_nil (info.in ()))
         {
@@ -85,7 +82,6 @@ main (int argc, char *argv[])
       CORBA::Long domainId = 911;
 
       CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in());
-      ACE_TRY_CHECK;
       if (0 == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));
@@ -100,9 +96,7 @@ main (int argc, char *argv[])
                                                            dpId,
                                                            tname,
                                                            dname,
-                                                           topicQos.in()
-                                                           ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                           topicQos.in());
 
       if (topicStatus != TAO::DCPS::CREATED)
         {
@@ -114,8 +108,7 @@ main (int argc, char *argv[])
       TAO_DDS_DCPSDataReader_i dri;
       PortableServer::ObjectId_var oid = poa->activate_object( &dri );
       obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataReaderRemote_var dr = TAO::DCPS::DataReaderRemote::_narrow(obj.in() ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      TAO::DCPS::DataReaderRemote_var dr = TAO::DCPS::DataReaderRemote::_narrow(obj.in());
       if (CORBA::is_nil (dr.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
@@ -134,40 +127,31 @@ main (int argc, char *argv[])
                                                  dr.in(),
                                                  drq.in(),
                                                  tii.in(),
-                                                 sQos.in()
-                                                 ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                                 sQos.in());
       if (0 == subId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_subscription failed!\n") ));
         }
 
       ACE_Time_Value run_time = ACE_Time_Value(15,0);
-      orb->run(run_time ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      orb->run(run_time);
 
 
-      info->remove_subscription(domainId, dpId, subId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_subscription(domainId, dpId, subId);
 
-      info->remove_topic(domainId, dpId, topicId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_topic(domainId, dpId, topicId);
 
-      info->remove_domain_participant(domainId, dpId ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remove_domain_participant(domainId, dpId);
 
-      orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      orb->destroy ();
 
       TheServiceParticipant->shutdown ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in subscriber.cpp:");
+      ex._tao_print_exception ("Exception caught in subscriber.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

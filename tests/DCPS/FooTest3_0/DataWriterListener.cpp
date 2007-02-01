@@ -18,7 +18,6 @@ DataWriterListenerImpl::~DataWriterListenerImpl (void)
 void DataWriterListenerImpl::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -32,7 +31,6 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
 void DataWriterListenerImpl::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -46,7 +44,6 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
 void DataWriterListenerImpl::on_liveliness_lost (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::LivelinessLostStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -60,7 +57,6 @@ void DataWriterListenerImpl::on_liveliness_lost (
 void DataWriterListenerImpl::on_publication_match (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::PublicationMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

@@ -72,7 +72,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
                  ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for "
                  "factory (id=%s).\n"), type_id.c_str ()));
               // We failed to activate the reactor task.
-              ACE_THROW(Transport::MiscProblem());
+              throw Transport::MiscProblem();
             }
 
           // Now we can save it in our data member.
@@ -100,7 +100,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to create TransportImpl object for "
                  "factory (id=%s).\n"), type_id.c_str ()));
-      ACE_THROW (Transport::UnableToCreate());
+      throw Transport::UnableToCreate();
     }
 
   int result = this->impl_map_.bind(impl_id, impl);
@@ -114,7 +114,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
   else if (result == 1)
     {
       // The TransportImpl object with the transport_id is already created.
-      ACE_THROW (Transport::Duplicate());
+      throw Transport::Duplicate();
     }
 
   // Only error cases get here.
@@ -130,14 +130,14 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: transport (%u) has already been created in the "
                  "TransportFactory.\n"), impl_id));
-      ACE_THROW (Transport::Duplicate());
+      throw Transport::Duplicate();
     }
   else
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to bind transport (%u) to impl_map_.\n"),
                  impl_id));
-      ACE_THROW (Transport::MiscProblem());
+      throw Transport::MiscProblem();
     }
 }
 
@@ -214,7 +214,7 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
   if (transport_type == "")
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::create_transport_impl transport_type is null. \n"));
-      ACE_THROW (CORBA::BAD_PARAM ());
+      throw CORBA::BAD_PARAM ();
     }
 
   TransportImpl_rch trans_impl
@@ -230,7 +230,7 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
           ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t)TransportFactory::create_transport_impl transport_type"
                                 " conflict - provided %s configured %s\n"), transport_type.c_str(),
                                 config->transport_type_.c_str ()));
-          ACE_THROW (Transport::ConfigurationConflict ());
+          throw Transport::ConfigurationConflict ();
         }
 
       trans_impl->configure (config.in ());
@@ -255,7 +255,7 @@ TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
       ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_configuration "
                             "transport (id=%u) is not configured. \n"),
                             transport_id));
-      ACE_THROW (Transport::NotConfigured ());
+      throw Transport::NotConfigured ();
     }
 
   return config;
@@ -296,7 +296,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_configuration transport_type"
                             "is null. \n"));
-      ACE_THROW (CORBA::BAD_PARAM ());
+      throw CORBA::BAD_PARAM ();
     }
 
   TransportConfiguration_rch config;
@@ -313,7 +313,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
           ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_configuration transport_type "
                                 "conflict - provided %s configured %s\n", transport_type.c_str(),
                                 config->transport_type_.c_str ()));
-          ACE_THROW (Transport::ConfigurationConflict ());
+          throw Transport::ConfigurationConflict ();
         }
       return config;
     }
@@ -328,7 +328,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
   if (factory_id == "")
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_factory factory_id is null. \n"));
-      ACE_THROW (CORBA::BAD_PARAM ());
+      throw CORBA::BAD_PARAM ();
     }
 
   TransportImplFactory_rch factory;
@@ -358,7 +358,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t)TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
         factory_id.c_str ()));
-      ACE_THROW (Transport::NotFound());
+      throw Transport::NotFound();
     }
 
   return factory;
@@ -407,17 +407,17 @@ TAO::DCPS::TransportFactory::register_generator (const char* type,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: transport type=%s already registered "
                  "with TransportFactory.\n"), type));
-      ACE_THROW (Transport::Duplicate());
+      throw Transport::Duplicate();
     }
   else if (result == -1)
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to bind transport type=%s to generator_map_.\n"),
                  type));
-      ACE_THROW (Transport::MiscProblem());
+      throw Transport::MiscProblem();
     }
 
-   // Get the list of default transport. Some transports(e.g. SimpleMcast) have multiple default 
+   // Get the list of default transport. Some transports(e.g. SimpleMcast) have multiple default
    // transport ids.
    TransportIdList default_ids;
    generator_rch->default_transport_ids (default_ids);
@@ -464,14 +464,14 @@ TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_i
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: factory (id=%s) already registered "
                  "in impl_type_map_.\n"), factory_id.c_str ()));
-      ACE_THROW (Transport::Duplicate());
+      throw Transport::Duplicate();
     }
   else if (result == -1)
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to bind factory (id=%s) to impl_type_map_.\n"),
                  factory_id.c_str ()));
-      ACE_THROW (Transport::MiscProblem());
+      throw Transport::MiscProblem();
     }
 }
 
@@ -500,14 +500,14 @@ TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transp
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: transport (id=%u) already registered "
                  "in configuration_map_.\n"), transport_id));
-      ACE_THROW (Transport::Duplicate());
+      throw Transport::Duplicate();
     }
   else if (result == -1)
     {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to bind transport (id=%u) to configuration_map_.\n"),
                  transport_id));
-      ACE_THROW (Transport::MiscProblem());
+      throw Transport::MiscProblem();
     }
 }
 
@@ -533,7 +533,7 @@ TAO::DCPS::TransportFactory::obtain(TransportIdType impl_id)
       {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Unknown impl_id (%d).\n", impl_id));
-        ACE_THROW (Transport::NotFound());
+        throw Transport::NotFound();
       }
   }
 

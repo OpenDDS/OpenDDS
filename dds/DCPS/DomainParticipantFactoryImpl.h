@@ -25,44 +25,43 @@ namespace TAO
     /**
     * @class DomainParticipantFactoryImpl
     *
-    * @brief Implements the ::TAO::DCPS::DomainParticipantFactory 
+    * @brief Implements the ::TAO::DCPS::DomainParticipantFactory
     *        interfaces.
     *
     * This class acts as factory of the DomainParticipant.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of  
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     *
     */
-    class TAO_DdsDcps_Export DomainParticipantFactoryImpl 
+    class TAO_DdsDcps_Export DomainParticipantFactoryImpl
       : public virtual POA_DDS::DomainParticipantFactory,
         public virtual PortableServer::RefCountServantBase
     {
     public:
-      
-      typedef Objref_Servant_Pair <DomainParticipantImpl, 
+
+      typedef Objref_Servant_Pair <DomainParticipantImpl,
                                    ::DDS::DomainParticipant,
                                    ::DDS::DomainParticipant_ptr,
                                    ::DDS::DomainParticipant_var > Participant_Pair;
       typedef ACE_Unbounded_Set < Participant_Pair > DPSet;
       typedef ACE_Unbounded_Set_Iterator < Participant_Pair > DPSet_Iterator;
-      typedef ACE_Hash_Map_Manager <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap;  
+      typedef ACE_Hash_Map_Manager <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap;
       typedef ACE_Hash_Map_Iterator <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap_Iterator;
       typedef ACE_Hash_Map_Entry <DDS::DomainId_t, DPSet> DPMap_Entry;
 
       /** Constructor **/
       DomainParticipantFactoryImpl (void);
-      
+
       /** Destructor **/
       virtual ~DomainParticipantFactoryImpl (void);
-      
+
 
 
     virtual ::DDS::DomainParticipant_ptr create_participant (
         ::DDS::DomainId_t domainId,
         const ::DDS::DomainParticipantQos & qos,
         ::DDS::DomainParticipantListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -70,7 +69,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_participant (
         ::DDS::DomainParticipant_ptr a_participant
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -78,7 +76,6 @@ namespace TAO
 
     virtual ::DDS::DomainParticipant_ptr lookup_participant (
         ::DDS::DomainId_t domainId
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -86,7 +83,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_participant_qos (
         const ::DDS::DomainParticipantQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -94,14 +90,12 @@ namespace TAO
 
     virtual void get_default_participant_qos (
         ::DDS::DomainParticipantQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::DomainParticipantFactory_ptr get_instance (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -109,9 +103,9 @@ namespace TAO
 
     /** This method is not defined in the IDL and is defined for
     *  internal use.
-    *  Delete all participants belong to this factory and hence 
+    *  Delete all participants belong to this factory and hence
     *  delete all entities created by the participants.
-    *  Note: The delete will terminate and return error code if 
+    *  Note: The delete will terminate and return error code if
     *        any contained participant is not empty.
     */
     ::DDS::ReturnCode_t delete_contained_participants ();

@@ -12,7 +12,7 @@
 
 #include "DataReaderListener.h"
 #include "TestException.h"
-// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service 
+// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
 
@@ -187,12 +187,10 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
   // Create the subscriber
   ::DDS::Subscriber_var sub;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       sub = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -204,8 +202,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
-                              (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                              (sub.in ());
 
       if (0 == sub_impl)
         {
@@ -260,19 +257,17 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           return ::DDS::Subscriber::_nil ();
         }
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in create_subscriber. ")));
       return ::DDS::Subscriber::_nil ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in create_subscriber.");
+      ex._tao_print_exception ("Exception caught in create_subscriber.");
       return ::DDS::Subscriber::_nil ();
     }
-  ACE_ENDTRY;
 
   return sub._retn ();
 }
@@ -286,12 +281,11 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
@@ -302,9 +296,7 @@ int main (int argc, char *argv[])
       participant =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (participant.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -322,7 +314,7 @@ int main (int argc, char *argv[])
             {
               ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("Failed to register the FooTypeSupport.")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
         }
       else
@@ -335,7 +327,7 @@ int main (int argc, char *argv[])
             {
               ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("Failed to register the FooNoTypeTypeSupport.")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
         }
 
@@ -348,7 +340,7 @@ int main (int argc, char *argv[])
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
         }
 
@@ -359,24 +351,21 @@ int main (int argc, char *argv[])
         = participant->create_topic(MY_TOPIC,
                                     MY_TYPE,
                                     topic_qos,
-                                    ::DDS::TopicListener::_nil()
-                                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                    ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("Failed to create_topic.")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       ::DDS::TopicDescription_var description
-        = participant->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        = participant->lookup_topicdescription(MY_TOPIC);
       if (CORBA::is_nil (description.in ()))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("Failed to lookup_topicdescription.")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       ::DDS::Topic_var topic1;
@@ -387,25 +376,21 @@ int main (int argc, char *argv[])
           topic1 = participant->create_topic (MY_TOPIC_FOR_UDP,
                                               MY_TYPE_FOR_UDP,
                                               topic_qos,
-                                              ::DDS::TopicListener::_nil()
-                                              ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                              ::DDS::TopicListener::_nil());
           if (CORBA::is_nil (topic1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) create_topic failed.\n")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
 
           description1
-            = participant->lookup_topicdescription(MY_TOPIC_FOR_UDP
-                                                   ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            = participant->lookup_topicdescription(MY_TOPIC_FOR_UDP);
           if (CORBA::is_nil (description1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("Failed to lookup_topicdescription.")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
         }
 
@@ -414,7 +399,7 @@ int main (int argc, char *argv[])
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("Failed to init_reader_tranport.")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       int attach_to_udp = using_udp;
@@ -428,7 +413,7 @@ int main (int argc, char *argv[])
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("Failed to create_subscriber.")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       ::DDS::Subscriber_var sub1;
@@ -441,7 +426,7 @@ int main (int argc, char *argv[])
             {
               ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("Failed to create_subscriber.")));
-              ACE_THROW (TestException ());
+              throw TestException ();
             }
         }
 
@@ -462,14 +447,12 @@ int main (int argc, char *argv[])
       DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
 
       ::DDS::DataReaderListener_var listener
-        = ::TAO::DCPS::servant_to_reference(listener_servant
-                                            ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        = ::TAO::DCPS::servant_to_reference(listener_servant);
 
       if (CORBA::is_nil (listener.in ()))
         {
           ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil.")));
-          ACE_THROW (TestException ());
+          throw TestException ();
         }
 
       ::DDS::DataReader_var * drs = new ::DDS::DataReader_var[num_datareaders];
@@ -493,9 +476,7 @@ int main (int argc, char *argv[])
           // create the datareader.
           drs[i] = the_sub->create_datareader(the_description.in (),
                                               dr_qos,
-                                              listener.in ()
-                                              ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                              listener.in ());
 
           if (CORBA::is_nil (drs[i].in ()))
             {
@@ -584,40 +565,34 @@ int main (int argc, char *argv[])
 
       delete [] drs;
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));
       status = 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main ():");
+      ex._tao_print_exception ("Exception caught in main ():");
       status = 1;
     }
-  ACE_ENDTRY;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       if (! CORBA::is_nil (participant.in ()))
         {
-          participant->delete_contained_entities(ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          participant->delete_contained_entities();
         }
       if (! CORBA::is_nil (dpf.in ()))
         {
-          dpf->delete_participant(participant.in () ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          dpf->delete_participant(participant.in ());
         }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-        "Exception caught in cleanup.");
+      ex._tao_print_exception ("Exception caught in cleanup.");
       status = 1;
     }
-  ACE_ENDTRY;
 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();

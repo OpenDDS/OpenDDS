@@ -36,7 +36,7 @@ namespace TAO
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
     //     Change it to be from configuration file.
     static ACE_CString ior ("file://repo.ior");
-    
+
     static ACE_CString config_fname ("");
 
     static const char COMMON_SECTION_NAME[] = "common";
@@ -50,7 +50,7 @@ namespace TAO
     static bool got_bit_lookup_duration_msec = false;
 
     Service_Participant::Service_Participant ()
-    : orb_ (CORBA::ORB::_nil ()), 
+    : orb_ (CORBA::ORB::_nil ()),
       orb_from_user_(0),
       n_chunks_ (DEFAULT_NUM_CHUNKS),
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
@@ -65,48 +65,48 @@ namespace TAO
     int
     Service_Participant::svc ()
     {
-      ACE_DECLARE_NEW_CORBA_ENV;
         {
           bool done = false;
-          while (! done) 
+          while (! done)
             {
-              ACE_TRY
+              try
                 {
-                  if (orb_->orb_core()->has_shutdown () == false) 
+                  if (orb_->orb_core()->has_shutdown () == false)
                     {
-                      orb_->run (ACE_ENV_ARG_PARAMETER);
-                      ACE_TRY_CHECK;
+                      orb_->run ();
                     }
                   done = true;
                 }
-              ACE_CATCH (CORBA::SystemException, sysex)
+              catch (const CORBA::SystemException& sysex)
                 {
-                  ACE_PRINT_EXCEPTION (sysex, "ERROR: Service_Participant::svc");
+                  sysex._tao_print_exception (
+                    "ERROR: Service_Participant::svc");
                 }
-              ACE_CATCH (CORBA::UserException, userex)
+              catch (const CORBA::UserException& userex)
                 {
-                  ACE_PRINT_EXCEPTION (userex, "ERROR: Service_Participant::svc");
+                  userex._tao_print_exception (
+                    "ERROR: Service_Participant::svc");
                 }
-              ACE_CATCHANY
+              catch (const CORBA::Exception& ex)
                 {
-                  ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION, "ERROR: Service_Participant::svc");
+                  ex._tao_print_exception (
+                    "ERROR: Service_Participant::svc");
                 }
-              ACE_ENDTRY;
-              if (orb_->orb_core()->has_shutdown ()) 
+              if (orb_->orb_core()->has_shutdown ())
                 {
                   done = true;
                 }
-              else 
+              else
                 {
                   orb_->orb_core()->reactor()->reset_reactor_event_loop ();
                 }
             }
         }
-      
+
       return 0;
     }
 
-    int 
+    int
     Service_Participant::set_ORB (CORBA::ORB_ptr orb)
     {
       // The orb is already created by the get_domain_participant_factory() call.
@@ -119,18 +119,18 @@ namespace TAO
       return 0;
     }
 
-    CORBA::ORB_ptr 
+    CORBA::ORB_ptr
     Service_Participant::get_ORB ()
     {
-      // This method should be called after either set_ORB is called 
+      // This method should be called after either set_ORB is called
       // or get_domain_participant_factory is called.
       ACE_ASSERT (! CORBA::is_nil (orb_.in ()));
 
       return CORBA::ORB::_duplicate (orb_.in ());
     }
 
-    PortableServer::POA_ptr 
-    Service_Participant::the_poa() 
+    PortableServer::POA_ptr
+    Service_Participant::the_poa()
     {
       if (CORBA::is_nil (root_poa_.in ()))
         {
@@ -140,21 +140,21 @@ namespace TAO
       return PortableServer::POA::_duplicate (root_poa_.in ());
     }
 
-    void 
+    void
     Service_Participant::shutdown ()
     {
-      ACE_TRY_NEW_ENV
+      try
         {
           ACE_GUARD (TAO_SYNCH_MUTEX, guard, this->factory_lock_);
           ACE_ASSERT (! CORBA::is_nil (orb_.in ()));
-          if (! orb_from_user_) 
+          if (! orb_from_user_)
             {
-              orb_->shutdown (0 ACE_ENV_ARG_PARAMETER); 
+              orb_->shutdown (0);
               this->wait ();
             }
         // Don't delete the participants - require the client code to delete participants
         #if 0
-          //TBD return error code from this call 
+          //TBD return error code from this call
           // -- non-empty entity will make this call return failure
           if (dp_factory_impl_->delete_contained_participants () != ::DDS::RETCODE_OK)
             {
@@ -164,51 +164,46 @@ namespace TAO
             }
         #endif
 
-          if (! orb_from_user_) 
+          if (! orb_from_user_)
             {
-              root_poa_->destroy (1, 1 ACE_ENV_ARG_PARAMETER);
-              orb_->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
+              root_poa_->destroy (1, 1);
+              orb_->destroy ();
             }
           orb_ = CORBA::ORB::_nil ();
           dp_factory_ = ::DDS::DomainParticipantFactory::_nil ();
         }
-      ACE_CATCHANY
+      catch (const CORBA::Exception& ex)
         {
-          ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                              "ERROR: Service_Participant::shutdown");
+          ex._tao_print_exception ("ERROR: Service_Participant::shutdown");
           return;
         }
-      ACE_ENDTRY;
     }
 
 
-    ::DDS::DomainParticipantFactory_ptr 
-    Service_Participant::get_domain_participant_factory (int &argc, 
+    ::DDS::DomainParticipantFactory_ptr
+    Service_Participant::get_domain_participant_factory (int &argc,
                                                          ACE_TCHAR *argv[])
     {
-      if (CORBA::is_nil (dp_factory_.in ())) 
+      if (CORBA::is_nil (dp_factory_.in ()))
         {
-          ACE_GUARD_RETURN (TAO_SYNCH_MUTEX, 
-                            guard, 
-                            this->factory_lock_, 
+          ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                            guard,
+                            this->factory_lock_,
                             ::DDS::DomainParticipantFactory::_nil ());
 
-          if (CORBA::is_nil (dp_factory_.in ())) 
+          if (CORBA::is_nil (dp_factory_.in ()))
             {
-              ACE_DECLARE_NEW_CORBA_ENV;
-              ACE_TRY
-                {   
-                  if (CORBA::is_nil (orb_.in ())) 
+              try
+                {
+                  if (CORBA::is_nil (orb_.in ()))
                     {
                       //TBD: allow user to specify the ORB id
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
-                      orb_ = CORBA::ORB_init (argc, 
-                                              argv, 
-                                              "TAO_DDS_DCPS" 
-                                              ACE_ENV_ARG_PARAMETER);
-                      ACE_TRY_CHECK;
+                      orb_ = CORBA::ORB_init (argc,
+                                              argv,
+                                              "TAO_DDS_DCPS");
                     }
 
                   if (parse_args (argc, argv) != 0)
@@ -220,10 +215,10 @@ namespace TAO
 
                   if (config_fname == "")
                     {
-                      ACE_DEBUG ((LM_INFO, 
+                      ACE_DEBUG ((LM_INFO,
                         ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration "
                         "file specified.\n")));
-                    } 
+                    }
                   else
                     {
                       // Load configuration only if the configuration file exists.
@@ -232,10 +227,10 @@ namespace TAO
                         {
                           ACE_DEBUG ((LM_INFO,
                                       ACE_TEXT("(%P|%t)INFO: not using file configuration - "
-                                      "can not open \"%s\" for reading. %p\n"), 
+                                      "can not open \"%s\" for reading. %p\n"),
                                       config_fname.c_str(), "fopen"));
                         }
-                      else 
+                      else
                         {
                           ACE_OS::fclose (in);
 
@@ -250,16 +245,13 @@ namespace TAO
                     }
 
                   CORBA::Object_var poa_object =
-                    orb_->resolve_initial_references("RootPOA" ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
+                    orb_->resolve_initial_references("RootPOA");
 
-                  root_poa_ = PortableServer::POA::_narrow (poa_object.in () 
-                                                            ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
+                  root_poa_ = PortableServer::POA::_narrow (poa_object.in ());
 
                   if (CORBA::is_nil (root_poa_.in ()))
                     {
-                      ACE_ERROR ((LM_ERROR, 
+                      ACE_ERROR ((LM_ERROR,
                                   ACE_TEXT ("(%P|%t) ERROR: ")
                                   ACE_TEXT ("Service_Participant::get_domain_participant_factory, ")
                                   ACE_TEXT ("nil RootPOA\n")));
@@ -270,15 +262,14 @@ namespace TAO
                                   DomainParticipantFactoryImpl (),
                                   ::DDS::DomainParticipantFactory::_nil ());
 
-                  dp_factory_ = servant_to_reference (dp_factory_servant_ ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
-                  
+                  dp_factory_ = servant_to_reference (dp_factory_servant_);
+
                   // Give ownership to poa.
                   dp_factory_servant_->_remove_ref ();
 
                   if (CORBA::is_nil (dp_factory_.in ()))
                     {
-                      ACE_ERROR ((LM_ERROR, 
+                      ACE_ERROR ((LM_ERROR,
                                   ACE_TEXT ("(%P|%t) ERROR: ")
                                   ACE_TEXT ("Service_Participant::get_domain_participant_factory, ")
                                   ACE_TEXT ("nil DomainParticipantFactory. \n")));
@@ -286,47 +277,41 @@ namespace TAO
                     }
 
 
-                  CORBA::Object_var obj = orb_->string_to_object (ior.c_str() ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
+                  CORBA::Object_var obj = orb_->string_to_object (ior.c_str());
 
-                  repo_ = DCPSInfo::_narrow (obj.in () ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
+                  repo_ = DCPSInfo::_narrow (obj.in ());
 
                   if (CORBA::is_nil (repo_.in ()))
                     {
-                      ACE_ERROR ((LM_ERROR, 
+                      ACE_ERROR ((LM_ERROR,
                                   ACE_TEXT ("(%P|%t) ERROR: ")
                                   ACE_TEXT ("Service_Participant::get_domain_participant_factory, ")
-                                  ACE_TEXT ("nil DCPSInfo. \n"))); 
+                                  ACE_TEXT ("nil DCPSInfo. \n")));
                       return ::DDS::DomainParticipantFactory::_nil ();
                     }
 
                   if (! this->orb_from_user_)
                     {
                       PortableServer::POAManager_var poa_manager =
-                        root_poa_->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
-                      ACE_TRY_CHECK;
+                        root_poa_->the_POAManager ();
 
-                      poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
-                      ACE_TRY_CHECK;
+                      poa_manager->activate ();
 
-                      if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) 
+                      if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
                         {
-                          ACE_ERROR ((LM_ERROR, 
+                          ACE_ERROR ((LM_ERROR,
                                       ACE_TEXT ("ERROR: Service_Participant::get_domain_participant_factory, ")
-                                      ACE_TEXT ("Failed to activate the orb task."))); 
+                                      ACE_TEXT ("Failed to activate the orb task.")));
                           return ::DDS::DomainParticipantFactory::_nil ();
                         }
                     }
                 }
-              ACE_CATCHANY
+              catch (const CORBA::Exception& ex)
                 {
-                  ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION, 
-                                      "ERROR: Service_Participant::get_domain_participant_factory");
+                  ex._tao_print_exception (
+                    "ERROR: Service_Participant::get_domain_participant_factory");
                   return ::DDS::DomainParticipantFactory::_nil ();
                 }
-              ACE_ENDTRY;
-              ACE_CHECK_RETURN (::DDS::DomainParticipantFactory::_nil ());
             }
         }
 
@@ -339,65 +324,65 @@ namespace TAO
     {
       ACE_Arg_Shifter arg_shifter (argc, argv);
 
-      while (arg_shifter.is_anything_left ()) 
+      while (arg_shifter.is_anything_left ())
         {
           const char *currentArg = 0;
 
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSDebugLevel")) != 0) 
+          if ((currentArg = arg_shifter.get_the_parameter("-DCPSDebugLevel")) != 0)
             {
               DCPS_debug_level = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_debug_level = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfoRepo")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfoRepo")) != 0)
             {
               ior = currentArg;
               arg_shifter.consume_arg ();
               got_info = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0)
             {
               // Deprecated, use -DCPSInfoRepo
               ior = currentArg;
               arg_shifter.consume_arg ();
               got_info = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0)
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_chunks = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0)
             {
               association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_chunk_association_multiplier = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSConfigFile")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSConfigFile")) != 0)
             {
               config_fname = currentArg;
               arg_shifter.consume_arg ();
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSLivelinessFactor")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSLivelinessFactor")) != 0)
             {
               liveliness_factor_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_liveliness_factor = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportPort")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportPort")) != 0)
             {
               bit_transport_port_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationMsec")) != 0) 
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationMsec")) != 0)
             {
               bit_lookup_duration_msec_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_lookup_duration_msec = true;
             }
-          else 
+          else
             {
               arg_shifter.ignore_arg ();
             }
@@ -407,7 +392,7 @@ namespace TAO
       return 0;
     }
 
-    void 
+    void
     Service_Participant::initialize ()
     {
       //NOTE: in the future these initial values may be configurable
@@ -522,13 +507,13 @@ namespace TAO
       ior = repo_ior;
       got_info = true;
     }
-    int 
+    int
     Service_Participant::bit_transport_port () const
     {
-       return bit_transport_port_; 
+       return bit_transport_port_;
     }
 
-    void 
+    void
     Service_Participant::bit_transport_port (int port)
     {
        bit_transport_port_ = port;
@@ -542,12 +527,12 @@ namespace TAO
       this->bit_transport_impl_
         = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
 
-      TransportConfiguration_rch config 
+      TransportConfiguration_rch config
         = TheTransportFactory->get_or_create_configuration (BIT_ALL_TRAFFIC, "SimpleTcp");
-      
-      SimpleTcpConfiguration* tcp_config 
+
+      SimpleTcpConfiguration* tcp_config
         = static_cast <SimpleTcpConfiguration*> (config.in ());
-      
+
       // localhost will only work for DCPSInfo on the same machine.
       // Don't specify an address to an OS picked address is used.
       tcp_config->local_address_
@@ -570,7 +555,7 @@ namespace TAO
     }
 
 
-    TransportImpl_rch 
+    TransportImpl_rch
     Service_Participant::bit_transport_impl ()
     {
       if (bit_transport_impl_.is_nil ())
@@ -581,59 +566,59 @@ namespace TAO
       return bit_transport_impl_;
     }
 
-    int 
+    int
     Service_Participant::bit_lookup_duration_msec () const
     {
       return bit_lookup_duration_msec_;
     }
 
-    void 
+    void
     Service_Participant::bit_lookup_duration_msec (int sec)
     {
       bit_lookup_duration_msec_ = sec;
       got_bit_lookup_duration_msec = true;
     }
 
-    size_t   
+    size_t
     Service_Participant::n_chunks () const
     {
       return n_chunks_;
     }
-  
-    void 
+
+    void
     Service_Participant::n_chunks (size_t chunks)
     {
       n_chunks_ = chunks;
       got_chunks = true;
     }
 
-    size_t   
+    size_t
     Service_Participant::association_chunk_multiplier () const
     {
       return association_chunk_multiplier_;
     }
-  
-    void 
+
+    void
     Service_Participant::association_chunk_multiplier (size_t multiplier)
     {
       association_chunk_multiplier_ = multiplier;
       got_chunk_association_multiplier = true;
     }
 
-    void 
+    void
     Service_Participant::liveliness_factor (int factor)
     {
       liveliness_factor_ = factor;
       got_liveliness_factor = true;
     }
 
-    int 
+    int
     Service_Participant::liveliness_factor () const
     {
       return liveliness_factor_;
     }
 
-    int 
+    int
     Service_Participant::load_configuration ()
     {
       int status = 0;
@@ -647,33 +632,33 @@ namespace TAO
       status = import.import_config (config_fname.c_str ());
 
       if (status != 0) {
-        ACE_ERROR_RETURN ((LM_ERROR, 
+        ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "import_config () returned %d\n"), 
+                           "import_config () returned %d\n"),
                            status),
                            -1);
       }
 
       status = this->load_common_configuration ();
       if (status != 0) {
-        ACE_ERROR_RETURN ((LM_ERROR, 
+        ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_common_configuration () returned %d\n"), 
+                           "load_common_configuration () returned %d\n"),
                            status),
                            -1);
-      } 
+      }
       status = TheTransportFactory->load_transport_configuration (this->cf_);
       if (status != 0) {
-        ACE_ERROR_RETURN ((LM_ERROR, 
+        ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_transport_configuration () returned %d\n"), 
+                           "load_transport_configuration () returned %d\n"),
                            status),
                            -1);
       }
       return 0;
     }
 
-    int 
+    int
     Service_Participant::load_common_configuration ()
     {
       const ACE_Configuration_Section_Key &root = this->cf_.root_section ();
@@ -682,9 +667,9 @@ namespace TAO
         {
           if (DCPS_debug_level > 0)
             {
-              // This is not an error if the configuration file does not have 
+              // This is not an error if the configuration file does not have
               // a common section. The code default configuration will be used.
-              ACE_DEBUG ((LM_DEBUG, 
+              ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration "
                           "failed to open section %s\n"),
                           COMMON_SECTION_NAME));
@@ -695,7 +680,7 @@ namespace TAO
         {
           if (got_debug_level)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSDebugLevel config value, use command option.\n")));
             }
           else
@@ -704,16 +689,16 @@ namespace TAO
             }
           if (got_info)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSInfoRepo config value, use command option.\n")));
             }
           else
-            { 
+            {
               GET_CONFIG_STRING_VALUE (this->cf_, sect, "DCPSInfoRepo", ior)
             }
           if (got_chunks)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSChunks config value, use command option.\n")));
             }
           else
@@ -722,7 +707,7 @@ namespace TAO
             }
           if (got_chunk_association_multiplier)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSChunkAssociationMutltiplier config value, use command option.\n")));
             }
           else
@@ -731,7 +716,7 @@ namespace TAO
             }
           if (got_bit_transport_port)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSBitTransportPort config value, use command option.\n")));
             }
           else
@@ -740,7 +725,7 @@ namespace TAO
             }
           if (got_liveliness_factor)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSLivelinessFactor config value, use command option.\n")));
             }
           else
@@ -749,7 +734,7 @@ namespace TAO
             }
           if (got_bit_lookup_duration_msec)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t)ignore DCPSBitLookupDurationMsec config value, use command option.\n")));
             }
           else
@@ -757,7 +742,7 @@ namespace TAO
               GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationMsec", this->bit_lookup_duration_msec_, int)
             }
         }
-       
+
       return 0;
     }
 

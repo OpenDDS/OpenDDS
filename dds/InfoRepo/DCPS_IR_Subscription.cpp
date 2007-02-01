@@ -59,7 +59,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
 
         if (participant_->is_alive())
           {
-            ACE_TRY_NEW_ENV
+            try
               {
                 if (TAO_debug_level > 0)
                  {
@@ -69,16 +69,14 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
                       id_, pub->get_id() ));
                  }
                 reader_->add_associations(id_, associationSeq);
-                ACE_TRY_CHECK;
               }
-            ACE_CATCHANY
+            catch (const CORBA::Exception& ex)
               {
-                ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+                ex._tao_print_exception (
                   "ERROR: Exception caught in DCPS_IR_Subscription::add_associated_publication:");
                 participant_->mark_dead();
                 status = -1;
               }
-            ACE_ENDTRY;
           }
 
         if (TAO_debug_level > 0)
@@ -118,22 +116,20 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
       idSeq[0] = pub->get_id();
       if (participant_->is_alive())
         {
-          ACE_TRY_NEW_ENV
+          try
             {
               reader_->remove_associations(idSeq, notify_lost);
-              ACE_TRY_CHECK;
             }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
             {
               if (TAO_debug_level > 0)
                 {
-                  ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+                  ex._tao_print_exception (
                     "ERROR: Exception caught in DCPS_IR_Subscription::remove_associated_publication:");
                 }
               participant_->mark_dead();
               marked_dead = true;
             }
-          ACE_ENDTRY;
         }
     }
 
@@ -215,7 +211,7 @@ void DCPS_IR_Subscription::disassociate_participant (TAO::DCPS::RepoId id)
           ++iter;
           if (TAO_debug_level > 0)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("DCPS_IR_Subscription::disassociate_participant () ")
                 ACE_TEXT("Subscription %d testing if pub %d particpant %d = %d\n"),
                 id_, pub->get_id(), pub->get_participant_id(), id));
@@ -236,22 +232,20 @@ void DCPS_IR_Subscription::disassociate_participant (TAO::DCPS::RepoId id)
           idSeq.length(count);
           if (participant_->is_alive())
             {
-              ACE_TRY_NEW_ENV
+              try
                 {
                   CORBA::Boolean dont_notify_lost = 0;
                   reader_->remove_associations(idSeq, dont_notify_lost);
-                  ACE_TRY_CHECK;
                 }
-              ACE_CATCHANY
+              catch (const CORBA::Exception& ex)
                 {
                   if (TAO_debug_level > 0)
                     {
-                      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+                      ex._tao_print_exception (
                         "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
                     }
                   participant_->mark_dead();
                 }
-              ACE_ENDTRY;
             }
         }
     }
@@ -280,7 +274,7 @@ void DCPS_IR_Subscription::disassociate_topic (TAO::DCPS::RepoId id)
           ++iter;
           if (TAO_debug_level > 0)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("DCPS_IR_Subscription::disassociate_topic () ")
                 ACE_TEXT("Subscription %d testing if pub %d topic %d = %d\n"),
                 id_, pub->get_id(), pub->get_topic_id(), id));
@@ -301,22 +295,20 @@ void DCPS_IR_Subscription::disassociate_topic (TAO::DCPS::RepoId id)
           idSeq.length(count);
           if (participant_->is_alive())
             {
-              ACE_TRY_NEW_ENV
+              try
                 {
                   CORBA::Boolean dont_notify_lost = 0;
                   reader_->remove_associations(idSeq, dont_notify_lost);
-                  ACE_TRY_CHECK;
                 }
-              ACE_CATCHANY
+              catch (const CORBA::Exception& ex)
                 {
                   if (TAO_debug_level > 0)
                     {
-                      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+                      ex._tao_print_exception (
                         "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
                     }
                   participant_->mark_dead();
                 }
-              ACE_ENDTRY;
             }
         }
     }
@@ -345,7 +337,7 @@ void DCPS_IR_Subscription::disassociate_publication (TAO::DCPS::RepoId id)
           ++iter;
           if (TAO_debug_level > 0)
             {
-              ACE_DEBUG((LM_DEBUG, 
+              ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("DCPS_IR_Subscription::disassociate_publication () ")
                 ACE_TEXT("Subscription %d testing if pub %d = %d\n"),
                 id_, pub->get_id(), id));
@@ -366,22 +358,20 @@ void DCPS_IR_Subscription::disassociate_publication (TAO::DCPS::RepoId id)
           idSeq.length(count);
           if (participant_->is_alive())
             {
-              ACE_TRY_NEW_ENV
+              try
                 {
                   CORBA::Boolean dont_notify_lost = 0;
                   reader_->remove_associations(idSeq, dont_notify_lost);
-                  ACE_TRY_CHECK;
                 }
-              ACE_CATCHANY
+              catch (const CORBA::Exception& ex)
                 {
                   if (TAO_debug_level > 0)
                     {
-                      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
+                      ex._tao_print_exception (
                         "ERROR: Exception caught in DCPS_IR_Subscription::remove_associations:");
                     }
                   participant_->mark_dead();
                 }
-              ACE_ENDTRY;
             }
         }
     }
