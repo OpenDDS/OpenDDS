@@ -81,7 +81,7 @@ TAO::DCPS::RepoIdSetMap::marshaled_size ()
   DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",5);
 
   // serialize len for the map size and set size information.
-  size_t size = (this->size () + 1) * sizeof (size_t);
+  size_t size = (this->size () + 1) * sizeof (CORBA::ULong);
 
   size_t num_ids = 0;
   MapType::ENTRY* entry;

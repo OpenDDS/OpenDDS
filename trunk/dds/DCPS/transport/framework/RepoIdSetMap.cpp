@@ -190,7 +190,8 @@ TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
     0);
 
   TAO::DCPS::Serializer writer(data, byte_order);
-  writer << this->size ();
+  CORBA::ULong sz = this->size ();
+  writer << sz;
 
   MapType::ENTRY* entry;
 
@@ -231,20 +232,20 @@ TAO::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
 
   TAO::DCPS::Serializer reader( acks, byte_order);
 
-  size_t num_subs = 0;
+  CORBA::ULong num_subs = 0;
   reader >> num_subs;
   if( reader.good_bit() != true) return -1;
 
-  for (size_t i = 0; i < num_subs; ++i)
+  for (CORBA::ULong i = 0; i < num_subs; ++i)
   {
     RepoId cur_sub = 0;
     reader >> cur_sub;
     if( reader.good_bit() != true) return -1;
-    size_t num_pubs_per_sub = 0;
+    CORBA::ULong num_pubs_per_sub = 0;
     reader >> num_pubs_per_sub;
     if( reader.good_bit() != true) return -1;
 
-    for (size_t j = 0; j < num_pubs_per_sub; ++j)
+    for (CORBA::ULong j = 0; j < num_pubs_per_sub; ++j)
     {
       RepoId pub = 0;
       reader >> pub;
