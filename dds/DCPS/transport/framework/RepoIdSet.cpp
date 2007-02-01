@@ -19,7 +19,8 @@ void
 TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
 {
   DBG_ENTRY_LVL("RepoIdSet","serialize",5);
-  serializer << this->size ();
+  CORBA::ULong sz = this->size ();
+  serializer << sz;
   MapType::ENTRY* entry;
 
   for (MapType::ITERATOR itr(this->map_);

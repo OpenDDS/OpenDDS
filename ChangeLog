@@ -1,3 +1,15 @@
+Thu Feb  1 21:02:13 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\framework\RepoIdSet.cpp:
+        * dds\DCPS\transport\framework\RepoIdSetMap.cpp:
+        * dds\DCPS\transport\framework\RepoIdSetMap.inl:
+
+          Fixed a bug that the FULLY_ASSOCIATION message serialize 
+          stream contains size_t data. Since size_t is platform
+          dependent, this makes the FULLY_ASSOCIATION message
+          deserialized incorrectly in the inter-host test. Replacing
+          size_t with CORBA::ULong fixed the problem.  
+          
 Thu Feb  1 16:40:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
