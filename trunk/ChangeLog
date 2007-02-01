@@ -1,3 +1,9 @@
+Thu Feb  1 23:30:48 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * bin/dcps_tests.lst:
+	  Most tests now need to dynamically load the SimpleTCP
+          library. Don't run those on static builds.
+
 Thu Feb  1 22:47:13 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * MPC/config/dcpsexe_with_tcp.mpb:
