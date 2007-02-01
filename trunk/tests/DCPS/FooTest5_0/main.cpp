@@ -318,10 +318,9 @@ int main (int argc, char *argv[])
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
 
   ACE_DEBUG((LM_DEBUG,"(%P|%t) FooTest5_0 main\n"));
-  ACE_TRY_NEW_ENV
+  try
     {
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
       if (CORBA::is_nil (dpf.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -340,15 +339,12 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
       ::Mine::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -363,7 +359,6 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -377,17 +372,14 @@ int main (int argc, char *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        dp->lookup_topicdescription(MY_TOPIC);
       if (CORBA::is_nil (description.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -400,9 +392,7 @@ int main (int argc, char *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -413,9 +403,7 @@ int main (int argc, char *argv[])
       // Create the publisher
       ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::PublisherListener::_nil());
       if (CORBA::is_nil (pub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -435,8 +423,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
-                              (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -452,8 +439,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::PublisherImpl* pub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                              ::DDS::Publisher_ptr>
-                              (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -474,9 +460,7 @@ int main (int argc, char *argv[])
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                         dw_qos,
-                                        ::DDS::DataWriterListener::_nil()
-                                        ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                        ::DDS::DataWriterListener::_nil());
 
       if (CORBA::is_nil (dw.in ()))
       {
@@ -496,9 +480,7 @@ int main (int argc, char *argv[])
       ::DDS::DataReader_var dr
         = sub->create_datareader(description.in (),
                                  dr_qos,
-                                 ::DDS::DataReaderListener::_nil()
-                                 ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                 ::DDS::DataReaderListener::_nil());
 
       if (CORBA::is_nil (dr.in ()))
         {
@@ -508,7 +490,7 @@ int main (int argc, char *argv[])
         }
 
       ::Mine::FooDataWriter_var foo_dw
-           = ::Mine::FooDataWriter::_narrow(dw.in () ACE_ENV_ARG_PARAMETER);
+           = ::Mine::FooDataWriter::_narrow(dw.in ());
       if (CORBA::is_nil (foo_dw.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -519,10 +501,10 @@ int main (int argc, char *argv[])
       ::Mine::FooDataWriterImpl* fast_dw =
         ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
                                            ::Mine::FooDataWriter_ptr>
-                (foo_dw.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dw.in ());
 
       ::Mine::FooDataReader_var foo_dr
-        = ::Mine::FooDataReader::_narrow(dr.in () ACE_ENV_ARG_PARAMETER);
+        = ::Mine::FooDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -533,7 +515,7 @@ int main (int argc, char *argv[])
       ::Mine::FooDataReaderImpl* fast_dr =
         ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
                                            ::Mine::FooDataReader_ptr>
-                (foo_dr.in ()  ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in ());
 
 
       // wait for association establishement before writing.
@@ -600,14 +582,12 @@ int main (int argc, char *argv[])
       foo.y = -1;
 
       handle
-          = fast_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+          = fast_dw->_cxx_register (foo);
 
       foo.x = 7;
 
       fast_dw->write(foo,
-                     handle
-                     ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                     handle);
 
       ::Xyz::Foo sample;
       ::DDS::SampleInfo info ;
@@ -662,36 +642,34 @@ cleanup:
 //      pub->delete_contained_entities() ;
 
       pub->delete_datawriter(dw.in ());
-      dp->delete_publisher(pub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_publisher(pub.in ());
 
 
       //clean up subscriber objects
 //      sub->delete_contained_entities() ;
 
       sub->delete_datareader(dr.in ());
-      dp->delete_subscriber(sub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in ());
 
       // clean up common objects
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.

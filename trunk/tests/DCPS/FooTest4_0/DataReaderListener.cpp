@@ -20,7 +20,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -36,7 +35,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -52,7 +50,6 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -68,7 +65,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

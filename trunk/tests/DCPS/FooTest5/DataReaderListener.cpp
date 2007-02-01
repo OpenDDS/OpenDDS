@@ -33,10 +33,10 @@ int read (::DDS::DataReader_ptr reader)
 
 #endif
 
-  ACE_TRY_NEW_ENV
+  try
   {
     DR_var foo_dr
-      = DR::_narrow(reader ACE_ENV_ARG_PARAMETER);
+      = DR::_narrow(reader);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -46,7 +46,7 @@ int read (::DDS::DataReader_ptr reader)
 
     DR_impl* dr_servant =
         ::TAO::DCPS::reference_to_servant< DR_impl, DR_ptr>
-                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in ());
 
     char action[5] ;
     if (use_take)
@@ -120,13 +120,11 @@ int read (::DDS::DataReader_ptr reader)
       }
     }
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in read:");
+    ex._tao_print_exception ("Exception caught in read:");
     return -1;
   }
-  ACE_ENDTRY;
 
   return 0;
 }
@@ -149,7 +147,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -165,7 +162,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -181,7 +177,6 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -197,7 +192,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

@@ -1,10 +1,10 @@
 #include "PubDriver.h"
 #include "TestException.h"
-// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service 
+// Include the SimpleUnreliableDgram.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
@@ -37,11 +37,9 @@ PubDriver::run(int& argc, char* argv[])
   // Need call the ORB_init to dynamically load the SimpleUdp library via
   // service configurator.
   // initialize the orb
-  CORBA::ORB_var orb = CORBA::ORB_init (argc, 
-                                        argv, 
-                                        "TAO_DDS_DCPS" 
-                                        ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "TAO_DDS_DCPS");
 
   this->parse_args(argc, argv);
   this->init();
@@ -147,18 +145,18 @@ PubDriver::init()
              "of SimpleUdp with the ALL_TRAFFIC transport_id (%d).\n",
              ALL_TRAFFIC));
 
-  TAO::DCPS::TransportImpl_rch transport_impl 
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+  TAO::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   "SimpleUdp",
                                                   TAO::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Get the existing or create a new SimpleUdpConfiguration object.\n"));
 
-  TAO::DCPS::TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* udp_config 
+  TAO::DCPS::SimpleUdpConfiguration* udp_config
     = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "

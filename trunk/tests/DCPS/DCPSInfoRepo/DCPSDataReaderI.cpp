@@ -9,16 +9,15 @@
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
   {
   }
-  
+
 // Implementation skeleton destructor
 TAO_DDS_DCPSDataReader_i::~TAO_DDS_DCPSDataReader_i (void)
   {
   }
-  
+
 void TAO_DDS_DCPSDataReader_i::add_associations (
     ::TAO::DCPS::RepoId yourId,
     const TAO::DCPS::WriterAssociationSeq & writers
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -51,7 +50,6 @@ void TAO_DDS_DCPSDataReader_i::add_associations (
 void TAO_DDS_DCPSDataReader_i::remove_associations (
     const TAO::DCPS::WriterIdSeq & writers,
     ::CORBA::Boolean notify_lost
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -80,7 +78,6 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
 
 void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
     const TAO::DCPS::IncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

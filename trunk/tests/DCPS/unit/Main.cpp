@@ -33,10 +33,10 @@ ORB_Task* orb_task = 0;
 using namespace ::DDS;
 using namespace ::TAO::DCPS;
 
-class ORB_Task : public ACE_Task_Base 
+class ORB_Task : public ACE_Task_Base
 {
 public:
-  ORB_Task (CORBA::ORB_ptr orb) 
+  ORB_Task (CORBA::ORB_ptr orb)
     : orb_(CORBA::ORB::_duplicate (orb))
   {
   };
@@ -44,38 +44,38 @@ public:
   /** Lanch a thread to run the orb. **/
   virtual int svc ()
   {
-    ACE_DECLARE_NEW_CORBA_ENV;
     {
       bool done = false;
-      while (! done) 
+      while (! done)
         {
-          ACE_TRY
+          try
             {
-              if (orb_->orb_core()->has_shutdown () == false) 
+              if (orb_->orb_core()->has_shutdown () == false)
                 {
-                  orb_->run (ACE_ENV_ARG_PARAMETER);
-                  ACE_TRY_CHECK;
+                  orb_->run ();
                 }
               done = true;
             }
-          ACE_CATCH (CORBA::SystemException, sysex)
+          catch (const CORBA::SystemException& sysex)
             {
-              ACE_PRINT_EXCEPTION (sysex, "TAO_DCPS_Service_Participant::svc");
+              sysex._tao_print_exception (
+                "TAO_DCPS_Service_Participant::svc");
             }
-          ACE_CATCH (CORBA::UserException, userex)
+          catch (const CORBA::UserException& userex)
             {
-              ACE_PRINT_EXCEPTION (userex, "TAO_DCPS_Service_Participant::svc");
+              userex._tao_print_exception (
+                "TAO_DCPS_Service_Participant::svc");
             }
-          ACE_CATCHANY
+          catch (const CORBA::Exception& ex)
             {
-              ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION, "TAO_DCPS_Service_Participant::svc");
+              ex._tao_print_exception (
+                "TAO_DCPS_Service_Participant::svc");
             }
-          ACE_ENDTRY;
-          if (orb_->orb_core()->has_shutdown ()) 
+          if (orb_->orb_core()->has_shutdown ())
             {
               done = true;
             }
-          else 
+          else
             {
               orb_->orb_core()->reactor()->reset_reactor_event_loop ();
             }
@@ -102,21 +102,20 @@ usage (const ACE_TCHAR * cmd)
 
 void
 parse_args (int argc,
-            ACE_TCHAR *argv[]
-            ACE_ENV_ARG_DECL)
+            ACE_TCHAR *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
     {
       client_orb = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -124,23 +123,20 @@ parse_args (int argc,
 }
 
 
-int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
+int run_domain_test ()
 {
   ::DDS::ReturnCode_t ret;
 
-  // create participant 
-  ::DDS::DomainParticipant_var new_dp 
-    = dpf->create_participant(MY_DOMAIN, 
-                              PARTICIPANT_QOS_DEFAULT, 
-                              ::DDS::DomainParticipantListener::_nil ()
-                              ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  // create participant
+  ::DDS::DomainParticipant_var new_dp
+    = dpf->create_participant(MY_DOMAIN,
+                              PARTICIPANT_QOS_DEFAULT,
+                              ::DDS::DomainParticipantListener::_nil ());
 
   TEST_CHECK (! CORBA::is_nil (new_dp.in ()));
 
-  ::DDS::DomainId_t domain_id 
-    = new_dp->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::DDS::DomainId_t domain_id
+    = new_dp->get_domain_id ();
 
   TEST_CHECK (domain_id == MY_DOMAIN);
 
@@ -148,138 +144,119 @@ int run_domain_test (ACE_ENV_SINGLE_ARG_DECL)
   PortableServer::ServantBase_var safe_servant = fts_servant;
 
 
-  MyTypeSupport_var fts = 
-    TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+  MyTypeSupport_var fts =
+    TAO::DCPS::servant_to_reference (fts_servant);
 
   if (::DDS::RETCODE_OK != fts->register_type(new_dp.in (), MY_TYPE))
     {
-      ACE_ERROR ((LM_ERROR, 
-      ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+      ACE_ERROR ((LM_ERROR,
+      ACE_TEXT ("Failed to register the FooTypeSupport.")));
       return 1;
     }
 
   // lookup existent participant
-  ::DDS::DomainParticipant_var looked_dp 
-    = dpf->lookup_participant(MY_DOMAIN ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-  
-  ::TAO::DCPS::DomainParticipantImpl* new_dp_servant 
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl, 
-                                ::DDS::DomainParticipant_ptr > 
-            (new_dp.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::DDS::DomainParticipant_var looked_dp
+    = dpf->lookup_participant(MY_DOMAIN);
 
-  ::TAO::DCPS::DomainParticipantImpl* looked_dp_servant 
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl, 
-                                ::DDS::DomainParticipant_ptr > 
-            (looked_dp.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::TAO::DCPS::DomainParticipantImpl* new_dp_servant
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl,
+                                ::DDS::DomainParticipant_ptr >
+            (new_dp.in ());
+
+  ::TAO::DCPS::DomainParticipantImpl* looked_dp_servant
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl,
+                                ::DDS::DomainParticipant_ptr >
+            (looked_dp.in ());
 
   TEST_CHECK (looked_dp_servant == new_dp_servant);
 
   // create topic
-  ::DDS::Topic_var new_topic 
-    = new_dp->create_topic(MY_TOPIC, 
-                           MY_TYPE, 
-                           TOPIC_QOS_DEFAULT, 
-                           ::DDS::TopicListener::_nil ()
-                           ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-  
-  ::TAO::DCPS::TopicImpl* new_topic_servant 
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl, 
-                                ::DDS::Topic_ptr > 
-            (new_topic.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::DDS::Topic_var new_topic
+    = new_dp->create_topic(MY_TOPIC,
+                           MY_TYPE,
+                           TOPIC_QOS_DEFAULT,
+                           ::DDS::TopicListener::_nil ());
+
+  ::TAO::DCPS::TopicImpl* new_topic_servant
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl,
+                                ::DDS::Topic_ptr >
+            (new_topic.in ());
 
   ::DDS::Duration_t timeout;
   timeout.sec = find_topic_timeout.sec ();
   timeout.nanosec = find_topic_timeout.usec ();
 
-  // find existent topic 
-  ::DDS::Topic_var found_topic 
-    = new_dp->find_topic(MY_TOPIC, timeout ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-    
-  ::TAO::DCPS::TopicImpl* found_topic_servant 
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl, 
-                                ::DDS::Topic_ptr > 
-            (found_topic.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  // find existent topic
+  ::DDS::Topic_var found_topic
+    = new_dp->find_topic(MY_TOPIC, timeout);
+
+  ::TAO::DCPS::TopicImpl* found_topic_servant
+    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl,
+                                ::DDS::Topic_ptr >
+            (found_topic.in ());
 
   TEST_CHECK (new_topic_servant == found_topic_servant);
 
   // find existent topicdescription
-  ::DDS::TopicDescription_var found_topicdescription 
-    = new_dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::DDS::TopicDescription_var found_topicdescription
+    = new_dp->lookup_topicdescription(MY_TOPIC);
 
-  TEST_CHECK (! CORBA::is_nil (found_topicdescription.in ())); 
+  TEST_CHECK (! CORBA::is_nil (found_topicdescription.in ()));
 
   // widen the topicdescription to topic
-  ::DDS::Topic_var widened_topic 
-    = ::DDS::Topic::_narrow(found_topicdescription.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ::DDS::Topic_var widened_topic
+    = ::DDS::Topic::_narrow(found_topicdescription.in ());
 
-  TEST_CHECK (! CORBA::is_nil (widened_topic.in ())); 
+  TEST_CHECK (! CORBA::is_nil (widened_topic.in ()));
 
-  ACE_ERROR((LM_ERROR, 
+  ACE_ERROR((LM_ERROR,
     "We expect to see an error message from delete_participant\n"));
-  ret = dpf->delete_participant(new_dp.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-  
+  ret = dpf->delete_participant(new_dp.in ());
+
   TEST_CHECK (ret == ::DDS::RETCODE_PRECONDITION_NOT_MET);
 
   // delete existent topic first time
-  ret = new_dp->delete_topic(found_topic.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ret = new_dp->delete_topic(found_topic.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   // delete existent topic second time
-  ret = new_dp->delete_topic(new_topic.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  ret = new_dp->delete_topic(new_topic.in ());
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-  // an extra delete existent topic 
-  ACE_ERROR((LM_ERROR, 
+  // an extra delete existent topic
+  ACE_ERROR((LM_ERROR,
     "We expect to see an error message from delete_topic\n"));
-  ret = new_dp->delete_topic(new_topic.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (EXTRA_DELETE_TOPIC);
- 
+  ret = new_dp->delete_topic(new_topic.in ());
+
   TEST_CHECK (ret == ::DDS::RETCODE_ERROR);
 
   // Look up the topicdescription after the topic is deleted will
   // return nil.
-  found_topicdescription 
-    = new_dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-  
+  found_topicdescription
+    = new_dp->lookup_topicdescription(MY_TOPIC);
+
   TEST_CHECK (CORBA::is_nil(found_topicdescription.in ()));
-  
+
   // find a non-existent topic - return nil
   ACE_High_Res_Timer timer;
   ACE_hrtime_t elapsedTime = 0;
   timer.start ();
-  found_topic = new_dp->find_topic(OTHER_TOPIC, timeout ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  found_topic = new_dp->find_topic(OTHER_TOPIC, timeout);
   timer.stop();
   timer.elapsed_microseconds(elapsedTime);
   elapsedTime += 10000; // some systems can be short by up to 10 milliseconds
-  TEST_CHECK (CORBA::is_nil(found_topic.in ()) 
+  TEST_CHECK (CORBA::is_nil(found_topic.in ())
     && long(elapsedTime) >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
 
   // delete the existent participant
-  ret = dpf->delete_participant(new_dp.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
-  
+  ret = dpf->delete_participant(new_dp.in ());
+
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
-  
+
   // lookup the participant after it's deleted - return nil
-  looked_dp = dpf->lookup_participant(MY_DOMAIN ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK_EX (MAIN);
+  looked_dp = dpf->lookup_participant(MY_DOMAIN);
 
   TEST_CHECK (CORBA::is_nil(looked_dp.in ()));
 
@@ -300,7 +277,7 @@ void run_next_sample_test (ssize_t size)
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
-    DataSampleListElement* sample 
+    DataSampleListElement* sample
       = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
@@ -311,7 +288,7 @@ void run_next_sample_test (ssize_t size)
   }
   ssize_t current_size = list.size_;
   bool ret = true;
-  
+
   if (middle != 0)
   {
     ret = list.dequeue_next_sample (middle);
@@ -326,8 +303,8 @@ void run_next_sample_test (ssize_t size)
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
-  for (ssize_t i = pub_id_head; 
-       i <= pub_id_tail; 
+  for (ssize_t i = pub_id_head;
+       i <= pub_id_tail;
        i ++)
   {
     if (i == pub_id_middle)
@@ -335,14 +312,14 @@ void run_next_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_sample (sample) 
+    TEST_CHECK (list.dequeue_head_next_sample (sample)
                 == true);
     TEST_CHECK (sample->publication_id_ == i);
     delete sample;
   }
   }
 
-  TEST_CHECK (list.head_ == 0 
+  TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
 }
@@ -355,12 +332,12 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
-  
+
   TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
-    DataSampleListElement* sample 
+    DataSampleListElement* sample
       = new DataSampleListElement (i, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
@@ -368,7 +345,7 @@ void run_next_send_sample_test (ssize_t size)
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
-    DataSampleListElement* sample 
+    DataSampleListElement* sample
       = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
@@ -381,7 +358,7 @@ void run_next_send_sample_test (ssize_t size)
 
   ssize_t current_size = list.size_;
   bool ret = true;
-  
+
   if (middle != 0)
   {
     ret = list.dequeue_next_send_sample (middle);
@@ -396,8 +373,8 @@ void run_next_send_sample_test (ssize_t size)
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
-  for (ssize_t i = pub_id_head; 
-       i <= pub_id_tail; 
+  for (ssize_t i = pub_id_head;
+       i <= pub_id_tail;
        i ++)
   {
     if (i == pub_id_middle)
@@ -405,13 +382,13 @@ void run_next_send_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_send_sample (sample) 
+    TEST_CHECK (list.dequeue_head_next_send_sample (sample)
                 == true);
     TEST_CHECK (sample->publication_id_ == i);
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0 
+  TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
 }
@@ -423,12 +400,12 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
-  
+
   TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < size; i ++)
   {
-    DataSampleListElement* sample 
+    DataSampleListElement* sample
       = new DataSampleListElement (i, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
@@ -439,7 +416,7 @@ void run_next_instance_sample_test (ssize_t size)
 
   ssize_t current_size = list.size_;
   bool ret = true;
-  
+
   if (middle != 0)
   {
     ret = list.dequeue_next_instance_sample (middle);
@@ -454,8 +431,8 @@ void run_next_instance_sample_test (ssize_t size)
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
-  for (ssize_t i = pub_id_head; 
-       i <= pub_id_tail; 
+  for (ssize_t i = pub_id_head;
+       i <= pub_id_tail;
        i ++)
   {
     if (i == pub_id_middle)
@@ -463,13 +440,13 @@ void run_next_instance_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_instance_sample (sample) 
+    TEST_CHECK (list.dequeue_head_next_instance_sample (sample)
                 == true);
     TEST_CHECK (sample->publication_id_ == i);
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0 
+  TEST_CHECK (list.head_ == 0
               && list.tail_ == 0
               && list.size_ == 0);
 }
@@ -477,56 +454,49 @@ void run_next_instance_sample_test (ssize_t size)
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
-  ACE_DECLARE_NEW_CORBA_ENV;
-  ACE_TRY_EX (MAIN)
+  try
     {
       parse_args (argc, argv);
-  
-      if (client_orb) 
+
+      if (client_orb)
         {
           // Client creates the orb.
           orb = CORBA::ORB_init (argc,
                                  argv,
-                                 "TAO_DDS_DCPS"
-                                 ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK_EX (MAIN);
-          
+                                 "TAO_DDS_DCPS");
+
           TheServiceParticipant->set_ORB(orb.in());
 
           // Client runs the orb.
           CORBA::Object_var obj =
-            orb->resolve_initial_references ("RootPOA" ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK_EX (MAIN);
-          
-          poa = PortableServer::POA::_narrow (obj.in () ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK_EX (MAIN);
+            orb->resolve_initial_references ("RootPOA");
+
+          poa = PortableServer::POA::_narrow (obj.in ());
 
           PortableServer::POAManager_var poa_manager =
-            poa->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+            poa->the_POAManager ();
 
-          poa_manager->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          poa_manager->activate ();
 
           orb_task = new ORB_Task (orb.in ());
-          if (orb_task->activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) 
+          if (orb_task->activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
             {
-              ACE_ERROR ((LM_ERROR, 
+              ACE_ERROR ((LM_ERROR,
                           ACE_TEXT ("TAO_DCPS_Service_Participant::get_domain_participant_factory, ")
-                          ACE_TEXT ("Failed to activate the orb task."))); 
+                          ACE_TEXT ("Failed to activate the orb task.")));
               return 1;
             }
-          
+
           dpf = TheParticipantFactory;
        }
-      else 
+      else
         {
           dpf = TheParticipantFactoryWithArgs(argc, argv);
           poa = TheServiceParticipant->the_poa();
         }
 
-      
-      int ret = run_domain_test (ACE_ENV_SINGLE_ARG_PARAMETER);
+
+      int ret = run_domain_test ();
       TEST_CHECK (ret == 0);
 
       for (ssize_t i = 0; i < 6; i ++)
@@ -536,29 +506,26 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         run_next_instance_sample_test (i);
       }
 
-      if (client_orb) 
+      if (client_orb)
         {
-          orb->shutdown (0 ACE_ENV_ARG_PARAMETER); 
-          ACE_TRY_CHECK;
+          orb->shutdown (0);
           orb_task->wait ();
         }
 
       TheServiceParticipant->shutdown ();
 
-      if (client_orb) 
+      if (client_orb)
         {
-          orb->destroy (ACE_ENV_SINGLE_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          orb->destroy ();
         }
 
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION, "Exception caught:");
+      ex._tao_print_exception ("Exception caught:");
       return 1;
     }
-  ACE_ENDTRY;
-   
+
   return 0;
 }
 

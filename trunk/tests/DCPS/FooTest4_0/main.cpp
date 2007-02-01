@@ -71,10 +71,9 @@ int parse_args (int argc, char *argv[])
 
 int main (int argc, char *argv[])
 {
-  ACE_TRY_NEW_ENV
+  try
     {
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
@@ -85,15 +84,12 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
       ::Mine::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -108,7 +104,6 @@ int main (int argc, char *argv[])
           return 1;
         }
 
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -122,9 +117,7 @@ int main (int argc, char *argv[])
         dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
@@ -408,8 +401,8 @@ int main (int argc, char *argv[])
 
 //---------------------------------------------------------------------
 
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
       writer_transport_impl = 0;
       reader_transport_impl = 0;
@@ -418,19 +411,17 @@ int main (int argc, char *argv[])
       TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

@@ -115,7 +115,6 @@ namespace TAO
       virtual void add_associations (
           ::TAO::DCPS::RepoId yourId,
           const TAO::DCPS::WriterAssociationSeq & writers
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -124,7 +123,6 @@ namespace TAO
       virtual void remove_associations (
           const TAO::DCPS::WriterIdSeq & writers,
           ::CORBA::Boolean callback
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -132,7 +130,6 @@ namespace TAO
 
       virtual void update_incompatible_qos (
           const TAO::DCPS::IncompatibleQosStatus & status
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -176,14 +173,12 @@ namespace TAO
         SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
         DataReaderRemote_ptr          dr_remote_objref
-        ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
       virtual ::DDS::ReturnCode_t delete_contained_entities (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -191,7 +186,6 @@ namespace TAO
 
       virtual ::DDS::ReturnCode_t set_qos (
           const ::DDS::DataReaderQos & qos
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -199,7 +193,6 @@ namespace TAO
 
       virtual void get_qos (
           ::DDS::DataReaderQos & qos
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -208,70 +201,60 @@ namespace TAO
       virtual ::DDS::ReturnCode_t set_listener (
           ::DDS::DataReaderListener_ptr a_listener,
           ::DDS::StatusKindMask mask
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::DataReaderListener_ptr get_listener (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::TopicDescription_ptr get_topicdescription (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::Subscriber_ptr get_subscriber (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::SampleRejectedStatus get_sample_rejected_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::LivelinessChangedStatus get_liveliness_changed_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::RequestedDeadlineMissedStatus get_requested_deadline_missed_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::RequestedIncompatibleQosStatus * get_requested_incompatible_qos_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::SubscriptionMatchStatus get_subscription_match_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::SampleLostStatus get_sample_lost_status (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -279,7 +262,6 @@ namespace TAO
 
       virtual ::DDS::ReturnCode_t wait_for_historical_data (
           const ::DDS::Duration_t & max_wait
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -287,7 +269,6 @@ namespace TAO
 
       virtual ::DDS::ReturnCode_t get_matched_publications (
           ::DDS::InstanceHandleSeq & publication_handles
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -296,21 +277,18 @@ namespace TAO
       virtual ::DDS::ReturnCode_t get_matched_publication_data (
           ::DDS::PublicationBuiltinTopicData & publication_data,
           ::DDS::InstanceHandle_t publication_handle
-          ACE_ENV_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::ReturnCode_t enable (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual ::DDS::StatusKindMask get_status_changes (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -357,7 +335,6 @@ namespace TAO
 
       // type specific DataReader's part of enable.
       virtual ::DDS::ReturnCode_t enable_specific (
-          ACE_ENV_SINGLE_ARG_DECL
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException

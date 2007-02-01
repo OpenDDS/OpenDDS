@@ -19,7 +19,7 @@
 // Information about TAO is available at:
 //     http://www.cs.wustl.edu/~schmidt/TAO.html
 
-// TAO_IDL - Generated from 
+// TAO_IDL - Generated from
 // .\be\be_codegen.cpp:1014
 
 #include "DomainParticipantListener.h"
@@ -28,16 +28,15 @@
 TAO_DCPS_DomainParticipantListener_i::TAO_DCPS_DomainParticipantListener_i (void)
   {
   }
-  
+
 // Implementation skeleton destructor
 TAO_DCPS_DomainParticipantListener_i::~TAO_DCPS_DomainParticipantListener_i (void)
   {
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
-    const ::DDS::InconsistentTopicStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::InconsistentTopicStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -45,10 +44,9 @@ void TAO_DCPS_DomainParticipantListener_i::on_inconsistent_topic (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_data_on_readers (
-    ::DDS::Subscriber_ptr 
-    ACE_ENV_ARG_DECL
+    ::DDS::Subscriber_ptr
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -56,11 +54,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_data_on_readers (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr ,
-    const ::DDS::OfferedDeadlineMissedStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::OfferedDeadlineMissedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -68,11 +65,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_offered_deadline_missed (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr,
-    const ::DDS::OfferedIncompatibleQosStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::OfferedIncompatibleQosStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -80,11 +76,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_offered_incompatible_qos (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_liveliness_lost (
     ::DDS::DataWriter_ptr ,
-    const ::DDS::LivelinessLostStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::LivelinessLostStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -92,11 +87,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_liveliness_lost (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_publication_match (
     ::DDS::DataWriter_ptr ,
-    const ::DDS::PublicationMatchStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::PublicationMatchStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -104,11 +98,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_publication_match (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_requested_deadline_missed (
     ::DDS::DataReader_ptr ,
-    const ::DDS::RequestedDeadlineMissedStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::RequestedDeadlineMissedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -116,11 +109,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_requested_deadline_missed (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr ,
-    const ::DDS::RequestedIncompatibleQosStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::RequestedIncompatibleQosStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -128,11 +120,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_requested_incompatible_qos (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_sample_rejected (
     ::DDS::DataReader_ptr ,
-    const ::DDS::SampleRejectedStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::SampleRejectedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -140,11 +131,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_sample_rejected (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_liveliness_changed (
     ::DDS::DataReader_ptr ,
-    const ::DDS::LivelinessChangedStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::LivelinessChangedStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -152,10 +142,9 @@ void TAO_DCPS_DomainParticipantListener_i::on_liveliness_changed (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_data_available (
-    ::DDS::DataReader_ptr 
-    ACE_ENV_ARG_DECL
+    ::DDS::DataReader_ptr
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -163,11 +152,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_data_available (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_subscription_match (
     ::DDS::DataReader_ptr ,
-    const ::DDS::SubscriptionMatchStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::SubscriptionMatchStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -175,11 +163,10 @@ void TAO_DCPS_DomainParticipantListener_i::on_subscription_match (
   {
     // Add your implementation here
   }
-  
+
 void TAO_DCPS_DomainParticipantListener_i::on_sample_lost (
     ::DDS::DataReader_ptr ,
-    const ::DDS::SampleLostStatus & 
-    ACE_ENV_ARG_DECL
+    const ::DDS::SampleLostStatus &
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

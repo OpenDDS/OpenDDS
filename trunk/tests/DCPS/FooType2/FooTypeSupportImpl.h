@@ -29,31 +29,28 @@
 class FooType_Export FooTypeSupportImpl : public virtual POA_FooTypeSupport
 {
 public:
-  //Constructor 
+  //Constructor
   FooTypeSupportImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~FooTypeSupportImpl (void);
-  
+
 
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-      ACE_ENV_SINGLE_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

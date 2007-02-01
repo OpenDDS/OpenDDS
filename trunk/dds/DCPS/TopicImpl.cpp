@@ -13,7 +13,7 @@ namespace TAO
   namespace DCPS
   {
     // Implementation skeleton constructor
-    TopicImpl::TopicImpl (const RepoId                   topic_id, 
+    TopicImpl::TopicImpl (const RepoId                   topic_id,
                           const char*                    topic_name,
                           const char*                    type_name,
                           POA_TAO::DCPS::TypeSupport_ptr type_support,
@@ -25,9 +25,9 @@ namespace TAO
                              type_support,
                              participant),
         qos_(qos),
-        // must default because create_topic does not take a mask 
+        // must default because create_topic does not take a mask
         // like set_listener does. - ?discrepency in the DDS spec.
-        listener_mask_(DEFAULT_STATUS_KIND_MASK), 
+        listener_mask_(DEFAULT_STATUS_KIND_MASK),
         listener_(::DDS::TopicListener::_duplicate(a_listener)),
         fast_listener_ (0),
         id_(topic_id),
@@ -44,10 +44,9 @@ namespace TAO
     }
 
 
-    ::DDS::ReturnCode_t 
+    ::DDS::ReturnCode_t
     TopicImpl::set_qos (
         const ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -55,7 +54,7 @@ namespace TAO
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
-          if (enabled_.value()) 
+          if (enabled_.value())
             {
               if (! Qos_Helper::changeable (qos_, qos))
                 {
@@ -72,17 +71,16 @@ namespace TAO
             }
           return ::DDS::RETCODE_OK;
         }
-      else 
+      else
         {
           return ::DDS::RETCODE_INCONSISTENT_POLICY;
         }
     }
 
 
-    void 
+    void
     TopicImpl::get_qos (
         ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -92,11 +90,10 @@ namespace TAO
     }
 
 
-    ::DDS::ReturnCode_t 
+    ::DDS::ReturnCode_t
     TopicImpl::set_listener (
         ::DDS::TopicListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -105,18 +102,16 @@ namespace TAO
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::TopicListener::_duplicate(a_listener);
-      fast_listener_ 
-        = reference_to_servant< ::POA_DDS::TopicListener, 
-                                ::DDS::TopicListener_ptr > 
-          (listener_.in () ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+      fast_listener_
+        = reference_to_servant< ::POA_DDS::TopicListener,
+                                ::DDS::TopicListener_ptr >
+          (listener_.in ());
       return ::DDS::RETCODE_OK;
     }
 
 
-    ::DDS::TopicListener_ptr 
+    ::DDS::TopicListener_ptr
     TopicImpl::get_listener (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -126,9 +121,8 @@ namespace TAO
     }
 
 
-    ::DDS::InconsistentTopicStatus 
+    ::DDS::InconsistentTopicStatus
     TopicImpl::get_inconsistent_topic_status (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -140,24 +134,22 @@ namespace TAO
     }
 
 
-    ::DDS::ReturnCode_t 
+    ::DDS::ReturnCode_t
     TopicImpl::enable (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ))
     {
-      //TDB - check if factory is enables and then enable all entities 
+      //TDB - check if factory is enables and then enable all entities
       // (don't need to do it for now because
       //  entity_factory.autoenable_created_entities is always = 1)
       return this->set_enabled ();
     }
 
 
-    ::DDS::StatusKindMask 
+    ::DDS::StatusKindMask
     TopicImpl::get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -168,7 +160,7 @@ namespace TAO
       return 0;
     }
 
-    RepoId 
+    RepoId
     TopicImpl::get_id () const
     {
       return id_;

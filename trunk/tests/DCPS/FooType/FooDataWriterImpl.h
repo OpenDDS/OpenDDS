@@ -34,22 +34,20 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
         )) {return ::DDS::RETCODE_OK;};
 
-  //Constructor 
+  //Constructor
   FooDataWriterImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~FooDataWriterImpl (void);
-  
+
 
   virtual ::DDS::InstanceHandle_t _cxx_register (
       const Foo & instance_data
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -59,7 +57,6 @@ public:
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -68,7 +65,6 @@ public:
   virtual ::DDS::ReturnCode_t unregister (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -78,7 +74,6 @@ public:
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -87,7 +82,6 @@ public:
   virtual ::DDS::ReturnCode_t write (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -97,7 +91,6 @@ public:
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -106,7 +99,6 @@ public:
   virtual ::DDS::ReturnCode_t dispose (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t instance_handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -116,7 +108,6 @@ public:
       const Foo & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -125,7 +116,6 @@ public:
   virtual ::DDS::ReturnCode_t get_key_value (
       Foo & key_holder,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

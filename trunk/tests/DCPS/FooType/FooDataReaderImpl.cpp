@@ -10,19 +10,19 @@
 #include "Foo_Singleton_Transport.h"
 
 
-  
+
 
 
 // Implementation skeleton constructor
 FooDataReaderImpl::FooDataReaderImpl (void)
   {
   }
-  
+
 // Implementation skeleton destructor
 FooDataReaderImpl::~FooDataReaderImpl (void)
   {
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::read (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -30,7 +30,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -45,7 +44,7 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::take (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -53,7 +52,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -68,11 +66,10 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::read_next_sample (
     Foo & received_data,
     ::DDS::SampleInfo & sample_info
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -84,11 +81,10 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
 
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::take_next_sample (
     Foo & received_data,
     ::DDS::SampleInfo & sample_info
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -100,7 +96,7 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
 
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::read_instance (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -109,7 +105,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -125,7 +120,7 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::take_instance (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -134,7 +129,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -150,7 +144,7 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::read_next_instance (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -159,7 +153,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -175,7 +168,7 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::take_next_instance (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -184,7 +177,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -200,11 +192,10 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::return_loan (
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -215,11 +206,10 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     // Add your implementation here
     return ::DDS::RETCODE_OK;
   }
-  
+
 ::DDS::ReturnCode_t FooDataReaderImpl::get_key_value (
     Foo & key_holder,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

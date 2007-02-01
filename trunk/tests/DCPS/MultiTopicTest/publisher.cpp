@@ -196,12 +196,11 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
@@ -224,9 +223,7 @@ int main (int argc, char *argv[])
               new ::Mine::Foo1TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts1 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts1 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T2)
@@ -235,9 +232,7 @@ int main (int argc, char *argv[])
               new ::Mine::Foo2TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts2 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts2 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T3)
@@ -246,17 +241,13 @@ int main (int argc, char *argv[])
               new ::Mine::Foo3TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts3 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts3 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -273,7 +264,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       if (topics & TOPIC_T2)
         {
@@ -284,7 +274,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       if (topics & TOPIC_T3)
         {
@@ -295,7 +284,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -314,9 +302,7 @@ int main (int argc, char *argv[])
           topic1 = dp->create_topic (MY_TOPIC1,
                                      MY_TYPE1,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic1.in ()))
             {
@@ -329,9 +315,7 @@ int main (int argc, char *argv[])
           topic2 = dp->create_topic (MY_TOPIC2,
                                      MY_TYPE2,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic2.in ()))
             {
@@ -344,9 +328,7 @@ int main (int argc, char *argv[])
           topic3 = dp->create_topic (MY_TOPIC3,
                                      MY_TYPE3,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic3.in ()))
             {
@@ -357,9 +339,7 @@ int main (int argc, char *argv[])
       // Create the publisher
       ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::PublisherListener::_nil());
       if (CORBA::is_nil (pub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -379,8 +359,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::PublisherImpl* pub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                                              ::DDS::Publisher_ptr>
-                              (pub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -439,9 +418,7 @@ int main (int argc, char *argv[])
         {
           dw1 = pub->create_datawriter(topic1.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil()
-                                      ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                      ::DDS::DataWriterListener::_nil());
 
           if (CORBA::is_nil (dw1.in ()))
             {
@@ -455,9 +432,7 @@ int main (int argc, char *argv[])
         {
           dw2 = pub->create_datawriter(topic2.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil()
-                                      ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                      ::DDS::DataWriterListener::_nil());
 
           if (CORBA::is_nil (dw2.in ()))
             {
@@ -471,9 +446,7 @@ int main (int argc, char *argv[])
         {
           dw3 = pub->create_datawriter(topic3.in (),
                                       dw_qos,
-                                      ::DDS::DataWriterListener::_nil()
-                                      ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                      ::DDS::DataWriterListener::_nil());
 
           if (CORBA::is_nil (dw3.in ()))
             {
@@ -664,41 +637,39 @@ int main (int argc, char *argv[])
         }
       delete [] writers;
 
-      dp->delete_publisher(pub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_publisher(pub.in ());
 
       if (topics & TOPIC_T1)
         {
-          dp->delete_topic(topic1.in () ACE_ENV_ARG_PARAMETER);
+          dp->delete_topic(topic1.in ());
         }
       if (topics & TOPIC_T2)
         {
-          dp->delete_topic(topic2.in () ACE_ENV_ARG_PARAMETER);
+          dp->delete_topic(topic2.in ());
         }
       if (topics & TOPIC_T3)
         {
-          dp->delete_topic(topic3.in () ACE_ENV_ARG_PARAMETER);
+          dp->delete_topic(topic3.in ());
         }
 
-      dp->delete_contained_entities(ACE_ENV_SINGLE_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_contained_entities();
+      dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return status;
 }

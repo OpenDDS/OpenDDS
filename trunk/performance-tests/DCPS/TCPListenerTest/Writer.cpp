@@ -35,30 +35,28 @@ void write (long id,
     data.values[i] = (float) i;
   }
 
-  W_var pt_dw 
-    = W::_narrow(writer ACE_ENV_ARG_PARAMETER);
+  W_var pt_dw
+    = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   Wimpl* pt_servant =
     ::TAO::DCPS::reference_to_servant< Wimpl, W_ptr>
-            (pt_dw.in ()  ACE_ENV_SINGLE_ARG_PARAMETER);
+            (pt_dw.in ());
 
   //SHH remove this kludge when the transport is fixed.
   //ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
-  ::DDS::InstanceHandle_t handle 
-      = pt_dw->_cxx_register (data ACE_ENV_ARG_PARAMETER);
+  ::DDS::InstanceHandle_t handle
+      = pt_dw->_cxx_register (data);
 
   {  // Extra scope for VC6
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
-    pt_servant->write(data, 
-                      handle 
-                      ACE_ENV_ARG_PARAMETER);
-    ACE_TRY_CHECK;
+    pt_servant->write(data,
+                      handle);
   }
   }
 }
@@ -66,9 +64,9 @@ void write (long id,
 
 
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_messages,
-               int data_size, 
+               int data_size,
                int num_readers,
                int writer_id)
                : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -81,22 +79,22 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 {
 }
 
-void 
+void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" %P|%t Writer::start \n")));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT(" %P|%t Writer::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
   }
 }
 
-void 
-Writer::end () 
+void
+Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT(" %P|%t Writer::end \n")));
@@ -104,14 +102,14 @@ Writer::end ()
 }
 
 
-int 
+int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
               data_size_));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     int num_connected_subs = 0;
     ::DDS::InstanceHandleSeq handles;
@@ -189,12 +187,10 @@ Writer::svc ()
 
 
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
   }
-  ACE_ENDTRY;
 
   ::DDS::InstanceHandleSeq handles;
   while (!finished_sending_)
@@ -213,7 +209,7 @@ Writer::svc ()
   return 0;
 }
 
-long 
+long
 Writer::writer_id () const
 {
   return writer_id_;

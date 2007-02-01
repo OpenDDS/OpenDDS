@@ -47,14 +47,14 @@ namespace TAO {
 
     class DomainParticipantImpl;
 
-    // changed from member function template to class template 
+    // changed from member function template to class template
     // to avoid VC++ v6 build problem.
     /*
      * Template method to retrieve the repository id by instance handle
      * from builtin topic.
-     */  
+     */
     template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq>
-    class BIT_Helper_1 
+    class BIT_Helper_1
     {
       public:
         ::DDS::ReturnCode_t instance_handle_to_repo_id (
@@ -69,12 +69,12 @@ namespace TAO {
           int key_pos = 2;
 
           if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
-            { 
+            {
               key_pos = 1;
             }
 
           BIT_DataSeq data;
-          ::DDS::ReturnCode_t ret 
+          ::DDS::ReturnCode_t ret
             = instance_handle_to_bit_data (dp, bit_name, handle, data);
 
           if (ret != ::DDS::RETCODE_OK)
@@ -87,8 +87,8 @@ namespace TAO {
             }
 
 
-          repoid = data[0].key[key_pos];  
- 
+          repoid = data[0].key[key_pos];
+
           if (repoid == 0)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -106,18 +106,14 @@ namespace TAO {
             const ::DDS::InstanceHandle_t& handle,
             BIT_DataSeq&                   data)
         {
-          ::DDS::Subscriber_var bit_subscriber 
-            = dp->get_builtin_subscriber (ACE_ENV_SINGLE_ARG_PARAMETER) ;
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          ::DDS::Subscriber_var bit_subscriber
+            = dp->get_builtin_subscriber () ;
 
-          ::DDS::DataReader_var reader 
-            = bit_subscriber->lookup_datareader (bit_name ACE_ENV_SINGLE_ARG_PARAMETER) ;
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          ::DDS::DataReader_var reader
+            = bit_subscriber->lookup_datareader (bit_name) ;
 
-          BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ()
-                                                           ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
-          
+          BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ());
+
           ACE_Time_Value due = ACE_OS::gettimeofday ()
             + ACE_Time_Value (TheServiceParticipant->bit_lookup_duration_msec () / 1000,
                              (TheServiceParticipant->bit_lookup_duration_msec () % 1000)*1000);
@@ -133,15 +129,13 @@ namespace TAO {
             {
               ::DDS::SampleInfoSeq the_info(1);
               BIT_DataSeq the_data(1);
-              ret = bit_reader->read_instance (the_data, 
-                                               the_info, 
-                                               1, 
-                                               handle, 
-                                               ::DDS::ANY_SAMPLE_STATE, 
-                                               ::DDS::ANY_VIEW_STATE, 
-                                               ::DDS::ANY_INSTANCE_STATE
-                                               ACE_ENV_ARG_PARAMETER);
-              ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+              ret = bit_reader->read_instance (the_data,
+                                               the_info,
+                                               1,
+                                               handle,
+                                               ::DDS::ANY_SAMPLE_STATE,
+                                               ::DDS::ANY_VIEW_STATE,
+                                               ::DDS::ANY_INSTANCE_STATE);
 
               if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
                 {
@@ -151,7 +145,7 @@ namespace TAO {
                                     handle, ret),
                                     ret);
                 }
-              else if (the_data.length () != 1)  
+              else if (the_data.length () != 1)
                 {
                   ACE_Time_Value now = ACE_OS::gettimeofday ();
                   if (now < due)
@@ -177,19 +171,19 @@ namespace TAO {
                       return ::DDS::RETCODE_TIMEOUT;
                     }
                 }
-              else 
+              else
                 {
                   data = the_data;
                   return ::DDS::RETCODE_OK; // success
                 }
             }
         }
-    
+
     };
 
 
     template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq, class IdSeq>
-    class BIT_Helper_2 
+    class BIT_Helper_2
     {
       public:
 
@@ -208,18 +202,15 @@ namespace TAO {
           int key_pos = 2;
 
           if (ACE_OS::strcmp (bit_name, BUILT_IN_PARTICIPANT_TOPIC) == 0)
-            { 
+            {
               key_pos = 1;
             }
 
-          ::DDS::Subscriber_ptr bit_subscriber 
-            = dp->get_builtin_subscriber (ACE_ENV_SINGLE_ARG_PARAMETER) ;
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          ::DDS::Subscriber_ptr bit_subscriber
+            = dp->get_builtin_subscriber () ;
 
-          ::DDS::DataReader_var reader 
-            = bit_subscriber->lookup_datareader (bit_name
-                                                 ACE_ENV_SINGLE_ARG_PARAMETER) ;
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          ::DDS::DataReader_var reader
+            = bit_subscriber->lookup_datareader (bit_name) ;
           if (CORBA::is_nil (reader.in ()))
             {
               ACE_ERROR_RETURN ((LM_DEBUG,
@@ -228,9 +219,7 @@ namespace TAO {
                     1);
             }
 
-          BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ()
-                                                           ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+          BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ());
           if (CORBA::is_nil (bit_reader.in ()))
             {
               ACE_ERROR_RETURN ((LM_DEBUG,
@@ -238,7 +227,7 @@ namespace TAO {
                    bit_name),
                     1);
             }
-          
+
           BIT_DataSeq data(max_samples);
           ::DDS::SampleInfoSeq infos(max_samples);
 
@@ -256,14 +245,12 @@ namespace TAO {
 
           while (1)
             {
-              ret = bit_reader->read (data, 
-                                      infos, 
+              ret = bit_reader->read (data,
+                                      infos,
                                       max_samples, //TBD: should be UNLIMITED
                                       ::DDS::ANY_SAMPLE_STATE,
-                                      ::DDS::ANY_VIEW_STATE, 
-                                      ::DDS::ANY_INSTANCE_STATE
-                                      ACE_ENV_ARG_PARAMETER);
-              ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+                                      ::DDS::ANY_VIEW_STATE,
+                                      ::DDS::ANY_INSTANCE_STATE);
 
               if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
                 {
@@ -283,12 +270,12 @@ namespace TAO {
               for (CORBA::ULong i = 0; i < repoid_len; i++)
                 {
                   for (CORBA::ULong j = 0; j < data_len; j++)
-                    {    
+                    {
                       if (DCPS_debug_level >= 10)
                         ACE_DEBUG((LM_DEBUG,"%s BIT has [%d, %d, %d]\n",
-                          bit_name, data[j].key[0], data[j].key[1], 
+                          bit_name, data[j].key[0], data[j].key[1],
                           data[j].key[2] ));
-                      if (data[j].key[key_pos] == repoids[i]) 
+                      if (data[j].key[key_pos] == repoids[i])
                         {
                           handles[i] = infos[j].instance_handle;
                           count ++;
@@ -296,7 +283,7 @@ namespace TAO {
                         }
                     }
                 }
-              
+
               if (count < repoid_len)
                 {
 

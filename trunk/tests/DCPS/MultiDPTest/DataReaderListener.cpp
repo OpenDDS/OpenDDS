@@ -13,7 +13,7 @@
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
 
-// Added unused arguments with default value to work around with vc6 
+// Added unused arguments with default value to work around with vc6
 // bug on template function instantiation.
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
 int read (::DDS::DataReader_ptr reader,
@@ -24,7 +24,7 @@ int read (::DDS::DataReader_ptr reader,
   ACE_UNUSED_ARG (dr_ptr);
   ACE_UNUSED_ARG (dr_var);
   ACE_UNUSED_ARG (dr_impl);
-  
+
 #else
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
@@ -33,10 +33,10 @@ int read (::DDS::DataReader_ptr reader)
 
 #endif
 
-  ACE_TRY_NEW_ENV
+  try
   {
-    DR_var foo_dr 
-      = DR::_narrow(reader ACE_ENV_ARG_PARAMETER);
+    DR_var foo_dr
+      = DR::_narrow(reader);
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -47,7 +47,7 @@ int read (::DDS::DataReader_ptr reader)
     DR_impl* dr_servant =
         TAO::DCPS::reference_to_servant< DR_impl,
                                          DR_ptr>
-                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in ());
 
     DT foo;
     ::DDS::SampleInfo si ;
@@ -58,33 +58,31 @@ int read (::DDS::DataReader_ptr reader)
 
     if (status == ::DDS::RETCODE_OK)
     {
-      ACE_DEBUG((LM_DEBUG,  
+      ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t)reader %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
         reader, foo.x, foo.y, foo.data_source));
-      ACE_DEBUG((LM_DEBUG,  
+      ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"),
-        si.sample_rank));  
+        si.sample_rank));
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: reader received ::DDS::RETCODE_NO_DATA!\n")),
         -1);
     }
     else
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: read  foo: Error: %d\n"), status),
         -1);
     }
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in read:");
+    ex._tao_print_exception ("Exception caught in read:");
     return -1;
   }
-  ACE_ENDTRY;
 
   return 0;
 }
@@ -96,7 +94,7 @@ DataReaderListenerImpl::DataReaderListenerImpl ()
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
   }
-  
+
 // Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
@@ -107,7 +105,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -119,11 +116,10 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n")));
   }
-  
+
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -135,11 +131,10 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n")));
   }
-  
+
 void DataReaderListenerImpl::on_liveliness_changed (
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -151,11 +146,10 @@ void DataReaderListenerImpl::on_liveliness_changed (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n")));
   }
-  
+
 void DataReaderListenerImpl::on_subscription_match (
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -167,7 +161,7 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_match \n")));
   }
-  
+
   void DataReaderListenerImpl::on_sample_rejected(
     ::DDS::DataReader_ptr reader,
     const DDS::SampleRejectedStatus& status
@@ -182,7 +176,7 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
   }
-  
+
   void DataReaderListenerImpl::on_data_available(
     ::DDS::DataReader_ptr reader
   )
@@ -195,8 +189,8 @@ void DataReaderListenerImpl::on_subscription_match (
 
     num_reads ++;
 
-    int ret = read <Xyz::Foo, 
-        ::Mine::FooSeq, 
+    int ret = read <Xyz::Foo,
+        ::Mine::FooSeq,
         ::Mine::FooDataReader,
         ::Mine::FooDataReader_ptr,
         ::Mine::FooDataReader_var,
@@ -208,7 +202,7 @@ void DataReaderListenerImpl::on_subscription_match (
         ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available read failed.\n")));
     }
   }
-  
+
   void DataReaderListenerImpl::on_sample_lost(
     ::DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status
@@ -223,4 +217,4 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
   }
-  
+

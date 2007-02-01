@@ -45,23 +45,23 @@ namespace TAO
     typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
         DataWriterMap ;
 
-    typedef std::map<PublicationId, PublisherDataWriterInfo*> 
+    typedef std::map<PublicationId, PublisherDataWriterInfo*>
         PublicationMap ;
-    
-  
+
+
     /**
     * @class PublisherImpl
     *
     * @brief Implements the ::TAO::DCPS::Publisher interfaces.
     *
     * This class acts as a factory and container of the datawriter.
-    * It is also an intermedia class which delegates the data from 
+    * It is also an intermedia class which delegates the data from
     * datawriter to transport for sending.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of  
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export PublisherImpl 
+    class TAO_DdsDcps_Export PublisherImpl
       : public virtual POA_DDS::Publisher,
         public virtual EntityImpl,
         public virtual TransportInterface
@@ -69,22 +69,21 @@ namespace TAO
     public:
       typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
 
-      ///Constructor 
+      ///Constructor
       PublisherImpl (const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
                      DomainParticipantImpl*       participant,
                      ::DDS::DomainParticipant_ptr participant_objref);
-      
-      ///Destructor 
+
+      ///Destructor
       virtual ~PublisherImpl (void);
-      
+
 
 
     virtual ::DDS::DataWriter_ptr create_datawriter (
         ::DDS::Topic_ptr a_topic,
         const ::DDS::DataWriterQos & qos,
         ::DDS::DataWriterListener_ptr a_listener
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -92,7 +91,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t delete_datawriter (
         ::DDS::DataWriter_ptr a_datawriter
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -100,14 +98,12 @@ namespace TAO
 
     virtual ::DDS::DataWriter_ptr lookup_datawriter (
         const char * topic_name
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t delete_contained_entities (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -115,7 +111,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::PublisherQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -123,7 +118,6 @@ namespace TAO
 
     virtual void get_qos (
         ::DDS::PublisherQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -132,49 +126,42 @@ namespace TAO
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::PublisherListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::PublisherListener_ptr get_listener (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t suspend_publications (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t resume_publications (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t begin_coherent_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t end_coherent_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::DomainParticipant_ptr get_participant (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -182,7 +169,6 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_default_datawriter_qos (
         const ::DDS::DataWriterQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -190,7 +176,6 @@ namespace TAO
 
     virtual void get_default_datawriter_qos (
         ::DDS::DataWriterQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -199,21 +184,18 @@ namespace TAO
     virtual ::DDS::ReturnCode_t copy_from_topic_qos (
         ::DDS::DataWriterQos & a_datawriter_qos,
         const ::DDS::TopicQos & a_topic_qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t enable (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -232,7 +214,7 @@ namespace TAO
     int is_clean () const;
 
     /** This method is called when the datawriter created by this
-    * publisher was enabled. It will notify the DCPSInfo that 
+    * publisher was enabled. It will notify the DCPSInfo that
     * a new datawriter/publication is associated with the topic.
     */
     ::DDS::ReturnCode_t writer_enabled (
@@ -257,7 +239,7 @@ namespace TAO
     void remove_associations(
         // sequence of reader ids
         const ReaderIdSeq & readers);
-    
+
     /**
     * Cache the publisher's object reference.
     */
@@ -267,7 +249,7 @@ namespace TAO
 
     /**
     * This is called by datawriter to notify the publisher to
-    * collect the available data from the datawriter for 
+    * collect the available data from the datawriter for
     * sending.
     */
     ::DDS::ReturnCode_t
@@ -277,7 +259,7 @@ namespace TAO
     * This is used to retrieve the listener for a certain status change.
     * If this publisher has a registered listener and the status kind
     * is in the listener mask then the listener is returned.
-    * Otherwise, the query for listener is propagated up to the 
+    * Otherwise, the query for listener is propagated up to the
     * factory/DomainParticipant.
     */
     ::POA_DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
@@ -291,7 +273,7 @@ namespace TAO
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
       ::DDS::StatusKindMask         listener_mask_;
-      /// Used to notify the entity for relevant events. 
+      /// Used to notify the entity for relevant events.
       ::DDS::PublisherListener_var  listener_;
       /// The publisher listener servant.
       ::POA_DDS::PublisherListener* fast_listener_;
@@ -308,7 +290,7 @@ namespace TAO
       DCPSInfo_var                  repository_;
       /// The DomainParticipant servant that owns this Publisher.
       DomainParticipantImpl*        participant_;
-      /// The object reference of the DomainParticipant that owns this 
+      /// The object reference of the DomainParticipant that owns this
       /// Publisher.
       ::DDS::DomainParticipant_var  participant_objref_;
       /// The suspend depth count.

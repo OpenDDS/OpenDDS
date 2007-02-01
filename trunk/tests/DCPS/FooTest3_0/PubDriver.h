@@ -11,21 +11,21 @@
 #include "ace/Task.h"
 #include "ace/String_Base.h"
 
-class PubDriver 
+class PubDriver
   : public ACE_Task_Base,
-    public virtual POA_Test::TestPubDriver, 
+    public virtual POA_Test::TestPubDriver,
     public virtual PortableServer::RefCountServantBase
 {
   public:
-     
-    enum Test_Kind { 
-      REGISTER_TEST   , 
-      UNREGISTER_TEST , 
+
+    enum Test_Kind {
+      REGISTER_TEST   ,
+      UNREGISTER_TEST ,
       DISPOSE_TEST    ,
       RESUME_TEST     ,
       LISTENER_TEST   ,
       ALLOCATOR_TEST  ,
-      LIVELINESS_TEST 
+      LIVELINESS_TEST
     };
 
     PubDriver();
@@ -34,7 +34,6 @@ class PubDriver
     void run(int& argc, char* argv[]);
 
     virtual void shutdown (
-      ACE_ENV_SINGLE_ARG_DECL
       )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -44,7 +43,6 @@ class PubDriver
     virtual void add_new_subscription (
       CORBA::Long       reader_id,
       const char *      sub_addr
-      ACE_ENV_ARG_DECL
       )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -78,7 +76,7 @@ class PubDriver
     int parse_pub_arg(const std::string& arg);
     int parse_sub_arg(const std::string& arg);
 
-    void add_subscription ( 
+    void add_subscription (
     CORBA::Long       reader_id,
     const char *      sub_addr
     );

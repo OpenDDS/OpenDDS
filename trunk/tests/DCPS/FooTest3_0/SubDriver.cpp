@@ -160,9 +160,7 @@ SubDriver::init(int& argc, char* argv[])
   // initialize the orb
   orb_ = CORBA::ORB_init (argc,
                           argv,
-                          "TAO_DDS_DCPS"
-                          ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                          "TAO_DDS_DCPS");
 
   // Now we can ask TheTransportFactory to create a TransportImpl object
   // using the SIMPLE_TCP type_id.  We also supply an identifier for this
@@ -333,11 +331,9 @@ SubDriver::run()
     }
 
   CORBA::Object_var object =
-    orb_->string_to_object (pub_driver_ior_.c_str () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    orb_->string_to_object (pub_driver_ior_.c_str ());
 
-  pub_driver_ = ::Test::TestPubDriver::_narrow (object.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  pub_driver_ = ::Test::TestPubDriver::_narrow (object.in ());
 
   TEST_CHECK (!CORBA::is_nil (pub_driver_.in ()));
   /*

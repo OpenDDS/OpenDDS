@@ -26,7 +26,6 @@ public:
 virtual void on_offered_deadline_missed (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedDeadlineMissedStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -35,7 +34,6 @@ virtual void on_offered_deadline_missed (
 virtual void on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedIncompatibleQosStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -44,7 +42,6 @@ virtual void on_offered_incompatible_qos (
 virtual void on_liveliness_lost (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::LivelinessLostStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -53,7 +50,6 @@ virtual void on_liveliness_lost (
 virtual void on_publication_match (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::PublicationMatchStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -62,7 +58,6 @@ virtual void on_publication_match (
 virtual void on_publication_disconnected (
     ::DDS::DataWriter_ptr writer,
     const ::TAO::DCPS::PublicationDisconnectedStatus & status
-    ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -71,7 +66,6 @@ virtual void on_publication_disconnected (
 virtual void on_publication_reconnected (
     ::DDS::DataWriter_ptr writer,
     const ::TAO::DCPS::PublicationReconnectedStatus & status
-    ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -80,7 +74,6 @@ virtual void on_publication_reconnected (
 virtual void on_publication_lost (
     ::DDS::DataWriter_ptr writer,
     const ::TAO::DCPS::PublicationLostStatus & status
-    ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

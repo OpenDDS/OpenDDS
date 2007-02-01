@@ -24,8 +24,8 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
                           ::DDS::Subscriber_ptr subscriber,
                           ::DDS::DataReader_ptr reader)
 {
-  R_var pt_dr 
-    = R::_narrow(reader ACE_ENV_ARG_PARAMETER);
+  R_var pt_dr
+    = R::_narrow(reader);
   if (CORBA::is_nil (pt_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
@@ -35,7 +35,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
   Rimpl* dr_servant =
       ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr.in() ACE_ENV_SINGLE_ARG_PARAMETER);
+              (pt_dr.in());
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
@@ -48,17 +48,17 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
     }
 
 
-  // wait for data to become available 
+  // wait for data to become available
   // so we know to start reading
   if (!Reader::wait_for_data(subscriber, 10))
-    ACE_ERROR_RETURN((LM_ERROR, 
+    ACE_ERROR_RETURN((LM_ERROR,
       "ERROR: waited too long for the first sample\n"),
       -2);
 
   int num_reads = 0;
   int zero_reads = 0;
   DDS::ReturnCode_t status;
-  ::DDS::SampleRejectedStatus rejected = 
+  ::DDS::SampleRejectedStatus rejected =
          dr_servant->get_sample_rejected_status ();
   ::DDS::SampleLostStatus lost =
          dr_servant->get_sample_lost_status ();
@@ -74,11 +74,10 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
         samples,
         infos,
         max_read_samples,
-        ::DDS::NOT_READ_SAMPLE_STATE, 
-        ::DDS::ANY_VIEW_STATE, 
-        ::DDS::ANY_INSTANCE_STATE
-        ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);//TBD do the right thing here.
+        ::DDS::NOT_READ_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ANY_INSTANCE_STATE);
+      //TBD do the right thing here.
 
 
       if (status == ::DDS::RETCODE_OK)
@@ -142,17 +141,17 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
             }
 
           // give the transport thread a chance to receive more and get the lock
-          ACE_OS::thr_yield (); 
+          ACE_OS::thr_yield ();
 
           //if (zero_reads > 500000)
           //  {
           //    ACE_ERROR((LM_ERROR, "Too many zero_reads!!!!\n"));
           //    ACE_DEBUG((LM_DEBUG,"samples = %d reads = %d zero_reads =%d samples per read = %d\n",
-          //      stats->packet_count_, num_reads, zero_reads, 
+          //      stats->packet_count_, num_reads, zero_reads,
           //      stats->packet_count_ /num_reads));
 
           //    ACE_ERROR((LM_ERROR,"ERROR: samples rejected = %d lost =%d read =%d total = %d !!!!!!\n",
-          //      rejected.total_count, 
+          //      rejected.total_count,
           //      lost.total_count, samples_recvd,
           //      rejected.total_count + lost.total_count + samples_recvd));
           //    ACE_OS::sleep(2);
@@ -166,7 +165,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
     }
 
   ACE_DEBUG((LM_DEBUG,"samples = %d reads = %d zero_reads =%d samples per read = %d\n",
-    stats->expected_packets_, num_reads, zero_reads, 
+    stats->expected_packets_, num_reads, zero_reads,
     stats->expected_packets_ /num_reads));
 
   return ::DDS::RETCODE_OK;
@@ -181,9 +180,9 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
 
 Reader::Reader(::DDS::Subscriber_ptr subscriber,
-               ::DDS::DataReader_ptr reader, 
+               ::DDS::DataReader_ptr reader,
                int num_publishers,
-               int num_samples, 
+               int num_samples,
                int data_size)
 : subscriber_ (::DDS::Subscriber::_duplicate(subscriber)),
   reader_ (::DDS::DataReader::_duplicate(reader)),
@@ -195,23 +194,23 @@ Reader::Reader(::DDS::Subscriber_ptr subscriber,
 {
 }
 
-void 
+void
 Reader::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Reader::start \n")));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) Reader::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
     throw TestException ();
   }
 }
 
-void 
-Reader::end () 
+void
+Reader::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Reader::end \n")));
@@ -219,7 +218,7 @@ Reader::end ()
 }
 
 
-int 
+int
 Reader::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -232,7 +231,7 @@ Reader::svc ()
 
   DDS::ReturnCode_t status;
 
-  ACE_TRY_NEW_ENV
+  try
   {
 
     switch ( num_floats_per_sample_ )
@@ -309,13 +308,11 @@ Reader::svc ()
     };
 
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
     return 1;
   }
-  ACE_ENDTRY;
 
   finished_sending_ = true;
 
@@ -349,7 +346,7 @@ Reader::wait_for_data (::DDS::Subscriber_ptr sub,
       ACE_OS::sleep (small);
     }
   return 0;
-} 
+}
 
 
 bool

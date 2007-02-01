@@ -32,10 +32,10 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-struct FooLess 
+struct FooLess
 {
   bool operator()(const Foo& left, const Foo& right) const
-  {	
+  {
     return (left.key < right.key);
   }
 };
@@ -55,16 +55,15 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
 
 
 
-  //Constructor 
+  //Constructor
   FooDataWriterImpl (void);
-  
-  //Destructor 
+
+  //Destructor
   virtual ~FooDataWriterImpl (void);
-  
+
 
   virtual ::DDS::InstanceHandle_t _cxx_register (
       const Foo & instance_data
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -74,7 +73,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
       const Foo & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -83,7 +81,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   virtual ::DDS::ReturnCode_t unregister (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -93,7 +90,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -102,7 +98,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   virtual ::DDS::ReturnCode_t write (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -112,7 +107,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
       const Foo & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -121,7 +115,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   virtual ::DDS::ReturnCode_t dispose (
       const Foo & instance_data,
       ::DDS::InstanceHandle_t instance_handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -131,7 +124,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
       const Foo & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -140,7 +132,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   virtual ::DDS::ReturnCode_t get_key_value (
       Foo & key_holder,
       ::DDS::InstanceHandle_t handle
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -168,7 +159,6 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
         TAO::DCPS::PublisherImpl*              publisher,
         ::DDS::Publisher_ptr                   publisher_objref,
         TAO::DCPS::DataWriterRemote_ptr        dw_remote_objref
-        ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException

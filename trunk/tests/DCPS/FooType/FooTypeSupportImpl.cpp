@@ -14,17 +14,16 @@
 FooTypeSupportImpl::FooTypeSupportImpl (void)
   {
   }
-  
+
 // Implementation skeleton destructor
 FooTypeSupportImpl::~FooTypeSupportImpl (void)
   {
   }
-  
+
 DDS::ReturnCode_t
 FooTypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -44,7 +43,6 @@ FooTypeSupportImpl::register_type (
 
 char *
 FooTypeSupportImpl::get_type_name (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -53,44 +51,40 @@ FooTypeSupportImpl::get_type_name (
   return CORBA::string_dup (this->_interface_repository_id());
 }
 
-  
+
 ::TAO::DCPS::DataWriterRemote_ptr FooTypeSupportImpl::create_datawriter (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
     FooDataWriterImpl* writer_impl;
-    ACE_NEW_RETURN(writer_impl, 
-                    FooDataWriterImpl(), 
+    ACE_NEW_RETURN(writer_impl,
+                    FooDataWriterImpl(),
                     ::TAO::DCPS::DataWriterRemote::_nil());
 
-    ::TAO::DCPS::DataWriterRemote_ptr writer_obj 
-      = ::TAO::DCPS::servant_to_reference (writer_impl ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
+    ::TAO::DCPS::DataWriterRemote_ptr writer_obj
+      = ::TAO::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
   }
-  
+
 ::TAO::DCPS::DataReaderRemote_ptr FooTypeSupportImpl::create_datareader (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
     FooDataReaderImpl* reader_impl;
-    ACE_NEW_RETURN(reader_impl, 
-                    FooDataReaderImpl(), 
+    ACE_NEW_RETURN(reader_impl,
+                    FooDataReaderImpl(),
                     ::TAO::DCPS::DataReaderRemote::_nil());
 
 
-    ::TAO::DCPS::DataReaderRemote_ptr reader_obj 
-      = ::TAO::DCPS::servant_to_reference (reader_impl ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
+    ::TAO::DCPS::DataReaderRemote_ptr reader_obj
+      = ::TAO::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;
   }
-  
+
 

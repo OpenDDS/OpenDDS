@@ -13,7 +13,7 @@
 #include "ace/OS_NS_unistd.h"
 
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
                int num_writes_per_thread)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -25,7 +25,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   ACE_UNUSED_ARG(history_depth);
   ACE_UNUSED_ARG(using_udp);
   ACE_UNUSED_ARG(num_ops_per_thread);
-    
+
   ::DDS::DataWriterQos dw_qos;
 
   writer_->get_qos(dw_qos) ;
@@ -33,23 +33,23 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   max_wait_ = dw_qos.liveliness.lease_duration.sec / 2 ;
 }
 
-void 
+void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Writer::start \n")));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
     throw TestException ();
   }
 }
 
-void 
-Writer::end () 
+void
+Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::end \n")));
@@ -57,15 +57,15 @@ Writer::end ()
 }
 
 
-int 
+int
 Writer::svc ()
 {
-  ACE_TRY_NEW_ENV
+  try
   {
     finished_sending_ = false;
 
     ::DDS::Topic_var topic = writer_->get_topic() ;
-  
+
     ACE_DEBUG((LM_DEBUG,"(%P|%t) %s: Writer::svc begins.\n",
               topic->get_name()));
 
@@ -77,9 +77,9 @@ Writer::svc ()
         foo.y = -1;
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
-    
-        ::Mine::Foo1DataWriter_var foo_dw 
-            = ::Mine::Foo1DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
+
+        ::Mine::Foo1DataWriter_var foo_dw
+            = ::Mine::Foo1DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -87,8 +87,8 @@ Writer::svc ()
         ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
-        ::DDS::InstanceHandle_t handle 
-            = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+        ::DDS::InstanceHandle_t handle
+            = foo_dw->_cxx_register (foo);
 
         for (int i = 0; i< num_writes_per_thread_; i ++)
           {
@@ -97,10 +97,8 @@ Writer::svc ()
             foo.x = (float)i;
             foo.c = 'A' + (i % 26) ;
 
-            foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            foo_dw->write(foo,
+                    handle);
           }
       }
     else if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC2))
@@ -108,9 +106,9 @@ Writer::svc ()
         ::T2::Foo2 foo;
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
-    
-        ::Mine::Foo2DataWriter_var foo_dw 
-            = ::Mine::Foo2DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
+
+        ::Mine::Foo2DataWriter_var foo_dw
+            = ::Mine::Foo2DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -118,8 +116,8 @@ Writer::svc ()
         ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
-        ::DDS::InstanceHandle_t handle 
-            = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+        ::DDS::InstanceHandle_t handle
+            = foo_dw->_cxx_register (foo);
 
         char buff[512] ;
         for (int i = 0; i< num_writes_per_thread_; i ++)
@@ -127,13 +125,11 @@ Writer::svc ()
             rsleep() ;
 
             ACE_OS::sprintf(buff, "message %d", i + 1) ;
-            
+
             foo.text = (const char *)buff ;
 
-            foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            foo_dw->write(foo,
+                    handle);
           }
       }
     else if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC3))
@@ -141,9 +137,9 @@ Writer::svc ()
         ::T3::Foo3 foo;
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
-    
-        ::Mine::Foo3DataWriter_var foo_dw 
-            = ::Mine::Foo3DataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
+
+        ::Mine::Foo3DataWriter_var foo_dw
+            = ::Mine::Foo3DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -151,8 +147,8 @@ Writer::svc ()
         ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
-        ::DDS::InstanceHandle_t handle 
-            = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+        ::DDS::InstanceHandle_t handle
+            = foo_dw->_cxx_register (foo);
 
         char buff[512] ;
         for (int i = 0; i< num_writes_per_thread_; i ++)
@@ -160,25 +156,21 @@ Writer::svc ()
             rsleep() ;
 
             ACE_OS::sprintf(buff, "message %d", i + 1) ;
-            
+
             foo.c = 'A' + (i % 26) ;
             foo.text = (const char *)buff ;
             foo.s = i + 1 ;
             foo.l = i * 100 ;
 
-            foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-            ACE_TRY_CHECK;
+            foo_dw->write(foo,
+                    handle);
           }
       }
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
   }
-  ACE_ENDTRY;
 
   finished_sending_ = true;
 

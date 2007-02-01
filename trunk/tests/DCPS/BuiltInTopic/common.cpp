@@ -4,8 +4,8 @@
 
 #include "common.h"
 #include "tests/DCPS/common/TestSupport.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -49,10 +49,10 @@ int init_transport ()
   reader_transport_impl
     = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config 
+  TAO::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
@@ -69,10 +69,10 @@ int init_transport ()
   writer_transport_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
@@ -91,7 +91,7 @@ int init_transport ()
 
 int attach_publisher_transport ()
 {
-  TAO::DCPS::AttachStatus attach_status 
+  TAO::DCPS::AttachStatus attach_status
     = publisher_servant->attach_transport(writer_transport_impl.in());
 
   if (attach_status != TAO::DCPS::ATTACH_OK)
@@ -121,14 +121,14 @@ int attach_publisher_transport ()
                         status_str.c_str()),
                         -1);
     }
-  
+
   return 0;
 }
 
 
 int attach_subscriber_transport ()
 {
-  TAO::DCPS::AttachStatus attach_status 
+  TAO::DCPS::AttachStatus attach_status
     = subscriber_servant->attach_transport(reader_transport_impl.in());
   if (attach_status != TAO::DCPS::ATTACH_OK)
     {
@@ -190,11 +190,11 @@ int ignore ()
                     ::DDS::ParticipantBuiltinTopicDataDataReader_var,
                     ::DDS::ParticipantBuiltinTopicDataSeq,
                     ::TAO::DCPS::ReaderIdSeq > hh;
-       
-      ::DDS::ReturnCode_t ret 
-        = hh.repo_ids_to_instance_handles(participant_servant, 
-          ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC, 
-          ignore_ids, 
+
+      ::DDS::ReturnCode_t ret
+        = hh.repo_ids_to_instance_handles(participant_servant,
+          ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+          ignore_ids,
           handles);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -206,14 +206,13 @@ int ignore ()
         return -1;
       }
 
-      ret = participant->ignore_participant (handles[0] ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      ret = participant->ignore_participant (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ")
-                    ACE_TEXT(" participant %d ignore participant %d returned error %d\n"), 
+                    ACE_TEXT(" participant %d ignore participant %d returned error %d\n"),
                     part_id, ignore_id, ret));
         return -1;
       }
@@ -238,11 +237,11 @@ int ignore ()
                     ::DDS::TopicBuiltinTopicDataDataReader_var,
                     ::DDS::TopicBuiltinTopicDataSeq,
                     ::TAO::DCPS::ReaderIdSeq > hh;
-       
-      ::DDS::ReturnCode_t ret 
-        = hh.repo_ids_to_instance_handles(participant_servant, 
-          ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC, 
-          ignore_ids, 
+
+      ::DDS::ReturnCode_t ret
+        = hh.repo_ids_to_instance_handles(participant_servant,
+          ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC,
+          ignore_ids,
           handles);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -254,14 +253,13 @@ int ignore ()
         return -1;
       }
 
-      ret = participant->ignore_topic (handles[0] ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      ret = participant->ignore_topic (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_TOPIC, ")
-                    ACE_TEXT(" ignore_topic %d return error %d\n"), 
+                    ACE_TEXT(" ignore_topic %d return error %d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -281,16 +279,16 @@ int ignore ()
       ignore_ids.length (1);
       ignore_ids[0] = ignore_id;
 
-      ::TAO::DCPS::BIT_Helper_2 < 
+      ::TAO::DCPS::BIT_Helper_2 <
                     ::DDS::PublicationBuiltinTopicDataDataReader,
                     ::DDS::PublicationBuiltinTopicDataDataReader_var,
                     ::DDS::PublicationBuiltinTopicDataSeq,
                     ::TAO::DCPS::ReaderIdSeq > hh;
-       
-      ::DDS::ReturnCode_t ret 
-        = hh.repo_ids_to_instance_handles(participant_servant, 
-          ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC, 
-          ignore_ids, 
+
+      ::DDS::ReturnCode_t ret
+        = hh.repo_ids_to_instance_handles(participant_servant,
+          ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+          ignore_ids,
           handles);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -302,8 +300,7 @@ int ignore ()
         return -1;
       }
 
-      ret = participant->ignore_publication (handles[0] ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      ret = participant->ignore_publication (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
@@ -333,11 +330,11 @@ int ignore ()
                     ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                     ::DDS::SubscriptionBuiltinTopicDataSeq,
                     ::TAO::DCPS::ReaderIdSeq > hh;
-       
-      ::DDS::ReturnCode_t ret 
-        = hh.repo_ids_to_instance_handles(participant_servant, 
-          ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC, 
-          ignore_ids, 
+
+      ::DDS::ReturnCode_t ret
+        = hh.repo_ids_to_instance_handles(participant_servant,
+          ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+          ignore_ids,
           handles);
 
       if (ret != ::DDS::RETCODE_OK)
@@ -349,14 +346,13 @@ int ignore ()
         return -1;
       }
 
-      ret = participant->ignore_subscription (handles[0] ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+      ret = participant->ignore_subscription (handles[0]);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
-                    ACE_TEXT(" ignore_subscription %d returned error 5d\n"), 
+                    ACE_TEXT(" ignore_subscription %d returned error 5d\n"),
                     handles[0], ret));
         return -1;
       }
@@ -369,7 +365,7 @@ int ignore ()
     return -1;
     break;
   }
-  
+
   return 0;
 #else
 
@@ -382,39 +378,36 @@ int write ()
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) write begins.\n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
     foo.x = -1;
     foo.y = -1;
     foo.key = default_key;
-    
-    ::Mine::FooDataWriter_var foo_dw 
-      = ::Mine::FooDataWriter::_narrow(datawriter.in () ACE_ENV_ARG_PARAMETER);
+
+    ::Mine::FooDataWriter_var foo_dw
+      = ::Mine::FooDataWriter::_narrow(datawriter.in ());
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
-    ::DDS::InstanceHandle_t handle 
-        = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+    ::DDS::InstanceHandle_t handle
+        = foo_dw->_cxx_register (foo);
 
     for (int i = 0; i< num_writes; i ++)
     {
 
       foo.x = (float)i;
 
-      foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      foo_dw->write(foo,
+                    handle);
     }
-   
+
     ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) write  done\n")));
   }
-  ACE_CATCHALL
+  catch (...)
   {
     ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) Exception caught in write."), -1);
   }
-  ACE_ENDTRY;
 
   return 0;
 }
@@ -423,11 +416,11 @@ int read (int expect_success)
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) read begins. \n")));
-  
-  ACE_TRY_NEW_ENV
+
+  try
   {
-    ::Mine::FooDataReader_var foo_dr 
-      = ::Mine::FooDataReader::_narrow(datareader.in () ACE_ENV_ARG_PARAMETER);
+    ::Mine::FooDataReader_var foo_dr
+      = ::Mine::FooDataReader::_narrow(datareader.in ());
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -438,7 +431,7 @@ int read (int expect_success)
     ::Mine::FooDataReaderImpl* dr_servant =
         reference_to_servant< ::Mine::FooDataReaderImpl,
                              ::Mine::FooDataReader_ptr>
-                (foo_dr.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dr.in ());
 
     int num_reads = 0;
     int num_received = 0;
@@ -457,18 +450,18 @@ int read (int expect_success)
 
       if (status == ::DDS::RETCODE_OK)
       {
-        if (!expect_success) 
+        if (!expect_success)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: received a message but did not expect too!\n"))
                              , -1);
-          
+
         }
         num_received++;
 
         if (default_key != foo.key)
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: reader received incorrect key!\n")
                       ));
         }
@@ -479,7 +472,7 @@ int read (int expect_success)
         }
         else
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: reader received unexpected message number %d!\n"),
                       msg_num));
         }
@@ -489,16 +482,16 @@ int read (int expect_success)
       }
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
-        if (expect_success) 
+        if (expect_success)
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: read returned ::DDS::RETCODE_NO_DATA!\n")));
           ACE_OS::sleep(1);
         }
       }
       else
       {
-        ACE_ERROR ((LM_ERROR, 
+        ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: read returned error %d\n"), status));
       }
     }
@@ -515,7 +508,7 @@ int read (int expect_success)
       {
         if ( !messages[k] )
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ERROR: reader did not receive message %d!\n"),
                              k), -1);
         }
@@ -523,17 +516,16 @@ int read (int expect_success)
     }
     else
     {
-       ACE_ERROR_RETURN ((LM_ERROR, 
+       ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: reader received %d messages expected %d ")
                           ACE_TEXT("messages!\n"), num_received, num_expected),
                           -1);
     }
   }
-  ACE_CATCHALL
+  catch (...)
   {
     ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t) Exception caught in read."), -1);
   }
-  ACE_ENDTRY;
 
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) read done.\n")));

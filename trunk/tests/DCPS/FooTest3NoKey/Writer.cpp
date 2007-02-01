@@ -8,9 +8,9 @@
 #include "TestException.h"
 #include "tests/DCPS/common/TestSupport.h"
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
-               int num_writes_per_thread, 
+               int num_writes_per_thread,
                int writer_id)
 : writer_ (::DDS::DataWriter::_duplicate(writer)),
   num_thread_to_write_ (num_thread_to_write),
@@ -24,31 +24,31 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
   registered_foo_.writer_id = writer_id_;
 }
 
-void 
+void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Writer::start \n")));
 
   // Register the instance without key then use this handle
-  // to verify other registrations always return same handle. 
-  foo_dw_ = ::Mine::FooDataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
+  // to verify other registrations always return same handle.
+  foo_dw_ = ::Mine::FooDataWriter::_narrow(writer_.in ());
   TEST_CHECK (! CORBA::is_nil (foo_dw_.in ()));
 
-  handle_ = foo_dw_->_cxx_register (registered_foo_ ACE_ENV_ARG_PARAMETER);
+  handle_ = foo_dw_->_cxx_register (registered_foo_);
 
-  if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
     throw TestException ();
   }
 }
 
-void 
-Writer::end () 
+void
+Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::end \n")));
@@ -56,29 +56,29 @@ Writer::end ()
 }
 
 
-int 
+int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
-    // Use the thread id as a_long_value which is used as key in the 
+    // Use the thread id as a_long_value which is used as key in the
     // FooTest3.
     foo.a_long_value = (CORBA::Long) (ACE_OS::thr_self ());
     foo.sample_sequence = -1;
     foo.handle_value = -1;
     foo.writer_id = writer_id_;
 
-    
+
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {
-      ::DDS::InstanceHandle_t handle 
-        = foo_dw_->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+      ::DDS::InstanceHandle_t handle
+        = foo_dw_->_cxx_register (foo);
 
-      // Any registration with different a_long_value should always 
+      // Any registration with different a_long_value should always
       // return the same handle.
       TEST_CHECK (handle_ == handle);
 
@@ -88,44 +88,40 @@ Writer::svc ()
       TEST_CHECK (data_map_.insert (handle, foo) == 0);
 
       // Calling get_key_value does not make sense since the Foo type has
-      // no key. But we call it to verify if the instance registered is 
+      // no key. But we call it to verify if the instance registered is
       // always the same.
       ::Xyz::Foo key_holder;
-      ::DDS::ReturnCode_t ret 
-        = foo_dw_->get_key_value(key_holder, handle ACE_ENV_ARG_PARAMETER);
+      ::DDS::ReturnCode_t ret
+        = foo_dw_->get_key_value(key_holder, handle);
 
       // check for equality
       TEST_CHECK(ret == ::DDS::RETCODE_OK);
-      TEST_CHECK (key_holder.a_long_value == registered_foo_.a_long_value); 
+      TEST_CHECK (key_holder.a_long_value == registered_foo_.a_long_value);
       TEST_CHECK(key_holder.sample_sequence == registered_foo_.sample_sequence);
       TEST_CHECK(key_holder.handle_value == registered_foo_.handle_value);
       TEST_CHECK(key_holder.writer_id == registered_foo_.writer_id);
 
-      foo_dw_->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      foo_dw_->write(foo,
+                    handle);
     }
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
   }
-  ACE_ENDTRY;
 
   return 0;
 }
 
-long 
+long
 Writer::writer_id () const
 {
   return writer_id_;
 }
 
 
-InstanceDataMap& 
-Writer::data_map () 
+InstanceDataMap&
+Writer::data_map ()
 {
   return data_map_;
 }

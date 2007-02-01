@@ -19,7 +19,7 @@
 // Information about TAO is available at:
 //     http://www.cs.wustl.edu/~schmidt/TAO.html
 
-// TAO_IDL - Generated from 
+// TAO_IDL - Generated from
 // .\be\be_codegen.cpp:1014
 
 #include "TopicListener.h"
@@ -30,16 +30,15 @@ TAO_DCPS_TopicListener_i::TAO_DCPS_TopicListener_i (void)
     last_status_.total_count = 0;
     last_status_.total_count_change = 0;
   }
-  
+
 // Implementation skeleton destructor
 TAO_DCPS_TopicListener_i::~TAO_DCPS_TopicListener_i (void)
   {
   }
-  
+
 void TAO_DCPS_TopicListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
     const ::DDS::InconsistentTopicStatus & status
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -47,4 +46,4 @@ void TAO_DCPS_TopicListener_i::on_inconsistent_topic (
   {
     last_status_ = status;
   }
-  
+

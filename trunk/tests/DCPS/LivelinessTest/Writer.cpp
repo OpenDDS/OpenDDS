@@ -10,7 +10,7 @@
 const int default_key = 101010;
 
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
                int num_writes_per_thread)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -20,13 +20,13 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 {
 }
 
-int 
+int
 Writer::run_test (int pass)
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     finished_sending_ = false;
 
@@ -36,17 +36,17 @@ Writer::run_test (int pass)
     foo.y = -1;
 
     foo.key = default_key;
-    
-    ::Mine::FooDataWriter_var foo_dw 
-      = ::Mine::FooDataWriter::_narrow(writer_.in () ACE_ENV_ARG_PARAMETER);
+
+    ::Mine::FooDataWriter_var foo_dw
+      = ::Mine::FooDataWriter::_narrow(writer_.in ());
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::run_test starting to write pass %d\n"),
               pass));
 
-    ::DDS::InstanceHandle_t handle 
-        = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+    ::DDS::InstanceHandle_t handle
+        = foo_dw->_cxx_register (foo);
 
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {
@@ -54,22 +54,18 @@ Writer::run_test (int pass)
       foo.x = (float)i;
       foo.y = (float)(-pass) ;
 
-      foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      foo_dw->write(foo,
+                    handle);
     }
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::run_test done writing.\n")));
 
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in run_test:");
+    ex._tao_print_exception ("Exception caught in run_test:");
   }
-  ACE_ENDTRY;
 
   finished_sending_ = true;
 

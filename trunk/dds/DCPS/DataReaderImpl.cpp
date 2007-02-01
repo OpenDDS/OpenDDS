@@ -126,7 +126,6 @@ void DataReaderImpl::init (
 			   SubscriberImpl*               subscriber,
 			   ::DDS::Subscriber_ptr         subscriber_objref,
 			   DataReaderRemote_ptr          dr_remote_objref
-			   ACE_ENV_ARG_DECL
 			   )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -153,14 +152,12 @@ void DataReaderImpl::init (
     {
       fast_listener_ = reference_to_servant<POA_DDS::DataReaderListener,
 	DDS::DataReaderListener_ptr>
-	(listener_.in() ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+	(listener_.in());
     }
   participant_servant_ = participant;
   participant_servant_->_add_ref ();
   domain_id_ =
-    participant_servant_->get_domain_id (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    participant_servant_->get_domain_id ();
 
   topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
 
@@ -174,8 +171,7 @@ void DataReaderImpl::init (
 
 
 void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
-				       const TAO::DCPS::WriterAssociationSeq & writers
-				       ACE_ENV_ARG_DECL)
+				       const TAO::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
@@ -344,9 +340,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
   if (listener != 0)
     {
       listener->on_subscription_match (dr_remote_objref_.in (),
-				       subscription_match_status
-				       ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+				       subscription_match_status);
 
       // TBD - why does the spec say to change this but not
       // change the ChangeFlagStatus after a listener call?
@@ -361,7 +355,6 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 void DataReaderImpl::remove_associations (
 					  const TAO::DCPS::WriterIdSeq & writers,
 					  ::CORBA::Boolean notify_lost
-					  ACE_ENV_ARG_DECL
 					  )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -532,24 +525,22 @@ void DataReaderImpl::remove_all_associations ()
       curr_writer.advance();
     }
 
-  ACE_TRY_NEW_ENV
+  try
     {
       CORBA::Boolean dont_notify_lost = 0;
       if (0 < size)
 	{
-	  remove_associations(writers, dont_notify_lost ACE_ENV_ARG_PARAMETER);
+	  remove_associations(writers, dont_notify_lost);
 	}
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
     }
-  ACE_ENDTRY;
 }
 
 
 void DataReaderImpl::update_incompatible_qos (
 					      const TAO::DCPS::IncompatibleQosStatus & status
-					      ACE_ENV_ARG_DECL
 					      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -577,7 +568,6 @@ void DataReaderImpl::update_incompatible_qos (
       listener->on_requested_incompatible_qos (dr_remote_objref_.in (),
 					       requested_incompatible_qos_status_);
 
-      ACE_CHECK;
 
       // TBD - why does the spec say to change total_count_change but not
       // change the ChangeFlagStatus after a listener call?
@@ -589,7 +579,6 @@ void DataReaderImpl::update_incompatible_qos (
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities (
-							       ACE_ENV_SINGLE_ARG_DECL
 							       )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -604,7 +593,6 @@ void DataReaderImpl::update_incompatible_qos (
 
 ::DDS::ReturnCode_t DataReaderImpl::set_qos (
 					     const ::DDS::DataReaderQos & qos
-					     ACE_ENV_ARG_DECL
 					     )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -640,7 +628,6 @@ void DataReaderImpl::update_incompatible_qos (
 
 void DataReaderImpl::get_qos (
 			      ::DDS::DataReaderQos & qos
-			      ACE_ENV_ARG_DECL
 			      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -652,7 +639,6 @@ void DataReaderImpl::get_qos (
 ::DDS::ReturnCode_t DataReaderImpl::set_listener (
 						  ::DDS::DataReaderListener_ptr a_listener,
 						  ::DDS::StatusKindMask mask
-						  ACE_ENV_ARG_DECL
 						  )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -664,13 +650,11 @@ void DataReaderImpl::get_qos (
   fast_listener_
     = reference_to_servant< ::POA_DDS::DataReaderListener,
     ::DDS::DataReaderListener_ptr >
-    (listener_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
 ::DDS::DataReaderListener_ptr DataReaderImpl::get_listener (
-							    ACE_ENV_SINGLE_ARG_DECL
 							    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -681,7 +665,6 @@ void DataReaderImpl::get_qos (
 
 
 ::DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription (
-								  ACE_ENV_SINGLE_ARG_DECL
 								  )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -691,7 +674,6 @@ void DataReaderImpl::get_qos (
 }
 
 ::DDS::Subscriber_ptr DataReaderImpl::get_subscriber (
-						      ACE_ENV_SINGLE_ARG_DECL
 						      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -701,7 +683,6 @@ void DataReaderImpl::get_qos (
 }
 
 ::DDS::SampleRejectedStatus DataReaderImpl::get_sample_rejected_status (
-									ACE_ENV_SINGLE_ARG_DECL
 									)
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -716,7 +697,6 @@ void DataReaderImpl::get_qos (
 }
 
 ::DDS::LivelinessChangedStatus DataReaderImpl::get_liveliness_changed_status (
-									      ACE_ENV_SINGLE_ARG_DECL
 									      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -737,7 +717,6 @@ void DataReaderImpl::get_qos (
 
 ::DDS::RequestedDeadlineMissedStatus
 DataReaderImpl::get_requested_deadline_missed_status (
-						      ACE_ENV_SINGLE_ARG_DECL
 						      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -754,7 +733,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::RequestedIncompatibleQosStatus * DataReaderImpl::get_requested_incompatible_qos_status (
-											       ACE_ENV_SINGLE_ARG_DECL
 											       )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -772,7 +750,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::SubscriptionMatchStatus DataReaderImpl::get_subscription_match_status (
-									      ACE_ENV_SINGLE_ARG_DECL
 									      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -788,7 +765,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::SampleLostStatus DataReaderImpl::get_sample_lost_status (
-								ACE_ENV_SINGLE_ARG_DECL
 								)
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -804,7 +780,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::ReturnCode_t DataReaderImpl::wait_for_historical_data (
 							      const ::DDS::Duration_t & max_wait
-							      ACE_ENV_ARG_DECL
 							      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -817,7 +792,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::ReturnCode_t DataReaderImpl::get_matched_publications (
 							      ::DDS::InstanceHandleSeq & publication_handles
-							      ACE_ENV_ARG_DECL
 							      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -844,7 +818,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 ::DDS::ReturnCode_t DataReaderImpl::get_matched_publication_data (
 								  ::DDS::PublicationBuiltinTopicData & publication_data,
 								  ::DDS::InstanceHandle_t publication_handle
-								  ACE_ENV_ARG_DECL
 								  )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -888,7 +861,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::enable (
-					    ACE_ENV_SINGLE_ARG_DECL
 					    )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -948,15 +920,12 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
   subscriber_servant_->reader_enabled(dr_remote_objref_.in (),
 				      name.in(),
-				      topic_servant_->get_id()
-				      ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+				      topic_servant_->get_id());
 
   return ::DDS::RETCODE_OK;
 }
 
 ::DDS::StatusKindMask DataReaderImpl::get_status_changes (
-							  ACE_ENV_SINGLE_ARG_DECL
 							  )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -967,7 +936,7 @@ DataReaderImpl::get_requested_deadline_missed_status (
 		    this->sample_lock_,
 		    ::DDS::RETCODE_ERROR);
 
-  return EntityImpl::get_status_changes (ACE_ENV_SINGLE_ARG_PARAMETER);
+  return EntityImpl::get_status_changes ();
 }
 
 
@@ -1417,7 +1386,6 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
     {
       listener->on_liveliness_changed (dr_remote_objref_.in (),
 				       liveliness_changed_status_);
-      ACE_CHECK;
 
       liveliness_changed_status_.active_count_change = 0;
       liveliness_changed_status_.inactive_count_change = 0;
@@ -1488,7 +1456,6 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
     {
       listener->on_liveliness_changed (dr_remote_objref_.in (),
 				       liveliness_changed_status_);
-      ACE_CHECK;
 
       liveliness_changed_status_.active_count_change = 0;
       liveliness_changed_status_.inactive_count_change = 0;

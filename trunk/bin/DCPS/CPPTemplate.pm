@@ -55,7 +55,6 @@ DDS::ReturnCode_t
 <%TYPE%>TypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -74,7 +73,6 @@ DDS::ReturnCode_t
 
 char *
 <%TYPE%>TypeSupportImpl::get_type_name (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -89,7 +87,6 @@ char *
 
 ::TAO::DCPS::DataWriterRemote_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -102,16 +99,13 @@ char *
 
 
     ::TAO::DCPS::DataWriterRemote_ptr writer_obj
-        = ::TAO::DCPS::servant_to_reference (writer_impl
-                                             ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK_RETURN (::TAO::DCPS::DataWriterRemote::_nil());
+        = ::TAO::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
 }
 
 ::TAO::DCPS::DataReaderRemote_ptr
 <%TYPE%>TypeSupportImpl::create_datareader (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -124,9 +118,7 @@ char *
 
 
     ::TAO::DCPS::DataReaderRemote_ptr reader_obj
-        = ::TAO::DCPS::servant_to_reference (reader_impl
-                                             ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
+        = ::TAO::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;
 }
@@ -157,7 +149,6 @@ char *
 DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::_cxx_register (
     const ::<%SCOPE%><%TYPE%> & instance_data
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -167,8 +158,7 @@ DDS::InstanceHandle_t
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return register_w_timestamp (instance_data,
                                ::TAO::DCPS::HANDLE_NIL,
-                               source_timestamp
-                               ACE_ENV_ARG_PARAMETER);
+                               source_timestamp);
 }
 
 DDS::InstanceHandle_t
@@ -176,7 +166,6 @@ DDS::InstanceHandle_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -209,7 +198,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -219,8 +207,7 @@ DDS::ReturnCode_t
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return unregister_w_timestamp (instance_data,
                                  handle,
-                                 source_timestamp
-                                 ACE_ENV_ARG_PARAMETER);
+                                 source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -228,7 +215,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -272,7 +258,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -282,8 +267,7 @@ DDS::ReturnCode_t
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return write_w_timestamp (instance_data,
                             handle,
-                            source_timestamp
-                            ACE_ENV_ARG_PARAMETER);
+                            source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -291,7 +275,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -338,7 +321,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -348,8 +330,7 @@ DDS::ReturnCode_t
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return dispose_w_timestamp (instance_data,
                               instance_handle,
-                              source_timestamp
-                              ACE_ENV_ARG_PARAMETER);
+                              source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -357,7 +338,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle,
     const ::DDS::Time_t & source_timestamp
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -388,7 +368,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::get_key_value (
     ::<%SCOPE%><%TYPE%> & key_holder,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -424,7 +403,6 @@ void
       ::DDS::Publisher_ptr                   publisher,
       TAO::DCPS::PublisherImpl*              publisher_servant,
       TAO::DCPS::DataWriterRemote_ptr        dw_remote
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -437,9 +415,7 @@ void
                                        participant_servant,
                                        publisher,
                                        publisher_servant,
-                                       dw_remote
-                                       ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                       dw_remote);
 
   ::<%SCOPE%><%TYPE%> data;
   if (_tao_is_bounded_size (data))
@@ -455,7 +431,6 @@ void
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::enable_specific (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -649,7 +624,6 @@ void
         TAO::DCPS::SubscriberImpl*        subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
         TAO::DCPS::DataReaderRemote_ptr   dr_remote_objref
-        ACE_ENV_ARG_DECL
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -662,13 +636,11 @@ void
                                       subscriber,
                                       subscriber_objref,
                                       dr_remote_objref) ;
-  ACE_CHECK;
 
 }
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::enable_specific (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -720,7 +692,6 @@ void
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::delete_contained_entities (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -739,7 +710,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -852,7 +822,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -944,7 +913,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1100,7 +1068,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1192,7 +1159,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_sample (
     ::<%SCOPE%><%TYPE%> & received_data,
     ::DDS::SampleInfo & sample_info
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1263,7 +1229,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_sample (
     ::<%SCOPE%><%TYPE%> & received_data,
     ::DDS::SampleInfo & sample_info
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1385,7 +1350,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1481,7 +1445,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1621,7 +1584,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1678,7 +1640,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1731,7 +1692,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
     ::<%MODULE%><%TYPE%>Seq & received_data,
     ::DDS::SampleInfoSeq & info_seq
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1758,7 +1718,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::get_key_value (
     ::<%SCOPE%><%TYPE%> & key_holder,
     ::DDS::InstanceHandle_t handle
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -2037,7 +1996,7 @@ void
 //{
 //  ::TAO::DCPS::DataReaderRemote_ptr reader_obj
 //      = ::TAO::DCPS::servant_to_reference
-//            (this ACE_ENV_ARG_PARAMETER);
+//            (this);
 //  ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
 //
 //  // servant_to_reference does not duplicate when the object is already active

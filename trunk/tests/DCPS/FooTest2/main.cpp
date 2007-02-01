@@ -32,10 +32,10 @@ int num_thread_to_write = 1;
 int block_on_write = 0;
 Foo foo;
 
-class Writer : public ACE_Task_Base 
+class Writer : public ACE_Task_Base
 {
 public:
-  Writer (::DDS::DataWriter_ptr writer, int num_thread_to_write = 1) 
+  Writer (::DDS::DataWriter_ptr writer, int num_thread_to_write = 1)
     : writer_ (::DDS::DataWriter::_duplicate(writer)),
       num_thread_to_write_ (num_thread_to_write)
   {
@@ -45,17 +45,17 @@ public:
   {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Writer::start \n")));
-    if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1) 
+    if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Writer::start, ")
-                  ACE_TEXT ("%p."), 
-                  "activate")); 
+                  ACE_TEXT ("%p."),
+                  "activate"));
       exit (1);
     }
   }
 
-  void end () 
+  void end ()
   {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Writer::end \n")));
@@ -68,21 +68,21 @@ public:
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Writer::svc \n")));
 
-    ACE_TRY_NEW_ENV
+    try
     {
-      FooDataWriter_var foo_dw = FooDataWriter::_narrow(writer_ ACE_ENV_ARG_PARAMETER);
+      FooDataWriter_var foo_dw = FooDataWriter::_narrow(writer_);
       TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
       foo.key = 101010;
       foo.x = (float) 123.456;
       foo.y = (float) 987.654;
 
-      ::DDS::InstanceHandle_t handle 
-        = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+      ::DDS::InstanceHandle_t handle
+        = foo_dw->_cxx_register (foo);
 
       Foo key_holder;
-      ::DDS::ReturnCode_t ret 
-        = foo_dw->get_key_value(key_holder, handle ACE_ENV_ARG_PARAMETER);
+      ::DDS::ReturnCode_t ret
+        = foo_dw->get_key_value(key_holder, handle);
 
       TEST_CHECK(ret == ::DDS::RETCODE_OK);
       // check for equality
@@ -90,18 +90,14 @@ public:
       TEST_CHECK (foo.x == key_holder.x);
       TEST_CHECK (foo.y == key_holder.y);
 
-      foo_dw->write(foo, 
-                    handle 
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      foo_dw->write(foo,
+                    handle);
 
     }
-    ACE_CATCHANY
+    catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-        "Exception caught in svc:");
+      ex._tao_print_exception ("Exception caught in svc:");
     }
-    ACE_ENDTRY;
 
     return 0;
   };
@@ -116,22 +112,22 @@ private:
 int parse_args (int argc, char *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
-  while (arg_shifter.is_anything_left ()) 
+
+  while (arg_shifter.is_anything_left ())
   {
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
     {
       num_thread_to_write = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0) 
+    if ((currentArg = arg_shifter.get_the_parameter("-b")) != 0)
     {
       block_on_write = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else 
+    else
     {
       arg_shifter.ignore_arg ();
     }
@@ -143,37 +139,32 @@ int parse_args (int argc, char *argv[])
 
 int main (int argc, char *argv[])
 {
-  ACE_TRY_NEW_ENV
+  try
     {
       parse_args (argc, argv);
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = fts_servant;
 
-      FooTypeSupport_var fts = 
+      FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
-      ACE_TRY_CHECK;
 
 
-      ::DDS::DomainParticipant_var dp = 
-        dpf->create_participant(MY_DOMAIN, 
-                                PARTICIPANT_QOS_DEFAULT, 
-                                ::DDS::DomainParticipantListener::_nil() 
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      ::DDS::DomainParticipant_var dp =
+        dpf->create_participant(MY_DOMAIN,
+                                PARTICIPANT_QOS_DEFAULT,
+                                ::DDS::DomainParticipantListener::_nil());
       TEST_CHECK (! CORBA::is_nil (dp.in ()));
 
       if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
         {
-          ACE_ERROR ((LM_ERROR, 
-            ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("Failed to register the FooTypeSupport.")));
           return 1;
         }
 
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -185,20 +176,16 @@ int main (int argc, char *argv[])
         topic_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
       }
 
-      ::DDS::Topic_var topic = 
-        dp->create_topic (MY_TOPIC, 
-                          MY_TYPE, 
-                          topic_qos, 
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      ::DDS::Topic_var topic =
+        dp->create_topic (MY_TOPIC,
+                          MY_TYPE,
+                          topic_qos,
+                          ::DDS::TopicListener::_nil());
       TEST_CHECK (! CORBA::is_nil (topic.in ()));
 
       ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::PublisherListener::_nil());
       TEST_CHECK (! CORBA::is_nil (pub.in ()));
 
       ::DDS::DataWriterQos dw_qos;
@@ -213,10 +200,8 @@ int main (int argc, char *argv[])
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                  dw_qos,
-                                 ::DDS::DataWriterListener::_nil()
-                                 ACE_ENV_ARG_PARAMETER);
-      
-      ACE_TRY_CHECK;
+                                 ::DDS::DataWriterListener::_nil());
+
       TEST_CHECK (! CORBA::is_nil (dw.in ()));
 
       Writer writer(dw, num_thread_to_write);
@@ -225,15 +210,12 @@ int main (int argc, char *argv[])
 
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                              ::DDS::SubscriberListener::_nil()
-                              ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                              ::DDS::SubscriberListener::_nil());
       TEST_CHECK (! CORBA::is_nil (sub.in ()));
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(MY_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
-      TEST_CHECK (! CORBA::is_nil (description.in ())); 
+        dp->lookup_topicdescription(MY_TOPIC);
+      TEST_CHECK (! CORBA::is_nil (description.in ()));
 
       ::DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
@@ -248,12 +230,10 @@ int main (int argc, char *argv[])
       ::DDS::DataReader_var dr =
         sub->create_datareader(description.in (),
                                dr_qos,
-                               ::DDS::DataReaderListener::_nil()
-                               ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                               ::DDS::DataReaderListener::_nil());
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
-      FooDataReader_var foo_dr = FooDataReader::_narrow(dr.in () ACE_ENV_ARG_PARAMETER);
+      FooDataReader_var foo_dr = FooDataReader::_narrow(dr.in ());
       TEST_CHECK (! CORBA::is_nil (foo_dr.in ()));
 
       for (int i = 0; i < num_thread_to_write; i ++)
@@ -265,7 +245,6 @@ int main (int argc, char *argv[])
 
         ::DDS::SampleInfo si;
         foo_dr->read_next_sample(foo_read_data, si);
-        ACE_TRY_CHECK;
 
         // check for equality
         TEST_CHECK (foo.key == foo_read_data.key);
@@ -274,25 +253,23 @@ int main (int argc, char *argv[])
       }
 
       // clean up the objects
-      pub->delete_datawriter(dw.in () ACE_ENV_ARG_PARAMETER);
-      dp->delete_publisher(pub.in () ACE_ENV_ARG_PARAMETER);
+      pub->delete_datawriter(dw.in ());
+      dp->delete_publisher(pub.in ());
 
-      sub->delete_datareader(dr.in () ACE_ENV_ARG_PARAMETER);
-      dp->delete_subscriber(sub.in () ACE_ENV_ARG_PARAMETER);
+      sub->delete_datareader(dr.in ());
+      dp->delete_subscriber(sub.in ());
 
-      dp->delete_topic(topic.in () ACE_ENV_ARG_PARAMETER);
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
 
-      TheServiceParticipant->shutdown (); 
+      TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }

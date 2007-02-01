@@ -19,14 +19,12 @@ static const char * writer_address_str = "127.0.0.1:29876";
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
                int history_depth,
-               int max_samples_per_instance) 
+               int max_samples_per_instance)
 : dp_(::DDS::DomainParticipant::_duplicate (dp))
 {
   // Create the publisher
   pub_ = dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                              ::DDS::PublisherListener::_nil()
-                              ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                              ::DDS::PublisherListener::_nil());
   if (CORBA::is_nil (pub_.in ()))
   {
     ACE_ERROR ((LM_ERROR,
@@ -43,11 +41,10 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the publisher to the transport.
-  ::TAO::DCPS::PublisherImpl* pub_impl 
+  ::TAO::DCPS::PublisherImpl* pub_impl
       = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
                               ::DDS::Publisher_ptr>
-                              (pub_.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                              (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -68,9 +65,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   dw_ = pub_->create_datawriter(topic,
                                 dw_qos,
-                                ::DDS::DataWriterListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+                                ::DDS::DataWriterListener::_nil());
 
   if (CORBA::is_nil (dw_.in ()))
   {
@@ -80,7 +75,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   ::Mine::FooDataWriter_var foo_dw = ::Mine::FooDataWriter::_narrow(
-      dw_.in () ACE_ENV_ARG_PARAMETER);
+      dw_.in ());
   if (CORBA::is_nil (foo_dw.in ()))
   {
     ACE_ERROR ((LM_ERROR,
@@ -90,7 +85,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   fast_dw_ = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
                                                 ::Mine::FooDataWriter_ptr>
-                (foo_dw.in () ACE_ENV_SINGLE_ARG_PARAMETER);
+                (foo_dw.in ());
 
 }
 
@@ -104,22 +99,20 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
       ACE_OS::printf ("writing %c foo.x = %f foo.y = %f, foo.key = %d\n",
                       foo.c, foo.x, foo.y, foo.key);
 
-      fast_dw_->write(foo, 
-                      handle 
-                      ACE_ENV_ARG_PARAMETER);
+      fast_dw_->write(foo,
+                      handle);
       break;
 
     case ::TAO::DCPS::INSTANCE_REGISTRATION:
       ACE_OS::printf ("registering foo.key = %d\n", foo.key) ;
-      handle = fast_dw_->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
+      handle = fast_dw_->_cxx_register (foo);
       break;
 
     case ::TAO::DCPS::DISPOSE_INSTANCE:
       ACE_OS::printf ("disposing foo.key = %d\n", foo.key) ;
 
-      fast_dw_->dispose(foo, 
-                        handle 
-                        ACE_ENV_ARG_PARAMETER);
+      fast_dw_->dispose(foo,
+                        handle);
       break;
 
     default:
@@ -129,13 +122,13 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
 }
 
 
-void 
+void
 Writer::test1 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test1 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -158,22 +151,20 @@ Writer::test1 ()
     // register I2
     write (::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test1:");
+    ex._tao_print_exception ("Exception caught in test1:");
   }
-  ACE_ENDTRY;
 }
 
 
-void 
+void
 Writer::test2 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test2 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -205,22 +196,20 @@ Writer::test2 ()
     // write I3 value Q
     write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test2:");
+    ex._tao_print_exception ("Exception caught in test2:");
   }
-  ACE_ENDTRY;
 }
 
 
-void 
+void
 Writer::test3 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test3 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -259,21 +248,19 @@ Writer::test3 ()
     // Dispose I2
     write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test3:");
+    ex._tao_print_exception ("Exception caught in test3:");
   }
-  ACE_ENDTRY;
 }
 
-void 
+void
 Writer::test4 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test4 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -285,21 +272,19 @@ Writer::test4 ()
     // write I1 value c
     write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test4:");
+    ex._tao_print_exception ("Exception caught in test4:");
   }
-  ACE_ENDTRY;
 }
 
-void 
+void
 Writer::test5 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test5 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -311,22 +296,20 @@ Writer::test5 ()
     // write I1 value d
     write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test5:");
+    ex._tao_print_exception ("Exception caught in test5:");
   }
-  ACE_ENDTRY;
 }
 
 
-void 
+void
 Writer::test6 ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::test6 \n")));
 
-  ACE_TRY_NEW_ENV
+  try
   {
     ::Xyz::Foo foo;
 
@@ -338,12 +321,10 @@ Writer::test6 ()
     // write I1 value d
     write (::TAO::DCPS::SAMPLE_DATA, foo) ;
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in test6:");
+    ex._tao_print_exception ("Exception caught in test6:");
   }
-  ACE_ENDTRY;
 }
 
 
@@ -351,15 +332,15 @@ int Writer::init_transport ()
 {
   int status = 0;
 
-  writer_transport_impl 
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
+  writer_transport_impl
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                   "SimpleTcp",
                                                   TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
@@ -378,13 +359,11 @@ int Writer::init_transport ()
 
 Writer::~Writer()
 {
-  pub_->delete_datawriter(dw_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+  pub_->delete_datawriter(dw_.in ());
   // Clean up publisher objects
   // pub_->delete_contained_entities() ;
 
-  dp_->delete_publisher(pub_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_TRY_CHECK;
+  dp_->delete_publisher(pub_.in ());
 
   //We have to wait a while to avoid the remove_association from DCPSInfo
   //called after the transport is release.

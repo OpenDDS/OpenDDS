@@ -60,8 +60,7 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
     {
       fast_listener_ = reference_to_servant<POA_DDS::PublisherListener,
   DDS::PublisherListener_ptr>
-  (listener_.in() ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+  (listener_.in());
     }
 }
 
@@ -91,7 +90,6 @@ PublisherImpl::~PublisherImpl (void)
               ::DDS::Topic_ptr a_topic,
               const ::DDS::DataWriterQos & qos,
               ::DDS::DataWriterListener_ptr a_listener
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -109,20 +107,16 @@ PublisherImpl::~PublisherImpl (void)
   ::DDS::DataWriterQos dw_qos;
   if (qos == DATAWRITER_QOS_DEFAULT)
     {
-      this->get_default_datawriter_qos(dw_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+      this->get_default_datawriter_qos(dw_qos);
     }
   else if (qos == DATAWRITER_QOS_USE_TOPIC_QOS)
     {
       ::DDS::TopicQos topic_qos;
-      a_topic->get_qos (topic_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+      a_topic->get_qos (topic_qos);
 
-      this->get_default_datawriter_qos(dw_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+      this->get_default_datawriter_qos(dw_qos);
 
-      this->copy_from_topic_qos (dw_qos, topic_qos ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+      this->copy_from_topic_qos (dw_qos, topic_qos);
     }
   else
     {
@@ -150,8 +144,7 @@ PublisherImpl::~PublisherImpl (void)
   TopicImpl* topic_servant
     = reference_to_servant<TopicImpl,
     ::DDS::Topic_ptr>
-    (a_topic ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+    (a_topic);
 
   POA_TAO::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
 
@@ -170,16 +163,14 @@ PublisherImpl::~PublisherImpl (void)
 
   DataWriterImpl* dw_servant = reference_to_servant <DataWriterImpl,
     ::DDS::DataWriter_ptr>
-    (dw_obj.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataWriter::_nil ());
+    (dw_obj.in ());
 
   // Give owner ship to poa.
   dw_servant->_remove_ref ();
 
   DomainParticipantImpl* participant
     = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-    (participant_objref_.in ()  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+    (participant_objref_.in ());
 
   dw_servant->init (a_topic,
         topic_servant,
@@ -188,16 +179,13 @@ PublisherImpl::~PublisherImpl (void)
         participant,
         publisher_objref_.in (),
         this,
-        dw_obj.in ()
-        ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::DataWriter::_nil());
+        dw_obj.in ());
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1)
     {
       ::DDS::ReturnCode_t ret
-    = dw_servant->enable (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_CHECK_RETURN (::DDS::DataWriter::_nil ());
+    = dw_servant->enable ();
 
       if (ret != ::DDS::RETCODE_OK)
   {
@@ -234,7 +222,6 @@ PublisherImpl::~PublisherImpl (void)
 
 ::DDS::ReturnCode_t PublisherImpl::delete_datawriter (
                   ::DDS::DataWriter_ptr a_datawriter
-                  ACE_ENV_ARG_DECL
                   )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -250,8 +237,7 @@ PublisherImpl::~PublisherImpl (void)
 
   DataWriterImpl* dw_servant
     = reference_to_servant <DataWriterImpl, ::DDS::DataWriter_ptr>
-    (a_datawriter ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (a_datawriter);
 
   if (dw_servant->get_publisher_servant () != this)
     {
@@ -338,30 +324,27 @@ PublisherImpl::~PublisherImpl (void)
   // not just unregister but remove any pending writes/sends.
   local_writer->unregister_all ();
 
-  ACE_TRY
+  try
     {
       this->repository_->remove_publication(
               participant_->get_domain_id (),
               participant_->get_id (),
-              publication_id
-              ACE_ENV_ARG_PARAMETER) ;
-      ACE_TRY_CHECK;
+              publication_id) ;
     }
-  ACE_CATCH (CORBA::SystemException, sysex)
+  catch (const CORBA::SystemException& sysex)
     {
-      ACE_PRINT_EXCEPTION (sysex,
-         "ERROR: System Exception"
-         " in PublisherImpl::delete_datawriter");
+      sysex._tao_print_exception (
+        "ERROR: System Exception"
+        " in PublisherImpl::delete_datawriter");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_CATCH (CORBA::UserException, userex)
+  catch (const CORBA::UserException& userex)
     {
-      ACE_PRINT_EXCEPTION (userex,
-         "ERROR: User Exception"
-         " in PublisherImpl::delete_datawriter");
+      userex._tao_print_exception (
+        "ERROR: User Exception"
+        " in PublisherImpl::delete_datawriter");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_ENDTRY;
 
   // Decrease ref count after the servant is removed from the
   // map.
@@ -374,7 +357,6 @@ PublisherImpl::~PublisherImpl (void)
 
 ::DDS::DataWriter_ptr PublisherImpl::lookup_datawriter (
               const char * topic_name
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -415,7 +397,6 @@ PublisherImpl::~PublisherImpl (void)
 }
 
 ::DDS::ReturnCode_t PublisherImpl::delete_contained_entities (
-                    ACE_ENV_SINGLE_ARG_DECL
                     )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -466,7 +447,6 @@ PublisherImpl::~PublisherImpl (void)
 
 ::DDS::ReturnCode_t PublisherImpl::set_qos (
               const ::DDS::PublisherQos & qos
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -503,7 +483,6 @@ PublisherImpl::~PublisherImpl (void)
 
 void PublisherImpl::get_qos (
            ::DDS::PublisherQos & qos
-           ACE_ENV_ARG_DECL
            )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -515,7 +494,6 @@ void PublisherImpl::get_qos (
 ::DDS::ReturnCode_t PublisherImpl::set_listener (
              ::DDS::PublisherListener_ptr a_listener,
              ::DDS::StatusKindMask mask
-             ACE_ENV_ARG_DECL
              )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -527,13 +505,11 @@ void PublisherImpl::get_qos (
   fast_listener_
     = reference_to_servant< ::POA_DDS::PublisherListener,
     ::DDS::PublisherListener_ptr >
-    (listener_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
 ::DDS::PublisherListener_ptr PublisherImpl::get_listener (
-                ACE_ENV_SINGLE_ARG_DECL
                 )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -543,7 +519,6 @@ void PublisherImpl::get_qos (
 }
 
 ::DDS::ReturnCode_t PublisherImpl::suspend_publications (
-               ACE_ENV_SINGLE_ARG_DECL
                )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -566,7 +541,6 @@ void PublisherImpl::get_qos (
 }
 
 ::DDS::ReturnCode_t PublisherImpl::resume_publications (
-              ACE_ENV_SINGLE_ARG_DECL
               )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -602,7 +576,6 @@ void PublisherImpl::get_qos (
 }
 
 ::DDS::ReturnCode_t PublisherImpl::begin_coherent_changes (
-                 ACE_ENV_SINGLE_ARG_DECL
                  )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -613,7 +586,6 @@ void PublisherImpl::get_qos (
 }
 
 ::DDS::ReturnCode_t PublisherImpl::end_coherent_changes (
-               ACE_ENV_SINGLE_ARG_DECL
                )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -624,7 +596,6 @@ void PublisherImpl::get_qos (
 }
 
 ::DDS::DomainParticipant_ptr PublisherImpl::get_participant (
-                   ACE_ENV_SINGLE_ARG_DECL
                    )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -635,7 +606,6 @@ void PublisherImpl::get_qos (
 
 ::DDS::ReturnCode_t PublisherImpl::set_default_datawriter_qos (
                      const ::DDS::DataWriterQos & qos
-                     ACE_ENV_ARG_DECL
                      )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -654,7 +624,6 @@ void PublisherImpl::get_qos (
 
 void PublisherImpl::get_default_datawriter_qos (
             ::DDS::DataWriterQos & qos
-            ACE_ENV_ARG_DECL
             )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -666,7 +635,6 @@ void PublisherImpl::get_default_datawriter_qos (
 ::DDS::ReturnCode_t PublisherImpl::copy_from_topic_qos (
               ::DDS::DataWriterQos & a_datawriter_qos,
               const ::DDS::TopicQos & a_topic_qos
-              ACE_ENV_ARG_DECL
               )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -697,7 +665,6 @@ void PublisherImpl::get_default_datawriter_qos (
 }
 
 ::DDS::ReturnCode_t PublisherImpl::enable (
-             ACE_ENV_SINGLE_ARG_DECL
              )
   ACE_THROW_SPEC ((
        CORBA::SystemException
@@ -717,13 +684,12 @@ void PublisherImpl::get_default_datawriter_qos (
 }
 
 ::DDS::StatusKindMask PublisherImpl::get_status_changes (
-               ACE_ENV_SINGLE_ARG_DECL
                )
   ACE_THROW_SPEC ((
        CORBA::SystemException
        ))
 {
-  return EntityImpl::get_status_changes (ACE_ENV_SINGLE_ARG_PARAMETER);
+  return EntityImpl::get_status_changes ();
 }
 
 
@@ -789,19 +755,17 @@ void PublisherImpl::remove_associations(
   info->remote_writer_ = writer ;
   info->local_writer_
     = reference_to_servant<DataWriterImpl, DataWriterRemote_ptr>
-    (writer ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (::DDS::RETCODE_ERROR);
+    (writer);
 
   info->topic_id_      = topic_id ;
   // all other info memebers default in constructor
 
   /// Load the publication into the repository and get the
   /// publication_id_ in return.
-  ACE_TRY
+  try
     {
       ::DDS::DataWriterQos qos;
-      info->remote_writer_->get_qos(qos ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      info->remote_writer_->get_qos(qos);
 
       TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
 
@@ -813,26 +777,23 @@ void PublisherImpl::remove_associations(
                info->remote_writer_,
                qos,
                trans_conf_info ,   // Obtained during setup.
-               qos_
-               ACE_ENV_ARG_PARAMETER) ;
-      ACE_TRY_CHECK;
+               qos_) ;
       info->local_writer_->set_publication_id (info->publication_id_);
     }
-  ACE_CATCH (CORBA::SystemException, sysex)
+  catch (const CORBA::SystemException& sysex)
     {
-      ACE_PRINT_EXCEPTION (sysex,
-         "ERROR: System Exception"
-         " in PublisherImpl::writer_enabled");
+      sysex._tao_print_exception (
+        "ERROR: System Exception"
+        " in PublisherImpl::writer_enabled");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_CATCH (CORBA::UserException, userex)
+  catch (const CORBA::UserException& userex)
     {
-      ACE_PRINT_EXCEPTION (userex,
-         "ERROR:  Exception"
-         " in PublisherImpl::writer_enabled");
+      userex._tao_print_exception (
+        "ERROR:  Exception"
+        " in PublisherImpl::writer_enabled");
       return ::DDS::RETCODE_ERROR;
     }
-  ACE_ENDTRY;
 
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,

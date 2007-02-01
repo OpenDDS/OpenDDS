@@ -201,12 +201,11 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
 //      TheServiceParticipant->liveliness_factor(100) ;
 
@@ -231,9 +230,7 @@ int main (int argc, char *argv[])
               new ::Mine::Foo1TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts1 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts1 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T2)
@@ -242,9 +239,7 @@ int main (int argc, char *argv[])
               new ::Mine::Foo2TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts2 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts2 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T3)
@@ -253,17 +248,13 @@ int main (int argc, char *argv[])
               new ::Mine::Foo3TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = fts_servant;
 
-          fts3 = TAO::DCPS::servant_to_reference (fts_servant
-                                                  ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          fts3 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
-                                ::DDS::DomainParticipantListener::_nil()
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                ::DDS::DomainParticipantListener::_nil());
 
       if (CORBA::is_nil (dp.in ()))
       {
@@ -281,7 +272,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       if (topics & TOPIC_T2)
         {
@@ -292,7 +282,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       if (topics & TOPIC_T3)
         {
@@ -303,7 +292,6 @@ int main (int argc, char *argv[])
               return 1;
             }
         }
-      ACE_TRY_CHECK;
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
@@ -322,9 +310,7 @@ int main (int argc, char *argv[])
           topic1 = dp->create_topic (MY_TOPIC1,
                                      MY_TYPE1,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic1.in ()))
             {
@@ -337,9 +323,7 @@ int main (int argc, char *argv[])
           topic2 = dp->create_topic (MY_TOPIC2,
                                      MY_TYPE2,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic2.in ()))
             {
@@ -352,9 +336,7 @@ int main (int argc, char *argv[])
           topic3 = dp->create_topic (MY_TOPIC3,
                                      MY_TYPE3,
                                      topic_qos,
-                                     ::DDS::TopicListener::_nil()
-                                     ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+                                     ::DDS::TopicListener::_nil());
 
           if (CORBA::is_nil (topic3.in ()))
             {
@@ -368,9 +350,7 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T1)
         {
-          description1 = dp->lookup_topicdescription(MY_TOPIC1
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          description1 = dp->lookup_topicdescription(MY_TOPIC1);
           if (CORBA::is_nil (description1.in ()))
             {
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -381,9 +361,7 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T2)
         {
-          description2 = dp->lookup_topicdescription(MY_TOPIC2
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          description2 = dp->lookup_topicdescription(MY_TOPIC2);
           if (CORBA::is_nil (description2.in ()))
             {
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -394,9 +372,7 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T3)
         {
-          description3 = dp->lookup_topicdescription(MY_TOPIC3
-                    ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          description3 = dp->lookup_topicdescription(MY_TOPIC3);
           if (CORBA::is_nil (description3.in ()))
             {
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -408,9 +384,7 @@ int main (int argc, char *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -430,8 +404,7 @@ int main (int argc, char *argv[])
       ::TAO::DCPS::SubscriberImpl* sub_impl
         = TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                            ::DDS::Subscriber_ptr>
-                              (sub.in () ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -496,43 +469,31 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T1)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant1
-                                                ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+            = ::TAO::DCPS::servant_to_reference(&drl_servant1);
 
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
-                                  drl.in ()
-                                  ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+                                  drl.in ());
         }
 
       if (topics & TOPIC_T2)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant2
-                                                ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+            = ::TAO::DCPS::servant_to_reference(&drl_servant2);
 
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
-                                  drl.in ()
-                                  ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+                                  drl.in ());
         }
 
       if (topics & TOPIC_T3)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant3
-                                                ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+            = ::TAO::DCPS::servant_to_reference(&drl_servant3);
 
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
-                                  drl.in ()
-                                  ACE_ENV_ARG_PARAMETER);
-          ACE_CHECK;
+                                  drl.in ());
         }
 /*
       // Indicate that the subscriber is ready
@@ -685,41 +646,39 @@ int main (int argc, char *argv[])
 
       sub->delete_contained_entities() ;
 
-      dp->delete_subscriber(sub.in () ACE_ENV_ARG_PARAMETER);
+      dp->delete_subscriber(sub.in ());
 
       if (topics & TOPIC_T1)
       {
-        dp->delete_topic(topic1.in () ACE_ENV_ARG_PARAMETER);
+        dp->delete_topic(topic1.in ());
       }
       if (topics & TOPIC_T2)
       {
-        dp->delete_topic(topic2.in () ACE_ENV_ARG_PARAMETER);
+        dp->delete_topic(topic2.in ());
       }
       if (topics & TOPIC_T3)
       {
-        dp->delete_topic(topic3.in () ACE_ENV_ARG_PARAMETER);
+        dp->delete_topic(topic3.in ());
       }
 
-      dp->delete_contained_entities(ACE_ENV_SINGLE_ARG_PARAMETER);
+      dp->delete_contained_entities();
 
-      dpf->delete_participant(dp.in () ACE_ENV_ARG_PARAMETER);
+      dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
     }
-  ACE_CATCH (TestException,ex)
+  catch (const TestException& ex)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
   return status;
 }

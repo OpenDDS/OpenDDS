@@ -24,7 +24,6 @@ DataWriterListenerImpl::~DataWriterListenerImpl ()
 void DataWriterListenerImpl::on_offered_deadline_missed (
   ::DDS::DataWriter_ptr,
   const ::DDS::OfferedDeadlineMissedStatus &
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -38,7 +37,6 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
 void DataWriterListenerImpl::on_offered_incompatible_qos (
   ::DDS::DataWriter_ptr,
   const ::DDS::OfferedIncompatibleQosStatus &
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -52,7 +50,6 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
 void DataWriterListenerImpl::on_liveliness_lost (
   ::DDS::DataWriter_ptr,
   const ::DDS::LivelinessLostStatus &
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -66,7 +63,6 @@ void DataWriterListenerImpl::on_liveliness_lost (
 void DataWriterListenerImpl::on_publication_match (
   ::DDS::DataWriter_ptr,
   const ::DDS::PublicationMatchStatus &
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -80,7 +76,6 @@ void DataWriterListenerImpl::on_publication_match (
 void DataWriterListenerImpl::on_publication_disconnected (
   ::DDS::DataWriter_ptr,
   const ::TAO::DCPS::PublicationDisconnectedStatus & status
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -99,7 +94,6 @@ void DataWriterListenerImpl::on_publication_disconnected (
 void DataWriterListenerImpl::on_publication_reconnected (
   ::DDS::DataWriter_ptr,
   const ::TAO::DCPS::PublicationReconnectedStatus & status
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -118,7 +112,6 @@ void DataWriterListenerImpl::on_publication_reconnected (
 void DataWriterListenerImpl::on_publication_lost (
   ::DDS::DataWriter_ptr,
   const ::TAO::DCPS::PublicationLostStatus & status
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -138,7 +131,6 @@ void DataWriterListenerImpl::on_publication_lost (
 
 void DataWriterListenerImpl::on_connection_deleted (
   ::DDS::DataWriter_ptr
-  ACE_ENV_ARG_DECL_WITH_DEFAULTS
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException

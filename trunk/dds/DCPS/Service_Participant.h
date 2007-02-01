@@ -23,7 +23,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200 
+#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
 # pragma warning( disable : 4231 )
 #endif
 
@@ -35,14 +35,14 @@ namespace TAO
     * @class Service_Participant
     *
     * @brief Service entrypoint.
-    *        
-    *   This class is a sigleton that allows ::DDS client applications to configure  
-    *   the TAO implementation of ::DDS. This includes running the ORB to support 
+    *
+    *   This class is a sigleton that allows ::DDS client applications to configure
+    *   the TAO implementation of ::DDS. This includes running the ORB to support
     *   ::DDS.
     *
-    *   @note: The client will either create an ORB and call set_ORB() before 
-    *   calling get_domain_particpant_factory() and will run the ORB *or* 
-    *   it will not call set_ORB() first and get_domain_particpant_factory() 
+    *   @note: The client will either create an ORB and call set_ORB() before
+    *   calling get_domain_particpant_factory() and will run the ORB *or*
+    *   it will not call set_ORB() first and get_domain_particpant_factory()
     *   will automatically create an ORB to be used by ::DDS and will run that
     *   ORB in a thread it creates.
     *
@@ -66,7 +66,7 @@ namespace TAO
 
       /** Get the ORB used by ::DDS.
       *   Only valid after set_ORB() or get_domain_participant_factory()
-      *   called. 
+      *   called.
       **/
       CORBA::ORB_ptr get_ORB ();
 
@@ -78,7 +78,7 @@ namespace TAO
       *  run it in a separate thread.
       **/
       ::DDS::DomainParticipantFactory_ptr get_domain_participant_factory (
-          int &argc = zero_argc, 
+          int &argc = zero_argc,
           ACE_TCHAR *argv[] = 0
         );
 
@@ -95,7 +95,7 @@ namespace TAO
 
       /** Accessor of the DCPSInfo object reference. **/
       DCPSInfo_ptr get_repository () const;
-      
+
       /** Accessors of the qos policy initial values. **/
       ::DDS::UserDataQosPolicy               initial_UserDataQosPolicy () const;
       ::DDS::TopicDataQosPolicy              initial_TopicDataQosPolicy () const;
@@ -127,21 +127,21 @@ namespace TAO
       ::DDS::SubscriberQos                   initial_SubscriberQos () const;
 
       /// This accessor is to provide the configurable number of chunks that
-      /// a datawriter's cached allocator need to allocate when the resource 
-      ///  limits are infinite.  Has a default, can be set by the -DCPSChunks 
+      /// a datawriter's cached allocator need to allocate when the resource
+      ///  limits are infinite.  Has a default, can be set by the -DCPSChunks
       /// option, or by n_chunks() setter.
       size_t   n_chunks () const;
-      
+
       /// set the value returned by n_chunks() accessor.
       /// See accessor description.
       void     n_chunks (size_t chunks);
 
       /// This accessor is to provide the multiplier for allocators
-      /// that have resources used on a per association basis. 
-      /// Has a default, can be set by the -DCPSChunkAssociationMutltiplier 
+      /// that have resources used on a per association basis.
+      /// Has a default, can be set by the -DCPSChunkAssociationMutltiplier
       /// option, or by n_association_chunk_multiplier() setter.
       size_t   association_chunk_multiplier () const;
-      
+
       /// set the value returned by n_association_chunk_multiplier() accessor.
       /// See accessor description.
       void     association_chunk_multiplier (size_t multiplier);
@@ -153,31 +153,31 @@ namespace TAO
       /// Accessor of the Liveliness propagation delay factor.
       /// @return % of lease period before sending a liveliness message.
       int liveliness_factor () const;
-      
+
       /** Set the InfoRepo's ior manually.
       * NOTE: This has to be called before the get_domain_participant_factory
       *       method.
       */
       void set_repo_ior(const char* repo_ior);
 
-      /** 
+      /**
       * Accessors for bit_transport_port_.
       * The accessor is used for client application to configure
       * the local transport listening port number.
       *
-      * Note: The default port is INVALID. The user needs call 
-      *       this function to setup the desired port number. 
+      * Note: The default port is INVALID. The user needs call
+      *       this function to setup the desired port number.
       */
       int bit_transport_port () const;
       void bit_transport_port (int port);
-    
+
       /// Accessor of the TransportImpl used by the builtin topics.
       TransportImpl_rch bit_transport_impl ();
 
       /**
       * Accessor for bit_lookup_duration_msec_.
       * The accessor is used for client application to configure
-      * the timeout for lookup data from the builtin topic 
+      * the timeout for lookup data from the builtin topic
       * datareader.  Value is in milliseconds.
       */
       int bit_lookup_duration_msec () const;
@@ -191,7 +191,7 @@ namespace TAO
         {
           bit_enabled_ = flag;
         }
-       
+
       bool get_BIT ()
         {
           return bit_enabled_;
@@ -202,16 +202,16 @@ namespace TAO
       int init_bit_transport_impl ();
 
     private:
-      
+
       /** Initalize default qos **/
       void initialize ();
 
-      /** Parse the command line for user options. e.g. "-DCPSInfo <iorfile>". 
+      /** Parse the command line for user options. e.g. "-DCPSInfo <iorfile>".
        *  It consumes -DCPS* options and thier arguments
        */
       int parse_args (int &argc, ACE_TCHAR *argv[]);
 
-      /** Import the configuration file to the ACE_Configuration_Heap object and load 
+      /** Import the configuration file to the ACE_Configuration_Heap object and load
        *  common section configuration to the Service_Participant singleton and load
        *  the factory and transport section configuration to the TransportFactory
        *  singleton.
@@ -223,7 +223,7 @@ namespace TAO
        */
       int load_common_configuration ();
 
-      /// The orb object reference which can be provided by client or initialized  
+      /// The orb object reference which can be provided by client or initialized
       /// by this sigleton.
       CORBA::ORB_var orb_;
 
@@ -236,16 +236,16 @@ namespace TAO
       /// The domain participant factory servant.
       /// Allocate the factory on the heap to avoid the circular dependency
       /// since the TAO::DCPS::DomainParticipantFactoryImpl constructor calls the
-      /// TAO::DCPS::Service_Participant singleton. 
+      /// TAO::DCPS::Service_Participant singleton.
       DomainParticipantFactoryImpl*        dp_factory_servant_;
 
       /// The domain participant factory object reference.
       ::DDS::DomainParticipantFactory_var  dp_factory_;
-      
+
       /// The DCPSInfo/repository object reference.
       DCPSInfo_var repo_;
 
-      /// The lock to serialize DomainParticipantFactory singleton creation 
+      /// The lock to serialize DomainParticipantFactory singleton creation
       /// and shutdown.
       TAO_SYNCH_MUTEX      factory_lock_;
 
@@ -300,7 +300,7 @@ namespace TAO
       /// The transport impl for builtin topics.
       TransportImpl_rch                      bit_transport_impl_;
 
-      
+
       bool bit_enabled_;
 
       /// The timeout for lookup data from the builtin topic datareader.
@@ -310,11 +310,11 @@ namespace TAO
       ACE_Configuration_Heap cf_;
     };
 
-   
+
     typedef TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX> TAO_SERVICE_PARTICIPANT;
 
 #if ! defined (__GNUC__) || (__GNUC__ < 4)
-    TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Service_Participant, TAO_SYNCH_MUTEX)  
+    TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Service_Participant, TAO_SYNCH_MUTEX)
 #endif
 
     #define TheServiceParticipant                     TAO::DCPS::TAO_SERVICE_PARTICIPANT::instance()
@@ -324,13 +324,12 @@ namespace TAO
     #define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
 
     /// Get a servant pointer given an object reference.
-    /// @throws PortableServer::POA::OjbectNotActive, 
+    /// @throws PortableServer::POA::OjbectNotActive,
     ///         PortableServer::POA::WrongAdapter
     ///         PortableServer::POA::WongPolicy
     template <class T_impl, class T_ptr>
     T_impl* reference_to_servant (
       T_ptr p
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -343,24 +342,22 @@ namespace TAO
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*, 
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*,
            poa->reference_to_servant (
-              p ACE_ENV_ARG_PARAMETER) );
-      ACE_CHECK_RETURN (0);
+              p) );
 
-      // Use the ServantBase_var so that the servant's reference 
+      // Use the ServantBase_var so that the servant's reference
       // count will not be changed by this operation.
       PortableServer::ServantBase_var servant = the_servant;
 
       return the_servant;
     }
 
-    /// @throws PortableServer::POA::ServantNotActive, 
+    /// @throws PortableServer::POA::ServantNotActive,
     ///         PortableServer::POA::WrongPolicy
     template <class T>
     typename T::_stub_ptr_type servant_to_reference (
       T *servant
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -368,21 +365,17 @@ namespace TAO
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
-      PortableServer::ObjectId_var oid = poa->activate_object (servant ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (T::_stub_type::_nil ());
+      PortableServer::ObjectId_var oid = poa->activate_object (servant);
 
-      CORBA::Object_var obj = poa->id_to_reference (oid.in () ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (T::_stub_type::_nil ());
+      CORBA::Object_var obj = poa->id_to_reference (oid.in ());
 
-      typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow (obj.in () ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (T::_stub_type::_nil ());
+      typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow (obj.in ());
       return the_obj;
     }
 
     template <class T>
     void deactivate_object (
       T obj
-      ACE_ENV_ARG_DECL
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -390,10 +383,8 @@ namespace TAO
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
       PortableServer::ObjectId_var oid =
-        poa->reference_to_id (obj ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
-      poa->deactivate_object (oid.in () ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK;
+        poa->reference_to_id (obj);
+      poa->deactivate_object (oid.in ());
     }
 
   } // namespace DCPS

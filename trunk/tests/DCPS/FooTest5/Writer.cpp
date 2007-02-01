@@ -12,7 +12,7 @@
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
 
-// Added unused arguments with default value to work around with vc6 
+// Added unused arguments with default value to work around with vc6
 // bug on template function instantiation.
 template<class DT, class DW, class DW_var>
 ::DDS::ReturnCode_t write (int writer_id,
@@ -33,26 +33,25 @@ template<class DT, class DW, class DW_var>
 {
 #endif
 
-  ACE_TRY_NEW_ENV
+  try
   {
     DT foo;
     //foo.data_source set below.
     foo.x = -1;
     foo.y = (float)writer_id;
-    
+
     // Use the thread id as the instance key.
     foo.data_source = (CORBA::Long) (ACE_OS::thr_self ());
-    
-    DW_var foo_dw 
-      = DW::_narrow(writer ACE_ENV_ARG_PARAMETER);
+
+    DW_var foo_dw
+      = DW::_narrow(writer);
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
-    ::DDS::InstanceHandle_t handle 
-        = foo_dw->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK_RETURN(::DDS::RETCODE_ERROR);
+    ::DDS::InstanceHandle_t handle
+        = foo_dw->_cxx_register (foo);
 
     for (int i = 0; i< num_samples_per_instance; i ++)
     {
@@ -65,18 +64,16 @@ template<class DT, class DW, class DW_var>
         foo.values[j] = (float) (i * i - j);
       }
 
-      ::DDS::ReturnCode_t ret 
-        = foo_dw->write(foo, 
-                        handle 
-                        ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      ::DDS::ReturnCode_t ret
+        = foo_dw->write(foo,
+                        handle);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"), 
-                    i, ret)); 
+                    ACE_TEXT ("%dth write() returned %d.\n"),
+                    i, ret));
         if (ret == ::DDS::RETCODE_TIMEOUT)
         {
           timeout_writes ++;
@@ -86,18 +83,16 @@ template<class DT, class DW, class DW_var>
       if (using_udp || using_mcast)
       {
         // Delay between sends to avoid dropping.
-        static ACE_Time_Value delay(op_interval_ms/1000, 
+        static ACE_Time_Value delay(op_interval_ms/1000,
                                     op_interval_ms%1000 *1000);
-        ACE_OS::sleep (delay); 
+        ACE_OS::sleep (delay);
       }
     }
   }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
   {
-    ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-      "Exception caught in svc:");
+    ex._tao_print_exception ("Exception caught in svc:");
   }
-  ACE_ENDTRY;
 
   return ::DDS::RETCODE_OK;
 }
@@ -112,26 +107,26 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 {
 }
 
-void 
+void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Writer::start \n")));
-  // Lanuch num_instances_per_writer threads. 
-  // Each thread writes one instance which uses the thread id as the 
+  // Lanuch num_instances_per_writer threads.
+  // Each thread writes one instance which uses the thread id as the
   // key value.
-  if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) 
+  if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("(%P|%t) Writer::start, ")
-                ACE_TEXT ("%p."), 
-                "activate")); 
+                ACE_TEXT ("%p."),
+                "activate"));
     throw TestException ();
   }
 }
 
-void 
-Writer::end () 
+void
+Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::end \n")));
@@ -139,7 +134,7 @@ Writer::end ()
 }
 
 
-int 
+int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -147,16 +142,16 @@ Writer::svc ()
 
   if (no_key)
   {
-    write<Xyz::FooNoKey, 
-          ::Mine::FooNoKeyDataWriter, 
-          ::Mine::FooNoKeyDataWriter_var> 
+    write<Xyz::FooNoKey,
+          ::Mine::FooNoKeyDataWriter,
+          ::Mine::FooNoKeyDataWriter_var>
           (writer_id_, timeout_writes_, writer_.in ());
   }
   else
   {
-    write<Xyz::Foo, 
-          ::Mine::FooDataWriter, 
-          ::Mine::FooDataWriter_var> 
+    write<Xyz::Foo,
+          ::Mine::FooDataWriter,
+          ::Mine::FooDataWriter_var>
           (writer_id_, timeout_writes_, writer_.in ());
   }
 
@@ -169,7 +164,7 @@ Writer::svc ()
 }
 
 
-long 
+long
 Writer::writer_id () const
 {
   return writer_id_;

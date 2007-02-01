@@ -1,12 +1,169 @@
+Thu Feb  1 16:40:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * dds/InfoRepo/DomainParticipantListener_i.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.cpp:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/DcpsIntegration/TopicListener.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType/FooDataReaderImpl.h:
+        * tests/DCPS/FooType/FooDataReaderImpl.cpp:
+        * tests/DCPS/FooType/FooDataWriterImpl.h:
+        * tests/DCPS/FooType/FooDataWriterImpl.cpp:
+        * tests/DCPS/FooType/FooTypeSupportImpl.h:
+        * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
+        * tests/DCPS/FooType2/FooDataReaderImpl.h:
+        * tests/DCPS/FooType2/FooDataReaderImpl.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.h:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+	  Removed TAO exception emulation macros using the script
+	  $ACE_ROOT/bin/rm_exception_macros.pl from the DOC group repository.
+
 Tue Jan 30 22:58:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
-	  Pass the instance_data as const-reference since it may be very large.
+          Pass the instance_data as const-reference since it may be very large.
 
         * dds/DCPS/transport/framework/BasicQueueLinkChunk_T.h:
         * dds/DCPS/transport/framework/NetworkAddress.inl:
-	  Added #includes needed for an inline=0 build.
+          Added #includes needed for an inline=0 build.
 
 Tue Jan 30 20:43:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 

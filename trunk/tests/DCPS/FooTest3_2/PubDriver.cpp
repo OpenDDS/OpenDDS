@@ -25,7 +25,7 @@ PubDriver::PubDriver()
   publisher_ (::DDS::Publisher::_nil ()),
   datawriters_ (0),
   writers_ (0),
-  pub_id_fname_ ("pub_id.txt"),            
+  pub_id_fname_ ("pub_id.txt"),
   sub_id_ (0),
   block_on_write_ (0),
   num_threads_to_write_ (0),
@@ -50,7 +50,7 @@ PubDriver::~PubDriver()
   {
     delete writers_[i];
   }
-      
+
   delete [] writers_;
 }
 
@@ -62,7 +62,7 @@ PubDriver::run(int& argc, char* argv[])
   init(argc, argv);
 
   run();
-   
+
   while (shutdown_ == false)
   {
     ACE_OS::sleep (1);
@@ -81,10 +81,10 @@ PubDriver::parse_args(int& argc, char* argv[])
   //  -s <sub_id:sub_host:sub_port>
   //
   //  -b <block/non-block waiting>
-  //  -t num_threads_to_write    defaults to 1 
-  //  -i num_writes_per_thread   defaults to 1 
-  //  -w num_datawriters_        defaults to 1 
-  //  -b block_on_write?1:0      defaults to 0 
+  //  -t num_threads_to_write    defaults to 1
+  //  -i num_writes_per_thread   defaults to 1
+  //  -w num_datawriters_        defaults to 1
+  //  -b block_on_write?1:0      defaults to 0
   //  -m multiple_instances?1:0  defaults to 0
   //  -n max_samples_per_instance defaults to INFINITE
   //  -d history.depth           defaults to 1
@@ -137,62 +137,62 @@ PubDriver::parse_args(int& argc, char* argv[])
 
       got_s = true;
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-b")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-b")) != 0)
     {
       block_on_write_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-t")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-t")) != 0)
     {
       num_threads_to_write_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-m")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-m")) != 0)
     {
       multiple_instances_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-i")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       num_writes_per_thread_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-w")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-w")) != 0)
     {
       num_datawriters_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       max_samples_per_instance_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-DCPS") != -1) 
+    else if (arg_shifter.cur_arg_strncasecmp("-DCPS") != -1)
     {
       // ignore -DCPSxxx options that will be handled by Service_Participant
       arg_shifter.ignore_arg();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       history_depth_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-y")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-y")) != 0)
     {
       has_key_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-v")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-v")) != 0)
     {
       pub_driver_ior_ = current_arg;
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-l")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-l")) != 0)
     {
       write_delay_msec_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-r")) != 0) 
+    else if ((current_arg = arg_shifter.get_the_parameter("-r")) != 0)
     {
       check_data_dropped_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
@@ -233,23 +233,16 @@ PubDriver::init(int& argc, char *argv[])
 {
   // Create DomainParticipant and then publisher, topic and datawriter.
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  ACE_CHECK;
 
   // Activate the PubDriver servant and write its ior to a file.
   PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
 
-  PortableServer::ObjectId_var id = poa->activate_object(this
-                                                         ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  PortableServer::ObjectId_var id = poa->activate_object(this);
 
-  CORBA::Object_var object = poa->id_to_reference(id.in()
-                                                  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::Object_var object = poa->id_to_reference(id.in());
 
-  CORBA::String_var ior_string = orb->object_to_string (object.in ()
-                                                        ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::String_var ior_string = orb->object_to_string (object.in ());
 
   //
   // Write the IOR to a file.
@@ -262,33 +255,29 @@ PubDriver::init(int& argc, char *argv[])
   }
   ACE_OS::fprintf (output_file, "%s", ior_string.in ());
   ACE_OS::fclose (output_file);
-  
-  datawriters_ = new ::DDS::DataWriter_var[num_datawriters_]; 
-  writers_ = new Writer* [num_datawriters_];  
+
+  datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
+  writers_ = new Writer* [num_datawriters_];
 
   ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
    PortableServer::ServantBase_var safe_servant = fts_servant;
 
-  ::Mine::FooTypeSupport_var fts = 
-    ::TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  ::Mine::FooTypeSupport_var fts =
+    ::TAO::DCPS::servant_to_reference (fts_servant);
 
 
-  participant_ = 
-    dpf->create_participant(MY_DOMAIN, 
-                            PARTICIPANT_QOS_DEFAULT, 
-                            ::DDS::DomainParticipantListener::_nil() 
-                            ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  participant_ =
+    dpf->create_participant(MY_DOMAIN,
+                            PARTICIPANT_QOS_DEFAULT,
+                            ::DDS::DomainParticipantListener::_nil());
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
 
   if (::DDS::RETCODE_OK != fts->register_type(participant_.in (), MY_TYPE))
     {
-      ACE_ERROR ((LM_ERROR, 
-        ACE_TEXT ("Failed to register the FooTypeSupport."))); 
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("Failed to register the FooTypeSupport.")));
     }
 
-  ACE_CHECK;
 
   ::DDS::TopicQos topic_qos;
   participant_->get_default_topic_qos(topic_qos);
@@ -304,25 +293,21 @@ PubDriver::init(int& argc, char *argv[])
     topic_qos.history.depth = history_depth_;
   }
 
-  topic_ = participant_->create_topic (MY_TOPIC, 
-                                       MY_TYPE, 
-                                       topic_qos, 
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  topic_ = participant_->create_topic (MY_TOPIC,
+                                       MY_TYPE,
+                                       topic_qos,
+                                       ::DDS::TopicListener::_nil());
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
 
-  
+
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                          ::DDS::PublisherListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                          ::DDS::PublisherListener::_nil());
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   attach_to_transport ();
 
-  ::DDS::DataWriterQos datawriter_qos; 
+  ::DDS::DataWriterQos datawriter_qos;
   publisher_->get_default_datawriter_qos (datawriter_qos);
 
   if (block_on_write_)
@@ -336,16 +321,14 @@ PubDriver::init(int& argc, char *argv[])
     datawriter_qos.history.depth = history_depth_;
   }
 
-  // Create one datawriter or multiple datawriters belong to the same 
+  // Create one datawriter or multiple datawriters belong to the same
   // publisher.
   for (int i = 0; i < num_datawriters_; i ++)
   {
-    datawriters_[i] 
+    datawriters_[i]
     = publisher_->create_datawriter(topic_.in (),
                                     datawriter_qos,
-                                    ::DDS::DataWriterListener::_nil()
-                                    ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                    ::DDS::DataWriterListener::_nil());
     TEST_CHECK (! CORBA::is_nil (datawriters_[i].in ()));
   }
 }
@@ -356,7 +339,7 @@ PubDriver::end()
   ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
 
   // Record samples been written in the Writer's data map.
-  // Verify the number of instances and the number of samples 
+  // Verify the number of instances and the number of samples
   // written to the datawriter.
   for (int i = 0; i < num_datawriters_; i ++)
   {
@@ -368,25 +351,25 @@ PubDriver::end()
       // have the same key or has no key value.
       TEST_CHECK (map.num_instances() == 1);
     }
-    else 
+    else
     {
       // multiple instances test - an instance per thread
       TEST_CHECK (map.num_instances() == num_threads_to_write_);
     }
     TEST_CHECK (map.num_samples() == num_threads_to_write_ * num_writes_per_thread_);
-    
-    publisher_->delete_datawriter(datawriters_[i].in () ACE_ENV_ARG_PARAMETER);
+
+    publisher_->delete_datawriter(datawriters_[i].in ());
   }
 
   // clean up the service objects
-  participant_->delete_publisher(publisher_.in () ACE_ENV_ARG_PARAMETER);
+  participant_->delete_publisher(publisher_.in ());
 
-  participant_->delete_topic(topic_.in () ACE_ENV_ARG_PARAMETER);
+  participant_->delete_topic(topic_.in ());
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  dpf->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
+  dpf->delete_participant(participant_.in ());
 
-  TheServiceParticipant->shutdown (); 
+  TheServiceParticipant->shutdown ();
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
 }
@@ -399,14 +382,14 @@ PubDriver::run()
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_LIB_TEXT("Unable to open %s for writing:(%u) %p\n"),
-                pub_id_fname_.c_str (), 
+                pub_id_fname_.c_str (),
                 ACE_LIB_TEXT("PubDriver::run")));
     return;
   }
 
   for (int i = 0; i < num_datawriters_; i ++)
   {
-    ::Mine::FooDataWriterImpl* datawriter_servant 
+    ::Mine::FooDataWriterImpl* datawriter_servant
       = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
@@ -414,7 +397,7 @@ PubDriver::run()
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%d. \n"), 
+                ACE_TEXT(" Write to %s: pub_id=%d. \n"),
                 pub_id_fname_.c_str (),
                 pub_id));
 
@@ -429,7 +412,7 @@ PubDriver::run()
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
 
   TAO::DCPS::NetworkAddress network_order_address(this->sub_addr_);
-  associations[0].readerTransInfo.data 
+  associations[0].readerTransInfo.data
     = TAO::DCPS::TransportInterfaceBLOB
                                    (sizeof(TAO::DCPS::NetworkAddress),
                                     sizeof(TAO::DCPS::NetworkAddress),
@@ -443,10 +426,10 @@ PubDriver::run()
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (int i = 0; i < num_datawriters_; i ++)
   {
-    ::TAO::DCPS::DataWriterRemote_var dw_remote 
+    ::TAO::DCPS::DataWriterRemote_var dw_remote
       = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i].in ());
 
-    ::Mine::FooDataWriterImpl* datawriter_servant 
+    ::Mine::FooDataWriterImpl* datawriter_servant
       = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
@@ -461,20 +444,20 @@ PubDriver::run()
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
 
   // Each Writer/DataWriter launch threads to write samples
-  // to the same instance or multiple instances. 
-  // When writing to multiple instances, the instance key 
+  // to the same instance or multiple instances.
+  // When writing to multiple instances, the instance key
   // identifies instances is the thread id.
   for (int i = 0; i < num_datawriters_; i ++)
   {
     writers_[i] = new Writer(this,
-                             datawriters_[i].in (), 
-                             num_threads_to_write_, 
-                             num_writes_per_thread_, 
+                             datawriters_[i].in (),
+                             num_threads_to_write_,
+                             num_writes_per_thread_,
                              multiple_instances_,
                              i,
                              has_key_,
                              write_delay_msec_,
-                             check_data_dropped_); 
+                             check_data_dropped_);
     writers_[i]->start ();
   }
   }
@@ -561,7 +544,6 @@ PubDriver::parse_sub_arg(const std::string& arg)
 }
 
 void PubDriver::shutdown (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -574,13 +556,13 @@ void PubDriver::shutdown (
 void PubDriver::attach_to_transport ()
 {
   // create TransportImpl.
-  TAO::DCPS::TransportImpl_rch transport_impl 
+  TAO::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config 
+  TAO::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
@@ -593,14 +575,13 @@ void PubDriver::attach_to_transport ()
     }
 
   // Attach the Publisher with the TransportImpl.
-  ::TAO::DCPS::PublisherImpl* pub_servant 
+  ::TAO::DCPS::PublisherImpl* pub_servant
     = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in() ACE_ENV_ARG_PARAMETER);
+      (publisher_.in());
 
-  ACE_CHECK;
   TEST_CHECK (pub_servant != 0);
 
-  TAO::DCPS::AttachStatus status 
+  TAO::DCPS::AttachStatus status
     = pub_servant->attach_transport(transport_impl.in ());
 
   if (status != TAO::DCPS::ATTACH_OK)

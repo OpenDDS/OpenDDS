@@ -194,24 +194,17 @@ void
 PubDriver::initialize(int& argc, char *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  ACE_CHECK;
 
   // Activate the PubDriver servant and write its ior to a file.
 
   PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
 
-  PortableServer::ObjectId_var id = poa->activate_object(this
-                                                         ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  PortableServer::ObjectId_var id = poa->activate_object(this);
 
-  CORBA::Object_var object = poa->id_to_reference(id.in()
-                                                  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::Object_var object = poa->id_to_reference(id.in());
 
-  CORBA::String_var ior_string = orb->object_to_string (object.in ()
-                                                        ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::String_var ior_string = orb->object_to_string (object.in ());
 
   //
   // Write the IOR to a file.
@@ -231,15 +224,12 @@ PubDriver::initialize(int& argc, char *argv[])
    PortableServer::ServantBase_var safe_servant = fts_servant;
 
   ::Mine::FooTypeSupport_var fts =
-    ::TAO::DCPS::servant_to_reference (fts_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    ::TAO::DCPS::servant_to_reference (fts_servant);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
-                            ::DDS::DomainParticipantListener::_nil()
-                            ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                            ::DDS::DomainParticipantListener::_nil());
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
 
   if (::DDS::RETCODE_OK != fts->register_type(participant_.in (), MY_TYPE))
@@ -248,7 +238,6 @@ PubDriver::initialize(int& argc, char *argv[])
                   ACE_TEXT ("Failed to register the FooTypeSupport.")));
     }
 
-  ACE_CHECK;
 
   ::DDS::TopicQos default_topic_qos;
   participant_->get_default_topic_qos(default_topic_qos);
@@ -260,21 +249,17 @@ PubDriver::initialize(int& argc, char *argv[])
   //To resolve the compilation errors, the operator is called explicitly.
   TEST_CHECK (! (new_topic_qos == default_topic_qos));
 
-  participant_->set_default_topic_qos(new_topic_qos ACE_ENV_ARG_PARAMETER);
+  participant_->set_default_topic_qos(new_topic_qos);
 
   topic_ = participant_->create_topic (MY_TOPIC,
                                        MY_TYPE,
                                        TOPIC_QOS_DEFAULT,
-                                       ::DDS::TopicListener::_nil()
-                                       ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                       ::DDS::TopicListener::_nil());
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
 
   publisher_ =
     participant_->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                   ::DDS::PublisherListener::_nil()
-                                   ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                   ::DDS::PublisherListener::_nil());
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
@@ -284,12 +269,10 @@ PubDriver::initialize(int& argc, char *argv[])
   attach_to_transport ();
 
   ::DDS::PublisherQos pub_qos_got;
-  publisher_->get_qos (pub_qos_got ACE_ENV_ARG_PARAMETER);
+  publisher_->get_qos (pub_qos_got);
 
   ::DDS::PublisherQos default_pub_qos;
-  participant_->get_default_publisher_qos (default_pub_qos
-                                           ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  participant_->get_default_publisher_qos (default_pub_qos);
   TEST_CHECK (pub_qos_got == default_pub_qos);
 
   ::DDS::PublisherQos new_pub_qos = pub_qos_got;
@@ -298,18 +281,16 @@ PubDriver::initialize(int& argc, char *argv[])
 
   TEST_CHECK (! (new_pub_qos == default_pub_qos));
 
-  ret = publisher_->set_qos (new_pub_qos ACE_ENV_ARG_PARAMETER);
+  ret = publisher_->set_qos (new_pub_qos);
   TEST_CHECK (ret == ::DDS::RETCODE_INCONSISTENT_POLICY);
 
   ::DDS::DomainParticipant_var participant
-    = publisher_->get_participant (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    = publisher_->get_participant ();
 
   TEST_CHECK (participant.in () == participant_.in ());
 
   ::DDS::DataWriterQos default_dw_qos;
-  publisher_->get_default_datawriter_qos (default_dw_qos ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  publisher_->get_default_datawriter_qos (default_dw_qos);
 
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos;
   new_default_dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
@@ -322,61 +303,50 @@ PubDriver::initialize(int& argc, char *argv[])
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_USE_TOPIC_QOS,
-                                    ::DDS::DataWriterListener::_nil()
-                                    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                    ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   ::DDS::DataWriterQos dw_qos_use_topic_qos;
-  datawriter_->get_qos (dw_qos_use_topic_qos ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  datawriter_->get_qos (dw_qos_use_topic_qos);
 
   ::DDS::DataWriterQos copied_from_topic = default_dw_qos;
   ret = publisher_->copy_from_topic_qos (copied_from_topic, new_topic_qos);
-  ACE_CHECK;
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   TEST_CHECK (dw_qos_use_topic_qos == copied_from_topic);
 
   // Delete the datawriter.
-  publisher_->delete_datawriter (datawriter_.in () ACE_ENV_ARG_PARAMETER);
+  publisher_->delete_datawriter (datawriter_.in ());
 
   // Create datawriter to test DATAWRITER_QOS_DEFAULT/get_publisher
   // get_qos/set_qos/get_default_datawriter_qos.
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     DATAWRITER_QOS_DEFAULT,
-                                    ::DDS::DataWriterListener::_nil()
-                                    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                    ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   ::DDS::Topic_var topic_got
-    = datawriter_->get_topic (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    = datawriter_->get_topic ();
 
   // the topics should point to the same servant
   // but not the same Object Reference.
   TopicImpl* topic_got_servant
     = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_got.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+        (topic_got.in ());
   TopicImpl* topic_servant
     = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+        (topic_.in ());
 
   TEST_CHECK (topic_got_servant == topic_servant);
 
   ::DDS::Publisher_var pub_got
-    = datawriter_->get_publisher (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    = datawriter_->get_publisher ();
 
   TEST_CHECK (pub_got.in () == publisher_.in ());
 
   ::DDS::DataWriterQos dw_qos_got;
-  datawriter_->get_qos (dw_qos_got ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  datawriter_->get_qos (dw_qos_got);
 
   TEST_CHECK (dw_qos_got == new_default_dw_qos);
 
@@ -388,18 +358,16 @@ PubDriver::initialize(int& argc, char *argv[])
 
   TEST_CHECK (! (dw_qos_got == new_dw_qos));
 
-  ret = datawriter_->set_qos (new_dw_qos ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  ret = datawriter_->set_qos (new_dw_qos);
 
   TEST_CHECK (ret == ::DDS::RETCODE_IMMUTABLE_POLICY);
 
   // Delete the datawriter.
-  publisher_->delete_datawriter (datawriter_.in () ACE_ENV_ARG_PARAMETER);
+  publisher_->delete_datawriter (datawriter_.in ());
 
   // Create datawriter to test register/unregister/dispose and etc.
   ::DDS::DataWriterQos dw_qos;
-  publisher_->get_default_datawriter_qos (dw_qos ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  publisher_->get_default_datawriter_qos (dw_qos);
 
   dw_qos.history.depth = history_depth_;
 
@@ -412,9 +380,7 @@ PubDriver::initialize(int& argc, char *argv[])
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     dw_qos,
-                                    ::DDS::DataWriterListener::_nil()
-                                    ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                    ::DDS::DataWriterListener::_nil());
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
@@ -422,15 +388,13 @@ PubDriver::initialize(int& argc, char *argv[])
     (datawriter_.in ());
 
   foo_datawriter_
-    = ::Mine::FooDataWriter::_narrow(datawriter_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = ::Mine::FooDataWriter::_narrow(datawriter_.in ());
 
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
     = ::TAO::DCPS::reference_to_servant < ::Mine::FooDataWriterImpl, ::Mine::FooDataWriter_ptr>
-      (foo_datawriter_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+      (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);
 }
@@ -442,27 +406,22 @@ PubDriver::end()
   // Verify the number of instances and the number of samples
   // written to the datawriter.
 
-  publisher_->delete_contained_entities (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
-  // publisher_->delete_datawriter(datawriter_.in () ACE_ENV_ARG_PARAMETER);
+  publisher_->delete_contained_entities ();
+  // publisher_->delete_datawriter(datawriter_.in ());
 
-  CORBA::String_var topic_name = topic_->get_name (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+  CORBA::String_var topic_name = topic_->get_name ();
 
   ::DDS::DataWriter_var dw = publisher_->lookup_datawriter (topic_name.in ());
 
   TEST_CHECK (CORBA::is_nil (dw.in ()));
 
   // clean up the service objects
-  participant_->delete_publisher(publisher_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  participant_->delete_publisher(publisher_.in ());
 
-  participant_->delete_topic(topic_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  participant_->delete_topic(topic_.in ());
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  dpf->delete_participant(participant_.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  dpf->delete_participant(participant_.in ());
 
   TheServiceParticipant->shutdown ();
   // Tear-down the entire Transport Framework.
@@ -563,8 +522,7 @@ PubDriver::register_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle1
-    = foo_datawriter_->_cxx_register (foo1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -573,14 +531,12 @@ PubDriver::register_test ()
   foo2.writer_id = 99;
 
   ::DDS::InstanceHandle_t handle2
-    = foo_datawriter_->_cxx_register (foo2 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo2);
 
   TEST_CHECK (handle1 == handle2);
 
   ::Xyz::Foo key_holder;
-  ret = foo_datawriter_->get_key_value(key_holder, handle1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  ret = foo_datawriter_->get_key_value(key_holder, handle1);
 
   TEST_CHECK(ret == ::DDS::RETCODE_OK);
   TEST_CHECK(key_holder.a_long_value == foo1.a_long_value);
@@ -596,9 +552,7 @@ PubDriver::register_test ()
     foo2.writer_id = 0;
 
     ret = foo_datawriter_->write(foo2,
-                                 handle2
-                                 ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                 handle2);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
   }
@@ -618,8 +572,7 @@ PubDriver::dispose_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -632,16 +585,13 @@ PubDriver::dispose_test ()
     foo2.sample_sequence = i;
 
     ret = foo_datawriter_->write(foo2,
-                        handle
-                        ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                        handle);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
   }
 
   ret
-    = foo_datawriter_->dispose(foo1, handle ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->dispose(foo1, handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
@@ -664,8 +614,7 @@ PubDriver::unregister_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -674,34 +623,26 @@ PubDriver::unregister_test ()
   foo2.writer_id = 0;
 
   ret = foo_datawriter_->write(foo2,
-                               handle
-                               ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                               handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   ret = foo_datawriter_->unregister (foo1,
-                                     handle
-                                     ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                     handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   foo2.sample_sequence = 2;
 
   ret = foo_datawriter_->write(foo2,
-                               ::DDS::HANDLE_NIL
-                               ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                               ::DDS::HANDLE_NIL);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   foo2.sample_sequence = 3;
 
   ret = foo_datawriter_->write(foo2,
-                               handle
-                               ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                               handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 }
@@ -720,8 +661,7 @@ PubDriver::resume_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -730,7 +670,7 @@ PubDriver::resume_test ()
   foo2.writer_id = 0;
 
   // fast way - call servant directly
-  ret = publisher_servant_->suspend_publications (ACE_ENV_SINGLE_ARG_PARAMETER);
+  ret = publisher_servant_->suspend_publications ();
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   for (int i = 1; i <= 10; i ++)
@@ -738,15 +678,13 @@ PubDriver::resume_test ()
     foo2.sample_sequence = i;
 
     ret = foo_datawriter_->write(foo2,
-                                 handle
-                                 ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                 handle);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
   }
 
   // fast way - call servant directly
-  ret = publisher_servant_->resume_publications (ACE_ENV_SINGLE_ARG_PARAMETER);
+  ret = publisher_servant_->resume_publications ();
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 }
 
@@ -762,63 +700,57 @@ PubDriver::listener_test ()
            DomainParticipantListenerImpl());
 
   ::DDS::DomainParticipantListener_var dpl
-    = ::TAO::DCPS::servant_to_reference (dpl_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = ::TAO::DCPS::servant_to_reference (dpl_servant);
 
   PublisherListenerImpl* pl_servant;
   ACE_NEW (pl_servant,
            PublisherListenerImpl());
 
   ::DDS::PublisherListener_var pl
-    = ::TAO::DCPS::servant_to_reference (pl_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = ::TAO::DCPS::servant_to_reference (pl_servant);
 
   DataWriterListenerImpl* dwl_servant;
   ACE_NEW (dwl_servant,
            DataWriterListenerImpl());
 
   ::DDS::DataWriterListener_var dwl
-    = ::TAO::DCPS::servant_to_reference (dwl_servant ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = ::TAO::DCPS::servant_to_reference (dwl_servant);
 
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got
-    = participant_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = participant_->get_listener ();
 
   TEST_CHECK (CORBA::is_nil (dpl_got.in ()));
 
-  participant_->set_listener (dpl.in (), DEFAULT_STATUS_KIND_MASK ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  participant_->set_listener (dpl.in (), DEFAULT_STATUS_KIND_MASK);
 
-  dpl_got = participant_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+  dpl_got = participant_->get_listener ();
 
   TEST_CHECK (dpl_got.in () == dpl.in ());
 
   // Test set_listener/get_listener for Publisher.
 
   ::DDS::PublisherListener_var pl_got
-    = publisher_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = publisher_->get_listener ();
 
   TEST_CHECK (CORBA::is_nil (pl_got.in ()));
 
-  publisher_->set_listener (pl.in (), 0 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  publisher_->set_listener (pl.in (), 0);
 
-  pl_got = publisher_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+  pl_got = publisher_->get_listener ();
 
   TEST_CHECK (pl_got.in () == pl.in ());
 
   // Test set_listener/get_listener for DataWriter.
 
   ::DDS::DataWriterListener_var dwl_got
-    = foo_datawriter_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = foo_datawriter_->get_listener ();
 
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
-  foo_datawriter_->set_listener (dwl.in (), 0 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  foo_datawriter_->set_listener (dwl.in (), 0);
 
-  dwl_got = foo_datawriter_->get_listener (ACE_ENV_SINGLE_ARG_PARAMETER);
+  dwl_got = foo_datawriter_->get_listener ();
 
   TEST_CHECK (dwl_got.in () == dwl.in ());
 
@@ -835,8 +767,7 @@ PubDriver::listener_test ()
   incomp_status.policies[1].count = 10;
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  foo_datawriter_->update_incompatible_qos (incomp_status);
 
   // Domainparticipant's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter and
@@ -846,7 +777,7 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_dw  == 0);
 
   ::DDS::OfferedIncompatibleQosStatus_var incomp_status_got
-    = foo_datawriter_->get_offered_incompatible_qos_status (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = foo_datawriter_->get_offered_incompatible_qos_status ();
 
   TEST_CHECK (incomp_status_got.in ().total_count == incomp_status.total_count);
   // TBD: This should be reconfirmed when the DataWriterImpl::update_incompatible_qos is
@@ -861,13 +792,10 @@ PubDriver::listener_test ()
   }
 
   publisher_->set_listener (pl.in (),
-                            ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS
-                            ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                            ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  foo_datawriter_->update_incompatible_qos (incomp_status);
 
   // Publisher's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter
@@ -877,12 +805,9 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_dw == 0);
 
   foo_datawriter_->set_listener (dwl.in (),
-                                 ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS
-                                 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+                                 ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
-  foo_datawriter_->update_incompatible_qos (incomp_status ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  foo_datawriter_->update_incompatible_qos (incomp_status);
 
   // DataWriter's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change.
@@ -891,7 +816,7 @@ PubDriver::listener_test ()
   TEST_CHECK (offered_incompatible_qos_called_on_dw == 1);
 
   ::DDS::StatusKindMask changed_status
-    = foo_datawriter_->get_status_changes (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = foo_datawriter_->get_status_changes ();
 
   // Both OFFERED_INCOMPATIBLE_QOS_STATUS and PUBLICATION_MATCH_STATUS status
   // are changed.
@@ -902,8 +827,7 @@ PubDriver::listener_test ()
 
   ::DDS::InstanceHandleSeq subscription_handles;
   ::DDS::ReturnCode_t ret
-    = foo_datawriter_->get_matched_subscriptions (subscription_handles
-                                                  ACE_ENV_ARG_PARAMETER);
+    = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK
               && subscription_handles.length () == 1
@@ -914,8 +838,7 @@ PubDriver::listener_test ()
   // The PUBLICATION_MATCH_STATUS status is updated when add_association.
   // One subscription is added already.
   ::DDS::PublicationMatchStatus match_status
-    = foo_datawriter_->get_publication_match_status (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->get_publication_match_status ();
 
   TEST_CHECK (match_status.total_count == 1);
   // The listener is set after add_association, so the total_count_change
@@ -933,19 +856,18 @@ PubDriver::listener_test ()
   reader_ids[0] = this->sub_id_;
 
   CORBA::Boolean dont_notify_lost = 0;
-  foo_datawriter_->remove_associations (reader_ids, dont_notify_lost ACE_ENV_ARG_PARAMETER);
+  foo_datawriter_->remove_associations (reader_ids, dont_notify_lost);
 
-  ret = foo_datawriter_->get_matched_subscriptions (subscription_handles
-                                                    ACE_ENV_ARG_PARAMETER);
+  ret = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK && subscription_handles.length () == 0);
 
   // The OfferedDeadlineMissedStatus and OfferedDeadlineMissedStatus are not
   // supported currently. The status got should be the same as initial status.
   ::DDS::OfferedDeadlineMissedStatus deadline_status
-    = foo_datawriter_->get_offered_deadline_missed_status (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = foo_datawriter_->get_offered_deadline_missed_status ();
   ::DDS::LivelinessLostStatus liveliness_status
-    = foo_datawriter_->get_liveliness_lost_status (ACE_ENV_SINGLE_ARG_PARAMETER);
+    = foo_datawriter_->get_liveliness_lost_status ();
 
   ::DDS::OfferedDeadlineMissedStatus initial_deadline_status;
   initial_deadline_status.total_count = 0;
@@ -976,8 +898,7 @@ PubDriver::allocator_test ()
   foo1.writer_id = -1;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo1 ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo1);
 
   ::Xyz::Foo foo2;
   foo2.a_long_value = 101010;
@@ -990,9 +911,7 @@ PubDriver::allocator_test ()
     foo2.sample_sequence = i;
 
     ret = foo_datawriter_->write(foo2,
-                                 handle
-                                 ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                 handle);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
@@ -1015,9 +934,7 @@ PubDriver::allocator_test ()
     foo2.sample_sequence = i + n_chunks;
 
     ret = foo_datawriter_->write(foo2,
-                                 handle
-                                 ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                 handle);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
@@ -1050,8 +967,7 @@ PubDriver::liveliness_test ()
   foo.writer_id = 0;
 
   ::DDS::InstanceHandle_t handle
-    = foo_datawriter_->_cxx_register (foo ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    = foo_datawriter_->_cxx_register (foo);
 
   foo.handle_value = handle;
 
@@ -1060,9 +976,7 @@ PubDriver::liveliness_test ()
     foo.sample_sequence = i;
 
     ret = foo_datawriter_->write(foo,
-                                 handle
-                                 ACE_ENV_ARG_PARAMETER);
-    ACE_CHECK;
+                                 handle);
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
@@ -1077,8 +991,7 @@ PubDriver::liveliness_test ()
   // publish & subscriber close down simultaneously.
   foo.sample_sequence = num_writes;
   ret = foo_datawriter_->write(foo,
-                               handle
-                               ACE_ENV_ARG_PARAMETER);
+                               handle);
 
   // Test control_dropped.
   // Unregister_all will request transport to remove_all_control_msgs.
@@ -1172,7 +1085,6 @@ PubDriver::parse_sub_arg(const std::string& arg)
 }
 
 void PubDriver::shutdown (
-    ACE_ENV_SINGLE_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1185,7 +1097,6 @@ void PubDriver::shutdown (
 void PubDriver::add_new_subscription (
     CORBA::Long       reader_id,
     const char *      sub_addr
-    ACE_ENV_ARG_DECL
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

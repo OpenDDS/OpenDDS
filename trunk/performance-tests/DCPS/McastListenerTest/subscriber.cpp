@@ -34,9 +34,9 @@
 int parse_args (int argc, char *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
-  
+
   arg_shifter.ignore_arg (); // ignore the command - argv[0]
-  while (arg_shifter.is_anything_left ()) 
+  while (arg_shifter.is_anything_left ())
   {
     // options:
     // -p  <num data writers>
@@ -50,49 +50,49 @@ int parse_args (int argc, char *argv[])
     // -z  <verbose transport debug>
 
     const char *currentArg = 0;
-    
-    if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0) 
+
+    if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
     {
       int shift_bits = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
       DATA_SIZE = 1 << shift_bits;
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
     {
       NUM_SAMPLES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
     {
       RECVS_BTWN_READS = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-a")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-a")) != 0)
     {
       reader_address_str = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-mcast")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-mcast")) != 0)
     {
       multicast_group_address_str = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-msi")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-msi")) != 0)
     {
       MAX_SAMPLES_PER_INSTANCE = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-mxs")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-mxs")) != 0)
     {
       MAX_SAMPLES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-mxi")) != 0) 
+    else if ((currentArg = arg_shifter.get_the_parameter("-mxi")) != 0)
     {
       MAX_INSTANCES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -102,7 +102,7 @@ int parse_args (int argc, char *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else 
+    else
     {
       ACE_ERROR((LM_ERROR,"(%P|%t) unexpected parameter %s\n", arg_shifter.get_current()));
       arg_shifter.ignore_arg ();
@@ -121,26 +121,23 @@ int main (int argc, char *argv[])
 
   int status = 0;
 
-  ACE_TRY_NEW_ENV
+  try
     {
       ACE_DEBUG((LM_INFO," %P|%t %T subscriber main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-      ACE_TRY_CHECK;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
       status = parse_args (argc, argv);
-      if (status) 
+      if (status)
         return status;
 
 
-      ::DDS::DomainParticipant_var dp = 
-        dpf->create_participant(TEST_DOMAIN, 
-                                PARTICIPANT_QOS_DEFAULT, 
-                                ::DDS::DomainParticipantListener::_nil() 
-                                ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      ::DDS::DomainParticipant_var dp =
+        dpf->create_participant(TEST_DOMAIN,
+                                PARTICIPANT_QOS_DEFAULT,
+                                ::DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -156,17 +153,15 @@ int main (int argc, char *argv[])
           ::Mine::Pt128TypeSupportImpl* pt128ts_servant = new ::Mine::Pt128TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = pt128ts_servant;
 
-          ::Mine::Pt128TypeSupport_var pt128ts = 
-            TAO::DCPS::servant_to_reference (pt128ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          ::Mine::Pt128TypeSupport_var pt128ts =
+            TAO::DCPS::servant_to_reference (pt128ts_servant);
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
-              ACE_ERROR ((LM_ERROR, 
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport."))); 
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 512:
@@ -174,17 +169,15 @@ int main (int argc, char *argv[])
           ::Mine::Pt512TypeSupportImpl* pt512ts_servant = new ::Mine::Pt512TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = pt512ts_servant;
 
-          ::Mine::Pt512TypeSupport_var pt512ts = 
-            TAO::DCPS::servant_to_reference (pt512ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          ::Mine::Pt512TypeSupport_var pt512ts =
+            TAO::DCPS::servant_to_reference (pt512ts_servant);
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
-              ACE_ERROR ((LM_ERROR, 
-                          ACE_TEXT (" %P|%t ERROR:Failed to register the Pt512TypeSupport."))); 
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT (" %P|%t ERROR:Failed to register the Pt512TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 2048:
@@ -192,17 +185,15 @@ int main (int argc, char *argv[])
           ::Mine::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Mine::Pt2048TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
 
-          ::Mine::Pt2048TypeSupport_var pt2048ts = 
-            TAO::DCPS::servant_to_reference (pt2048ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          ::Mine::Pt2048TypeSupport_var pt2048ts =
+            TAO::DCPS::servant_to_reference (pt2048ts_servant);
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
-              ACE_ERROR ((LM_ERROR, 
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport."))); 
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
         break;
       case 8192:
@@ -210,24 +201,22 @@ int main (int argc, char *argv[])
           ::Mine::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Mine::Pt8192TypeSupportImpl();
           PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
 
-          ::Mine::Pt8192TypeSupport_var pt8192ts = 
-            TAO::DCPS::servant_to_reference (pt8192ts_servant ACE_ENV_ARG_PARAMETER);
-          ACE_TRY_CHECK;
+          ::Mine::Pt8192TypeSupport_var pt8192ts =
+            TAO::DCPS::servant_to_reference (pt8192ts_servant);
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
-              ACE_ERROR ((LM_ERROR, 
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport."))); 
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport.")));
               return 1;
             }
-          ACE_TRY_CHECK;
         }
       };
 
 
       ::DDS::TopicQos topic_qos;
       dp->get_default_topic_qos(topic_qos);
-      
+
       topic_qos.resource_limits.max_samples_per_instance =
             MAX_SAMPLES_PER_INSTANCE;
       topic_qos.resource_limits.max_instances = MAX_INSTANCES;
@@ -235,21 +224,18 @@ int main (int argc, char *argv[])
 
       topic_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
 
-      ::DDS::Topic_var topic = 
-        dp->create_topic (TEST_TOPIC, 
-                          TEST_TYPE, 
-                          topic_qos, 
-                          ::DDS::TopicListener::_nil()
-                          ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      ::DDS::Topic_var topic =
+        dp->create_topic (TEST_TOPIC,
+                          TEST_TYPE,
+                          topic_qos,
+                          ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
       ::DDS::TopicDescription_var description =
-        dp->lookup_topicdescription(TEST_TOPIC ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        dp->lookup_topicdescription(TEST_TOPIC);
       if (CORBA::is_nil (description.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -261,9 +247,7 @@ int main (int argc, char *argv[])
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                             ::DDS::SubscriberListener::_nil()
-                             ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                             ::DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -280,11 +264,10 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl 
+      ::TAO::DCPS::SubscriberImpl* sub_impl
         = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
                                 ::DDS::Subscriber_ptr>
-                              (sub.in() ACE_ENV_SINGLE_ARG_PARAMETER);
-        ACE_TRY_CHECK;
+                              (sub.in());
 
       if (0 == sub_impl)
       {
@@ -339,8 +322,7 @@ int main (int argc, char *argv[])
       PortableServer::ServantBase_var safe_servant = dr_listener_impl;
 
       ::DDS::DataReaderListener_var dr_listener =
-        TAO::DCPS::servant_to_reference (dr_listener_impl ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+        TAO::DCPS::servant_to_reference (dr_listener_impl);
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -348,12 +330,10 @@ int main (int argc, char *argv[])
                           1);
       }
 
-      ::DDS::DataReader_var  the_dr 
+      ::DDS::DataReader_var  the_dr
                = sub->create_datareader(description.in() ,
                                         dr_qos,
-                                        dr_listener.in()
-                                        ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+                                        dr_listener.in());
 
       if (CORBA::is_nil (the_dr.in() ))
       {
@@ -367,7 +347,7 @@ int main (int argc, char *argv[])
           ACE_OS::sleep(2);
        }
 
-      //The collocated test for SimpleMcast needs more time than SimpleUdp to 
+      //The collocated test for SimpleMcast needs more time than SimpleUdp to
       //wait for receiving all end messages.
       ACE_OS::sleep(10);
 
@@ -375,18 +355,16 @@ int main (int argc, char *argv[])
       dpf->delete_participant(dp.in ());
 
       TheTransportFactory->release();
-      TheServiceParticipant->shutdown (); 
+      TheServiceParticipant->shutdown ();
 
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& ex)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Exception caught in main.cpp:");
+      ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  ACE_ENDTRY;
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from 
+  // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.
   //       Otherwise cleanup after main() will encount access vilation.
   reader_transport_impl = 0;

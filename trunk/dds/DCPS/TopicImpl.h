@@ -24,16 +24,16 @@ namespace TAO
     *
     * @brief Implements the ::DDS::Topic interface.
     *
-    * See the DDS specification, OMG formal/04-12-02, for a description of 
+    * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export TopicImpl 
+    class TAO_DdsDcps_Export TopicImpl
       : public virtual POA_DDS::Topic,
         public virtual EntityImpl,
         public virtual TopicDescriptionImpl
     {
     public:
-      //Constructor 
+      //Constructor
       TopicImpl (const RepoId                   topic_id,
                  const char*                    topic_name,
                  const char*                    type_name,
@@ -41,14 +41,13 @@ namespace TAO
                  const ::DDS::TopicQos &        qos,
                  ::DDS::TopicListener_ptr       a_listener,
                  ::DDS::DomainParticipant_ptr   participant);
-      
-      //Destructor 
+
+      //Destructor
       virtual ~TopicImpl (void);
-      
+
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -56,7 +55,6 @@ namespace TAO
 
     virtual void get_qos (
         ::DDS::TopicQos & qos
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -65,35 +63,30 @@ namespace TAO
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::TopicListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-        ACE_ENV_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::TopicListener_ptr get_listener (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::InconsistentTopicStatus get_inconsistent_topic_status (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::ReturnCode_t enable (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-        ACE_ENV_SINGLE_ARG_DECL
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -101,7 +94,7 @@ namespace TAO
 
       /** This method is not defined in the IDL and is defined for
       *  internal use.
-      *  Return the id given by the DCPSInfo repositoy. 
+      *  Return the id given by the DCPSInfo repositoy.
       */
       RepoId get_id () const;
 
@@ -115,7 +108,7 @@ namespace TAO
       ::DDS::TopicQos                qos_;
 
       /// The mask for which kind of events the listener
-      ///  will be notified about. 
+      ///  will be notified about.
       ::DDS::StatusKindMask          listener_mask_;
       /// The topic listener
       ::DDS::TopicListener_var       listener_;
@@ -128,7 +121,7 @@ namespace TAO
       /// The number of DataReaders and DataWriters using this Topic.
       CORBA::Long                    entity_refs_;
 
-      /// count of different topics with the same topic name but 
+      /// count of different topics with the same topic name but
       /// different characteristics (typename or ?incompatible Qos?).
       ::DDS::InconsistentTopicStatus inconsistent_topic_status_;
     };

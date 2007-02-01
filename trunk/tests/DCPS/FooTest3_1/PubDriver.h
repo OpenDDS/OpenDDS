@@ -12,20 +12,19 @@
 #include <string>
 
 class PubDriver
-  : public virtual POA_Test::TestPubDriver, 
+  : public virtual POA_Test::TestPubDriver,
     public virtual PortableServer::RefCountServantBase
 {
   public:
-        
+
     friend class Writer;
-    
+
     PubDriver();
     virtual ~PubDriver();
 
     void run(int& argc, char* argv[]);
 
     virtual void shutdown (
-      ACE_ENV_SINGLE_ARG_DECL
       )
     ACE_THROW_SPEC ((
       CORBA::SystemException
