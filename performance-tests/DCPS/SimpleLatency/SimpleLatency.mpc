@@ -1,7 +1,8 @@
-project(DDS*Pub): taoexe, portableserver, dcps {
-  requires += exceptions
-  exename = tao_pub
+// -*- MPC -*-
+// $Id$
 
+project(*idl): dcps {
+  requires += exceptions
 
   TypeSupport_Files {
     DDSPerfTest.idl >> PubMessageTypeSupport.idl \
@@ -13,7 +14,20 @@ project(DDS*Pub): taoexe, portableserver, dcps {
 
   }
 
-  
+  IDL_Files {
+    DDSPerfTest.idl
+    PubMessageTypeSupport.idl
+    AckMessageTypeSupport.idl
+  }
+
+  custom_only = 1
+}
+
+project(DDS*Pub): taoexe, portableserver, dcps {
+  after += *idl
+  requires += exceptions
+  exename = tao_pub
+
   IDL_Files {
     DDSPerfTest.idl
     PubMessageTypeSupport.idl
@@ -25,27 +39,15 @@ project(DDS*Pub): taoexe, portableserver, dcps {
     PubListener.cpp
     PubMessageTypeSupportImpl.cpp
     AckMessageTypeSupportImpl.cpp
-
   }
 }
 
 
 project(DDS*Sub): taoexe, portableserver, dcps {
+  after += *idl
   requires += exceptions
   exename = tao_sub
 
-
-  TypeSupport_Files {
-    DDSPerfTest.idl >> PubMessageTypeSupport.idl \
-                       PubMessageTypeSupportImpl.h \
-                       PubMessageTypeSupportImpl.cpp \
-                       AckMessageTypeSupport.idl \
-                       AckMessageTypeSupportImpl.h \
-                       AckMessageTypeSupportImpl.cpp 
-
-  }
-
-  
   IDL_Files {
     DDSPerfTest.idl
     PubMessageTypeSupport.idl

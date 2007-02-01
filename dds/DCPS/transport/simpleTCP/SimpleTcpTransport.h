@@ -4,7 +4,8 @@
 #ifndef TAO_DCPS_SIMPLETCPTRANSPORT_H
 #define TAO_DCPS_SIMPLETCPTRANSPORT_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include "SimpleTcp_export.h"
+
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
 #include  "SimpleTcpConfiguration_rch.h"
 #include  "SimpleTcpDataLink_rch.h"
@@ -23,7 +24,7 @@ namespace TAO
     class SimpleTcpAcceptor;
     class SimpleTcpConnectionReplaceTask;
 
-    class TAO_DdsDcps_Export SimpleTcpTransport : public TransportImpl
+    class SimpleTcp_Export SimpleTcpTransport : public TransportImpl
     {
       public:
 
@@ -110,7 +111,7 @@ namespace TAO
 //            because it gets set in our configure() method, and
 //            dropped in our shutdown_i() method.  Maybe we can just
 //            assume that configure() can remain unlocked (why not lock it
-//            though - it isn't in the send or receive path?) 
+//            though - it isn't in the send or receive path?)
 //            Step back and take a look at when the various locks in here
 //            get used - and if not in the direct send or recieve path,
 //            maybe we can simplify this at the expense of a little more
@@ -147,7 +148,7 @@ namespace TAO
         TransportReactorTask_rch   reactor_task_;
 
         /// This task is used to resolve some deadlock situation
-        /// duing reconnecting. 
+        /// duing reconnecting.
         /// TODO: reuse the reconnect_task in the SimpleTcpConnection
         ///       for new connection checking.
         SimpleTcpConnectionReplaceTask* con_checker_;

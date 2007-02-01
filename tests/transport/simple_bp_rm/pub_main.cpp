@@ -1,3 +1,5 @@
+// $Id$
+
 #include "PubDriver.h"
 #include "TestException.h"
 #include "ace/Log_Msg.h"
@@ -7,7 +9,11 @@
 int
 main(int argc, char* argv[])
 {
-  //TURN_ON_VERBOSE_DEBUG;
+  // Need call the ORB_init to dynamically load the transport libs.
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "DDS_DCPS");
+
   ACE_LOG_MSG->priority_mask(LM_TRACE     |
                              LM_DEBUG     |
                              LM_INFO      |

@@ -1,15 +1,86 @@
+Thu Feb  1 22:47:13 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * MPC/config/dcpsexe_with_tcp.mpb:
+	  MPC configuration for linking application against SimpleTCP.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+          cosmetic changes.
+
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+          Remove code to auto-config SimpleTCP. The assumption that
+          SimpleTCP is part of the DDS core is no longer valid.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.mpc:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp_export.h:
+        * dds/DdsDcps.mpc:
+          Modificat/Addit ions to break up SimpleTCP from the DDS core.
+
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/tcp.conf:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/tcp.conf:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/tcp.conf:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/simple_n/sub_main.cpp:
+          Additions to dynamically load/init SimpleTCP.
+
+        * tests/transport/simple/DDS_transport_simple.mpc:
+        * tests/transport/simple/README:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+        * tests/transport/simple/tcp.conf:
+          Configure test to statically link/configure against SimpleTCP library.
+
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+          Factor our common build segments to avoid conflicts in parallel
+          build systems (-j > 1)
+
 Thu Feb  1 21:02:13 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\RepoIdSet.cpp:
         * dds\DCPS\transport\framework\RepoIdSetMap.cpp:
         * dds\DCPS\transport\framework\RepoIdSetMap.inl:
 
-          Fixed a bug that the FULLY_ASSOCIATION message serialize 
+          Fixed a bug that the FULLY_ASSOCIATION message serialize
           stream contains size_t data. Since size_t is platform
           dependent, this makes the FULLY_ASSOCIATION message
           deserialized incorrectly in the inter-host test. Replacing
-          size_t with CORBA::ULong fixed the problem.  
-          
+          size_t with CORBA::ULong fixed the problem.
+
 Thu Feb  1 16:40:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

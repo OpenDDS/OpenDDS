@@ -111,13 +111,14 @@ static const size_t FACTORY_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (FACTORY_SE
 // The transport section name prefix.
 static const char  TRANSPORT_SECTION_NAME_PREFIX[] = "transport_impl_";
 // The transport section name prefix is "transport_impl_" so the length is 15.
-static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX); 
+static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX);
 
 namespace TAO
 {
   namespace DCPS
   {
     // Values used in TransportFactory::create_transport_impl () call.
+    // ciju: Doesn't add any value. Removing.
     const bool AUTO_CONFIG = 1;
     const bool DONT_AUTO_CONFIG = 0;
 
@@ -198,7 +199,7 @@ namespace TAO
         DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE    = 4096
       };
 
-   
+
     enum Association_Status
     {
       Fully_Associated,

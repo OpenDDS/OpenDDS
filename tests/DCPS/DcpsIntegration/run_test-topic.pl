@@ -21,7 +21,7 @@ PerlACE::add_lib_path('../FooType');
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                             "-o $dcpsrepo_ior"
-                            . " -d $domains_file");
+                            . " -d $domains_file -NOBITS");
 
 
 $Topic = new PerlACE::Process ("topic_test",

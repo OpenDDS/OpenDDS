@@ -31,13 +31,17 @@ if ($#ARGV >= 0)
 	$common_opts = $common_opts." -v";
     }
 }
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
-$Subscriber = new PerlACE::Process ("subscriber",
-				    "-DCPSConfigFile sub.ini".$common_opts);
-$Publisher = new PerlACE::Process ("publisher",
-				   "-DCPSConfigFile pub.ini".$common_opts);
+$DCPSREPO = new PerlACE::Process
+    ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo"
+     , " -NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
+$Subscriber = new PerlACE::Process
+    ("subscriber"
+     , " $svc_config -DCPSConfigFile sub.ini".$common_opts);
+$Publisher = new PerlACE::Process
+    ("publisher"
+     , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

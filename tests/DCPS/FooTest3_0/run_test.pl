@@ -23,7 +23,7 @@ $shutdown_pub = 1;
 $add_new_subscription = 0;
 $num_subscribers = 1;
 $shutdown_delay_secs=10;
-
+$svc_config="-ORBSvcConf ../../tcp.conf";
 
 if ($ARGV[0] eq 'unregister') {
     $test_to_run = 1;
@@ -92,11 +92,12 @@ unlink $pubdriver_ior;
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                                   "-o $dcpsrepo_ior"
-                                  . " -d $domains_file");
+                                  . " -d $domains_file -NOBITS");
 print $DCPSREPO->CommandLine(), "\n";
 
 $publisher = new PerlACE::Process ("FooTest3_publisher",
-                                   "-p $pub_id_fname:localhost:$pub_port "
+				   "$svc_config "
+                                   . "-p $pub_id_fname:localhost:$pub_port "
                                    . "-s $sub_id:localhost:$sub_port "
                                    . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
                                    . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
@@ -104,7 +105,8 @@ $publisher = new PerlACE::Process ("FooTest3_publisher",
 print $publisher->CommandLine(), "\n";
 
 $subscriber = new PerlACE::Process ("FooTest3_subscriber",
-				    "-p $pub_id_fname:localhost:$pub_port "
+				    "$svc_config "
+				    . "-p $pub_id_fname:localhost:$pub_port "
                                     . "-s $sub_id:localhost:$sub_port -n $num_writes "
                                     . "-v file://$pubdriver_ior -x $shutdown_pub "
                                     . "-a $add_new_subscription -d $shutdown_delay_secs");
@@ -137,7 +139,8 @@ if ($num_subscribers == 2)
     $num_writes = 2; # 2 writes
 
     $subscriber2 = new PerlACE::Process ("FooTest3_subscriber",
-					 "-p $pub_id_fname:localhost:$pub_port "
+					 "$svc_config "
+					 . "-p $pub_id_fname:localhost:$pub_port "
 					 . "-s $sub_id:localhost:$sub_port -n $num_writes "
 					 . "-v file://$pubdriver_ior -x 1 -a 1 "
 					 . "-d $shutdown_delay_secs");

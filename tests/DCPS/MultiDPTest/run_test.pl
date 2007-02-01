@@ -31,27 +31,28 @@ $subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
 $publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
 $publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
 
-unlink $dcpsrepo_ior; 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $dcpsrepo_ior;
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
 #                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file");
+                             . " -d $domains_file -NOBITS");
 print $DCPSREPO->CommandLine(), "\n";
 
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 # test multiple cases
-$sub_parameters = "-s $sub_addr1 -s $sub_addr2 "
+$sub_parameters = "$svc_config -s $sub_addr1 -s $sub_addr2 "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
-              
+
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "-p $pub_addr "
+$pub_parameters = "$svc_config -p $pub_addr "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
 
 
@@ -94,11 +95,11 @@ if ($ir != 0) {
     $status = 1;
 }
 
-unlink $dcpsrepo_ior; 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $dcpsrepo_ior;
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";
@@ -108,9 +109,3 @@ else {
 }
 
 exit $status;
-
-
-
-
-
-

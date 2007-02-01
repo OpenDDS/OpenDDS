@@ -53,7 +53,7 @@ if ($ARGV[$arg_idx] eq 'mcast') {
 
 
 # multiple instances, single datawriter, single datareader
-if ($ARGV[$arg_idx] eq 'mi') { 
+if ($ARGV[$arg_idx] eq 'mi') {
   $num_instances_per_writer=2;
 }
 elsif ($ARGV[$arg_idx] eq 'mwmr') {
@@ -68,7 +68,7 @@ elsif ($ARGV[$arg_idx] eq 'mwmr_long_seq') {
   $num_readers = 2;
 }
 elsif ($ARGV[$arg_idx] eq 'blocking') {
-  $writer_blocking_ms=1000000; # 1000 seconds 
+  $writer_blocking_ms=1000000; # 1000 seconds
   $num_instances_per_writer=5;
   $num_samples_per_instance=20;
   $max_samples_per_instance=1;
@@ -87,7 +87,7 @@ elsif ($ARGV[$arg_idx] eq 'mixed_trans') {
   $num_readers = 2;
   $mixed_trans = 1;
 }
-elsif ($ARGV[$arg_idx] eq '') { 
+elsif ($ARGV[$arg_idx] eq '') {
   #default test - single datareader single instance.
 }
 else {
@@ -103,19 +103,20 @@ $subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
 $publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
 $publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
 
-unlink $dcpsrepo_ior; 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $dcpsrepo_ior;
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 
 $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
                              . " -ORBDebugLevel 1"
-                             . " -d $domains_file");
+                             . " -d $domains_file -NOBITS");
 print $DCPSREPO->CommandLine(), "\n";
 
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
 if ($use_udp == 1 || $mixed_trans == 1) {
   $svc_config=" -ORBSvcConf udp.conf ";
 }
@@ -178,11 +179,11 @@ if ($ir != 0) {
     $status = 1;
 }
 
-unlink $dcpsrepo_ior; 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $dcpsrepo_ior;
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";
@@ -192,9 +193,3 @@ else {
 }
 
 exit $status;
-
-
-
-
-
-

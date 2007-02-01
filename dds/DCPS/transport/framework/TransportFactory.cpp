@@ -3,6 +3,7 @@
 // $Id$
 
 #include  "DCPS/DdsDcps_pch.h"
+#include "TransportDebug.h"
 #include  "TransportFactory.h"
 #include  "TransportConfiguration.h"
 #include  "ace/OS_NS_strings.h"
@@ -35,7 +36,7 @@
 TAO::DCPS::TransportImpl_rch
 TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
 {
-  DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",5);
+  DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",1);
 
   TransportImplFactory_rch impl_factory = this->get_or_create_factory (type_id);
 
@@ -211,9 +212,11 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
                                                     ACE_CString transport_type,
                                                     bool auto_configure)
 {
-  if (transport_type == "")
+  if (transport_type.length() == 0)
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::create_transport_impl transport_type is null. \n"));
+      VDBG_LVL ((LM_ERROR,
+                 ACE_TEXT("(%P|%t)TransportFactory::create_transport_impl "
+                          "transport_type is null. \n")), 0);
       throw CORBA::BAD_PARAM ();
     }
 
@@ -227,9 +230,11 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 
       if (transport_type != config->transport_type_)
         {
-          ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t)TransportFactory::create_transport_impl transport_type"
-                                " conflict - provided %s configured %s\n"), transport_type.c_str(),
-                                config->transport_type_.c_str ()));
+          VDBG_LVL ((LM_ERROR,
+                     ACE_TEXT ("(%P|%t)TransportFactory::create_transport_impl "
+                               "transport_type conflict - provided %s configured %s\n")
+                     , transport_type.c_str(),
+                     config->transport_type_.c_str ()), 0);
           throw Transport::ConfigurationConflict ();
         }
 
@@ -325,6 +330,8 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
 TAO::DCPS::TransportImplFactory_rch
 TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 {
+  DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",1);
+
   if (factory_id == "")
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_factory factory_id is null. \n"));
@@ -363,22 +370,6 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 
   return factory;
 }
-
-
-void
-TAO::DCPS::TransportFactory::register_simpletcp ()
-{
-  SimpleTcpGenerator* generator;
-  ACE_NEW (generator, SimpleTcpGenerator ());
-  if (generator == 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t)TransportFactory::register_simpletcp no memory\n")));
-      return;
-    }
-  this->register_generator ("SimpleTcp", generator);
-}
-
 
 void
 TAO::DCPS::TransportFactory::register_generator (const char* type,
@@ -444,7 +435,7 @@ void
 TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
                                               TransportImplFactory_rch factory)
 {
-  DBG_ENTRY_LVL("TransportFactory","register_factory",5);
+  DBG_ENTRY_LVL("TransportFactory","register_factory",1);
 
   int result;
 
@@ -613,5 +604,3 @@ TAO::DCPS::TransportFactory::release(TransportIdType impl_id)
   // hold on to our lock_).
   impl->shutdown();
 }
-
-

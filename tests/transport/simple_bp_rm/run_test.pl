@@ -37,7 +37,7 @@ unlink $subreadyfile;
 # Parse the command line.
 #
 GetOptions(
-  "iterations|n=i" => \$iterations, 
+  "iterations|n=i" => \$iterations,
   "timeout|t=i"    => \$testTime,
   "publisher|p=i"  => \$publisherId,
   "subscriber|s=i" => \$subscriberId,
@@ -47,11 +47,13 @@ GetOptions(
   "sport|y=i"      => \$subscriberPort,
 ) ;
 
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
+
 #
 # Subscriber command and arguments.
 #
 my $subscriberCmd  = "./simple_subscriber" ;
-my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $subscriberArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                    . "-s $subscriberId:$subscriberHost:$subscriberPort "
                    . "-n $iterations " ;
 
@@ -59,7 +61,7 @@ my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
 # Publisher command and arguments.
 #
 my $publisherCmd  = "./simple_publisher" ;
-my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
+my $publisherArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$subscriberHost:$subscriberPort "
                    . "-n $iterations " ;
 
@@ -72,6 +74,7 @@ my $publisher  = new PerlACE::Process( $publisherCmd,  $publisherArgs) ;
 #
 # Fire up the subscriber first.
 #
+print $subscriber->CommandLine() . "\n";
 $subscriber->Spawn() ;
 if (PerlACE::waitforfile_timed ($subreadyfile, 5) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
@@ -79,6 +82,7 @@ if (PerlACE::waitforfile_timed ($subreadyfile, 5) == -1) {
     exit 1;
 }
 
+print $publisher->CommandLine() . "\n";
 #
 # Don't start the publisher for a few seconds.  We are not generating
 # anything in the file system here to wait for, so just use a delay - yuk.
@@ -94,4 +98,3 @@ die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( 5) ;
 unlink $subreadyfile;
 
 exit 0 ;
-

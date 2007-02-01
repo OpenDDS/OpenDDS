@@ -91,14 +91,21 @@ unlink $testoutputfilename;
 open(SAVEERR, ">&STDERR");
 open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
-$Subscriber = new PerlACE::Process ("subscriber",
-          "-DCPSConfigFile sub.ini -a $num_reads_before_crash -n $num_expected_reads"
-          . " -i $read_delay_ms -l $lost_subscription_callback -e $end_with_publisher");
-$Publisher = new PerlACE::Process ("publisher",
-          "-DCPSConfigFile pub.ini -a $num_writes_before_crash -n $num_writes "
-          . "-i $write_delay_ms -l $lost_publication_callback -d $expected_deleted_connections");
+$svc_config=" -ORBSvcConf ../../tcp.conf ";
+
+$DCPSREPO = new PerlACE::Process
+    ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo"
+     , "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
+$Subscriber = new PerlACE::Process
+    ("subscriber"
+     , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
+     . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
+     . " -e $end_with_publisher");
+$Publisher = new PerlACE::Process
+    ("publisher"
+     , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
+     . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
+     . " -d $expected_deleted_connections");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -132,9 +139,10 @@ if ($num_reads_before_crash > 0)
   # different status on windows and linux.
   print "Subscriber crashed and returned $SubscriberResult. \n";
 
-  $Subscriber = new PerlACE::Process ("subscriber",
-          "-DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub "
-          . "-r $num_reads_deviation");
+  $Subscriber = new PerlACE::Process
+      ("subscriber"
+       , " $svc_config -DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub"
+       . " -r $num_reads_deviation");
 
   sleep($restart_delay);
 
@@ -151,8 +159,9 @@ if ($num_writes_before_crash > 0) {
   # different status on windows and linux.
   print "Publisher crashed and returned $PublisherResult. \n";
 
-  $Publisher = new PerlACE::Process ("publisher",
-          "-DCPSConfigFile pub.ini -n $num_writes");
+  $Publisher = new PerlACE::Process
+      ("publisher"
+       , " $svc_config -DCPSConfigFile pub.ini -n $num_writes");
 
   sleep($restart_delay);
 
