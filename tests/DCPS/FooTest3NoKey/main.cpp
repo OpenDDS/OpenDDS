@@ -262,7 +262,7 @@ int main (int argc, char *argv[])
       TheServiceParticipant->shutdown ();
 
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));

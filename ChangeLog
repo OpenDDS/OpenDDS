@@ -1,25 +1,57 @@
+Fri Feb  2 20:37:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+
+	  Moved "requires += exceptions" to the base project since all DDS apps
+	  now require exceptions.
+
+	* performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+
+	  Eliminated "unused local variable"-type warnings that were left over
+	  from the scripted removal of exception macros.
+
 Fri Feb  2 15:03:56 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/Messenger.mpc:
-	  Factor our common build segments to avoid conflicts in parallel
+          Factor our common build segments to avoid conflicts in parallel
           build systems (-j > 1).
 
 Fri Feb  2 14:46:39 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * bin/dcps_tests.lst:
-	  Unknowingly introduced character created a wrong file
+          Unknowingly introduced character created a wrong file
           patch. Fixed it.
 
 Thu Feb  1 23:30:48 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * bin/dcps_tests.lst:
-	  Most tests now need to dynamically load the SimpleTCP
+          Most tests now need to dynamically load the SimpleTCP
           library. Don't run those on static builds.
 
 Thu Feb  1 22:47:13 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * MPC/config/dcpsexe_with_tcp.mpb:
-	  MPC configuration for linking application against SimpleTCP.
+          MPC configuration for linking application against SimpleTCP.
 
         * dds/DCPS/transport/framework/TransportDefs.h:
           cosmetic changes.
@@ -253,8 +285,8 @@ Thu Feb  1 16:40:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/transport/udp_simple_n/PubDriver.cpp:
         * tests/transport/udp_simple_n/SubDriver.cpp:
 
-	  Removed TAO exception emulation macros using the script
-	  $ACE_ROOT/bin/rm_exception_macros.pl from the DOC group repository.
+          Removed TAO exception emulation macros using the script
+          $ACE_ROOT/bin/rm_exception_macros.pl from the DOC group repository.
 
 Tue Jan 30 22:58:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

@@ -375,7 +375,7 @@ int main (int argc, char *argv[])
       ACE_OS::fclose(readers_completed);
       ACE_OS::fclose(writers_completed);
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));

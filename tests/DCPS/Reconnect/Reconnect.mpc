@@ -1,6 +1,6 @@
 
 project(*Publisher) : taoexe, portableserver, dcps {
-  requires += exceptions
+  
   exename   = publisher
 
   TypeSupport_Files {
@@ -21,7 +21,7 @@ project(*Publisher) : taoexe, portableserver, dcps {
 }
 
 project(*Subscriber) : taoexe, portableserver, dcps {
-  requires += exceptions
+  
   exename   = subscriber
 
   TypeSupport_Files {

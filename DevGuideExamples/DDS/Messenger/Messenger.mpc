@@ -2,7 +2,7 @@
 project(*idl): dcps {
   // This project ensures the common components get built first.
 
-  requires += exceptions
+  
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -18,7 +18,7 @@ project(*idl): dcps {
 
 
 project(DDS*Publisher) : taoexe, portableserver, dcps {
-  requires += exceptions
+  
   exename   = publisher
 
   TypeSupport_Files {
@@ -38,7 +38,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
 }
 
 project(DDS*Subscriber) : taoexe, portableserver, dcps {
-  requires += exceptions
+  
   exename   = subscriber
 
   TypeSupport_Files {
