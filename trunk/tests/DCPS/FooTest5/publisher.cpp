@@ -244,7 +244,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
           return ::DDS::Publisher::_nil ();
         }
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in create_publisher(). ")));
@@ -516,7 +516,7 @@ int main (int argc, char *argv[])
       delete []dw;
       delete [] writers;
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));

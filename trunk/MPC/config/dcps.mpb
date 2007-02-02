@@ -10,4 +10,7 @@ project : orbsvcslib, dcps_ts_defaults {
 
   includes    += $(DDS_ROOT)
   idlflags    += -Gdcps -I $(DDS_ROOT)
+
+  // DDS is not compatible with an exceptions=0 build
+  requires    += exceptions
 }

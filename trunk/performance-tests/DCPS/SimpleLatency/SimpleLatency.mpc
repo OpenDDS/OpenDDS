@@ -2,7 +2,7 @@
 // $Id$
 
 project(*idl): dcps {
-  requires += exceptions
+  
 
   TypeSupport_Files {
     DDSPerfTest.idl >> PubMessageTypeSupport.idl \
@@ -25,7 +25,7 @@ project(*idl): dcps {
 
 project(DDS*Pub): taoexe, portableserver, dcps {
   after += *idl
-  requires += exceptions
+  
   exename = tao_pub
 
   IDL_Files {
@@ -45,7 +45,7 @@ project(DDS*Pub): taoexe, portableserver, dcps {
 
 project(DDS*Sub): taoexe, portableserver, dcps {
   after += *idl
-  requires += exceptions
+  
   exename = tao_sub
 
   IDL_Files {

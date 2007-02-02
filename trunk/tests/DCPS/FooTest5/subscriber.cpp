@@ -257,7 +257,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           return ::DDS::Subscriber::_nil ();
         }
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in create_subscriber. ")));
@@ -565,7 +565,7 @@ int main (int argc, char *argv[])
 
       delete [] drs;
     }
-  catch (const TestException& ex)
+  catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main (). ")));
