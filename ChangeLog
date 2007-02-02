@@ -1,3 +1,9 @@
+Fri Feb  2 14:46:39 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * bin/dcps_tests.lst:
+	  Unknowingly introduced character created a wrong file
+          patch. Fixed it.
+
 Thu Feb  1 23:30:48 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * bin/dcps_tests.lst:
