@@ -1,3 +1,10 @@
+Fri Feb  2 23:49:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added notes for SimpleMcast support and refactor of SimpleUdp and 
+          SimpleMcast.
+          
 Fri Feb  2 22:36:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples\DDS\Messenger\sub_udp.ini:
