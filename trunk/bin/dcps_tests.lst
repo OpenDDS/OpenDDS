@@ -18,7 +18,7 @@ tests/DCPS/DCPSInfoRepo/run_test.pl
 tests/DCPS/unit/run_test.pl: !STATIC
 tests/DCPS/FooTest3_0/run_test.pl: !STATIC
 tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN !STATIC
-btests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !STATIC
+tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !STATIC
