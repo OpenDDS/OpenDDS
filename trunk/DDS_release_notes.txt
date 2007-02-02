@@ -2,6 +2,11 @@ Version 1.0 of TAO DDS.
 
 New to this version are the following changes:
 
+- Supported an unreliable multicast transport -  SimpleMcast.
+
+- Refactored SimpleUdp and SimpleMcast and now the SimpleUnreliableDgram 
+  library supports both SimpleUdp and SimpleMcast transports.
+  
 - Moved mpb files from the top-level DDS directory,
   into MPC/config, to make them consistent with
   the location of similar files in TAO and CIAO.
@@ -41,6 +46,10 @@ New to this version are the following changes:
 
 - Added on_connection_deleted to TAO::DCPS::DataWriterListener/DataReaderListener 
   for testing connection object memory leak.
+
+- Fixed a bug that uses a platform dependent type - size_t in FULLY_ASSOICIATION 
+  message. This would make publisher and subscriber not fully associated 
+  in inter-host test such as tests between windowsXP and Linux.
 
 =========================================================================
 
