@@ -1,3 +1,9 @@
+Fri Feb  2 15:03:56 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+	  Factor our common build segments to avoid conflicts in parallel
+          build systems (-j > 1).
+
 Fri Feb  2 14:46:39 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * bin/dcps_tests.lst:
