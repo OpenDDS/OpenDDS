@@ -571,7 +571,7 @@ namespace TAO
                             this->topics_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          TopicMap_Entry* entry;
+          TopicMap_Entry* entry = 0;
           if (topics_.find (topic_name.in (), entry) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -675,7 +675,7 @@ namespace TAO
                   first_time = 0;
                 }
 
-              TopicMap_Entry* entry;
+              TopicMap_Entry* entry = 0;
               {
                 ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                                   tao_mon,
@@ -775,7 +775,7 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry;
+      TopicMap_Entry* entry = 0;
       if (topics_.find (name, entry) == -1)
         {
           return ::DDS::TopicDescription::_nil();
@@ -1427,7 +1427,7 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry;
+      TopicMap_Entry* entry = 0;
       if (topics_.find (topic_name, entry) == 0)
         {
           entry->int_id_.client_refs_ ++;

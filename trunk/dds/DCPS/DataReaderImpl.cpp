@@ -533,7 +533,7 @@ void DataReaderImpl::remove_all_associations ()
 	  remove_associations(writers, dont_notify_lost);
 	}
     }
-  catch (const CORBA::Exception& ex)
+  catch (const CORBA::Exception&)
     {
     }
 }

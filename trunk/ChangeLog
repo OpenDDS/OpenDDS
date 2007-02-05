@@ -1,3 +1,16 @@
+Mon Feb  5 16:24:06 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin\dcps_tests.lst:
+
+          Added missing ":" that makes the build configuration be the 
+          parameter of test script.
+          
+        * dds\DCPS\DataWriterImpl.cpp:
+        * dds\DCPS\DataReaderImpl.cpp:
+        * dds\DCPS\DomainParticipantImpl.cpp:
+
+          Fixed warnings due unused or not initialized local variables.  
+          
 Fri Feb  2 23:49:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:

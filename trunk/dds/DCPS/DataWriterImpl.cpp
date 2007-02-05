@@ -456,7 +456,7 @@ void DataWriterImpl::remove_all_associations ()
     this->remove_associations(readers, dont_notify_lost);
   }
     }
-  catch (const CORBA::Exception& ex)
+  catch (const CORBA::Exception&)
     {
     }
 }
