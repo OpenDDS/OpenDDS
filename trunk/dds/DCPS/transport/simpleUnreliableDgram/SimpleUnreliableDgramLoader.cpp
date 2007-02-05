@@ -57,7 +57,7 @@ TAO_DCPS_SimpleUnreliableDgramLoader::init (int argc,
             }
             else {
               ACE_ERROR_RETURN ((LM_ERROR,
-                ACE_TEXT("TAO_DCPS_SimpleUnreliableDgramLoader: Unknown type ")
+                ACE_TEXT("ERROR: TAO_DCPS_SimpleUnreliableDgramLoader: Unknown type ")
                 ACE_TEXT("<%s>.\n"), type),
                 -1);
             }

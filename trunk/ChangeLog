@@ -1,3 +1,20 @@
+Mon Feb  5 18:04:11 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests\DCPS\FooTest5\run_test.pl:
+
+          Added SimpleTcp service config to mixed_trans test to load the 
+          SimpleTcp library. This would fix the mixed transport test failure.
+          
+        * dds\DCPS\transport\simpleTCP\SimpleTcpLoader.cpp:
+        
+          Added transport type checking and print error if an incorrent type
+          provided by service config file. 
+          
+        * dds\DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.cpp:
+
+          Updated incorrect type error message to have ERROR keyword to be easy for 
+          debugging.
+
 Mon Feb  5 16:24:06 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin\dcps_tests.lst:
