@@ -117,8 +117,11 @@ $DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
 print $DCPSREPO->CommandLine(), "\n";
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
-if ($use_udp == 1 || $mixed_trans == 1) {
+if ($use_udp == 1) {
   $svc_config=" -ORBSvcConf udp.conf ";
+}
+elsif ($mixed_trans == 1) {
+  $svc_config= " -ORBSvcConf udp.conf -ORBSvcConf ../../tcp.conf ";
 }
 elsif ($use_mcast == 1) {
   $svc_config=" -ORBSvcConf mcast.conf ";

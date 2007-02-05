@@ -42,6 +42,14 @@ DCPS_SimpleTcpLoader::init (int argc, ACE_TCHAR* argv[])
           {
             ACE_TCHAR* type = argv[curarg];
 
+            if (ACE_OS::strcasecmp (type, ACE_TEXT("SimpleTcp")) != 0)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("ERROR: DCPS_SimpleTcpLoader: Unknown type ")
+                  ACE_TEXT("<%s>.\n"), type),
+                  -1);
+              }
+
             TAO::DCPS::SimpleTcpGenerator* generator;
             ACE_NEW_RETURN (generator,
                             TAO::DCPS::SimpleTcpGenerator (),
