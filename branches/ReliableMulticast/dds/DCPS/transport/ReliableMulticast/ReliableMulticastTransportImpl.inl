@@ -4,4 +4,12 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-//@@todo: Add ACE_INLINE Code Here
+ACE_INLINE
+TAO::DCPS::ReliableMulticastTransportImpl::ReliableMulticastTransportImpl()
+{
+}
+
+ACE_INLINE
+TAO::DCPS::ReliableMulticastTransportImpl::~ReliableMulticastTransportImpl()
+{
+}

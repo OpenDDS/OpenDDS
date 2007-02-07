@@ -4,4 +4,13 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-//@@todo: Add ACE_INLINE Code Here
+ACE_INLINE
+TAO::DCPS::ReliableMulticastThreadSynchResource::ReliableMulticastThreadSynchResource()
+  : TAO::DCPS::ThreadSynchResource(ACE_HANDLE())
+{
+}
+
+ACE_INLINE
+TAO::DCPS::ReliableMulticastThreadSynchResource::~ReliableMulticastThreadSynchResource()
+{
+}
