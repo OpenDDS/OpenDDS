@@ -1,40 +1,45 @@
+Wed Feb  7 16:01:49 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * DDS_release_notes.txt:
+	  Add release notes for the 0.10 release.
+
 Mon Feb  5 18:04:11 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests\DCPS\FooTest5\run_test.pl:
 
-          Added SimpleTcp service config to mixed_trans test to load the 
+          Added SimpleTcp service config to mixed_trans test to load the
           SimpleTcp library. This would fix the mixed transport test failure.
-          
+
         * dds\DCPS\transport\simpleTCP\SimpleTcpLoader.cpp:
-        
+
           Added transport type checking and print error if an incorrent type
-          provided by service config file. 
-          
+          provided by service config file.
+
         * dds\DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.cpp:
 
-          Updated incorrect type error message to have ERROR keyword to be easy for 
+          Updated incorrect type error message to have ERROR keyword to be easy for
           debugging.
 
 Mon Feb  5 16:24:06 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin\dcps_tests.lst:
 
-          Added missing ":" that makes the build configuration be the 
+          Added missing ":" that makes the build configuration be the
           parameter of test script.
-          
+
         * dds\DCPS\DataWriterImpl.cpp:
         * dds\DCPS\DataReaderImpl.cpp:
         * dds\DCPS\DomainParticipantImpl.cpp:
 
-          Fixed warnings due unused or not initialized local variables.  
-          
+          Fixed warnings due unused or not initialized local variables.
+
 Fri Feb  2 23:49:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
 
-          Added notes for SimpleMcast support and refactor of SimpleUdp and 
+          Added notes for SimpleMcast support and refactor of SimpleUdp and
           SimpleMcast.
-          
+
 Fri Feb  2 22:36:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples\DDS\Messenger\sub_udp.ini:
@@ -1907,6 +1912,7 @@ Fri Oct  6 22:25:25 UTC 2006  Ciju John  <johnc@ociweb.com>
         * tests/DCPS/Reconnect/run_test.pl:
           Further fixes to the regression test added in:
           Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
+
 Fri Oct  6 14:58:05 UTC 2006  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
