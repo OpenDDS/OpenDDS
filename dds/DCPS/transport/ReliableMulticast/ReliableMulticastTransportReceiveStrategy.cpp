@@ -9,4 +9,29 @@
 #include "ReliableMulticastTransportReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-//@@todo: Add Code Here
+ssize_t
+TAO::DCPS::ReliableMulticastTransportReceiveStrategy::receive_bytes(
+  iovec iov[],
+  int n,
+  ACE_INET_Addr& remote_address
+  )
+{
+  return -1;
+}
+
+void
+TAO::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
+  ReceivedDataSample& sample,
+  const ACE_INET_Addr& remote_address
+  )
+{
+}
+
+int start_i()
+{
+  return -1;
+}
+
+void stop_i()
+{
+}
