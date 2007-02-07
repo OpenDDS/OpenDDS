@@ -12,6 +12,21 @@
 #include "ReliableMulticastTransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace
+{
+  struct TransportInterfaceData
+  {
+    TransportInterfaceData(const ACE_INET_Addr& address)
+      : version_(1)
+      , multicast_group_address_(address)
+    {
+    }
+
+    char version_;
+    TAO::DCPS::NetworkAddress multicast_group_address_;
+  };
+}
+
 TAO::DCPS::DataLink*
 TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   const TransportInterfaceInfo& remote_info,
@@ -41,19 +56,9 @@ TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* c
   return 0;
 }
 
-namespace
+void
+TAO::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 {
-  struct TransportInterfaceData
-  {
-    TransportInterfaceData(const ACE_INET_Addr& address)
-      : version_(1)
-      , multicast_group_address_(address)
-    {
-    }
-
-    char version_;
-    TAO::DCPS::NetworkAddress multicast_group_address_;
-  };
 }
 
 int
@@ -68,4 +73,9 @@ TAO::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceI
     reinterpret_cast<CORBA::Octet*>(&transport_interface_data)
     );
   return 0;
+}
+
+void
+TAO::DCPS::ReliableMulticastTransportImpl::release_datalink_i(DataLink* link)
+{
 }

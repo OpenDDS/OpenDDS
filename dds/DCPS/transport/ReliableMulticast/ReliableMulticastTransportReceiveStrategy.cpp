@@ -27,11 +27,13 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
 {
 }
 
-int start_i()
+int
+TAO::DCPS::ReliableMulticastTransportReceiveStrategy::start_i()
 {
   return -1;
 }
 
-void stop_i()
+void
+TAO::DCPS::ReliableMulticastTransportReceiveStrategy::stop_i()
 {
 }
