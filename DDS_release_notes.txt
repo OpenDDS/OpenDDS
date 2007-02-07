@@ -8,7 +8,7 @@ New to this version are the following changes:
   This is useful for tests, we can now unify sub.ini and sub_udp.ini,
   for example.
 
-- Fix a deadlock in the DCPSInforRepo server related to
+- Fix a deadlock in the DCPSInfoRepo server related to
   nested CORBA upcalls.
 
 - Several memory leak fixes.
@@ -20,7 +20,8 @@ New to this version are the following changes:
 - New configuration option 'passive_connect_duration' to set
   timeout on initial passive connection establishment. Setting
   this prevents deadlock when the InfoRepo directs subscriber
-  to connect with a bogus/dead publisher.
+  to connect with a bogus/dead publisher. See the DDS Programmer's
+  Guide for details.
 
 - Fix compile issues on Green Hills compiler.
 
@@ -28,7 +29,8 @@ New to this version are the following changes:
   into a separate library.
 
 - Enhance the previous logging mechanism. Add log levels. Logging
-  can be entirely compiled out for increased performance.
+  can be entirely compiled out for increased performance. See the
+  DDS Programmer's Guide for details.
 
 - Fix race condition involving Reconnection task.
   Fix race-condition in sending graceful disconnect message.
