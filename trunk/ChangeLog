@@ -1,3 +1,13 @@
+Wed Feb  7 16:38:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+
+	  Added "after" clauses to ensure that the client and server are not
+	  built until the IDL-generated files are in place.  This .mpc file
+	  should be the "gold standard" of how to use MPC with DDS.  It factors
+	  out the common IDL tasks so that the client and server projects can
+	  be run in parallel (VC8 and GNU make -j) without errors.
+
 Wed Feb  7 16:01:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -56,10 +66,10 @@ Fri Feb  2 20:37:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/Reconnect/Reconnect.mpc:
         * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
 
-	  Moved "requires += exceptions" to the base project since all DDS apps
-	  now require exceptions.
+          Moved "requires += exceptions" to the base project since all DDS apps
+          now require exceptions.
 
-	* performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
         * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
         * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
         * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
@@ -77,8 +87,8 @@ Fri Feb  2 20:37:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/MultiTopicTest/publisher.cpp:
         * tests/DCPS/MultiTopicTest/subscriber.cpp:
 
-	  Eliminated "unused local variable"-type warnings that were left over
-	  from the scripted removal of exception macros.
+          Eliminated "unused local variable"-type warnings that were left over
+          from the scripted removal of exception macros.
 
 Fri Feb  2 15:03:56 UTC 2007  Ciju John  <johnc@ociweb.com>
 
