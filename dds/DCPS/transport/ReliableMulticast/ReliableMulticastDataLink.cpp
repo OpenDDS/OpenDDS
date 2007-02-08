@@ -6,6 +6,7 @@
 #include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastTransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastDataLink.inl"
@@ -26,5 +27,11 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
 bool
 TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 {
+  std::cout << "is_publisher == " << is_publisher << std::endl;
   return false;
+}
+
+void
+TAO::DCPS::ReliableMulticastDataLink::stop_i()
+{
 }
