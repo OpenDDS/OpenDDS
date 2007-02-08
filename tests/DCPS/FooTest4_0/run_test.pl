@@ -28,7 +28,7 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-$DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "-o $dcpsrepo_ior"
                              . " -d $domains_file -ORBDebugLevel 1 -NOBITS");
 

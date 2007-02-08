@@ -40,7 +40,7 @@ $status = 0;
 $client_orb = "";
 
 
-$REPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo", 
+$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", 
                               "-o $iorfile -d domain_ids"
                               );
 #                              . " -ORBDebugLevel 1");

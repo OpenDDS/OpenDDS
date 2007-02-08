@@ -2,6 +2,9 @@ Version 0.10 of TAO DDS.
 
 New to this version are the following changes:
 
+- The DCPSInfoRepo executable is now moved to $DDS_ROOT/bin.  It was previously
+  located in $DDS_ROOT/dds/InfoRepo.
+
 - Allow configurations to specify a transport that is not in a loaded
   library.  This will print a warning to ACE_ERROR but will not fail
   until the user attempts to attach the transport to a reader/writer.
