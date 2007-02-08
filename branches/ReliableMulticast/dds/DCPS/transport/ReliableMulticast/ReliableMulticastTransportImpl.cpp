@@ -5,7 +5,6 @@
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportImpl.h"
 #include "ReliableMulticastTransportConfiguration.h"
-#include "ReliableMulticastDataLink.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #if !defined (__ACE_INLINE__)
@@ -33,8 +32,37 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   int connect_as_publisher
   )
 {
-  TAO::DCPS::ReliableMulticastDataLink* data_link = 0;
-  return data_link;
+  TAO::DCPS::ReliableMulticastDataLink_rch data_link;
+  const TransportInterfaceData& transport_interface_data =
+    reinterpret_cast<const TransportInterfaceData&>(remote_info);
+  ACE_INET_Addr multicast_group_address;
+
+  transport_interface_data.multicast_group_address_.to_addr(
+    multicast_group_address
+    );
+
+  ReliableMulticastDataLinkMap::iterator iter =
+    data_links_.find(multicast_group_address);
+  if (iter != data_links_.end())
+  {
+    return iter->second._retn();
+  }
+
+  data_link = new TAO::DCPS::ReliableMulticastDataLink(
+    multicast_group_address,
+    *this
+    );
+  data_links_[multicast_group_address] = data_link;
+  
+  if (!data_link->connect(connect_as_publisher == 1))
+  {
+    ACE_ERROR_RETURN(
+      (LM_ERROR, "(%P|%t) ERROR: Failed to connect data link.\n"),
+      0
+      );
+  }
+
+  return data_link._retn();
 }
 
 int
@@ -47,7 +75,8 @@ TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* c
   {
     ACE_ERROR_RETURN(
       (LM_ERROR, "(%P|%t) ERROR: Failed downcast from TransportConfiguration to ReliableMulticastTransportConfiguration.\n"),
-      -1);
+      -1
+      );
   }
 
   my_config->_add_ref();

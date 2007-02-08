@@ -13,7 +13,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include <map>
 
 namespace TAO
 {
@@ -30,7 +32,7 @@ namespace TAO
       virtual ~ReliableMulticastTransportImpl();
 
     protected:
-      virtual DataLink* find_or_create_datalink(
+      virtual TAO::DCPS::DataLink* find_or_create_datalink(
         const TransportInterfaceInfo& remote_info,
         int connect_as_publisher
         );
@@ -41,11 +43,16 @@ namespace TAO
 
       virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
 
-      virtual void release_datalink_i(DataLink* link);
+      virtual void release_datalink_i(TAO::DCPS::DataLink* link);
 
     private:
       ReliableMulticastTransportConfiguration* configuration_;
       // JSP: Add transport configuration storage
+      typedef std::map<
+        ACE_INET_Addr,
+        TAO::DCPS::ReliableMulticastDataLink_rch
+        > ReliableMulticastDataLinkMap;
+      ReliableMulticastDataLinkMap data_links_;
     };
 
   } /* namespace DCPS */

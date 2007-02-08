@@ -13,6 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 
 namespace TAO
@@ -25,11 +26,19 @@ namespace TAO
       : public DataLink
     {
     public:
-      ReliableMulticastDataLink();
+      ReliableMulticastDataLink(
+        const ACE_INET_Addr& multicast_group_address,
+        TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
+        );
       virtual ~ReliableMulticastDataLink();
+
+      bool connect(bool is_publisher);
 
     protected:
       virtual void stop_i();
+
+    private:
+      TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
     };
 
   } /* namespace DCPS */
