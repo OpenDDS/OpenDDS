@@ -27,7 +27,7 @@ unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -NOBITS
-$DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              " -NOTBITS -o $dcpsrepo_ior"
                              . " -d $domains_file -NOBITS");
 

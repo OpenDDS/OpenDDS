@@ -1,5 +1,6 @@
 project (DCPSInfoRepo) : dcpsexe, portableserver, iortable {
   exename  = DCPSInfoRepo
+  exeout   = $(DDS_ROOT)/bin
 
   pch_header   = DcpsInfo_pch.h
   pch_source   = DcpsInfo_pch.cpp

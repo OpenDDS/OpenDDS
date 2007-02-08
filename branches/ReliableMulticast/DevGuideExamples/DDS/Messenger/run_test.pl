@@ -52,7 +52,7 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
 $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
 $Publisher = new PerlACE::Process ("publisher", " $pub_opts");

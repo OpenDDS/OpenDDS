@@ -110,7 +110,7 @@ unlink $publisher_completed;
 unlink $publisher_ready;
 
 
-$DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
                              . " -ORBDebugLevel 1"
                              . " -d $domains_file -NOBITS");
