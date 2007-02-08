@@ -2,6 +2,7 @@
 //
 // $Id$
 
+#include "ReliableMulticastDataLink.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
