@@ -15,6 +15,7 @@
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace TAO
 {
@@ -27,6 +28,7 @@ namespace TAO
     {
     public:
       ReliableMulticastDataLink(
+        TransportReactorTask_rch& reactor_task,
         const ACE_INET_Addr& multicast_group_address,
         TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
         );
@@ -38,6 +40,7 @@ namespace TAO
       virtual void stop_i();
 
     private:
+      TAO::DCPS::TransportReactorTask_rch reactor_task_;
       TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
     };
 

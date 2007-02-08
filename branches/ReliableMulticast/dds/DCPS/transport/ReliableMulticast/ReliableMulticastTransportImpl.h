@@ -15,6 +15,7 @@
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include <map>
 
 namespace TAO
@@ -53,6 +54,7 @@ namespace TAO
         TAO::DCPS::ReliableMulticastDataLink_rch
         > ReliableMulticastDataLinkMap;
       ReliableMulticastDataLinkMap data_links_;
+      TransportReactorTask_rch reactor_task_;
     };
 
   } /* namespace DCPS */
