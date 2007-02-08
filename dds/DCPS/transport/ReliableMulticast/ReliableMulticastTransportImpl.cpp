@@ -6,6 +6,7 @@
 #include "ReliableMulticastTransportImpl.h"
 #include "ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImpl.inl"
@@ -49,6 +50,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   }
 
   data_link = new TAO::DCPS::ReliableMulticastDataLink(
+    reactor_task_,
     multicast_group_address,
     *this
     );
@@ -79,15 +81,25 @@ TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* c
       );
   }
 
+  reactor_task_ = reactor_task();
+  if (reactor_task_.is_nil())
+  {
+    ACE_ERROR_RETURN(
+      (LM_ERROR, "(%P|%t) ERROR: This transport requires a reactor.\n"),
+      -1
+      );
+  }
+
   my_config->_add_ref();
   configuration_ = my_config;
-  
+
   return 0;
 }
 
 void
 TAO::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 {
+  reactor_task_ = 0;
 }
 
 int
