@@ -1,0 +1,7 @@
+// has *.mwc_skip extension so mwc.pl -recurse does not pick it up.
+// Only want to generated this project when explicitly given:
+//    mwc.pl -type vc71 DCPS_IDL_tests.mwc_skip
+workspace {
+  Compiler
+  Serializer
+}
