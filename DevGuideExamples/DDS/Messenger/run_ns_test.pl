@@ -27,7 +27,7 @@ unlink $dcpsrepo_ior;
 
 $NS = new PerlACE::Process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
                             "-o $ns_ior");
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = new PerlACE::Process ("subscriber", 

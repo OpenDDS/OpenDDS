@@ -1,4 +1,4 @@
-Thu Feb  9 03:43:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+Fri Feb  9 03:43:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * NEWS:
 
@@ -6,6 +6,63 @@ Thu Feb  9 03:43:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           ChangeLog entry. 
           (see Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>)
           
+Thu Feb  8 19:17:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          The DCPSInfoRepo executable is now moved to $DDS_ROOT/bin.  It was
+	  previously located in $DDS_ROOT/dds/InfoRepo.
+
+	* DDS_release_notes.txt:
+
+	  Documented this change.
+
+        * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+	  Updated all tests that use the DCPSInfoRepo so that the test looks in
+	  $DDS_ROOT/bin for the executable.
+
 Wed Feb  7 23:20:35 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -15,16 +72,16 @@ Wed Feb  7 16:38:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/Messenger.mpc:
 
-	  Added "after" clauses to ensure that the client and server are not
-	  built until the IDL-generated files are in place.  This .mpc file
-	  should be the "gold standard" of how to use MPC with DDS.  It factors
-	  out the common IDL tasks so that the client and server projects can
-	  be run in parallel (VC8 and GNU make -j) without errors.
+          Added "after" clauses to ensure that the client and server are not
+          built until the IDL-generated files are in place.  This .mpc file
+          should be the "gold standard" of how to use MPC with DDS.  It factors
+          out the common IDL tasks so that the client and server projects can
+          be run in parallel (VC8 and GNU make -j) without errors.
 
 Wed Feb  7 16:01:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DDS_release_notes.txt:
-	  Add release notes for the 0.10 release.
+          Add release notes for the 0.10 release.
 
 Mon Feb  5 18:04:11 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 

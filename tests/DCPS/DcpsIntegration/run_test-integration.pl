@@ -19,7 +19,7 @@ unlink $dcpsrepo_ior;
 
 PerlACE::add_lib_path('../FooType');
 
-$DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                             "-o $dcpsrepo_ior"
                             . " -d $domains_file -ORBDebugLevel 1 -NOBITS");
 
