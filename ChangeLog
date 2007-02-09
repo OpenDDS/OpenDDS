@@ -1,3 +1,11 @@
+Thu Feb  9 03:43:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * NEWS:
+
+          Removed this file and moved its contents to the corresponding
+          ChangeLog entry. 
+          (see Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>)
+          
 Wed Feb  7 23:20:35 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -2166,8 +2174,19 @@ Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
         * NEWS:
         * configure.ac:
 
-          Added files that are needed to generate automake makefiles.
+          Added files that are needed to generate automake makefiles. The following
+          command must be used to generate them from MPC:
 
+            $MPC_ROOT/mwc.pl -include $ACE_ROOT/bin/MakeProjectCreator/config 
+             -type automake DDS.mwc
+
+          You must not run mwc.pl from $ACE_ROOT/bin to do this.
+          The ACE_ROOT, TAO_ROOT and DDS_ROOT environment variables must be set. 
+          Additionally, ACE_BUILDDIR should be set to $ACE_ROOT and TAO_BUILDDIR
+          should be set to $TAO_ROOT.
+
+          Please note that this is experimental and has not been fully tested.
+  
 Mon Jul 17 20:24:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           DDS 0.9 released.
