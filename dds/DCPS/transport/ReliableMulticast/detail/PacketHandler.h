@@ -11,6 +11,10 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "EventHandler.h"
+#include "Packet.h"
+#include <cstring>
+
 namespace TAO
 {
 
@@ -24,8 +28,29 @@ namespace TAO
       {
 
         class PacketHandler
+          : public TAO::DCPS::ReliableMulticast::detail::EventHandler
         {
-        //@@todo: Add Code Here
+        public:
+          template <typename Container> void send_many(
+            const Container& container,
+            const ACE_INET_Addr& dest
+            );
+
+          virtual void send(
+            const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
+            const ACE_INET_Addr& dest
+            );
+
+          virtual void receive(
+            char* buffer,
+            size_t size,
+            const ACE_INET_Addr& peer
+            );
+
+          virtual void receive(
+            const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
+            const ACE_INET_Addr& peer
+            ) = 0;
         };
 
       } /* namespace detail */
