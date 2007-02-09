@@ -1,7 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : orbsvcsexe, dcps {
-  libs        += SimpleTcp
-  after       += SimpleTcp
-}
