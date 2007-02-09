@@ -1,0 +1,660 @@
+Version 0.10 of TAO DDS.
+
+New to this version are the following changes:
+
+- The DCPSInfoRepo executable is now moved to $DDS_ROOT/bin.  It was previously
+  located in $DDS_ROOT/dds/InfoRepo.
+
+- Allow configurations to specify a transport that is not in a loaded
+  library.  This will print a warning to ACE_ERROR but will not fail
+  until the user attempts to attach the transport to a reader/writer.
+  This is useful for tests, we can now unify sub.ini and sub_udp.ini,
+  for example.
+
+- Fix a deadlock in the DCPSInfoRepo server related to
+  nested CORBA upcalls.
+
+- Several memory leak fixes.
+
+- A new dedicated task to cleanup resources upon remote DataLink
+  disconnection. This is used among other places for cleaning
+  up resources upon remote side crash.
+
+- New configuration option 'passive_connect_duration' to set
+  timeout on initial passive connection establishment. Setting
+  this prevents deadlock when the InfoRepo directs subscriber
+  to connect with a bogus/dead publisher. See the DDS Programmer's
+  Guide for details.
+
+- Fix compile issues on Green Hills compiler.
+
+- Decrease core DDS library footprint by breaking up SimpleTCP transport
+  into a separate library.
+
+- Enhance the previous logging mechanism. Add log levels. Logging
+  can be entirely compiled out for increased performance. See the
+  DDS Programmer's Guide for details.
+
+- Fix race condition involving Reconnection task.
+  Fix race-condition in sending graceful disconnect message.
+  Fix race condition in 'send_delayed_notifications'.
+
+- Increase performance by making thread synchronization more
+  fine grained.
+
+- Supported an unreliable multicast transport -  SimpleMcast.
+
+- Refactored SimpleUdp and SimpleMcast and now the SimpleUnreliableDgram
+  library supports both SimpleUdp and SimpleMcast transports.
+
+- Moved mpb files from the top-level DDS directory,
+  into MPC/config, to make them consistent with
+  the location of similar files in TAO and CIAO.
+  Now the TAO version has to have an
+  $ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg to
+  make MPC run success for DDS.
+
+- Fixed memory grow in the thread-per-connection when datawriter writes too
+  fast and continuously requests remove_sample. The problem is the samples
+  in thread-per-connection queue are not removed and cause memory grow.
+
+- Supported the datareader and datawriter restart up without shutdown transport.
+
+  Made the DCPS entity servants deleted upon delete_*()
+  call instead of upon orb shutdown. This would make the create/delete
+  DCPS entity multiple times in a single process without shutdown
+  Service Participant.
+
+  The reconnect thread and connection object memory leaking problem was fixed.
+  A dedicated task belonging to the TransportImpl object is used to clean up
+  any resources associated with the DataLink.
+
+  Added keep_link configuration to indicate whether a datalink should
+  be maintained when all associations are removed. This would allow
+  the datareader/datawriter restart in same endpoint reconnect reuse
+  the same connection.
+
+- Fixed a problem that the send_start could send on a nil datalink.
+  The problem is a datalink insertion and finding are not sychnorized.
+
+- Supported the default transport id for SimpleTcp and SimpleUdp.
+  The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for
+  DEFAULT_<transport>_CONFIG values. Each specific transport
+  has its default id in that range such as DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00
+  and DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01. Note the default transports can not
+  be configured by the users.
+
+- Added on_connection_deleted to TAO::DCPS::DataWriterListener/DataReaderListener
+  for testing connection object memory leak.
+
+- Fixed a bug that uses a platform dependent type - size_t in FULLY_ASSOICIATION
+  message. This would make publisher and subscriber not fully associated
+  in inter-host test such as tests between windowsXP and Linux.
+
+=========================================================================
+
+Version 0.9 of TAO DDS.
+
+New to this version are the following changes:
+
+  - Supported DDS build on VS6, gcc 4.1 and gcc 3.3.3.
+
+  - Fixed a potential deadlock in SimpleTcpReconnectTask which could
+    happen when shutdown() is invoked by the reconnect thread.
+
+  - Fixed a deadlock situation on linux when the direct_send()
+    detects a lost connection and calls the relink(). The problem is
+    a non-recursive lock in send strategy is recursively acquired.
+
+  - Added fully association establishment support. This should fix the
+    problem:
+      "create_meteorite() does not wait for full association establishment
+      so even if there are waiting subscribers,  a write shortly after
+      creating the datawriter may be dropped on the publisher side because
+      add_associations() has not completed on the publisher side.
+      The sample may also be dropped on the subscriber side because the
+      connection exists between the publisher and subscriber but the
+      associations have not been mapped on the subscriber side."
+
+  - Supported thread-per-connection send. A new configuration
+     "thread_per_connection" is added to turn on and turn off(default) this
+     new feature. With this new feature, the samples are sent to different
+     connections in parallel.
+
+      # Determine if the transport needs create a new thread for a
+      # datalink/connection to send samples under normal traffic (no backpressure).
+      # If thread_per_connection is 1, the publisher creates a supered thread
+      # for each datalink/connection to send samples instead of using the same
+      # thread to send to different dealing's/connections sequentially.
+      # The default value is 0 (using same thread send to all datalinks)
+      thread_per_connection=
+
+--- more notes and limitations ---
+
+    - Current transport on receiving side does not handle a packet with
+      a single control message with no data such as GRACEFUL_DISCONNECT
+      message. To work around with this problem, some bogus data is sent
+      with the message.
+
+--- status of nightly build tests ---
+
+    - The builtin topic tests failure are expected since the builtin topic was not
+      supported and tested.
+
+    - tests failed intermittently
+
+      tests/DCPS/Compiler/idl_test1_main/run_test.pl
+      [Details] ERROR: <idl_test1> exited with coredump from signal 11 : SEXY
+
+      tests/DCPS/FooTest5_0/run_test.pl udp
+      [Details] (24994|1084229984) DataReaderImpl::remove_associations: ERROR: Unable to remove writer publisher_id 5.
+      [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid liveliness_changed_status inactive count.
+
+      tests/DCPS/Reconnect/run_test.pl bp_timeout
+      [Details] test FAILED. Please see the /tao_builds/taoadmin/BETA/ACE_wrappers/TAO/DDS/tests/DCPS/Reconnect/test.log for details.
+      [Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with status 2
+
+=========================================================================
+
+Version 0.8 of TAO DDS.
+
+New to this version are the following changes:
+
+  - Added configuration of DCPS and transports via configuration files.
+    This also simplified the code related to creating and configuring
+    transports.
+    See file://TAO_DDS_Configuration_Settings.html for more information.
+
+  - fixed a possible deadlock.
+    The scenario it was found in was:
+    * Start a subscriber with two readers.
+    * start a publisher with two corresponding writers.
+    * the subscriber would deadlock between the ORB and transport
+      threads.
+    * If the publisher started first, it would not deadlock.
+
+  - changed some heap allocations to cached allocator allocations.
+    No heap allocations are in the write -> read code path for
+    value types containing scalars (no arrays, sequences or strings).
+
+  - Uninlined some unnecessary inlines to reduce the footprint.
+
+  - Added DDS_HAS_MINIMUM_BIT macro to build without Built In Topic
+    support. Defining the macro will NOT build BIT support.
+
+  - Made the DCPSInfoRepo register with IOR table as well as providing
+    the ior file to provide alternate schemes of distributing the object
+    reference and made the DCPSInfoRepo object reference to be persistent
+    to simplify deployment.
+
+  - Added an option -DCPSInfoRepo to replace -DCPSInfo option and deprecated
+    -DCPSInfo option.
+
+  - Fixed a bug in Registered_Data_Types that caused multiple domain participants
+    within the same domain in a process to not register same data types.
+
+  - Fixed DDS application failure between the publisher and subscriber
+    on different endianess machines. The byte order is set upon data
+    serializing and de-serializing.
+    The swap_bytes configuration value per TransportImpl instance is now
+    appropriately used to allow different transports use different setting
+    of swap_bytes.
+
+  - Added TypeSupport::get_type_name() support. If a nil type name is supplied
+    by user to register type support then the default type name - the interface
+    repository id is used.
+
+  - Supported the SimpleTCP connection re-establishment and
+    disconnected/lost/reconnected publication and subscription callbacks.
+    The disconnected callback is called just before reconnect is attempted.
+    If reconnect fails, the connection lost callback is called.
+    If reconnect succeeds, the reconnected callback is called. During
+    reconnecting, the messages are queued until the reconnecting is done.
+    If the reconnecting succeeds, the queued messages are sent out.
+    Otherwise the messages are discarded.
+
+    The main changes are:
+
+    1) Added new idl interfaces - TAO::DataReaderListener and
+       TAO::DataWriterListener to support on_*_disconnected,
+       on_*_lost and on_*_reconnected callbacks.
+
+    2) New configuration values are added to support the
+       reconnect strategy.
+
+        ###=== Configurations for connector side during reconnecting===
+
+        # The initial retry delay in milliseconds.
+        # The first connection retry will be when the loss of connection
+        # is detected.  The second try will be after this delay.
+        # The default is 500 miliseconds.
+        conn_retry_initial_delay=
+
+        # The backoff multiplier for reconnection strategy.
+        # The third and so on reconnect will be this value * the previous delay.
+        # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
+        # the second reconnect attempt will be at 0.5 seconds after first retry connect
+        # fails; the third attempt will be 0.75 seconds after the second retry connect
+        # fails; the fourth attempt will be 1.125 seconds after the third retry connect
+        # fails.
+        # The default value is 2.0.
+        conn_retry_backoff_multiplier=
+
+        # Number of attemps to reconnect before giving up and calling
+        # on_publication_lost() and on_subscription_lost() callbacks.
+        # The default is 3.
+        conn_retry_attempts=
+
+        # Maximum period (in milliseconds) of not being able to send queued
+        # messages. If there are samples queued and no output for longer
+        # than this period then the connection will be closed and on_*_lost()
+        # callbacks will be called. If the value is zero, the default, then
+        # this check will not be made.
+        max_output_pause_period=
+
+        ###=== Configurations for acceptor side during reconnecting===
+
+        # The time period in milliseconds for the acceptor side
+        # of a connection to wait for the connection to be reconnected.
+        # If not reconnected within this period then
+        # on_publication_lost() and on_subscription_lost() callbacks
+        # will be called.
+        # The default is 2 seconds (2000 millseconds).
+        passive_reconnect_duration=
+
+    Implemenation details:
+     a) A new interface - relink() is added to both receive
+       and send strategy. The relink () is called whenever send or
+       recv call fails. The acceptor/connector role of a connection
+       object represents does not change during reconnecting. The
+       connector side actively tries to reconnect and the acceptor
+       side passively waits for the new connection coming.
+
+
+     b) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test
+        the on_*_lost callback and the connection re-establishment.
+
+  - Fixed a problem that add_association() failed when multiple
+    publishers/subscribers start simultaneously. Added a lock
+    to pretect the internal map in DataLinkSetMap to fix the
+    problem.
+
+--- more notes and limitations ---
+  This section adds on to the "KNONW LIMITATIONS" section at the bottom
+  of this document.
+
+  - A transport instance may only be used by publications and subscriptions
+    of a single domain because the pub & sub ids are only unique within
+    a domain and the transport uses this ids to map associations to
+    links/connections.
+
+  - The current transport implementation does not allow associations between
+    datareaders and datawriters associated with the same transport in the same
+    process. To work around this limitation, the datareader and the datawriter
+    need use different TransportImpl objects. Otherwise, there are such errors:
+
+    (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
+    (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
+
+=========================================================================
+
+Version 0.7 of TAO DDS.
+
+New to this version are the following changes:
+  - Added a configuration parameter to control the use of the Nagle
+    algorithm for the SimpleTCP protocol.  By default, the Nagle
+    algorithm is now disabled.
+  - Improved VC6 support.
+  - Fixed some memory leaks.
+  - Added support for 64 bit architectures.
+
+=========================================================================
+
+Version 0.6 of TAO DDS.
+
+New to this version are the following changes:
+  - Changed the default ior file name for DCPSInfoRepo from dcps_ir.ior
+    to repo.ior.
+  - Changed the packet and sample length fields to 32 bit integers so
+    we can support samples larger than 64 KB.
+  - Improved support for MS VC6
+
+=========================================================================
+
+Version 0.5 of TAO DDS.
+
+New to this version are the following changes:
+  - Many memory leaks have been removed.
+  - A memory allocation bug has been corrected.
+  - The -a option of DCPSInfoRepo now works as documented.
+
+=========================================================================
+
+This is the first release of a Data Distribution Service (DDS).
+
+Point of contact: Scott Harris     harris_s@ociweb.com
+                  Paul Calabrese   calabrese_p@ociweb.com
+
+See the User's Guide for an user introduction to the service.
+
+TAO's DDS implementation consists of the following:
+* Implementation of the interfaces in the DDS spec and
+  $DDS_ROOT/dds/DCPS
+
+* A service repository driver in $DDS_ROOT/dds/InfoRepo
+
+* Type support generator, dcps_ts.pl, is in $DDS_ROOT/bin
+  and its templates are in $DDS_ROOT/bin/DCPS.
+
+* You must use DDS with a version of TAO that has had its
+  TAO_IDL compiler modified to support DDS type definition
+  using the -Gdcps option.  Any OCI version later than
+  TAO 1.4a P4 or DOC group version later than 1.4.6 should
+  work.
+
+* An example in $DDS_ROOT/DevGuideExamples/DDS
+
+* Functional tests in $DDS_ROOT/tests
+
+* Performance tests in $DDS_ROOT/performance-tests
+
+=========================================================================
+
+The implementation currently (6/3/05) supports the following features:
+
+An implementation of the "Minimum Profile" (as defined in the spec) with
+the following qualifications.
+
+--- supported QoS ----
+   Note: all other QoS can only have the default values
+         (as defined in the spec).
+  - LIVELINESS.lease_duration = <any period of time>;
+  - RELIABILITY.kind = RELIABLE
+  - RELIABILITY.kind = BEST_EFFORT
+  - HISTORY.kind = KEEP_LAST
+    HISTORY.depth = <any value>
+  - HISTORY.kind = KEEP_ALL
+    RESOURCE_LIMITS.max_samples_per_instance
+    RELIABILITY.max_blocking_time = <any period of time>
+  - RESOURCE_LIMITS.max_samples
+  - RESOURCE_LIMITS.max_instances
+
+--- supported entities ----
+DomainParticipantFactory, DomainParticipant, Topic, TopicDescription, Publisher
+DataWriter,DataReader, Subscriber, all Listeners.
+  - Does not support any Conditions, WaitSet, ContentFilteredTopic or
+    MultiTopic (or the methods on the supported topics related to these
+    classes).
+
+-- listener calls supported ---
+--- publisher side --
+- on_offered_incompatible_qos
+- on_publication_match
+--- subscriber side
+- on_requested_incompatible_qos
+- on_sample_rejected
+- on_liveliness_changed
+- on_data_available
+- on_subscription_match
+- on_sample_lost
+- on_data_on_readers
+
+  Other call are not supported because they are related to QoS that
+  is not supported.
+
+-- Built-In Topics --
+The Built-In Topic functionality is available but enabled by default.
+The client must call Service_Participant::set_bit(true) to
+enable Built-in Topic support.
+The Built-in Topic functionality has some problems (see below).
+
+--- data type definition  --
+Can define a structure in IDL that will be used as a DDS data type.
+The structure may include basic scalar types, strings, sequences,
+arrays, enumeration and unions.
+It may not contain interfaces or value types.
+
+Zero or more keys can be specified for a data type.
+
+---- supported transports ---
+- SimpleTCPTransport
+  A TCP based transport.
+- SimpleUDPTransport
+  A UDP based transport (unreliable delivery).
+
+The TAO implementation provides a transport framework that makes it
+easy to add a new transport.
+
+
+=========================================================================
+extra information on the supported QoS
+
+   - LIVELINESS.lease_duration = <any period of time>;
+      // set the liveliness heartbeat interval.
+      // note: LIVELINESS.kind must be AUTOMATIC
+
+  - RELIABILITY.kind = RELIABLE
+    This Qos should be associated with a SimpleTCP transport.
+    The SimpleTCP transport is currently the only transport supporting
+    RELIABILITY.kind = RELIABLE.
+
+  - RELIABILITY.kind = BEST_EFFORT
+    The SimpleUDP transport supports this Qos.
+
+The following two sets of QoS that define the sample queuing behavior
+of samples.
+
+  - HISTORY.kind = KEEP_LAST
+    HISTORY.depth = <any value>
+    When HISTORY.kind=KEEP_LAST up to HISTORY.depth samples will be held by
+    a DataWriter and DataReader.
+    If there are HISTORY.depth samples not sent by the publisher's transport
+    then the oldest sample will be "lost" when the write call is made.
+    If the transport receives a sample and there are HISTORY.depth NOT_READ
+    samples then the oldest sample will be "lost".
+    See Listener & Status section.
+
+
+  - HISTORY.kind = KEEP_ALL
+    RESOURCE_LIMITS.max_samples_per_instance
+    RELIABILITY.max_blocking_time = <any period of time>
+
+    When HISTORY.kind = KEEP_ALL a write call will block up to
+    the RELIABILITY.max_blocking_time because
+    RESOURCE_LIMITS.max_samples_per_instance are already waiting to be
+    sent.  The write call will return OK if the sample was queued (to be sent)
+    within the timeout period or TIMEOUT if the sample was not queued (because
+    the backpressure had not let up).
+    HISTORY.kind = KEEP_ALL does not make sense when use with the SimpleUDP
+    transport because the SimpleUDP transport does not confirm that the sample
+    was received by the subscriber and hence will never block.
+
+    If the transport receives a sample and there are
+    RESOURCE_LIMITS.max_samples_per_instance
+    NOT_READ samples the newly received sample will be "rejected".
+
+  - RESOURCE_LIMITS.max_samples
+    This QoS determines the maximum number of samples allowed for a given
+    DataWriter or DataReader. In the TAO DDS implementation it also determines
+    the number of pre-allocated memory chunks for sample data.  If the value is
+    UNLIMITED (the default) then the Service_Participant::n_chunks() value will
+    be used in place of RESOURCE_LIMITS.max_samples to determine the number of
+    pre-allocated sample chunks.  n_chunks() defaults to 20 but can be
+    set by the client code.
+
+    Note: unbounded data types do not use the pre-allocated memory for samples
+    but they do use pre-allocated data structures related to samples) so
+    unbounded data types will be less efficient than bounded types.
+    Any type containing a sequence/string without bounds or containing a
+    union (even if it contains all bounded fields) is an unbounded type.
+
+    // unbounded  (by any of the fields)
+    struct unbounded {
+      string name;
+      A_Union data;
+      sequence<float> values;
+    };
+
+    // bounded
+    struct bounded {
+      string<10> name;
+      sequence<float,3> values;
+    };
+
+
+  - RESOURCE_LIMITS.max_instances
+    Can be set to any value but is not used by the TAO implementation.
+
+
+
+=========================================================================
+========= KNOWN LIMITATIONS ===============
+
+-------------------------------------------------------------------------------
+) Zero-copy reads (see "2.1.2.5.3.8 read" in the spec) is not supported
+  and not tested but it is partially implemented but not tested.
+
+  **** Users should not use the zero-copy read functionality ****
+  This includes read/take interfaces with <typename>PtrVec parameters,
+  return_loan() or passing a <typeName>Seq to read/take with max_len==0.
+  **********************************************************************
+
+  zero-copy read implementation has the following issues:
+  - the zero-copy read impl in TAO outputs a std::vector of sample pointers.
+    Should use an ACE_vector or use delayed demarshaling for zero-copy impl.
+  - The return_loan() operation is not overloaded to return std::vector.
+  - the return_loan() may not "do no harm" if the FooSeq was not zero-copied.
+  - The read operation with FooSeq does an "allocate and copy" when the
+    FooSeq indicates that it should zero-copy.
+  - Only read() and take() implement the zero copy. Other read and
+    take interfaces should.
+
+-------------------------------------------------------------------------------
+) Users must ensure that TopicDescriptions are not used after there
+  associated Topic is deleted.
+
+-------------------------------------------------------------------------------
+) Tests sending large messages quickly may fail sending with
+  the following error:
+
+  SimpleTcpSendStrategy::send_bytes: ERROR: sendv: Invalid argument
+
+  The DataWriter must be deleted and created again to establish
+  the connection.
+
+-------------------------------------------------------------------------------
+) create_datawriter() does not wait for full association establishment so
+  a write shortly after creating the datawriter may be dropped on the
+  publisher side because add_associations() has not completed on the
+  publisher side.
+  The sample may also be dropped on the subscriber side event though
+  the connection exists between the publisher and subscriber when
+  the associations have not been mapped on the subscriber side.
+
+  If the publisher expects existing DataReaders to receive the
+  messages it sends after creating the DataWriter, it must delay
+  calling write for the first time for a few seconds.
+
+-------------------------------------------------------------------------------
+) Built-in Topic (BIT) support has the following problems:
+
+  1) It is possible that Build-In Topic samples will not
+     arrive.
+     This caused by the DCPSInfoRepo writing the values
+     before associations use by BIT are fully established
+     (as described in the previous limitation note).
+
+  2) The DURABILITY.kind=TRANSIENT_LOCAL implementation supporting
+     Built-in Topics is a kludge that results in the BIT sample
+     values being resent to every subscriber when a new subscriber
+     is associated.
+     This has little impact on functionality of BIT except
+     that the sample state may say it is NOT_READ after
+     a client has already read the sample.
+
+  3) The framework reads samples in support of its operations
+     and hence the sample state may be READ when the client
+     has never read the sample.
+
+  4) The QoS values in BIT data samples are not updated when an entities QoS
+     is set (because the DCPSInfoRepo is not told of the set/update).
+     So looking at USER_DATA will work if the USER_DATA was assigned in
+     the initial creation of the entity but not if it was set_qos() later.
+     But using the USER_DATA QoS is not yet supported anyway.
+
+-------------------------------------------------------------------------------
+) When Built-in Topic support is not enabled,
+  by Service_Participant->set_bit(true), the InstanceHanlde_t values in
+  statuses actually RepoIDs.
+  One way to know what it is is to know if your application has enabled BIT.
+  Another is that if the InstanceHandle_t value is < 9999 then it
+  is not a valid instance handle value but is a RepoId value.
+
+-------------------------------------------------------------------------------
+) Calling set_qos() on an entity does not propagate the QoS changes.
+  This is currently acceptable because all of the supported QoS are
+  Changeable=no.
+
+-------------------------------------------------------------------------------
+) Auto_dispose on unregister is not implemented.
+
+-------------------------------------------------------------------------------
+) Samples are only rejected for having more than
+  qos.resource_limits.max_samples_per_instance NOT_READ samples in an
+  instance.
+
+  The implementation should also reject for too many total NOT_READ samples
+  or too many instances.
+
+  Since the TAO implementation does not have hard limits with respect to
+  these values this limitation is considered acceptable.
+
+  Note: When more than resource_limits.max_samples are queued
+  in the DataReader the heap will be used instead of pre-allocated
+  memory.
+
+-------------------------------------------------------------------------------
+) There is no check that the Transport implementation supports the given QoS.
+  The user should not use the SimpleUDPTransport with
+  HISTORY.kind=KEEP_ALL or RELIABILITY.kind = RELIABLE.
+
+
+-------------------------------------------------------------------------------
+) The SampleInfo[].instance_state may be wrong.
+
+  The current implementation assumes that all instances have been written
+  to by all writers so the instance only goes to the NO_WRITERS state
+  when there are no active writers for the whole DataReader (not just
+  the instance).
+
+-------------------------------------------------------------------------------
+) We have implemented formal/04-12-02 but there is a new version of the
+  DDS specification, ptc/05-03-10 that has various improvements and
+  clarifications.
+
+-------------------------------------------------------------------------------
+) We currently allocate buffers that are too large for the Application data
+  on the subscriber side.  This means that our memory usage is greater
+  than it should be for some data types, especially those containing
+  large strings, arrays, or structures.
+
+=========================================================================
+=== Test Failures =====
+Note: A list of test that are run in the nightly automated build/test
+      can be found in $DDS_ROOT/bin/dcps_tests.lst
+      The nightly automated build/test is run on a Windows XP with
+      VC++ 7.1, Red Hat Linux v9 with gcc and Solaris/x86 with gcc.
+
+* DCPS/BuiltInTopic/run_test.pl <all>
+  Occasionally fails.  This is due to BIT limitations given above.
+
+* TAO/orbsvcs/tests/DDS/DCPS/FooTest3_0/run_test.pl resume
+  Occasionally fails on Solaris box but passes on Linux and Windows.
+  I believe it is a test related timing issue.
+
+* TAO/orbsvcs/tests/DDS/DCPS/FooTest5/run_test.pl blocking
+  Occasionally cores while shutting down on Solaris box
+  but passes on Linux and Windows.
+
+ LocalWords:  gcc SimpleTcpReconnectTask linux datawriter datalink backpressure
+ LocalWords:  datalinks builtin idl coredump udp
