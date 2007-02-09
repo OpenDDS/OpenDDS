@@ -11,6 +11,16 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Reactor.h"
+#include "ace/Event_Handler.h"
+#include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram_Mcast.h"
+#include "ace/Thread_Mutex.h"
+#include "ace/Guard_T.h"
+#include <queue>
+#include <string>
+#include <utility>
+
 namespace TAO
 {
 
@@ -24,8 +34,47 @@ namespace TAO
       {
 
         class EventHandler
+          : public ACE_Event_Handler
         {
-        //@@todo: Add Code Here
+        public:
+          virtual ~EventHandler();
+
+          virtual void send(
+            char* buffer,
+            size_t size,
+            const ACE_INET_Addr& dest
+            );
+
+          virtual void receive(
+            char* buffer,
+            size_t size,
+            const ACE_INET_Addr& peer
+            );
+
+          virtual ACE_HANDLE get_handle() const;
+
+          virtual int handle_input(
+            ACE_HANDLE fd = ACE_INVALID_HANDLE
+            );
+
+          virtual int handle_output(
+            ACE_HANDLE fd = ACE_INVALID_HANDLE
+            );
+
+          virtual int handle_close(
+            ACE_HANDLE fd,
+            ACE_Reactor_Mask mask
+            );
+
+        protected:
+          typedef std::queue<
+            std::pair<std::string, ACE_INET_Addr>
+            > Queue;
+
+          ACE_SOCK_Dgram_Mcast socket_;
+          ACE_Thread_Mutex input_mutex_;
+          ACE_Thread_Mutex output_mutex_;
+          Queue output_queue_;
         };
 
       } /* namespace detail */
