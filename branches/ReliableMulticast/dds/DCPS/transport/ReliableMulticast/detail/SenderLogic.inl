@@ -4,4 +4,11 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-//@@todo: Add ACE_INLINE Code Here
+ACE_INLINE
+TAO::DCPS::ReliableMulticast::detail::SenderLogic::SenderLogic(
+  size_t max_size
+  )
+  : max_size_(max_size)
+  , current_id_(0)
+{
+}
