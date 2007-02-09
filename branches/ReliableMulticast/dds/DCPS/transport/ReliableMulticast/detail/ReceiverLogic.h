@@ -32,7 +32,7 @@ namespace TAO
         class ReceiverLogic
         {
         public:
-          enum reliability_type
+          enum ReliabilityMode
           {
             HARD_RELIABILITY,
             SOFT_RELIABILITY
@@ -44,7 +44,7 @@ namespace TAO
 
           ReceiverLogic(
             size_t max_size = 256,
-            const reliability_type& reliability = HARD_RELIABILITY
+            const ReliabilityMode& reliability = HARD_RELIABILITY
             );
 
           void receive(
@@ -100,7 +100,7 @@ namespace TAO
             > BufferType;
 
           size_t max_size_;
-          reliability_type reliability_;
+          ReliabilityMode reliability_;
           bool seen_last_delivered_;
           TAO::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;
           TAO::DCPS::ReliableMulticast::detail::NackGenerator nacker_;
