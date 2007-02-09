@@ -94,7 +94,7 @@ open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/dds/InfoRepo/DCPSInfoRepo"
+    ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
      , "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process
     ("subscriber"

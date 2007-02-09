@@ -90,7 +90,7 @@ unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
 
-$DCPSREPO = new PerlACE::Process ("../../../dds/InfoRepo/DCPSInfoRepo",
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-o $dcpsrepo_ior"
                                   . " -d $domains_file -NOBITS");
 print $DCPSREPO->CommandLine(), "\n";
