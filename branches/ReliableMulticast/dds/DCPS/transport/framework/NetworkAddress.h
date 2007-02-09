@@ -32,7 +32,7 @@ namespace TAO
       /// Accessor to populate the provided ACE_INET_Addr object from the
       /// network order ip and port number.  The resulting ACE_INET_Addr
       /// object will be in local order.
-      void to_addr(ACE_INET_Addr& addr);
+      void to_addr(ACE_INET_Addr& addr) const;
 
       /// The network order ip address (4 bytes)
       ACE_UINT32 ip_;
