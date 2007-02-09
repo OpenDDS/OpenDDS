@@ -4,4 +4,8 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-//@@todo: Add ACE_INLINE Code Here
+ACE_INLINE
+TAO::DCPS::ReliableMulticast::detail::EventHandler::~EventHandler()
+{
+  handle_close(ACE_INVALID_HANDLE, 0);
+}
