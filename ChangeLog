@@ -1,11 +1,15 @@
+Fri Feb  9 21:38:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS version 0_10 released.
+
 Fri Feb  9 03:43:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * NEWS:
 
           Removed this file and moved its contents to the corresponding
-          ChangeLog entry. 
+          ChangeLog entry.
           (see Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>)
-          
+
 Thu Feb  8 19:17:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
@@ -2234,16 +2238,16 @@ Wed Jul 26 23:50:35 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
           Added files that are needed to generate automake makefiles. The following
           command must be used to generate them from MPC:
 
-            $MPC_ROOT/mwc.pl -include $ACE_ROOT/bin/MakeProjectCreator/config 
+            $MPC_ROOT/mwc.pl -include $ACE_ROOT/bin/MakeProjectCreator/config
              -type automake DDS.mwc
 
           You must not run mwc.pl from $ACE_ROOT/bin to do this.
-          The ACE_ROOT, TAO_ROOT and DDS_ROOT environment variables must be set. 
+          The ACE_ROOT, TAO_ROOT and DDS_ROOT environment variables must be set.
           Additionally, ACE_BUILDDIR should be set to $ACE_ROOT and TAO_BUILDDIR
           should be set to $TAO_ROOT.
 
           Please note that this is experimental and has not been fully tested.
-  
+
 Mon Jul 17 20:24:01 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
           DDS 0.9 released.
