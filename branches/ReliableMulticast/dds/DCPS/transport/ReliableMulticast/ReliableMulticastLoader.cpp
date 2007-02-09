@@ -2,6 +2,7 @@
 //
 // $Id$
 
+#include "ReliableMulticast_pch.h"
 #include "ReliableMulticastLoader.h"
 #include "ReliableMulticastTransportGenerator.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
