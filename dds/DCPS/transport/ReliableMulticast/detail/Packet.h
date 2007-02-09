@@ -29,7 +29,7 @@ namespace TAO
         {
           typedef unsigned long id_type;
 
-          enum packet_type
+          enum PacketType
           {
             DATA,
             NACK,
@@ -39,7 +39,7 @@ namespace TAO
 
           Packet(
             id_type id = 0,
-            const packet_type& type = DATA,
+            const PacketType& type = DATA,
             id_type begin = 0,
             id_type end = 0
             )
@@ -70,7 +70,7 @@ namespace TAO
           }
 
           id_type id_;
-          packet_type type_;
+          PacketType type_;
           id_type nack_begin_;
           id_type nack_end_;
           std::string payload_;
