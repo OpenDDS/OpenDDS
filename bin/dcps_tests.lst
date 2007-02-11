@@ -8,8 +8,6 @@
 #
 # Example: TAO\examples\foo\run_test.pl: !MINIMUM !ST
 #
-# NOTE: This file contains examples and other service level test  for
-# TAO's. Please do not include regular tests here.
 
 
 
@@ -63,7 +61,7 @@ tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !STATIC
-tests/DCPS/FooTest5_0/run_test.pl !STATIC
+tests/DCPS/FooTest5_0/run_test.pl: !STATIC
 tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl give_addrs: !DCPS_MIN !STATIC

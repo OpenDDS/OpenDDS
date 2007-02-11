@@ -1,3 +1,8 @@
+Sun Feb 11 19:57:32 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+	  Fixed a typo, one line was missing the ':' before !STATIC.
+
 Fri Feb  9 22:00:08 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS version 0_10 released.
@@ -15,11 +20,11 @@ Thu Feb  8 19:17:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * dds/InfoRepo/DCPSInfoRepo.mpc:
 
           The DCPSInfoRepo executable is now moved to $DDS_ROOT/bin.  It was
-	  previously located in $DDS_ROOT/dds/InfoRepo.
+          previously located in $DDS_ROOT/dds/InfoRepo.
 
-	* DDS_release_notes.txt:
+        * DDS_release_notes.txt:
 
-	  Documented this change.
+          Documented this change.
 
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
@@ -64,13 +69,13 @@ Thu Feb  8 19:17:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/sub_init_loop/run_test.pl:
         * tests/DCPS/unit/run_test.pl:
 
-	  Updated all tests that use the DCPSInfoRepo so that the test looks in
-	  $DDS_ROOT/bin for the executable.
+          Updated all tests that use the DCPSInfoRepo so that the test looks in
+          $DDS_ROOT/bin for the executable.
 
 Wed Feb  7 23:20:35 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DDS_release_notes.txt:
-	  Minor modifications.
+          Minor modifications.
 
 Wed Feb  7 16:38:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
