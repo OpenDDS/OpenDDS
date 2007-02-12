@@ -1,3 +1,9 @@
+Mon Feb 12 19:02:14 UTC 2007  Ciju John  <johcn@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * dds/Version.h:
+	  Update release version number.
+
 Sun Feb 11 19:57:32 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
