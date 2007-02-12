@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_PERCONNECTIONSYNCH_H
 #define TAO_DCPS_PERCONNECTIONSYNCH_H
 
-#include  "ThreadSynch.h"
-#include  "ace/Task.h"
-#include  "ace/Synch.h"
-#include  "ace/Condition_T.h"
+#include "ThreadSynch.h"
+#include "ace/Task.h"
+#include "ace/Synch.h"
+#include "ace/Condition_T.h"
 
 
 namespace TAO

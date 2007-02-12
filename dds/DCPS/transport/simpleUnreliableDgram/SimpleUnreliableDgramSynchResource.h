@@ -4,13 +4,13 @@
 #ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
 #define TAO_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramSocket_rch.h"
-#include  "SimpleUnreliableDgramTransport.h"
-#include  "SimpleUnreliableDgramTransport_rch.h"
-#include  "dds/DCPS/transport/framework/ThreadSynchResource.h"
-#include  "ace/Handle_Set.h"
-#include  "ace/Time_Value.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramSocket_rch.h"
+#include "SimpleUnreliableDgramTransport.h"
+#include "SimpleUnreliableDgramTransport_rch.h"
+#include "dds/DCPS/transport/framework/ThreadSynchResource.h"
+#include "ace/Handle_Set.h"
+#include "ace/Time_Value.h"
 
 
 namespace TAO

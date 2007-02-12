@@ -6,19 +6,19 @@
 #ifndef TAO_DDS_DCPS_DATAWRITER_H
 #define TAO_DDS_DCPS_DATAWRITER_H
 
-#include  "dds/DdsDcpsPublicationS.h"
-#include  "dds/DdsDcpsDataWriterRemoteS.h"
-#include  "dds/DdsDcpsDomainC.h"
-#include  "dds/DdsDcpsTopicC.h"
-#include  "dds/DCPS/transport/framework/TransportSendListener.h"
-#include  "WriteDataContainer.h"
-#include  "Definitions.h"
-#include  "DataSampleList.h"
-#include  "DataSampleHeader.h"
-#include  "TopicImpl.h"
-#include  "AssociationData.h"
+#include "dds/DdsDcpsPublicationS.h"
+#include "dds/DdsDcpsDataWriterRemoteS.h"
+#include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsTopicC.h"
+#include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include "WriteDataContainer.h"
+#include "Definitions.h"
+#include "DataSampleList.h"
+#include "DataSampleHeader.h"
+#include "TopicImpl.h"
+#include "AssociationData.h"
 
-#include  "ace/Event_Handler.h"
+#include "ace/Event_Handler.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

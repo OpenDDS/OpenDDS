@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_SIMPLEMCASTCONFIGURATION_H
 #define TAO_DCPS_SIMPLEMCASTCONFIGURATION_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramConfiguration.h"
-#include  "ace/INET_Addr.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramConfiguration.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

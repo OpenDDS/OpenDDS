@@ -4,22 +4,22 @@
 #ifndef TAO_DDS_DCPS_SUBSCRIBER_H
 #define TAO_DDS_DCPS_SUBSCRIBER_H
 
-#include  "dds/DdsDcpsSubscriptionS.h"
-#include  "dds/DdsDcpsDataReaderRemoteC.h"
-#include  "dds/DdsDcpsInfoC.h"
-#include  "EntityImpl.h"
-#include  "Definitions.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "ace/Synch.h"
+#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsDataReaderRemoteC.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "EntityImpl.h"
+#include "Definitions.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "ace/Synch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include  <map>
-#include  <set>
-#include  <list>
-#include  <vector>
+#include <map>
+#include <set>
+#include <list>
+#include <vector>
 
 namespace TAO
 {

@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_BASICQUEUELINKALLOCATOR_T_H
 #define TAO_DCPS_BASICQUEUELINKALLOCATOR_T_H
 
-#include  "BasicQueueLink_T.h"
-#include  "BasicQueueLinkChunk_T.h"
-#include  "ace/Malloc_T.h"
-#include  "ace/OS.h"
-#include  "ace/Null_Mutex.h"
+#include "BasicQueueLink_T.h"
+#include "BasicQueueLinkChunk_T.h"
+#include "ace/Malloc_T.h"
+#include "ace/OS.h"
+#include "ace/Null_Mutex.h"
 
 namespace TAO
 {

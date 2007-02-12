@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_BASICQUEUEVISITOR_T_H
 #define TAO_DCPS_BASICQUEUEVISITOR_T_H
 
-#include  "ace/CORBA_macros.h"
+#include "ace/CORBA_macros.h"
 
 
 namespace TAO

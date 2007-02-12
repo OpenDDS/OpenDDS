@@ -4,9 +4,9 @@
 #ifndef TAO_DDS_RCOBJECT_T_H
 #define TAO_DDS_RCOBJECT_T_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ace/Atomic_Op.h"
-#include  "ace/Malloc_Base.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ace/Atomic_Op.h"
+#include "ace/Malloc_Base.h"
 
 
 namespace TAO

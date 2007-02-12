@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleMcastSocket.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleMcastSocket.h"
 
 
 #if !defined (__ACE_INLINE__)

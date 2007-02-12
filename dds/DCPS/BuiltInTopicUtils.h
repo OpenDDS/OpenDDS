@@ -12,12 +12,12 @@
 #ifndef BUILTINTOPICUTILS_H
 #define BUILTINTOPICUTILS_H
 
-#include  "dcps_export.h"
-#include  "dds/DdsDcpsInfrastructureC.h"
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "dds/DdsDcpsSubscriptionC.h"
-#include  "Service_Participant.h"
-#include  "DomainParticipantImpl.h"
+#include "dcps_export.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+#include "Service_Participant.h"
+#include "DomainParticipantImpl.h"
 
 
 namespace TAO {

@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_DATASAMPLELIST_H
 #define TAO_DCPS_DATASAMPLELIST_H
 
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "Definitions.h"
-#include  "Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "Definitions.h"
+#include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 
 namespace TAO
 {

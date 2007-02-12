@@ -1,3 +1,72 @@
+Mon Feb 12 19:57:45 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/built_in_topic_support.mpb:
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_ts_defaults.mpb:
+        * MPC/config/dcpsexe_with_tcp.mpb:
+        * MPC/config/dcpsexe_with_unreliable_dgram.mpb:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.mpc:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.mpc:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/dcps_bits.mpb:
+
+          Added the ability to build without built-in topic support as an MPC
+          feature.  To use, run mwc.pl like so (from $DDS_ROOT):
+                  mwc.pl -type gnuace -features built_in_topics=0 DDS.mwc
+          Alternatively, add "built_in_topics=0" to default.features within
+          $ACE_ROOT/bin/MakeProjectCreator/config (the former method is
+          preferred so that we don't have DDS-specific modifications within the
+          ACE source tree).
+
+          Also, cleaned up the various mpb and mpc files to simplify things.
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/TypeSupportImpl.cpp:
+
+          Removed these files.  They were not used by the project.
+
+        * dds/DCPS/*.{h,cpp,inl}:
+        * dds/DCPS/transport/framework/*.{h,cpp,inl}
+        * dds/DCPS/transport/simpleUnreliableDgram/*.{h,cpp,inl}:
+
+          Normalized all #include preprocessor directives to have exactly one
+          space after the #include.
+
+        * dds/DCPS/transport/simpleTCP/*.{h,cpp,inl}:
+
+          Normalized all #include preprocessor directives to have exactly one
+          space after the #include.  Also, enabled PCH for SimpleTCP since it
+          was still referencing dds/DCPS from one it used to be part of that
+          library.
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+
+          Made the project names consistent (DDS_Messenger_idl instead of
+          Messenger_idl).
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Load the SimpleTCP library via svc.conf.
+
+        * tests/DCPS/FooType/Foo_Singleton_Transport.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/transport/dds_comparative/*.{h,cpp}:
+        * tests/transport/mcast_simple/*.{h,cpp}:
+        * tests/transport/mcast_simple_n/*.{h,cpp}:
+        * tests/transport/simple/*.{h,cpp}:
+        * tests/transport/simple_bp/*.{h,cpp}:
+        * tests/transport/simple_bp_rm/*.{h,cpp}:
+        * tests/transport/simple_n/*.{h,cpp}:
+        * tests/transport/udp_simple/*.{h,cpp}:
+        * tests/transport/udp_simple_n/*.{h,cpp}:
+
+	  Normalized all #include preprocessor directives to have exactly one
+	  space after the #include.
+
 Mon Feb 12 20:23:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.h:
@@ -10,6 +79,7 @@ Mon Feb 12 20:23:50 UTC 2007  Ciju John  <johnc@ociweb.com>
         * dds/DCPS/transport/framework/TransportFactory.h:
         * dds/DCPS/transport/framework/TransportFactory.cpp:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
           Work-around to force a single instance of the singleton
           object. Previously, building against the DOC TAO created
           singleton instances local to a shared library.
@@ -22,12 +92,12 @@ Mon Feb 12 19:02:14 UTC 2007  Ciju John  <johcn@ociweb.com>
 
         * DDS_release_notes.txt:
         * dds/Version.h:
-	  Update release version number.
+          Update release version number.
 
 Sun Feb 11 19:57:32 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
-	  Fixed a typo, one line was missing the ':' before !STATIC.
+          Fixed a typo, one line was missing the ':' before !STATIC.
 
 Fri Feb  9 22:00:08 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 

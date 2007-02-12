@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ThreadSynch.h"
+#include "ThreadSynch.h"
 
 ACE_INLINE int
 TAO::DCPS::TransportSendStrategy::start()

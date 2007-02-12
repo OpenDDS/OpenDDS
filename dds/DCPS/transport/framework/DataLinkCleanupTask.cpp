@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include  "DataLinkCleanupTask.h"
+#include "DataLinkCleanupTask.h"
 
-#include  "DCPS/DataWriterImpl.h"
-#include  "DCPS/DataReaderImpl.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 #include "TransportImpl.h"
 
 TAO::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)

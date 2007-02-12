@@ -2,19 +2,19 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpTransport.h"
-#include  "SimpleTcpConnectionReplaceTask.h"
-#include  "SimpleTcpAcceptor.h"
-#include  "SimpleTcpSendStrategy.h"
-#include  "SimpleTcpReceiveStrategy.h"
-#include  "SimpleTcpConfiguration.h"
-#include  "SimpleTcpDataLink.h"
-#include  "SimpleTcpSynchResource.h"
-#include  "SimpleTcpConnection.h"
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpTransport.h"
+#include "SimpleTcpConnectionReplaceTask.h"
+#include "SimpleTcpAcceptor.h"
+#include "SimpleTcpSendStrategy.h"
+#include "SimpleTcpReceiveStrategy.h"
+#include "SimpleTcpConfiguration.h"
+#include "SimpleTcpDataLink.h"
+#include "SimpleTcpSynchResource.h"
+#include "SimpleTcpConnection.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()

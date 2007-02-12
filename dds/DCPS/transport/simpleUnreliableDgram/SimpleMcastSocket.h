@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_SIMPLEMCASTSOCKET_H
 #define TAO_DCPS_SIMPLEMCASTSOCKET_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "ace/SOCK_Dgram_Mcast.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "ace/SOCK_Dgram_Mcast.h"
 
 
 namespace TAO

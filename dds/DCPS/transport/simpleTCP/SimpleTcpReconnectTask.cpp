@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpReconnectTask.h"
-#include  "SimpleTcpConnection.h"
-#include  "SimpleTcpSendStrategy.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpReconnectTask.h"
+#include "SimpleTcpConnection.h"
+#include "SimpleTcpSendStrategy.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 

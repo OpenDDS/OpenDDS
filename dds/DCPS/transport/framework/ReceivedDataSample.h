@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_RECEIVEDDATASAMPLE_H
 #define TAO_DCPS_RECEIVEDDATASAMPLE_H
 
-#include  "dds/DCPS/DataSampleHeader.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/DataSampleHeader.h"
+#include "ace/Synch.h"
 
 class ACE_Message_Block;
 

@@ -4,21 +4,21 @@
 #ifndef TAO_DCPS_SIMPLETCPCONNECTION_H
 #define TAO_DCPS_SIMPLETCPCONNECTION_H
 
-#include  "SimpleTcpConfiguration.h"
-#include  "SimpleTcpConfiguration_rch.h"
-//borland #include  "SimpleTcpDataLink.h"
-#include  "SimpleTcpDataLink_rch.h"
-#include  "SimpleTcpConnection_rch.h"
-//borland #include  "SimpleTcpSendStrategy.h"
-#include  "SimpleTcpSendStrategy_rch.h"
-//borland #include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-#include  "SimpleTcpReconnectTask.h"
-#include  "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "ace/SOCK_Stream.h"
-#include  "ace/Svc_Handler.h"
-#include  "ace/INET_Addr.h"
-#include  "ace/Synch.h"
+#include "SimpleTcpConfiguration.h"
+#include "SimpleTcpConfiguration_rch.h"
+//borland #include "SimpleTcpDataLink.h"
+#include "SimpleTcpDataLink_rch.h"
+#include "SimpleTcpConnection_rch.h"
+//borland #include "SimpleTcpSendStrategy.h"
+#include "SimpleTcpSendStrategy_rch.h"
+//borland #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "SimpleTcpReconnectTask.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
+#include "ace/INET_Addr.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_SIMPLEMCASTFACTORY_H
 #define TAO_DCPS_SIMPLEMCASTFACTORY_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "dds/DCPS/transport/framework/TransportImplFactory.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "dds/DCPS/transport/framework/TransportImplFactory.h"
 
 class SimpleMcastTransport;
 

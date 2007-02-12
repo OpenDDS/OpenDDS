@@ -4,13 +4,13 @@
 #ifndef PUB_H
 #define PUB_H
 
-#include  "PubWriter.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "dds/DCPS/transport/framework/TransportDefs.h"
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
-#include  "dds/DCPS/AssociationData.h"
-#include  "ace/INET_Addr.h"
-#include  <vector>
+#include "PubWriter.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/AssociationData.h"
+#include "ace/INET_Addr.h"
+#include <vector>
 
 
 class Pub : public TAO::DCPS::TransportInterface

@@ -1,19 +1,19 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportSendStrategy.h"
-#include  "RemoveAllVisitor.h"
-#include  "TransportConfiguration.h"
-#include  "ThreadSynchStrategy.h"
-#include  "ThreadSynchResource.h"
-#include  "TransportQueueElement.h"
-#include  "BuildChainVisitor.h"
-#include  "QueueRemoveVisitor.h"
-#include  "PacketRemoveVisitor.h"
-#include  "TransportDefs.h"
-#include  "dds/DCPS/DataSampleList.h"
-#include  "EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportSendStrategy.h"
+#include "RemoveAllVisitor.h"
+#include "TransportConfiguration.h"
+#include "ThreadSynchStrategy.h"
+#include "ThreadSynchResource.h"
+#include "TransportQueueElement.h"
+#include "BuildChainVisitor.h"
+#include "QueueRemoveVisitor.h"
+#include "PacketRemoveVisitor.h"
+#include "TransportDefs.h"
+#include "dds/DCPS/DataSampleList.h"
+#include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"

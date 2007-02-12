@@ -20,11 +20,11 @@
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
 #include "ace/Message_Block.h"
 #include "ace/Malloc_T.h"
-#include  <map>
+#include <map>
 #ifdef WIN32
-#include  <hash_map>
+#include <hash_map>
 #else
-#include  <ext/hash_map>
+#include <ext/hash_map>
 #endif
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

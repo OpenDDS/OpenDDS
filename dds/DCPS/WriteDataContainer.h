@@ -5,12 +5,12 @@
 #define TAO_DDS_DCPS_WRITE_DATA_CONTAINER_H
 
 
-#include  "dds/DdsDcpsInfrastructureC.h"
-#include  "DataSampleList.h"
-#include  "ace/Synch_T.h"
-#include  "ace/Hash_Map_Manager.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "DataSampleList.h"
+#include "ace/Synch_T.h"
+#include "ace/Hash_Map_Manager.h"
 
-#include  <set>
+#include <set>
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

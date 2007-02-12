@@ -2,12 +2,12 @@
 //
 // $Id$
 
-#include "DCPS/DdsDcps_pch.h"
-#include  "InstanceState.h"
-#include  "DataReaderImpl.h"
-#include  "SubscriptionInstance.h"
-#include  "ReceivedDataElementList.h"
-#include  "Qos_Helper.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "InstanceState.h"
+#include "DataReaderImpl.h"
+#include "SubscriptionInstance.h"
+#include "ReceivedDataElementList.h"
+#include "Qos_Helper.h"
 
 #if !defined (__ACE_INLINE__)
 # include "InstanceState.inl"

@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "PubWriter.h"
-#include  "Pub.h"
-#include  "dds/DCPS/DataSampleList.h"
+#include "PubWriter.h"
+#include "Pub.h"
+#include "dds/DCPS/DataSampleList.h"
 
 
 PubWriter::PubWriter()

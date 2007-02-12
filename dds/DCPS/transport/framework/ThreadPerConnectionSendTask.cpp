@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "ThreadPerConnectionSendTask.h"
-#include  "TransportQueueElement.h"
-#include  "DataLink.h"
-#include  "ThreadPerConRemoveVisitor.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
-#include  "dds/DCPS/DataSampleList.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ThreadPerConnectionSendTask.h"
+#include "TransportQueueElement.h"
+#include "DataLink.h"
+#include "ThreadPerConRemoveVisitor.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/DataSampleList.h"
 
 #include "ace/Auto_Ptr.h"
 

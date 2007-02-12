@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "PoolSynchStrategy.h"
-#include  "PoolSynch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "PoolSynchStrategy.h"
+#include "PoolSynch.h"
 
 
 #if !defined (__ACE_INLINE__)

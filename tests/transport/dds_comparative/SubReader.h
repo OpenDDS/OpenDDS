@@ -4,8 +4,8 @@
 #ifndef SUBREADER_H
 #define SUBREADER_H
 
-#include  "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include  "dds/DCPS/Definitions.h"
+#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "dds/DCPS/Definitions.h"
 
 
 class SubReader : public TAO::DCPS::TransportReceiveListener

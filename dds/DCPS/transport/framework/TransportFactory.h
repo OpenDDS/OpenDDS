@@ -4,17 +4,17 @@
 #ifndef TAO_DCPS_TRANSPORTFACTORY_H
 #define TAO_DCPS_TRANSPORTFACTORY_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportDefs.h"
-#include  "TransportImpl_rch.h"
-#include  "TransportImplFactory_rch.h"
-#include  "TransportReactorTask_rch.h"
-//borland #include  "TransportGenerator.h"
-#include  "TransportGenerator_rch.h"
-#include  "TransportConfiguration_rch.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Synch.h"
-#include  "ace/Configuration.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportDefs.h"
+#include "TransportImpl_rch.h"
+#include "TransportImplFactory_rch.h"
+#include "TransportReactorTask_rch.h"
+//borland #include "TransportGenerator.h"
+#include "TransportGenerator_rch.h"
+#include "TransportConfiguration_rch.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Synch.h"
+#include "ace/Configuration.h"
 
 
 namespace TAO

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpConfiguration.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpConfiguration.h"
 
 
 #if !defined (__ACE_INLINE__)

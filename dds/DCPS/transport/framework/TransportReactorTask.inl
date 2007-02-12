@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ace/Reactor.h"
-#include  "EntryExit.h"
+#include "ace/Reactor.h"
+#include "EntryExit.h"
 
 ACE_INLINE ACE_Reactor*
 TAO::DCPS::TransportReactorTask::get_reactor()

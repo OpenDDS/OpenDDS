@@ -4,14 +4,14 @@
 #ifndef TAO_DCPS_DATALINKSET_H
 #define TAO_DCPS_DATALINKSET_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "DataLink_rch.h"
-#include  "TransportDefs.h"
-#include  "TransportSendControlElement.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "DataLink_rch.h"
+#include "TransportDefs.h"
+#include "TransportSendControlElement.h"
 
-#include  "ace/Hash_Map_With_Allocator_T.h"
-#include  "ace/Synch.h"
+#include "ace/Hash_Map_With_Allocator_T.h"
+#include "ace/Synch.h"
 
 namespace TAO
 {

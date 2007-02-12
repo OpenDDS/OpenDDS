@@ -2,13 +2,13 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpDataLink.h"
-#include  "SimpleTcpReceiveStrategy.h"
-#include  "SimpleTcpConfiguration.h"
-#include  "SimpleTcpSendStrategy.h"
-#include  "dds/DCPS/transport/framework/TransportControlElement.h"
-#include  "dds/DCPS/DataSampleHeader.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpDataLink.h"
+#include "SimpleTcpReceiveStrategy.h"
+#include "SimpleTcpConfiguration.h"
+#include "SimpleTcpSendStrategy.h"
+#include "dds/DCPS/transport/framework/TransportControlElement.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "ace/Log_Msg.h"
 
 #if !defined (__ACE_INLINE__)

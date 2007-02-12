@@ -3,7 +3,7 @@
 // $Id$
 
 
-#include "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataWriterImpl.h"
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
@@ -21,7 +21,7 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
-#include  "ace/Reactor.h"
+#include "ace/Reactor.h"
 
 namespace TAO
 {

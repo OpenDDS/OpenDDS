@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "TransportImpl_rch.h"
-#include  "TransportImpl.h"
-#include  "EntryExit.h"
+#include "TransportImpl_rch.h"
+#include "TransportImpl.h"
+#include "EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::TransportImplFactory::TransportImplFactory()

@@ -2,11 +2,11 @@
 //
 // $Id$
 
-#include  "SimpleUdpConfiguration.h"
-#include  "SimpleUnreliableDgramDataLink.h"
-#include  "SimpleUnreliableDgramDataLink_rch.h"
-#include  "SimpleUdpSocket.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleUdpConfiguration.h"
+#include "SimpleUnreliableDgramDataLink.h"
+#include "SimpleUnreliableDgramDataLink_rch.h"
+#include "SimpleUdpSocket.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 ACE_INLINE

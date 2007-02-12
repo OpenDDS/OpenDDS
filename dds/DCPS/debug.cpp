@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "debug.h"
 

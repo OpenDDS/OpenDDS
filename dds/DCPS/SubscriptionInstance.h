@@ -4,9 +4,9 @@
 #ifndef TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
 #define TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
 
-#include  "dcps_export.h"
-#include  "ReceivedDataElementList.h"
-#include  "InstanceState.h"
+#include "dcps_export.h"
+#include "ReceivedDataElementList.h"
+#include "InstanceState.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

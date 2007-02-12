@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_THETRANSPORTFACTORY_H
 #define TAO_DCPS_THETRANSPORTFACTORY_H
 
-#include  "TransportFactory.h"
+#include "TransportFactory.h"
 
 #if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
 # pragma warning( disable : 4231 )

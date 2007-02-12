@@ -2,8 +2,8 @@
 //
 // $Id$
 
-#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE ACE_Reactor*
 TAO::DCPS::SimpleTcpReceiveStrategy::get_reactor()

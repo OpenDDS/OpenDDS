@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "RepoIdSet.h"
-#include  "EntryExit.h"
+#include "RepoIdSet.h"
+#include "EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::RepoIdSetMap::RepoIdSetMap()

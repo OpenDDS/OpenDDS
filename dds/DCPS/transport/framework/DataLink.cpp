@@ -2,20 +2,20 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "DataLink.h"
-#include  "RepoIdSet.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "DataLink.h"
+#include "RepoIdSet.h"
 
-#include  "DataLinkSetMap.h"
-#include  "ReceivedDataSample.h"
+#include "DataLinkSetMap.h"
+#include "ReceivedDataSample.h"
 
-#include  "TransportImpl.h"
-#include  "TransportConfiguration.h"
-#include  "dds/DCPS/DataWriterImpl.h"
-#include  "dds/DCPS/DataReaderImpl.h"
+#include "TransportImpl.h"
+#include "TransportConfiguration.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
-#include  "EntryExit.h"
-#include  "tao/debug.h"
+#include "EntryExit.h"
+#include "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"

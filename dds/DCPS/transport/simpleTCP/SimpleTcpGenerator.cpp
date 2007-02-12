@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpGenerator.h"
-#include  "SimpleTcpConfiguration.h"
-#include  "SimpleTcpFactory.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpGenerator.h"
+#include "SimpleTcpConfiguration.h"
+#include "SimpleTcpFactory.h"
 
 
 TAO::DCPS::SimpleTcpGenerator::SimpleTcpGenerator()

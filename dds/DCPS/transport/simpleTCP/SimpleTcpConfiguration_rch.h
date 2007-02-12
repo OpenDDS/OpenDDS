@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_SIMPLETCPCONFIGURATION_RCH_H
 #define TAO_DCPS_SIMPLETCPCONFIGURATION_RCH_H
 
-#include  "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 
 namespace TAO

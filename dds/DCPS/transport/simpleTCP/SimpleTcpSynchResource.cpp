@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpSynchResource.h"
-#include  "SimpleTcpConnection.h"
-#include  "SimpleTcpSendStrategy.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpSynchResource.h"
+#include "SimpleTcpConnection.h"
+#include "SimpleTcpSendStrategy.h"
 
 TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
                                             (SimpleTcpConnection*  connection,

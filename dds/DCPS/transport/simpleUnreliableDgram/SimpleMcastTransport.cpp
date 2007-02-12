@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleMcastTransport.h"
-#include  "SimpleMcastConfiguration.h"
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleMcastTransport.h"
+#include "SimpleMcastConfiguration.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 
 #if !defined (__ACE_INLINE__)

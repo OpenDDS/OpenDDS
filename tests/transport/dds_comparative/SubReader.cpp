@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SubReader.h"
-#include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "SubReader.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 
 SubReader::SubReader()

@@ -4,10 +4,10 @@
 #ifndef TAO_DDS_DCPS_TOPIC_IMPL_H
 #define TAO_DDS_DCPS_TOPIC_IMPL_H
 
-#include  "dds/DdsDcpsTopicS.h"
-#include  "dds/DdsDcpsInfoC.h"
-#include  "EntityImpl.h"
-#include  "TopicDescriptionImpl.h"
+#include "dds/DdsDcpsTopicS.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "EntityImpl.h"
+#include "TopicDescriptionImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

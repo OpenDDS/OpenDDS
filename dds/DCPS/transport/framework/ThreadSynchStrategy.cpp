@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "ThreadSynchStrategy.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ThreadSynchStrategy.h"
 
 
 #if !defined (__ACE_INLINE__)

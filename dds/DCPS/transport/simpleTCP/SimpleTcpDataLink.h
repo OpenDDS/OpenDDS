@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_SIMPLETCPDATALINK_H
 #define TAO_DCPS_SIMPLETCPDATALINK_H
 
-#include  "SimpleTcpConnection_rch.h"
-#include  "SimpleTcpTransport_rch.h"
-#include  "dds/DCPS/transport/framework/DataLink.h"
-#include  "ace/INET_Addr.h"
+#include "SimpleTcpConnection_rch.h"
+#include "SimpleTcpTransport_rch.h"
+#include "dds/DCPS/transport/framework/DataLink.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

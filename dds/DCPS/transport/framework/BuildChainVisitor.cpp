@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "BuildChainVisitor.h"
-#include  "TransportQueueElement.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "BuildChainVisitor.h"
+#include "TransportQueueElement.h"
 
 #if !defined (__ACE_INLINE__)
 #include "BuildChainVisitor.inl"

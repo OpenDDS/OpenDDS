@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportQueueElement.h"
-#include  "EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportQueueElement.h"
+#include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 # include "TransportQueueElement.inl"

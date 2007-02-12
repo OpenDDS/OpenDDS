@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_SIMPLEUDPCONFIGURATION_H
 #define TAO_DCPS_SIMPLEUDPCONFIGURATION_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramConfiguration.h"
-#include  "dds/DCPS/transport/framework/TransportDefs.h"
-#include  "ace/Configuration.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "ace/Configuration.h"
 
 
 namespace TAO

@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportReceiveListener.h"
-#include  "EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportReceiveListener.h"
+#include "EntryExit.h"
 
 
 #if !defined (__ACE_INLINE__)

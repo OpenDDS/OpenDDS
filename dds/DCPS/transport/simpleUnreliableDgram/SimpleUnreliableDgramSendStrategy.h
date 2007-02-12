@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMSENDSTRATEGY_H
 #define TAO_DCPS_SIMPLEUNRELIABLEDGRAMSENDSTRATEGY_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramSocket_rch.h"
-#include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
-#include  "ace/INET_Addr.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramSocket_rch.h"
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

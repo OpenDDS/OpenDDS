@@ -2,11 +2,11 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpFactory.h"
-#include  "SimpleTcpTransport.h"
-#include  "SimpleTcpConnection.h"
-#include  "SimpleTcpSendStrategy.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpFactory.h"
+#include "SimpleTcpTransport.h"
+#include "SimpleTcpConnection.h"
+#include "SimpleTcpSendStrategy.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpFactory.inl"

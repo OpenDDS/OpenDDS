@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportHeader.h"
-#include  "dds/DCPS/Serializer.h"
-#include  "EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportHeader.h"
+#include "dds/DCPS/Serializer.h"
+#include "EntryExit.h"
 
 const ACE_CDR::Octet
 TAO::DCPS::TransportHeader::supported_id_[6]

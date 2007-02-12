@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportImplFactory.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportImplFactory.h"
 
 
 #if !defined (__ACE_INLINE__)

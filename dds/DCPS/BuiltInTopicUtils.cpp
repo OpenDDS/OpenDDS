@@ -2,7 +2,7 @@
 //
 // $Id$
 
-#include "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "dds/DCPS/BuiltInTopicUtils.h"
 
 namespace TAO {

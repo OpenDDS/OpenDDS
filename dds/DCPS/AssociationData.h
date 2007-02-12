@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_ASSOCIATIONDATA_H
 #define TAO_DCPS_ASSOCIATIONDATA_H
 
-#include  "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 
 namespace TAO

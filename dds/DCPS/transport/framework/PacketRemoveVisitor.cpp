@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "PacketRemoveVisitor.h"
-#include  "dds/DCPS/DataSampleList.h"
-#include  "ace/Message_Block.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "PacketRemoveVisitor.h"
+#include "dds/DCPS/DataSampleList.h"
+#include "ace/Message_Block.h"
 
 
 #if !defined (__ACE_INLINE__)

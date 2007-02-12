@@ -4,7 +4,7 @@
 #ifndef TAO_DDS_DCPS_MARKED_DEFAULT_QOS_H
 #define TAO_DDS_DCPS_MARKED_DEFAULT_QOS_H
 
-#include  "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

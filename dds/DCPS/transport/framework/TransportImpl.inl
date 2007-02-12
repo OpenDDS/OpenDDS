@@ -2,12 +2,12 @@
 //
 // $Id$
 
-#include  "TransportInterface.h"
-#include  "TransportConfiguration.h"
-#include  "TransportReactorTask.h"
-#include  "DataLink_rch.h"
-#include  "DataLink.h"
-#include  "EntryExit.h"
+#include "TransportInterface.h"
+#include "TransportConfiguration.h"
+#include "TransportReactorTask.h"
+#include "DataLink_rch.h"
+#include "DataLink.h"
+#include "EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::TransportImpl::TransportImpl()

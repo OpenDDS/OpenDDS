@@ -2,14 +2,14 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportDebug.h"
-#include  "TransportFactory.h"
-#include  "TransportConfiguration.h"
+#include "TransportFactory.h"
+#include "TransportConfiguration.h"
 
-#include  "tao/TAO_Singleton.h"
+#include "tao/TAO_Singleton.h"
 
-#include  "ace/OS_NS_strings.h"
+#include "ace/OS_NS_strings.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportFactory.inl"

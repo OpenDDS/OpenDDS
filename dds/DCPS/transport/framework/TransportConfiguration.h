@@ -4,12 +4,12 @@
 #ifndef TAO_DCPS_TRANSPORTCONFIGURATION_H
 #define TAO_DCPS_TRANSPORTCONFIGURATION_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportDefs.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "ace/Synch.h"
-#include  "ace/Configuration.h"
-#include  "ace/SString.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportDefs.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "ace/Synch.h"
+#include "ace/Configuration.h"
+#include "ace/SString.h"
 
 class ACE_Reactor;
 

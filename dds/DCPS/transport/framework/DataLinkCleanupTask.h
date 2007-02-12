@@ -6,9 +6,9 @@
 
 #include /**/ "ace/pre.h"
 
-#include  "dds/DCPS/transport/framework/QueueTaskBase_T.h"
-#include  "dds/DCPS/transport/framework/DataLink.h"
-#include  "dds/DCPS/transport/framework/DataLink_rch.h"
+#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/transport/framework/DataLink.h"
+#include "dds/DCPS/transport/framework/DataLink_rch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

@@ -4,12 +4,12 @@
 #ifndef TAO_DCPS_TRANSPORTDEFS_H
 #define TAO_DCPS_TRANSPORTDEFS_H
 
-#include  "dds/DCPS/Definitions.h"
-#include  "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
-#include  "dds/DCPS/Definitions.h"
-#include  "dds/DCPS/debug.h"
-#include  "ace/Basic_Types.h"
-#include  <vector>
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/debug.h"
+#include "ace/Basic_Types.h"
+#include <vector>
 
 class ACE_Message_Block ;
 class ACE_Data_Block ;

@@ -1,6 +1,5 @@
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-
+#include "SimpleTcp_pch.h"
 #include "SimpleTcp.h"
 #include "SimpleTcpLoader.h"
 #include "tao/debug.h"

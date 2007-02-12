@@ -2,23 +2,23 @@
 //
 // $Id$
 
-#include "DCPS/DdsDcps_pch.h"
-#include  "DataReaderImpl.h"
-#include  "tao/ORB_Core.h"
-#include  "SubscriptionInstance.h"
-#include  "ReceivedDataElementList.h"
-#include  "DomainParticipantImpl.h"
-#include  "Service_Participant.h"
-#include  "Qos_Helper.h"
-#include  "TopicImpl.h"
-#include  "SubscriberImpl.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "DataReaderImpl.h"
+#include "tao/ORB_Core.h"
+#include "SubscriptionInstance.h"
+#include "ReceivedDataElementList.h"
+#include "DomainParticipantImpl.h"
+#include "Service_Participant.h"
+#include "Qos_Helper.h"
+#include "TopicImpl.h"
+#include "SubscriberImpl.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include  "BuiltInTopicUtils.h"
+#include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include  "ace/Reactor.h"
+#include "ace/Reactor.h"
 
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"

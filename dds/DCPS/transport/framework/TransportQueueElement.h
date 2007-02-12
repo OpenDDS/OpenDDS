@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_TRANSPORTQUEUEELEMENT_H
 #define TAO_DCPS_TRANSPORTQUEUEELEMENT_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/Definitions.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Definitions.h"
+#include "ace/Synch.h"
 
 class ACE_Message_Block;
 

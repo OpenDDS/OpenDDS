@@ -2,13 +2,13 @@
 //
 // $Id$
 
-#include  "SimpleDataWriter.h"
-#include  "SimplePublisher.h"
-#include  "dds/DCPS/DataSampleHeader.h"
-#include  "dds/DCPS/DataSampleList.h"
-#include  "dds/DCPS/transport/framework/TransportSendElement.h"
-#include  "ace/OS.h"
-#include  <sstream>
+#include "SimpleDataWriter.h"
+#include "SimplePublisher.h"
+#include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "ace/OS.h"
+#include <sstream>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 

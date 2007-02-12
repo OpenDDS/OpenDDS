@@ -4,8 +4,8 @@
 #ifndef SIMPLEDATAREADER_H
 #define SIMPLEDATAREADER_H
 
-#include  "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include  "dds/DCPS/Definitions.h"
+#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "dds/DCPS/Definitions.h"
 
 
 class SimpleDataReader : public TAO::DCPS::TransportReceiveListener

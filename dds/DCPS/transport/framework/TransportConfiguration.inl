@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "TransportDefs.h"
-#include  "PerConnectionSynchStrategy.h"
-#include  "EntryExit.h"
+#include "TransportDefs.h"
+#include "PerConnectionSynchStrategy.h"
+#include "EntryExit.h"
 
 
 // TBD SOON - The ThreadStrategy objects need to be reference counted.

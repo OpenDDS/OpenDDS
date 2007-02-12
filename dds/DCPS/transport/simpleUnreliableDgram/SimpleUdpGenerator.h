@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_SIMPLEUDP_GENERATOR_H
 #define TAO_DCPS_SIMPLEUDP_GENERATOR_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "dds/DCPS/transport/framework/TransportGenerator.h"
-#include  "ace/Synch.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "dds/DCPS/transport/framework/TransportGenerator.h"
+#include "ace/Synch.h"
 
 namespace TAO
 {

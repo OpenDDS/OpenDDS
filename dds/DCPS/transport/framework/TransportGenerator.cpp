@@ -2,8 +2,8 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportGenerator.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportGenerator.h"
 
 
 TAO::DCPS::TransportGenerator::TransportGenerator()

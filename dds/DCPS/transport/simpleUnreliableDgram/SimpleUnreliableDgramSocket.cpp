@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "ace/Reactor.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "ace/Reactor.h"
 
 
 #if !defined (__ACE_INLINE__)

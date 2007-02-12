@@ -4,11 +4,11 @@
 #ifndef SIMPLESUBSCRIBER_H
 #define SIMPLESUBSCRIBER_H
 
-#include  "SimpleDataReader.h"
-#include  "dds/DCPS/Definitions.h"
-#include  "dds/DCPS/AssociationData.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "SimpleDataReader.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
 class SimpleSubscriber : public TAO::DCPS::TransportInterface

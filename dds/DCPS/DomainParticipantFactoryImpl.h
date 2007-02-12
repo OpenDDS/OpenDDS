@@ -4,12 +4,12 @@
 #ifndef TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
 #define TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
 
-#include  "Definitions.h"
-#include  "dds/DdsDcpsDomainS.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Null_Mutex.h"
-#include  "ace/Recursive_Thread_Mutex.h"
-#include  "ace/Unbounded_Set.h"
+#include "Definitions.h"
+#include "dds/DdsDcpsDomainS.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Null_Mutex.h"
+#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Unbounded_Set.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

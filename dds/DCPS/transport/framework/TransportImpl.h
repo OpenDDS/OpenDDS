@@ -4,20 +4,20 @@
 #ifndef TAO_DCPS_TRANSPORTIMPL_H
 #define TAO_DCPS_TRANSPORTIMPL_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "dds/DCPS/AssociationData.h"
-#include  "TransportDefs.h"
-//borland #include  "TransportConfiguration.h"
-#include  "TransportConfiguration_rch.h"
-//borland #include  "TransportReactorTask.h"
-#include  "TransportReactorTask_rch.h"
-#include  "RepoIdSetMap.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/AssociationData.h"
+#include "TransportDefs.h"
+//borland #include "TransportConfiguration.h"
+#include "TransportConfiguration_rch.h"
+//borland #include "TransportReactorTask.h"
+#include "TransportReactorTask_rch.h"
+#include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Synch.h"
-#include  "ace/Vector_T.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Synch.h"
+#include "ace/Vector_T.h"
 
 
 namespace TAO

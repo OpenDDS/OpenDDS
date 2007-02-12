@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
-#include  "TopicDescriptionImpl.h"
-#include  "DomainParticipantImpl.h"
-#include  "TopicImpl.h"
-#include  "Service_Participant.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TopicDescriptionImpl.h"
+#include "DomainParticipantImpl.h"
+#include "TopicImpl.h"
+#include "Service_Participant.h"
 
 namespace TAO
 {

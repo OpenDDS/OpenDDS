@@ -2,11 +2,11 @@
 //
 // $Id$
 
-#include  "SimpleTcpTransport.h"
-#include  "SimpleTcpConnection.h"
-#include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
-#include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleTcpTransport.h"
+#include "SimpleTcpConnection.h"
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE const ACE_INET_Addr&
 TAO::DCPS::SimpleTcpDataLink::remote_address() const

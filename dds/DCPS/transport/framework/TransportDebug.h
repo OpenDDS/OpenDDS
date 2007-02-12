@@ -4,7 +4,7 @@
 #ifndef TAO_DDS_TRANSPORT_DEBUG_H
 #define TAO_DDS_TRANSPORT_DEBUG_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

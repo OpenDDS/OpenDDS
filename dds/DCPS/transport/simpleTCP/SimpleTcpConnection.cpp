@@ -2,21 +2,21 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpConnection.h"
-#include  "SimpleTcpTransport.h"
-#include  "SimpleTcpConfiguration.h"
-#include  "SimpleTcpDataLink.h"
-#include  "SimpleTcpReceiveStrategy.h"
-#include  "SimpleTcpSendStrategy.h"
-#include  "SimpleTcpReconnectTask.h"
-#include  "ace/os_include/netinet/os_tcp.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpConnection.h"
+#include "SimpleTcpTransport.h"
+#include "SimpleTcpConfiguration.h"
+#include "SimpleTcpDataLink.h"
+#include "SimpleTcpReceiveStrategy.h"
+#include "SimpleTcpSendStrategy.h"
+#include "SimpleTcpReconnectTask.h"
+#include "ace/os_include/netinet/os_tcp.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
-#include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 
 // The connection lost can be detected by both send and receive strategy. When
 // that happens, both of them add a request to the reconnect task. The reconnect

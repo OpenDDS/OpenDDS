@@ -4,12 +4,12 @@
 #ifndef TAO_DCPS_TRANSPORT_GENERATOR_H
 #define TAO_DCPS_TRANSPORT_GENERATOR_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "dds/DCPS/transport/framework/TransportImplFactory.h"
-#include  "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/transport/framework/TransportImplFactory.h"
+#include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
-#include  "ace/Synch.h"
+#include "ace/Synch.h"
 
 namespace TAO
 {

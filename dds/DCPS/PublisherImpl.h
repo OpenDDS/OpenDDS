@@ -4,21 +4,21 @@
 #ifndef TAO_DDS_DCPS_PUBLISHER_IMPL_H
 #define TAO_DDS_DCPS_PUBLISHER_IMPL_H
 
-#include  "dds/DdsDcpsPublicationS.h"
-#include  "dds/DdsDcpsDataWriterRemoteC.h"
-#include  "dds/DdsDcpsInfoC.h"
-#include  "EntityImpl.h"
-#include  "DataSampleList.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "ace/Synch.h"
+#include "dds/DdsDcpsPublicationS.h"
+#include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "EntityImpl.h"
+#include "DataSampleList.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "ace/Synch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include  <map>
-#include  <list>
-#include  <vector>
+#include <map>
+#include <list>
+#include <vector>
 
 
 namespace TAO

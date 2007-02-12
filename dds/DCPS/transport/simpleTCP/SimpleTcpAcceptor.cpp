@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "SimpleTcpAcceptor.h"
-#include  "SimpleTcpTransport.h"
-#include  "SimpleTcpSendStrategy.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleTcp_pch.h"
+#include "SimpleTcpAcceptor.h"
+#include "SimpleTcpTransport.h"
+#include "SimpleTcpSendStrategy.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 // This can not be inlined since it needs to have the internals of the

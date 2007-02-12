@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  <ace/Message_Block.h>
-#include  <ace/CDR_Stream.h>
-#include  "Serializer.h"
+#include <ace/Message_Block.h>
+#include <ace/CDR_Stream.h>
+#include "Serializer.h"
 
 
 // NOTE: I use the ternary operators in here for conditionals to help

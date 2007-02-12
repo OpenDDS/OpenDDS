@@ -2,8 +2,8 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUnreliableDgramDataLink.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUnreliableDgramDataLink.h"
 
 
 #if !defined (__ACE_INLINE__)

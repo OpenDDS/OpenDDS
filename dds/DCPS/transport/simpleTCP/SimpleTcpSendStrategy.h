@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_SIMPLETCPSENDSTRATEGY_H
 #define TAO_DCPS_SIMPLETCPSENDSTRATEGY_H
 
-#include  "SimpleTcpConnection_rch.h"
-#include  "SimpleTcpConnection.h"
-#include  "SimpleTcpDataLink_rch.h"
-#include  "dds/DCPS/transport/framework/TransportSendStrategy.h"
+#include "SimpleTcpConnection_rch.h"
+#include "SimpleTcpConnection.h"
+#include "SimpleTcpDataLink_rch.h"
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 
 namespace TAO
