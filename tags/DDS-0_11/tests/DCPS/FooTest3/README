@@ -1,0 +1,38 @@
+This is to test the publisher side without transport available.
+The DdsDcps lib needs build with the PUBLISHER_TEST defined.
+
+
+Each test case needs launch DCPSInfoRepo:
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+
+Command line option:
+
+    -t num_threads_to_write    defaults to 1 
+    -i num_writes_per_thread   defaults to 1 
+    -w num_datawriters         defaults to 1 
+    -b block_on_write?1:0      defaults to 0 
+    -m multiple_instances?1:0  defaults to 0
+
+
+Single datawriter test:   - run_test.pl
+
+   e.g. FooTest3 -DCPSInfoRepo file://repo.ior -t 5              
+        FooTest3 -DCPSInfoRepo file://repo.ior -t 5 -b 1         
+     
+
+multiple instances test:  - run_test_mi.pl
+
+   e.g. FooTest3 -DCPSInfoRepo file://repo.ior -m 1 -t 5         
+        FooTest3 -DCPSInfoRepo file://repo.ior -m 1 -t 5 -b 1    
+
+
+multiple datawriter with multiple instances test:  - run_test_mw.pl
+
+   e.g FooTest3 -DCPSInfoRepo file://repo.ior -w 5 -m 1 -t 5          
+       FooTest3 -DCPSInfoRepo file://repo.ior -w 5 -m 1 -t 5 -b 1     
+
+
+
+
