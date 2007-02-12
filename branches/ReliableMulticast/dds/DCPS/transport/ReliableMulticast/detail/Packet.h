@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Basic_Types.h"
 #include <string>
 
 namespace TAO
@@ -27,7 +28,7 @@ namespace TAO
 
         struct Packet
         {
-          typedef unsigned long id_type;
+          typedef ACE_UINT32 id_type;
 
           enum PacketType
           {
