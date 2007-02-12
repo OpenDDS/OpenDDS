@@ -32,6 +32,9 @@ namespace TAO
         /// Dtor
         ~TransportFactory();
 
+      /// Return a singleton instance of this class.
+      static TransportFactory * instance (void);
+
         /// Register the SimpleTcp transport since it's part of the DDSDcps library.
         void register_simpletcp ();
 
@@ -52,7 +55,7 @@ namespace TAO
         /// library creates a concrete transport generator and register with TransportFactory singleton.
         /// Special Note: Caller is "giving away" the generator to
         ///               this TransportFactory.
-        void register_generator (const char* name, 
+        void register_generator (const char* name,
                                  TransportGenerator* generator);
 
         /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory

@@ -406,7 +406,7 @@ int DCPS_IR_Domain::init_built_in_topics()
   // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
-  ::TAO::DCPS::TheTransientKludge->enable ();
+  TheTransientKludge->enable ();
 
   if (TAO_debug_level > 0)
     {
@@ -1538,4 +1538,3 @@ template class ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,A
 #pragma instantiate ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
 
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-

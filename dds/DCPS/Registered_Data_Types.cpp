@@ -4,6 +4,9 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include  "Registered_Data_Types.h"
+
+#include "tao/TAO_Singleton.h"
+
 #include "ace/Unbounded_Set.h"
 #include "ace/SString.h"
 
@@ -73,6 +76,17 @@ namespace TAO
         } /* if (0 < domains_.current_size() ) */
 
     }
+
+    Data_Types_Register*
+    Data_Types_Register::instance (void)
+    {
+      // Hide the template instantiation to prevent multiple instances
+      // from being created.
+
+      return
+	TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>::instance ();
+    }
+
 
 
     ::DDS::ReturnCode_t Data_Types_Register::register_type (

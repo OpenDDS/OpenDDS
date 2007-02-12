@@ -6,14 +6,13 @@
 
 
 #include "dcps_export.h"
-#include "tao/TAO_Singleton.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200 
+#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
 # pragma warning( disable : 4231 )
 #endif
 
@@ -37,6 +36,9 @@ namespace TAO
       Transient_Kludge ();
       ~Transient_Kludge ();
 
+      /// Return a singleton instance of this class.
+      static Transient_Kludge* instance (void);
+
       /// Turn on enabled_ flag.
       void enable ();
 
@@ -51,16 +53,8 @@ namespace TAO
       bool  enabled_;
     };
 
-    typedef TAO_Singleton< ::TAO::DCPS::Transient_Kludge, TAO_SYNCH_MUTEX > TRANSIENT_KLUDGE;
 
-    #if ! defined (__GNUC__) || (__GNUC__ < 4)
-
-    TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton,
-                                   Transient_Kludge,
-                                   TAO_SYNCH_MUTEX)
-    #endif
-
-    #define TheTransientKludge TRANSIENT_KLUDGE::instance()
+    #define TheTransientKludge ::TAO::DCPS::Transient_Kludge::instance()
 
   } // namespace DCPS
 } // namespace TAO

@@ -7,7 +7,10 @@
 #include  "BuiltInTopicUtils.h"
 #include  "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
+
 #include  "tao/ORB_Core.h"
+#include "tao/TAO_Singleton.h"
+
 #include  "ace/Arg_Shifter.h"
 #include  "ace/Reactor.h"
 #include  "ace/Configuration_Import_Export.h"
@@ -60,6 +63,16 @@ namespace TAO
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       initialize();
+    }
+
+    Service_Participant *
+    Service_Participant::instance (void)
+    {
+      // Hide the template instantiation to prevent multiple instances
+      // from being created.
+
+      return
+	TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance ();
     }
 
     int
@@ -760,4 +773,3 @@ template class TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
 #pragma instantiate TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>
 
 #endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-
