@@ -23,9 +23,27 @@ namespace TAO
       namespace detail
       {
 
+        class Packet;
+
         class PacketSerializer
         {
-        //@@todo: Add Code Here
+        public:
+          PacketSerializer(const Packet& packet);
+          PacketSerializer(Packet& packet);
+
+          /// Create a buffer appropriately-sized for the input Packet and
+          /// return it.  This buffer is owned by the caller!
+          char* getBuffer(const Packet& packet) const;
+
+          void serializeFromTo(
+            const Packet& packet,
+            char* buffer
+            ) const;
+
+          void serializeFromTo(
+            char* buffer,
+            Packet& packet
+            );
         };
 
       } /* namespace detail */
