@@ -11,7 +11,6 @@
 #include  "DomainParticipantFactoryImpl.h"
 #include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "tao/TAO_Singleton.h"
 
 #include  "tao/PortableServer/Root_POA.h"
 
@@ -57,6 +56,9 @@ namespace TAO
     public:
       /** Constructor **/
       Service_Participant ();
+
+      /// Return a singleton instance of this class.
+      static Service_Participant * instance (void);
 
       /** Lanch a thread to run the orb. **/
       virtual int svc ();
@@ -310,14 +312,7 @@ namespace TAO
       ACE_Configuration_Heap cf_;
     };
 
-
-    typedef TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX> TAO_SERVICE_PARTICIPANT;
-
-#if ! defined (__GNUC__) || (__GNUC__ < 4)
-    TAO_DDSDCPS_SINGLETON_DECLARE (::TAO_Singleton, Service_Participant, TAO_SYNCH_MUTEX)
-#endif
-
-    #define TheServiceParticipant                     TAO::DCPS::TAO_SERVICE_PARTICIPANT::instance()
+    #define TheServiceParticipant                     TAO::DCPS::Service_Participant::instance()
 
     #define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
 

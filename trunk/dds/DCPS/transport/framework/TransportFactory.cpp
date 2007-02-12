@@ -6,12 +6,25 @@
 #include "TransportDebug.h"
 #include  "TransportFactory.h"
 #include  "TransportConfiguration.h"
+
+#include  "tao/TAO_Singleton.h"
+
 #include  "ace/OS_NS_strings.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportFactory.inl"
 #endif /* __ACE_INLINE__ */
 
+
+TAO::DCPS::TransportFactory*
+TAO::DCPS::TransportFactory::instance (void)
+{
+  // Hide the template instantiation to prevent multiple instances
+  // from being created.
+
+  return
+    TAO_Singleton<TransportFactory, TAO_SYNCH_MUTEX>::instance ();
+}
 
 /// This will create a new TransportImpl object (some concrete subclass of
 /// TransportImpl actually), and "assign it" the provided impl_id as

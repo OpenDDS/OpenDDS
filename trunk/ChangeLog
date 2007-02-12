@@ -1,3 +1,19 @@
+Mon Feb 12 20:23:50 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Transient_Kludge.h:
+        * dds/DCPS/Transient_Kludge.cpp:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+          Work-around to force a single instance of the singleton
+          object. Previously, building against the DOC TAO created
+          singleton instances local to a shared library.
+
 Mon Feb 12 19:20:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DDS version 0_11 released.
