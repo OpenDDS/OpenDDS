@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ReceivedDataSample.h"
-#include  "EntryExit.h"
+#include "ReceivedDataSample.h"
+#include "EntryExit.h"
 
 
 ACE_INLINE

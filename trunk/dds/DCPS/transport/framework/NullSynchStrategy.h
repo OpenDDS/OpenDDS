@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_NULLSYNCHSTRATEGY_H
 #define TAO_DCPS_NULLSYNCHSTRATEGY_H
 
-#include  "ThreadSynchStrategy.h"
+#include "ThreadSynchStrategy.h"
 
 
 namespace TAO

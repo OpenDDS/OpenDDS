@@ -1,5 +1,5 @@
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
+#include "SimpleTcp_pch.h"
 
 #include "SimpleTcpLoader.h"
 #include "SimpleTcpGenerator.h"

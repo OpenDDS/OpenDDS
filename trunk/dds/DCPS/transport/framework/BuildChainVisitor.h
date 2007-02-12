@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_BUILDCHAINVISTOR_H
 #define TAO_DCPS_BUILDCHAINVISTOR_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "BasicQueueVisitor_T.h"
+#include "dds/DCPS/dcps_export.h"
+#include "BasicQueueVisitor_T.h"
 
 class ACE_Message_Block;
 

@@ -5,8 +5,8 @@
 #define TAO_DCPS_SIMPLEUNRELIABLEDGRAMDATALINK_H
 
 #include "SimpleUnreliableDgram_export.h"
-#include  "dds/DCPS/transport/framework/DataLink.h"
-#include  "ace/INET_Addr.h"
+#include "dds/DCPS/transport/framework/DataLink.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

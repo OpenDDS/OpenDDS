@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H
 #define TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H
 
-#include  "SimpleTcpConnection_rch.h"
-#include  "SimpleTcpConnection.h"
-#include  "dds/DCPS/transport/framework/ThreadSynchResource.h"
-#include  "ace/Handle_Set.h"
-#include  "ace/Time_Value.h"
+#include "SimpleTcpConnection_rch.h"
+#include "SimpleTcpConnection.h"
+#include "dds/DCPS/transport/framework/ThreadSynchResource.h"
+#include "ace/Handle_Set.h"
+#include "ace/Time_Value.h"
 
 
 namespace TAO

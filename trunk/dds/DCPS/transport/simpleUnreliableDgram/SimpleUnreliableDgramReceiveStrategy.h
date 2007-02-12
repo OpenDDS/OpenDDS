@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMRECEIVESTRATEGY_H
 #define TAO_DCPS_SIMPLEUNRELIABLEDGRAMRECEIVESTRATEGY_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramSocket_rch.h"
-#include  "SimpleUnreliableDgramTransport_rch.h"
-#include  "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramSocket_rch.h"
+#include "SimpleUnreliableDgramTransport_rch.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 
 namespace TAO

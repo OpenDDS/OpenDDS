@@ -4,16 +4,16 @@
 #ifndef TAO_DCPS_TRANSPORTSENDSTRATEGY_H
 #define TAO_DCPS_TRANSPORTSENDSTRATEGY_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "ThreadSynchWorker.h"
-#include  "TransportDefs.h"
-#include  "BasicQueue_T.h"
-#include  "TransportHeader.h"
-#include  "TransportReplacedElement.h"
-#include  "TransportConfiguration_rch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "ThreadSynchWorker.h"
+#include "TransportDefs.h"
+#include "BasicQueue_T.h"
+#include "TransportHeader.h"
+#include "TransportReplacedElement.h"
+#include "TransportConfiguration_rch.h"
 
-#include  "ace/Synch.h"
+#include "ace/Synch.h"
 
 namespace TAO
 {

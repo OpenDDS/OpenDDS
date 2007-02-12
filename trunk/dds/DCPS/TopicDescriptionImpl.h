@@ -4,9 +4,9 @@
 #ifndef TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 #define TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 
-#include  "dds/DdsDcpsTopicS.h"
-#include  "dds/DdsDcpsTypeSupportTaoS.h"
-#include  "ace/SString.h"
+#include "dds/DdsDcpsTopicS.h"
+#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "ace/SString.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

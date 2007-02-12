@@ -2,7 +2,7 @@
 //
 // $Id$
 
-#include  "EntryExit.h"
+#include "EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::ThreadSynchWorker::ThreadSynchWorker()

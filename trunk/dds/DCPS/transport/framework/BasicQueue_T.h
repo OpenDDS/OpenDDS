@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_BASICQUEUE_T_H
 #define TAO_DCPS_BASICQUEUE_T_H
 
-#include  "BasicQueueLinkPool_T.h"
-#include  "BasicQueueVisitor_T.h"
+#include "BasicQueueLinkPool_T.h"
+#include "BasicQueueVisitor_T.h"
 
 
 namespace TAO

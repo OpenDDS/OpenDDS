@@ -2,8 +2,8 @@
 //
 // $Id$
 
-#include  "EntryExit.h"
-#include  "ace/ACE.h"
+#include "EntryExit.h"
+#include "ace/ACE.h"
 
 ACE_INLINE
 TAO::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)

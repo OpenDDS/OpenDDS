@@ -1,21 +1,21 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
-#include  "Service_Participant.h"
-#include  "BuiltInTopicUtils.h"
-#include  "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "Service_Participant.h"
+#include "BuiltInTopicUtils.h"
+#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
-#include  "tao/ORB_Core.h"
+#include "tao/ORB_Core.h"
 #include "tao/TAO_Singleton.h"
 
-#include  "ace/Arg_Shifter.h"
-#include  "ace/Reactor.h"
-#include  "ace/Configuration_Import_Export.h"
-#include  "ace/Service_Config.h"
-#include  "ace/Argv_Type_Converter.h"
+#include "ace/Arg_Shifter.h"
+#include "ace/Reactor.h"
+#include "ace/Configuration_Import_Export.h"
+#include "ace/Service_Config.h"
+#include "ace/Argv_Type_Converter.h"
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"

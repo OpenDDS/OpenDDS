@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ace/Message_Block.h"
-#include  "EntryExit.h"
+#include "ace/Message_Block.h"
+#include "EntryExit.h"
 
 #include <assert.h>
 

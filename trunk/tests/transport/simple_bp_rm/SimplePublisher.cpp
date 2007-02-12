@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimplePublisher.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include  "TestException.h"
-#include  <string>
+#include "SimplePublisher.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "TestException.h"
+#include <string>
 
 
 SimplePublisher::SimplePublisher()

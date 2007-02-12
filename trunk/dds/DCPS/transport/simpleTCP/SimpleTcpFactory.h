@@ -6,7 +6,7 @@
 
 #include "SimpleTcp_export.h"
 
-#include  "dds/DCPS/transport/framework/TransportImplFactory.h"
+#include "dds/DCPS/transport/framework/TransportImplFactory.h"
 
 class SimpleTcpTransport;
 

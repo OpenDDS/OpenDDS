@@ -2,8 +2,8 @@
 //
 // $Id$
 
-#include  "ReceivedDataElementList.h"
-#include  "InstanceState.h"
+#include "ReceivedDataElementList.h"
+#include "InstanceState.h"
 
 
 ACE_INLINE

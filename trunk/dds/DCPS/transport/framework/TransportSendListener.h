@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTSENDLISTENER_H
 #define TAO_DCPS_TRANSPORTSENDLISTENER_H
 
-#include  "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/dcps_export.h"
 
 class ACE_Message_Block;
 

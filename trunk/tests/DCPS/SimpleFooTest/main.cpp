@@ -18,8 +18,8 @@
 
 #include "ace/Get_Opt.h"
 
-#include  "dds/DCPS/TopicDescriptionImpl.h"
-#include  "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/TopicDescriptionImpl.h"
+#include "dds/DCPS/Service_Participant.h"
 
 // if COND fails then log error and abort with -1.
 #define TEST_CHECK(COND) \

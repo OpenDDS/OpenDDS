@@ -3,8 +3,8 @@
 // $Id$
 
 
-#include "DCPS/DdsDcps_pch.h"
-#include  "EntityImpl.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "EntityImpl.h"
 
 namespace TAO
 {

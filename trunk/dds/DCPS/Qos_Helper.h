@@ -4,7 +4,7 @@
 #ifndef TAO_DDS_DCPS_QOS_HELPER_H
 #define TAO_DDS_DCPS_QOS_HELPER_H
 
-#include  "dds/DdsDcpsC.h"
+#include "dds/DdsDcpsC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

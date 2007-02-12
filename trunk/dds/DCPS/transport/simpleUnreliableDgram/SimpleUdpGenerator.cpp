@@ -2,9 +2,9 @@
 //
 // $Id$
 #include "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUdpGenerator.h"
-#include  "SimpleUdpConfiguration.h"
-#include  "SimpleUdpFactory.h"
+#include "SimpleUdpGenerator.h"
+#include "SimpleUdpConfiguration.h"
+#include "SimpleUdpFactory.h"
 
 
 TAO::DCPS::SimpleUdpGenerator::SimpleUdpGenerator()

@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_NETWORKADDRESS_H
 #define TAO_DCPS_NETWORKADDRESS_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ace/INET_Addr.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleDataReader.h"
-#include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include  "ace/Log_Msg.h"
-#include  "ace/OS.h"
+#include "SimpleDataReader.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 

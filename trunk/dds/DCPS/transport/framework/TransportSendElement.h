@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_TRANSPORTSENDELEMENT_H
 #define TAO_DCPS_TRANSPORTSENDELEMENT_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportQueueElement.h"
-#include  "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportQueueElement.h"
+#include "dds/DCPS/DataSampleList.h"
 
 namespace TAO
 {

@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_SIMPLEMCASTTRANSPORT_H
 #define TAO_DCPS_SIMPLEMCASTTRANSPORT_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramTransport.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramTransport.h"
 
 
 namespace TAO

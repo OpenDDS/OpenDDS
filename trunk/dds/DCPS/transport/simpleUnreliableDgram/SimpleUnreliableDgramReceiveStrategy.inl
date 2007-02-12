@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgramTransport.h"
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "SimpleUnreliableDgramTransport.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 ACE_INLINE

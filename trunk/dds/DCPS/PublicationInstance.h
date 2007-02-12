@@ -4,8 +4,8 @@
 #ifndef TAO_DDS_DCPS_PUBLICATION_INSTANCE_H
 #define TAO_DDS_DCPS_PUBLICATION_INSTANCE_H
 
-#include  "dcps_export.h"
-#include  "DataSampleList.h"
+#include "dcps_export.h"
+#include "DataSampleList.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

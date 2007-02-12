@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUdpConfiguration.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUdpConfiguration.h"
 
 
 #if !defined (__ACE_INLINE__)

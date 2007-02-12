@@ -5,10 +5,10 @@
 #define TAO_DDS_DCPS_DEFINITION_H
 
 
-#include  "Cached_Allocator_With_Overflow_T.h"
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "dds/DdsDcpsInfrastructureC.h"
-#include  "ace/Message_Block.h"
+#include "Cached_Allocator_With_Overflow_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "ace/Message_Block.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

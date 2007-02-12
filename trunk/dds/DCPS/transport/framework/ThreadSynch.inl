@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "ThreadSynchResource.h"
-#include  "EntryExit.h"
+#include "ThreadSynchResource.h"
+#include "EntryExit.h"
 
 
 /// Note that we allow the ThreadSynchResource pointer to be NULL to

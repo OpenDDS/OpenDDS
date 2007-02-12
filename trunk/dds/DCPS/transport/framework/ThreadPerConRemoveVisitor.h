@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_THREADPERCONREMOVEVISITOR_H
 #define TAO_DCPS_THREADPERCONREMOVEVISITOR_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "BasicQueueVisitor_T.h"
-#include  "TransportDefs.h"
-#include  "ThreadPerConnectionSendTask.h"
-#include  "ace/Message_Block.h"
+#include "dds/DCPS/dcps_export.h"
+#include "BasicQueueVisitor_T.h"
+#include "TransportDefs.h"
+#include "ThreadPerConnectionSendTask.h"
+#include "ace/Message_Block.h"
 
 
 namespace TAO

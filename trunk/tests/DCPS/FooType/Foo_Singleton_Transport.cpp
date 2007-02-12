@@ -1,6 +1,6 @@
 
 
-#include  "Foo_Singleton_Transport.h"
+#include "Foo_Singleton_Transport.h"
 
 Singleton_Transport::Singleton_Transport(void)
 {

@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportConfiguration.h"
-#include  "ThreadSynchStrategy.h"
-#include  "EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportConfiguration.h"
+#include "ThreadSynchStrategy.h"
+#include "EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 # include "TransportConfiguration.inl"

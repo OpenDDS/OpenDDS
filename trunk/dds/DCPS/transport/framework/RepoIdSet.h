@@ -4,12 +4,13 @@
 #ifndef TAO_DCPS_REPOIDSET_H
 #define TAO_DCPS_REPOIDSET_H
 
-#include  "TransportDefs.h"
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Synch.h"
+#include "TransportDefs.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/Serializer.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

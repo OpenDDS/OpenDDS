@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_DATASAMPLEHEADER_H
 #define TAO_DCPS_DATASAMPLEHEADER_H
 
-#include  "Definitions.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

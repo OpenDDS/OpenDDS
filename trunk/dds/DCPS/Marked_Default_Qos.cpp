@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
-#include  "Marked_Default_Qos.h"
-#include  "Service_Participant.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "Marked_Default_Qos.h"
+#include "Service_Participant.h"
 
 
 namespace TAO

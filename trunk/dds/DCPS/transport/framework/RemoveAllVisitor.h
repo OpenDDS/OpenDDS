@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_REMOVEALLVISITOR_H
 #define TAO_DCPS_REMOVEALLVISITOR_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "BasicQueueVisitor_T.h"
+#include "dds/DCPS/dcps_export.h"
+#include "BasicQueueVisitor_T.h"
 
 
 namespace TAO

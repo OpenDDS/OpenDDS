@@ -4,8 +4,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include  "ace/SString.h"
-#include  "ace/Atomic_Op.h"
+#include "ace/SString.h"
+#include "ace/Atomic_Op.h"
 
 enum TransportInstanceId
 {

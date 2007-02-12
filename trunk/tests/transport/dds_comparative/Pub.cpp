@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "Pub.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include  "TestException.h"
+#include "Pub.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "TestException.h"
 
 
 Pub::Pub()

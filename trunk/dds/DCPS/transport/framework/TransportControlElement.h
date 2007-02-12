@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_TRANSPORTGDCONTROLELEMENT_H
 #define TAO_DCPS_TRANSPORTGDCONTROLELEMENT_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportDefs.h"
-#include  "TransportQueueElement.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportDefs.h"
+#include "TransportQueueElement.h"
 
 class ACE_Message_Block ;
 

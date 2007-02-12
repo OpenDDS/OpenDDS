@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_RECEIVELISTENERSET_H
 #define TAO_DCPS_RECEIVELISTENERSET_H
 
-#include  "dds/DCPS/RcObject_T.h"
-#include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

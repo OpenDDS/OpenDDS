@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_POOLSYNCH_H
 #define TAO_DCPS_POOLSYNCH_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ThreadSynch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ThreadSynch.h"
 
 
 namespace TAO

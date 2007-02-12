@@ -6,14 +6,14 @@
 
 #include "SimpleTcp_export.h"
 
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "SimpleTcpConfiguration_rch.h"
-#include  "SimpleTcpDataLink_rch.h"
-#include  "SimpleTcpConnection_rch.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
-#include  "ace/INET_Addr.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "SimpleTcpConfiguration_rch.h"
+#include "SimpleTcpDataLink_rch.h"
+#include "SimpleTcpConnection_rch.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "ace/INET_Addr.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

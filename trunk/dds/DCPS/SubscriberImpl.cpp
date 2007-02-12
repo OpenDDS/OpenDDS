@@ -2,25 +2,25 @@
 //
 // $Id$
 
-#include "DCPS/DdsDcps_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
-#include  "SubscriberImpl.h"
-#include  "DomainParticipantImpl.h"
-#include  "Qos_Helper.h"
-#include  "TopicImpl.h"
-#include  "DataReaderImpl.h"
-#include  "Service_Participant.h"
-#include  "dds/DdsDcpsTypeSupportTaoS.h"
-#include  "TopicDescriptionImpl.h"
-#include  "Marked_Default_Qos.h"
-#include  "DataSampleList.h"
-#include  "AssociationData.h"
-#include  "Transient_Kludge.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "dds/DCPS/transport/framework/DataLinkSet.h"
+#include "SubscriberImpl.h"
+#include "DomainParticipantImpl.h"
+#include "Qos_Helper.h"
+#include "TopicImpl.h"
+#include "DataReaderImpl.h"
+#include "Service_Participant.h"
+#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "TopicDescriptionImpl.h"
+#include "Marked_Default_Qos.h"
+#include "DataSampleList.h"
+#include "AssociationData.h"
+#include "Transient_Kludge.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/DataLinkSet.h"
 
-#include  "tao/debug.h"
+#include "tao/debug.h"
 
 
 namespace TAO

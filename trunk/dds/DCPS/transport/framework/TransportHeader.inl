@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "dds/DCPS/Serializer.h"
-#include  "EntryExit.h"
+#include "dds/DCPS/Serializer.h"
+#include "EntryExit.h"
 
 
 ACE_INLINE

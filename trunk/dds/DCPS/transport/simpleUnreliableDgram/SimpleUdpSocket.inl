@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "dds/DCPS/transport/framework/EntryExit.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "ace/Synch.h"
 
 
 ACE_INLINE

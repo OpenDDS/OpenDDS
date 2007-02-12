@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "Transient_Kludge.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "Transient_Kludge.h"
 
 #include "tao/TAO_Singleton.h"
 

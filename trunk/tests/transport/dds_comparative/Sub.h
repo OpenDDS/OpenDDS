@@ -4,13 +4,13 @@
 #ifndef SUB_H
 #define SUB_H
 
-#include  "SubReader.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "dds/DCPS/transport/framework/TransportDefs.h"
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
-#include  "dds/DCPS/AssociationData.h"
-#include  "ace/INET_Addr.h"
-#include  <vector>
+#include "SubReader.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/AssociationData.h"
+#include "ace/INET_Addr.h"
+#include <vector>
 
 
 class Sub : public TAO::DCPS::TransportInterface

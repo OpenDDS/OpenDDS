@@ -4,10 +4,10 @@
 #ifndef TAO_DDS_DCPS_ENTITY_IMPL_H
 #define TAO_DDS_DCPS_ENTITY_IMPL_H
 
-#include  "dds/DdsDcpsInfrastructureS.h"
-#include  "ace/Atomic_Op_T.h"
+#include "dds/DdsDcpsInfrastructureS.h"
+#include "ace/Atomic_Op_T.h"
 
-#include  <map>
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

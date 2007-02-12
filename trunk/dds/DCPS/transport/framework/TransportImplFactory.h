@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_TRANSPORTIMPLFACTORY_H
 #define TAO_DCPS_TRANSPORTIMPLFACTORY_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "dds/DCPS/RcObject_T.h"
-//borland #include  "TransportImpl.h"
-#include  "TransportImpl_rch.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+//borland #include "TransportImpl.h"
+#include "TransportImpl_rch.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

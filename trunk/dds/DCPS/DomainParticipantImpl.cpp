@@ -1,25 +1,25 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
-#include  "DomainParticipantImpl.h"
-#include  "Service_Participant.h"
-#include  "Qos_Helper.h"
-#include  "PublisherImpl.h"
-#include  "SubscriberImpl.h"
-#include  "Marked_Default_Qos.h"
-#include  "Registered_Data_Types.h"
-#include  "Transient_Kludge.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "DomainParticipantImpl.h"
+#include "Service_Participant.h"
+#include "Qos_Helper.h"
+#include "PublisherImpl.h"
+#include "SubscriberImpl.h"
+#include "Marked_Default_Qos.h"
+#include "Registered_Data_Types.h"
+#include "Transient_Kludge.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include  "BuiltInTopicUtils.h"
-#include  "ParticipantBuiltinTopicDataTypeSupportImpl.h"
-#include  "PublicationBuiltinTopicDataTypeSupportImpl.h"
-#include  "SubscriptionBuiltinTopicDataTypeSupportImpl.h"
-#include  "TopicBuiltinTopicDataTypeSupportImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "dds/ParticipantBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/PublicationBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/SubscriptionBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/TopicBuiltinTopicDataTypeSupportImpl.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include  "tao/debug.h"
+#include "tao/debug.h"
 
 namespace TAO
 {

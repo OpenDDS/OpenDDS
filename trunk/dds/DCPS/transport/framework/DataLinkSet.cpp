@@ -1,12 +1,12 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "DataLinkSet.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "DataLinkSet.h"
 
-#include  "dds/DCPS/DataSampleList.h"
-#include  "TransportImpl.h"
-#include  "TransportSendListener.h"
+#include "dds/DCPS/DataSampleList.h"
+#include "TransportImpl.h"
+#include "TransportSendListener.h"
 
 #include "EntryExit.h"
 

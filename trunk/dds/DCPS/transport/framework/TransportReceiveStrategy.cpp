@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportReceiveStrategy.h"
-#include  "ace/INET_Addr.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportReceiveStrategy.h"
+#include "ace/INET_Addr.h"
 
 
 #if !defined (__ACE_INLINE__)

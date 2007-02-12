@@ -1,17 +1,17 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h"
-#include  "WriteDataContainer.h"
-#include  "Service_Participant.h"
-#include  "DataSampleList.h"
-#include  "DataWriterImpl.h"
-#include  "PublicationInstance.h"
-#include  "dds/DCPS/transport/framework/TransportSendElement.h"
-#include  "dds/DCPS/transport/framework/TransportDebug.h"
-#include  "tao/debug.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "WriteDataContainer.h"
+#include "Service_Participant.h"
+#include "DataSampleList.h"
+#include "DataWriterImpl.h"
+#include "PublicationInstance.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
+#include "tao/debug.h"
 
-#include  "Serializer.h"
+#include "Serializer.h"
 
 namespace TAO
 {

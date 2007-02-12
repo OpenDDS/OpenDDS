@@ -6,8 +6,8 @@
 
 #include "SimpleTcp_export.h"
 
-#include  "dds/DCPS/transport/framework/TransportConfiguration.h"
-#include  "ace/INET_Addr.h"
+#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "ace/INET_Addr.h"
 
 
 namespace TAO

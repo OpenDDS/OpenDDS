@@ -4,8 +4,8 @@
 #ifndef SIMPLEDATAWRITER_H
 #define SIMPLEDATAWRITER_H
 
-#include  "dds/DCPS/transport/framework/TransportSendListener.h"
-#include  "dds/DCPS/Definitions.h"
+#include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include "dds/DCPS/Definitions.h"
 
 class SimplePublisher;
 

@@ -4,27 +4,27 @@
 #ifndef TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include  "EntityImpl.h"
-#include  "Definitions.h"
-#include  "TopicImpl.h"
-#include  "dds/DdsDcpsPublicationC.h"
-#include  "dds/DdsDcpsSubscriptionC.h"
-#include  "dds/DdsDcpsTopicC.h"
-#include  "dds/DdsDcpsDomainS.h"
-#include  "dds/DdsDcpsInfoC.h"
+#include "EntityImpl.h"
+#include "Definitions.h"
+#include "TopicImpl.h"
+#include "dds/DdsDcpsPublicationC.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsTopicC.h"
+#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsInfoC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include  "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
-#include  "dds/PublicationBuiltinTopicDataTypeSupportC.h"
-#include  "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
-#include  "dds/TopicBuiltinTopicDataTypeSupportC.h"
+#include "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
+#include "dds/PublicationBuiltinTopicDataTypeSupportC.h"
+#include "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
+#include "dds/TopicBuiltinTopicDataTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include  "ace/Hash_Map_Manager.h"
-#include  "ace/Null_Mutex.h"
-#include  "ace/Recursive_Thread_Mutex.h"
-#include  "ace/Unbounded_Set.h"
+#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "ace/Hash_Map_Manager.h"
+#include "ace/Null_Mutex.h"
+#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Unbounded_Set.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

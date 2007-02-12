@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportControlElement.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportControlElement.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 TAO::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)

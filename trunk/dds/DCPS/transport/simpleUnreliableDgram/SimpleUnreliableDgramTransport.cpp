@@ -2,16 +2,16 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUnreliableDgramTransport.h"
-#include  "SimpleUnreliableDgramSendStrategy.h"
-#include  "SimpleUnreliableDgramReceiveStrategy.h"
-#include  "SimpleUnreliableDgramSynchResource.h"
-#include  "SimpleUnreliableDgramSocket.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUnreliableDgramTransport.h"
+#include "SimpleUnreliableDgramSendStrategy.h"
+#include "SimpleUnreliableDgramReceiveStrategy.h"
+#include "SimpleUnreliableDgramSynchResource.h"
+#include "SimpleUnreliableDgramSocket.h"
 
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
-#include  "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include  <vector>
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include <vector>
 
 
 #if !defined (__ACE_INLINE__)

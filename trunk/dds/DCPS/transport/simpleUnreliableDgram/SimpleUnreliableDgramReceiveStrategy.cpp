@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUnreliableDgramReceiveStrategy.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUnreliableDgramReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleUnreliableDgramReceiveStrategy.inl"

@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_NULLSYNCH_H
 #define TAO_DCPS_NULLSYNCH_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ThreadSynch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ThreadSynch.h"
 
 
 namespace TAO

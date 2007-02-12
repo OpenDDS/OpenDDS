@@ -6,7 +6,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include  "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

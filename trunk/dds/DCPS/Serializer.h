@@ -4,8 +4,8 @@
 #ifndef TAO_DDS_DCPS_SERIALIZER_H
 #define TAO_DDS_DCPS_SERIALIZER_H
 
-#include  "ace/CDR_Base.h"
-#include  "dcps_export.h"
+#include "ace/CDR_Base.h"
+#include "dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -196,7 +196,7 @@ namespace TAO
 # include "Serializer.inl"
 #else  /* __ACE_INLINE__ */
 
-#include  <ace/CDR_Stream.h>
+#include <ace/CDR_Stream.h>
 
 // Insertion operators.
 extern TAO_DdsDcps_Export

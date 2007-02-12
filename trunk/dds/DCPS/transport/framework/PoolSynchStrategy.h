@@ -4,11 +4,11 @@
 #ifndef TAO_DCPS_POOLSYNCHSTRATEGY_H
 #define TAO_DCPS_POOLSYNCHSTRATEGY_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ThreadSynchStrategy.h"
-#include  "ace/Task.h"
-#include  "ace/Synch.h"
-#include  "ace/Condition_T.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ThreadSynchStrategy.h"
+#include "ace/Task.h"
+#include "ace/Synch.h"
+#include "ace/Condition_T.h"
 
 
 namespace TAO

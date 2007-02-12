@@ -4,10 +4,10 @@
 #ifndef TAO_DCPS_SIMPLEUDPSOCKET_H
 #define TAO_DCPS_SIMPLEUDPSOCKET_H
 
-#include  "SimpleUnreliableDgram_export.h"
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "ace/INET_Addr.h"
-#include  "ace/SOCK_Dgram.h"
+#include "SimpleUnreliableDgram_export.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram.h"
 
 
 namespace TAO

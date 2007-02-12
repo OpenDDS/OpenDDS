@@ -2,11 +2,11 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUdpTransport.h"
-#include  "SimpleUdpConfiguration.h"
-#include  "dds/DCPS/transport/framework/NetworkAddress.h"
-#include  <vector>
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUdpTransport.h"
+#include "SimpleUdpConfiguration.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <vector>
 
 
 #if !defined (__ACE_INLINE__)

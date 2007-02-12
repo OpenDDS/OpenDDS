@@ -4,7 +4,7 @@
 #ifndef TAO_DCPS_TRANSPORTHEADER_H
 #define TAO_DCPS_TRANSPORTHEADER_H
 
-#include  "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Definitions.h"
 
 
 namespace TAO

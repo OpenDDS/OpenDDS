@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_BASICQUEUELINKPOOL_T_H
 #define TAO_DCPS_BASICQUEUELINKPOOL_T_H
 
-#include  "BasicQueueLink_T.h"
-#include  "BasicQueueLinkAllocator_T.h"
-#include  "ace/Malloc_T.h"
+#include "BasicQueueLink_T.h"
+#include "BasicQueueLinkAllocator_T.h"
+#include "ace/Malloc_T.h"
 
 
 namespace TAO
@@ -80,7 +80,7 @@ namespace TAO
 #ifndef TAO_DCPS_BASICQUEUELINKPOOL_T_H
 #define TAO_DCPS_BASICQUEUELINKPOOL_T_H
 
-#include  "BasicQueueLink_T.h"
+#include "BasicQueueLink_T.h"
 
 namespace TAO
 {

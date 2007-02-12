@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "DCPS/DdsDcps_pch.h"
-#include  "TransportSendControlElement.h"
-#include  "TransportSendListener.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "TransportSendControlElement.h"
+#include "TransportSendListener.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendControlElement.inl"

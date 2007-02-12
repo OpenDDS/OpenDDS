@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUdpFactory.h"
-#include  "SimpleUdpTransport.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUdpFactory.h"
+#include "SimpleUdpTransport.h"
 
 
 #if !defined (__ACE_INLINE__)

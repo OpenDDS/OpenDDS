@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "TransportReceiveListener.h"
-#include  "ReceivedDataSample.h"
-#include  "EntryExit.h"
+#include "TransportReceiveListener.h"
+#include "ReceivedDataSample.h"
+#include "EntryExit.h"
 
 ACE_INLINE
 TAO::DCPS::ReceiveListenerSet::ReceiveListenerSet()

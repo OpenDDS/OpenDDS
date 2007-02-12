@@ -4,12 +4,12 @@
 #ifndef TAO_DCPS_TRANSPORTINTERFACE_H
 #define TAO_DCPS_TRANSPORTINTERFACE_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportImpl_rch.h"
-#include  "DataLinkSetMap.h"
-#include  "TransportDefs.h"
-#include  "dds/DCPS/Definitions.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportImpl_rch.h"
+#include "DataLinkSetMap.h"
+#include "TransportDefs.h"
+#include "dds/DCPS/Definitions.h"
+#include "ace/Synch.h"
 
 class ACE_Message_Block;
 

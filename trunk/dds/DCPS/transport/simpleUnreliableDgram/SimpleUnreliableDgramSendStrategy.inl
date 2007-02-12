@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "SimpleUnreliableDgramSynchResource.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
-#include  "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "SimpleUnreliableDgramSynchResource.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportConfiguration.h"
 
 
 ACE_INLINE

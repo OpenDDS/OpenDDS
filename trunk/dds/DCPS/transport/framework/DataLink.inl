@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "TransportSendStrategy.h"
-#include  "TransportReceiveStrategy.h"
-#include  "ThreadPerConnectionSendTask.h"
-#include  "EntryExit.h"
+#include "TransportSendStrategy.h"
+#include "TransportReceiveStrategy.h"
+#include "ThreadPerConnectionSendTask.h"
+#include "EntryExit.h"
 
 
 ACE_INLINE void

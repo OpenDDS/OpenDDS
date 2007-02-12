@@ -2,10 +2,10 @@
 //
 // $Id$
 
-#include  "SimpleUnreliableDgram_pch.h"
-#include  "SimpleUnreliableDgramSynchResource.h"
-#include  "SimpleUnreliableDgramSocket.h"
-#include  "dds/DCPS/transport/framework/EntryExit.h"
+#include "SimpleUnreliableDgram_pch.h"
+#include "SimpleUnreliableDgramSynchResource.h"
+#include "SimpleUnreliableDgramSocket.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 TAO::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchResource

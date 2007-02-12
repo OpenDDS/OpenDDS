@@ -2,9 +2,9 @@
 //
 // $Id$
 
-#include  "EntryExit.h"
-#include  "DataLink.h"
-#include  "TransportSendElement.h"
+#include "EntryExit.h"
+#include "DataLink.h"
+#include "TransportSendElement.h"
 
 ACE_INLINE void
 TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)

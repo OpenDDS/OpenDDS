@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "EntryExit.h"
-#include  "ace/OS.h"
+#include "EntryExit.h"
+#include "ace/OS.h"
 
 
 ACE_INLINE int

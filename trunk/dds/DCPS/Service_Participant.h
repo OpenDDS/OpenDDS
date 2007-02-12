@@ -4,19 +4,19 @@
 #ifndef TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
 
-#include  "DomainParticipantFactoryImpl.h"
-#include  "dds/DdsDcpsInfrastructureS.h"
-#include  "dds/DdsDcpsDomainC.h"
-#include  "dds/DdsDcpsInfoC.h"
-#include  "DomainParticipantFactoryImpl.h"
-#include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "dds/DdsDcpsInfrastructureS.h"
+#include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
 
-#include  "tao/PortableServer/Root_POA.h"
+#include "tao/PortableServer/Root_POA.h"
 
-#include  "ace/Task.h"
-#include  "ace/Auto_Ptr.h"
-#include  "ace/Configuration.h"
+#include "ace/Task.h"
+#include "ace/Auto_Ptr.h"
+#include "ace/Configuration.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -4,9 +4,9 @@
 #ifndef TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
 #define TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "TransportQueueElement.h"
-#include  "ace/Synch.h"
+#include "dds/DCPS/dcps_export.h"
+#include "TransportQueueElement.h"
+#include "ace/Synch.h"
 
 
 namespace TAO

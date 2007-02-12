@@ -5,8 +5,8 @@
 #ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#include  "dcps_export.h"
-#include  "dds/DdsDcpsInfrastructureC.h"
+#include "dcps_export.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

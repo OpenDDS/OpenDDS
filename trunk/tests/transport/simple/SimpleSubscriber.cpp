@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "SimpleSubscriber.h"
-#include  "TestException.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "dds/DCPS/transport/framework/TransportInterface.h"
-#include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "SimpleSubscriber.h"
+#include "TestException.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include  "ace/SString.h"
+#include "ace/SString.h"
 
 
 SimpleSubscriber::SimpleSubscriber()

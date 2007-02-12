@@ -4,8 +4,8 @@
 #ifndef TAO_DCPS_PERCONNECTIONSYNCHSTRATEGY_H
 #define TAO_DCPS_PERCONNECTIONSYNCHSTRATEGY_H
 
-#include  "dds/DCPS/dcps_export.h"
-#include  "ThreadSynchStrategy.h"
+#include "dds/DCPS/dcps_export.h"
+#include "ThreadSynchStrategy.h"
 
 
 namespace TAO

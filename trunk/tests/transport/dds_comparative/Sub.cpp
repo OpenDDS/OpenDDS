@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
 // $Id$
-#include  "Sub.h"
-#include  "dds/DCPS/transport/framework/TransportImpl.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include  "TestException.h"
+#include "Sub.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "TestException.h"
 
 
 Sub::Sub()
