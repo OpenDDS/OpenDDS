@@ -72,7 +72,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
   }
   else if (p.type_ == Packet::HEARTBEAT)
   {
-    if (!in_range(p.id_, -max_size_ - max_size_, 0))
+    if (!in_range(p.id_, 0 - 2 * max_size_, 0))
     {
       // NACK the last packet, which will send it along and
       // then trigger the above NACK code...

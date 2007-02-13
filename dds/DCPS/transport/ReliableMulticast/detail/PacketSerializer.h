@@ -23,7 +23,7 @@ namespace TAO
       namespace detail
       {
 
-        class Packet;
+        struct Packet;
 
         class PacketSerializer
         {
