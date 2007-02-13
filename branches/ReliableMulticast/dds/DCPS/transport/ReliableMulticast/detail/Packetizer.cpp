@@ -10,6 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 #include "Packet.h"
+#include <algorithm>
 
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 
