@@ -815,6 +815,7 @@ DataReaderImpl::get_requested_deadline_missed_status (
   return ::DDS::RETCODE_OK;
 }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 ::DDS::ReturnCode_t DataReaderImpl::get_matched_publication_data (
 								  ::DDS::PublicationBuiltinTopicData & publication_data,
 								  ::DDS::InstanceHandle_t publication_handle
@@ -823,7 +824,6 @@ DataReaderImpl::get_requested_deadline_missed_status (
 		   CORBA::SystemException
 		   ))
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
   if (enabled_ == false)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -854,11 +854,8 @@ DataReaderImpl::get_requested_deadline_missed_status (
     }
 
   return ret;
-#else
-
-  return ::DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 ::DDS::ReturnCode_t DataReaderImpl::enable (
 					    )

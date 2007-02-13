@@ -171,9 +171,12 @@ module DDS {
     ReturnCode_t get_matched_publications(
         inout InstanceHandleSeq publication_handles);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
     ReturnCode_t get_matched_publication_data(
         inout PublicationBuiltinTopicData publication_data,
         in InstanceHandle_t publication_handle);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
     };
 
     // ----------------------------------------------------------------------

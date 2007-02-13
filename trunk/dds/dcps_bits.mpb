@@ -16,8 +16,7 @@ feature (built_in_topics) : dcps_ts_defaults, built_in_topic_support, taoidldefa
     TopicBuiltinTopicDataTypeSupportImpl.cpp
   }
 
-  idlflags -= -Sa -St
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT) -Sa -St
 
   IDL_Files {
     idlflags += -Gdcps
@@ -35,8 +34,7 @@ feature (built_in_topics) : dcps_ts_defaults, built_in_topic_support, taoidldefa
 
 feature (!built_in_topics) : built_in_topic_support, taoidldefaults {
 
-  idlflags -= -Sa -St
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT) -Sa -St
 
   IDL_Files {
     DdsDcpsInfrastructure.idl
