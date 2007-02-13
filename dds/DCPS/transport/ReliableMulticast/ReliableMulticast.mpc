@@ -1,4 +1,9 @@
 project : dcps {
   sharedname   = ReliableMulticast
   dynamicflags = RELIABLEMULTICAST_BUILD_DLL
+
+  Source_Files {
+    *.cpp
+    detail/*.cpp
+  }
 }

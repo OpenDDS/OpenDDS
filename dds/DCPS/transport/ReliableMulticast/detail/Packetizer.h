@@ -11,6 +11,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/SOCK_IO.h"
+#include <vector>
+
 namespace TAO
 {
 
@@ -23,9 +26,21 @@ namespace TAO
       namespace detail
       {
 
+        class Packet;
+
         class Packetizer
         {
-        //@@todo: Add Code Here
+        public:
+          enum
+          {
+            MAX_PAYLOAD_SIZE = 1024
+          };
+
+          void packetize(
+            const iovec iov[],
+            int size,
+            std::vector<Packet>& packets
+            );
         };
 
       } /* namespace detail */
