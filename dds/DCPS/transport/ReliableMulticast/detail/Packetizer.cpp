@@ -2,6 +2,7 @@
 //
 // $Id$
 
+#include "ReliableMulticast_pch.h"
 #include "Packetizer.h"
 
 #if !defined (__ACE_INLINE__)
