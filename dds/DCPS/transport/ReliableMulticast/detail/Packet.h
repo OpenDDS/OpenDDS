@@ -62,12 +62,27 @@ namespace TAO
             const Packet& rhs
             ) const
           {
-            return
+            bool ok =
               id_ == rhs.id_ &&
-              type_ == rhs.type_ &&
-              payload_ == rhs.payload_ &&
-              nack_begin_ == rhs.nack_begin_ &&
-              nack_end_ == rhs.nack_end_;
+              type_ == rhs.type_;
+            if (type_ == NACK)
+            {
+              ok &=
+                (nack_begin_ == rhs.nack_begin_) &&
+                (nack_end_ == rhs.nack_end_);
+            }
+            else if (type_ == DATA)
+            {
+              ok &= payload_ == rhs.payload_;
+            }
+            return ok;
+          }
+
+          bool operator!=(
+            const Packet& rhs
+            ) const
+          {
+            return !(*this == rhs);
           }
 
           id_type id_;
