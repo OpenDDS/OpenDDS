@@ -67,6 +67,7 @@ enum TransportInstanceId
 
 
 int init_transport ();
+int cleanup_transport ();
 int attach_publisher_transport ();
 int attach_subscriber_transport ();
 int ignore ();
