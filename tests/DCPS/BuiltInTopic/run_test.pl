@@ -41,10 +41,10 @@ $client_orb = "";
 
 
 $REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", 
-         "-ORBSvcConf ../../tcp.conf -o $iorfile -d domain_ids");
-
-$CL = new PerlACE::Process ("bit", "-ORBSvcConf ../../tcp.conf "
-                            ."-DCPSInfoRepo file://$iorfile -i $ignore_kind");
+                              "-o $iorfile -d domain_ids -ORBSvcConf ../../tcp.conf"
+                              );
+#                              . " -ORBDebugLevel 1");
+$CL = new PerlACE::Process ("bit", "-ORBSvcConf ../../tcp.conf -DCPSInfoRepo file://$iorfile -i $ignore_kind");
 
 $REPO->Spawn ();
 

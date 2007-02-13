@@ -546,6 +546,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   shutdown ();
 
+  cleanup_transport ();
+
   return failed;
 #else
 

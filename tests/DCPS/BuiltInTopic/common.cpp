@@ -88,6 +88,12 @@ int init_transport ()
   return 0;
 }
 
+int cleanup_transport ()
+{
+  writer_transport_impl = 0;
+  reader_transport_impl = 0;
+  return 0;
+}
 
 int attach_publisher_transport ()
 {

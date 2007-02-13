@@ -1,3 +1,20 @@
+Tue Feb 13 17:45:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/common.h:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Added a way for main() to inform common.cpp that the transports need
+          to be unloaded.  Without this the transports would attempt to unload
+          after main() completes (due to static destructors).  The transports
+          can't unload after main() completes because the dynamic libraries
+          that implement that transports have already been unloaded.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Since SimpleTCP is now a separate library, need to enable the
+          -ORBSvcConf argument to load it.
+
 Mon Feb 12 19:57:45 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/built_in_topic_support.mpb:
@@ -64,8 +81,8 @@ Mon Feb 12 19:57:45 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * tests/transport/udp_simple/*.{h,cpp}:
         * tests/transport/udp_simple_n/*.{h,cpp}:
 
-	  Normalized all #include preprocessor directives to have exactly one
-	  space after the #include.
+          Normalized all #include preprocessor directives to have exactly one
+          space after the #include.
 
 Mon Feb 12 20:23:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
