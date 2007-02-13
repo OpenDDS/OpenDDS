@@ -9,7 +9,7 @@ project : orbsvcslib, dcps_ts_defaults, built_in_topic_support {
   libpaths    += $(DDS_ROOT)/lib
 
   includes    += $(DDS_ROOT)
-  idlflags    += -Gdcps -I$(DDS_ROOT)
+  idlflags    += -Gdcps -I$(DDS_ROOT) -Sa -St
 
   // DDS is not compatible with an exceptions=0 build
   requires    += exceptions

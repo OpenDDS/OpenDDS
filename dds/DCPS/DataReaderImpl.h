@@ -274,6 +274,7 @@ namespace TAO
           CORBA::SystemException
         ));
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
       virtual ::DDS::ReturnCode_t get_matched_publication_data (
           ::DDS::PublicationBuiltinTopicData & publication_data,
           ::DDS::InstanceHandle_t publication_handle
@@ -281,6 +282,7 @@ namespace TAO
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
       virtual ::DDS::ReturnCode_t enable (
         )

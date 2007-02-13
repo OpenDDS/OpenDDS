@@ -1,3 +1,29 @@
+Tue Feb 13 23:00:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * dds/dcps_bits.mpb:
+
+          Default to call tao_idl with -Sa and -St arguments to suppress
+          generation of CORBA Any and Typecode operations.
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+
+          Place Built-in Topic specific code within #ifndef DDS_MINIMUM_BIT so
+          that even more is excluded from the build when the MPC feature
+          built_in_topics is zero.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          As a consequence of the above IDL changes, the
+          get_matched_{publication,subscription}_data() operations are not
+          available in a built_in_topics=0 build.  Before this change the
+          operations were present but returned an "unsupported" error code.
+
 Tue Feb 13 17:45:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopic/common.h:

@@ -144,6 +144,7 @@ namespace TAO
         CORBA::SystemException
       ));
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
     virtual ::DDS::ReturnCode_t get_matched_subscription_data (
         ::DDS::SubscriptionBuiltinTopicData & subscription_data,
         ::DDS::InstanceHandle_t subscription_handle
@@ -151,6 +152,7 @@ namespace TAO
       ACE_THROW_SPEC ((
         CORBA::SystemException
       ));
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
     virtual ::DDS::ReturnCode_t enable (
       )

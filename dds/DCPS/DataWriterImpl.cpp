@@ -668,13 +668,13 @@ DataWriterImpl::get_matched_subscriptions ( ::DDS::InstanceHandleSeq & subscript
   return ::DDS::RETCODE_OK;
 }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 ::DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicData & subscription_data,
             ::DDS::InstanceHandle_t subscription_handle
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
   if (enabled_ == false)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -700,11 +700,8 @@ DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicD
     }
 
   return ret;
-#else
-
-  return ::DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 ::DDS::ReturnCode_t
 DataWriterImpl::enable ( )

@@ -97,9 +97,12 @@ module DDS {
     ReturnCode_t get_matched_subscriptions(
       inout InstanceHandleSeq subscription_handles);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
     ReturnCode_t get_matched_subscription_data(
       inout SubscriptionBuiltinTopicData subscription_data,
       in InstanceHandle_t subscription_handle);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
     };
 
     // ----------------------------------------------------------------------
