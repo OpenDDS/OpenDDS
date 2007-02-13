@@ -10,7 +10,15 @@
 #endif /* __ACE_INLINE__ */
 
 #include "Packet.h"
+
+//We'd like the following #include to give us the function std::min()
+//and not to get confused with any macros named min.
+#ifdef min
+#  undef min
+#endif
+
 #include <algorithm>
+
 
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 
