@@ -1,3 +1,17 @@
+Wed Feb 14 17:27:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/built_in_topic_support.mpb:
+
+          Fixed whitespace.
+
+	* MPC/config/dcps.mpb:
+        * MPC/config/dds_suppress_any_support.mpb:
+        * dds/dcps_bits.mpb:
+
+          Earlier versions of TAO (such as 1.4a) don't work properly with the
+          tao_idl -Sa -St options.  This check-in provides an MPC feature that
+          will be used to turn on or off the -Sa -St options.
+
 Wed Feb 14 16:41:22 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
