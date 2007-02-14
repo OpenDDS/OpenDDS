@@ -5,12 +5,14 @@
 #include "ReliableMulticast_pch.h"
 #include "ReactivePacketReceiver.h"
 #include "Packet.h"
+#include "PacketReceiverCallback.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ReactivePacketReceiver.inl"
 #endif /* __ACE_INLINE__ */
 
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef TAO::DCPS::ReliableMulticast::detail::PacketReceiverCallback PacketReceiverCallback;
 
 namespace
 {
@@ -22,9 +24,11 @@ namespace
 }
 
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketReceiver(
-  const ACE_INET_Addr& multicast_group_address
+  const ACE_INET_Addr& multicast_group_address,
+  PacketReceiverCallback& callback
   )
-  : multicast_group_address_(multicast_group_address)
+  : callback_(callback)
+  , multicast_group_address_(multicast_group_address)
 {
 }
 
@@ -75,6 +79,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive(
   std::vector<Packet> delivered;
 
   bool schedule_timer = false;
+  try
   {
     ACE_Guard<ACE_Thread_Mutex> lock(nack_mutex_);
 
@@ -89,6 +94,17 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive(
       schedule_timer = true;
     }
   }
+  catch(std::exception&)
+  {
+    callback_.reliability_compromised();
+    return;
+  }
+
+  if (!delivered.empty())
+  {
+    callback_.received_packets(delivered);
+  }
+
   if (schedule_timer)
   {
     if (reactor()->schedule_timer(this, 0, ACE_Time_Value(0, 0)) == -1)

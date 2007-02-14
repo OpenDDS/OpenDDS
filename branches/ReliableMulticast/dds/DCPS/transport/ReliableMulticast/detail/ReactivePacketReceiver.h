@@ -29,12 +29,15 @@ namespace TAO
       namespace detail
       {
 
+        class PacketReceiverCallback;
+
         class ReliableMulticast_Export ReactivePacketReceiver
           : public PacketHandler
         {
         public:
           ReactivePacketReceiver(
-            const ACE_INET_Addr& multicast_group_address
+            const ACE_INET_Addr& multicast_group_address,
+            PacketReceiverCallback& callback
             );
         
           virtual ~ReactivePacketReceiver();
@@ -52,11 +55,12 @@ namespace TAO
             );
         
         private:
+          PacketReceiverCallback& callback_;
+          ACE_INET_Addr multicast_group_address_;
           ACE_Thread_Mutex nack_mutex_;
           std::map<ACE_INET_Addr, ReceiverLogic> receiver_logics_;
           typedef std::map<ACE_INET_Addr, std::vector<Packet> > PeerToPacketVectorMap;
           PeerToPacketVectorMap nacks_;
-          ACE_INET_Addr multicast_group_address_;
         };
 
       } /* namespace detail */
