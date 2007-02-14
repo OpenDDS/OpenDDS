@@ -19,6 +19,9 @@ void PublisherListenerImpl::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedDeadlineMissedStatus & status
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     ACE_UNUSED_ARG(writer);
     ACE_UNUSED_ARG(status);
@@ -29,6 +32,9 @@ void PublisherListenerImpl::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::OfferedIncompatibleQosStatus & status
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     ACE_UNUSED_ARG(writer);
     ACE_UNUSED_ARG(status);
@@ -39,6 +45,9 @@ void PublisherListenerImpl::on_liveliness_lost (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::LivelinessLostStatus & status
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     ACE_UNUSED_ARG(writer);
     ACE_UNUSED_ARG(status);
@@ -49,6 +58,9 @@ void PublisherListenerImpl::on_publication_match (
     ::DDS::DataWriter_ptr writer,
     const ::DDS::PublicationMatchStatus & status
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     ACE_UNUSED_ARG(writer);
     ACE_UNUSED_ARG(status);

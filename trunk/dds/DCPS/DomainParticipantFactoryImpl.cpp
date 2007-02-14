@@ -30,6 +30,9 @@ namespace TAO
         const ::DDS::DomainParticipantQos & qos,
         ::DDS::DomainParticipantListener_ptr a_listener
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (! Qos_Helper::valid (qos))
         {
@@ -170,6 +173,9 @@ namespace TAO
     DomainParticipantFactoryImpl::delete_participant (
         ::DDS::DomainParticipant_ptr a_participant
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
 
       if (CORBA::is_nil(a_participant))
@@ -302,6 +308,9 @@ namespace TAO
     DomainParticipantFactoryImpl::lookup_participant (
         ::DDS::DomainId_t domainId
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
@@ -334,6 +343,9 @@ namespace TAO
     DomainParticipantFactoryImpl::set_default_participant_qos (
         const ::DDS::DomainParticipantQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid (qos)
           && Qos_Helper::consistent (qos))
@@ -350,6 +362,9 @@ namespace TAO
     void DomainParticipantFactoryImpl::get_default_participant_qos (
         ::DDS::DomainParticipantQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = default_participant_qos_;
     }
@@ -388,6 +403,9 @@ namespace TAO
     ::DDS::DomainParticipantFactory_ptr
     DomainParticipantFactoryImpl::get_instance (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return TheParticipantFactory;
     }

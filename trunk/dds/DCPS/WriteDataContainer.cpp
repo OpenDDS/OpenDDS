@@ -121,6 +121,9 @@ WriteDataContainer::reenqueue_all(DataWriterImpl* writer)
 WriteDataContainer::register_instance(
 				      ::DDS::InstanceHandle_t&      instance_handle,
 				      DataSample*&                  registered_sample)
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   PublicationInstance* instance = NULL;
 
@@ -180,6 +183,9 @@ WriteDataContainer::unregister(
 			       DataSample*&              registered_sample,
 			       DataWriterImpl*           writer,
 			       bool                      dup_registered_sample)
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   PublicationInstance* instance = 0;
 
@@ -214,6 +220,9 @@ WriteDataContainer::dispose(
 			    ::DDS::InstanceHandle_t       instance_handle,
 			    DataSample*&                  registered_sample,
 			    bool                          dup_registered_sample)
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   PublicationInstance* instance = 0;
 

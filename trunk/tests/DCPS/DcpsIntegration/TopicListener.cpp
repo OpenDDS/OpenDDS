@@ -40,6 +40,9 @@ void TAO_DCPS_TopicListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
     const ::DDS::InconsistentTopicStatus & status
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     last_status_ = status;
   }

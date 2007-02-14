@@ -127,6 +127,9 @@ void DataReaderImpl::init (
 			   ::DDS::Subscriber_ptr         subscriber_objref,
 			   DataReaderRemote_ptr          dr_remote_objref
 			   )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   topic_servant_ = a_topic ;
   topic_servant_->_add_ref ();
@@ -169,6 +172,7 @@ void DataReaderImpl::init (
 
 void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 				       const TAO::DCPS::WriterAssociationSeq & writers)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
 
@@ -352,6 +356,9 @@ void DataReaderImpl::remove_associations (
 					  const TAO::DCPS::WriterIdSeq & writers,
 					  ::CORBA::Boolean notify_lost
 					  )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_associations",5);
 
@@ -535,6 +542,9 @@ void DataReaderImpl::remove_all_associations ()
 void DataReaderImpl::update_incompatible_qos (
 					      const TAO::DCPS::IncompatibleQosStatus & status
 					      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ::POA_DDS::DataReaderListener* listener
       = listener_for (::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
@@ -570,6 +580,9 @@ void DataReaderImpl::update_incompatible_qos (
 
 ::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities (
 							       )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   if (DCPS_debug_level >= 2)
     ACE_DEBUG ((LM_DEBUG,
@@ -581,6 +594,9 @@ void DataReaderImpl::update_incompatible_qos (
 ::DDS::ReturnCode_t DataReaderImpl::set_qos (
 					     const ::DDS::DataReaderQos & qos
 					     )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
@@ -613,6 +629,9 @@ void DataReaderImpl::update_incompatible_qos (
 void DataReaderImpl::get_qos (
 			      ::DDS::DataReaderQos & qos
 			      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   qos = qos_ ;
 }
@@ -621,6 +640,9 @@ void DataReaderImpl::get_qos (
 						  ::DDS::DataReaderListener_ptr a_listener,
 						  ::DDS::StatusKindMask mask
 						  )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
@@ -634,6 +656,9 @@ void DataReaderImpl::get_qos (
 
 ::DDS::DataReaderListener_ptr DataReaderImpl::get_listener (
 							    )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   return ::DDS::DataReaderListener::_duplicate (listener_.in ());
 }
@@ -641,18 +666,27 @@ void DataReaderImpl::get_qos (
 
 ::DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription (
 								  )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   return ::DDS::TopicDescription::_duplicate (topic_desc_.in ()) ;
 }
 
 ::DDS::Subscriber_ptr DataReaderImpl::get_subscriber (
 						      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   return ::DDS::Subscriber::_duplicate (subscriber_objref_.in ());
 }
 
 ::DDS::SampleRejectedStatus DataReaderImpl::get_sample_rejected_status (
 									)
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
@@ -664,6 +698,9 @@ void DataReaderImpl::get_qos (
 
 ::DDS::LivelinessChangedStatus DataReaderImpl::get_liveliness_changed_status (
 									      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
@@ -681,6 +718,9 @@ void DataReaderImpl::get_qos (
 ::DDS::RequestedDeadlineMissedStatus
 DataReaderImpl::get_requested_deadline_missed_status (
 						      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
@@ -694,6 +734,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::RequestedIncompatibleQosStatus * DataReaderImpl::get_requested_incompatible_qos_status (
 											       )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->publication_handle_lock_);
 
@@ -708,6 +751,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::SubscriptionMatchStatus DataReaderImpl::get_subscription_match_status (
 									      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->publication_handle_lock_);
 
@@ -720,6 +766,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::SampleLostStatus DataReaderImpl::get_sample_lost_status (
 								)
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe (this->sample_lock_);
 
@@ -732,6 +781,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 ::DDS::ReturnCode_t DataReaderImpl::wait_for_historical_data (
 							      const ::DDS::Duration_t & max_wait
 							      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_UNUSED_ARG( max_wait) ;
   // Add your implementation here
@@ -741,6 +793,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 ::DDS::ReturnCode_t DataReaderImpl::get_matched_publications (
 							      ::DDS::InstanceHandleSeq & publication_handles
 							      )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   if (enabled_ == false)
     {
@@ -765,6 +820,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 								  ::DDS::PublicationBuiltinTopicData & publication_data,
 								  ::DDS::InstanceHandle_t publication_handle
 								  )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   if (enabled_ == false)
     {
@@ -801,6 +859,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::ReturnCode_t DataReaderImpl::enable (
 					    )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   if (qos_.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS)
     {
@@ -863,6 +924,9 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
 ::DDS::StatusKindMask DataReaderImpl::get_status_changes (
 							  )
+  ACE_THROW_SPEC ((
+		   CORBA::SystemException
+		   ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
 		    guard,
