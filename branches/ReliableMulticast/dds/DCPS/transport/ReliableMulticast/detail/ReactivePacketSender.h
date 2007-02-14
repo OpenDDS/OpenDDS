@@ -12,6 +12,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "Packet.h"
 #include "PacketHandler.h"
 #include "SenderLogic.h"
 
@@ -26,8 +27,6 @@ namespace TAO
 
       namespace detail
       {
-
-        struct Packet;
 
         class ReliableMulticast_Export ReactivePacketSender
           : public PacketHandler
