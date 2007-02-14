@@ -49,7 +49,10 @@ public:
 virtual void on_inconsistent_topic (
     ::DDS::Topic_ptr the_topic,
     const ::DDS::InconsistentTopicStatus & status
-  );
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ));
 
 
 

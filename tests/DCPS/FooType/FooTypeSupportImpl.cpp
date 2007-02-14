@@ -25,6 +25,9 @@ FooTypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
 {
   CORBA::String_var tn;
   if (type_name == 0 || type_name[0] == '\0')
@@ -41,6 +44,9 @@ FooTypeSupportImpl::register_type (
 char *
 FooTypeSupportImpl::get_type_name (
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
 {
   return CORBA::string_dup (this->_interface_repository_id());
 }
@@ -48,6 +54,9 @@ FooTypeSupportImpl::get_type_name (
 
 ::TAO::DCPS::DataWriterRemote_ptr FooTypeSupportImpl::create_datawriter (
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     FooDataWriterImpl* writer_impl;
     ACE_NEW_RETURN(writer_impl,
@@ -62,6 +71,9 @@ FooTypeSupportImpl::get_type_name (
 
 ::TAO::DCPS::DataReaderRemote_ptr FooTypeSupportImpl::create_datareader (
   )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
   {
     FooDataReaderImpl* reader_impl;
     ACE_NEW_RETURN(reader_impl,

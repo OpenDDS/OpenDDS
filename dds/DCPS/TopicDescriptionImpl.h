@@ -40,13 +40,22 @@ namespace TAO
 
 
       virtual char * get_type_name (
-        );
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
       virtual char * get_name (
-        );
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
       virtual ::DDS::DomainParticipant_ptr get_participant (
-        );
+        )
+        ACE_THROW_SPEC ((
+          CORBA::SystemException
+        ));
 
       /** This method is not defined in the IDL and is defined for
       *  internal use.

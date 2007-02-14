@@ -58,6 +58,9 @@ namespace TAO
         const ::DDS::PublisherQos & qos,
         ::DDS::PublisherListener_ptr a_listener
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ::DDS::PublisherQos pub_qos;
 
@@ -137,6 +140,9 @@ namespace TAO
     DomainParticipantImpl::delete_publisher (
         ::DDS::Publisher_ptr p
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (enabled_ == false)
         {
@@ -195,6 +201,9 @@ namespace TAO
         const ::DDS::SubscriberQos & qos,
         ::DDS::SubscriberListener_ptr a_listener
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ::DDS::SubscriberQos sub_qos;
       if (qos == SUBSCRIBER_QOS_DEFAULT)
@@ -274,6 +283,9 @@ namespace TAO
     DomainParticipantImpl::delete_subscriber (
         ::DDS::Subscriber_ptr s
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (enabled_ == false)
         {
@@ -341,6 +353,9 @@ namespace TAO
     ::DDS::Subscriber_ptr
     DomainParticipantImpl::get_builtin_subscriber (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (enabled_ == false)
         {
@@ -360,6 +375,9 @@ namespace TAO
         const ::DDS::TopicQos & qos,
         ::DDS::TopicListener_ptr a_listener
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ::DDS::TopicQos topic_qos;
 
@@ -500,6 +518,9 @@ namespace TAO
     DomainParticipantImpl::delete_topic (
         ::DDS::Topic_ptr a_topic
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return delete_topic_i (a_topic, false);
     }
@@ -636,6 +657,9 @@ namespace TAO
         const char * topic_name,
         const ::DDS::Duration_t & timeout
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       try
         {
@@ -734,6 +758,9 @@ namespace TAO
     DomainParticipantImpl::lookup_topicdescription (
         const char * name
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (enabled_ == false)
         {
@@ -763,6 +790,9 @@ namespace TAO
     ::DDS::ReturnCode_t
     DomainParticipantImpl::delete_contained_entities (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (enabled_ == false)
         {
@@ -881,6 +911,9 @@ namespace TAO
     DomainParticipantImpl::set_qos (
         const ::DDS::DomainParticipantQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
@@ -915,6 +948,9 @@ namespace TAO
     DomainParticipantImpl::get_qos (
         ::DDS::DomainParticipantQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = qos_;
     }
@@ -925,6 +961,9 @@ namespace TAO
         ::DDS::DomainParticipantListener_ptr a_listener,
         ::DDS::StatusKindMask mask
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
@@ -940,6 +979,9 @@ namespace TAO
     ::DDS::DomainParticipantListener_ptr
     DomainParticipantImpl::get_listener (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return ::DDS::DomainParticipantListener::_duplicate(listener_.in());
     }
@@ -949,6 +991,9 @@ namespace TAO
     DomainParticipantImpl::ignore_participant (
         ::DDS::InstanceHandle_t handle
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
@@ -1016,6 +1061,9 @@ namespace TAO
     DomainParticipantImpl::ignore_topic (
         ::DDS::InstanceHandle_t handle
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
@@ -1072,6 +1120,9 @@ namespace TAO
     DomainParticipantImpl::ignore_publication (
         ::DDS::InstanceHandle_t handle
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
@@ -1128,6 +1179,9 @@ namespace TAO
     DomainParticipantImpl::ignore_subscription (
         ::DDS::InstanceHandle_t handle
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       if (enabled_ == false)
@@ -1183,6 +1237,9 @@ namespace TAO
     ::DDS::DomainId_t
     DomainParticipantImpl::get_domain_id (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return domain_id_;
     }
@@ -1191,6 +1248,9 @@ namespace TAO
     void
     DomainParticipantImpl::assert_liveliness (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       // This operation needs to only be used if the DomainParticipant contains
       // DataWriter entities with the LIVELINESS set to MANUAL_BY_PARTICIPANT and
@@ -1206,6 +1266,9 @@ namespace TAO
     DomainParticipantImpl::set_default_publisher_qos (
         const ::DDS::PublisherQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
@@ -1223,6 +1286,9 @@ namespace TAO
     DomainParticipantImpl::get_default_publisher_qos (
         ::DDS::PublisherQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = default_publisher_qos_;
     }
@@ -1232,6 +1298,9 @@ namespace TAO
     DomainParticipantImpl::set_default_subscriber_qos (
         const ::DDS::SubscriberQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
@@ -1249,6 +1318,9 @@ namespace TAO
     DomainParticipantImpl::get_default_subscriber_qos (
         ::DDS::SubscriberQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = default_subscriber_qos_;
     }
@@ -1258,6 +1330,9 @@ namespace TAO
     DomainParticipantImpl::set_default_topic_qos (
         const ::DDS::TopicQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
@@ -1275,6 +1350,9 @@ namespace TAO
     DomainParticipantImpl::get_default_topic_qos (
         ::DDS::TopicQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = default_topic_qos_;
     }
@@ -1282,6 +1360,9 @@ namespace TAO
     ::DDS::ReturnCode_t
     DomainParticipantImpl::enable (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       //TDB - check if factory is enables and then enable all entities
       // (don't need to do it for now because
@@ -1314,6 +1395,9 @@ namespace TAO
     ::DDS::StatusKindMask
     DomainParticipantImpl::get_status_changes (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return EntityImpl::get_status_changes ();
     }
@@ -1334,6 +1418,9 @@ namespace TAO
         const ::DDS::TopicQos & qos,
         ::DDS::TopicListener_ptr a_listener
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,

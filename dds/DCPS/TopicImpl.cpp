@@ -48,6 +48,9 @@ namespace TAO
     TopicImpl::set_qos (
         const ::DDS::TopicQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
@@ -79,6 +82,9 @@ namespace TAO
     TopicImpl::get_qos (
         ::DDS::TopicQos & qos
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       qos = qos_;
     }
@@ -89,6 +95,9 @@ namespace TAO
         ::DDS::TopicListener_ptr a_listener,
         ::DDS::StatusKindMask mask
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
@@ -104,6 +113,9 @@ namespace TAO
     ::DDS::TopicListener_ptr
     TopicImpl::get_listener (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       return ::DDS::TopicListener::_duplicate(listener_.in ());
     }
@@ -112,6 +124,9 @@ namespace TAO
     ::DDS::InconsistentTopicStatus
     TopicImpl::get_inconsistent_topic_status (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       ::DDS::InconsistentTopicStatus status;
       status = inconsistent_topic_status_;
@@ -122,6 +137,9 @@ namespace TAO
     ::DDS::ReturnCode_t
     TopicImpl::enable (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       //TDB - check if factory is enables and then enable all entities
       // (don't need to do it for now because
@@ -133,6 +151,9 @@ namespace TAO
     ::DDS::StatusKindMask
     TopicImpl::get_status_changes (
       )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
     {
       // TBD - Currently no supported QoS allow changes
       // so it always returns 0 (No changes).

@@ -48,28 +48,49 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::TopicQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual void get_qos (
         ::DDS::TopicQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::TopicListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::TopicListener_ptr get_listener (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::InconsistentTopicStatus get_inconsistent_topic_status (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t enable (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
       /** This method is not defined in the IDL and is defined for
       *  internal use.

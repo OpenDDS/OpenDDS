@@ -43,17 +43,29 @@ public:
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 
   virtual
   char * get_type_name (
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 
   virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 
   virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 };
 
 class MyDataReaderImpl :  public virtual TAO::DCPS::DataReaderImpl
@@ -61,7 +73,9 @@ class MyDataReaderImpl :  public virtual TAO::DCPS::DataReaderImpl
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
       )
-      { return ::DDS::RETCODE_OK;};
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+        )) { return ::DDS::RETCODE_OK;};
 
 };
 
@@ -70,7 +84,9 @@ class MyDataWriterImpl :  public virtual TAO::DCPS::DataWriterImpl
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
       )
-      {return ::DDS::RETCODE_OK;};
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+        )) {return ::DDS::RETCODE_OK;};
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

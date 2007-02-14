@@ -45,22 +45,33 @@ public:
 
   virtual ::DDS::ReturnCode_t enable_specific (
       )
-      { return ::DDS::RETCODE_OK;};
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+        )) { return ::DDS::RETCODE_OK;};
 
 
   virtual void add_associations (
       ::TAO::DCPS::RepoId yourId,
       const TAO::DCPS::WriterAssociationSeq & writers
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 
   virtual void remove_associations (
       const TAO::DCPS::WriterIdSeq & writers,
       ::CORBA::Boolean notify_lost
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 
   virtual void update_incompatible_qos (
       const TAO::DCPS::IncompatibleQosStatus & status
-    );
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 };
 
 

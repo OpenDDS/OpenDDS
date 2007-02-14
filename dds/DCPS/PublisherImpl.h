@@ -84,68 +84,122 @@ namespace TAO
         ::DDS::Topic_ptr a_topic,
         const ::DDS::DataWriterQos & qos,
         ::DDS::DataWriterListener_ptr a_listener
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t delete_datawriter (
         ::DDS::DataWriter_ptr a_datawriter
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::DataWriter_ptr lookup_datawriter (
         const char * topic_name
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t delete_contained_entities (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::PublisherQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual void get_qos (
         ::DDS::PublisherQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::PublisherListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::PublisherListener_ptr get_listener (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t suspend_publications (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t resume_publications (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t begin_coherent_changes (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t end_coherent_changes (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::DomainParticipant_ptr get_participant (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t set_default_datawriter_qos (
         const ::DDS::DataWriterQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual void get_default_datawriter_qos (
         ::DDS::DataWriterQos & qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t copy_from_topic_qos (
         ::DDS::DataWriterQos & a_datawriter_qos,
         const ::DDS::TopicQos & a_topic_qos
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::ReturnCode_t enable (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     virtual ::DDS::StatusKindMask get_status_changes (
-      );
+      )
+      ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ));
 
     ACE_INLINE
     ACE_Recursive_Thread_Mutex&      get_pi_lock ()
