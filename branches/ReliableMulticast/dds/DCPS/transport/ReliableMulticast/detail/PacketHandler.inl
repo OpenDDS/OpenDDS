@@ -5,6 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 template <typename Container>
+ACE_INLINE
 void
 TAO::DCPS::ReliableMulticast::detail::PacketHandler::send_many(
   const Container& container,
