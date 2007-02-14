@@ -5,12 +5,33 @@
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastTransportImpl.h"
+#include "detail/PacketReceiverCallback.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastDataLink.inl"
 #endif /* __ACE_INLINE__ */
+
+namespace
+{
+  class CallbackImpl
+    : public TAO::DCPS::ReliableMulticast::detail::PacketReceiverCallback
+  {
+  public:
+    virtual ~CallbackImpl() {}
+
+    virtual void received_packets(
+      const std::vector<TAO::DCPS::ReliableMulticast::detail::Packet>& packets
+      )
+    {
+    }
+
+    virtual void reliability_compromised()
+    {
+    }
+  };
+}
 
 TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   TransportReactorTask_rch& reactor_task,
@@ -34,4 +55,6 @@ TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 void
 TAO::DCPS::ReliableMulticastDataLink::stop_i()
 {
+  receiver_.reset();
+  sender_.reset();
 }

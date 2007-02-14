@@ -5,6 +5,7 @@
 #include "ReliableMulticast_pch.h"
 #include "PacketSerializer.h"
 #include "Packet.h"
+#include "ace/Auto_Ptr.h"
 #include "ace/CDR_Stream.h"
 
 #if !defined (__ACE_INLINE__)
@@ -56,25 +57,9 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   }
 }
 
-namespace
-{
-  struct SafeArray
-  {
-    SafeArray(char* buf)
-      : buf_(buf)
-    {
-    }
-    ~SafeArray()
-    {
-      delete [] buf_;
-    }
-    char* buf_;
-  };
-}
-
 void
 TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
-  char* buffer,
+  const char* buffer,
   size_t size,
   Packet& packet
   ) const
@@ -95,8 +80,8 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   {
     size_t arraysize = 0;
     input >> arraysize;
-    SafeArray safe_array(new char[arraysize]);
-    input.read_char_array(safe_array.buf_, arraysize);
-    packet.payload_.assign(safe_array.buf_, arraysize);
+    ACE_Auto_Basic_Array_Ptr<char> safe_array(new char[arraysize]);
+    input.read_char_array(safe_array.get(), arraysize);
+    packet.payload_.assign(safe_array.get(), arraysize);
   }
 }

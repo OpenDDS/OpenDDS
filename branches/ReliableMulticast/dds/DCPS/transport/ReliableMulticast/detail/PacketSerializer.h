@@ -44,7 +44,7 @@ namespace TAO
             ) const;
 
           void serializeFromTo(
-            char* buffer,
+            const char* buffer,
             size_t size,
             Packet& packet
             ) const;

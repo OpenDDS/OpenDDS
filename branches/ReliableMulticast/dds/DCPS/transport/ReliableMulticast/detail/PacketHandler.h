@@ -56,7 +56,7 @@ namespace TAO
             );
 
           virtual void receive(
-            char* buffer,
+            const char* buffer,
             size_t size,
             const ACE_INET_Addr& peer
             );
