@@ -11,7 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ReliableMulticast_Export.h"
+#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticast_Export.h"
 
 namespace TAO
 {
