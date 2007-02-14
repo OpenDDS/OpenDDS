@@ -1,3 +1,10 @@
+Wed Feb 14 16:41:22 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Eliminate "unused parameter" warnings.
+
 Wed Feb 14 15:03:33 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

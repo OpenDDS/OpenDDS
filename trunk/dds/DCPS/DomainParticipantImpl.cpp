@@ -1006,7 +1006,7 @@ namespace TAO
 
       return ::DDS::RETCODE_OK;
 #else
-
+      ACE_UNUSED_ARG (handle);
       return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
@@ -1062,7 +1062,7 @@ namespace TAO
 
       return ::DDS::RETCODE_OK;
 #else
-
+      ACE_UNUSED_ARG (handle);
       return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
@@ -1118,7 +1118,7 @@ namespace TAO
 
       return ::DDS::RETCODE_OK;
 #else
-
+      ACE_UNUSED_ARG (handle);
       return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
@@ -1174,7 +1174,7 @@ namespace TAO
 
       return ::DDS::RETCODE_OK;
 #else
-
+      ACE_UNUSED_ARG (handle);
       return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
