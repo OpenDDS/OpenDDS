@@ -351,7 +351,7 @@ namespace
       VERIFY_IN(nacks, Packet(1 + base, Packet::NACK, 1 + base, 2 + base));
       VERIFY(delivered.size() == 0);
     }
-    catch(std::exception& e)
+    catch(std::exception&)
     {
       failed = true;
     }
