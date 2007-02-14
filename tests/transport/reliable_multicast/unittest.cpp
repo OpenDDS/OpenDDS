@@ -3,6 +3,7 @@
 #include "dds/DCPS/transport/ReliableMulticast/detail/Packetizer.h"
 #include "dds/DCPS/transport/ReliableMulticast/detail/ReceiverLogic.h"
 #include "dds/DCPS/transport/ReliableMulticast/detail/SenderLogic.h"
+#include "ace/Auto_Ptr.h"
 #include <iostream>
 #include <string>
 #include <stdexcept>
@@ -62,40 +63,6 @@ namespace
     verify(false, file, line);
   }
 
-  struct SafeArray
-  {
-    SafeArray(char* buf = 0)
-      : buf_(buf)
-    {
-    }
-
-    ~SafeArray()
-    {
-      delete [] buf_;
-    }
-
-    void operator=(char* buf)
-    {
-      SafeArray tmp(buf);
-      swap(tmp);
-    }
-
-    char* buffer() const
-    {
-      return buf_;
-    }
-
-  private:
-    void swap(SafeArray& rhs)
-    {
-      char* tmp = rhs.buf_;
-      rhs.buf_ = buf_;
-      buf_ = tmp;
-    }
-
-    char* buf_;
-  };
-
   typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
   typedef TAO::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
   typedef TAO::DCPS::ReliableMulticast::detail::Packetizer Packetizer;
@@ -112,25 +79,25 @@ namespace
     Packet pout;
     PacketSerializer ps;
     size_t size = 0;
-    SafeArray safe_array;
+    ACE_Auto_Basic_Array_Ptr<char> safe_array;
 
-    safe_array = ps.getBuffer(p1, size);
-    ps.serializeFromTo(p1, safe_array.buffer(), size);
-    ps.serializeFromTo(safe_array.buffer(), size, pout);
+    safe_array.reset(ps.getBuffer(p1, size));
+    ps.serializeFromTo(p1, safe_array.get(), size);
+    ps.serializeFromTo(safe_array.get(), size, pout);
     VERIFY(p1 == pout);
     VERIFY(p2 != pout);
     VERIFY(p3 != pout);
 
-    safe_array = ps.getBuffer(p2, size);
-    ps.serializeFromTo(p2, safe_array.buffer(), size);
-    ps.serializeFromTo(safe_array.buffer(), size, pout);
+    safe_array.reset(ps.getBuffer(p2, size));
+    ps.serializeFromTo(p2, safe_array.get(), size);
+    ps.serializeFromTo(safe_array.get(), size, pout);
     VERIFY(p1 != pout);
     VERIFY(p2 == pout);
     VERIFY(p3 != pout);
 
-    safe_array = ps.getBuffer(p3, size);
-    ps.serializeFromTo(p3, safe_array.buffer(), size);
-    ps.serializeFromTo(safe_array.buffer(), size, pout);
+    safe_array.reset(ps.getBuffer(p3, size));
+    ps.serializeFromTo(p3, safe_array.get(), size);
+    ps.serializeFromTo(safe_array.get(), size, pout);
     VERIFY(p1 != pout);
     VERIFY(p2 != pout);
     VERIFY(p3 == pout);
@@ -142,12 +109,12 @@ namespace
     iovec iov[3];
     char buf1[] = "This is a test";
     char buf2[] = "This is another test";
-    SafeArray buf3_safe_array(new char[Packetizer::MAX_PAYLOAD_SIZE]);
+    ACE_Auto_Basic_Array_Ptr<char> buf3_safe_array(new char[Packetizer::MAX_PAYLOAD_SIZE]);
     iov[0].iov_base = buf1;
     iov[0].iov_len = sizeof(buf1) - 1; // no trailing NULL
     iov[1].iov_base = buf2;
     iov[1].iov_len = sizeof(buf2) - 1; // no trailing NULL
-    iov[2].iov_base = buf3_safe_array.buffer();
+    iov[2].iov_base = buf3_safe_array.get();
     iov[2].iov_len = Packetizer::MAX_PAYLOAD_SIZE;
     std::vector<Packet> packets;
 
