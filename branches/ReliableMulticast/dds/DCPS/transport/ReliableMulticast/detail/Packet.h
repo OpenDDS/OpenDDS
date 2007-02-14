@@ -56,7 +56,7 @@ namespace TAO
             const Packet& rhs
             ) const
           {
-            return (id_ < rhs.id_) || (type_ < rhs.type_);
+            return (type_ == rhs.type_) ? (id_ < rhs.id_) : (type_ < rhs.type_);
           }
 
           bool operator==(
