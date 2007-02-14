@@ -4,12 +4,11 @@
 
 #include "ReliableMulticast_pch.h"
 #include "EventHandler.h"
+#include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
 #include "EventHandler.inl"
 #endif /* __ACE_INLINE__ */
-
-#include <stdexcept>
 
 void
 TAO::DCPS::ReliableMulticast::detail::EventHandler::send(

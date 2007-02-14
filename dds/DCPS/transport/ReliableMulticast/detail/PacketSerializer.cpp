@@ -4,13 +4,12 @@
 
 #include "ReliableMulticast_pch.h"
 #include "PacketSerializer.h"
+#include "Packet.h"
+#include "ace/CDR_Stream.h"
 
 #if !defined (__ACE_INLINE__)
 #include "PacketSerializer.inl"
 #endif /* __ACE_INLINE__ */
-
-#include "Packet.h"
-#include "ace/CDR_Stream.h"
 
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 
