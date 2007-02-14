@@ -35,7 +35,20 @@ namespace TAO
           template <typename Container> void send_many(
             const Container& container,
             const ACE_INET_Addr& dest
-            );
+            )
+          {
+            for (
+              typename Container::const_iterator iter = container.begin();
+              iter != container.end();
+              ++iter
+              )
+            {
+              TAO::DCPS::ReliableMulticast::detail::PacketHandler::send(
+                *iter,
+                dest
+                );
+            }
+          }
 
           virtual void send(
             const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
