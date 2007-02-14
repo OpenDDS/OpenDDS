@@ -11,6 +11,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
+
 namespace TAO
 {
 
@@ -25,7 +27,7 @@ namespace TAO
 
         struct Packet;
 
-        class PacketSerializer
+        class ReliableMulticast_Export PacketSerializer
         {
         public:
           /// Create a buffer appropriately-sized for the input Packet and

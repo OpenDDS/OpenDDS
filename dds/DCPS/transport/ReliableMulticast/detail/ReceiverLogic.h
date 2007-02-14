@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "Packet.h"
 #include "NackGenerator.h"
 #include <map>
@@ -29,7 +30,7 @@ namespace TAO
       namespace detail
       {
 
-        class ReceiverLogic
+        class ReliableMulticast_Export ReceiverLogic
         {
         public:
           enum ReliabilityMode

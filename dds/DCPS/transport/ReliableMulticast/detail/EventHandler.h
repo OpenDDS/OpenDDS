@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "ace/Reactor.h"
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
@@ -33,7 +34,7 @@ namespace TAO
       namespace detail
       {
 
-        class EventHandler
+        class ReliableMulticast_Export EventHandler
           : public ACE_Event_Handler
         {
         public:

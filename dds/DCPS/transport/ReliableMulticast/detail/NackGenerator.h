@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "Packet.h"
 #include <set>
 #include <vector>
@@ -27,7 +28,7 @@ namespace TAO
       namespace detail
       {
 
-        class NackGenerator
+        class ReliableMulticast_Export NackGenerator
         {
         public:
           typedef std::set<
