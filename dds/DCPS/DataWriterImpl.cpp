@@ -123,7 +123,6 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            TAO::DCPS::PublisherImpl*              publisher_servant,
            TAO::DCPS::DataWriterRemote_ptr        dw_remote
            )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","init", 5);
   topic_objref_ = ::DDS::Topic::_duplicate (topic);
@@ -166,7 +165,6 @@ void
 DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
            const ReaderAssociationSeq & readers
            )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   if (entity_deleted_ == true)
     {
@@ -331,7 +329,6 @@ void
 DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
               ::CORBA::Boolean notify_lost
               )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -465,7 +462,6 @@ void DataWriterImpl::remove_all_associations ()
 void
 DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus & status
             )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ::POA_DDS::DataWriterListener* listener
       = listener_for (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
@@ -495,9 +491,6 @@ DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus
 DataWriterImpl::set_qos (
        const ::DDS::DataWriterQos & qos
        )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
@@ -531,9 +524,6 @@ void
 DataWriterImpl::get_qos (
        ::DDS::DataWriterQos & qos
        )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   qos = qos_;
 }
@@ -542,7 +532,6 @@ DataWriterImpl::get_qos (
 DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
              ::DDS::StatusKindMask mask
              )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
@@ -556,28 +545,24 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
 
 ::DDS::DataWriterListener_ptr
 DataWriterImpl::get_listener ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::DataWriterListener::_duplicate (listener_.in ());
 }
 
 ::DDS::Topic_ptr
 DataWriterImpl::get_topic ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::Topic::_duplicate (topic_objref_.in ());
 }
 
 ::DDS::Publisher_ptr
 DataWriterImpl::get_publisher ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   return ::DDS::Publisher::_duplicate (publisher_objref_.in ());
 }
 
 ::DDS::LivelinessLostStatus
 DataWriterImpl::get_liveliness_lost_status ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
@@ -591,7 +576,6 @@ DataWriterImpl::get_liveliness_lost_status ( )
 
 ::DDS::OfferedDeadlineMissedStatus
 DataWriterImpl::get_offered_deadline_missed_status ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
@@ -605,7 +589,6 @@ DataWriterImpl::get_offered_deadline_missed_status ( )
 
 ::DDS::OfferedIncompatibleQosStatus *
 DataWriterImpl::get_offered_incompatible_qos_status ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
@@ -621,7 +604,6 @@ DataWriterImpl::get_offered_incompatible_qos_status ( )
 
 ::DDS::PublicationMatchStatus
 DataWriterImpl::get_publication_match_status ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
@@ -635,7 +617,6 @@ DataWriterImpl::get_publication_match_status ( )
 
 void
 DataWriterImpl::assert_liveliness ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   // This operation need only be used if the LIVELINESS setting
   // is either MANUAL_BY_PARTICIPANT or MANUAL_BY_TOPIC.
@@ -651,7 +632,6 @@ DataWriterImpl::assert_liveliness ( )
 ::DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscriptions ( ::DDS::InstanceHandleSeq & subscription_handles
               )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   if (enabled_ == false)
     {
@@ -673,7 +653,6 @@ DataWriterImpl::get_matched_subscriptions ( ::DDS::InstanceHandleSeq & subscript
 DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicData & subscription_data,
             ::DDS::InstanceHandle_t subscription_handle
             )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   if (enabled_ == false)
     {
@@ -705,7 +684,6 @@ DataWriterImpl::get_matched_subscription_data ( ::DDS::SubscriptionBuiltinTopicD
 
 ::DDS::ReturnCode_t
 DataWriterImpl::enable ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   //TDB - check if factory is enabled and then enable all entities
   // (don't need to do it for now because
@@ -826,7 +804,6 @@ DataWriterImpl::enable ( )
 
 ::DDS::StatusKindMask
 DataWriterImpl::get_status_changes ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
   return EntityImpl::get_status_changes ();
@@ -837,7 +814,6 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
            DataSample* data,
            const ::DDS::Time_t & source_timestamp
            )
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance",5);
   if (enabled_ == false)
@@ -890,7 +866,6 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
 DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
            const ::DDS::Time_t & source_timestamp
            )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister",5);
   if (enabled_ == false)
@@ -947,7 +922,6 @@ DataWriterImpl::write ( DataSample* data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
       )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",5);
   if (enabled_ == false)
@@ -1003,7 +977,6 @@ DataWriterImpl::write ( DataSample* data,
 ::DDS::ReturnCode_t DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
                 const ::DDS::Time_t & source_timestamp
                 )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL("DataWriterImpl","dispose",5);
   if (enabled_ == false)

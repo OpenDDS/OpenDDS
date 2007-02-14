@@ -25,9 +25,6 @@ namespace TAO
     ::DDS::ReturnCode_t
     EntityImpl::set_enabled (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
       {
         if (enabled_ == false)
           {
@@ -40,9 +37,6 @@ namespace TAO
     ::DDS::StatusKindMask
     EntityImpl::get_status_changes (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
       {
         ::DDS::StatusKindMask status_changed = 0;
         if (enabled_ == true)

@@ -56,9 +56,6 @@ DDS::ReturnCode_t
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if (type_name == 0 || type_name[0] == '\0')
      this->type_name_ = this->get_type_name();
@@ -74,9 +71,6 @@ DDS::ReturnCode_t
 char *
 <%TYPE%>TypeSupportImpl::get_type_name (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if (this->type_name_ == NULL)
     return CORBA::string_dup (this->_interface_repository_id());
@@ -88,9 +82,6 @@ char *
 ::TAO::DCPS::DataWriterRemote_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
     <%TYPE%>DataWriterImpl* writer_impl;
     ACE_NEW_RETURN(writer_impl,
@@ -107,9 +98,6 @@ char *
 ::TAO::DCPS::DataReaderRemote_ptr
 <%TYPE%>TypeSupportImpl::create_datareader (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
     <%TYPE%>DataReaderImpl* reader_impl = 0;
     ACE_NEW_RETURN(reader_impl,
@@ -150,9 +138,6 @@ DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::_cxx_register (
     const ::<%SCOPE%><%TYPE%> & instance_data
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -167,9 +152,6 @@ DDS::InstanceHandle_t
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_UNUSED_ARG (handle);
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -199,9 +181,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -216,9 +195,6 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -259,9 +235,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -276,9 +249,6 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   //  A lock is obtained on entering this method to serialize access to
   //  the contained data storage and interfaces.  This lock protects the
@@ -322,9 +292,6 @@ DDS::ReturnCode_t
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -339,9 +306,6 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t instance_handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -369,9 +333,6 @@ DDS::ReturnCode_t
     ::<%SCOPE%><%TYPE%> & key_holder,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -404,9 +365,6 @@ void
       TAO::DCPS::PublisherImpl*              publisher_servant,
       TAO::DCPS::DataWriterRemote_ptr        dw_remote
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
 {
   this->TAO_DCPS_DataWriterImpl::init (topic,
                                        topic_servant,
@@ -432,9 +390,6 @@ void
 ::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::enable_specific (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::<%SCOPE%><%TYPE%> data;
   if (_tao_is_bounded_size (data))
@@ -625,9 +580,6 @@ void
         ::DDS::Subscriber_ptr         subscriber_objref,
         TAO::DCPS::DataReaderRemote_ptr   dr_remote_objref
       )
-        ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
 {
   this->TAO_DCPS_DataReaderImpl::init(a_topic,
                                       qos,
@@ -642,9 +594,6 @@ void
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::enable_specific (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   data_allocator_ = new DataAllocator(get_n_chunks ()) ;
     if (::TAO::DCPS::DCPS_debug_level >= 2)
@@ -693,9 +642,6 @@ void
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::delete_contained_entities (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   return this->delete_contained_entities() ;
 }
@@ -711,9 +657,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
@@ -823,9 +766,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((::CORBA::Long)info_seq.maximum() < max_samples)
     {
@@ -914,9 +854,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
@@ -1069,9 +1006,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((::CORBA::Long)info_seq.maximum() < max_samples)
     {
@@ -1160,9 +1094,6 @@ DDS::ReturnCode_t
     ::<%SCOPE%><%TYPE%> & received_data,
     ::DDS::SampleInfo & sample_info
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
 
   bool found_data = false;
@@ -1230,9 +1161,6 @@ DDS::ReturnCode_t
     ::<%SCOPE%><%TYPE%> & received_data,
     ::DDS::SampleInfo & sample_info
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   bool found_data = false;
 
@@ -1351,9 +1279,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
@@ -1446,9 +1371,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
@@ -1585,9 +1507,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
 
@@ -1641,9 +1560,6 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
  ::DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
 
@@ -1693,9 +1609,6 @@ DDS::ReturnCode_t
     ::<%MODULE%><%TYPE%>Seq & received_data,
     ::DDS::SampleInfoSeq & info_seq
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   if (received_data.release() != info_seq.release())
     {
@@ -1719,9 +1632,6 @@ DDS::ReturnCode_t
     ::<%SCOPE%><%TYPE%> & key_holder,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,

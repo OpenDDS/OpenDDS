@@ -34,19 +34,13 @@ class PubDriver
     void run(int& argc, char* argv[]);
 
     virtual void shutdown (
-      )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+      );
 
 
     virtual void add_new_subscription (
       CORBA::Long       reader_id,
       const char *      sub_addr
-      )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+      );
 
   private:
 

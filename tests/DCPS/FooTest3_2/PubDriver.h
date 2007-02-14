@@ -24,10 +24,7 @@ class PubDriver
     void run(int& argc, char* argv[]);
 
     virtual void shutdown (
-      )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+      );
 
 
   private:

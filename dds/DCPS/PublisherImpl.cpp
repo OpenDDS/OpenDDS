@@ -91,9 +91,6 @@ PublisherImpl::~PublisherImpl (void)
               const ::DDS::DataWriterQos & qos,
               ::DDS::DataWriterListener_ptr a_listener
               )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (CORBA::is_nil (a_topic))
     {
@@ -223,9 +220,6 @@ PublisherImpl::~PublisherImpl (void)
 ::DDS::ReturnCode_t PublisherImpl::delete_datawriter (
                   ::DDS::DataWriter_ptr a_datawriter
                   )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (enabled_ == false)
     {
@@ -358,9 +352,6 @@ PublisherImpl::~PublisherImpl (void)
 ::DDS::DataWriter_ptr PublisherImpl::lookup_datawriter (
               const char * topic_name
               )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (enabled_ == false)
     {
@@ -398,9 +389,6 @@ PublisherImpl::~PublisherImpl (void)
 
 ::DDS::ReturnCode_t PublisherImpl::delete_contained_entities (
                     )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (enabled_ == false)
     {
@@ -448,9 +436,6 @@ PublisherImpl::~PublisherImpl (void)
 ::DDS::ReturnCode_t PublisherImpl::set_qos (
               const ::DDS::PublisherQos & qos
               )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
@@ -484,9 +469,6 @@ PublisherImpl::~PublisherImpl (void)
 void PublisherImpl::get_qos (
            ::DDS::PublisherQos & qos
            )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   qos = qos_;
 }
@@ -495,9 +477,6 @@ void PublisherImpl::get_qos (
              ::DDS::PublisherListener_ptr a_listener,
              ::DDS::StatusKindMask mask
              )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
@@ -511,18 +490,12 @@ void PublisherImpl::get_qos (
 
 ::DDS::PublisherListener_ptr PublisherImpl::get_listener (
                 )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   return ::DDS::PublisherListener::_duplicate (listener_.in ());
 }
 
 ::DDS::ReturnCode_t PublisherImpl::suspend_publications (
                )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (enabled_ == false)
     {
@@ -542,9 +515,6 @@ void PublisherImpl::get_qos (
 
 ::DDS::ReturnCode_t PublisherImpl::resume_publications (
               )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (enabled_ == false)
     {
@@ -577,9 +547,6 @@ void PublisherImpl::get_qos (
 
 ::DDS::ReturnCode_t PublisherImpl::begin_coherent_changes (
                  )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   //NOT REQUIRED FOR FIRST IMPLEMENTATION
   return ::DDS::RETCODE_UNSUPPORTED;
@@ -587,9 +554,6 @@ void PublisherImpl::get_qos (
 
 ::DDS::ReturnCode_t PublisherImpl::end_coherent_changes (
                )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   //NOT REQUIRED FOR FIRST IMPLEMENTATION
   return ::DDS::RETCODE_UNSUPPORTED;
@@ -597,9 +561,6 @@ void PublisherImpl::get_qos (
 
 ::DDS::DomainParticipant_ptr PublisherImpl::get_participant (
                    )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
 }
@@ -607,9 +568,6 @@ void PublisherImpl::get_qos (
 ::DDS::ReturnCode_t PublisherImpl::set_default_datawriter_qos (
                      const ::DDS::DataWriterQos & qos
                      )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
@@ -625,9 +583,6 @@ void PublisherImpl::get_qos (
 void PublisherImpl::get_default_datawriter_qos (
             ::DDS::DataWriterQos & qos
             )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   qos = default_datawriter_qos_;
 }
@@ -636,9 +591,6 @@ void PublisherImpl::get_default_datawriter_qos (
               ::DDS::DataWriterQos & a_datawriter_qos,
               const ::DDS::TopicQos & a_topic_qos
               )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   if (Qos_Helper::valid(a_topic_qos)
       && Qos_Helper::consistent(a_topic_qos))
@@ -666,9 +618,6 @@ void PublisherImpl::get_default_datawriter_qos (
 
 ::DDS::ReturnCode_t PublisherImpl::enable (
              )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   //TDB - check if factory is enables and then enable all entities
   // (don't need to do it for now because
@@ -685,9 +634,6 @@ void PublisherImpl::get_default_datawriter_qos (
 
 ::DDS::StatusKindMask PublisherImpl::get_status_changes (
                )
-  ACE_THROW_SPEC ((
-       CORBA::SystemException
-       ))
 {
   return EntityImpl::get_status_changes ();
 }

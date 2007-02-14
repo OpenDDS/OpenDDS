@@ -57,12 +57,7 @@ public:
       const char * topicName,
       const char * dataTypeName,
       const ::DDS::TopicQos & qos
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-    ));
+    );
 
   virtual TAO::DCPS::TopicStatus find_topic (
       ::DDS::DomainId_t domainId,
@@ -70,35 +65,19 @@ public:
       CORBA::String_out dataTypeName,
       ::DDS::TopicQos_out qos,
       TAO::DCPS::RepoId_out topicId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-    ));
+    );
 
   virtual TAO::DCPS::TopicStatus remove_topic (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId topicId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Topic
-    ));
+    );
 
   virtual TAO::DCPS::TopicStatus enable_topic (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId topicId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Topic
-    ));
+    );
 
   virtual TAO::DCPS::RepoId add_publication (
       ::DDS::DomainId_t domainId,
@@ -108,25 +87,13 @@ public:
       const ::DDS::DataWriterQos & qos,
       const TAO::DCPS::TransportInterfaceInfo & transInfo,
       const ::DDS::PublisherQos & publisherQos
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Topic
-    ));
+    );
 
     virtual void remove_publication (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId publicationId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Publication
-    ));
+    );
 
   virtual TAO::DCPS::RepoId add_subscription (
       ::DDS::DomainId_t domainId,
@@ -136,91 +103,47 @@ public:
       const ::DDS::DataReaderQos & qos,
       const TAO::DCPS::TransportInterfaceInfo & transInfo,
       const ::DDS::SubscriberQos & subscriberQos
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Topic
-    ));
+    );
 
     virtual void remove_subscription (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
       TAO::DCPS::RepoId subscriptionId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Subscription
-    ));
+    );
 
   virtual TAO::DCPS::RepoId add_domain_participant (
       ::DDS::DomainId_t domain,
       const ::DDS::DomainParticipantQos & qos
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-    ));
+    );
 
     virtual void remove_domain_participant (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-    ));
+    );
 
   virtual void ignore_domain_participant (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId otherParticipantId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-    ));
+    );
 
   virtual void ignore_topic (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId topicId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Topic
-    ));
+    );
 
   virtual void ignore_subscription (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId subscriptionId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Subscription
-    ));
+    );
 
   virtual void ignore_publication (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId myParticipantId,
       TAO::DCPS::RepoId publicationId
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-      , TAO::DCPS::Invalid_Domain
-      , TAO::DCPS::Invalid_Participant
-      , TAO::DCPS::Invalid_Publication
-    ));
+    );
 
   /// Called to load the domains
   /// returns the number of domains that were loaded.

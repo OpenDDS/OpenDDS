@@ -24,9 +24,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 ::DDS::InstanceHandle_t FooDataWriterImpl::_cxx_register (
     const Foo & instance_data
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     // Add your implementation here
@@ -38,9 +35,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(handle);
@@ -53,9 +47,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(handle);
@@ -68,9 +59,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(handle);
@@ -83,9 +71,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(handle);
     // Add your implementation here
@@ -98,9 +83,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(handle);
@@ -114,9 +96,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t instance_handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(instance_handle);
@@ -129,9 +108,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t instance_handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(instance_data);
     ACE_UNUSED_ARG(instance_handle);
@@ -144,9 +120,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     Foo & key_holder,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(key_holder);
     ACE_UNUSED_ARG(handle);

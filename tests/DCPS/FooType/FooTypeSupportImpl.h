@@ -41,29 +41,17 @@ public:
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   char * get_type_name (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 };
 
 

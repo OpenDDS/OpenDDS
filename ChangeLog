@@ -1,3 +1,90 @@
+Wed Feb 14 15:03:33 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * dds/InfoRepo/DomainParticipantListener_i.cpp:
+
+          Removed ACE_THROW_SPEC() macros from core and generated code.
+
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.cpp:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/DcpsIntegration/TopicListener.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooType/FooDataReaderImpl.h:
+        * tests/DCPS/FooType/FooDataReaderImpl.cpp:
+        * tests/DCPS/FooType/FooDataWriterImpl.h:
+        * tests/DCPS/FooType/FooDataWriterImpl.cpp:
+        * tests/DCPS/FooType/FooTypeSupportImpl.h:
+        * tests/DCPS/FooType/FooTypeSupportImpl.cpp:
+        * tests/DCPS/FooType2/FooDataReaderImpl.h:
+        * tests/DCPS/FooType2/FooDataReaderImpl.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.h:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Removed ACE_THROW_SPEC() macros from test code.
+
 Tue Feb 13 23:00:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps.mpb:
