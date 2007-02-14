@@ -104,11 +104,15 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::find_nack_containing(
 {
   PacketSet::iterator result = nacks_.upper_bound(packet);
 
+  if (nacks_.empty())
+  {
+    return result;
+  }
   if (result == nacks_.begin())
   {
     if (result->nack_end_ >= result->nack_begin_)
     {
-      result = nacks_.end();
+      return nacks_.end();
     }
   }
   else
@@ -118,7 +122,7 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::find_nack_containing(
     {
       if (result->nack_end_ >= result->nack_begin_)
       {
-        result = nacks_.end();
+        return nacks_.end();
       }
     }
   }
