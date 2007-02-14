@@ -550,7 +550,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   return failed;
 #else
-
+  ACE_UNUSED_ARG (argc);
+  ACE_UNUSED_ARG (argv);
   ACE_DEBUG((LM_DEBUG, "BIT support is not enabled.\n"));
   return 0;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
