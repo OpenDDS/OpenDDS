@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "ace/SOCK_IO.h"
 #include <vector>
 
@@ -28,7 +29,7 @@ namespace TAO
 
         struct Packet;
 
-        class Packetizer
+        class ReliableMulticast_Export Packetizer
         {
         public:
           enum

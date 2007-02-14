@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "EventHandler.h"
 #include "Packet.h"
 #include <cstring>
@@ -27,7 +28,7 @@ namespace TAO
       namespace detail
       {
 
-        class PacketHandler
+        class ReliableMulticast_Export PacketHandler
           : public TAO::DCPS::ReliableMulticast::detail::EventHandler
         {
         public:

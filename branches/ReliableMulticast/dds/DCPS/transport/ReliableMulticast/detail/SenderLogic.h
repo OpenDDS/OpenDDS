@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "Packet.h"
 #include <vector>
 #include <map>
@@ -27,7 +28,7 @@ namespace TAO
       namespace detail
       {
 
-        class SenderLogic
+        class ReliableMulticast_Export SenderLogic
         {
         public:
           typedef std::vector<

@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ReliableMulticast_Export.h"
 #include "ace/Basic_Types.h"
 #include <string>
 
@@ -26,7 +27,7 @@ namespace TAO
       namespace detail
       {
 
-        struct Packet
+        struct ReliableMulticast_Export Packet
         {
           typedef ACE_UINT32 id_type;
 
