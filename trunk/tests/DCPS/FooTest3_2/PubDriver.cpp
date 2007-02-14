@@ -545,9 +545,6 @@ PubDriver::parse_sub_arg(const std::string& arg)
 
 void PubDriver::shutdown (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   shutdown_ = true;
 }

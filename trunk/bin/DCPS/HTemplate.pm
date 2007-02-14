@@ -66,31 +66,19 @@ public:
   DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   char * get_type_name (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   private:
     CORBA::String_var type_name_;
@@ -123,39 +111,27 @@ public:
   virtual
   DDS::InstanceHandle_t _cxx_register (
       const ::<%SCOPE%><%TYPE%> & instance_data
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::InstanceHandle_t register_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t unregister (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t unregister_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
@@ -164,10 +140,7 @@ public:
   DDS::ReturnCode_t write (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
@@ -177,38 +150,26 @@ public:
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t dispose (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t dispose_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
 
   /**
@@ -224,20 +185,14 @@ public:
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
         TAO::DCPS::DataWriterRemote_ptr        dw_remote
-      )
-        ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
   /**
    * Do parts of enable specific to the datatype.
    * Called by DataWriterImpl::enable().
    */
   virtual ::DDS::ReturnCode_t enable_specific (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
   /**
    * The framework has completed its part of unregistering the
@@ -321,10 +276,7 @@ public:
 
   virtual
   DDS::ReturnCode_t delete_contained_entities (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   /**
    * Initialize the DataReader object.
@@ -339,20 +291,14 @@ public:
         TAO::DCPS::SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr                    subscriber_objref,
         TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
-      )
-        ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
   /**
    * Do parts of enable specific to the datatype.
    * Called by DataReaderImpl::enable().
    */
   virtual ::DDS::ReturnCode_t enable_specific (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
   virtual
   DDS::ReturnCode_t read (
@@ -362,10 +308,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   // zero-copy overloaded version
   virtual
@@ -376,10 +319,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t take (
@@ -389,10 +329,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t take (
@@ -402,28 +339,19 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t read_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
       ::DDS::SampleInfo & sample_info
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t take_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
       ::DDS::SampleInfo & sample_info
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t read_instance (
@@ -434,10 +362,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t take_instance (
@@ -448,10 +373,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t read_next_instance (
@@ -462,10 +384,7 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t take_next_instance (
@@ -476,28 +395,19 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t return_loan (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
  protected:
 

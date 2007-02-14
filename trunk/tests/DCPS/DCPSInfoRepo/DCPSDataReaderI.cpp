@@ -19,9 +19,6 @@ void TAO_DDS_DCPSDataReader_i::add_associations (
     ::TAO::DCPS::RepoId yourId,
     const TAO::DCPS::WriterAssociationSeq & writers
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     CORBA::ULong length = writers.length();
 
@@ -51,9 +48,6 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
     const TAO::DCPS::WriterIdSeq & writers,
     ::CORBA::Boolean notify_lost
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG (notify_lost);
     CORBA::ULong length = writers.length();
@@ -79,9 +73,6 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
 void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
     const TAO::DCPS::IncompatibleQosStatus & status
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("\n!!! TAO_DDS_DCPSDataReader_i::update_incompatible_qos () :\n")

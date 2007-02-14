@@ -1086,9 +1086,6 @@ PubDriver::parse_sub_arg(const std::string& arg)
 
 void PubDriver::shutdown (
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   shutdown_ = 1;
 }
@@ -1098,9 +1095,6 @@ void PubDriver::add_new_subscription (
     CORBA::Long       reader_id,
     const char *      sub_addr
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   sub_id_ = reader_id;
   sub_addr_ = sub_addr;

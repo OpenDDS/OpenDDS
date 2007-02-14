@@ -38,9 +38,6 @@ namespace TAO
     char *
     TopicDescriptionImpl::get_type_name (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
     {
       return CORBA::string_dup(type_name_.c_str());
     }
@@ -49,9 +46,6 @@ namespace TAO
     char *
     TopicDescriptionImpl::get_name (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
     {
       return CORBA::string_dup(topic_name_.c_str());
     }
@@ -60,9 +54,6 @@ namespace TAO
     ::DDS::DomainParticipant_ptr
     TopicDescriptionImpl::get_participant (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ))
     {
       return ::DDS::DomainParticipant::_duplicate (participant_);
     }

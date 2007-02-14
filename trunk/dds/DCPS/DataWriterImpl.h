@@ -69,125 +69,71 @@ namespace TAO
 
     virtual ::DDS::ReturnCode_t set_qos (
         const ::DDS::DataWriterQos & qos
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void get_qos (
         ::DDS::DataWriterQos & qos
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::ReturnCode_t set_listener (
         ::DDS::DataWriterListener_ptr a_listener,
         ::DDS::StatusKindMask mask
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::DataWriterListener_ptr get_listener (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::Topic_ptr get_topic (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::Publisher_ptr get_publisher (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::LivelinessLostStatus get_liveliness_lost_status (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::OfferedDeadlineMissedStatus get_offered_deadline_missed_status (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::OfferedIncompatibleQosStatus * get_offered_incompatible_qos_status (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::PublicationMatchStatus get_publication_match_status (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void assert_liveliness (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::ReturnCode_t get_matched_subscriptions (
         ::DDS::InstanceHandleSeq & subscription_handles
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
     virtual ::DDS::ReturnCode_t get_matched_subscription_data (
         ::DDS::SubscriptionBuiltinTopicData & subscription_data,
         ::DDS::InstanceHandle_t subscription_handle
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
     virtual ::DDS::ReturnCode_t enable (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void add_associations (
         ::TAO::DCPS::RepoId yourId,
         const ReaderAssociationSeq & readers
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void remove_associations (
         const ReaderIdSeq & readers,
         ::CORBA::Boolean callback
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void update_incompatible_qos (
         const TAO::DCPS::IncompatibleQosStatus & status
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
 
     /**
@@ -207,10 +153,7 @@ namespace TAO
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
         TAO::DCPS::DataWriterRemote_ptr        dw_remote
-      )
-        ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     /**
      * Delegate to the WriteDataContainer to register and tell
@@ -221,10 +164,7 @@ namespace TAO
         ::DDS::InstanceHandle_t& handle,
         DataSample* data,
         const ::DDS::Time_t & source_timestamp
-      )
-      ACE_THROW_SPEC ((
-      CORBA::SystemException
-      ));
+      );
 
 
     /**
@@ -234,10 +174,7 @@ namespace TAO
     ::DDS::ReturnCode_t unregister (
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
 
     /**
@@ -248,10 +185,7 @@ namespace TAO
       DataSample* sample,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
     /**
     * Delegate to the WriteDataContainer to dispose all data samples
@@ -261,10 +195,7 @@ namespace TAO
     ::DDS::ReturnCode_t dispose (
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
     /**
     * Return the number of samples for a given instance.
@@ -412,9 +343,7 @@ namespace TAO
     // type specific DataWriter's part of enable.
     virtual ::DDS::ReturnCode_t enable_specific (
       )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      )) = 0;
+      = 0;
 
 
       /// The number of chunks for the cached allocator.

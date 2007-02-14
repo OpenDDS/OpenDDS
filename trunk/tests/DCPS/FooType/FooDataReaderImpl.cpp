@@ -31,9 +31,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -53,9 +50,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -71,9 +65,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     Foo & received_data,
     ::DDS::SampleInfo & sample_info
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(sample_info);
     // Add your implementation here
@@ -86,9 +77,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     Foo & received_data,
     ::DDS::SampleInfo & sample_info
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(sample_info);
     // Add your implementation here
@@ -106,9 +94,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -130,9 +115,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -154,9 +136,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -178,9 +157,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -197,9 +173,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     FooSeq & received_data,
     ::DDS::SampleInfoSeq & info_seq
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(received_data);
     ACE_UNUSED_ARG(info_seq);
@@ -211,9 +184,6 @@ FooDataReaderImpl::~FooDataReaderImpl (void)
     Foo & key_holder,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG(key_holder);
     ACE_UNUSED_ARG(handle);

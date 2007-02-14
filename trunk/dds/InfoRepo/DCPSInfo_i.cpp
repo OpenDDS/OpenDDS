@@ -38,11 +38,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     const char * dataTypeName,
     const ::DDS::TopicQos & qos
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -75,10 +70,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
     ::DDS::TopicQos_out qos,
     TAO::DCPS::RepoId_out topicId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -111,12 +102,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId topicId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -147,12 +132,6 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   TAO::DCPS::RepoId participantId,
   TAO::DCPS::RepoId topicId
   )
-  ACE_THROW_SPEC ((
-  CORBA::SystemException
-  , TAO::DCPS::Invalid_Domain
-  , TAO::DCPS::Invalid_Participant
-  , TAO::DCPS::Invalid_Topic
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -185,12 +164,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     const TAO::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::PublisherQos & publisherQos
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -250,12 +223,6 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId publicationId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Publication
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -290,12 +257,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     const TAO::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::SubscriberQos & subscriberQos
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -356,12 +317,6 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
     TAO::DCPS::RepoId participantId,
     TAO::DCPS::RepoId subscriptionId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Subscription
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -389,10 +344,6 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     ::DDS::DomainId_t domain,
     const ::DDS::DomainParticipantQos & qos
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-  ))
 {
   DCPS_IR_Domain* domainPtr;
 
@@ -432,11 +383,6 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     ::DDS::DomainId_t domainId,
     TAO::DCPS::RepoId participantId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-  ))
 {
   DCPS_IR_Domain* domainPtr;
 
@@ -462,11 +408,6 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId otherParticipantId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -491,12 +432,6 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId topicId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -521,12 +456,6 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId subscriptionId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Subscription
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -551,12 +480,6 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
     TAO::DCPS::RepoId myParticipantId,
     TAO::DCPS::RepoId publicationId
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Publication
-  ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)

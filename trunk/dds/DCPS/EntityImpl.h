@@ -40,16 +40,10 @@ namespace TAO
 
 
     virtual ::DDS::ReturnCode_t set_enabled (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::StatusKindMask get_status_changes (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
 
     virtual void set_deleted (bool state);

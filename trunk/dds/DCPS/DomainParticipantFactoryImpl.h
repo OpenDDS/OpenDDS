@@ -62,44 +62,26 @@ namespace TAO
         ::DDS::DomainId_t domainId,
         const ::DDS::DomainParticipantQos & qos,
         ::DDS::DomainParticipantListener_ptr a_listener
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::ReturnCode_t delete_participant (
         ::DDS::DomainParticipant_ptr a_participant
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::DomainParticipant_ptr lookup_participant (
         ::DDS::DomainId_t domainId
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::ReturnCode_t set_default_participant_qos (
         const ::DDS::DomainParticipantQos & qos
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual void get_default_participant_qos (
         ::DDS::DomainParticipantQos & qos
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     virtual ::DDS::DomainParticipantFactory_ptr get_instance (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-      ));
+      );
 
     /** This method is not defined in the IDL and is defined for
     *  internal use.
