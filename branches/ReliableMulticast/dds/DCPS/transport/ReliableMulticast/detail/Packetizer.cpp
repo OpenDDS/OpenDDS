@@ -4,12 +4,11 @@
 
 #include "ReliableMulticast_pch.h"
 #include "Packetizer.h"
+#include "Packet.h"
 
 #if !defined (__ACE_INLINE__)
 #include "Packetizer.inl"
 #endif /* __ACE_INLINE__ */
-
-#include "Packet.h"
 
 //We'd like the following #include to give us the function std::min()
 //and not to get confused with any macros named min.

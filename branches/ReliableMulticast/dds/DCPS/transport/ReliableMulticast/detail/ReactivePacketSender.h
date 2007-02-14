@@ -12,6 +12,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "PacketHandler.h"
+#include "SenderLogic.h"
 
 namespace TAO
 {
@@ -25,9 +27,35 @@ namespace TAO
       namespace detail
       {
 
+        struct Packet;
+
         class ReliableMulticast_Export ReactivePacketSender
+          : public PacketHandler
         {
-        //@@todo: Add Code Here
+        public:
+          ReactivePacketSender(
+            const ACE_INET_Addr& multicast_group_address
+            );
+          virtual ~ReactivePacketSender();
+      
+          bool open();
+      
+          virtual void send(const Packet& p);
+      
+          virtual void receive(
+            const Packet& packet,
+            const ACE_INET_Addr& peer
+            );
+      
+          int handle_timeout(
+            const ACE_Time_Value& current_time,
+            const void* = 0
+            );
+      
+        private:
+          ACE_Thread_Mutex heartbeat_mutex_;
+          SenderLogic sender_logic_;
+          ACE_INET_Addr multicast_group_address_;
         };
 
       } /* namespace detail */
