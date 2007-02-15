@@ -13,8 +13,6 @@
 
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastRcHandles.h"
-#include "detail/ReactivePacketReceiver.h"
-#include "detail/ReactivePacketSender.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include "ace/Auto_Ptr.h"
@@ -24,6 +22,19 @@ namespace TAO
 
   namespace DCPS
   {
+
+    namespace ReliableMulticast
+    {
+
+      namespace detail
+      {
+
+        class ReactivePacketReceiver;
+        class ReactivePacketSender;
+
+      } /* namespace detail */
+
+    } /* namespace ReliableMulticast */
 
     class ReliableMulticast_Export ReliableMulticastDataLink
       : public DataLink
@@ -42,6 +53,7 @@ namespace TAO
       virtual void stop_i();
 
     private:
+      ACE_INET_Addr multicast_group_address_;
       bool is_publisher_;
       TAO::DCPS::TransportReactorTask_rch reactor_task_;
       TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;

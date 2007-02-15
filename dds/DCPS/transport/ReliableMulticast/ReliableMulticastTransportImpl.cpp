@@ -119,4 +119,27 @@ TAO::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceI
 void
 TAO::DCPS::ReliableMulticastTransportImpl::release_datalink_i(DataLink* link)
 {
+  TAO::DCPS::ReliableMulticastDataLink* data_link =
+    dynamic_cast<TAO::DCPS::ReliableMulticastDataLink*>(link);
+
+  if (data_link == 0)
+  {
+    ACE_ERROR(
+      (LM_ERROR, "(%P|%t) ERROR: Framework requested removal of a data link we didn't create.\n")
+      );
+    return;
+  }
+
+  for (
+    ReliableMulticastDataLinkMap::iterator iter = data_links_.begin();
+    iter != data_links_.end();
+    ++iter
+    )
+  {
+    if (iter->second.in() == data_link)
+    {
+      data_links_.erase(iter);
+      return;
+    }
+  }
 }
