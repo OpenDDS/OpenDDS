@@ -13,6 +13,9 @@
 #include "ReliableMulticastDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
+typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
+typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender ReactivePacketSender;
+
 namespace
 {
   class CallbackImpl
@@ -31,6 +34,8 @@ namespace
     {
     }
   };
+
+  CallbackImpl callback_;
 }
 
 TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
@@ -39,6 +44,8 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
   )
   : TAO::DCPS::DataLink(&transport_impl)
+  , multicast_group_address_(multicast_group_address)
+  , is_publisher_(false)
   , reactor_task_(reactor_task)
   , transport_impl_(&transport_impl)
 {
@@ -48,8 +55,17 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
 bool
 TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 {
-  std::cout << "is_publisher == " << is_publisher << std::endl;
-  return false;
+  if (is_publisher)
+  {
+    receiver_.reset();
+    sender_.reset(new ReactivePacketSender(multicast_group_address_));
+  }
+  else
+  {
+    receiver_.reset(new ReactivePacketReceiver(multicast_group_address_, callback_));
+    sender_.reset();
+  }
+  return true;
 }
 
 void
