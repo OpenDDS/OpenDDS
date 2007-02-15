@@ -1,10 +1,19 @@
+Thu Feb 15 14:50:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+
+          In the change logged at
+          Wed Feb  7 16:38:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          I forgot to change the "after +=" lines of the MPC file to match the
+          new project name.
+
 Wed Feb 14 17:27:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/built_in_topic_support.mpb:
 
           Fixed whitespace.
 
-	* MPC/config/dcps.mpb:
+        * MPC/config/dcps.mpb:
         * MPC/config/dds_suppress_any_support.mpb:
         * dds/dcps_bits.mpb:
 

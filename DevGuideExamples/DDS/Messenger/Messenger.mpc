@@ -18,7 +18,7 @@ project(DDS*idl): dcps {
 project(DDS*Publisher) : taoexe, portableserver, dcps {
   
   exename   = publisher
-  after    += *idl
+  after    += DDS*idl
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -39,7 +39,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
 project(DDS*Subscriber) : taoexe, portableserver, dcps {
   
   exename   = subscriber
-  after    += *idl
+  after    += DDS*idl
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
