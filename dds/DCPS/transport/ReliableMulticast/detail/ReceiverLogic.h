@@ -44,7 +44,7 @@ namespace TAO
             > PacketVector;
 
           ReceiverLogic(
-            size_t max_size = 256,
+            size_t max_receive_buffer_size = 256,
             const ReliabilityMode& reliability = HARD_RELIABILITY
             );
 
@@ -100,7 +100,7 @@ namespace TAO
             TAO::DCPS::ReliableMulticast::detail::Packet
             > BufferType;
 
-          size_t max_size_;
+          size_t max_receive_buffer_size_;
           ReliabilityMode reliability_;
           bool seen_last_delivered_;
           TAO::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;

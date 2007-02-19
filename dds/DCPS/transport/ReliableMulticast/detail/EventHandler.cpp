@@ -4,6 +4,7 @@
 
 #include "ReliableMulticast_pch.h"
 #include "EventHandler.h"
+#include <iostream>
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
@@ -31,18 +32,6 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
       throw std::runtime_error("failure to register_handler");
     }
   }
-}
-
-void
-TAO::DCPS::ReliableMulticast::detail::EventHandler::receive(
-  char* buffer,
-  size_t size,
-  const ACE_INET_Addr& peer
-  )
-{
-  ACE_UNUSED_ARG(buffer);
-  ACE_UNUSED_ARG(size);
-  ACE_UNUSED_ARG(peer);
 }
 
 ACE_HANDLE

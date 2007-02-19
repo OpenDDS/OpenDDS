@@ -47,10 +47,10 @@ namespace TAO
             );
 
           virtual void receive(
-            char* buffer,
+            const char* buffer,
             size_t size,
             const ACE_INET_Addr& peer
-            );
+            ) = 0;
 
           virtual ACE_HANDLE get_handle() const;
 
