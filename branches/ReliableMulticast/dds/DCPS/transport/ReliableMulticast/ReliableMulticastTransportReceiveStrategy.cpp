@@ -10,14 +10,6 @@
 #include "ReliableMulticastTransportReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-//We'd like the following #include to give us the function std::min()
-//and not to get confused with any macros named min.
-#ifdef min
-#  undef min
-#endif
-
-#include <algorithm>
-
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
 typedef TAO::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransportImpl;
@@ -35,7 +27,7 @@ namespace
     size_t& packetidx
     )
   {
-    size_t to_fill = std::min(iov.iov_len, packet.payload_.size());
+    size_t to_fill = std::min(size_t(iov.iov_len), packet.payload_.size());
     if (to_fill == 0)
     {
       return 0;
