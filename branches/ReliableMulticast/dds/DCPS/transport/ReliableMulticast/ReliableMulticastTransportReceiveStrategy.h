@@ -12,7 +12,10 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "detail/PacketReceiverCallback.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "ace/Auto_Ptr.h"
+#include <vector>
 
 namespace TAO
 {
@@ -20,11 +23,42 @@ namespace TAO
   namespace DCPS
   {
 
+    namespace ReliableMulticast
+    {
+
+      namespace detail
+      {
+
+        class ReactivePacketReceiver;
+
+      } /* namespace detail */
+
+    } /* namespace ReliableMulticast */
+
+    class ReliableMulticastDataLink;
+
     class ReliableMulticast_Export ReliableMulticastTransportReceiveStrategy
       : public TransportReceiveStrategy
+      , public TAO::DCPS::ReliableMulticast::detail::PacketReceiverCallback
     {
     public:
+      ReliableMulticastTransportReceiveStrategy(
+        ReliableMulticastDataLink& data_link
+        );
       virtual ~ReliableMulticastTransportReceiveStrategy();
+
+      void configure(
+        ACE_Reactor* reactor,
+        const ACE_INET_Addr& multicast_group_address
+        );
+
+      void teardown();
+
+      virtual void received_packets(
+        const std::vector<TAO::DCPS::ReliableMulticast::detail::Packet>& packets
+        );
+
+      virtual void reliability_compromised();
 
     protected:
       virtual ssize_t receive_bytes(
@@ -41,6 +75,12 @@ namespace TAO
       virtual int start_i();
 
       virtual void stop_i();
+
+    private:
+      ReliableMulticastDataLink& data_link_;
+      ACE_Auto_Ptr<TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver> receiver_;
+      std::vector<TAO::DCPS::ReliableMulticast::detail::Packet> buffered_packets_;
+      std::vector<TAO::DCPS::ReliableMulticast::detail::Packet> to_deliver_;
     };
 
   } /* namespace DCPS */

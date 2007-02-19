@@ -48,7 +48,10 @@ TAO::DCPS::ReliableMulticast::detail::SenderLogic::send(
   )
 {
   delivered.clear();
-  if (p.type_ == TAO::DCPS::ReliableMulticast::detail::Packet::DATA)
+  if (
+    p.type_ == TAO::DCPS::ReliableMulticast::detail::Packet::DATA_INTERMEDIATE ||
+    p.type_ == TAO::DCPS::ReliableMulticast::detail::Packet::DATA_END_OF_MESSAGE
+    )
   {
     buffer_packet(p, delivered);
   }
@@ -73,9 +76,9 @@ TAO::DCPS::ReliableMulticast::detail::SenderLogic::buffer_packet(
 {
   TAO::DCPS::ReliableMulticast::detail::Packet tmp(p);
 
-  if (buffersize() == max_size_)
+  if (buffersize() == max_retry_buffer_size_)
   {
-    buffer_.erase(current_id_ - max_size_);
+    buffer_.erase(current_id_ - max_retry_buffer_size_);
   }
   tmp.id_ = current_id_;
   ++current_id_;

@@ -13,9 +13,10 @@
 
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastRcHandles.h"
+#include "ReliableMulticastTransportReceiveStrategy.h"
+#include "ReliableMulticastTransportSendStrategy.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
-#include "ace/Auto_Ptr.h"
 
 namespace TAO
 {
@@ -23,31 +24,21 @@ namespace TAO
   namespace DCPS
   {
 
-    namespace ReliableMulticast
-    {
-
-      namespace detail
-      {
-
-        class ReactivePacketReceiver;
-        class ReactivePacketSender;
-
-      } /* namespace detail */
-
-    } /* namespace ReliableMulticast */
-
     class ReliableMulticast_Export ReliableMulticastDataLink
       : public DataLink
     {
     public:
       ReliableMulticastDataLink(
         TransportReactorTask_rch& reactor_task,
+        ReliableMulticastTransportConfiguration& configuration,
         const ACE_INET_Addr& multicast_group_address,
         TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
         );
       virtual ~ReliableMulticastDataLink();
 
       bool connect(bool is_publisher);
+
+      TAO::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
 
     protected:
       virtual void stop_i();
@@ -57,8 +48,8 @@ namespace TAO
       bool is_publisher_;
       TAO::DCPS::TransportReactorTask_rch reactor_task_;
       TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
-      ACE_Auto_Ptr<TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver> receiver_;
-      ACE_Auto_Ptr<TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender> sender_;
+      TAO::DCPS::ReliableMulticastTransportReceiveStrategy receive_strategy_;
+      TAO::DCPS::ReliableMulticastTransportSendStrategy send_strategy_;
     };
 
   } /* namespace DCPS */

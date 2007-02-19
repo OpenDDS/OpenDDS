@@ -33,7 +33,8 @@ namespace TAO
 
           enum PacketType
           {
-            DATA,
+            DATA_INTERMEDIATE,
+            DATA_END_OF_MESSAGE,
             NACK,
             DATA_NOT_AVAILABLE,
             HEARTBEAT
@@ -41,50 +42,22 @@ namespace TAO
 
           Packet(
             id_type id = 0,
-            const PacketType& type = DATA,
+            const PacketType& type = DATA_INTERMEDIATE,
             id_type begin = 0,
             id_type end = 0
-            )
-            : id_(id)
-            , type_(type)
-            , nack_begin_(begin)
-            , nack_end_(end)
-          {
-          }
+            );
 
           bool operator<(
             const Packet& rhs
-            ) const
-          {
-            return (type_ == rhs.type_) ? (id_ < rhs.id_) : (type_ < rhs.type_);
-          }
+            ) const;
 
           bool operator==(
             const Packet& rhs
-            ) const
-          {
-            bool ok =
-              id_ == rhs.id_ &&
-              type_ == rhs.type_;
-            if (type_ == NACK)
-            {
-              ok &=
-                (nack_begin_ == rhs.nack_begin_) &&
-                (nack_end_ == rhs.nack_end_);
-            }
-            else if (type_ == DATA)
-            {
-              ok &= payload_ == rhs.payload_;
-            }
-            return ok;
-          }
+            ) const;
 
           bool operator!=(
             const Packet& rhs
-            ) const
-          {
-            return !(*this == rhs);
-          }
+            ) const;
 
           id_type id_;
           PacketType type_;

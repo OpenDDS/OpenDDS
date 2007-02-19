@@ -73,7 +73,7 @@ namespace
   {
     Packet p1(10, Packet::DATA_NOT_AVAILABLE);
     Packet p2(12, Packet::HEARTBEAT);
-    Packet p3(1, Packet::DATA);
+    Packet p3(1, Packet::DATA_END_OF_MESSAGE);
     p3.payload_.assign("Test Payload");
 
     Packet pout;
@@ -120,15 +120,15 @@ namespace
 
     packetizer.packetize(iov, 2, packets);
     VERIFY(packets.size() == 1);
-    VERIFY(packets[0].type_ == Packet::DATA);
+    VERIFY(packets[0].type_ == Packet::DATA_END_OF_MESSAGE);
     VERIFY(packets[0].payload_.size() == strlen("This is a testThis is another test"));
     VERIFY(packets[0].payload_ == "This is a testThis is another test");
 
     packetizer.packetize(iov, 3, packets);
     VERIFY(packets.size() == 2);
-    VERIFY(packets[0].type_ == Packet::DATA);
+    VERIFY(packets[0].type_ == Packet::DATA_END_OF_MESSAGE);
     VERIFY(packets[0].payload_.size() == Packetizer::MAX_PAYLOAD_SIZE);
-    VERIFY(packets[1].type_ == Packet::DATA);
+    VERIFY(packets[1].type_ == Packet::DATA_END_OF_MESSAGE);
     VERIFY(packets[1].payload_.size() == strlen("This is a testThis is another test"));
   }
 
@@ -141,16 +141,16 @@ namespace
     std::vector<Packet> delivered;
     Packet pm2na(-2 + base, Packet::DATA_NOT_AVAILABLE);
     Packet pm1(-1 + base);
-    Packet p0(0 + base);
-    Packet p1(1 + base);
-    Packet p2(2 + base);
-    Packet p3(3 + base);
-    Packet p4(4 + base);
-    Packet p5(5 + base);
-    Packet p6(6 + base);
-    Packet p7(7 + base);
-    Packet p8(8 + base);
-    Packet p9(9 + base);
+    Packet p0(0 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p1(1 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p2(2 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p3(3 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p4(4 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p5(5 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p6(6 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p7(7 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p8(8 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p9(9 + base, Packet::DATA_END_OF_MESSAGE);
 
     receiver_logic.receive(pm2na, nacks, delivered);
     VERIFY(nacks.size() == 0);
@@ -159,7 +159,7 @@ namespace
     receiver_logic.receive(p0, nacks, delivered);
     VERIFY(nacks.size() == 0);
     VERIFY(delivered.size() == 1);
-    VERIFY_IN(delivered, Packet(0 + base, Packet::DATA));
+    VERIFY_IN(delivered, Packet(0 + base, Packet::DATA_END_OF_MESSAGE));
 
     receiver_logic.receive(pm1, nacks, delivered);
     VERIFY(nacks.size() == 0);
@@ -192,9 +192,9 @@ namespace
     VERIFY(nacks.size() == 1);
     VERIFY_IN(nacks, Packet(4 + base, Packet::NACK, 4 + base, 9 + base));
     VERIFY(delivered.size() == 3);
-    VERIFY_IN(delivered, Packet(1 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(2 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(3 + base, Packet::DATA));
+    VERIFY_IN(delivered, Packet(1 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(2 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(3 + base, Packet::DATA_END_OF_MESSAGE));
 
     receiver_logic.receive(p1, nacks, delivered);
     VERIFY(nacks.size() == 1);
@@ -211,8 +211,8 @@ namespace
     VERIFY(nacks.size() == 1);
     VERIFY_IN(nacks, Packet(6 + base, Packet::NACK, 6 + base, 9 + base));
     VERIFY(delivered.size() == 2);
-    VERIFY_IN(delivered, Packet(4 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(5 + base, Packet::DATA));
+    VERIFY_IN(delivered, Packet(4 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(5 + base, Packet::DATA_END_OF_MESSAGE));
 
     receiver_logic.receive(p8, nacks, delivered);
     VERIFY(nacks.size() == 1);
@@ -227,10 +227,10 @@ namespace
     receiver_logic.receive(p6, nacks, delivered);
     VERIFY(nacks.size() == 0);
     VERIFY(delivered.size() == 4);
-    VERIFY_IN(delivered, Packet(6 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(7 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(8 + base, Packet::DATA));
-    VERIFY_IN(delivered, Packet(9 + base, Packet::DATA));
+    VERIFY_IN(delivered, Packet(6 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(7 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(8 + base, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(delivered, Packet(9 + base, Packet::DATA_END_OF_MESSAGE));
   }
 
   void test_reliability_failure_common(
@@ -240,20 +240,20 @@ namespace
   {
     std::vector<Packet> nacks;
     std::vector<Packet> delivered;
-    Packet p0(0 + base);
-    Packet p1(1 + base);
-    Packet p3(3 + base);
-    Packet p4(4 + base);
-    Packet p5(5 + base);
-    Packet p6(6 + base);
-    Packet p7(7 + base);
-    Packet p8(8 + base);
-    Packet p9(9 + base);
+    Packet p0(0 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p1(1 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p3(3 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p4(4 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p5(5 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p6(6 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p7(7 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p8(8 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p9(9 + base, Packet::DATA_END_OF_MESSAGE);
 
     receiver_logic.receive(p0, nacks, delivered);
     VERIFY(nacks.size() == 0);
     VERIFY(delivered.size() == 1);
-    VERIFY_IN(delivered, Packet(0 + base, Packet::DATA));
+    VERIFY_IN(delivered, Packet(0 + base, Packet::DATA_END_OF_MESSAGE));
 
     receiver_logic.receive(p9, nacks, delivered);
     VERIFY(nacks.size() == 1);
@@ -311,7 +311,7 @@ namespace
 
     try
     {
-      Packet p2(2 + base);
+      Packet p2(2 + base, Packet::DATA_END_OF_MESSAGE);
 
       receiver_logic.receive(p2, nacks, delivered);
       VERIFY(nacks.size() == 1);
@@ -342,21 +342,21 @@ namespace
     std::vector<Packet> nacks;
     std::vector<Packet> delivered;
 
-    Packet p2(2 + base);
+    Packet p2(2 + base, Packet::DATA_END_OF_MESSAGE);
 
     receiver_logic.receive(p2, nacks, delivered);
     if (should_fail)
     {
       VERIFY(nacks.size() == 0);
       VERIFY(delivered.size() == 8);
-      VERIFY_IN(delivered, Packet(2 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(3 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(4 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(5 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(6 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(7 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(8 + base, Packet::DATA));
-      VERIFY_IN(delivered, Packet(9 + base, Packet::DATA));
+      VERIFY_IN(delivered, Packet(2 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(3 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(4 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(5 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(6 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(7 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(8 + base, Packet::DATA_END_OF_MESSAGE));
+      VERIFY_IN(delivered, Packet(9 + base, Packet::DATA_END_OF_MESSAGE));
     }
     else
     {
@@ -399,9 +399,9 @@ namespace
     )
   {
     SenderLogic sender_logic(2);
-    Packet p0(1000 + base);
-    Packet p1(-298 + base);
-    Packet p2(391123 + base);
+    Packet p0(1000 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p1(-298 + base, Packet::DATA_END_OF_MESSAGE);
+    Packet p2(391123 + base, Packet::DATA_END_OF_MESSAGE);
     Packet p0n(0, Packet::NACK, 0, 1);
     Packet p1n(1, Packet::NACK, 1, 2);
     Packet p2n(2, Packet::NACK, 2, 3);
@@ -411,19 +411,19 @@ namespace
 
     sender_logic.send(p0, delivered);
     VERIFY(delivered.size() == 1);
-    VERIFY_IN(delivered, Packet(0));
+    VERIFY_IN(delivered, Packet(0, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.send(p1, delivered);
     VERIFY(delivered.size() == 1);
-    VERIFY_IN(delivered, Packet(1));
+    VERIFY_IN(delivered, Packet(1, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.receive(p0n, redelivered);
     VERIFY(redelivered.size() == 1);
-    VERIFY_IN(redelivered, Packet(0, Packet::DATA));
+    VERIFY_IN(redelivered, Packet(0, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.send(p2, delivered);
     VERIFY(delivered.size() == 1);
-    VERIFY_IN(delivered, Packet(2));
+    VERIFY_IN(delivered, Packet(2, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.receive(p0n, redelivered);
     VERIFY(redelivered.size() == 1);
@@ -431,17 +431,17 @@ namespace
 
     sender_logic.receive(p1n, redelivered);
     VERIFY(redelivered.size() == 1);
-    VERIFY_IN(redelivered, Packet(1, Packet::DATA));
+    VERIFY_IN(redelivered, Packet(1, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.receive(p2n, redelivered);
     VERIFY(redelivered.size() == 1);
-    VERIFY_IN(redelivered, Packet(2, Packet::DATA));
+    VERIFY_IN(redelivered, Packet(2, Packet::DATA_END_OF_MESSAGE));
 
     sender_logic.receive(p02n, redelivered);
     VERIFY(redelivered.size() == 3);
     VERIFY_IN(redelivered, Packet(0, Packet::DATA_NOT_AVAILABLE));
-    VERIFY_IN(redelivered, Packet(1, Packet::DATA));
-    VERIFY_IN(redelivered, Packet(2, Packet::DATA));
+    VERIFY_IN(redelivered, Packet(1, Packet::DATA_END_OF_MESSAGE));
+    VERIFY_IN(redelivered, Packet(2, Packet::DATA_END_OF_MESSAGE));
   }
 
   void test_SenderLogic()

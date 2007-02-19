@@ -4,4 +4,16 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-//@@todo: Add ACE_INLINE Code Here
+ACE_INLINE
+TAO::DCPS::ReliableMulticast::detail::Packet::Packet(
+  id_type id,
+  const PacketType& type,
+  id_type begin,
+  id_type end
+  )
+  : id_(id)
+  , type_(type)
+  , nack_begin_(begin)
+  , nack_end_(end)
+{
+}

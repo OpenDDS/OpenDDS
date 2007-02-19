@@ -26,7 +26,10 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
   {
     size += 4 + 4;
   }
-  else if (packet.type_ == Packet::DATA)
+  else if (
+    packet.type_ == Packet::DATA_INTERMEDIATE ||
+    packet.type_ == Packet::DATA_END_OF_MESSAGE
+    )
   {
     size += 4;
     size += packet.payload_.size();
@@ -50,7 +53,10 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
     output << packet.nack_begin_;
     output << packet.nack_end_;
   }
-  else if (packet.type_ == Packet::DATA)
+  else if (
+    packet.type_ == Packet::DATA_INTERMEDIATE ||
+    packet.type_ == Packet::DATA_END_OF_MESSAGE
+    )
   {
     output << packet.payload_.size();
     output.write_char_array(packet.payload_.data(), packet.payload_.size());
@@ -76,7 +82,10 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
     input >> packet.nack_begin_;
     input >> packet.nack_end_;
   }
-  else if (packet.type_ == Packet::DATA)
+  else if (
+    packet.type_ == Packet::DATA_INTERMEDIATE ||
+    packet.type_ == Packet::DATA_END_OF_MESSAGE
+    )
   {
     size_t arraysize = 0;
     input >> arraysize;

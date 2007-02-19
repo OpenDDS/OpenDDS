@@ -6,7 +6,7 @@
 
 ACE_INLINE
 TAO::DCPS::ReliableMulticastThreadSynchResource::ReliableMulticastThreadSynchResource()
-  : TAO::DCPS::ThreadSynchResource(ACE_HANDLE())
+  : TAO::DCPS::ThreadSynchResource(ACE_INVALID_HANDLE)
 {
 }
 

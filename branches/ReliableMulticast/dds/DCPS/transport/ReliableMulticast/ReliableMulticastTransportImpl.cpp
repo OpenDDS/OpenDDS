@@ -35,7 +35,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 {
   TAO::DCPS::ReliableMulticastDataLink_rch data_link;
   const TransportInterfaceData& transport_interface_data =
-    reinterpret_cast<const TransportInterfaceData&>(remote_info);
+    reinterpret_cast<const TransportInterfaceData&>(*(remote_info.data.get_buffer()));
   ACE_INET_Addr multicast_group_address;
 
   transport_interface_data.multicast_group_address_.to_addr(
@@ -51,6 +51,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 
   data_link = new TAO::DCPS::ReliableMulticastDataLink(
     reactor_task_,
+    *configuration_,
     multicast_group_address,
     *this
     );

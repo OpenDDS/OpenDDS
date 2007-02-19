@@ -20,6 +20,7 @@ namespace
     const char* errMsg
     )
   {
+    ACE_ERROR((LM_ERROR, errMsg));
   }
 }
 
@@ -41,11 +42,11 @@ bool
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
   )
 {
-  if (socket_.join(
+  if (socket_.open(
     multicast_group_address_
     ) == -1)
   {
-    logError("ReactivePacketReceiver: failure to open");
+    logError("ReactivePacketReceiver: failure to open\n");
     return false;
   }
   if (reactor()->register_handler(
@@ -53,7 +54,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
     ACE_Event_Handler::READ_MASK
     ) == -1)
   {
-    logError("ReactivePacketReceiver: failure to register_handler");
+    logError("ReactivePacketReceiver: failure to register_handler\n");
     socket_.close();
     return false;
   }
@@ -64,7 +65,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
     ACE_Time_Value(1)
     ) == -1)
   {
-    logError("ReactivePacketReceiver: failure to schedule_timer");
+    logError("ReactivePacketReceiver: failure to schedule_timer\n");
   }
   return true;
 }
@@ -109,7 +110,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive(
   {
     if (reactor()->schedule_timer(this, 0, ACE_Time_Value(0, 0)) == -1)
     {
-      logError("Unable to schedule immediate timer");
+      logError("ReactivePacketReceiver: Unable to schedule immediate timer\n");
     }
   }
 }

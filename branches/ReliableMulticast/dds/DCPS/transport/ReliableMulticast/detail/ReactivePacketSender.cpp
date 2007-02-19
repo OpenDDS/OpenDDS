@@ -19,6 +19,7 @@ namespace
     const char* errMsg
     )
   {
+    ACE_ERROR((LM_ERROR, errMsg));
   }
 }
 
@@ -44,7 +45,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
     ACE_INET_Addr("localhost")
     ) == -1)
   {
-    logError("ReactivePacketSender: failure to open");
+    logError("ReactivePacketSender: failure to open\n");
     return false;
   }
   if (reactor()->register_handler(
@@ -52,7 +53,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
     ACE_Event_Handler::READ_MASK
     ) == -1)
   {
-    logError("ReactivePacketSender: failure to register_handler");
+    logError("ReactivePacketSender: failure to register_handler\n");
     return false;
   }
   if (reactor()->schedule_timer(
@@ -62,7 +63,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
     ACE_Time_Value(1)
     ) == -1)
   {
-    logError("ReactivePacketSender: failure to schedule_timer");
+    logError("ReactivePacketSender: failure to schedule_timer\n");
   }
   return true;
 }
