@@ -45,7 +45,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
   {
     bool prior_nack_canceled = nacker_.cancel(p.id_);
 
-    if (in_range(p.id_, 1, max_receive_buffer_size_ + max_receive_buffer_size_))
+    if (in_range(p.id_, 1, receiver_buffer_size_ + receiver_buffer_size_))
     {
       if (p.id_ == last_delivered_id_ + 1)
       {
@@ -82,7 +82,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
   }
   else if (p.type_ == Packet::HEARTBEAT)
   {
-    if (!in_range(p.id_, 0 - 2 * max_receive_buffer_size_, 0))
+    if (!in_range(p.id_, 0 - 2 * receiver_buffer_size_, 0))
     {
       // NACK the last packet, which will send it along and
       // then trigger the above NACK code...
@@ -151,7 +151,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::buffer_packet(
 {
   buffer_.insert(std::make_pair(p.id_, p));
 
-  if (buffersize() == max_receive_buffer_size_)
+  if (buffersize() == receiver_buffer_size_)
   {
     handle_unreliable_operation(delivered);
   }
@@ -239,7 +239,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::handle_unreliable_operation
       // handle wraparound
       while (
         iter->first - buffer_.begin()->first >=
-        max_receive_buffer_size_ + max_receive_buffer_size_
+        receiver_buffer_size_ + receiver_buffer_size_
         )
       {
         --iter;

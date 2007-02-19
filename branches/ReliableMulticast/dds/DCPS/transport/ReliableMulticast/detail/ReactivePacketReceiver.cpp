@@ -26,10 +26,12 @@ namespace
 
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketReceiver(
   const ACE_INET_Addr& multicast_group_address,
-  PacketReceiverCallback& callback
+  PacketReceiverCallback& callback,
+  size_t receiver_buffer_size
   )
   : callback_(callback)
   , multicast_group_address_(multicast_group_address)
+  , receiver_buffer_size_(receiver_buffer_size)
 {
 }
 
@@ -84,7 +86,11 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive(
   {
     ACE_Guard<ACE_Thread_Mutex> lock(nack_mutex_);
 
-    receiver_logics_[peer].receive(packet, nacks, delivered);
+    if (receiver_logics_[peer].get() == 0)
+    {
+      receiver_logics_[peer].reset(new ReceiverLogic(receiver_buffer_size_));
+    }
+    receiver_logics_[peer]->receive(packet, nacks, delivered);
     if (nacks.empty())
     {
       nacks_.erase(peer);

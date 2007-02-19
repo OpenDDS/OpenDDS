@@ -45,6 +45,8 @@ namespace TAO
 
     private:
       ACE_INET_Addr multicast_group_address_;
+      size_t sender_history_size_;
+      size_t receiver_buffer_size_;
       bool is_publisher_;
       TAO::DCPS::TransportReactorTask_rch reactor_task_;
       TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;

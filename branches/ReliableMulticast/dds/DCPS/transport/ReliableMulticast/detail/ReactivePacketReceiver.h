@@ -15,6 +15,8 @@
 #include "PacketHandler.h"
 #include "Packet.h"
 #include "ReceiverLogic.h"
+#include "ace/Bound_Ptr.h"
+#include "ace/Null_Mutex.h"
 #include <map>
 
 namespace TAO
@@ -37,7 +39,8 @@ namespace TAO
         public:
           ReactivePacketReceiver(
             const ACE_INET_Addr& multicast_group_address,
-            PacketReceiverCallback& callback
+            PacketReceiverCallback& callback,
+            size_t receiver_buffer_size
             );
         
           virtual ~ReactivePacketReceiver();
@@ -55,10 +58,13 @@ namespace TAO
             );
         
         private:
+          typedef ACE_Strong_Bound_Ptr<ReceiverLogic, ACE_Null_Mutex> ReceiverLogicPtr;
+
           PacketReceiverCallback& callback_;
           ACE_INET_Addr multicast_group_address_;
+          size_t receiver_buffer_size_;
           ACE_Thread_Mutex nack_mutex_;
-          std::map<ACE_INET_Addr, ReceiverLogic> receiver_logics_;
+          std::map<ACE_INET_Addr, ReceiverLogicPtr> receiver_logics_;
           typedef std::map<ACE_INET_Addr, std::vector<Packet> > PeerToPacketVectorMap;
           PeerToPacketVectorMap nacks_;
         };

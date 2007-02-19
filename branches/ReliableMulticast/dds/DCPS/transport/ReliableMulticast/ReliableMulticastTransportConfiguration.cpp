@@ -56,6 +56,10 @@ TAO::DCPS::ReliableMulticastTransportConfiguration::load(
     }
 
     GET_CONFIG_VALUE(config, trans_sect, "receiver", receiver_, bool);
+
+    GET_CONFIG_VALUE(config, trans_sect, "sender_history_size", sender_history_size_, size_t);
+
+    GET_CONFIG_VALUE(config, trans_sect, "receiver_buffer_size", receiver_buffer_size_, size_t);
   }
   return result;
 }

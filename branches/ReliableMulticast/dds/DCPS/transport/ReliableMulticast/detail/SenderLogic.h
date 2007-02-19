@@ -35,7 +35,7 @@ namespace TAO
             TAO::DCPS::ReliableMulticast::detail::Packet
             > PacketVector;
 
-	  SenderLogic(size_t max_retry_buffer_size = 1024);
+	  SenderLogic(size_t sender_history_size);
 
           void receive(
             const TAO::DCPS::ReliableMulticast::detail::Packet& p,
@@ -67,7 +67,7 @@ namespace TAO
             TAO::DCPS::ReliableMulticast::detail::Packet
             > BufferType;
 
-          size_t max_retry_buffer_size_;
+          size_t sender_history_size_;
           TAO::DCPS::ReliableMulticast::detail::Packet::id_type current_id_;
           BufferType buffer_;
         };

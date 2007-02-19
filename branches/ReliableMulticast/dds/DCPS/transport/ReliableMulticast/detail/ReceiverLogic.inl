@@ -6,10 +6,10 @@
 
 ACE_INLINE
 TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::ReceiverLogic(
-  size_t max_receive_buffer_size,
+  size_t receiver_buffer_size,
   const ReliabilityMode& reliability
   )
-  : max_receive_buffer_size_(max_receive_buffer_size)
+  : receiver_buffer_size_(receiver_buffer_size)
   , reliability_(reliability)
   , seen_last_delivered_(false)
   , last_delivered_id_(0)
