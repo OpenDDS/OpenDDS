@@ -16,6 +16,8 @@
 #  undef min
 #endif
 
+#include <algorithm>
+
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
 typedef TAO::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransportImpl;
