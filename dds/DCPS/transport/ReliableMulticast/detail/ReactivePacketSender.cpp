@@ -24,9 +24,10 @@ namespace
 }
 
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender(
-  const ACE_INET_Addr& multicast_group_address
+  const ACE_INET_Addr& multicast_group_address,
+  size_t sender_history_size
   )
-  : sender_logic_(1024)
+  : sender_logic_(sender_history_size)
   , multicast_group_address_(multicast_group_address)
 {
 }

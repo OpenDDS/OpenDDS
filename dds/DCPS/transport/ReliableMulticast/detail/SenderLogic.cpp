@@ -76,9 +76,9 @@ TAO::DCPS::ReliableMulticast::detail::SenderLogic::buffer_packet(
 {
   TAO::DCPS::ReliableMulticast::detail::Packet tmp(p);
 
-  if (buffersize() == max_retry_buffer_size_)
+  if (buffersize() == sender_history_size_)
   {
-    buffer_.erase(current_id_ - max_retry_buffer_size_);
+    buffer_.erase(current_id_ - sender_history_size_);
   }
   tmp.id_ = current_id_;
   ++current_id_;

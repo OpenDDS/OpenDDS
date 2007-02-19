@@ -33,7 +33,8 @@ namespace TAO
         {
         public:
           ReactivePacketSender(
-            const ACE_INET_Addr& multicast_group_address
+            const ACE_INET_Addr& multicast_group_address,
+            size_t sender_history_size
             );
           virtual ~ReactivePacketSender();
       

@@ -81,10 +81,15 @@ namespace
 void
 TAO::DCPS::ReliableMulticastTransportReceiveStrategy::configure(
   ACE_Reactor* reactor,
-  const ACE_INET_Addr& multicast_group_address
+  const ACE_INET_Addr& multicast_group_address,
+  size_t receiver_buffer_size
   )
 {
-  receiver_.reset(new ReactivePacketReceiver(multicast_group_address, *this));
+  receiver_.reset(new ReactivePacketReceiver(
+    multicast_group_address,
+    *this,
+    receiver_buffer_size
+    ));
   receiver_->reactor(reactor);
   receiver_->open();
 }

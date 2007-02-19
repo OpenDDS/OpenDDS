@@ -6,9 +6,9 @@
 
 ACE_INLINE
 TAO::DCPS::ReliableMulticast::detail::SenderLogic::SenderLogic(
-  size_t max_retry_buffer_size
+  size_t sender_history_size
   )
-  : max_retry_buffer_size_(max_retry_buffer_size)
+  : sender_history_size_(sender_history_size)
   , current_id_(0)
 {
 }

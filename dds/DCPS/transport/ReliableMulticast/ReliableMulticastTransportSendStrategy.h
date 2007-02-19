@@ -49,7 +49,8 @@ namespace TAO
 
       void configure(
         ACE_Reactor* reactor,
-        const ACE_INET_Addr& multicast_group_address
+        const ACE_INET_Addr& multicast_group_address,
+        size_t sender_history_size
         );
 
       void teardown();
