@@ -10,6 +10,12 @@
 #include "ReliableMulticastTransportReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
+//We'd like the following #include to give us the function std::min()
+//and not to get confused with any macros named min.
+#ifdef min
+#  undef min
+#endif
+
 typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
 typedef TAO::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransportImpl;
