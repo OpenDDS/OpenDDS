@@ -12,6 +12,19 @@
 #endif /* __ACE_INLINE__ */
 
 void
+TAO::DCPS::ReliableMulticast::detail::EventHandler::close()
+{
+  if (socket_.get_handle() != ACE_INVALID_HANDLE)
+  {
+    reactor()->remove_handler(
+      this,
+      ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL
+      );
+    socket_.close();
+  }
+}
+
+void
 TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
   char* buffer,
   size_t size,
@@ -87,11 +100,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
       item.first = item.first.substr(bytes_sent);
     }
   }
-  if (output_queue_.empty())
-  {
-    reactor()->remove_handler(this, ACE_Event_Handler::WRITE_MASK);
-  }
-  return 0;
+  return output_queue_.empty() ? -1 : 0;
 }
 
 int
@@ -101,21 +110,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_close(
   )
 {
   ACE_UNUSED_ARG(fd);
+  ACE_UNUSED_ARG(mask);
 
-  if (
-    mask == ACE_Event_Handler::WRITE_MASK ||
-    mask == ACE_Event_Handler::TIMER_MASK
-    )
-  {
-    return 0;
-  }
-  if (socket_.get_handle() != ACE_INVALID_HANDLE)
-  {
-    reactor()->remove_handler(
-      this,
-      ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL
-      );
-    socket_.close();
-  }
   return 0;
 }

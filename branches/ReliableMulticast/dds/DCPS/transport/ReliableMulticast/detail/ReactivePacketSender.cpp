@@ -24,18 +24,14 @@ namespace
 }
 
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender(
+  const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
   size_t sender_history_size
   )
   : sender_logic_(sender_history_size)
+  , local_address_(local_address)
   , multicast_group_address_(multicast_group_address)
 {
-}
-
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::~ReactivePacketSender(
-  )
-{
-  handle_close(ACE_INVALID_HANDLE, 0);
 }
 
 bool
@@ -43,7 +39,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
   )
 {
   if (socket_.ACE_SOCK_Dgram::open(
-    ACE_INET_Addr("localhost")
+    local_address_
     ) == -1)
   {
     logError("ReactivePacketSender: failure to open\n");
@@ -67,6 +63,17 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
     logError("ReactivePacketSender: failure to schedule_timer\n");
   }
   return true;
+}
+
+void
+TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::close()
+{
+  if (reactor()->cancel_timer(this) == -1)
+  {
+    logError("ReactivePacketSender: failure to cancel_timer\n");
+  }
+  TAO::DCPS::ReliableMulticast::detail::EventHandler::close();
+  reactor(0);
 }
 
 void

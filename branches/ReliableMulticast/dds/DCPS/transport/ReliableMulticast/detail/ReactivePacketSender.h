@@ -33,28 +33,32 @@ namespace TAO
         {
         public:
           ReactivePacketSender(
+            const ACE_INET_Addr& local_address,
             const ACE_INET_Addr& multicast_group_address,
             size_t sender_history_size
             );
           virtual ~ReactivePacketSender();
-      
+
           bool open();
-      
+
+          virtual void close();
+
           virtual void send(const Packet& p);
-      
+
           virtual void receive(
             const Packet& packet,
             const ACE_INET_Addr& peer
             );
-      
+
           int handle_timeout(
             const ACE_Time_Value& current_time,
             const void* = 0
             );
-      
+
         private:
           ACE_Thread_Mutex heartbeat_mutex_;
           SenderLogic sender_logic_;
+          ACE_INET_Addr local_address_;
           ACE_INET_Addr multicast_group_address_;
         };
 

@@ -7,6 +7,7 @@
 #include "ReliableMulticastTransportImpl.h"
 #include "ReliableMulticastThreadSynchResource.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastDataLink.inl"
@@ -19,6 +20,7 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
   )
   : TAO::DCPS::DataLink(&transport_impl)
+  , local_address_(configuration.local_address_)
   , multicast_group_address_(multicast_group_address)
   , sender_history_size_(configuration.sender_history_size_)
   , receiver_buffer_size_(configuration.receiver_buffer_size_)
@@ -27,6 +29,7 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   , transport_impl_(&transport_impl)
   , receive_strategy_(*this)
   , send_strategy_(configuration, new TAO::DCPS::ReliableMulticastThreadSynchResource)
+  , running_(false)
 {
   transport_impl_->_add_ref();
 }
@@ -38,6 +41,7 @@ TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
   {
     send_strategy_.configure(
       reactor_task_->get_reactor(),
+      local_address_,
       multicast_group_address_,
       sender_history_size_
       );
@@ -51,12 +55,20 @@ TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
       );
   }
   start(&send_strategy_, &receive_strategy_);
+  running_ = true;
   return true;
 }
 
 void
 TAO::DCPS::ReliableMulticastDataLink::stop_i()
 {
-  send_strategy_.teardown();
-  receive_strategy_.teardown();
+  std::cout << "-------> Tearing down data link" << std::endl;
+  if (running_)
+  {
+    send_strategy_.teardown();
+    receive_strategy_.teardown();
+    reactor_task_ = 0;
+    running_ = false;
+  }
+  std::cout << "<------- Done" << std::endl;
 }

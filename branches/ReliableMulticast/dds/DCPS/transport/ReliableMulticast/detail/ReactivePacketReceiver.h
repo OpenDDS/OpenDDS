@@ -42,21 +42,23 @@ namespace TAO
             PacketReceiverCallback& callback,
             size_t receiver_buffer_size
             );
-        
+
           virtual ~ReactivePacketReceiver();
-        
+
           bool open();
-        
+
+          virtual void close();
+
           virtual void receive(
             const Packet& packet,
             const ACE_INET_Addr& peer
             );
-        
+
           int handle_timeout(
             const ACE_Time_Value& current_time,
             const void* = 0
             );
-        
+
         private:
           typedef ACE_Strong_Bound_Ptr<ReceiverLogic, ACE_Null_Mutex> ReceiverLogicPtr;
 
