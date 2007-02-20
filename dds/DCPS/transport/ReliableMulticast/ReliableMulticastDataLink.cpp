@@ -6,6 +6,8 @@
 #include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastTransportImpl.h"
 #include "ReliableMulticastThreadSynchResource.h"
+#include "ReliableMulticastTransportConfiguration.h"
+
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include <iostream>
 
