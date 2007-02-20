@@ -9,7 +9,6 @@
 #include "ReliableMulticastTransportConfiguration.h"
 
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastDataLink.inl"
@@ -64,7 +63,6 @@ TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 void
 TAO::DCPS::ReliableMulticastDataLink::stop_i()
 {
-  std::cout << "-------> Tearing down data link" << std::endl;
   if (running_)
   {
     send_strategy_.teardown();
@@ -72,5 +70,4 @@ TAO::DCPS::ReliableMulticastDataLink::stop_i()
     reactor_task_ = 0;
     running_ = false;
   }
-  std::cout << "<------- Done" << std::endl;
 }

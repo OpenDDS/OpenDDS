@@ -5,7 +5,6 @@
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportSendStrategy.h"
 #include "detail/Packetizer.h"
-#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportSendStrategy.inl"
@@ -35,13 +34,11 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::configure(
 void
 TAO::DCPS::ReliableMulticastTransportSendStrategy::teardown()
 {
-  std::cout << "-------> Tearing down send strategy" << std::endl;
   if (sender_.get() != 0)
   {
     sender_->close();
     sender_.reset();
   }
-  std::cout << "<------- Done" << std::endl;
 }
 
 void

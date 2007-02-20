@@ -18,7 +18,7 @@ TAO::DCPS::ReliableMulticastTransportConfiguration::load(
   if (id == DEFAULT_RELIABLE_MULTICAST_PUB_ID || id == DEFAULT_RELIABLE_MULTICAST_SUB_ID)
   {
     ACE_ERROR_RETURN(
-      (LM_ERROR, "(%P|%t) ERROR: You can not configure the default SimpleMcast transport (id=%u).\n", id),
+      (LM_ERROR, "(%P|%t) ERROR: You can not configure the default reliable multicast transport (id=%u).\n", id),
       -1
       );
   }
