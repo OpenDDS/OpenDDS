@@ -40,6 +40,8 @@ namespace TAO
         public:
           virtual ~EventHandler();
 
+          virtual void close();
+
           virtual void send(
             char* buffer,
             size_t size,

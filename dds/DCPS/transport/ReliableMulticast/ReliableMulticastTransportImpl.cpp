@@ -7,6 +7,7 @@
 #include "ReliableMulticastTransportConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImpl.inl"
@@ -100,7 +101,10 @@ TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* c
 void
 TAO::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 {
+  std::cout << "-------> Shutting down TransportImpl, " << data_links_.size() << " data links" << std::endl;
+  data_links_.clear();
   reactor_task_ = 0;
+  std::cout << "<------- Done" << std::endl;
 }
 
 int

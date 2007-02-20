@@ -35,11 +35,6 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketRece
 {
 }
 
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::~ReactivePacketReceiver(
-  )
-{
-}
-
 bool
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
   )
@@ -70,6 +65,18 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
     logError("ReactivePacketReceiver: failure to schedule_timer\n");
   }
   return true;
+}
+
+void
+TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::close(
+)
+{
+  if (reactor()->cancel_timer(this) == -1)
+  {
+    logError("ReactivePacketReceiver: failure to cancel_timer\n");
+  }
+  TAO::DCPS::ReliableMulticast::detail::EventHandler::close();
+  reactor(0);
 }
 
 void

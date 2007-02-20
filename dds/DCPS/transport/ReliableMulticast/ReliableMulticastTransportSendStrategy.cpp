@@ -5,6 +5,7 @@
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportSendStrategy.h"
 #include "detail/Packetizer.h"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportSendStrategy.inl"
@@ -17,11 +18,13 @@ typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender ReactivePacke
 void
 TAO::DCPS::ReliableMulticastTransportSendStrategy::configure(
   ACE_Reactor* reactor,
+  const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
   size_t sender_history_size
   )
 {
   sender_.reset(new ReactivePacketSender(
+    local_address,
     multicast_group_address,
     sender_history_size
     ));
@@ -32,7 +35,13 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::configure(
 void
 TAO::DCPS::ReliableMulticastTransportSendStrategy::teardown()
 {
-  sender_.reset();
+  std::cout << "-------> Tearing down send strategy" << std::endl;
+  if (sender_.get() != 0)
+  {
+    sender_->close();
+    sender_.reset();
+  }
+  std::cout << "<------- Done" << std::endl;
 }
 
 void

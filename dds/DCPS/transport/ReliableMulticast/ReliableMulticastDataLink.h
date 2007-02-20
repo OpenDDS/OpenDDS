@@ -44,6 +44,7 @@ namespace TAO
       virtual void stop_i();
 
     private:
+      ACE_INET_Addr local_address_;
       ACE_INET_Addr multicast_group_address_;
       size_t sender_history_size_;
       size_t receiver_buffer_size_;
@@ -52,6 +53,7 @@ namespace TAO
       TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
       TAO::DCPS::ReliableMulticastTransportReceiveStrategy receive_strategy_;
       TAO::DCPS::ReliableMulticastTransportSendStrategy send_strategy_;
+      bool running_;
     };
 
   } /* namespace DCPS */
