@@ -39,7 +39,7 @@ bool
 TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
   )
 {
-  if (socket_.open(
+  if (socket_.join(
     multicast_group_address_
     ) == -1)
   {
