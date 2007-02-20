@@ -4,7 +4,6 @@
 
 #include "ReliableMulticast_pch.h"
 #include "EventHandler.h"
-#include <iostream>
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)

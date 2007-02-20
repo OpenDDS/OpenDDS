@@ -5,7 +5,6 @@
 #include "ReliableMulticast_pch.h"
 #include "ReliableMulticastTransportReceiveStrategy.h"
 #include "ReliableMulticastTransportImpl.h"
-#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportReceiveStrategy.inl"
@@ -98,13 +97,11 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::configure(
 void
 TAO::DCPS::ReliableMulticastTransportReceiveStrategy::teardown()
 {
-  std::cout << "-------> Tearing down receive strategy" << std::endl;
   if (receiver_.get() != 0)
   {
     receiver_->close();
     receiver_.reset();
   }
-  std::cout << "<------- Done" << std::endl;
 }
 
 void
