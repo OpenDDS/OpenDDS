@@ -9,6 +9,7 @@
 #include "TransportReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
+#include <ace/Select_Reactor.h>
 
 TAO::DCPS::TransportReactorTask::TransportReactorTask()
   : state_ (STATE_NOT_RUNNING),
@@ -16,7 +17,7 @@ TAO::DCPS::TransportReactorTask::TransportReactorTask()
 {
   DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",5);
   // Set our reactor pointer to a new reactor object.
-  this->reactor_ = new ACE_Reactor();
+  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
 }
 
 
