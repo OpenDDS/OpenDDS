@@ -23,7 +23,7 @@ TAO_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
     );
 
   TheTransportFactory->register_generator(
-    "ReliableMulticast",
+    "ReliableMulticast", 
     generator
     );
 
@@ -36,7 +36,7 @@ ACE_FACTORY_DEFINE(
   )
 ACE_STATIC_SVC_DEFINE (
   TAO_DCPS_ReliableMulticastLoader,
-  ACE_TEXT ("DCPS_ReliableMulticastLoader"),
+  ACE_TEXT ("TAO_DCPS_ReliableMulticastLoader"),
   ACE_SVC_OBJ_T,
   &ACE_SVC_NAME (TAO_DCPS_ReliableMulticastLoader),
   ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,
