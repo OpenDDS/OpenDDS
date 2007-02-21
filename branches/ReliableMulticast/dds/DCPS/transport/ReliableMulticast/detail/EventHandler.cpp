@@ -85,7 +85,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
   {
     Queue::value_type& item = output_queue_.front();
     ssize_t bytes_sent = socket_.ACE_SOCK_Dgram::send(
-      static_cast<const void*>(item.first.c_str()),
+      static_cast<const void*>(item.first.data()),
       item.first.size(),
       item.second
       );
