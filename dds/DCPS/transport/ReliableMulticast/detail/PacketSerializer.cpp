@@ -20,7 +20,8 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
   size_t& size
   ) const
 {
-  size = 0;
+  // In case of alignment issues
+  size = ACE_CDR::MAX_ALIGNMENT;
   size += 4 + 4;
   if (packet.type_ == Packet::NACK)
   {
@@ -37,7 +38,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
   return new char[size];
 }
 
-void
+char*
 TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   const Packet& packet,
   char* buffer,
@@ -47,7 +48,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   ACE_OutputCDR output(buffer, size);
 
   output << packet.id_;
-  output << ACE_CDR::Long(packet.type_);
+  output << packet.type_;
   if (packet.type_ == Packet::NACK)
   {
     output << packet.nack_begin_;
@@ -59,8 +60,12 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
     )
   {
     output << packet.payload_.size();
-    output.write_char_array(packet.payload_.data(), packet.payload_.size());
+    if (!packet.payload_.empty())
+    {
+      output.write_char_array(packet.payload_.data(), packet.payload_.size());
+    }
   }
+  return output.begin()->rd_ptr();
 }
 
 void
@@ -71,7 +76,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   ) const
 {
   ACE_InputCDR input(buffer, size);
-  ACE_CDR::Long type;
+  ACE_INT32 type;
 
   packet.payload_.clear();
   input >> packet.id_;
@@ -89,8 +94,11 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   {
     size_t arraysize = 0;
     input >> arraysize;
-    ACE_Auto_Basic_Array_Ptr<char> safe_array(new char[arraysize]);
-    input.read_char_array(safe_array.get(), arraysize);
-    packet.payload_.assign(safe_array.get(), arraysize);
+    if (arraysize > 0)
+    {
+      ACE_Auto_Basic_Array_Ptr<char> safe_array(new char[arraysize]);
+      input.read_char_array(safe_array.get(), arraysize);
+      packet.payload_.assign(safe_array.get(), arraysize);
+    }
   }
 }

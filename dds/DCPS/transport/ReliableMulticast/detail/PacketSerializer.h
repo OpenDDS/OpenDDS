@@ -37,7 +37,9 @@ namespace TAO
             size_t& size
             ) const;
 
-          void serializeFromTo(
+          /// Returns a pointer to the first byte in the buffer that is
+          /// used - this is due to alignment in ACE_OutputCDR.
+          char* serializeFromTo(
             const Packet& packet,
             char* buffer,
             size_t size
