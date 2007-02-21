@@ -14,6 +14,9 @@
 int
 TAO_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
 {
+  ACE_UNUSED_ARG(argc);
+  ACE_UNUSED_ARG(argv);
+
   TAO::DCPS::TransportGenerator* generator = 0;
 
   ACE_NEW_RETURN(

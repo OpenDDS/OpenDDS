@@ -50,6 +50,8 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::stop_i()
 ssize_t
 TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
+  ACE_UNUSED_ARG(bp);
+
   ssize_t sent = 0;
   for (int idx = 0; idx < n; ++idx)
   {
@@ -81,5 +83,8 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::get_handle()
 ssize_t
 TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
+  ACE_UNUSED_ARG(iov);
+  ACE_UNUSED_ARG(n);
+
   return -1;
 }
