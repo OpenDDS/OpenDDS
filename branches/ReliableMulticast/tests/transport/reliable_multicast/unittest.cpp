@@ -82,22 +82,22 @@ namespace
     ACE_Auto_Basic_Array_Ptr<char> safe_array;
 
     safe_array.reset(ps.getBuffer(p1, size));
-    ps.serializeFromTo(p1, safe_array.get(), size);
-    ps.serializeFromTo(safe_array.get(), size, pout);
+    char* begin = ps.serializeFromTo(p1, safe_array.get(), size);
+    ps.serializeFromTo(begin, size - (begin - safe_array.get()), pout);
     VERIFY(p1 == pout);
     VERIFY(p2 != pout);
     VERIFY(p3 != pout);
 
     safe_array.reset(ps.getBuffer(p2, size));
-    ps.serializeFromTo(p2, safe_array.get(), size);
-    ps.serializeFromTo(safe_array.get(), size, pout);
+    begin = ps.serializeFromTo(p2, safe_array.get(), size);
+    ps.serializeFromTo(begin, size - (begin - safe_array.get()), pout);
     VERIFY(p1 != pout);
     VERIFY(p2 == pout);
     VERIFY(p3 != pout);
 
     safe_array.reset(ps.getBuffer(p3, size));
-    ps.serializeFromTo(p3, safe_array.get(), size);
-    ps.serializeFromTo(safe_array.get(), size, pout);
+    begin = ps.serializeFromTo(p3, safe_array.get(), size);
+    ps.serializeFromTo(begin, size - (begin - safe_array.get()), pout);
     VERIFY(p1 != pout);
     VERIFY(p2 != pout);
     VERIFY(p3 == pout);

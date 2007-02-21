@@ -25,11 +25,11 @@ TAO::DCPS::ReliableMulticast::detail::PacketHandler::send(
   ACE_Auto_Basic_Array_Ptr<char> serialized(
     packetSerializer.getBuffer(packet, buffer_size)
     );
-  packetSerializer.serializeFromTo(packet, serialized.get(), buffer_size);
+  char* begin = packetSerializer.serializeFromTo(packet, serialized.get(), buffer_size);
 
   TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
-    serialized.get(),
-    buffer_size,
+    begin,
+    buffer_size - (begin - serialized.get()),
     dest
     );
 }
