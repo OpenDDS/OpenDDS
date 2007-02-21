@@ -145,6 +145,8 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::receive_bytes(
   ACE_INET_Addr& remote_address
   )
 {
+  ACE_UNUSED_ARG(remote_address);
+
   return fillIovecArray(buffered_packets_, iov, n);
 }
 
@@ -154,6 +156,8 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
   const ACE_INET_Addr& remote_address
   )
 {
+  ACE_UNUSED_ARG(remote_address);
+
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT)
   {
     gracefully_disconnected_ = true;

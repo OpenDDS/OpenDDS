@@ -59,7 +59,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
 {
   ACE_UNUSED_ARG(fd);
 
-  char buffer[1024];
+  char buffer[8192];
   ACE_INET_Addr peer;
 
   ssize_t bytes_read = socket_.recv(
