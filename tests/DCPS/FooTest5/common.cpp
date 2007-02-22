@@ -12,14 +12,17 @@
 
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
+#include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
 
 
 const char* MY_TOPIC    = "foo";
 const char* MY_TOPIC_FOR_UDP = "fooudp";
 const char* MY_TOPIC_FOR_MCAST = "foomcast";
+const char* MY_TOPIC_FOR_RELIABLE_MULTICAST = "fooReliableMulticast";
 const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
 const char* MY_TYPE_FOR_MCAST = "FooMcast";
+const char* MY_TYPE_FOR_RELIABLE_MULTICAST = "FooReliableMulticast";
 const char * reader_address_str = "";
 const char * multicast_group_address_str = "";
 const char * writer_address_str = "";
@@ -39,6 +42,7 @@ int history_depth = 1;
 // default to using TCP
 int using_udp = 0;
 int using_mcast = 0;
+int using_reliable_multicast = 0;
 int sequence_length = 10;
 int no_key = 0;
 InstanceDataMap results;
@@ -50,9 +54,11 @@ int mixed_trans = 0;
 TAO::DCPS::TransportImpl_rch reader_tcp_impl;
 TAO::DCPS::TransportImpl_rch reader_udp_impl;
 TAO::DCPS::TransportImpl_rch reader_mcast_impl;
+TAO::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
 TAO::DCPS::TransportImpl_rch writer_tcp_impl;
 TAO::DCPS::TransportImpl_rch writer_udp_impl;
 TAO::DCPS::TransportImpl_rch writer_mcast_impl;
+TAO::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
 
 ACE_TString synch_file_dir;
 
@@ -64,7 +70,7 @@ ACE_TString sub_ready_filename = ACE_TEXT("subscriber_ready.txt");
 ACE_TString sub_finished_filename = ACE_TEXT("subscriber_finished.txt");
 
 
-int init_reader_tranport ()
+int init_reader_transport ()
 {
   int status = 0;
 
@@ -83,7 +89,7 @@ int init_reader_tranport ()
       if (!reader_address_given)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub UDP")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
                     ACE_TEXT(" Must specify an address for UDP.\n")));
           return 11;
         }
@@ -95,7 +101,7 @@ int init_reader_tranport ()
       if (reader_udp_impl->configure(reader_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub UDP")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -116,7 +122,7 @@ int init_reader_tranport ()
       if (!reader_address_given)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub MCAST")
                     ACE_TEXT(" Must specify an address for MCAST bind.\n")));
           return 11;
         }
@@ -124,7 +130,7 @@ int init_reader_tranport ()
       if (!multicast_group_address_given)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub MCAST")
                     ACE_TEXT(" Must specify an address for MCAST receipt.\n")));
           return 11;
         }
@@ -140,7 +146,52 @@ int init_reader_tranport ()
       if (reader_mcast_impl->configure(reader_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub MCAST")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub MCAST")
+                    ACE_TEXT(" Failed to configure the transport.\n")));
+          status = 1;
+        }
+    }
+
+  if (using_reliable_multicast)
+    {
+      reader_reliable_multicast_impl 
+        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_RELIABLE_MULTICAST, 
+                                                      "ReliableMulticast", 
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+      TAO::DCPS::TransportConfiguration_rch reader_config 
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
+
+      TAO::DCPS::ReliableMulticastTransportConfiguration* reader_reliable_multicast_config 
+        = static_cast <TAO::DCPS::ReliableMulticastTransportConfiguration*> (reader_config.in ());
+
+      if (!reader_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub RELIABLE_MULTICAST")
+                    ACE_TEXT(" Must specify an address for RELIABLE_MULTICAST bind.\n")));
+          return 11;
+        }
+
+      if (!multicast_group_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub RELIABLE_MULTICAST")
+                    ACE_TEXT(" Must specify an address for RELIABLE_MULTICAST receipt.\n")));
+          return 11;
+        }
+
+
+
+      ACE_INET_Addr reader_address (reader_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      reader_reliable_multicast_config->local_address_ = reader_address;
+      reader_reliable_multicast_config->multicast_group_address_ = multicast_group_address;
+      reader_reliable_multicast_config->receiver_ = true;
+
+      if (reader_reliable_multicast_impl->configure(reader_config.in()) != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub RELIABLE_MULTICAST")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -169,7 +220,7 @@ int init_reader_tranport ()
       if (reader_tcp_impl->configure(reader_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_tranport: sub TCP ")
+                    ACE_TEXT("(%P|%t) init_reader_transport: sub TCP ")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -180,7 +231,7 @@ int init_reader_tranport ()
 
 
 
-int init_writer_tranport ()
+int init_writer_transport ()
 {
   int status = 0;
 
@@ -196,11 +247,11 @@ int init_writer_tranport ()
 
       TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
         = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
-      
+
       if (!writer_address_given)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_tranport: pub UDP")
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
                     ACE_TEXT(" Must specify an address for UDP.\n")));
           return 12;
         }
@@ -211,7 +262,7 @@ int init_writer_tranport ()
       if (writer_udp_impl->configure(writer_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_tranport: pub UDP")
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -229,11 +280,11 @@ int init_writer_tranport ()
 
       TAO::DCPS::SimpleMcastConfiguration* writer_mcast_config 
         = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
-      
+
       if (!writer_address_given)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_tranport: pub MCAST")
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub MCAST")
                     ACE_TEXT(" Must specify an address for MCAST.\n")));
           return 12;
         }
@@ -244,7 +295,40 @@ int init_writer_tranport ()
       if (writer_mcast_impl->configure(writer_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_tranport: pub MCAST")
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub MCAST")
+                    ACE_TEXT(" Failed to configure the transport.\n")));
+          status = 1;
+        }
+    }
+
+  if (using_reliable_multicast)
+    {
+      writer_reliable_multicast_impl 
+        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_RELIABLE_MULTICAST, 
+                                                      "ReliableMulticast", 
+                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+
+      TAO::DCPS::TransportConfiguration_rch writer_config 
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
+
+      TAO::DCPS::ReliableMulticastTransportConfiguration* writer_reliable_multicast_config 
+        = static_cast <TAO::DCPS::ReliableMulticastTransportConfiguration*> (writer_config.in ());
+
+      if (!writer_address_given)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub RELIABLE_MULTICAST")
+                    ACE_TEXT(" Must specify an address for RELIABLE_MULTICAST.\n")));
+          return 12;
+        }
+
+      ACE_INET_Addr writer_address (writer_address_str);
+      writer_reliable_multicast_config->multicast_group_address_ = writer_address;
+
+      if (writer_reliable_multicast_impl->configure(writer_config.in()) != 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub RELIABLE_MULTICAST")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }
@@ -262,7 +346,7 @@ int init_writer_tranport ()
 
       TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
         = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-      
+
       if (writer_address_given)
         {
           ACE_INET_Addr writer_address (writer_address_str);
@@ -273,7 +357,7 @@ int init_writer_tranport ()
       if (writer_tcp_impl->configure(writer_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_tranport: pub TCP")
+                    ACE_TEXT("(%P|%t) init_writer_transport: pub TCP")
                     ACE_TEXT(" Failed to configure the transport.\n")));
           status = 1;
         }

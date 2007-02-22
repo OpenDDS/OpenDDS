@@ -14,9 +14,11 @@ const long  MY_DOMAIN = 411;
 extern const char* MY_TOPIC;
 extern const char* MY_TOPIC_FOR_UDP;
 extern const char* MY_TOPIC_FOR_MCAST;
+extern const char* MY_TOPIC_FOR_RELIABLE_MULTICAST;
 extern const char* MY_TYPE;
 extern const char* MY_TYPE_FOR_UDP;
 extern const char* MY_TYPE_FOR_MCAST;
+extern const char* MY_TYPE_FOR_RELIABLE_MULTICAST;
 extern const char * reader_address_str;
 extern const char * multicast_group_address_str;
 extern const char * writer_address_str;
@@ -35,6 +37,7 @@ extern int history_depth;
 // default to using TCP
 extern int using_udp;
 extern int using_mcast;
+extern int using_reliable_multicast;
 extern int sequence_length;
 extern int no_key;
 extern InstanceDataMap results;
@@ -46,9 +49,11 @@ extern int mixed_trans;
 extern TAO::DCPS::TransportImpl_rch reader_tcp_impl;
 extern TAO::DCPS::TransportImpl_rch reader_udp_impl;
 extern TAO::DCPS::TransportImpl_rch reader_mcast_impl;
+extern TAO::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
 extern TAO::DCPS::TransportImpl_rch writer_tcp_impl;
 extern TAO::DCPS::TransportImpl_rch writer_udp_impl;
 extern TAO::DCPS::TransportImpl_rch writer_mcast_impl;
+extern TAO::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
 
 extern ACE_TString synch_file_dir;
 // These files need to be unlinked in the run test script before and
@@ -63,7 +68,8 @@ enum TransportTypeId
 {
   SIMPLE_TCP,
   SIMPLE_UDP,
-  SIMPLE_MCAST
+  SIMPLE_MCAST,
+  RELIABLE_MULTICAST
 };
 
 
@@ -72,14 +78,16 @@ enum TransportInstanceId
   SUB_TRAFFIC_TCP,
   SUB_TRAFFIC_UDP,
   SUB_TRAFFIC_MCAST,
+  SUB_TRAFFIC_RELIABLE_MULTICAST,
   PUB_TRAFFIC_TCP,
   PUB_TRAFFIC_UDP,
-  PUB_TRAFFIC_MCAST
+  PUB_TRAFFIC_MCAST,
+  PUB_TRAFFIC_RELIABLE_MULTICAST
 };
 
 
-int init_reader_tranport ();
-int init_writer_tranport ();
+int init_reader_transport ();
+int init_writer_transport ();
 
 
 #endif /* COMMON_H */
