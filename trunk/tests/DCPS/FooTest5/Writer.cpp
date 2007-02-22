@@ -87,6 +87,8 @@ template<class DT, class DW, class DW_var>
                                     op_interval_ms%1000 *1000);
         ACE_OS::sleep (delay);
       }
+
+      // No delay necessary for reliable multicast
     }
   }
   catch (const CORBA::Exception& ex)

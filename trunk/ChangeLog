@@ -1,3 +1,112 @@
+Thu Feb 22 14:10:25 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * MPC/config/dcpsexe_with_reliable_multicast.mpb:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/transport/ReliableMulticast:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.mpc:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastLoader.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastLoader.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastLoader.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastRcHandles.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastThreadSynchResource.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastThreadSynchResource.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastThreadSynchResource.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportGenerator.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportGenerator.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportGenerator.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportReceiveStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportReceiveStrategy.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast_Export.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast_pch.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast_pch.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packet.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packet.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packet.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketReceiverCallback.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packetizer.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packetizer.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/Packetizer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReceiverLogic.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReceiverLogic.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReceiverLogic.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/SenderLogic.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/SenderLogic.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/SenderLogic.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/reliable_multicast.conf:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/transport/reliable_multicast:
+        * tests/transport/reliable_multicast/reliable_multicast.mpc:
+        * tests/transport/reliable_multicast/unittest.cpp:
+
+          Added a reliable multicast transport from the ReliableMulticast
+          branch, merging revisions 450 through 528 from that branch into
+          the trunk.  This transport has the same basic configuration
+          parameters as the unreliable multicast transport, but adds the
+          following:
+
+            sender_history_size - How many packets to buffer for potential
+              retransmission
+            receiver_buffer_size - How large a buffer to keep on the receiving
+              side to handle reordering, late delivery, etc.
+
+          This transport introduces fragmentation and re-assembly logic so
+          from the perspective of the transport framework it appears that
+          a receiver is joining a UDP stream already in progress.
+
+          When an unrecoverable fault is detected, the transport currently
+          sets the disconnected flag.  This should eventually be configurable
+          through QoS parameters.
+
+            svn merge -r450:528 https://svn.dre.vanderbilt.edu/DOC/DDS/branches/ReliableMulticast
+
 Thu Feb 15 14:50:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/Messenger.mpc:

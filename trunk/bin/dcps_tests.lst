@@ -53,6 +53,7 @@ tests/DCPS/FooTest4_0/run_test.pl: !STATIC
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl mcast: !DCPS_MIN !NOMCAST !STATIC
+tests/DCPS/FooTest5/run_test.pl reliable_multicast: !DCPS_MIN !NOMCAST !STATIC
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN !STATIC
@@ -89,6 +90,7 @@ tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/reliable_multicast/unittest: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN !STATIC
 performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN !STATIC

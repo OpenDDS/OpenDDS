@@ -22,6 +22,7 @@ $num_writers=1;
 $use_take=0;
 $use_udp = 0;
 $use_mcast = 0;
+$use_reliable_multicast = 0;
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:29803";
 $num_readers=1;
@@ -48,6 +49,12 @@ if ($ARGV[$arg_idx] eq 'udp') {
 if ($ARGV[$arg_idx] eq 'mcast') {
   $use_mcast = 1;
   $pub_addr = "224.0.0.1:29803";
+  $arg_idx = $arg_idx + 1;
+}
+
+if ($ARGV[$arg_idx] eq 'reliable_multicast') {
+  $use_reliable_multicast = 1;
+  $pub_addr = "224.0.0.1:29804";
   $arg_idx = $arg_idx + 1;
 }
 
@@ -126,12 +133,16 @@ elsif ($mixed_trans == 1) {
 elsif ($use_mcast == 1) {
   $svc_config=" -ORBSvcConf mcast.conf ";
 }
+elsif ($use_reliable_multicast == 1) {
+  $svc_config=" -ORBSvcConf reliable_multicast.conf ";
+}
 
 # test multiple cases
 $sub_parameters = "$svc_config -u $use_udp -c $use_mcast -s $sub_addr -p $pub_addr -r $num_readers -t $use_take"
               . " -m $num_instances_per_writer -i $num_samples_per_instance"
 	      . " -w $num_writers -z $sequence_length"
-              . " -k $no_key -y $read_interval_ms -f $mixed_trans";
+              . " -k $no_key -y $read_interval_ms -f $mixed_trans"
+              . " -a $use_reliable_multicast";
 
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
@@ -140,7 +151,8 @@ $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_wr
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
 	      . " -n $max_samples_per_instance -z $sequence_length"
 	      . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
-              . " -f $mixed_trans";
+              . " -f $mixed_trans"
+              . " -a $use_reliable_multicast";
 
 
 $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
