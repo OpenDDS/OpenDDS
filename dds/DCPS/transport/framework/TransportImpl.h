@@ -43,6 +43,23 @@ namespace TAO
 
     typedef ACE_Vector<AssociationInfo> AssociationInfoList;
 
+    /** The TransportImpl class includes the abstract methods that must be implemented 
+    *   by any implementation to provide data delivery service to the DCPS implementation. 
+    *   This includes methods to send data, received data, configure the operation, and 
+    *   manage associations and datalinks between local and remote objects of the implementation.
+    *   
+    *   Notes about object ownership:
+    *   1)Has longer lifetime than the publisher and subscriber objects. The publishers 
+    *     and subscribers are owned by the DomainParticipant and transport factory shutdown 
+    *     is always after DomainParticipant factory shutdown. 
+    *   2)The concrete transport object owns the datalink objects. 
+    *   3)Own  a DataLinkCleanup object. 
+    *   4)Reference to TransportConfiguration object and TransportReactorTask object owned
+    *     by TransportFactory.
+    *   5)During transport shutdown, if this object does not have ownership of an object
+    *     but has a references via smart pointer then the reference should be freed;
+    *     if this object has ownership of task objects then the tasks should be closed.
+    */
     class TAO_DdsDcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:

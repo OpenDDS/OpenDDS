@@ -28,6 +28,16 @@ namespace TAO
     class QueueRemoveVisitor;
     class PacketRemoveVisitor;
 
+    /**
+     * This class provides methods to fill packets with samples for sending 
+     * and handles backpressure. It maintains the list of samples in current
+     * packets and also the list of samples queued during backpressure. A thread
+     * per connection is created to handle the queued samples.
+     *
+     * Notes for the object ownership:
+     * 1) Owns ThreadSynch object, list of samples in current packet and list
+     *    of samples in queue.
+     */ 
     class TAO_DdsDcps_Export TransportSendStrategy
       : public RcObject<ACE_SYNCH_MUTEX>,
         public ThreadSynchWorker

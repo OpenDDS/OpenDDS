@@ -24,6 +24,16 @@ namespace TAO
     class SimpleTcpAcceptor;
     class SimpleTcpConnectionReplaceTask;
 
+    /**
+     * This class provides the "SimpleTcp" transport specific implementation.
+     * It creates the acceptor for listening the incoming requests using
+     * TCP and maintains a collection of TCP specific connections/datalinks.
+     *
+     * Notes about object ownership:
+     * 1) Own the datalink objects, passive connection objects, acceptor object 
+     *    and SimpleTcpConnectionReplaceTask object(used during reconnecting).
+     * 2) Reference to TransportReactorTask object owned by base class.
+     */
     class SimpleTcp_Export SimpleTcpTransport : public TransportImpl
     {
       public:

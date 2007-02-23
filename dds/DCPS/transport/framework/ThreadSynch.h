@@ -14,8 +14,18 @@ namespace TAO
   {
 
     class ThreadSynchResource;
-
-
+   
+    /**
+     * This class is the base class for different ThreadSynch stratege, currently
+     * only the thread per connection strategy is implemented and used. 
+     *
+     * Notes for object ownership:
+     * 1) Pointer to TransportSendStrategy object (as ThreadSynchWorker) directly but not 
+     *    reference counted. It won't have access problem during it lifetime because the 
+     *    TransportSendStrategy object owns this ThreadSynch object.
+     * 2) The ThreadSynch object is created by the ThreadSynchResource object and it owns
+     *    the ThreadSynchResource object.
+     */
     class TAO_DdsDcps_Export ThreadSynch
     {
       public:

@@ -17,7 +17,10 @@ namespace TAO
 
   namespace DCPS
   {
-
+    /**
+     * This class provides buffer for data received by transports, de-assemble
+     * the data to individual samples and deliver them. 
+     */ 
     class TAO_DdsDcps_Export TransportReceiveStrategy 
       : public RcObject<ACE_SYNCH_MUTEX>
     {
