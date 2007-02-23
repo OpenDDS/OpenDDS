@@ -27,7 +27,15 @@ namespace TAO
     class SimpleUnreliableDgramReceiveStrategy;
     class ReceivedDataSample;
 
-
+    /**
+     * This class provides specific implementation for unreliable transports - UDP and 
+     * unreliable multicast.
+     *
+     * Notes about object ownership:
+     * 1) Own datalink objects and socket object.
+     * 2) Reference to TransportReactorTask object, configuration object 
+     *    and TransportReceiveStrategy object.
+     */
     class SimpleUnreliableDgram_Export SimpleUnreliableDgramTransport : public TransportImpl
     {
       public:

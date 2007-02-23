@@ -27,6 +27,12 @@ namespace TAO
     struct DataSampleListElement;
 
 
+    /**
+     * This class provides the methods that the DSPS components use to call 
+     * into the Transport layer. This is the main mechanism by which the 
+     * application sends data to subscriptions and manages associations between
+     * publications and subscriptions in the service.
+     */
     class TAO_DdsDcps_Export TransportInterface
     {
       public:

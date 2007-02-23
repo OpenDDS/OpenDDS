@@ -33,6 +33,16 @@ namespace TAO
     class  ThreadPerConnectionSendTask;
 
 
+    /**
+     * This class manages the reservations based on the associations between datareader
+     * and datawriter. It basically delegate the samples to send strategy for sending and 
+     * deliver the samples received by receive strategy to the listener.
+     *
+     * Notes about object ownership:
+     * 1) Own the send strategy object and receive strategy object.
+     * 2) Own ThreadPerConnectionSendTask object which is used when thread_per_connection
+     *    is enabled.
+     */
     class TAO_DdsDcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
     {
       friend class DataLinkCleanupTask;

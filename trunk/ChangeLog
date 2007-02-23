@@ -1,3 +1,17 @@
+Fri Feb 23 18:30:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * DCPS\transport\simpleTCP\SimpleTcpTransport.h:
+        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.h:
+        * DCPS\transport\framework\TransportReceiveStrategy.h:
+        * DCPS\transport\framework\DataLink.h:
+        * DCPS\transport\framework\ThreadSynch.h:
+        * DCPS\transport\framework\TransportImpl.h:
+        * DCPS\transport\framework\TransportFactory.h:
+        * DCPS\transport\framework\TransportInterface.h:
+        * DCPS\transport\framework\TransportSendStrategy.h:
+
+          Added comments to describer the ownership of transport components.
+          
 Thu Feb 22 14:10:25 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * MPC/config/dcpsexe_with_reliable_multicast.mpb:

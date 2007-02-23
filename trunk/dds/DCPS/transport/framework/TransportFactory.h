@@ -22,6 +22,17 @@ namespace TAO
   namespace DCPS
   {
 
+    /**
+     * The TransportFactory is a singleton object which provides a mechanism to 
+     * the application code to create objects of individual transport implementations. 
+     * It is possible to have more than a single object of a given implementation 
+     * in order to support separation of communications between different DDS Domains 
+     * or application defined areas of control.
+     *
+     * Notes about object ownership:
+     * 1) Own the transport configuration objects, transport implementation objects
+     *    and TransportReactorTask object.
+     */
     class TAO_DdsDcps_Export TransportFactory
     {
       public:
