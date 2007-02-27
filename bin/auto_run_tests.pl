@@ -82,7 +82,7 @@ foreach my $test_lst (@file_list) {
               }
           }
         else {
-            if (! -e $program) {
+            if ((! -e $program) && (! -e "$program.exe")) {
                 print STDERR "Error: $directory.$program does not exist\n";
                 next;
               }
