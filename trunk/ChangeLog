@@ -1,3 +1,9 @@
+Tue Feb 27 18:46:29 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Fixed to run .exe files specified in the .lst for perl to run.
+
 Fri Feb 23 18:30:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * DCPS\transport\simpleTCP\SimpleTcpTransport.h:
@@ -11,7 +17,7 @@ Fri Feb 23 18:30:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DCPS\transport\framework\TransportSendStrategy.h:
 
           Added comments to describer the ownership of transport components.
-          
+
 Thu Feb 22 14:10:25 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * MPC/config/dcpsexe_with_reliable_multicast.mpb:
