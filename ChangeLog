@@ -1,3 +1,15 @@
+Wed Feb 28 16:46:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Added the -l command-line option, used to specify an alternate file
+          containing the test list.
+          When using the -s option (sandbox), don't assume that the target test
+          is a Perl script, it may be an executable.  Files ending in .pl are
+          assumed to be Perl scripts, otherwise they will be treated as
+          executables.
+          Also, removed code specific to ACE tests.
+
 Tue Feb 27 18:46:29 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * bin/auto_run_tests.pl:
