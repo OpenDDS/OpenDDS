@@ -22,10 +22,10 @@ use Env qw(DDS_ROOT ACE_ROOT PATH);
 
 ################################################################################
 
-if (!getopts ('ds:c') || $opt_h) {
-    print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-o] [-t]\n";
+if (!getopts ('ds:cl:') || $opt_h) {
+    print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-o] [-t] [-l listfile]\n";
     print "\n";
-    print "Runs the tests listed in auto_run_tests.lst\n";
+    print "Runs the tests listed in dcps_tests.lst\n";
     print "\n";
     print "Options:\n";
     print "    -c config   Run the tests for the <config> configuration\n";
@@ -33,6 +33,8 @@ if (!getopts ('ds:c') || $opt_h) {
     print "    -s sandbox  Runs each program using a sandbox program\n";
     print "    -c          dcps tests only\n";
     print "    -Config cfg Run the tests for the <cfg> configuration\n";
+    print "    -l listfile Run the tests specified in listfile instead of ".
+        "dcps_tests.lst\n";
     print "\n";
     $dcps_config_list = new PerlACE::ConfigList;
     $dcps_config_list->load ($DDS_ROOT."/bin/dcps_tests.lst");
@@ -42,20 +44,18 @@ if (!getopts ('ds:c') || $opt_h) {
 
 my @file_list;
 
-if ($opt_c) {
-push (@file_list, "/bin/dcps_tests.lst");
-}
-
-if (scalar(@file_list) == 0) {
-push (@file_list, "/bin/dcps_tests.lst");
+if ($opt_l) {
+    push (@file_list, $opt_l);
+} else {
+    push (@file_list, "$DDS_ROOT/bin/dcps_tests.lst");
 }
 
 foreach my $test_lst (@file_list) {
 
     my $config_list = new PerlACE::ConfigList;
-    $config_list->load ($DDS_ROOT.$test_lst);
+    $config_list->load ($test_lst);
 
-    # Insures that we search for stuff in the current directory.
+    # Ensures that we search for stuff in the current directory.
     $PATH .= $Config::Config{path_sep} . '.';
 
     foreach $test ($config_list->valid_entries ()) {
@@ -97,12 +97,12 @@ foreach my $test_lst (@file_list) {
 
         $cmd = '';
         if ($opt_s) {
-            $cmd = "$opt_s \"perl $program $inherited_options\"";
+            $program = "perl $program" if ($program =~ /\.pl$/);
+            $cmd = "$opt_s \"$program $inherited_options\"";
         }
         else {
             $cmd = $program.$inherited_options;
         }
-
 
         my $result = 0;
 
@@ -114,14 +114,11 @@ foreach my $test_lst (@file_list) {
             $result = system ($cmd);
             $time = time() - $start_time;
 
-            # see note about tests/run_test.pl printing reports for ace tests individually
-            if (! $is_ace_test) {    
-                if ($result > 0) {
-                    print "Error: $test returned with status $result\n";
-                }
-
-                print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
+            if ($result > 0) {
+                print "Error: $test returned with status $result\n";
             }
+
+            print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
         }
     }
 }
