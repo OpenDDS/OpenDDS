@@ -14,6 +14,9 @@ $status = 0;
 if ($ARGV[0] eq 'udp') {
   $svc_conf = " -ORBSvcConf udp.conf ";
 }
+else {
+    $svc_conf = " -ORBSvcConf tcp.conf";
+}
 
 
 my($port1) = 10001 + PerlACE::uniqueid() ;
@@ -21,6 +24,7 @@ $domains_file = PerlACE::LocalFile ("domain_ids");
 $ns_ior = PerlACE::LocalFile ("ns.ior");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
+$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;
@@ -30,15 +34,12 @@ $NS = new PerlACE::Process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Servic
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file "
                                 . "-ORBEndpoint iiop://localhost:$port1");
-$Subscriber = new PerlACE::Process ("subscriber", 
-                                    "$svc_conf -DCPSConfigFile sub.ini "
-                                  . "$arg_ns_ref "
-                                  . "-DCPSInfoRepo corbaname:rir:#InfoRepo");
-$Publisher = new PerlACE::Process ("publisher", 
-                                   "$svc_conf -DCPSConfigFile pub.ini "
-                                 . "$arg_ns_ref "
-                                 . "-DCPSInfoRepo corbaname:rir:#InfoRepo");
+$Subscriber = new PerlACE::Process ("subscriber",
+                                    "-DCPSConfigFile sub.ini $common_args");
+$Publisher = new PerlACE::Process ("publisher",
+                                   "-DCPSConfigFile pub.ini $common_args");
 
+#print $NS->CommandLine() . "\n";
 $NS->Spawn();
 if (PerlACE::waitforfile_timed ($ns_ior, 5) == -1) {
     print STDERR "ERROR: cannot find file <$ns_ior>\n";
@@ -46,6 +47,7 @@ if (PerlACE::waitforfile_timed ($ns_ior, 5) == -1) {
     exit 1;
 }
 
+#print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -61,8 +63,10 @@ $NSADD->SpawnWaitKill(5);
 
 unlink $dcpsrepo_ior;
 
+#print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
 
+#print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
 
