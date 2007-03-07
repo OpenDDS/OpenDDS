@@ -6,18 +6,17 @@
 #ifndef TAO_DDS_DCPS_DATAWRITER_H
 #define TAO_DDS_DCPS_DATAWRITER_H
 
-#include "publication_export.h"
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/WriteDataContainer.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/TopicImpl.h"
-#include "dds/DCPS/AssociationData.h"
+#include "WriteDataContainer.h"
+#include "Definitions.h"
+#include "DataSampleList.h"
+#include "DataSampleHeader.h"
+#include "TopicImpl.h"
+#include "AssociationData.h"
 
 #include "ace/Event_Handler.h"
 
@@ -53,7 +52,7 @@ namespace TAO
     *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
     *        up ownership to this WriteDataContainer.
     */
-    class TAO_DdsDcps_Publication_Export DataWriterImpl
+    class TAO_DdsDcps_Export DataWriterImpl
       : public virtual POA_TAO::DCPS::DataWriterRemote,
         public virtual EntityImpl,
         public virtual TransportSendListener,

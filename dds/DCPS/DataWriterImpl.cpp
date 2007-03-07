@@ -3,19 +3,20 @@
 // $Id$
 
 
-#include "Publication_pch.h"
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataWriterImpl.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
+#include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/TopicImpl.h"
-#include "dds/DCPS/PublicationInstance.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/Transient_Kludge.h"
+#include "Service_Participant.h"
+#include "Qos_Helper.h"
+#include "TopicImpl.h"
+#include "PublisherImpl.h"
+#include "PublicationInstance.h"
+#include "Serializer.h"
+#include "Transient_Kludge.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/EntryExit.h"

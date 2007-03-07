@@ -7,8 +7,8 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Service_Participant.h"
 
-#include "dds/DCPS/Publication/DataWriterImpl.h"
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
 // Implementation skeleton constructor
 MyTypeSupportImpl::MyTypeSupportImpl (void)

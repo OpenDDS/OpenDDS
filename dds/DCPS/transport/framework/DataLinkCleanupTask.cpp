@@ -5,8 +5,8 @@
 
 #include "DataLinkCleanupTask.h"
 
-#include "dds/DCPS/Publication/DataWriterImpl.h"
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "TransportImpl.h"
 
