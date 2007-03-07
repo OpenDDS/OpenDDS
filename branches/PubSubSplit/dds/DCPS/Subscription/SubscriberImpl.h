@@ -4,11 +4,12 @@
 #ifndef TAO_DDS_DCPS_SUBSCRIBER_H
 #define TAO_DDS_DCPS_SUBSCRIBER_H
 
+#include "subscription_export.h"
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DdsDcpsInfoC.h"
-#include "EntityImpl.h"
-#include "Definitions.h"
+#include "dds/DCPS/EntityImpl.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
 
@@ -49,7 +50,7 @@ namespace TAO
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
     //Class SubscriberImpl
-    class TAO_DdsDcps_Export SubscriberImpl
+    class TAO_DdsDcps_Subscription_Export SubscriberImpl
       : public virtual POA_DDS::Subscriber,
         public virtual EntityImpl,
         public virtual TransportInterface
