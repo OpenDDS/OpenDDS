@@ -16,7 +16,7 @@
 
 #include "FooTypeS.h"
 #include "footype_export.h"
-#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/Publication/DataWriterImpl.h"
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
 #include "ace/Message_Block.h"
 #include "ace/Malloc_T.h"

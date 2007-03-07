@@ -18,7 +18,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/Subscription/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportImpl.h"
 #include "tests/DCPS/MultiTopicTypes/Foo2TypeSupportImpl.h"
