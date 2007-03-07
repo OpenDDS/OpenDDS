@@ -5,7 +5,7 @@
 #include "WriteDataContainer.h"
 #include "Service_Participant.h"
 #include "DataSampleList.h"
-#include "DataWriterImpl.h"
+#include "Publication/DataWriterImpl.h"
 #include "PublicationInstance.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"

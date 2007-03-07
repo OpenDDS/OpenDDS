@@ -5,21 +5,21 @@
 #ifndef TAO_DDS_DCPS_DATAREADER_H
 #define TAO_DDS_DCPS_DATAREADER_H
 
-#include "dcps_export.h"
-#include "EntityImpl.h"
+#include "subscription_export.h"
+#include "dds/DCPS/EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "Definitions.h"
-#include "TopicImpl.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/TopicImpl.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "SubscriptionInstance.h"
+#include "dds/DCPS/SubscriptionInstance.h"
 #include "SubscriberImpl.h"
-#include "InstanceState.h"
-#include "DomainParticipantImpl.h"
-#include "Cached_Allocator_With_Overflow_T.h"
+#include "dds/DCPS/InstanceState.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
 
 
 #include "ace/String_Base.h"
@@ -42,7 +42,7 @@ namespace TAO
                 ReceivedDataAllocator;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
-    class TAO_DdsDcps_Export WriterInfo {
+    class TAO_DdsDcps_Subscription_Export WriterInfo {
       public:
         WriterInfo (); // needed for Hash_Map_Manager
 
@@ -91,7 +91,7 @@ namespace TAO
     * is specific to the data-type associated with the topic.
     *
     */
-    class TAO_DdsDcps_Export DataReaderImpl
+    class TAO_DdsDcps_Subscription_Export DataReaderImpl
       : public virtual POA_TAO::DCPS::DataReaderRemote,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,

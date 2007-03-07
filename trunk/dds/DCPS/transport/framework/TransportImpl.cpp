@@ -4,8 +4,8 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportImpl.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/Subscription/DataReaderImpl.h"
 #include "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
