@@ -7,10 +7,10 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/TopicImpl.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/Publication/PublisherImpl.h"
+#include "dds/DCPS/Subscription/SubscriberImpl.h"
 #include "dds/DdsDcpsDomainC.h"
 
 using namespace ::DDS;

@@ -16,7 +16,7 @@
 
 #include "FooTypeS.h"
 #include "footype_export.h"
-#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/Publication/DataWriterImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

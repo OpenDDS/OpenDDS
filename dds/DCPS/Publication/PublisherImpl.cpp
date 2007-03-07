@@ -1,17 +1,17 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "Publication_pch.h"
 #include "PublisherImpl.h"
-#include "DomainParticipantImpl.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "DataWriterImpl.h"
-#include "Service_Participant.h"
-#include "Qos_Helper.h"
-#include "Marked_Default_Qos.h"
-#include "TopicImpl.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/TopicImpl.h"
 #include "dds/DdsDcpsTypeSupportTaoS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "AssociationData.h"
+#include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"

@@ -28,8 +28,8 @@ sub contents { return <<'!EOT'
 #define <%UPPERTYPE%>TYPESUPPORTI_H_
 
 #include "<%TYPE%>TypeSupportS.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/Subscription/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
 

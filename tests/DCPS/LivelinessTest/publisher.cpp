@@ -15,7 +15,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/Publication/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
