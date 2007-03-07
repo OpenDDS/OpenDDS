@@ -14,23 +14,26 @@ $status = 0;
 if ($ARGV[0] eq 'udp') {
   $svc_conf = " -ORBSvcConf udp.conf ";
 }
+else {
+    $svc_conf = " -ORBSvcConf tcp.conf";
+}
 
 
 my($port1) = 10001 + PerlACE::uniqueid() ;
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
+    . " $svc_conf";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "-NOBITS -o $dcpsrepo_ior -d $domains_file "
                                 . "-ORBEndpoint iiop://localhost:$port1");
-$Subscriber = new PerlACE::Process ("subscriber", 
-                                    "$svc_conf -DCPSConfigFile sub.ini "
-                                  . "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
-$Publisher = new PerlACE::Process ("publisher", 
-                                   "$svc_conf -DCPSConfigFile pub.ini "
-                                 . "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo");
+$Subscriber = new PerlACE::Process ("subscriber",
+                                    "-DCPSConfigFile sub.ini $common_args");
+$Publisher = new PerlACE::Process ("publisher",
+                                   "-DCPSConfigFile pub.ini $common_args");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

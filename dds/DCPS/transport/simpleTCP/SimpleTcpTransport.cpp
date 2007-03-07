@@ -358,9 +358,9 @@ TAO::DCPS::SimpleTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",5);
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s:%d\n",
-	      this->tcp_config_->local_address_.get_host_addr (),
-	      this->tcp_config_->local_address_.get_port_number ()));
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s:%d\n",
+             this->tcp_config_->local_address_.get_host_addr (),
+             this->tcp_config_->local_address_.get_port_number ()), 2);
 
   NetworkAddress network_order_address(this->tcp_config_->local_address_);
 
