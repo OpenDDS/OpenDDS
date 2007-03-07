@@ -16,7 +16,7 @@
 
 #include "FooTypeS.h"
 #include "footype_export.h"
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

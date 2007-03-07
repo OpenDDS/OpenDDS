@@ -6,7 +6,7 @@
 
 #include "InstanceDataMap.h"
 #include "dds/DdsDcpsPublicationC.h"
-#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "ace/Task.h"
 
   

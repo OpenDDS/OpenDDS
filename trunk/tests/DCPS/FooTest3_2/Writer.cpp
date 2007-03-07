@@ -8,7 +8,7 @@
 #include "PubDriver.h"
 #include "TestException.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "tests/DCPS/FooType3Unbounded/FooTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 

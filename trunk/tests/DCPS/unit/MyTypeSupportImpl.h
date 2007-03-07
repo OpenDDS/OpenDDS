@@ -15,8 +15,8 @@
 
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
-#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "MyTypeSupportS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

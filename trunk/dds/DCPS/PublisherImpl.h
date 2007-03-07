@@ -4,12 +4,11 @@
 #ifndef TAO_DDS_DCPS_PUBLISHER_IMPL_H
 #define TAO_DDS_DCPS_PUBLISHER_IMPL_H
 
-#include "publication_export.h"
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DdsDcpsInfoC.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "EntityImpl.h"
+#include "DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "ace/Synch.h"
 
@@ -30,7 +29,7 @@ namespace TAO
     class DataWriterImpl;
 
     /// Information about a DataWriter
-    struct TAO_DdsDcps_Publication_Export PublisherDataWriterInfo {
+    struct TAO_DdsDcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
       DataWriterRemote_ptr         remote_writer_ ;
       /// The datawriter servant.
@@ -62,7 +61,7 @@ namespace TAO
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Publication_Export PublisherImpl
+    class TAO_DdsDcps_Export PublisherImpl
       : public virtual POA_DDS::Publisher,
         public virtual EntityImpl,
         public virtual TransportInterface

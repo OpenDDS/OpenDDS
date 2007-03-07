@@ -11,8 +11,8 @@
 
 #include "TransportImpl.h"
 #include "TransportConfiguration.h"
-#include "dds/DCPS/Publication/DataWriterImpl.h"
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
 #include "EntryExit.h"
 #include "tao/debug.h"

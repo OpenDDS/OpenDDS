@@ -25,7 +25,7 @@
 #ifndef DCPSDATAWRITERI_H_
 #define DCPSDATAWRITERI_H_
 
-#include "dds/DCPS/Publication/DataWriterImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

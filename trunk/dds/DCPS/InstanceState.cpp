@@ -4,7 +4,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "InstanceState.h"
-#include "Subscription/DataReaderImpl.h"
+#include "DataReaderImpl.h"
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "Qos_Helper.h"

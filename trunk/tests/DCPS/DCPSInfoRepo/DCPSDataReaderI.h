@@ -25,7 +25,7 @@
 #ifndef DCPSDATAREADERI_H_
 #define DCPSDATAREADERI_H_
 
-#include "dds/DCPS/Subscription/DataReaderImpl.h"
+#include "dds/DCPS/DataReaderImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
