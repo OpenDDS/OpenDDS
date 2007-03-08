@@ -1,5 +1,5 @@
-#ifndef SUBSCRIBER_PCH_H
-#define SUBSCRIBER_PCH_H
+#ifndef SUBSCRIPTION_PCH_H
+#define SUBSCRIPTION_PCH_H
 
 #ifdef USING_PCH
 
