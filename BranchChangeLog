@@ -1,3 +1,12 @@
+Thu Mar  8 16:09:27 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Publication/Publication_pch.h:
+        * dds/DCPS/Publication/Publication_pch.cpp:
+        * dds/DCPS/Subscription/Subscription_pch.h:
+        * dds/DCPS/Subscription/Subscription_pch.cpp:
+
+          Fixed guards and include file names.
+
 Wed Mar  7 21:53:39 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:

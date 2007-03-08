@@ -1,5 +1,5 @@
-#ifndef PUBLISHER_PCH_H
-#define PUBLISHER_PCH_H
+#ifndef PUBLICATION_PCH_H
+#define PUBLICATION_PCH_H
 
 #ifdef USING_PCH
 
