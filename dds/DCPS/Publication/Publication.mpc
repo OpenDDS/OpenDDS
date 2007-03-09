@@ -1,4 +1,4 @@
-project : orbsvcslib, core, portableserver {
+project : orbsvcslib, core, portableserver, built_in_topic_support {
 
   requires    += exceptions
 
