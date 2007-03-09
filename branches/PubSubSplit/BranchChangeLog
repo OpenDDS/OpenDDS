@@ -1,3 +1,10 @@
+Fri Mar  9 16:17:13 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Publication/Publication.mpc:
+        * dds/DCPS/Subscription/Subscription.mpc:
+
+          Fixed BIT problems.
+
 Fri Mar  9 15:14:24 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/Publication/Publication.mpc:
