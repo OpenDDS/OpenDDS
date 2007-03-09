@@ -5,6 +5,7 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "PublisherFactory.h"
 #include "Publication/PublisherImpl.h"
 #include "Subscription/SubscriberImpl.h"
 #include "Marked_Default_Qos.h"
@@ -91,13 +92,18 @@ namespace TAO
           return ::DDS::Publisher::_nil();
         }
 
-      PublisherImpl* pub = 0;
-      ACE_NEW_RETURN(pub,
-                     PublisherImpl(pub_qos,
-                                   a_listener,
-                                   this,
-                                   participant_objref_.in ()),
-                     ::DDS::Publisher::_nil());
+      PublisherFactory* publisherFactory = &getPublisherFactory();
+      if (publisherFactory == 0)
+      {
+        return ::DDS::Publisher::_nil();
+      }
+
+      PublisherImpl* pub = publisherFactory->make_publisher(
+        pub_qos,
+        a_listener,
+        this,
+        participant_objref_.in ()
+        );
 
       if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1))
         {

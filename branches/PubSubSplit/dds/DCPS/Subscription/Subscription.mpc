@@ -7,7 +7,8 @@ project : orbsvcslib, core, portableserver, built_in_topic_support {
   libout       = $(DDS_ROOT)/lib
   includes    += $(DDS_ROOT)
 
-  after       += DdsIDL
+  after       += DdsDcps
+  libs        += TAO_DdsDcps
 
   pch_header   = Subscription_pch.h
   pch_source   = Subscription_pch.cpp

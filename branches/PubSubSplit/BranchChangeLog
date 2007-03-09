@@ -1,3 +1,17 @@
+Fri Mar  9 18:59:25 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Publication/Publication.mpc:
+        * dds/DCPS/Publication/PublicationFactory.h:
+        * dds/DCPS/Publication/PublicationFactory.cpp:
+        * dds/DCPS/Publication/PublisherImpl.h:
+        * dds/DCPS/PublisherFactory.h:
+        * dds/DCPS/PublisherFactory.cpp:
+        * dds/DCPS/Subscription/Subscription.mpc:
+
+          Allow the Publication side of things to register itself
+          on demand.
+
 Fri Mar  9 16:17:13 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/Publication/Publication.mpc:

@@ -212,7 +212,7 @@ namespace TAO
     *  internal use.
     *  Check if there is any datawriter associated with this publisher.
     */
-    int is_clean () const;
+    virtual int is_clean () const;
 
     /** This method is called when the datawriter created by this
     * publisher was enabled. It will notify the DCPSInfo that
@@ -244,7 +244,7 @@ namespace TAO
     /**
     * Cache the publisher's object reference.
     */
-    void set_object_reference (
+    virtual void set_object_reference (
         const ::DDS::Publisher_ptr& pub
       );
 
