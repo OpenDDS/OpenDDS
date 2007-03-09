@@ -6,6 +6,7 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   dynamicflags = TAO_DDSDCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
   includes    += $(DDS_ROOT)
+  after       += DdsIDL
 
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
@@ -15,6 +16,7 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   includes    += $(DDS_ROOT)/dds
 
   Source_Files {
+    *.cpp
     DCPS/*.cpp
     DCPS/transport/framework/*.cpp
   }
@@ -24,16 +26,6 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   }
 
   IDL_Files {
-    DdsDcpsDomain.idl
-    DdsDcpsPublication.idl
-    DdsDcpsSubscription.idl
-    DdsDcpsTopic.idl
-    DdsDcps.idl
-    DdsDcpsInfo.idl
-    DdsDcpsDataReaderRemote.idl
-    DdsDcpsDataWriterRemote.idl
-    DdsDcpsInfoUtils.idl
-    DdsDcpsTypeSupportTao.idl
   }
 
 }

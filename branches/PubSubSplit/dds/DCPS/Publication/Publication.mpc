@@ -7,15 +7,9 @@ project : orbsvcslib, core, portableserver {
   libout       = $(DDS_ROOT)/lib
   includes    += $(DDS_ROOT)
 
-  after       += DdsDcps
+  after       += DdsIDL
 
-  pch_header   = DCPS/Publication/Publication_pch.h
-  pch_source   = DCPS/Publication/Publication_pch.cpp
+  pch_header   = Publication_pch.h
+  pch_source   = Publication_pch.cpp
 
-  Source_Files {
-    DCPS/Publication/*.cpp
-  }
-
-  IDL_Files {
-  }
 }
