@@ -99,8 +99,6 @@ int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
 
-  ACE_DEBUG((LM_DEBUG,"(%P|%t) %T Repo main\n")); //REMOVE
-
   try
     {
       // The usual server side boilerplate code.
@@ -206,14 +204,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       FILE * file = ACE_OS::fopen (::ior_file.c_str(), "w");
       if (file != NULL)
-  {
-    ACE_OS::fprintf (file, "%s", objref_str.in ());
-    ACE_OS::fclose (file);
+        {
+          ACE_OS::fprintf (file, "%s", objref_str.in ());
+          ACE_OS::fclose (file);
 
-    orb->run ();
-  }
+          orb->run ();
+        }
       else {
-  ACE_ERROR((LM_ERROR, "ERROR: Unable to open IOR file: %s\n", ::ior_file.c_str()));
+        ACE_ERROR((LM_ERROR, "ERROR: Unable to open IOR file: %s\n", ::ior_file.c_str()));
       }
 
       TheServiceParticipant->shutdown ();
