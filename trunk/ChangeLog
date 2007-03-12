@@ -1,3 +1,36 @@
+Mon Mar 12 21:12:47 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          cosmetic fixes - indent lines.
+
+        * tests/DCPS/Messenger_ZeroCopy:
+        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * tests/DCPS/Messenger_ZeroCopy/Messenger.idl:
+        * tests/DCPS/Messenger_ZeroCopy/Messenger.mpc:
+        * tests/DCPS/Messenger_ZeroCopy/README:
+        * tests/DCPS/Messenger_ZeroCopy/Writer.h:
+        * tests/DCPS/Messenger_ZeroCopy/Writer.cpp:
+        * tests/DCPS/Messenger_ZeroCopy/domain_ids:
+        * tests/DCPS/Messenger_ZeroCopy/mcast.conf:
+        * tests/DCPS/Messenger_ZeroCopy/pub.ini:
+        * tests/DCPS/Messenger_ZeroCopy/pub_mcast.ini:
+        * tests/DCPS/Messenger_ZeroCopy/pub_udp.ini:
+        * tests/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * tests/DCPS/Messenger_ZeroCopy/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger_ZeroCopy/run_ns_test.pl:
+        * tests/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * tests/DCPS/Messenger_ZeroCopy/sub.ini:
+        * tests/DCPS/Messenger_ZeroCopy/sub_mcast.ini:
+        * tests/DCPS/Messenger_ZeroCopy/sub_udp.ini:
+        * tests/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * tests/DCPS/Messenger_ZeroCopy/tcp.conf:
+        * tests/DCPS/Messenger_ZeroCopy/udp.conf:
+          Add new test to demonstrate zero copy semantics.
+
+        * bin/dcps_tests.lst:
+          Add Messenger_ZeroCopy to nightly test framework.
+
 Wed Mar  7 23:32:35 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:

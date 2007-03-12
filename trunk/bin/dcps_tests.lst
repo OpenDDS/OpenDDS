@@ -12,6 +12,7 @@
 
 
 # TBD ?? should we create a DDS configuration to limit running these tests?
+tests/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/DCPSInfoRepo/run_test.pl
 tests/DCPS/unit/run_test.pl: !STATIC
 tests/DCPS/FooTest3_0/run_test.pl: !STATIC
