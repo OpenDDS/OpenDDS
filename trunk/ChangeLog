@@ -1,3 +1,12 @@
+Tue Mar 13 13:56:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Messenger_ZeroCopy/Messenger.mpc:
+        * tests/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+
+          Renamed this file from Messenger.mpc to Messenger_ZeroCopy.mpc since
+          MPC project names must be unique in the workspace and project names
+          are derived from the name of the .mpc file.
+
 Mon Mar 12 21:12:47 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
