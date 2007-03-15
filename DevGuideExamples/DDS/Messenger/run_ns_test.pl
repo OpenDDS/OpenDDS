@@ -56,9 +56,9 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-$NSADD = new PerlACE::Process("$ENV{TAO_ROOT}/utils/nslist/nsadd",
+$NSADD = new PerlACE::Process("$ENV{ACE_ROOT}/bin/nsadd",
                               "$arg_ns_ref --name InfoRepo --ior file://$dcpsrepo_ior");
-
+$NSADD->IgnoreExeSubDir(1);
 $NSADD->SpawnWaitKill(5);
 
 unlink $dcpsrepo_ior;
