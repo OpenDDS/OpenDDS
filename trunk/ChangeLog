@@ -1,3 +1,17 @@
+Thu Mar 15 14:29:19 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+
+          The nsadd binary needs to be found in $ACE_ROOT/bin.  The fact that
+          it's also in $TAO_ROOT/utils/nslist is just a side-effect of the GNU
+          make build system.
+
+        * tests/DCPS/Messenger_ZeroCopy/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger_ZeroCopy/run_ns_test.pl:
+
+          Removed these files.  These alternate forms of run_test.pl are not
+          used for this test.
+
 Tue Mar 13 13:56:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Messenger_ZeroCopy/Messenger.mpc:
