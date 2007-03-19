@@ -75,6 +75,7 @@ foreach my $test_lst (@file_list) {
         chdir ($DDS_ROOT."/$directory")
             || die "Error: Cannot chdir to $DDS_ROOT/$directory";
 
+        my $subdir = $PerlACE::Process::ExeSubDir;
         if ($program =~ /(.*?) (.*)/) {
             if (! -e $1) {
                 print STDERR "Error: $directory.$1 does not exist\n";
@@ -82,14 +83,14 @@ foreach my $test_lst (@file_list) {
               }
           }
         else {
-            if ((! -e $program) && (! -e "$program.exe")) {
-                print STDERR "Error: $directory.$program does not exist\n";
+            if ((! -e "$subdir$program") && (! -e "$subdir$program.exe")) {
+                print STDERR "Error: $directory/$subdir$program does not exist\n";
                 next;
               }
           }
 
         ### Genrate the -ExeSubDir and -Config options
-        my $inherited_options = " -ExeSubDir $PerlACE::Process::ExeSubDir ";
+        my $inherited_options = " -ExeSubDir $subdir ";
 
         foreach my $config ($config_list->my_config_list ()) {
              $inherited_options .= " -Config $config ";
@@ -101,7 +102,7 @@ foreach my $test_lst (@file_list) {
             $cmd = "$opt_s \"$program $inherited_options\"";
         }
         else {
-            $cmd = $program.$inherited_options;
+            $cmd = $subdir.$program.$inherited_options;
         }
 
         my $result = 0;

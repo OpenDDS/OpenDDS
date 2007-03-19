@@ -1,7 +1,11 @@
+Mon Mar 19 19:14:34 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
 Mon Mar 19 14:48:21 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Messenger_Imr/pub.ini:
-	  The repo.ior file path was mistakenly absolute. Fixed that.
+          The repo.ior file path was mistakenly absolute. Fixed that.
 
 Thu Mar 15 19:34:39 UTC 2007  Ciju John  <johnc@ociweb.com>
 
@@ -22,7 +26,7 @@ Thu Mar 15 19:34:39 UTC 2007  Ciju John  <johnc@ociweb.com>
           New test for InfoRepo - TAO ImR compatibility.
 
         * bin/dcps_tests.lst:
-	  Add new test to automated test list.
+          Add new test to automated test list.
 
 Thu Mar 15 14:29:19 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
