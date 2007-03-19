@@ -2,6 +2,9 @@ Mon Mar 19 19:14:34 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
 
+          When running an executable directly (no run_test.pl), we need to take
+          into account the -ExeSubDir setting.
+
 Mon Mar 19 14:48:21 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Messenger_Imr/pub.ini:
