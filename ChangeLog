@@ -1,3 +1,11 @@
+Tue Mar 20 21:16:06 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+          cosmetic changes
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Create InfoRepo class and reorganize existing code.
+
 Tue Mar 20 19:38:17 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Messenger_IOGR_Imr:
