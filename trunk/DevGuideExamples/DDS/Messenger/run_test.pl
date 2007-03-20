@@ -12,7 +12,7 @@ use PerlACE::Run_Test;
 $status = 0;
 
 $opts =  "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile pub.ini ";
+$pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
@@ -57,7 +57,7 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
 $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
 
-#print $DCPSREPO->CommandLine() . "\n";
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -65,10 +65,10 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-#print $Publisher->CommandLine() . "\n";
+print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
 
-#print $Subscriber->CommandLine() . "\n";
+print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
 
