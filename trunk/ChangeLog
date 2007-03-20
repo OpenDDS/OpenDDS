@@ -2,6 +2,8 @@ Tue Mar 20 13:51:51 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
 
+          Fixed bugs in yesterday's check-in of this file.
+
 Mon Mar 19 19:14:34 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
