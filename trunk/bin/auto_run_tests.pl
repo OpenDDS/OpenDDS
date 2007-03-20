@@ -76,15 +76,19 @@ foreach my $test_lst (@file_list) {
             || die "Error: Cannot chdir to $DDS_ROOT/$directory";
 
         my $subdir = $PerlACE::Process::ExeSubDir;
+        my $progNoArgs = $program;
         if ($program =~ /(.*?) (.*)/) {
-            if (! -e $1) {
+            $progNoArgs = $1;
+            if (! -e $progNoArgs) {
                 print STDERR "Error: $directory.$1 does not exist\n";
                 next;
               }
           }
         else {
-            if ((! -e "$subdir$program") && (! -e "$subdir$program.exe")) {
-                print STDERR "Error: $directory/$subdir$program does not exist\n";
+            my $cmd = $program;
+            $cmd = $subdir.$cmd if ($program !~ /\.pl$/);
+            if ((! -e $cmd) && (! -e "$cmd.exe")) {
+                print STDERR "Error: $directory/$cmd does not exist\n";
                 next;
               }
           }
@@ -93,16 +97,17 @@ foreach my $test_lst (@file_list) {
         my $inherited_options = " -ExeSubDir $subdir ";
 
         foreach my $config ($config_list->my_config_list ()) {
-             $inherited_options .= " -Config $config ";
+            $inherited_options .= " -Config $config ";
         }
 
         $cmd = '';
         if ($opt_s) {
-            $program = "perl $program" if ($program =~ /\.pl$/);
+            $program = "perl $program" if ($progNoArgs =~ /\.pl$/);
             $cmd = "$opt_s \"$program $inherited_options\"";
         }
         else {
-            $cmd = $subdir.$program.$inherited_options;
+            $cmd = $program.$inherited_options;
+            $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
         my $result = 0;
