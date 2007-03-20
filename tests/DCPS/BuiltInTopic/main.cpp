@@ -556,4 +556,3 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   return 0;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
-
