@@ -1,3 +1,24 @@
+Tue Mar 20 19:38:17 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * tests/DCPS/Messenger_IOGR_Imr:
+        * tests/DCPS/Messenger_IOGR_Imr/Aggregator.h:
+        * tests/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * tests/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/Messenger.idl:
+        * tests/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * tests/DCPS/Messenger_IOGR_Imr/README:
+        * tests/DCPS/Messenger_IOGR_Imr/Writer.h:
+        * tests/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/domain_ids:
+        * tests/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * tests/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * tests/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * tests/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+          New test to demonstrate multiple InfoRepo objects being
+          presented as a single IOGR. This test is currently incomplete.
+
 Tue Mar 20 16:47:32 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/run_test.pl:
