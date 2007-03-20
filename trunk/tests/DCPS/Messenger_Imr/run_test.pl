@@ -10,20 +10,20 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 use Sys::Hostname;
 
-$useImr = 1;
+my $useImr = 1;
 if ($ARGV[0] eq 'noImr') {
     $useImr = 0;
 }
 
-$status = 0;
+my $status = 0;
 
-$opts =  "-ORBSvcConf ../../tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+my $opts =  "-ORBSvcConf ../../tcp.conf";
+my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
+my $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 #my $OBJ_REF_STYLE = "-orbobjrefstyle url";
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my $domains_file = PerlACE::LocalFile ("domain_ids");
+my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 my $implrepo_ior = PerlACE::LocalFile ("imr.ior");
 my $activator_ior = PerlACE::LocalFile ("activator.ior");
@@ -38,10 +38,10 @@ if ($useImr == 1) {
 
 my $ImR = new PerlACE::Process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE -orbendpoint iiop://:12346");
 my $Act = new PerlACE::Process ($imr_activator, "-o $activator_ior $imr_init_ref $OBJ_REF_STYLE -orbendpoint iiop://:12347");
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
+my $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 my $imr_util = new PerlACE::Process ("$tao_imr");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+my $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
+my $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
 
 # We want the tao_imr executable to be found exactly in the path
 # given, without being modified by the value of -ExeSubDir.
@@ -101,7 +101,7 @@ if (SpawnWait($DCPSREPO, $dcpsrepo_ior, 30) != 0) {
 
 #RunImRUtil("shutdown InfoRepo");
 # The Info Repo can be killed once the IOR has been generated.
-$DCPSREPO->WaitKill(5);
+$DCPSREPO->Kill();
 
 # Note : If the server registers itself, then it won't set the
 # activator name. If we don't set it here, then the activator
