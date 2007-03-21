@@ -1,12 +1,22 @@
+Wed Mar 21 22:13:32 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+	  Register with the UpdateManager.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/Update_export.h:
+          Framework for dealing with Persistence and federation menagers.
+
 Wed Mar 21 18:06:01 UTC 2007  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
-        
+
           Changed return value of an ACE_ERROR_RETURN macro
           to eliminate an int-to-bool warning on VC8.
-          
+
         * dds/DCPS/Qos_Helper.inl:
-        
+
           Changes to eliminate time_t-to-CORBA::Long conversion
           warnings on VC8.
 

@@ -9,18 +9,25 @@
 
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "UpdateManager.h"
+
 #include "dds/DCPS/BuiltInTopicUtils.h"
-
-
-#include /**/ "ace/Read_Buffer.h"
-#include /**/ "ace/OS_NS_stdio.h"
 
 #include /**/ "tao/debug.h"
 
+#include /**/ "ace/Read_Buffer.h"
+#include /**/ "ace/OS_NS_stdio.h"
+#include "ace/Dynamic_Service.h"
 
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (void)
 {
+  UpdateManager* um = ACE_Dynamic_Service<UpdateManager>::instance
+    ("UpdateManager");
+
+  if (um != 0) {
+    um->add (this);
+  }
 }
 
 
