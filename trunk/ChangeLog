@@ -1,3 +1,8 @@
+Wed Mar 21 15:06:50 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * bin/dcps_tests.lst:
+          Additional flags for restricting tests for certain build types.
+
 Tue Mar 20 21:16:06 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/run_test.pl:
