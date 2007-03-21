@@ -1,3 +1,15 @@
+Wed Mar 21 18:06:01 UTC 2007  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        
+          Changed return value of an ACE_ERROR_RETURN macro
+          to eliminate an int-to-bool warning on VC8.
+          
+        * dds/DCPS/Qos_Helper.inl:
+        
+          Changes to eliminate time_t-to-CORBA::Long conversion
+          warnings on VC8.
+
 Wed Mar 21 15:06:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * bin/dcps_tests.lst:
