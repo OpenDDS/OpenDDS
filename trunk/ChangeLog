@@ -1,7 +1,11 @@
+Thu Mar 22 13:46:57 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl: untabified
+
 Wed Mar 21 22:13:32 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
-	  Register with the UpdateManager.
+          Register with the UpdateManager.
 
         * dds/InfoRepo/UpdateManager.h:
         * dds/InfoRepo/UpdateManager.cpp:
