@@ -123,7 +123,7 @@ int main (int argc, char *argv[]) {
         }
 
         // check for file
-        struct stat my_stat;
+        ACE_stat my_stat;
         if (ACE_OS::stat (publisher_trigger.c_str(), &my_stat) == 0) {
           // found the trigger file.
           break;

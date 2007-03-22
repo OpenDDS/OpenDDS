@@ -1,3 +1,12 @@
+Thu Mar 22 14:18:12 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/UpdateManager.cpp:
+          Include pre compiled headers.
+
+        * tests/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+          Use the portable variant of the structure used for quering file
+          stat().
+
 Thu Mar 22 13:46:57 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl: untabified
