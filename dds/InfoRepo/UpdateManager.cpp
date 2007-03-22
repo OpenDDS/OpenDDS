@@ -1,3 +1,5 @@
+#include "DcpsInfo_pch.h"
+
 #include "UpdateManager.h"
 
 UpdateManager::UpdateManager (void)
