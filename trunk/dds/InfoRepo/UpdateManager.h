@@ -14,15 +14,13 @@
 #ifndef _UPDATE_MANAGER_
 #define _UPDATE_MANAGER_
 
-#include "Update_export.h"
-
 #include "ace/Task.h"
 #include "ace/Service_Config.h"
 
 // forward declarations
 class TAO_DDS_DCPSInfo_i;
 
-class Update_Export UpdateManager : public ACE_Task_Base
+class UpdateManager : public ACE_Task_Base
 {
  public:
   UpdateManager (void);
@@ -51,10 +49,10 @@ class Update_Export UpdateManager : public ACE_Task_Base
   int fini (void);
 };
 
-ACE_STATIC_SVC_DECLARE_EXPORT (Update, UpdateManager)
-ACE_FACTORY_DECLARE (Update, UpdateManager)
+ACE_STATIC_SVC_DECLARE (UpdateManager)
+ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManager)
 
-class Update_Export UpdateManager_Loader
+class UpdateManager_Loader
 {
 public:
   static int init (void);
