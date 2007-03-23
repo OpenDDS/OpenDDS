@@ -45,7 +45,7 @@ UpdateManager_Loader::init (void)
     (ace_svc_desc_UpdateManager);
 }
 
-ACE_FACTORY_DEFINE (Update, UpdateManager)
+ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManager)
 ACE_STATIC_SVC_DEFINE (UpdateManager,
                          ACE_TEXT ("UpdateManager"),
                          ACE_SVC_OBJ_T,
