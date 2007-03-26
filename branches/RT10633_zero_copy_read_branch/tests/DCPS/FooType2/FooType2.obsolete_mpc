@@ -1,0 +1,22 @@
+project(DcpsFooType2) : orbsvcslib, portableserver {
+  libs        += TAO_DdsDcps
+  after       += DdsDcps
+  libout       = .
+  idlflags    += -Wb,export_macro=FooType_Export -Wb,export_include=footype_export.h
+  dynamicflags = FOOTYPE_BUILD_DLL
+  tagchecks   += Dcps
+  pch_header   =
+  pch_source   =
+
+  IDL_Files {
+    FooType.idl
+  }
+
+
+  Source_Files {
+    FooTypeSupportImpl.cpp
+    FooDataReaderImpl.cpp
+    FooDataWriterImpl.cpp
+  }
+}
+
