@@ -506,7 +506,8 @@ ACE_Message_Block*
     // block.
 
     ACE_NEW_RETURN (mb,
-                    ACE_Message_Block (sizeof (::<%SCOPE%><%TYPE%>)),
+                    marshaled_size_ ? marshaled_size_ :
+                                      _dcps_find_size(instance_data),
                     0);
   }
 

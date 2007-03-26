@@ -1,3 +1,16 @@
+Mon Mar 26 16:05:36 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        
+          Fixed a bug on registration sample marshalling when data type has 
+          unbounded size and registers with variable size data. The problem is
+          the serialization buffer does not allocate enough memory for the 
+          registered sample.
+
+        * DDS_release_notes.txt:
+        
+          Added the bug fix to release note.
+
 Fri Mar 23 15:13:43 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/UpdateManager.h:
