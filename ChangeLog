@@ -1,3 +1,9 @@
+Mon Mar 26 21:25:07 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * DDS_release_notes.txt:
+        
+          Add some known problems to the release notes.
+          
 Mon Mar 26 16:05:36 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

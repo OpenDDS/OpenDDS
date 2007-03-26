@@ -108,6 +108,18 @@ New to this version are the following changes:
   message. This would make publisher and subscriber not fully associated
   in inter-host test such as tests between windowsXP and Linux.
 
+=== known problem ===
+1. $DDS_ROOT/DevGuideExamples/DDS/Messenger/run_*_test.pl is not configured
+correctly for SimpleTCP.
+$DDS_ROOT/DevGuideExamples/DDS/Messenger/run_test.pl, however, is set up for
+the new SimpleTCP implementation.
+
+2. With certain combinations of DDS version, TAO version, and compiler
+version, singletons stopped working across shared-lib boundaries (code from
+each shared lib would get a different singleton).
+
+Note: #1 and #2 are resolved in the next release.
+
 =========================================================================
 
 Version 0.9 of TAO DDS.
@@ -526,6 +538,16 @@ of samples.
 
 =========================================================================
 ========= KNOWN LIMITATIONS ===============
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+An instance key must be a base type (not a complex type like array or struct).
+
+This limitation exists because the generated lessThan operator does not 
+currently handle complex types.
+
+This limitation can be worked around by specifying multiple keys such that
+all of the base types in the complex type are specified.
 
 -------------------------------------------------------------------------------
 ) Zero-copy reads (see "2.1.2.5.3.8 read" in the spec) is not supported
