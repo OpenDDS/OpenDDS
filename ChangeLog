@@ -1,3 +1,9 @@
+Mon Mar 26 21:52:05 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed a compliation error introduced earlier today.    
+
 Mon Mar 26 21:25:07 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * DDS_release_notes.txt:
