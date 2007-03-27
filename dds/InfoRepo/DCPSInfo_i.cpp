@@ -21,12 +21,13 @@
 
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (void)
+  : um_ (0)
 {
-  UpdateManager* um = ACE_Dynamic_Service<UpdateManager>::instance
+  um_ = ACE_Dynamic_Service<UpdateManager>::instance
     ("UpdateManager");
 
-  if (um != 0) {
-    um->add (this);
+  if (um_ != 0) {
+    um_->add (this);
   }
 }
 

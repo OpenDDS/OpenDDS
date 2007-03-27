@@ -1,26 +1,53 @@
+Tue Mar 27 14:25:40 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Move variable initialization into the constructor.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+          The InfoRepo holds a reference to the UpdateManager. The
+          UpdateManager is the gateway for all persistence and federation
+          services.
+
+        * dds/InfoRepo/Updater.h:
+        * dds/InfoRepo/Updater.inl:
+          Interfaces for the persistence/federation services.
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+          Concrete persistence implementation.
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+          Data types common to all updates.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+          This is a service object that acts as the gateway coordinating
+          the InfoRepo, persistence & federation services.
+
 Mon Mar 26 21:52:05 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
-          Fixed a compliation error introduced earlier today.    
+          Fixed a compliation error introduced earlier today.
 
 Mon Mar 26 21:25:07 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * DDS_release_notes.txt:
-        
+
           Add some known problems to the release notes.
-          
-Mon Mar 26 16:05:36 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+Mon Mar 26 16:05:36 UTC 2007  Pan Dan  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-        
-          Fixed a bug on registration sample marshalling when data type has 
+
+          Fixed a bug on registration sample marbling when data type has
           unbounded size and registers with variable size data. The problem is
-          the serialization buffer does not allocate enough memory for the 
+          the serialization buffer does not allocate enough memory for the
           registered sample.
 
         * DDS_release_notes.txt:
-        
+
           Added the bug fix to release note.
 
 Fri Mar 23 15:13:43 UTC 2007  Ciju John  <johnc@ociweb.com>
@@ -6812,3 +6839,5 @@ Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
           on the AAC-DDS-1_4_3_branch branch
           in cvs.ociweb.com:/cvs for the original
           developement history.
+
+         LocalWords:  UTC compliation txt

@@ -14,13 +14,14 @@
 #ifndef _UPDATE_MANAGER_
 #define _UPDATE_MANAGER_
 
-#include "ace/Task.h"
+#include "ace/Service_Object.h"
 #include "ace/Service_Config.h"
 
 // forward declarations
 class TAO_DDS_DCPSInfo_i;
+class Updater;
 
-class UpdateManager : public ACE_Task_Base
+class UpdateManager : public ACE_Service_Object
 {
  public:
   UpdateManager (void);
@@ -29,8 +30,10 @@ class UpdateManager : public ACE_Task_Base
 
   // mechanism for InfoRepo object to be registered.
   void add (TAO_DDS_DCPSInfo_i* info);
+  void add (Updater* updater);
 
-  virtual int svc (void);
+  void remove (const TAO_DDS_DCPSInfo_i* info);
+  void remove (const Updater* updater);
 
   /// Force a clean shutdown.
   void shutdown (void);
@@ -50,6 +53,7 @@ class UpdateManager : public ACE_Task_Base
 };
 
 ACE_STATIC_SVC_DECLARE (UpdateManager)
+
 ACE_FACTORY_DECLARE (ACE_Local_Service, UpdateManager)
 
 class UpdateManager_Loader
