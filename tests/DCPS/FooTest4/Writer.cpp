@@ -71,7 +71,8 @@ Writer::start ()
       sample.header_.message_id_ = ::TAO::DCPS::SAMPLE_DATA ;
       sample.header_.sequence_ = seq.value_ ;
       sample.header_.publication_id_ = 1 ;
-      sample.header_.source_timestamp_sec_ = now.sec() ;
+      sample.header_.source_timestamp_sec_ =
+		  static_cast<ACE_INT32> (now.sec ());
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000 ;
 
       sample.sample_ =  new ACE_Message_Block(sizeof(foo)) ;

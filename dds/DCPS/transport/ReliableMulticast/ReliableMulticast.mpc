@@ -1,4 +1,4 @@
-project : dcps {
+project : dcps, vc8_warnings {
   sharedname   = ReliableMulticast
   dynamicflags = RELIABLEMULTICAST_BUILD_DLL
   includes    += $(DDS_ROOT)/dds/DCPS/transport/ReliableMulticast

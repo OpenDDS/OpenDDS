@@ -69,7 +69,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   dr_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
 
-  dr_qos.liveliness.lease_duration.sec = max_blocking_time.sec() ;
+  dr_qos.liveliness.lease_duration.sec =
+	  static_cast<CORBA::Long> (max_blocking_time.sec ());
   dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
   ::DDS::DataReaderListener_var drl
