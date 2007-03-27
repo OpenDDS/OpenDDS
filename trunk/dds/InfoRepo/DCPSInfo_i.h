@@ -33,6 +33,9 @@
 // typedef declarations
 typedef ACE_Map_Manager< ::DDS::DomainId_t, DCPS_IR_Domain*, ACE_Null_Mutex> DCPS_IR_Domain_Map;
 
+// Forward declaration
+class UpdateManager;
+
 /**
  * @class TAO_DDS_DCPSInfo_i
  *
@@ -234,6 +237,7 @@ public:
 private:
 
   DCPS_IR_Domain_Map domains_;
+  UpdateManager* um_;
 };
 
 

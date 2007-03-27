@@ -15,10 +15,19 @@ UpdateManager::add (TAO_DDS_DCPSInfo_i* info)
   info_ = info;
 }
 
-int
-UpdateManager::svc (void)
+void
+UpdateManager::add (Updater* )
 {
-  return 0;
+}
+
+void
+UpdateManager::remove (const TAO_DDS_DCPSInfo_i* )
+{
+}
+
+void
+UpdateManager::remove (const Updater* )
+{
 }
 
 void
@@ -46,6 +55,7 @@ UpdateManager_Loader::init (void)
 }
 
 ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManager)
+
 ACE_STATIC_SVC_DEFINE (UpdateManager,
                          ACE_TEXT ("UpdateManager"),
                          ACE_SVC_OBJ_T,
@@ -53,3 +63,5 @@ ACE_STATIC_SVC_DEFINE (UpdateManager,
                          ACE_Service_Type::DELETE_THIS
                          | ACE_Service_Type::DELETE_OBJ,
                          0)
+
+ACE_STATIC_SVC_REQUIRE (UpdateManager)

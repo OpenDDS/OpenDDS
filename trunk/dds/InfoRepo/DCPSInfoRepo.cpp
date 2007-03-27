@@ -55,6 +55,9 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , listen_address_given_ (0)
     , use_bits_ (true)
 {
+  listen_address_str_ = ACE_LOCALHOST;
+  listen_address_str_ += ":2839";
+
   init (argc, argv);
 }
 
@@ -94,9 +97,6 @@ void
 InfoRepo::parse_args (int argc,
                       ACE_TCHAR *argv[])
 {
-  listen_address_str_ = ACE_LOCALHOST;
-  listen_address_str_ += ":2839";
-
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   const char* current_arg = 0;
