@@ -1,5 +1,6 @@
 // -*- C++ -*-
 
+#include "DcpsInfo_pch.h"
 #include "Updater.h"
 #include "UpdateManager.h"
 

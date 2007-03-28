@@ -49,22 +49,22 @@ class UpdateManager : public ACE_Service_Object
   // Methods inherited from the Updater
   //
 
-  virtual void unregisterCallback (void);
+  void unregisterCallback (void);
 
   // Request an image refresh to be sent to
   //  the specified callback (asynchronously).
-  virtual void requestImage (void);
+  void requestImage (void);
 
   // Add entities to be persisted.
-  virtual void add (const UTopic& topic);
-  virtual void add(const ParticipantData& participant);
-  virtual void add(const ActorData& actor);
+  void add (const UTopic& topic);
+  void add(const ParticipantData& participant);
+  void add(const ActorData& actor);
 
   // Remove an entity (but not children) from persistence.
-  virtual void remove(const ItemType& itemType, const IdType& id);
+  void remove(const ItemType& itemType, const IdType& id);
 
   // Persist updated Qos parameters for an entity.
-  virtual void updateQos(const ItemType& itemType, const IdType& id
+  void updateQos(const ItemType& itemType, const IdType& id
 			 , const QosType& qos);
 
  private:
@@ -76,10 +76,10 @@ class UpdateManager : public ACE_Service_Object
   // This isn't intended to be a shared library.
   //  Hiding these interfaces.
   /// Shared object initializer
-  int init (int argc, ACE_TCHAR *argv[]);
+  virtual int init (int argc, ACE_TCHAR *argv[]);
 
   /// Shared object finalizer
-  int fini (void);
+  virtual int fini (void);
 };
 
 ACE_STATIC_SVC_DECLARE (UpdateManager)
