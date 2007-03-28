@@ -19,6 +19,8 @@
 
 #include <string>
 
+class UpdateManager;
+
 class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
 {
  public:
@@ -79,6 +81,8 @@ class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
 
   std::string persistence_file_;
   bool overwrite_;
+
+  UpdateManager *um_;
 
   ALLOCATOR *allocator_;
 

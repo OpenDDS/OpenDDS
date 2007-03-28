@@ -72,6 +72,16 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
                                                          qos,
                                                          participantPtr);
 
+  if (um_)
+    {
+      UpdateManager::UTopic topic = {domainId, topicId, participantId
+                                     , const_cast<char*>(topicName)
+                                     , const_cast<char*>(dataTypeName)
+                                     , const_cast< ::DDS::TopicQos &>(qos)};
+
+      um_->add (topic);
+    }
+
   return topicStatus;
 }
 

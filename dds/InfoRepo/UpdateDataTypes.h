@@ -44,9 +44,9 @@ enum SpecificQosType
 
 // Typedefs:
 
-typedef char* BinStr;
+typedef std::vector <char> BinStr;
 
-typedef std::pair<ssize_t, BinStr> QosType;
+typedef std::pair <ItemType, BinStr> QosType;
 
 typedef long IdType;
 
@@ -56,37 +56,44 @@ typedef BinStr IORType;
 
 // Data Types:
 
-typedef struct {
+template <typename Q, typename S>
+struct TopicStrt {
   IdType domainId;
   IdType topicId; // Unique system-wide
   IdType particiapntId;
-  StringType name;
-  StringType dataType;
-  QosType topicQos;
-} TopicData;
+  S name;
+  S dataType;
+  Q topicQos;
+};
 
-typedef struct {
+template <typename Q>
+struct ParticipantStrt {
   IdType domainId;
   IdType participantId; // Unique system-wide
-  QosType participantQos;
-  IORType ior;
-} ParticipantData;
+  Q participantQos;
+};
 
-typedef struct {
+template <typename Q, typename B>
+struct ActorStrt {
   IdType actorId; // Unique system-wide
   IdType topicId;
   IdType participantId;
   ActorType type;
-  QosType pubsubQos;
-  QosType drdwQos;
-  //std::vector<TransportInterfaceInfo> transportInterfaceInfo;
-} ActorData;
+  B ior;
+  Q pubsubQos;
+  Q drdwQos;
+  //std::vector<TransportInterfaceInfo> transportInterfaceInfo; // TBD
+};
+
+typedef struct TopicStrt <QosType, StringType> TopicData;
+typedef struct ParticipantStrt <QosType> ParticipantData;
+typedef struct ActorStrt <QosType, IORType> ActorData;
 
 struct ImageData {
   unsigned long sequenceNumber;
-  std::vector<TopicData> topics;
-  std::vector<ParticipantData> participants;
-  std::vector<ActorData> actors;
+  std::vector <TopicData> topics;
+  std::vector <ParticipantData> participants;
+  std::vector <ActorData> actors;
 };
 
 #endif // _UPDATE_DATA_TYPES
