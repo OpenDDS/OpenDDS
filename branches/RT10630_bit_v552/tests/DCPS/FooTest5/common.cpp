@@ -235,39 +235,6 @@ int init_writer_transport ()
 {
   int status = 0;
 
-  if (mixed_trans || using_udp)
-    {
-      writer_udp_impl 
-        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_UDP, 
-                                                      "SimpleUdp", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-
-      TAO::DCPS::TransportConfiguration_rch writer_config 
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, "SimpleUdp");
-
-      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
-
-      if (!writer_address_given)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
-                    ACE_TEXT(" Must specify an address for UDP.\n")));
-          return 12;
-        }
-
-      ACE_INET_Addr writer_address (writer_address_str);
-      writer_udp_config->local_address_ = writer_address;
-
-      if (writer_udp_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-
   if (using_mcast)
     {
       writer_mcast_impl 
@@ -301,7 +268,7 @@ int init_writer_transport ()
         }
     }
 
-  if (using_reliable_multicast)
+  else if (using_reliable_multicast)
     {
       writer_reliable_multicast_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_RELIABLE_MULTICAST, 
@@ -334,34 +301,70 @@ int init_writer_transport ()
         }
     }
 
-  else if (mixed_trans || ! using_udp)
+  else 
+  {
+    if (mixed_trans || using_udp)
     {
-      writer_tcp_impl 
-        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                      "SimpleTcp", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+      writer_udp_impl 
+        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_UDP, 
+        "SimpleUdp", 
+        TAO::DCPS::DONT_AUTO_CONFIG);
 
       TAO::DCPS::TransportConfiguration_rch writer_config 
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, "SimpleUdp");
 
-      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
+        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
-      if (writer_address_given)
-        {
-          ACE_INET_Addr writer_address (writer_address_str);
-          writer_tcp_config->local_address_ = writer_address;
-        }
-        // else use default address - OS assigned.
+      if (!writer_address_given)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
+          ACE_TEXT(" Must specify an address for UDP.\n")));
+        return 12;
+      }
 
-      if (writer_tcp_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_writer_transport: pub TCP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
+      ACE_INET_Addr writer_address (writer_address_str);
+      writer_udp_config->local_address_ = writer_address;
+
+      if (writer_udp_impl->configure(writer_config.in()) != 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) init_writer_transport: pub UDP")
+          ACE_TEXT(" Failed to configure the transport.\n")));
+        status = 1;
+      }
+
+      if (using_udp)
+        return status;
     }
+
+    writer_tcp_impl 
+      = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
+                                                    "SimpleTcp", 
+                                                    TAO::DCPS::DONT_AUTO_CONFIG);
+
+    TAO::DCPS::TransportConfiguration_rch writer_config 
+      = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
+
+    TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+      = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+
+    if (writer_address_given)
+      {
+        ACE_INET_Addr writer_address (writer_address_str);
+        writer_tcp_config->local_address_ = writer_address;
+      }
+      // else use default address - OS assigned.
+
+    if (writer_tcp_impl->configure(writer_config.in()) != 0)
+      {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) init_writer_transport: pub TCP")
+                  ACE_TEXT(" Failed to configure the transport.\n")));
+        status = 1;
+      }
+   }
 
   return status;
 }

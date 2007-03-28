@@ -16,6 +16,7 @@ namespace TAO
         next_sample_ (0),
         next_instance_sample_ (0),
         next_send_sample_ (0),
+        previous_send_sample_ (0),
         send_listener_ (send_listner),
         space_available_ (false),
         handle_(handle),
@@ -51,8 +52,8 @@ namespace TAO
     void
     DataSampleList::enqueue_tail_next_sample (DataSampleListElement* sample)
     {
-      sample->previous_sample_ = 0;
-      sample->next_sample_ = 0;
+      //sample->previous_sample_ = 0;
+      //sample->next_sample_ = 0;
       
       ++size_ ;
       if( head_ == 0) 
@@ -96,6 +97,8 @@ namespace TAO
               head_->previous_sample_ = 0;
             }
 
+          stale->next_sample_ = 0;
+          stale->previous_sample_ = 0;
           return true;
         }
     }
@@ -104,9 +107,9 @@ namespace TAO
     void
     DataSampleList::enqueue_tail_next_send_sample (DataSampleListElement* sample)
     {
-      sample->previous_sample_ = 0;
-      sample->next_sample_ = 0;
-      sample->next_send_sample_ = 0;
+      //sample->previous_sample_ = 0;
+      //sample->next_sample_ = 0;
+      //sample->next_send_sample_ = 0;
 
       ++ size_ ;
       if(head_ == 0) 
@@ -117,8 +120,9 @@ namespace TAO
       else 
         {
           // Add to existing list.
-          sample->previous_sample_ = tail_;
-          tail_->next_sample_ = sample;
+          //sample->previous_sample_ = tail_;
+          //tail_->next_sample_ = sample;
+          sample->previous_send_sample_ = tail_;
           tail_->next_send_sample_ = sample ;
           tail_ = sample ;
         }
@@ -140,15 +144,24 @@ namespace TAO
       else
         {
           --size_ ;
+
           head_ = head_->next_send_sample_ ;
           if (head_ == 0)
             {
               tail_ = 0;
             }
-          else 
+          else
             {
-              head_->previous_sample_ = 0;
+              head_->previous_send_sample_ = 0;
             }
+          //else 
+          //  {
+          //    head_->previous_sample_ = 0;
+          //  }
+          
+          stale->next_send_sample_ = 0 ;
+          stale->previous_send_sample_ = 0 ;
+
           return true;
         }
     }
@@ -195,6 +208,8 @@ namespace TAO
             {
               tail_ = 0;
             }
+
+          stale->next_instance_sample_ = 0;
           return true;
         }
     }

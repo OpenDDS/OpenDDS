@@ -366,6 +366,8 @@ main (int argc, char *argv[])
                             9);
         }
 
+      TheTransportFactory->release();
+
       TheServiceParticipant->shutdown();
 
     }

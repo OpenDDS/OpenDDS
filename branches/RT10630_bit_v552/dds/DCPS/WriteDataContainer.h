@@ -298,6 +298,8 @@ namespace TAO
       /// still in use externally (by the transport).
       DataSampleList   released_data_ ;
 
+      DataSampleList   data_holder_;
+
       /// The individual instance queue threads in the
       /// data.
       PublicationInstanceMapType instances_;

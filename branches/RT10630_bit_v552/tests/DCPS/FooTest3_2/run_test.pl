@@ -90,14 +90,15 @@ $pub_id_fname="pub_id.txt";
 $pub_port=5555;
 $sub_port=6666;
 $sub_id=1;
+$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
 $DCPSREPO=new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file -NOBITS");
+                             "$repo_bit_conf -o $dcpsrepo_ior"
+                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $publisher=new PerlACE::Process ("FooTest3_publisher"

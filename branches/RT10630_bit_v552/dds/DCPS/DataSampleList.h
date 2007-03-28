@@ -111,6 +111,8 @@ namespace TAO
       /// Thread of data being sent.
       DataSampleListElement* next_send_sample_ ;
 
+      DataSampleListElement* previous_send_sample_;
+
       /// Pointer to object that will be informed when the data has
       /// been delivered.  This needs to be set prior to using the
       /// TransportInterface to send().

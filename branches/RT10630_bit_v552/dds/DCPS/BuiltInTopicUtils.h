@@ -206,7 +206,7 @@ namespace TAO {
               key_pos = 1;
             }
 
-          ::DDS::Subscriber_ptr bit_subscriber
+          ::DDS::Subscriber_var bit_subscriber
             = dp->get_builtin_subscriber () ;
 
           ::DDS::DataReader_var reader

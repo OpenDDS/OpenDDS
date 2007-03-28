@@ -442,7 +442,7 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 bool
 TAO::DCPS::TransportImpl::acked (RepoId pub_id)
 {
-  return this->pending_sub_map_.equal (this->acked_sub_map_, pub_id);
+  return this->pending_sub_map_.is_subset (this->acked_sub_map_, pub_id);
 }
 
 bool

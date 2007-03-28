@@ -21,6 +21,7 @@ $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
+$repo_bit_conf = "-NOBITS";
 
 # need $num_msgs_btwn_rec unread samples plus 20 for good measure
 # (possibly allocated by not yet queue by the transport because of greedy read).
@@ -32,8 +33,8 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBSvcConf repo.conf");
+                             "$repo_bit_conf -o $dcpsrepo_ior"
+                             . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";

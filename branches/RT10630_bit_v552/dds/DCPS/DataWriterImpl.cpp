@@ -194,34 +194,6 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
     this->publisher_servant_->add_associations( readers, this, qos_) ;
   }
 
-  if (TheTransientKludge->is_enabled ())
-    {
-      // The above condition is only true for the DCPSInfo Server.
-
-      // kludge over a kludge
-      // This sleep ensures that the newly created connection used
-      // by Built-In Topics is established end-to-end
-      // before the BIT data is resent.
-      // Atleast hopefully that will happen in 3 seconds.
-      // !!! this sleep caused other problems.
-      //     Consider this double kludge at a later time.
-      //     Could optimize this by only sleeping when
-      //     it is the first time the TransportBlob is seen
-      //     (in other words when the connection is being established).
-      //     But actaully we still need a small sleep because
-      //     although the conneciton is established already the
-      //     subscriber side association may not yet be established.
-      //     ACE_OS::sleep(2);
-
-      // This is a very limited implementation of
-      // DURABILITY.kind=TRANSIENT_LOCAL
-      // It suffers from resending the history to every subscription.
-
-      // Tell the WriteDataContainer to resend all sending/sent
-      // samples.
-      this->data_container_->reenqueue_all (this);
-      this->publisher_servant_->data_available(this) ;
-    }
 }
 
 
@@ -243,7 +215,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 
   ::DDS::InstanceHandleSeq handles;
 
-  if (! is_bit_)
+  if (! is_bit_ )
     {
       // Create the list of readers repo id.
       ReaderIdSeq rd_ids;
@@ -289,6 +261,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
   }
     }
 
+  {
   // protect subscription_handles_, publication_match_status_
   // and status changed flags.
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -323,6 +296,37 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
     }
 
   delete [] remote_associations;
+  }
+
+
+    if (TheTransientKludge->is_enabled ())
+    {
+      // The above condition is only true for the DCPSInfo Server.
+
+      // kludge over a kludge
+      // This sleep ensures that the newly created connection used
+      // by Built-In Topics is established end-to-end
+      // before the BIT data is resent.
+      // Atleast hopefully that will happen in 3 seconds.
+      // !!! this sleep caused other problems.
+      //     Consider this double kludge at a later time.
+      //     Could optimize this by only sleeping when
+      //     it is the first time the TransportBlob is seen
+      //     (in other words when the connection is being established).
+      //     But actaully we still need a small sleep because
+      //     although the conneciton is established already the
+      //     subscriber side association may not yet be established.
+      //     ACE_OS::sleep(2);
+
+      // This is a very limited implementation of
+      // DURABILITY.kind=TRANSIENT_LOCAL
+      // It suffers from resending the history to every subscription.
+
+      // Tell the WriteDataContainer to resend all sending/sent
+      // samples.
+      this->data_container_->reenqueue_all (this);
+      this->publisher_servant_->data_available(this) ;
+    }
 }
 
 
@@ -1457,7 +1461,7 @@ DataWriterImpl::repo_ids_to_instance_handles (const ReaderIdSeq& ids,
   CORBA::ULong cur_sz = ids.length ();
   // TBD: Remove the condition check after we change to default support
   //      builtin topics.
-  if (TheServiceParticipant->get_BIT () == true)
+  if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,

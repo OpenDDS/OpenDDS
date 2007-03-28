@@ -26,18 +26,20 @@ $mcast_addr='224.0.0.1:29803';
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
+                             "$repo_bit_conf -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";
 
 
-$sub_parameters = "-ORBSvcConf  mcast.conf -p $num_writers"
+$sub_parameters = "-ORBSvcConf  mcast.conf $app_bit_conf -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
@@ -59,7 +61,7 @@ print $Sub3->CommandLine(), "\n";
 $Sub4 = new PerlACE::Process ("subscriber", $sub_parameters );
 print $Sub4->CommandLine(), "\n";
 
-$pub_parameters = "-ORBSvcConf  mcast.conf -p 1"
+$pub_parameters = "-ORBSvcConf  mcast.conf $app_bit_conf -p 1"
 #              . " -DCPSDebugLevel 6"
               . " -r $num_readers" 
               . " -n $num_messages -d $data_size" 

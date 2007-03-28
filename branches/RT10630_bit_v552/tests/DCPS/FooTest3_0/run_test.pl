@@ -84,6 +84,8 @@ $pub_port = 5555;
 $sub_port = 6666;
 $sub_id = 1;
 $history_depth=10;
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
@@ -91,13 +93,13 @@ unlink $pubdriver_ior;
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-o $dcpsrepo_ior"
-                                  . " -d $domains_file -NOBITS");
+                                  "$repo_bit_conf -o $dcpsrepo_ior"
+                                  . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 
 $publisher = new PerlACE::Process ("FooTest3_publisher",
 				   "$svc_config "
-                                   . "-p $pub_id_fname:localhost:$pub_port "
+                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
                                    . "-s $sub_id:localhost:$sub_port "
                                    . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
                                    . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
@@ -107,7 +109,7 @@ print $publisher->CommandLine(), "\n";
 $subscriber = new PerlACE::Process ("FooTest3_subscriber",
 				    "$svc_config "
 				    . "-p $pub_id_fname:localhost:$pub_port "
-                                    . "-s $sub_id:localhost:$sub_port -n $num_writes "
+                                    . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
                                     . "-v file://$pubdriver_ior -x $shutdown_pub "
                                     . "-a $add_new_subscription -d $shutdown_delay_secs");
 
