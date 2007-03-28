@@ -83,7 +83,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
       if (status == ::DDS::RETCODE_OK)
         {
           num_reads++;
-
+ACE_DEBUG ((LM_DEBUG, "(%P|%t) reader %d %d\n", num_reads, samples[samples.length () - 1].sequence_num));
           if (samples[samples.length () - 1].sequence_num == -1)
             {
               int valid_msg_count = 0;

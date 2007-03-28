@@ -209,16 +209,16 @@ TAO::DCPS::RepoIdSetMap::marshal (bool byte_order)
 
 
 bool
-TAO::DCPS::RepoIdSetMap::equal (RepoIdSetMap& map, RepoId id)
+TAO::DCPS::RepoIdSetMap::is_subset (RepoIdSetMap& map, RepoId id)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","equal",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","is_subset",5);
 
   RepoIdSet_rch given_id_set = map.find (id);
   RepoIdSet_rch this_id_set = this->find (id);
 
   if (! given_id_set.is_nil () && ! this_id_set.is_nil ())
   {
-    return this_id_set->equal (* (given_id_set.in ()));
+    return this_id_set->is_subset (* (given_id_set.in ()));
   }
 
   return false;

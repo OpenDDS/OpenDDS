@@ -71,6 +71,11 @@ long total_samples = 500;
 
 int main(int argc, char *argv[])
 {
+       // Calling TheParticipantFactoryWithArgs before user application parse command
+       // line.
+       DDS::DomainParticipantFactory_var dpf =
+         TheParticipantFactoryWithArgs (argc, argv);
+
        bool useTCP = true;
        DomainId_t myDomain = 411;
 
@@ -105,11 +110,7 @@ int main(int argc, char *argv[])
        /* Try to set realtime scheduling class*/
        set_rt();
 
-
        /* Create participant */
-       DDS::DomainParticipantFactory_var dpf =
-         TheParticipantFactoryWithArgs (argc, argv);
-
        DDS::DomainParticipant_var dp =
               dpf->create_participant (myDomain,
                                        PARTICIPANT_QOS_DEFAULT, 
@@ -127,11 +128,11 @@ int main(int argc, char *argv[])
        /* Initialize the transports for publisher*/
        TAO::DCPS::TransportImpl_rch pub_tcp_impl;
        if (useTCP) {
-         TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
+         pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
                                                      "SimpleTcp", 
                                                      ::TAO::DCPS::AUTO_CONFIG);
         } else {
-         TheTransportFactory->create_transport_impl (UDP_IMPL_ID, 
+         pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID, 
                                                      "SimpleUdp", 
                                                      TAO::DCPS::DONT_AUTO_CONFIG);
          TAO::DCPS::TransportConfiguration_rch config 

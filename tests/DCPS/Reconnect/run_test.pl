@@ -95,7 +95,7 @@ $svc_config=" -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = new PerlACE::Process
     ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-     , "-NOBITS -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
+     , "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process
     ("subscriber"
      , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"

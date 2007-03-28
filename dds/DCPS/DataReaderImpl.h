@@ -333,6 +333,8 @@ namespace TAO
       void notify_subscription_lost (const WriterIdSeq& pubids);
       void notify_connection_deleted ();
 
+      bool is_bit () const;
+
     protected:
 
       // type specific DataReader's part of enable.

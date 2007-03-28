@@ -56,7 +56,7 @@ namespace TAO
         ACE_Message_Block* marshal (bool byte_order);
 
         /// Check if two RepoIdSetMaps have same contents.
-        bool equal (RepoIdSetMap& map, RepoId id);
+        bool is_subset (RepoIdSetMap& map, RepoId id);
         
         /// Demarshal the serialized data of a RepoIdSetMap. 
         int demarshal (ACE_Message_Block* acks, bool byte_order);

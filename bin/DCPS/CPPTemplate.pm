@@ -505,8 +505,8 @@ ACE_Message_Block*
   { // Don't use the cached allocator for the registered sample message
     // block.
 
-    ACE_NEW_RETURN (mb,
-                    ACE_Message_Block (sizeof (::<%SCOPE%><%TYPE%>)),
+    ACE_NEW_RETURN (mb, ACE_Message_Block (marshaled_size_ ? marshaled_size_ :
+                                           _dcps_find_size(instance_data)),
                     0);
   }
 
@@ -1978,7 +1978,7 @@ void
           this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
-  else
+  else if (! this->is_bit ())
   {
     ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ")

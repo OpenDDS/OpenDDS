@@ -12,6 +12,7 @@
 #include "Qos_Helper.h"
 #include "TopicImpl.h"
 #include "SubscriberImpl.h"
+#include "Transient_Kludge.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -276,80 +277,47 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
       wr_ids.length (wr_len);
 
       for (CORBA::ULong i = 0; i < wr_len; i++)
-	{
-	  wr_ids[i] = writers[i].writerId;
-	}
+      {
+        wr_ids[i] = writers[i].writerId;
+      }
 
-      // TBD: Remove the condition check after we change to default support
-      //      builtin topics.
-      if (TheServiceParticipant->get_BIT () == true)
-	{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-	  BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
-	    ::DDS::PublicationBuiltinTopicDataDataReader_var,
-	    ::DDS::PublicationBuiltinTopicDataSeq,
-	    WriterIdSeq > hh;
+      this->repo_ids_to_instance_handles (wr_ids, handles);
 
-	  ::DDS::ReturnCode_t ret =
-	      hh.repo_ids_to_instance_handles(participant_servant_,
-                                              BUILT_IN_PUBLICATION_TOPIC,
-                                              wr_ids,
-                                              handles);
+      ::POA_DDS::DataReaderListener* listener
+        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
 
-	  if (ret != ::DDS::RETCODE_OK)
-	    {
-	      ACE_ERROR ((LM_ERROR,
-			  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-			  ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
-	      return;
-	    }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-	}
-      else
-	{
-	  handles.length (wr_len);
-	  for (CORBA::ULong i = 0; i < wr_len; i++)
-	    {
-	      handles[i] = wr_ids[i];
-	    }
-	}
+      ::DDS::SubscriptionMatchStatus subscription_match_status;
+
+      ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+      wr_len = handles.length ();
+      CORBA::ULong pub_len = publication_handles_.length();
+      publication_handles_.length (pub_len + wr_len);
+
+      for (CORBA::ULong i = 0; i < wr_len; i++)
+      {
+        subscription_match_status_.total_count ++;
+        subscription_match_status_.total_count_change ++;
+        publication_handles_[pub_len + i] = handles[i];
+        subscription_match_status_.last_publication_handle = handles[i];
+      }
+
+      set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
+
+      subscription_match_status = subscription_match_status_;
+
+      if (listener != 0)
+      {
+        listener->on_subscription_match (dr_remote_objref_.in (),
+          subscription_match_status);
+
+        // TBD - why does the spec say to change this but not
+        // change the ChangeFlagStatus after a listener call?
+
+        // Client will look at it so next time it looks the change should be 0
+        subscription_match_status_.total_count_change = 0;
+
+      }
     }
-
-  ::POA_DDS::DataReaderListener* listener
-      = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
-
-  ::DDS::SubscriptionMatchStatus subscription_match_status;
-
-  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
-  CORBA::ULong wr_len = handles.length ();
-  CORBA::ULong pub_len = publication_handles_.length();
-  publication_handles_.length (pub_len + wr_len);
-
-  for (CORBA::ULong i = 0; i < wr_len; i++)
-    {
-      subscription_match_status_.total_count ++;
-      subscription_match_status_.total_count_change ++;
-      publication_handles_[pub_len + i] = handles[i];
-      subscription_match_status_.last_publication_handle = handles[i];
-    }
-
-  set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
-
-  subscription_match_status = subscription_match_status_;
-
-  if (listener != 0)
-    {
-      listener->on_subscription_match (dr_remote_objref_.in (),
-				       subscription_match_status);
-
-      // TBD - why does the spec say to change this but not
-      // change the ChangeFlagStatus after a listener call?
-
-      // Client will look at it so next time it looks the change should be 0
-      subscription_match_status_.total_count_change = 0;
-
-    }
-
 }
 
 void DataReaderImpl::remove_associations (
@@ -366,40 +334,7 @@ void DataReaderImpl::remove_associations (
 
   if (! is_bit_)
     {
-      // TBD: Remove the condition check after we change to default support
-      //      builtin topics.
-      if (TheServiceParticipant->get_BIT () == true)
-	{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-	  BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
-	    ::DDS::PublicationBuiltinTopicDataDataReader_var,
-	    ::DDS::PublicationBuiltinTopicDataSeq,
-	    WriterIdSeq > hh;
-
-	  ::DDS::ReturnCode_t ret
-	      = hh.repo_ids_to_instance_handles(participant_servant_,
-						BUILT_IN_PUBLICATION_TOPIC,
-						writers,
-						handles);
-
-	  if (ret != ::DDS::RETCODE_OK)
-	    {
-	      ACE_ERROR ((LM_ERROR,
-			  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
-			  ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
-	      return;
-	    }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-	}
-      else
-	{
-	  CORBA::ULong wr_len = writers.length ();
-	  handles.length (wr_len);
-	  for (CORBA::ULong i = 0; i < wr_len; i++)
-	    {
-	      handles[i] = writers[i];
-	    }
-	}
+      this->repo_ids_to_instance_handles (writers, handles);
     }
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
@@ -1528,15 +1463,18 @@ DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",5);
   SubscriptionLostStatus status;
 
-  this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+  if (! this->is_bit_)
+    {
+      this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-    = DataReaderListener::_narrow (this->listener_.in ());
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
-						status);
+      // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+      // is given to this DataReader then narrow() fails.
+      DataReaderListener_var the_listener
+        = DataReaderListener::_narrow (this->listener_.in ());
+      if (! CORBA::is_nil (the_listener.in ()))
+        the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
+        status);
+    }
 }
 
 
@@ -1544,17 +1482,20 @@ void
 DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_reconnected",5);
-  SubscriptionLostStatus status;
+  if (! this->is_bit_)
+  {
+    SubscriptionLostStatus status;
 
-  this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+    this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-    = DataReaderListener::_narrow (this->listener_.in ());
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
-					       status);
+    // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+    // is given to this DataReader then narrow() fails.
+    DataReaderListener_var the_listener
+      = DataReaderListener::_narrow (this->listener_.in ());
+    if (! CORBA::is_nil (the_listener.in ()))
+      the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
+      status);
+  }
 }
 
 
@@ -1562,17 +1503,21 @@ void
 DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",5);
-  SubscriptionLostStatus status;
+  
+  if (! this->is_bit_)
+  {
+    SubscriptionLostStatus status;
 
-  this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+    this->repo_ids_to_instance_handles (pubids, status.publication_handles);
 
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-    = DataReaderListener::_narrow (this->listener_.in ());
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
-					status);
+    // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+    // is given to this DataReader then narrow() fails.
+    DataReaderListener_var the_listener
+      = DataReaderListener::_narrow (this->listener_.in ());
+    if (! CORBA::is_nil (the_listener.in ()))
+      the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
+      status);
+  }
 }
 
 
@@ -1596,7 +1541,7 @@ DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids,
   CORBA::ULong cur_sz = ids.length ();
   // TBD: Remove the condition check after we change to default support
   //      builtin topics.
-  if (TheServiceParticipant->get_BIT () == true)
+  if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
@@ -1626,6 +1571,11 @@ DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids,
 	  hdls[i] = ids[i];
 	}
     }
+}
+
+bool DataReaderImpl::is_bit () const
+{
+  return this->is_bit_;
 }
 
 } // namespace DCPS
