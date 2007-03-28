@@ -1,3 +1,8 @@
+Wed Mar 28 14:38:10 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+	  Add missing header files. Caused problems on DOC builds.
+
 Wed Mar 28 14:11:05 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
