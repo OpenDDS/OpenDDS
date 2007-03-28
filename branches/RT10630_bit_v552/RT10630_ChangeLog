@@ -1,0 +1,140 @@
+Wed Mar 28 20:38:22 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\DdsDcpsInfrastructure.idl:
+        
+          Updated the DCPS_DATA_KEY definition for built-in-topic so it can
+          generate appropriate KeyLessThan method.
+
+Wed Mar 28 19:53:43 UTC 2007  Yan Dai  <dai_y@ociweb.com> - v571
+
+        * bin\DCPS\CPPTemplate.pm:
+        
+          Fixed a bug that an unbounded registration sampple serialization does not allocate
+          enought memory and made dispose ignore the case of bit sample not registered since 
+          it could hanppen.
+          
+        * dds\DCPS\DataSampleList.cpp:
+        * dds\DCPS\DataSampleList.inl:
+        * dds\DCPS\DataSampleList.h:
+          
+          Made the next_send_sample_/previous_send_sample link isolated from the 
+          next_sample_/previous_sample link. When inserting/deleting DataSampleElement to
+          one of the links will not change the other link.
+          
+        * dds\DCPS\DataReaderImpl.h:
+        
+          Added bit accessor.
+          
+        * dds\DCPS\WriteDataContainer.cpp:
+        * dds\DCPS\WriteDataContainer.h:
+        
+          Made all internal list(unsent, sending, released, sent) using 
+          next_send_sample/previous_send_sample link, instance sample list 
+          and waiting instance sample list using next_instance_sample link
+          and added the sample_holder which use next_sample/previous sample
+          link to hold all samples by the order of write.
+          
+        * dds\DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.cpp:
+        
+          Corrected the class name in a debug message.
+          
+        * dds\DCPS\transport\framework\TransportImpl.cpp:
+        * dds\DCPS\transport\framework\RepoIdSetMap.h:
+        * dds\DCPS\transport\framework\RepoIdSet.cpp:
+        * dds\DCPS\transport\framework\RepoIdSetMap.cpp:
+        * dds\DCPS\transport\framework\RepoIdSet.h:       
+          
+          Fixed a problem that the publisher fully association expect the
+          same repo set received as in pending association set. This will
+          fail when the subscriber creates multiple datareaders to the same
+          topic. The pending association set should be a subset of the 
+          fully association info from subscriber.
+           
+        * dds\DCPS\DataWriterImpl.cpp:
+        
+          Moved the reenqueue_all call that supports TRANSIENT_LOCAL from
+          add_associations to fully_association. This should avoid the
+          sample lost during fully association period.
+          
+        * dds\DCPS\BuiltInTopicUtils.h:
+        
+          Fixed memory leak of the bit_subscriber get from 
+          domainparticipant. 
+          
+        * dds\DCPS\Service_Participant.cpp:
+        * dds\DCPS\Service_Participant.h:
+        
+          Supported -DCPSBit option in command line and also in DCPS config.
+          Made the built-in-topic defaults be on and removed the set_BIT().
+                    
+        * dds\DCPS\DataReaderImpl.cpp:
+        
+          Made the bit datareader remove_association will not covert the repo id 
+          to the instance handler since the built-in-topic subscriber may 
+          already deactivated.
+        
+        * DevGuideExamples\DDS\Messenger\sub_udp.ini:
+        * DevGuideExamples\DDS\Messenger\run_corbaloc_test.pl:
+        * DevGuideExamples\DDS\Messenger\pub_mcast.ini:
+        * DevGuideExamples\DDS\Messenger\sub_mcast.ini:
+        * DevGuideExamples\DDS\Messenger\pub_udp.ini:
+        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        * DevGuideExamples\DDS\Messenger\run_ns_test.pl:
+        * performance-tests\DCPS\SimpleE2ETest\run_test_rejected.pl:
+        * performance-tests\DCPS\SimpleE2ETest\subscriber.cpp:
+        * performance-tests\DCPS\SimpleE2ETest\run_test_long.pl:
+        * performance-tests\DCPS\SimpleE2ETest\run_test.pl:
+        * performance-tests\DCPS\SimpleE2ETest\publisher.cpp:
+        * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
+        * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
+        * performance-tests\DCPS\SimpleLatency\run_test.pl:
+        * performance-tests\DCPS\TCPListenerTest\repo.conf:
+        * performance-tests\DCPS\TCPListenerTest\run_test-1p1s.pl:
+        * performance-tests\DCPS\TCPListenerTest\run_test-4p1s.pl:
+        * performance-tests\DCPS\TCPListenerTest\run_test-2p3s.pl:
+        * performance-tests\DCPS\TCPListenerTest\run_test-1p4s.pl:
+        * performance-tests\DCPS\TCPListenerTest\conf.ini:
+        * performance-tests\DCPS\McastListenerTest\run_test-1p1s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-1p4s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-2p3s.pl:
+        * performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
+        * performance-tests\DCPS\UDPListenerTest\run_test-1p1s.pl:
+        * performance-tests\DCPS\UDPListenerTest\run_test-1p4s.pl:
+        * performance-tests\DCPS\UDPListenerTest\run_test-2p3s.pl:
+        * performance-tests\DCPS\UDPListenerTest\run_test-4p1s.pl:
+        * performance-tests\DCPS\UDPNoKeyTest\Reader.cpp:
+        * performance-tests\DCPS\UDPNoKeyTest\run_test-2pubs.pl:
+        * performance-tests\DCPS\UDPNoKeyTest\run_test.pl:
+        * tests\DCPS\Messenger_IOGR_Imr\run_test.pl:
+        * tests\DCPS\unit\Main.cpp:
+        * tests\DCPS\unit\run_test.pl:
+        * tests\DCPS\Reconnect\run_test.pl:
+        * tests\DCPS\MultiTopicTest\run_test1.pl:
+        * tests\DCPS\MultiTopicTest\run_test2.pl:
+        * tests\DCPS\MultiTopicTest\run_test3.pl:
+        * tests\DCPS\MultiTopicTest\run_test.pl:
+        * tests\DCPS\DcpsIntegration\topic.cpp:
+        * tests\DCPS\DcpsIntegration\infrastructure.cpp:
+        * tests\DCPS\DcpsIntegration\run_test-topic.pl:
+        * tests\DCPS\DcpsIntegration\run_test-integration.pl:
+        * tests\DCPS\Messenger_Imr\pub.ini:
+        * tests\DCPS\Messenger_Imr\sub.ini:
+        * tests\DCPS\BuiltInTopic\main.cpp:
+        * tests\DCPS\sub_init_loop\run_test.pl:
+        * tests\DCPS\Messenger_ZeroCopy\run_test.pl:
+        * tests\DCPS\FooTest3_0\run_test.pl:
+        * tests\DCPS\FooTest3_1\run_test_nokey.pl:
+        * tests\DCPS\FooTest3_1\run_test.pl:
+        * tests\DCPS\FooTest4_0\run_test.pl:
+        * tests\DCPS\FooTest3_2\run_test.pl:
+        * tests\DCPS\FooTest5_0\main.cpp:
+        * tests\DCPS\FooTest5_0\run_test.pl:
+        * tests\DCPS\DCPSInfoRepo\run_test.pl:
+        * tests\DCPS\FooTest4\run_test.pl:
+        * tests\DCPS\FooTest5\common.cpp:
+        * tests\DCPS\FooTest5\run_test.pl:
+        * tests\DCPS\LivelinessTest\run_test.pl:
+        * tests\DCPS\MultiDPTest\run_test.pl:
+        
+          Fixed the tests to run with the bit turned on. All performance tests
+          and a few other tests do not use bit. 
