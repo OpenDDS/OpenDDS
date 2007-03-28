@@ -1,7 +1,31 @@
+Wed Mar 28 14:11:05 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+          Pass data downstream to persistence layer.
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+          Connect up the PersistenceUpdater with the upper layer
+          UpdateManager.
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+          Templatize the data structures. Allows for reusability.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+          Added interfaces for upstream communication.
+
+        * dds/InfoRepo/Updater.h:
+        * dds/InfoRepo/Updater.cpp:
+          Add cpp file. This got rid of a circular include dependency.
+
+        * dds/InfoRepo/Updater.inl:
+          Removed this file.
+
 Tue Mar 27 19:13:03 UTC 2007  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * tests/DCPS/Serializer/SerializerTest.cpp:
-        
+
           Changed some long double assignments, passed as an array
           of chars, for platforms where the size of the long
           double is less than 16 bytes, to use signed chars
@@ -9,15 +33,15 @@ Tue Mar 27 19:13:03 UTC 2007  Jeff Parsons <j.parsons@vanderbilt.edu>
           half the previous values were using all 8 bits. This
           change eliminates warnings on platforms/compilers
           where char is a signed type, for example Windows/vc8.
-          
+
         * tests/DCPS/FooTest4_0/Reader.cpp:
         * tests/DCPS/FooTest4/Writer.cpp:
-        
+
           Added explicit casts to eliminate truncation warnings
           in assignments of time_t to signed 32-bit integer types.
-          
+
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.mpc:
-        
+
           Added vc8_warnings.mpb as a base project to eliminate
           a vc8 warning about the parameters passed to std::copy.
 

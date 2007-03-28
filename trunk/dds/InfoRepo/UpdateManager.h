@@ -14,8 +14,12 @@
 #ifndef _UPDATE_MANAGER_
 #define _UPDATE_MANAGER_
 
+#include "Updater.h"
+
 #include "ace/Service_Object.h"
 #include "ace/Service_Config.h"
+
+#include <set>
 
 // forward declarations
 class TAO_DDS_DCPSInfo_i;
@@ -24,6 +28,8 @@ class Updater;
 class UpdateManager : public ACE_Service_Object
 {
  public:
+  typedef struct TopicStrt < ::DDS::TopicQos &, char*> UTopic;
+
   UpdateManager (void);
 
   virtual ~UpdateManager (void);
@@ -32,16 +38,40 @@ class UpdateManager : public ACE_Service_Object
   void add (TAO_DDS_DCPSInfo_i* info);
   void add (Updater* updater);
 
-  void remove (const TAO_DDS_DCPSInfo_i* info);
+  // Mechanism to register Updaters/InfoRepo
+  void remove ();
   void remove (const Updater* updater);
 
   /// Force a clean shutdown.
   void shutdown (void);
 
-  // Mechanism to register Updaters.
+  //
+  // Methods inherited from the Updater
+  //
+
+  virtual void unregisterCallback (void);
+
+  // Request an image refresh to be sent to
+  //  the specified callback (asynchronously).
+  virtual void requestImage (void);
+
+  // Add entities to be persisted.
+  virtual void add (const UTopic& topic);
+  virtual void add(const ParticipantData& participant);
+  virtual void add(const ActorData& actor);
+
+  // Remove an entity (but not children) from persistence.
+  virtual void remove(const ItemType& itemType, const IdType& id);
+
+  // Persist updated Qos parameters for an entity.
+  virtual void updateQos(const ItemType& itemType, const IdType& id
+			 , const QosType& qos);
 
  private:
+  typedef std::set <Updater*> Updaters;
+
   TAO_DDS_DCPSInfo_i* info_;
+  Updaters updaters_;
 
   // This isn't intended to be a shared library.
   //  Hiding these interfaces.

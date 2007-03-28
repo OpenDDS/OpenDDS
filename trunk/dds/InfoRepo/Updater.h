@@ -57,6 +57,4 @@ class UpdaterBase : public Updater
   LockType um_lock_;
 };
 
-#include "Updater.inl"
-
 #endif // _UPDATER_

@@ -1,9 +1,13 @@
+#include "DcpsInfo_pch.h"
+
 #include "PersistenceUpdater.h"
+#include "UpdateManager.h"
 
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_strings.h"
 #include "ace/Svc_Handler.h"
+#include "ace/Dynamic_Service.h"
 
 PersistenceUpdater::IdType_ExtId::IdType_ExtId ()
 {}
@@ -35,9 +39,12 @@ PersistenceUpdater::IdType_ExtId::hash (void) const
 };
 
 
+
+
 PersistenceUpdater::PersistenceUpdater (void)
   : persistence_file_ ("InforepoPersist")
     , overwrite_ (true)
+    , um_ (0)
 { }
 
 PersistenceUpdater::~PersistenceUpdater (void)
@@ -70,6 +77,17 @@ void* createIndex (const std::string& tag, PersistenceUpdater::ALLOCATOR& alloca
 int
 PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
 {
+  // discover the UpdateManager
+  um_ = ACE_Dynamic_Service<UpdateManager>::instance
+    ("UpdateManager");
+
+  if (um_ == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater initialization failed. "
+                "No UpdateManager discovered.\n"));
+    return -1;
+  }
+  um_->add (this);
+
   this->parse (argc, argv);
 
   ACE_MMAP_Memory_Pool::OPTIONS options (ACE_DEFAULT_BASE_ADDR);
@@ -150,6 +168,7 @@ PersistenceUpdater::svc (void)
 void
 PersistenceUpdater::requestImage (void)
 {
+  // TBD
 }
 
 void
