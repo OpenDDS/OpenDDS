@@ -52,14 +52,14 @@ class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
                                              , TAO_SYNCH_MUTEX> > ALLOCATOR;
 
   PersistenceUpdater (void);
-  ~PersistenceUpdater (void);
+  virtual ~PersistenceUpdater (void);
 
-  int init (int argc, ACE_TCHAR *argv[]);
+  virtual int init (int argc, ACE_TCHAR *argv[]);
 
   /// Shared object finalizer
-  int fini (void);
+  virtual int fini (void);
 
-  int svc (void);
+  virtual int svc (void);
 
   // Request an image refresh to be sent to
   //  the specified callback (asynchronously).

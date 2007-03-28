@@ -1,3 +1,12 @@
+Wed Mar 28 15:28:05 UTC 2007  Ciju John  <johnc@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/UpdateManager.h:
+          Fix minor class inheritance issues.
+
+        * dds/InfoRepo/Updater.cpp:
+          Add missing pch header file.
+
 Wed Mar 28 14:38:10 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/PersistenceUpdater.h:
