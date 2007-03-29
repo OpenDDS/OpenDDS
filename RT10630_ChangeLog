@@ -1,3 +1,23 @@
+Thu Mar 29 20:59:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\transport\framework\TransportImpl.cpp:
+        * dds\DCPS\transport\framework\TransportFactory.h:
+        * dds\DCPS\transport\framework\TransportFactory.cpp:
+        
+          Made the TransportFactory create a new reactor for different
+          transport instance. With a single reactor thread, the input of
+          one transport will be blocked while another transport is handling 
+          input. This would solve the problem that lookup instance handle 
+          by repo id fail via built-in-topic datareader during 
+          fully_association.
+
+        * tests\DCPS\FooTest3_1\run_test_nokey.pl:
+        * tests\DCPS\FooTest3_1\run_test.pl:
+        * tests\DCPS\FooTest3_2\run_test.pl:
+        
+          Disable BIT on these tests since the subscriber does not request 
+          an id from DCPSInfoRepo.
+
 Wed Mar 29 06:16:17 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\WriteDataContainer.cpp:
