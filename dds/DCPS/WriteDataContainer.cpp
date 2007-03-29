@@ -366,7 +366,7 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
   // by transport.  We are now been notified by transport, so we can
   // now release the element.
   //
-  if (released_data_.dequeue_next_sample (sample))
+  if (released_data_.dequeue_next_send_sample (sample))
   {
     release_buffer( sample) ;
     return;
@@ -429,7 +429,7 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
   }
   else
   {
-    sent_data_.enqueue_tail_next_sample (sample);
+    sent_data_.enqueue_tail_next_send_sample (sample);
   }
 }
 
@@ -473,7 +473,7 @@ WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail_next_send_sample (sample);
   }
-  else if (released_data_.dequeue_next_sample (sample) == true)
+  else if (released_data_.dequeue_next_send_sample (sample) == true)
   {
     // The remove_sample is requested when sample list size
     // reaches limit. In this case, the oldest sample is
@@ -506,7 +506,7 @@ WriteDataContainer::remove_oldest_sample (
     ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
-      ACE_TEXT("dequeue_head_next_instance_sample failed\n")),
+      ACE_TEXT("dequeue_head_next_sample failed\n")),
       ::DDS::RETCODE_ERROR);
   }
 
@@ -526,9 +526,9 @@ WriteDataContainer::remove_oldest_sample (
   // Locate the head of the list that the stale data is in.
   //
   DataSampleListElement* head = stale ;
-  while( head->previous_sample_ != 0)
+  while( head->previous_send_sample_ != 0)
   {
-    head = head->previous_sample_ ;
+    head = head->previous_send_sample_ ;
   }
 
   //
@@ -547,7 +547,7 @@ WriteDataContainer::remove_oldest_sample (
     // in use, and we need to wait until it is told by the transport.
     //
     result = this->sending_data_.dequeue_next_send_sample (stale);
-    released_data_.enqueue_tail_next_sample (stale);
+    released_data_.enqueue_tail_next_send_sample (stale);
     released = false;
   }
   else if( head == this->sent_data_.head_)
@@ -555,7 +555,7 @@ WriteDataContainer::remove_oldest_sample (
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->sent_data_.dequeue_next_sample (stale) ;
+    result = this->sent_data_.dequeue_next_send_sample (stale) ;
     release_buffer(stale) ;
     released = true;
   }
@@ -565,7 +565,7 @@ WriteDataContainer::remove_oldest_sample (
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->unsent_data_.dequeue_next_sample (stale) ;
+    result = this->unsent_data_.dequeue_next_send_sample (stale) ;
     release_buffer(stale) ;
     released = true;
   }
@@ -583,7 +583,7 @@ WriteDataContainer::remove_oldest_sample (
     ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
-      ACE_TEXT("dequeue_next_sample from internal list failed.\n")),
+      ACE_TEXT("dequeue_next_send_sample from internal list failed.\n")),
       ::DDS::RETCODE_ERROR);
 
   }
@@ -721,12 +721,18 @@ WriteDataContainer::obtain_buffer (
   {
     release_buffer (element);
   }
+  else
+  {
+    data_holder_.enqueue_tail_next_sample (element);
+  }
+
   return ret;
 }
 
 void
 WriteDataContainer::release_buffer (DataSampleListElement* element)
 {
+  data_holder_.dequeue_next_sample (element);
   // Release the memeory to the allocator.
   ACE_DES_FREE (element,
     sample_list_element_allocator_.free,

@@ -1,3 +1,13 @@
+Wed Mar 29 06:16:17 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\WriteDataContainer.cpp:
+        
+          A wrong version was committed, now commit the correct version.
+        
+        * dds\DCPS\Service_Participant.h:
+          
+          Updated comments for set_ORB().
+
 Wed Mar 28 20:38:22 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\DdsDcpsInfrastructure.idl:

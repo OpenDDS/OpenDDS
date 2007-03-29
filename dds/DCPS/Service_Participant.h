@@ -63,7 +63,9 @@ namespace TAO
       /** Lanch a thread to run the orb. **/
       virtual int svc ();
 
-      /** Client provides an ORB for the ::DDS client to use. **/
+      /** Client provides an ORB for the ::DDS client to use.
+      **  Note the user is responsible to run the ORB.
+      **/
       int set_ORB (CORBA::ORB_ptr orb);
 
       /** Get the ORB used by ::DDS.
