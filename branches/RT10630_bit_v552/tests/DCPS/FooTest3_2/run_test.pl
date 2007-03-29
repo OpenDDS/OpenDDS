@@ -30,6 +30,8 @@ $receive_dalay_msec=0;
 $check_data_dropped=0;
 $publisher_running_sec=20;
 $subscriber_running_sec=20;
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 # multiple instances test
 if ($ARGV[0] eq 'mi') {
@@ -90,7 +92,6 @@ $pub_id_fname="pub_id.txt";
 $pub_port=5555;
 $sub_port=6666;
 $sub_id=1;
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
@@ -103,7 +104,7 @@ $DCPSREPO=new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $publisher=new PerlACE::Process ("FooTest3_publisher"
 				 , "$svc_config"
-                                 . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                 . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                  . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
                                  . " -m $multiple_instance -i $num_writes_per_thread "
                                  . " -n $max_samples_per_instance -d $history_depth"
@@ -114,7 +115,7 @@ print $publisher->CommandLine(), "\n";
 
 $subscriber=new PerlACE::Process ("FooTest3_subscriber",
 				  , "$svc_config"
-                                  . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                  . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
 	                                . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec");
 
 print $subscriber->CommandLine(), "\n";

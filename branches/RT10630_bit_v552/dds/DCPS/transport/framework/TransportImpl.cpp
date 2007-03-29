@@ -47,6 +47,12 @@ void
 TAO::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",5);
+ 
+  if (! this->reactor_task_.is_nil ())
+  {
+    this->reactor_task_->stop ();
+    this->reactor_task_ = 0;  
+  }
 
   this->pre_shutdown_i();
 
