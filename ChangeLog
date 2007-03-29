@@ -1,3 +1,12 @@
+Thu Mar 29 15:26:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config-legacy:
+        * MPC/config-legacy/README.txt:
+        * MPC/config-legacy/vc8_warnings.mpb:
+
+          Added a new directory that will hold MPC config files needed to build
+          DDS with older versions of ACE+TAO.  See the README.txt for details.
+
 Wed Mar 28 15:28:05 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/PersistenceUpdater.h:
@@ -10,7 +19,7 @@ Wed Mar 28 15:28:05 UTC 2007  Ciju John  <johnc@ociweb.com>
 Wed Mar 28 14:38:10 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/PersistenceUpdater.h:
-	  Add missing header files. Caused problems on DOC builds.
+          Add missing header files. Caused problems on DOC builds.
 
 Wed Mar 28 14:11:05 UTC 2007  Ciju John  <johnc@ociweb.com>
 
@@ -115,7 +124,7 @@ Fri Mar 23 15:13:43 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * dds/InfoRepo/UpdateManager.h:
         * dds/InfoRepo/UpdateManager.cpp:
-	  Made the UpdateManager a local service.
+          Made the UpdateManager a local service.
 
         * dds/InfoRepo/Update_export.h:
           Removed this file.
