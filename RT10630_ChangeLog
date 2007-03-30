@@ -1,3 +1,20 @@
+Fri Mar 30 16:21:25 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\DataReaderImpl.h:
+        * dds\DCPS\DataWriterImpl.cpp:
+        * dds\DCPS\DataWriterImpl.h:
+        * dds\DCPS\DataReaderImpl.cpp:
+
+          Fixed a problem that remove_association will fail look for
+          the bit information. A RepoId->InstanceHandler map is added 
+          to cache the info retrieved upon add_association, any operation
+          after will look the cache to get the instance handler for 
+          listener callback.
+          
+        * dds\DCPS\BuiltInTopicUtils.h:
+
+         Changed the fail return to RETCODE_ERROR.
+          
 Thu Mar 29 20:59:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\transport\framework\TransportImpl.cpp:

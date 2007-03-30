@@ -382,10 +382,16 @@ namespace TAO
 
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t         next_handle_;
+
     private:
 
-      /// Convert the publication repo ids to the publication handle.
-      void repo_ids_to_instance_handles (const WriterIdSeq& ids,
+      /// Lookup the instance handles by the publication repo ids 
+      /// via the bit datareader.
+      bool bit_lookup_instance_handles (const WriterIdSeq& ids,
+                                         ::DDS::InstanceHandleSeq & hdls);
+
+      /// Lookup the cache to get the instance handle by the publication repo ids.
+      bool cache_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
       friend class WriterInfo;
@@ -407,7 +413,15 @@ namespace TAO
 
       ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
 
+      typedef ACE_Hash_Map_Manager_Ex<RepoId,
+                                      DDS::InstanceHandle_t,
+                                      ACE_Hash<RepoId>,
+                                      ACE_Equal_To<RepoId>,
+                                      ACE_Null_Mutex>        RepoIdToHandleMap;
+
+      RepoIdToHandleMap               id_to_handle_map_;
       ::DDS::InstanceHandleSeq        publication_handles_;
+
 
       // Status conditions.
       ::DDS::LivelinessChangedStatus        liveliness_changed_status_ ;
