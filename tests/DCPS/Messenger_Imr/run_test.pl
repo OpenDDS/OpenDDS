@@ -99,7 +99,7 @@ if (SpawnWait($DCPSREPO, $dcpsrepo_ior, 30) != 0) {
     exit 1;
 }
 
-#RunImRUtil("shutdown InfoRepo");
+RunImRUtil("shutdown InfoRepo");
 # The Info Repo can be killed once the IOR has been generated.
 $DCPSREPO->Kill();
 
