@@ -178,21 +178,21 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
 
   if (entity_deleted_ == true)
-    {
-      if (DCPS_debug_level >= 1)
-	ACE_DEBUG ((LM_DEBUG,
-		    ACE_TEXT("(%P|%t) DataReaderImpl::add_associations")
-		    ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
-      return;
-    }
+  {
+    if (DCPS_debug_level >= 1)
+      ACE_DEBUG ((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations")
+      ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
+    return;
+  }
 
   ::DDS::InstanceHandleSeq handles;
 
   if (0 == subscription_id_)
-    {
-      // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
-      subscription_id_ = yourId;
-    }
+  {
+    // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
+    subscription_id_ = yourId;
+  }
 
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
@@ -200,69 +200,69 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
     // keep track of writers associate with this reader
     CORBA::ULong wr_len = writers.length ();
     for (CORBA::ULong i = 0; i < wr_len; i++)
+    {
+      PublicationId writer_id = writers[i].writerId;
+      WriterInfo info(this, writer_id);
+      if (this->writers_.bind(writer_id, info) != 0)
       {
-	PublicationId writer_id = writers[i].writerId;
-	WriterInfo info(this, writer_id);
-	if (this->writers_.bind(writer_id, info) != 0)
-	  {
-	    ACE_ERROR((LM_ERROR,
-		       "(%P|%t) DataReaderImpl::add_associations: "
-		       "ERROR: Unable to insert writer publisher_id %d.\n",
-		       writer_id));
-	  }
-
-	// TBD should we set the status flag?
-
-	liveliness_changed_status_.active_count++;
-	// don't increment the change count because we don't call the listner
-	// TBD - does this make sense?
-	//liveliness_changed_status_.active_count_change++;
-
-	// inactive count remains the same - this is a new writer
-	//liveliness_changed_status_.inactive_count xx;
-	//liveliness_changed_status_.inactive_count_change xx;
-
-	if (liveliness_changed_status_.active_count < 0)
-	  {
-	    ACE_ERROR ((LM_ERROR,
-			ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-			ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
-	    return;
-	  }
-	if (liveliness_changed_status_.inactive_count < 0)
-	  {
-	    ACE_ERROR ((LM_ERROR,
-			ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-			ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
-	    return;
-	  }
-	if (this->writers_.current_size () !=
-	    unsigned (liveliness_changed_status_.active_count +
-		      liveliness_changed_status_.inactive_count) )
-	  {
-	    ACE_ERROR ((LM_ERROR,
-			ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-			ACE_TEXT(" liveliness count does not match the number of writers.\n")));
-	    return;
-	  }
-
-	//TBD - I don't think we should call the listner->on_liveliness_changed
-	//      even though this new association is "alive".
-	//      ?? or is it not alive until the first sample is recieved?
-
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) DataReaderImpl::add_associations: "
+          "ERROR: Unable to insert writer publisher_id %d.\n",
+          writer_id));
       }
+
+      // TBD should we set the status flag?
+
+      liveliness_changed_status_.active_count++;
+      // don't increment the change count because we don't call the listner
+      // TBD - does this make sense?
+      //liveliness_changed_status_.active_count_change++;
+
+      // inactive count remains the same - this is a new writer
+      //liveliness_changed_status_.inactive_count xx;
+      //liveliness_changed_status_.inactive_count_change xx;
+
+      if (liveliness_changed_status_.active_count < 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+          ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
+        return;
+      }
+      if (liveliness_changed_status_.inactive_count < 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+          ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
+        return;
+      }
+      if (this->writers_.current_size () !=
+        unsigned (liveliness_changed_status_.active_count +
+        liveliness_changed_status_.inactive_count) )
+      {
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+          ACE_TEXT(" liveliness count does not match the number of writers.\n")));
+        return;
+      }
+
+      //TBD - I don't think we should call the listner->on_liveliness_changed
+      //      even though this new association is "alive".
+      //      ?? or is it not alive until the first sample is recieved?
+
+    }
 
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
-      {
-	// this call will start the timer if it is not already set
-	ACE_Time_Value now = ACE_OS::gettimeofday ();
-	if (DCPS_debug_level >= 5)
-	  ACE_DEBUG((LM_DEBUG,
-		     "(%P|%t) DataReaderImpl::add_associations"
-		     " Starting/resetting liveliness timer for reader %d\n",
-		     subscription_id_ ));
-	this->handle_timeout (now, this);
-      }
+    {
+      // this call will start the timer if it is not already set
+      ACE_Time_Value now = ACE_OS::gettimeofday ();
+      if (DCPS_debug_level >= 5)
+        ACE_DEBUG((LM_DEBUG,
+        "(%P|%t) DataReaderImpl::add_associations"
+        " Starting/resetting liveliness timer for reader %d\n",
+        subscription_id_ ));
+      this->handle_timeout (now, this);
+    }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
 
     // add associations to the transport before using
@@ -281,7 +281,8 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
         wr_ids[i] = writers[i].writerId;
       }
 
-      this->repo_ids_to_instance_handles (wr_ids, handles);
+      if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
+        return;
 
       ::POA_DDS::DataReaderListener* listener
         = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
@@ -298,6 +299,12 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
         subscription_match_status_.total_count ++;
         subscription_match_status_.total_count_change ++;
         publication_handles_[pub_len + i] = handles[i];
+        if (id_to_handle_map_.bind (wr_ids[i], handles[i]) != 0)
+        {
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataReaderImpl::add_associations "
+            "insert %d - %X to id_to_handle_map_ failed \n", wr_ids[i], handles[i]));
+          return;
+        }
         subscription_match_status_.last_publication_handle = handles[i];
       }
 
@@ -320,6 +327,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
     }
 }
 
+
 void DataReaderImpl::remove_associations (
 					  const TAO::DCPS::WriterIdSeq & writers,
 					  ::CORBA::Boolean notify_lost
@@ -332,101 +340,107 @@ void DataReaderImpl::remove_associations (
 
   ::DDS::InstanceHandleSeq handles;
 
-  if (! is_bit_)
-    {
-      this->repo_ids_to_instance_handles (writers, handles);
-    }
-
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
   // keep track of writers associate with this reader
   CORBA::ULong wr_len = writers.length ();
   for (CORBA::ULong i = 0; i < wr_len; i++)
+  {
+    PublicationId writer_id = writers[i];
+
+    int was_alive = 0;
+    WriterMapType::ENTRY* entry;
+    if (this->writers_.find(writer_id, entry)  == 0)
+      was_alive = entry->int_id_.is_alive ();
+
+    if (this->writers_.unbind(writer_id) != 0)
     {
-      PublicationId writer_id = writers[i];
-
-      int was_alive = 0;
-      WriterMapType::ENTRY* entry;
-      if (this->writers_.find(writer_id, entry)  == 0)
-	was_alive = entry->int_id_.is_alive ();
-
-      if (this->writers_.unbind(writer_id) != 0)
-	{
-	  ACE_ERROR((LM_ERROR,
-		     "(%P|%t) DataReaderImpl::remove_associations: "
-		     "ERROR: Unable to remove writer publisher_id %d.\n",
-		     writer_id));
-	}
-
-      // No need to cancel the liveliness timer becaue it will
-      // have no impact if there are no writers or existing writers are alive
-
-      //TBD ? should we tell the sample instances that the writer has been removed?
-
-      //TBD should we set the status flag?
-
-      if (was_alive)
-	{
-	  liveliness_changed_status_.active_count--;
-	  liveliness_changed_status_.active_count_change--;
-	}
-      else
-	{
-	  liveliness_changed_status_.inactive_count--;
-	  liveliness_changed_status_.inactive_count_change--;
-	}
-
-      if (liveliness_changed_status_.active_count < 0)
-	{
-	  ACE_ERROR ((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		      ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
-	  return;
-	}
-      if (liveliness_changed_status_.inactive_count < 0)
-	{
-	  ACE_ERROR ((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		      ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
-	  return;
-	}
-      if (this->writers_.current_size () !=
-	  unsigned (liveliness_changed_status_.active_count +
-                    liveliness_changed_status_.inactive_count) )
-	{
-	  ACE_ERROR ((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		      ACE_TEXT(" liveliness count does not match the number of writers.\n")));
-	  return;
-	}
-
-      //TBD - I don't think we should call the listner->on_liveliness_changed
-      //      even though this write is dead because it is removed.
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) DataReaderImpl::remove_associations: "
+        "ERROR: Unable to remove writer publisher_id %d.\n",
+        writer_id));
     }
 
-  CORBA::ULong pubed_len = publication_handles_.length();
-  //CORBA::ULong wr_len = handles.length();
-  for (CORBA::ULong wr_index = 0; wr_index < wr_len; wr_index++)
+    // No need to cancel the liveliness timer becaue it will
+    // have no impact if there are no writers or existing writers are alive
+
+    //TBD ? should we tell the sample instances that the writer has been removed?
+
+    //TBD should we set the status flag?
+
+    if (was_alive)
+    {
+      liveliness_changed_status_.active_count--;
+      liveliness_changed_status_.active_count_change--;
+    }
+    else
+    {
+      liveliness_changed_status_.inactive_count--;
+      liveliness_changed_status_.inactive_count_change--;
+    }
+
+    if (liveliness_changed_status_.active_count < 0)
+    {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
+      return;
+    }
+    if (liveliness_changed_status_.inactive_count < 0)
+    {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
+      return;
+    }
+    if (this->writers_.current_size () !=
+      unsigned (liveliness_changed_status_.active_count +
+      liveliness_changed_status_.inactive_count) )
+    {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT(" liveliness count does not match the number of writers.\n")));
+      return;
+    }
+
+    //TBD - I don't think we should call the listner->on_liveliness_changed
+    //      even though this write is dead because it is removed.
+  }
+
+  if (! is_bit_)
+  {
+    if (this->cache_lookup_instance_handles (writers, handles) == false)
+      return;
+
+    CORBA::ULong pubed_len = publication_handles_.length();
+    //CORBA::ULong wr_len = handles.length();
+    for (CORBA::ULong wr_index = 0; wr_index < wr_len; wr_index++)
     {
 
       for (CORBA::ULong pubed_index = 0;
-	   pubed_index < pubed_len;
-	   pubed_index++)
-	{
-	  if (publication_handles_[pubed_index] == handles[wr_index])
-	    {
-	      // move last element to this position.
-	      if (pubed_index < pubed_len - 1)
-		{
-		  publication_handles_[pubed_index]
-		    = publication_handles_[pubed_len - 1];
-		}
-	      pubed_len --;
-	      publication_handles_.length (pubed_len);
-	      break;
-	    }
-	}
+        pubed_index < pubed_len;
+        pubed_index++)
+      {
+        if (publication_handles_[pubed_index] == handles[wr_index])
+        {
+          // move last element to this position.
+          if (pubed_index < pubed_len - 1)
+          {
+            publication_handles_[pubed_index]
+            = publication_handles_[pubed_len - 1];
+          }
+          pubed_len --;
+          publication_handles_.length (pubed_len);
+          break;
+        }
+      }
     }
+
+    for (CORBA::ULong i = 0; i < wr_len; ++i)
+    {
+      id_to_handle_map_.unbind (writers[i]);
+    }
+  }
 
   this->subscriber_servant_->remove_associations(writers);
 
@@ -1465,7 +1479,8 @@ DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
 
   if (! this->is_bit_)
     {
-      this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+      if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
+        return;
 
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
       // is given to this DataReader then narrow() fails.
@@ -1482,11 +1497,13 @@ void
 DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_reconnected",5);
+
   if (! this->is_bit_)
   {
     SubscriptionLostStatus status;
 
-    this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+    if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
+      return;
 
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
@@ -1508,7 +1525,8 @@ DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
   {
     SubscriptionLostStatus status;
 
-    this->repo_ids_to_instance_handles (pubids, status.publication_handles);
+    if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
+      return;
 
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
@@ -1534,44 +1552,72 @@ DataReaderImpl::notify_connection_deleted ()
     the_listener->on_connection_deleted (this->dr_remote_objref_.in ());
 }
 
-void
-DataReaderImpl::repo_ids_to_instance_handles (const WriterIdSeq& ids,
+bool
+DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
 					      ::DDS::InstanceHandleSeq & hdls)
 {
-  CORBA::ULong cur_sz = ids.length ();
   // TBD: Remove the condition check after we change to default support
   //      builtin topics.
   if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
-    {
+  {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
-	::DDS::PublicationBuiltinTopicDataDataReader_var,
-	::DDS::PublicationBuiltinTopicDataSeq,
-	WriterIdSeq > hh;
+    BIT_Helper_2 < ::DDS::PublicationBuiltinTopicDataDataReader,
+      ::DDS::PublicationBuiltinTopicDataDataReader_var,
+      ::DDS::PublicationBuiltinTopicDataSeq,
+      WriterIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-	  = hh.repo_ids_to_instance_handles(participant_servant_,
-					    BUILT_IN_PUBLICATION_TOPIC,
-					    ids,
-					    hdls);
+    ::DDS::ReturnCode_t ret
+      = hh.repo_ids_to_instance_handles(participant_servant_,
+      BUILT_IN_PUBLICATION_TOPIC,
+      ids,
+      hdls);
 
-      if (ret != ::DDS::RETCODE_OK)
-	{
-	  ACE_ERROR ((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::repo_ids_to_instance_handles failed \n")));
-	  return;
-	}
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-    }
-  else
+    if (ret != ::DDS::RETCODE_OK)
     {
-      hdls.length (cur_sz);
-      for (CORBA::ULong i = 0; i < cur_sz; i++)
-	{
-	  hdls[i] = ids[i];
-	}
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::bit_lookup_instance_handles failed \n")));
+      return false;
     }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+  }
+  else
+  {
+    CORBA::ULong num_wrts = ids.length ();
+    hdls.length (num_wrts);
+    for (CORBA::ULong i = 0; i < num_wrts; i++)
+    {
+      hdls[i] = ids[i];
+    }
+  }
+  
+  return true;
 }
+
+bool
+DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
+					      ::DDS::InstanceHandleSeq & hdls)
+{
+  CORBA::ULong num_ids = ids.length ();
+  for (CORBA::ULong i = 0; i < num_ids; ++i)
+  {
+    RepoIdToHandleMap::ENTRY* ientry;
+    if (id_to_handle_map_.find (ids[i], ientry) != 0)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t)ERROR: DataReaderImpl::cache_lookup_instance_handles "
+        "could not find instance handle for writer %d\n", ids[i]),
+        false);
+    }
+    else
+    {
+      CORBA::ULong len = hdls.length ();
+      hdls.length (len + 1);
+      hdls[len] = ientry->int_id_;
+    }
+  }
+
+  return true;
+}
+
 
 bool DataReaderImpl::is_bit () const
 {
