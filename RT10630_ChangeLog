@@ -1,3 +1,20 @@
+Fri Mar 31 00:29:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\SubscriberImpl.cpp:
+
+          Fixed a deadlock situation that the reactor thread and the 
+          thread calling delete_participant acquire locks in reverse 
+          order. The two involved locks are the si_lock_ in SubscriberImpl
+          and the token_ in ACE_Select_Reactor_T. The thread calling 
+          delete_participant holds the lock in SubscriberImpl and tries to acquire lock
+          in select reactor to remove handler while the reactor thread is handling
+          an event which holds the lock in reactor. The reactor thread delieved the 
+          sample to datareader and insert the datareader to the subscriber internal
+          cotainer which acquire the lock in SubscriberImpl. Since the lock in 
+          SubscriberImpl protects the internal data structure, to fix this problem, 
+          the lock scope in SubscriberImpl was adjusted so that the datareader will
+          not hold the lock while calling remove_all_associations().
+
 Fri Mar 30 16:21:25 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\DataReaderImpl.h:
