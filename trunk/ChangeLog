@@ -2,7 +2,7 @@ Fri Mar 30 13:55:52 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Messenger_Imr/run_test.pl:
           Inform ImR of initial InfoRepo shutdown. This is a work around
-          for a bug in the .15a/DOC ImR. The ImR interprets an failure
+          for a bug in the 1.5a/DOC ImR. The ImR interprets an failure
           to ping the InfoRepo as a timeout and throws a location_forward
           to the publisher, leading to a publisher error.
 
