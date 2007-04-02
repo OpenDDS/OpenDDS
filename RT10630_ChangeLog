@@ -1,3 +1,20 @@
+Mon Apr  2 18:51:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DdsDcpsInfrastructure.idl:
+ 
+          Corrected DCPS_DATA_KEY for TopicBuiltinTopicData.
+          
+        * performance-tests\DCPS\TCPListenerTest\run_test-4p1s.pl:
+        * performance-tests\DCPS\TCPListenerTest\run_test-2p3s.pl:
+        * performance-tests\DCPS\TCPListenerTest\run_test-1p4s.pl:
+        
+          Added test cases with the bit turned on.
+          
+        * performance-tests\DCPS\TCPListenerTest\conf.ini:
+
+          Removed the DCPSBit=0 configuration and use the command line to disable
+          the bit.
+          
 Fri Mar 31 00:29:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\SubscriberImpl.cpp:

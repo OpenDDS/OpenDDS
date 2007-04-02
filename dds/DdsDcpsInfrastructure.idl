@@ -489,7 +489,9 @@ module DDS {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[0]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[1]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[2]"
     struct TopicBuiltinTopicData {
 		BuiltinTopicKey_t key;
 		string name;
