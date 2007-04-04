@@ -22,8 +22,7 @@ namespace TAO
     class TransportSendListener;
     class DataLinkSetMap;
     struct DataSampleListElement;
-
-
+ 
     class TAO_DdsDcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
@@ -81,6 +80,8 @@ namespace TAO
         /// event.  It will then clear the send_links_ set.
         void send_stop();
 
+        DataLinkSet* select_links (const RepoId* remoteIds, 
+                                      const CORBA::ULong num_targets);
 
       private:
 

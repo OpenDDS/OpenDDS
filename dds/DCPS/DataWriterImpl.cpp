@@ -168,6 +168,7 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
+  DBG_ENTRY_LVL ("DataWriterImpl","add_associations", 5);
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -202,6 +203,8 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
            size_t                  num_remote_associations,
            const AssociationData*  remote_associations)
 {
+  DBG_ENTRY_LVL ("DataWriterImpl","fully_associated", 5);
+
   {
     // protect readers_
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -216,7 +219,6 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
   if (! is_bit_)
   {
     ::DDS::InstanceHandleSeq handles;
-
     // Create the list of readers repo id.
     ReaderIdSeq rd_ids;
     rd_ids.length (num_remote_associations);
@@ -273,7 +275,9 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
     }
   }
 
-    if (TheTransientKludge->is_enabled ())
+  // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using TheTransientKludge.
+  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
+    //if (TheTransientKludge->is_enabled ())
     {
       // The above condition is only true for the DCPSInfo Server.
 
@@ -298,8 +302,19 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 
       // Tell the WriteDataContainer to resend all sending/sent
       // samples.
-      this->data_container_->reenqueue_all (this);
-      this->publisher_servant_->data_available(this) ;
+        // Create the list of readers repo id.
+      TAO::DCPS::RepoId* rd_ids = new TAO::DCPS::RepoId [num_remote_associations];
+
+      for (CORBA::ULong i = 0; i < num_remote_associations; i++)
+      {
+        rd_ids[i] = remote_associations[i].remote_id_;
+        //ACE_DEBUG ((LM_DEBUG, "(%P|%t)reenqueue_all from %d to %d\n", this->get_publication_id (),
+        // rd_ids[i]));
+      }
+
+
+      this->data_container_->reenqueue_all (this, rd_ids, num_remote_associations);
+      this->publisher_servant_->resend_data_available(this) ;
     }
 }
 
@@ -1018,6 +1033,14 @@ DataWriterImpl::get_unsent_data()
 {
   return data_container_->get_unsent_data ();
 }
+
+
+DataSampleList
+DataWriterImpl::get_resend_data()
+{
+  return data_container_->get_resend_data ();
+}
+
 
 void
 DataWriterImpl::unregister_all ()

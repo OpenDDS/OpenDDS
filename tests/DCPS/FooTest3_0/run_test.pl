@@ -49,21 +49,27 @@ elsif ($ARGV[0] eq 'liveliness') {
     $test_to_run = 6;
     $num_writes = 4;;  # 1 register, 3 writes
 }
-elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
-    # 2 readers with default register test
-    # The first datareader does not shutdown the publisher
-    # and the second datareader will shutdown the publisher.
 
-    # Made the shutdown delay longer so the first subscriber
-    # will keep the connection with the publisher until the
-    # the publisher shutdown.
-    $shutdown_delay_secs=30;
-    $shutdown_pub = 0;
-    $num_subscribers = 2;
+#Disabled the reenqueue_all test since we changed to not use the TransientKludge,
+#as the condition of reenqueue_all, the TRANSIENT_LOCAL durability is supported. 
+#This reenqueue_all test will not be applicable in the new TRANSIENT_LOCAL 
+#implementation.
 
-    # The first reader will get 5 msgs in total
-    $num_writes = 5;
-}
+#elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
+#    # 2 readers with default register test
+#    # The first datareader does not shutdown the publisher
+#    # and the second datareader will shutdown the publisher.
+#
+#    # Made the shutdown delay longer so the first subscriber
+#    # will keep the connection with the publisher until the
+#    # the publisher shutdown.
+#    $shutdown_delay_secs=30;
+#    $shutdown_pub = 0;
+#    $num_subscribers = 2;
+#
+#    # The first reader will get 5 msgs in total
+#    $num_writes = 5;
+#}
 elsif ($ARGV[0] eq '') { # register test
     # default register test: 1 register and 2 writes.
 }

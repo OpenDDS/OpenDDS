@@ -6,6 +6,7 @@
 
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "DataSampleList.h"
 #include "ace/Synch_T.h"
 #include "ace/Hash_Map_Manager.h"
@@ -108,13 +109,14 @@ namespace TAO
           ::DDS::InstanceHandle_t instance);
 
       /**
-      * Enqueue all "sending" and "sent" samples for resending.
-      * This method requests the transport to drop current "sending"
-      * samples. The "sending" samples are moved to unsent_data_
-      * list as a result of remove_sample.
+      * Create a list with the copies of all "sending" and "sent" samples 
+      * for resending.
+      * These 
       */
       ::DDS::ReturnCode_t
-      reenqueue_all(DataWriterImpl* writer);
+      reenqueue_all(DataWriterImpl* writer, 
+                    const TAO::DCPS::RepoId* rds, 
+                    const CORBA::ULong num_rds);
 
       /**
       * Dynamically allocate a PublicationInstance object and add to
@@ -187,6 +189,7 @@ namespace TAO
       * as well.
       */
       DataSampleList get_unsent_data() ;
+      DataSampleList get_resend_data() ;
 
       /**
       * Obtain a list of data that has been obtained via the
@@ -263,6 +266,11 @@ namespace TAO
 
     private:
 
+      void copy_and_append (DataSampleList& list, 
+                            const DataSampleList& appended, 
+                            const TAO::DCPS::RepoId* rds, 
+                            const CORBA::ULong num_rds);
+
       /**
       * Remove the oldest sample (head) from the instance history list.
       * This method also updates the internal lists to reflect
@@ -298,7 +306,13 @@ namespace TAO
       /// still in use externally (by the transport).
       DataSampleList   released_data_ ;
 
+      /// The list of all samples written to this datawriter in writing order.
       DataSampleList   data_holder_;
+
+      /// List of the data reenqueued to support the transient local policy.
+      /// These DataSampleElement will be appended to released_data_ list
+      /// after passing to the transport. 
+      DataSampleList   resend_data_ ;
 
       /// The individual instance queue threads in the
       /// data.

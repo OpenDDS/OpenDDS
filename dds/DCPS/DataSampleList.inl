@@ -11,6 +11,8 @@ namespace TAO
       TransportSendElementAllocator* allocator)
       : sample_ (0),
         publication_id_ (publication_id), 
+        subscription_ids_ (0),
+        num_subs_ (0),
         group_id_ (0),
         previous_sample_ (0),
         next_sample_ (0),
@@ -25,12 +27,36 @@ namespace TAO
     }
 
     ACE_INLINE
+    DataSampleListElement::DataSampleListElement (const DataSampleListElement& elem)
+    {
+      sample_ = elem.sample_->duplicate ();
+      publication_id_ = elem.publication_id_;
+      subscription_ids_ = elem.subscription_ids_;
+      group_id_ = elem.group_id_;
+      previous_sample_ = elem.previous_sample_;
+      next_sample_ = elem.next_sample_;
+      next_instance_sample_ = elem.next_instance_sample_;
+      next_send_sample_ = elem.next_send_sample_;
+      previous_send_sample_ = elem.previous_send_sample_;
+      send_listener_ = elem.send_listener_;
+      space_available_ = elem.space_available_;
+      handle_ = elem.handle_;
+      transport_send_element_allocator_ = elem.transport_send_element_allocator_;
+    }
+
+
+    ACE_INLINE
     DataSampleListElement::~DataSampleListElement ()
     {
-      if (sample_ != 0)
+      if (sample_)
         {
           sample_->release ();
         }
+
+      if (subscription_ids_)
+      {
+        delete [] subscription_ids_;
+      }
     }
  
     ACE_INLINE

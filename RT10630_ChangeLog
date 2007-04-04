@@ -1,3 +1,56 @@
+Tue Apr  3 23:54:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+          
+        * dds\InfoRepo\DCPS_IR_Domain.cpp:
+        
+          Made the BIT datarwriter in DCPSInfoRepo use the TRANSIENT_LOCAL durability
+          qos and added more debug messages.
+          
+        * dds\DCPS\DataSampleList.h:
+        * dds\DCPS\DataSampleList.inl:
+
+          Added copy constructor that duplicates the sample. The DataSampleListElement
+          now has data member of the specific reader ids. If the reader list is nil then the 
+          sample will be sent to all subscribers.
+
+        * dds\DCPS\WriteDataContainer.cpp:
+        * dds\DCPS\WriteDataContainer.h:
+        * dds\DCPS\DataWriterImpl.cpp:
+        * dds\DCPS\DataWriterImpl.h:
+        * dds\DCPS\PublisherImpl.cpp:
+        * dds\DCPS\PublisherImpl.h:
+        * dds\DCPS\Qos_Helper.inl:
+
+          Supported TRANSIENT_LOCAL_QOS on datawriter. The datawriter will resend all
+          current sending and sent samples to the new associated datareaders.
+          
+        * dds\DCPS\transport\framework\DataLink.h:
+        * dds\DCPS\transport\framework\DataLinkSetMap.h:
+        * dds\DCPS\transport\framework\DataLink.cpp:
+        * dds\DCPS\transport\framework\DataLink.inl:
+        * dds\DCPS\transport\framework\DataLinkSet.h:
+        * dds\DCPS\transport\framework\TransportInterface.inl:
+        * dds\DCPS\transport\framework\DataLinkSetMap.cpp:
+        * dds\DCPS\transport\framework\DataLinkSet.cpp:
+          
+          Supported the samples to send to specific datareaders.
+          
+        * dds\DCPS\DataReaderImpl.cpp:
+        
+          Added a debug logging.
+          
+        * performance-tests\DCPS\TCPListenerTest\run_test-1p1s.pl:
+        
+          Fixed test failure due to the change of bit disable via configuration file to 
+          command line option and added bit test case.
+          
+        * tests\DCPS\FooTest3_0\run_test.pl:
+        * bin\dcps_tests.lst:
+        
+          Disabled the reenqueue_all test since it is not applicable. The condition of
+          reenqueue_all() call is changed from based on TransientKludge to based on 
+          TRANSIENT_LOCAL qos and resend the samples in queue to the new associated
+          datareader instead of all subscribered datareaders.
+
 Mon Apr  2 18:51:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds\DdsDcpsInfrastructure.idl:

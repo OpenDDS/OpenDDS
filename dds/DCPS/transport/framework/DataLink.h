@@ -148,6 +148,10 @@ namespace TAO
         // clear all unsent samples upon backpressure timed out.
         void terminate_send ();
 
+        /// This is called on publisher side to see if this link communicates
+        /// with the provided sub.
+        bool is_target (const RepoId& sub_id);
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class
@@ -179,8 +183,6 @@ namespace TAO
 
         /// The transport receive strategy object for this DataLink.
         TransportReceiveStrategy_rch receive_strategy_;
-
-  protected:
 
         friend class ThreadPerConnectionSendTask;
 

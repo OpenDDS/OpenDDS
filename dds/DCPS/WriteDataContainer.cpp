@@ -37,8 +37,8 @@ WriteDataContainer::WriteDataContainer(
                                        waiting_on_release_ (false),
                                        condition_ (lock_),
                                        n_chunks_ (n_chunks),
-                                       sample_list_element_allocator_(n_chunks_),
-                                       transport_send_element_allocator_(n_chunks_, sizeof (TAO::DCPS::TransportSendElement)),
+                                       sample_list_element_allocator_(2 * n_chunks_),
+                                       transport_send_element_allocator_(2 * n_chunks_, sizeof (TAO::DCPS::TransportSendElement)),
                                        shutdown_ (false),
                                        next_handle_(1)
 {
@@ -93,30 +93,32 @@ WriteDataContainer::enqueue(
 }
 
 ::DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(DataWriterImpl* writer)
+WriteDataContainer::reenqueue_all(DataWriterImpl* writer, 
+                                  const TAO::DCPS::RepoId* rds, 
+                                  const CORBA::ULong num_rds)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
     this->lock_,
     ::DDS::RETCODE_ERROR);
 
-  while (sending_data_.size_ > 0)
+  // Make a copy of sending_data_ and sent_data_;
+  DataSampleList list;
+
+  if (sending_data_.size_ > 0)
   {
-    // The remove_sample results a data_dropped call
-    // which will move the sample from sending_data_
-    // to unsent_data_.
-    writer->remove_sample (sending_data_.head_);
+    this->copy_and_append (list, sending_data_, rds, num_rds);
   }
 
-  // All sending samples are now in unsent_data_ list.
-  // Now move "sent" samples into unsent_data_ list.
-  unsent_data_.enqueue_tail_next_send_sample (sent_data_);
-  // Clear the sent_data_ list.
-  sent_data_.reset ();
+  if (sent_data_.size_ > 0)
+  {
+    this->copy_and_append (list, sent_data_, rds, num_rds);
+  }
 
   return ::DDS::RETCODE_OK;
 }
 
+ 
 ::DDS::ReturnCode_t
 WriteDataContainer::register_instance(
                                       ::DDS::InstanceHandle_t&      instance_handle,
@@ -323,6 +325,34 @@ WriteDataContainer::get_unsent_data()
   // Clear the unsent data list.
   //
   this->unsent_data_.reset ();
+  //
+  // Return the moved list.
+  //
+  return list ;
+}
+
+DataSampleList
+WriteDataContainer::get_resend_data()
+{
+  DBG_ENTRY_LVL("WriteDataContainer","get_resend_data",5);
+
+  //
+  // The samples in unsent_data are added to the sending_data
+  // during enqueue.
+  //
+  DataSampleList list = this->resend_data_ ;
+
+  //
+  // The unsent_data_ already linked with the
+  // next_send_sample during enqueue.
+  // Append the unsent_data_ to current sending_data_
+  // list.
+  released_data_.enqueue_tail_next_send_sample(list);
+
+  //
+  // Clear the unsent data list.
+  //
+  this->resend_data_.reset ();
   //
   // Return the moved list.
   //
@@ -855,6 +885,32 @@ WriteDataContainer::get_next_handle ()
     0);
   return next_handle_++;
 }
+
+
+void WriteDataContainer::copy_and_append (DataSampleList& list, 
+                                           const DataSampleList& appended, 
+                                           const TAO::DCPS::RepoId* rds, 
+                                           const CORBA::ULong num_rds)
+ {
+   DataSampleListElement* cur = appended.head_;
+   while (cur)
+   {
+     DataSampleListElement* element = 0;
+     ACE_NEW_MALLOC (element,
+       static_cast<DataSampleListElement*>
+       ( sample_list_element_allocator_.malloc
+       ( sizeof (DataSampleListElement) ) ),
+       DataSampleListElement (*cur));
+
+     element->subscription_ids_ = ACE_const_cast(TAO::DCPS::RepoId*, rds);
+     element->num_subs_ = num_rds;
+
+     list.enqueue_tail_next_send_sample (element);
+
+     cur = cur->next_send_sample_; 
+   }
+ }
+
 
 } // namespace TAO
 } // namespace DCPS

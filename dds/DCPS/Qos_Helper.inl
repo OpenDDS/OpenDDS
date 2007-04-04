@@ -186,7 +186,8 @@ namespace TAO
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DurabilityQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_DurabilityQosPolicy())
+      if (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS //TheServiceParticipant->initial_DurabilityQosPolicy()
+        || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
       {
         return true;
       }
