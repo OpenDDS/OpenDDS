@@ -147,3 +147,36 @@ TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
       }
   }
 }
+
+
+TAO::DCPS::DataLinkSet*
+TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds, 
+                                      const CORBA::ULong num_targets)
+{
+  DataLinkSet_rch selected_links = new DataLinkSet ();
+
+  MapType::ENTRY* entry;
+
+  { // guard scope
+    GuardType guard(this->lock_);
+
+    for (MapType::ITERATOR itr(*map_);
+      itr.next(entry);
+      itr.advance())
+    {
+      for (CORBA::ULong i = 0; i < num_targets; ++i)
+      {
+        if (entry->int_id_->is_target (remoteIds[i]))
+        {
+          selected_links->map_->bind (entry->int_id_->id(), 
+                                      entry->int_id_, 
+                                      &(selected_links->map_entry_allocator_));
+          break;
+        }
+      }
+    }
+  }
+
+  return selected_links._retn ();
+}
+

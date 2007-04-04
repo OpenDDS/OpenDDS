@@ -278,6 +278,7 @@ namespace TAO
     * Retreive the unsent data from the WriteDataContainer.
     */
     DataSampleList get_unsent_data ();
+    DataSampleList get_resend_data ();
 
     /**
     * Cache the publication repository id after adding

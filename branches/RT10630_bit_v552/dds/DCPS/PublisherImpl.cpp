@@ -874,6 +874,37 @@ PublisherImpl::data_available(DataWriterImpl* writer)
   return ::DDS::RETCODE_OK;
 }
 
+
+::DDS::ReturnCode_t
+PublisherImpl::resend_data_available(DataWriterImpl* writer)
+{
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->pi_lock_,
+        ::DDS::RETCODE_ERROR);
+
+  DataSampleList list = writer->get_resend_data() ;
+
+  if( this->suspend_depth_count_ > 0)
+    {
+      // append list to the avaliable data list.
+      // Collect samples from all of the Publisher's Datawriters
+      // in this list so when resume_publication is called
+      // the Publisher does not have to iterate over its
+      // DataWriters to get the unsent data samples.
+      available_data_list_.enqueue_tail_next_send_sample (list);
+    }
+  else
+    {
+      // Do LATENCY_BUDGET processing here.
+      // Do coherency processing here.
+      // tell the transport to send the data sample(s).
+      this->send(list) ;
+    }
+  return ::DDS::RETCODE_OK;
+}
+
+
 ::POA_DDS::PublisherListener*
 PublisherImpl::listener_for (::DDS::StatusKind kind)
 {

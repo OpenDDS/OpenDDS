@@ -15,7 +15,8 @@ namespace TAO
   {
     typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
                                               TransportSendElementAllocator;
-
+    
+    const int MAX_READERS_TO_RESEND = 5;
 
     class TransportSendListener;
     struct PublicationInstance;
@@ -84,6 +85,9 @@ namespace TAO
                              TransportSendListener*  send_listner,
                              PublicationInstance*    handle,
                              TransportSendElementAllocator* allocator);
+
+      DataSampleListElement (const DataSampleListElement& elem);
+
 //remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
@@ -93,6 +97,8 @@ namespace TAO
 
       /// Publication Id used downstream.
       PublicationId          publication_id_ ;
+      TAO::DCPS::RepoId*     subscription_ids_;
+      CORBA::ULong           num_subs_;
 
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)

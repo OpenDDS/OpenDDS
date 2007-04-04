@@ -905,6 +905,8 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
 
 void DataReaderImpl::data_received(const ReceivedDataSample& sample)
 {
+  DBG_ENTRY_LVL("DataReaderImpl","data_received",5);
+
   // ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);

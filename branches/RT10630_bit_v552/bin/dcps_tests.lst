@@ -23,7 +23,9 @@ tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN !STATIC
-tests/DCPS/FooTest3_0/run_test.pl reenqueue_all: !DCPS_MIN !STATIC
+#Disable reenqueue_all test as it's not applicable due to new 
+#implementaion of TRANSIENT_LOCAL_QOS support.
+#tests/DCPS/FooTest3_0/run_test.pl reenqueue_all: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_1/run_test.pl: !STATIC
 tests/DCPS/FooTest3_1/run_test.pl mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_1/run_test.pl mw: !DCPS_MIN !STATIC
