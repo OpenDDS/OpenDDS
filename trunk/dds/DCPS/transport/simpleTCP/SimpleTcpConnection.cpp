@@ -255,7 +255,7 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
   int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
   //ACE_SOCK_Stream sock = ACE_static_cast(ACE_SOCK_Stream, this->peer() );
-#if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+#  if !defined (ACE_LACKS_SOCKET_BUFSIZ)
 
   // A little screwy double negative logic: disabling nagle involves
   // enabling TCP_NODELAY
@@ -287,14 +287,14 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
       rcv_size));
     return;
   }
-#else
-   ACE_UNUSED_ARG (snd_size);
-   ACE_UNUSED_ARG (rcv_size);
-#endif /* !ACE_LACKS_SOCKET_BUFSIZ */
+#  else
+  ACE_UNUSED_ARG (tcp_config);
+  ACE_UNUSED_ARG (snd_size);
+  ACE_UNUSED_ARG (rcv_size);
+#  endif /* !ACE_LACKS_SOCKET_BUFSIZ */
 
 #else
-   ACE_UNUSED_ARG (snd_size);
-   ACE_UNUSED_ARG (rcv_size);
+  ACE_UNUSED_ARG (tcp_config);
 #endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 }
 

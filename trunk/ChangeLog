@@ -1,3 +1,10 @@
+Thu Apr  5 14:37:57 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Elimiate warnings from unused variables on some platforms (QNX) that
+          result in certain "#if defined" paths being taken through the code.
+
 Fri Mar 30 13:55:52 UTC 2007  Ciju John  <johnc@ociweb.com>
 
         * tests/DCPS/Messenger_Imr/run_test.pl:
