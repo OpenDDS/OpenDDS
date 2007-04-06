@@ -1,0 +1,10 @@
+Fri Apr  6 20:04:22 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Began refactoring the transport layer by removing some inheritance
+          that will get in the way of future work.
