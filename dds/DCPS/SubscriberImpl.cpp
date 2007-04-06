@@ -71,7 +71,7 @@ SubscriberImpl::~SubscriberImpl (void)
 
   // Tell the transport to detach this
   // Subscriber/TransportInterface.
-  this->detach_transport ();
+  transport_interface_.detach_transport ();
   //
   // The datareders should be deleted already before calling delete
   // subscriber.
@@ -201,7 +201,7 @@ SubscriberImpl::create_datareader (
 	}
     }
 
-  TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+  TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -309,7 +309,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       datareader_set_.erase(dr_servant) ;
     }
 
-  TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+  TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -779,11 +779,11 @@ SubscriberImpl::add_associations (
 
   // TBD - pass the priority as part of the associations data
   //       because there is a priority per remote publication.
-  this->add_publications(reader->get_subscription_id(),
-			 reader,
-			 writers[0].writerQos.transport_priority.value,
-			 length,
-			 associations);
+  transport_interface_.add_publications(reader->get_subscription_id(),
+    reader,
+    writers[0].writerQos.transport_priority.value,
+    length,
+    associations);
 
   ACE_UNUSED_ARG(reader_qos) ;  // for now...
 
@@ -804,8 +804,8 @@ SubscriberImpl::remove_associations(
 
   // TMB - I don't know why I need to call it this way, but gcc complains
   //       under linux otherwise.
-  this->TransportInterface::remove_associations(writers.length(),
-						writers.get_buffer()) ;
+  transport_interface_.remove_associations(writers.length(),
+    writers.get_buffer()) ;
 }
 
 
@@ -832,16 +832,17 @@ SubscriberImpl::reader_enabled(
       ::DDS::DataReaderQos qos;
       info->remote_reader_->get_qos(qos);
 
-      TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
-      info->subscription_id_
-	= this->repository_->add_subscription(
-					      participant_->get_domain_id (),
-					      participant_->get_id (),
-					      info->topic_id_,
-					      info->remote_reader_,
-					      qos,
-					      trans_conf_info,
-					      qos_) ;
+      TAO::DCPS::TransportInterfaceInfo trans_conf_info =
+        transport_interface_.connection_info ();
+      info->subscription_id_ =
+        this->repository_->add_subscription(
+          participant_->get_domain_id (),
+          participant_->get_id (),
+          info->topic_id_,
+          info->remote_reader_,
+          qos,
+          trans_conf_info,
+          qos_) ;
       info->local_reader_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)
@@ -881,6 +882,12 @@ SubscriberImpl::reader_enabled(
   // Increase the ref count when the servant is referenced
   // by the datareader map.
   info->local_reader_->_add_ref ();
+}
+
+AttachStatus
+SubscriberImpl::attach_transport (TransportImpl* impl)
+{
+  return transport_interface_.attach_transport(impl);
 }
 
 ::POA_DDS::SubscriberListener*

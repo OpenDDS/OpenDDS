@@ -71,7 +71,7 @@ PublisherImpl::~PublisherImpl (void)
 
   // Tell the transport to detach this
   // Publisher/TransportInterface.
-  this->detach_transport ();
+  transport_interface_.detach_transport ();
 
   //The datawriters should be deleted already before calling delete
   //publisher.
@@ -197,7 +197,7 @@ PublisherImpl::~PublisherImpl (void)
   }
     }
 
-  TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+  TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -295,7 +295,7 @@ PublisherImpl::~PublisherImpl (void)
 
     publication_map_.erase (publication_id);
 
-    TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+    TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
     if (impl.is_nil ())
       {
   ACE_ERROR ((LM_ERROR,
@@ -568,7 +568,7 @@ void PublisherImpl::get_qos (
 
   if (suspend_depth_count_ == 0)
     {
-      this->send (available_data_list_);
+      transport_interface_.send (available_data_list_);
       available_data_list_.head_ = available_data_list_.tail_ = 0;
     }
 
@@ -725,10 +725,10 @@ void PublisherImpl::add_associations (
       associations[i].remote_data_ = readers[i].readerTransInfo;
     }
 
-  this->add_subscriptions (writer->get_publication_id (),
-         writer_qos.transport_priority.value,
-         length,
-         associations);
+  transport_interface_.add_subscriptions (writer->get_publication_id (),
+    writer_qos.transport_priority.value,
+    length,
+    associations);
   // TransportInterface does not take ownership of the associations.
   // The associations will be deleted when transport inform
   // datawriter fully associated (in DataWriterImpl::fully_associated()).
@@ -741,8 +741,8 @@ void PublisherImpl::remove_associations(
 
   // TMB - I don't know why I have to do it this way, but the compiler
   //       on linux complains with an error otherwise.
-  this->TransportInterface::remove_associations(readers.length(),
-            readers.get_buffer());
+  transport_interface_.remove_associations(readers.length(),
+    readers.get_buffer());
 }
 
 ::DDS::ReturnCode_t PublisherImpl::writer_enabled(
@@ -767,17 +767,18 @@ void PublisherImpl::remove_associations(
       ::DDS::DataWriterQos qos;
       info->remote_writer_->get_qos(qos);
 
-      TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      TAO::DCPS::TransportInterfaceInfo trans_conf_info =
+        transport_interface_.connection_info ();
 
-      info->publication_id_
-  = this->repository_->add_publication(
-               participant_->get_domain_id (), // Loaded during Publisher construction
-               participant_->get_id (),  // Loaded during Publisher construction.
-               info->topic_id_, // Loaded during DataWriter construction.
-               info->remote_writer_,
-               qos,
-               trans_conf_info ,   // Obtained during setup.
-               qos_) ;
+      info->publication_id_ =
+        this->repository_->add_publication(
+           participant_->get_domain_id (), // Loaded during Publisher construction
+           participant_->get_id (),  // Loaded during Publisher construction.
+           info->topic_id_, // Loaded during DataWriter construction.
+           info->remote_writer_,
+           qos,
+           trans_conf_info ,   // Obtained during setup.
+           qos_) ;
       info->local_writer_->set_publication_id (info->publication_id_);
     }
   catch (const CORBA::SystemException& sysex)
@@ -869,9 +870,41 @@ PublisherImpl::data_available(DataWriterImpl* writer)
       // Do LATENCY_BUDGET processing here.
       // Do coherency processing here.
       // tell the transport to send the data sample(s).
-      this->send(list) ;
+      transport_interface_.send(list) ;
     }
   return ::DDS::RETCODE_OK;
+}
+
+int
+PublisherImpl::swap_bytes () const
+{
+  return transport_interface_.swap_bytes();
+}
+
+SendControlStatus
+PublisherImpl::send_control(RepoId                 pub_id,
+                            TransportSendListener* listener,
+                            ACE_Message_Block*     msg)
+{
+  return transport_interface_.send_control(pub_id, listener, msg);
+}
+
+int
+PublisherImpl::remove_sample(const DataSampleListElement* sample, bool dropped_by_transport)
+{
+  return transport_interface_.remove_sample(sample, dropped_by_transport);
+}
+
+int
+PublisherImpl::remove_all_control_msgs(RepoId pub_id)
+{
+  return transport_interface_.remove_all_control_msgs(pub_id);
+}
+
+AttachStatus
+PublisherImpl::attach_transport(TransportImpl* impl)
+{
+  return transport_interface_.attach_transport(impl);
 }
 
 ::POA_DDS::PublisherListener*

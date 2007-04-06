@@ -63,8 +63,7 @@ namespace TAO
     */
     class TAO_DdsDcps_Export PublisherImpl
       : public virtual POA_DDS::Publisher,
-        public virtual EntityImpl,
-        public virtual TransportInterface
+        public virtual EntityImpl
     {
     public:
       typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
@@ -255,6 +254,21 @@ namespace TAO
     ::DDS::ReturnCode_t
     data_available(DataWriterImpl* writer);
 
+    /*
+     * Exposed TransportImpl methods
+     */
+    int swap_bytes() const;
+
+    SendControlStatus send_control(RepoId                 pub_id,
+                                   TransportSendListener* listener,
+                                   ACE_Message_Block*     msg);
+
+    int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
+
+    int remove_all_control_msgs(RepoId pub_id);
+
+    AttachStatus attach_transport(TransportImpl* impl);
+
     /**
     * This is used to retrieve the listener for a certain status change.
     * If this publisher has a registered listener and the status kind
@@ -311,6 +325,7 @@ namespace TAO
       /// The catched available data while suspending.
       DataSampleList                available_data_list_ ;
 
+      TransportInterface            transport_interface_;
     };
 
   } // namespace  ::DDS

@@ -37,6 +37,8 @@ namespace TAO
     {
       public:
 
+        TransportInterface();
+
         virtual ~TransportInterface();
 
         /// Accessor for the TransportInterfaceInfo.
@@ -86,10 +88,6 @@ namespace TAO
         /// Return the TransportImpl object reference.
         TransportImpl_rch get_transport_impl ();
 
-      protected:
-
-        TransportInterface();
-
         /// A Publisher will invoke this method to add associations to
         /// the transport interface.
         /// Returns 0 if successful, -1 if unsuccessful
@@ -129,6 +127,7 @@ namespace TAO
         /// "attach_transport()" method.
         void detach_transport();
 
+      protected:
         /// Method to be implemented by subclass so that it may be
         /// informed of a transport_detached() "event".  The subclass
         /// should implement this such that it stops calling methods on
