@@ -369,9 +369,10 @@ PubDriver::end()
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(participant_.in ());
 
-  TheServiceParticipant->shutdown ();
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+
+  TheServiceParticipant->shutdown ();
 }
 
 void
