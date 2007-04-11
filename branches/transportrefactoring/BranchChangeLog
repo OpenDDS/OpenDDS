@@ -1,3 +1,11 @@
+Wed Apr 11 17:04:55 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkCallback.h:
+        * dds/DCPS/transport/framework/Transport.h:
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Added in new files from the transport API set.
+
 Fri Apr  6 20:04:22 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/PublisherImpl.h:
