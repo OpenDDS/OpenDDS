@@ -13,7 +13,7 @@
 #include <vector>
 
 
-class Pub : public TAO::DCPS::TransportInterface
+class Pub
 {
   public:
 
@@ -110,6 +110,8 @@ class Pub : public TAO::DCPS::TransportInterface
 
     /// The list of SubInfo objects (each holds a sub_id and a sub_addr).
     SubInfoList subs_;
+
+    TAO::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* PUB_H */

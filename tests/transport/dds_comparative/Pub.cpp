@@ -84,7 +84,7 @@ Pub::wait()
 void
 Pub::send_samples(const TAO::DCPS::DataSampleList& samples)
 {
-  this->send(samples);
+  transport_interface_.send(samples);
 }
 
 
@@ -114,7 +114,8 @@ Pub::init_attach_transport(unsigned impl_id)
     }
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  TAO::DCPS::AttachStatus status =
+    transport_interface_.attach_transport(transport.in());
 
   if (status != TAO::DCPS::ATTACH_OK)
     {
@@ -154,7 +155,8 @@ Pub::init_add_subscriptions()
       this->subs_[i].as_association(subs[i]);
     }
 
-  int result = this->add_subscriptions(this->pub_id_, 0, num_subs, subs);
+  int result =
+    transport_interface_.add_subscriptions(this->pub_id_, 0, num_subs, subs);
 
   delete [] subs;
 

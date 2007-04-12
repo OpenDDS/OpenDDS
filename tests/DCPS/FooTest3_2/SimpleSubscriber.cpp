@@ -8,6 +8,7 @@
 #include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include <string>
 
+
 SimpleSubscriber::SimpleSubscriber()
 {
 }
@@ -39,7 +40,8 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
     }
 
   // Attempt to attach ourselves to the transport.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in ());
+  TAO::DCPS::AttachStatus status =
+    transport_interface_.attach_transport(transport.in ());
 
   if (status != TAO::DCPS::ATTACH_OK)
     {
@@ -75,7 +77,8 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
 
   // Add the association between the local sub_id and the remote pub_id
   // to the transport via the TransportInterface.
-  int result = this->add_publications(sub_id,
+  int result =
+    transport_interface_.add_publications(sub_id,
                                       &this->reader_,
                                       0,   /* priority */
                                       num_publications,

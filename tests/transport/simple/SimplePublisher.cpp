@@ -51,7 +51,8 @@ SimplePublisher::init(TAO::DCPS::TransportIdType          transport_id,
              "Attach ourselves (SimplePublisher) to the TransportImpl.\n"));
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  TAO::DCPS::AttachStatus status =
+    transport_interface_.attach_transport(transport.in());
 
   if (status != TAO::DCPS::ATTACH_OK)
     {
@@ -96,7 +97,8 @@ SimplePublisher::init(TAO::DCPS::TransportIdType          transport_id,
 
   // Add the association between the local pub_id and the remote sub_id
   // to the transport via the TransportInterface (our base class).
-  int result = this->add_subscriptions(pub_id,
+  int result =
+    transport_interface_.add_subscriptions(pub_id,
                                        0,                  /* priority */
                                        num_subscriptions,
                                        subscriptions);
@@ -128,7 +130,7 @@ SimplePublisher::send_samples(const TAO::DCPS::DataSampleList& samples)
 {
   DBG_ENTRY("SimplePublisher","send_samples");
 
-  this->send(samples);
+  transport_interface_.send(samples);
 }
 
 
