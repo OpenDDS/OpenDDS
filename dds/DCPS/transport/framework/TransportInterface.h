@@ -39,7 +39,7 @@ namespace TAO
 
         TransportInterface();
 
-        virtual ~TransportInterface();
+        ~TransportInterface();
 
         /// Accessor for the TransportInterfaceInfo.
         const TransportInterfaceInfo& connection_info() const;
@@ -135,7 +135,7 @@ namespace TAO
         /// the detachment to complete.
         ///
         /// Default implementation does nothing.
-        virtual void transport_detached_i();
+        void transport_detached_i();
 
 
       private:

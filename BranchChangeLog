@@ -1,3 +1,10 @@
+Wed Apr 11 19:06:40 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          This class no longer acts as a base so its virtual methods have
+          been de-virtualized.
+
 Wed Apr 11 17:04:55 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkCallback.h:
