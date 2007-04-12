@@ -1,8 +1,9 @@
 Thu Apr 12 14:30:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
-        * DDS.mwc:
-
         * bin/auto_run_tests.pl:
+
+          Applied Chad's change to $ACE_ROOT/bin/auto_run_tests.pl from:
+          Thu Apr 12 12:18:20 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
 Tue Apr 10 22:50:05 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
