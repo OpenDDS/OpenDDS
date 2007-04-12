@@ -62,6 +62,10 @@ foreach my $test_lst (@file_list) {
         my $directory = ".";
         my $program = ".";
 
+        ## Remove intermediate '.' directories to allow the
+        ## scoreboard matrix to read things correctly
+        $test =~ s!/./!/!g;
+
         if ($test =~ /(.*)\/([^\/]*)$/) {
             $directory = $1;
             $program = $2;
