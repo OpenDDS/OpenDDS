@@ -575,6 +575,7 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

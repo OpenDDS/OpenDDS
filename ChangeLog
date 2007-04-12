@@ -1,3 +1,24 @@
+Thu Apr 12 14:30:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Applied Chad's change to $ACE_ROOT/bin/auto_run_tests.pl from:
+          Thu Apr 12 12:18:20 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+Tue Apr 10 22:50:05 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp
+        * tests/DCPS/FooTest4/main.cpp
+          Resolved access violation on Windows platforms because
+          the transport threads were not shutdown before
+          ServiceParticipant/ORB was shutdown.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp
+        * tests/DCPS/FooTest3_1/PubDriver.cpp
+        * tests/DCPS/FooTest3_2/PubDriver.cpp
+          Changed the order of shutdown so transports were shutdown
+          before the ServiceParticipant/ORB.
+
 Thu Apr  5 14:37:57 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:

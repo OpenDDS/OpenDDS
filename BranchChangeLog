@@ -1,3 +1,15 @@
+Thu Apr 12 17:40:59 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * ChangeLog:
+        * bin/auto_run_tests.pl:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+
+          svn merge -r583:589 https://svn.dre.vanderbilt.edu/DOC/DDS/trunk
+
 Wed Apr 11 19:06:40 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInterface.h:
