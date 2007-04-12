@@ -1,9 +1,15 @@
+Thu Apr 12 14:30:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+
+        * bin/auto_run_tests.pl:
+
 Tue Apr 10 22:50:05 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp
         * tests/DCPS/FooTest4/main.cpp
-          Resolved access violation on Windows platforms because 
-          the transport threads were not shutdown before 
+          Resolved access violation on Windows platforms because
+          the transport threads were not shutdown before
           ServiceParticipant/ORB was shutdown.
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp
