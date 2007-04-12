@@ -150,7 +150,10 @@ SimpleDataWriter::obtain_element(SimplePublisher* publisher)
     }
 
   bool dropped_by_transport = false;
-  publisher->remove_sample(this->element_, dropped_by_transport);
+  publisher->transport_interface_.remove_sample(
+    this->element_,
+    dropped_by_transport
+    );
 
   if (this->num_delivered_ == this->num_sent_)
     {

@@ -10,7 +10,7 @@
 #include "dds/DCPS/Definitions.h"
 
 
-class SimplePublisher : public TAO::DCPS::TransportInterface
+class SimplePublisher
 {
   public:
 
@@ -42,6 +42,8 @@ class SimplePublisher : public TAO::DCPS::TransportInterface
   private:
 
     SimpleDataWriter writer_;
+
+    TAO::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* SIMPLEPUBLISHER_H */

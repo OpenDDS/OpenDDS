@@ -13,7 +13,7 @@
 #include <vector>
 
 
-class Sub : public TAO::DCPS::TransportInterface
+class Sub
 {
   public:
 
@@ -78,6 +78,8 @@ class Sub : public TAO::DCPS::TransportInterface
     SubReader reader_;
 
     PubInfoList pubs_;
+
+    TAO::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* SUB_H */

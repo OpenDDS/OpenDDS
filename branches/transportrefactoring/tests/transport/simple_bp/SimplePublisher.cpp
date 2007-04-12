@@ -39,7 +39,8 @@ SimplePublisher::init(TAO::DCPS::TransportIdType               transport_id,
     }
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  TAO::DCPS::AttachStatus status =
+    transport_interface_.attach_transport(transport.in());
 
   if (status != TAO::DCPS::ATTACH_OK)
     {
@@ -75,7 +76,8 @@ SimplePublisher::init(TAO::DCPS::TransportIdType               transport_id,
 
   // Add the association between the local pub_id and the remote sub_id
   // to the transport via the TransportInterface.
-  int result = this->add_subscriptions (pub_id,
+  int result =
+    transport_interface_.add_subscriptions (pub_id,
                                         0,   /* priority */
                                         num_subscriptions,
                                         subscriptions);
@@ -101,7 +103,7 @@ void
 SimplePublisher::send_samples(const TAO::DCPS::DataSampleList& samples)
 {
   ACE_Time_Value start = ACE_OS::gettimeofday();
-  this->send(samples);
+  transport_interface_.send(samples);
   ACE_Time_Value finished = ACE_OS::gettimeofday();
 
   ACE_Time_Value total = finished - start;

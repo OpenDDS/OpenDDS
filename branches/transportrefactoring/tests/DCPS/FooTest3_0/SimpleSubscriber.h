@@ -11,7 +11,7 @@
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
-class SimpleSubscriber : public TAO::DCPS::TransportInterface
+class SimpleSubscriber
 {
 public:
 
@@ -40,6 +40,7 @@ private:
   TAO::DCPS::RepoId                   sub_id_;
   ssize_t                             num_publications_;
   const TAO::DCPS::AssociationData*   publications_;
+  TAO::DCPS::TransportInterface       transport_interface_;
 };
 
 #endif  /* SIMPLESUBSCRIBER_H */

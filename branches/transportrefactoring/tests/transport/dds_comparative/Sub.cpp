@@ -96,7 +96,8 @@ Sub::init_attach_transport(unsigned impl_id)
     }
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  TAO::DCPS::AttachStatus status =
+    transport_interface_.attach_transport(transport.in());
 
   if (status != TAO::DCPS::ATTACH_OK)
     {
@@ -136,7 +137,8 @@ Sub::init_add_publications()
       this->pubs_[i].as_association(pubs[i]);
     }
 
-  int result = this->add_publications(this->sub_id_,
+  int result = 
+    transport_interface_.add_publications(this->sub_id_,
                                       &(this->reader_),
                                       0,
                                       num_pubs,

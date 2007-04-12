@@ -11,7 +11,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
-class SimpleSubscriber : public TAO::DCPS::TransportInterface
+class SimpleSubscriber
 {
   public:
 
@@ -40,6 +40,8 @@ class SimpleSubscriber : public TAO::DCPS::TransportInterface
   private:
 
     SimpleDataReader reader_;
+
+    TAO::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* SIMPLESUBSCRIBER_H */

@@ -1,3 +1,51 @@
+Thu Apr 12 20:42:27 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/transport/dds_comparative/Pub.h:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/Sub.h:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/mcast_simple/SimplePublisher.h:
+        * tests/transport/mcast_simple/SimplePublisher.cpp:
+        * tests/transport/mcast_simple/SimpleSubscriber.h:
+        * tests/transport/mcast_simple/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple_n/SimplePublisher.h:
+        * tests/transport/mcast_simple_n/SimplePublisher.cpp:
+        * tests/transport/mcast_simple_n/SimpleSubscriber.h:
+        * tests/transport/mcast_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/simple/SimplePublisher.h:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.h:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.h:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.h:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_n/SimplePublisher.h:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.h:
+        * tests/transport/simple_n/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimplePublisher.h:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.h:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple_n/SimplePublisher.h:
+        * tests/transport/udp_simple_n/SimplePublisher.cpp:
+        * tests/transport/udp_simple_n/SimpleSubscriber.h:
+        * tests/transport/udp_simple_n/SimpleSubscriber.cpp:
+
+          Updated tests to not inherit from TransportInterface.
+
 Thu Apr 12 17:40:59 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * ChangeLog:

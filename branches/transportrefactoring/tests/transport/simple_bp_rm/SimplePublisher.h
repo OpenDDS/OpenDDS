@@ -10,7 +10,7 @@
 #include "dds/DCPS/Definitions.h"
 
 
-class SimplePublisher : public TAO::DCPS::TransportInterface
+class SimplePublisher
 {
   public:
 
@@ -31,6 +31,7 @@ class SimplePublisher : public TAO::DCPS::TransportInterface
     /// called.
     int delivered_test_message();
 
+    TAO::DCPS::TransportInterface transport_interface_;
 
   protected:
 
