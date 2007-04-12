@@ -63,6 +63,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
 InfoRepo::~InfoRepo (void)
 {
+  TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
 
   orb_->destroy ();
