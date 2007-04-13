@@ -48,8 +48,10 @@ public:
 
   /// Adds the subscription to the list of subscriptions
   /// Tries to associate with existing publications if successfully added
+  /// 'associate' switch toggles association attempt.
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_subscription_reference (DCPS_IR_Subscription* subscription);
+  int add_subscription_reference (DCPS_IR_Subscription* subscription
+				  , bool associate = true);
 
   /// Removes the subscription from the list of subscriptions
   /// Returns 0 if successful
@@ -85,7 +87,7 @@ public:
   /// Associate the publication and subscription
   void associate (DCPS_IR_Publication* publication,
                   DCPS_IR_Subscription* subscription);
-  
+
   const char* get_name () const ;
   const char* get_dataTypeName () const;
 

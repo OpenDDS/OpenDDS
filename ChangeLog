@@ -1,3 +1,74 @@
+Fri Apr 13 20:54:05 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        Cumulative modifications to add persistence in the DCPS InfoRepo.
+
+        * dds/InfoRepo/ArrDelAdapter.h:
+	  Custom auto_ptr for dealing with arrays.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Add command line option '-reincarnate' to control restart
+          state. Delay POA manager activation, so that requests cannot be
+          processed unless InfoRepo is fully initialized.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+          Add API for underlying persistence layers to modify InfoRepo
+          state.
+
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.cpp:
+          New API to set a base Id. Required if persisted sate is being
+          restored.
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+          Modify the persisted data structures to be compatible with ACE
+          allocators. Add new svc config option '-reset' to control
+          persistance file cleanup upon restart. Finish up the API
+          implementations.
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+          Core persistence data structures.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/UpdateManager.cpp:
+          Data types for bridging the upstream and downstream
+          layers. Finish up remaining API implemenations.
+
+        * dds/InfoRepo/Updater.h:
+        * dds/InfoRepo/Updater.cpp:
+          Update to reflect modification UpdateManager types.
+
+        * tests/DCPS/Prst_delayed_subscriber:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Messenger.idl:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.h:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/domain_ids:
+        * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/tcp.conf:
+        * tests/DCPS/Prst_delayed_subscriber/README:
+          Simple test to test InfoRepo persistance mechanism.
+
+        * bin/dcps_tests.lst:
+          Turn on Prst_delayed_subscriber in nightly builds.
+
 Thu Apr 12 14:30:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
