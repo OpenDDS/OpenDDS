@@ -28,6 +28,7 @@
 
 // forward declarations
 class DCPS_IR_Domain;
+class UpdateManager;
 
 typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
 typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
@@ -48,7 +49,8 @@ class DCPS_IR_Participant
 public:
   DCPS_IR_Participant (TAO::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
-                       ::DDS::DomainParticipantQos qos);
+                       ::DDS::DomainParticipantQos qos,
+		       UpdateManager* um);
 
   virtual ~DCPS_IR_Participant();
 
@@ -95,7 +97,7 @@ public:
   // called by publications and subscriptions when the writer
   // or reader throws an exception during a remote invocation
   //
-  /// Changes aliveStatus to false then adds itself to the 
+  /// Changes aliveStatus to false then adds itself to the
   ///  domain's list of dead participants for removal
   void mark_dead ();
 
@@ -147,6 +149,7 @@ private:
   TAO_DDS_RepoId_Set ignoredPublications_;
   TAO_DDS_RepoId_Set ignoredSubscriptions_;
 
+  UpdateManager* um_;
 };
 
 

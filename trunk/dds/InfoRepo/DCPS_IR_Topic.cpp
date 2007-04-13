@@ -37,7 +37,7 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
       DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin();
       DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Topic::~DCPS_IR_Topic () ")
                  ACE_TEXT("id %d\n"),
                  id_ ));
@@ -46,7 +46,7 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
         {
           pub = *iter;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: Publication id %d still held!\n"),
                      pub->get_id()
                      ));
@@ -55,18 +55,23 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
 }
 
 
-int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication)
+int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
+                                              , bool associate)
 {
   int status = publicationRefs_.insert(publication);
   switch (status)
     {
     case 0:
-      // Publish the BIT information
-      domain_->publish_publication_bit (publication);
 
-      description_->try_associate_publication(publication);
-      // Do not check incompatible qos here.  The check is done
-      // in the DCPS_IR_Topic_Description::try_associate_publication method
+      if (associate)
+        {
+          // Publish the BIT information
+          domain_->publish_publication_bit (publication);
+
+          description_->try_associate_publication(publication);
+          // Do not check incompatible qos here.  The check is done
+          // in the DCPS_IR_Topic_Description::try_associate_publication method
+        }
 
       if (TAO_debug_level > 0)
         {
@@ -107,7 +112,7 @@ int DCPS_IR_Topic::remove_publication_reference (DCPS_IR_Publication* publicatio
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic::remove_publication_reference ")
         ACE_TEXT("Unable to remove publication reference %X\n"),
         publication));
-    } 
+    }
   return status;
 }
 
@@ -145,7 +150,7 @@ void DCPS_IR_Topic::try_associate (DCPS_IR_Subscription* subscription)
             id_, subscription->get_id() ));
         }
     }
-  else 
+  else
     {
       // check all publications for compatibility
       DCPS_IR_Publication* pub = 0;
@@ -168,7 +173,7 @@ void DCPS_IR_Topic::try_associate (DCPS_IR_Subscription* subscription)
         } /* while (iter != end) */
 
       // The subscription QOS is not checked because
-      // we don't know if the subscription is finished cycling 
+      // we don't know if the subscription is finished cycling
       // through topics.
     }
 }

@@ -12,6 +12,7 @@
 
 
 # TBD ?? should we create a DDS configuration to limit running these tests?
+tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !STATIC !MINIMUM !CORBA_E_COMPACT
 tests/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/DCPSInfoRepo/run_test.pl

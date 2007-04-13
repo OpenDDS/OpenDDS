@@ -163,8 +163,41 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic(TAO::DCPS::RepoId_out topicId,
                                                  const ::DDS::TopicQos & qos,
                                                  DCPS_IR_Participant* participantPtr)
 {
-  topicId = get_next_topic_id();
+  topicId = 0;
 
+  TAO::DCPS::RepoId topic_id = get_next_topic_id();
+  TAO::DCPS::TopicStatus status = add_topic_i (topic_id, topicName
+                                               , dataTypeName
+                                               , qos, participantPtr);
+
+  if (status == TAO::DCPS::CREATED) {
+    topicId = topic_id;
+  }
+
+  return status;
+}
+
+TAO::DCPS::TopicStatus
+DCPS_IR_Domain::force_add_topic(TAO::DCPS::RepoId topicId,
+                                const char* topicName,
+                                const char* dataTypeName,
+                                const ::DDS::TopicQos & qos,
+                                DCPS_IR_Participant* participantPtr)
+{
+  this->set_base_topic_id (topicId + 1);
+  TAO::DCPS::TopicStatus status = add_topic_i (topicId, topicName
+                                               , dataTypeName
+                                               , qos, participantPtr);
+
+  return status;
+}
+
+TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
+                                                    const char * topicName,
+                                                    const char * dataTypeName,
+                                                    const ::DDS::TopicQos & qos,
+                                                    DCPS_IR_Participant* participantPtr)
+{
   DCPS_IR_Topic_Description* description;
   int descriptionLookup = find_topic_description(topicName, dataTypeName, description);
   if (1 == descriptionLookup)
@@ -993,6 +1026,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_participant_id ()
   return participantIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_participant_id (TAO::DCPS::RepoId id)
+{
+  return participantIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
@@ -1000,6 +1038,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
   return topicIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_topic_id (TAO::DCPS::RepoId id)
+{
+  return topicIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
@@ -1007,6 +1050,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
   return pubsubIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_publication_id (TAO::DCPS::RepoId id)
+{
+  return pubsubIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
@@ -1014,6 +1062,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
   return pubsubIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_subscription_id (TAO::DCPS::RepoId id)
+{
+  return pubsubIdGenerator_.set_base_id (id);
+}
 
 
 void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)

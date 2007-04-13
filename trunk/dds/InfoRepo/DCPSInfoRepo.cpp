@@ -40,13 +40,14 @@ private:
   PortableServer::POA_var info_poa_;
   PortableServer::POAManager_var poa_manager_;
 
-  TAO_DDS_DCPSInfo_i info_;
+  auto_ptr<TAO_DDS_DCPSInfo_i> info_;
 
   ACE_TString ior_file_;
   ACE_TString domain_file_;
   ACE_TString listen_address_str_;
   int listen_address_given_;
   bool use_bits_;
+  bool reincarnate_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
@@ -54,6 +55,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , domain_file_ (ACE_TEXT("domain_ids"))
     , listen_address_given_ (0)
     , use_bits_ (true)
+    , reincarnate_ (true)
 {
   listen_address_str_ = ACE_LOCALHOST;
   listen_address_str_ += ":2839";
@@ -110,6 +112,17 @@ InfoRepo::parse_args (int argc,
           listen_address_given_ = 1;
           arg_shifter.consume_arg();
         }
+      else if ((current_arg = arg_shifter.get_the_parameter
+                ("-reincarnate")) != 0)
+        {
+          int p = ACE_OS::atoi (current_arg);
+          reincarnate_ = true;
+
+          if (p == 0) {
+            reincarnate_ = false;
+          }
+          arg_shifter.consume_arg ();
+        }
       else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0)
         {
           domain_file_ = current_arg;
@@ -151,6 +164,7 @@ bool
 InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 {
   orb_ = CORBA::ORB_init (argc, argv, "");
+  info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), reincarnate_));
 
   // ciju: Hard-code the 'RW' wait strategy directive.
   // Deadlocks have been observed to occur otherwise under stress conditions.
@@ -162,13 +176,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   CORBA::Object_var obj =
     orb_->resolve_initial_references ("RootPOA");
-
   root_poa_ = PortableServer::POA::_narrow (obj.in ());
 
   poa_manager_ =
     root_poa_->the_POAManager ();
-
-  poa_manager_->activate ();
 
   // Use persistent and user id POA policies so the Info Repo's
   // object references are consistent.
@@ -190,7 +201,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId ("InfoRepo");
   info_poa_->activate_object_with_id (oid.in (),
-                                      &info_);
+                                      info_.get());
   obj = info_poa_->id_to_reference(oid.in());
   TAO::DCPS::DCPSInfo_var info_repo
     = TAO::DCPS::DCPSInfo::_narrow (obj.in ());
@@ -215,7 +226,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     {
       ACE_INET_Addr address (listen_address_str_.c_str());
 
-      if (0 != info_.init_transport(listen_address_given_, address))
+      if (0 != info_->init_transport(listen_address_given_, address))
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
@@ -225,7 +236,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   // Load the domains _after_ initializing the participant factory and initializing
   // the transport
-  if (0 >= info_.load_domains (domain_file_.c_str(), use_bits_))
+  if (0 >= info_->load_domains (domain_file_.c_str(), use_bits_))
     {
       //ACE_ERROR_RETURN((LM_ERROR, "ERROR: Failed to load any domains!\n"), -1);
     }
@@ -250,6 +261,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
       throw InitError ("Unable to open IOR file.");
   }
   ior_stream << objref_str.in ();
+
+  // Finally activate the POA manager, so invocations
+  //  can be processed.
+  poa_manager_->activate ();
 
   return true;
 }

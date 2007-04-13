@@ -13,6 +13,8 @@
 
 #include "Updater.h"
 
+#include "dds/DdsDcpsInfoUtilsC.h"
+
 #include "ace/Task.h"
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Malloc_T.h"
@@ -20,6 +22,7 @@
 
 #include <string>
 
+// Forward declaration
 class UpdateManager;
 
 class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
@@ -44,44 +47,52 @@ class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
     IdType id_;
   };
 
-  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, TopicData*> TopicIndex;
-  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, ParticipantData*> ParticipantIndex;
-  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, ActorData*> ActorIndex;
-
+public:
   typedef ACE_Allocator_Adapter <ACE_Malloc <ACE_MMAP_MEMORY_POOL
                                              , TAO_SYNCH_MUTEX> > ALLOCATOR;
 
+  /// Persisted entity data structures
+  typedef struct TopicStrt <QosSeq, ACE_CString> Topic;
+  typedef struct ParticipantStrt <QosSeq> Participant;
+  typedef struct ActorStrt <QosSeq, QosSeq, ACE_CString, BinSeq> RWActor;
+
+  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Topic*> TopicIndex;
+  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Participant*> ParticipantIndex;
+  typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, RWActor*> ActorIndex;
+
+public:
   PersistenceUpdater (void);
   virtual ~PersistenceUpdater (void);
 
+  /// Service object initialization
   virtual int init (int argc, ACE_TCHAR *argv[]);
 
-  /// Shared object finalizer
+  /// pure ACE_Task_Base methods
   virtual int fini (void);
-
   virtual int svc (void);
 
-  // Request an image refresh to be sent to
-  //  the specified callback (asynchronously).
+  /// Request an image refresh to be sent upstream.
+  /// This is currently done synchronously.
+  /// TBD: Move to an asynchronous model
   virtual void requestImage (void);
 
-  // Add entities to be persisted.
-  virtual void add (const TopicData& topic);
-  virtual void add (const ParticipantData& participant);
-  virtual void add (const ActorData& actor);
+  /// Add entities to be persisted.
+  virtual void add (const UpdateManager::DTopic& topic);
+  virtual void add (const UpdateManager::DParticipant& participant);
+  virtual void add (const UpdateManager::DActor& actor);
 
-  // Remove an entity (but not children) from persistence.
-  virtual void remove (const ItemType& itemType, const IdType& id);
+  /// Remove an entity (but not children) from persistence.
+  virtual void remove (const IdType& id);
 
-  // Persist updated Qos parameters for an entity.
+  /// Persist updated Qos parameters for an entity.
   virtual void updateQos (const ItemType& itemType, const IdType& id
-			 , const QosType& qos);
+			 , const ::QosSeq& qos);
 
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
 
   std::string persistence_file_;
-  bool overwrite_;
+  bool reset_;
 
   UpdateManager *um_;
 
@@ -91,5 +102,6 @@ class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
   ParticipantIndex *participant_index_;
   ActorIndex *actor_index_;
 };
+
 
 #endif // _PERSISTENCE_UPDATER_
