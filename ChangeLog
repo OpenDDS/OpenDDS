@@ -1,3 +1,8 @@
+Mon Apr 16 20:51:19 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+	  Modify timeouts to account for slower machines.
+
 Mon Apr 16 16:05:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * docs:
