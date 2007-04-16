@@ -3,6 +3,7 @@
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataLinkSet.h"
+#include "DataLinkSet_rch.h"
 
 #include "dds/DCPS/DataSampleList.h"
 #include "TransportImpl.h"
@@ -150,7 +151,7 @@ TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
 
 
 TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds, 
+TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
                                       const CORBA::ULong num_targets)
 {
   DataLinkSet_rch selected_links = new DataLinkSet ();
@@ -168,8 +169,8 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
       {
         if (entry->int_id_->is_target (remoteIds[i]))
         {
-          selected_links->map_->bind (entry->int_id_->id(), 
-                                      entry->int_id_, 
+          selected_links->map_->bind (entry->int_id_->id(),
+                                      entry->int_id_,
                                       &(selected_links->map_entry_allocator_));
           break;
         }
@@ -179,4 +180,3 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
 
   return selected_links._retn ();
 }
-
