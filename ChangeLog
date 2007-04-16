@@ -1,3 +1,9 @@
+Mon Apr 16 16:05:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * docs:
+        * docs/README_InfoRepo_Persistence:
+	  Document the DCPS InfoRepo persistence API & mechanism.
+
 Fri Apr 13 20:54:05 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         Cumulative modifications to add persistence in the DCPS InfoRepo.
