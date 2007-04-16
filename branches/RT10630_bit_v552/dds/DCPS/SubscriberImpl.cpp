@@ -286,7 +286,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
     dr_info = it->second;
-
+      
     datareader_map_.erase(it) ;
     datareader_set_.erase(dr_servant) ;
   }
@@ -342,11 +342,11 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   delete dr_info;
 
   dr_servant->cleanup ();
+
   // Decrease the ref count after the servant is removed
   // from the datareader map.
-  dr_servant->_remove_ref ();
 
-  deactivate_object < ::DDS::DataReader_ptr > (a_datareader);
+  dr_servant->_remove_ref ();
 
   return ::DDS::RETCODE_OK;
 }
@@ -792,11 +792,14 @@ SubscriberImpl::add_associations (
 
   // TBD - pass the priority as part of the associations data
   //       because there is a priority per remote publication.
+
+
+ 
   this->add_publications(reader->get_subscription_id(),
-			 reader,
-			 writers[0].writerQos.transport_priority.value,
-			 length,
-			 associations);
+			                   reader,
+			                   writers[0].writerQos.transport_priority.value,
+			                   length,
+			                   associations);
 
   ACE_UNUSED_ARG(reader_qos) ;  // for now...
 
@@ -817,6 +820,7 @@ SubscriberImpl::remove_associations(
 
   // TMB - I don't know why I need to call it this way, but gcc complains
   //       under linux otherwise.
+
   this->TransportInterface::remove_associations(writers.length(),
 						writers.get_buffer()) ;
 }
@@ -882,6 +886,7 @@ SubscriberImpl::reader_enabled(
   DataReaderMap::iterator it
     = datareader_map_.insert(DataReaderMap::value_type(topic_name,
 						       info));
+
   if (it == datareader_map_.end ())
     {
       ACE_ERROR ((LM_ERROR,

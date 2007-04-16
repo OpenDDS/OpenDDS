@@ -108,6 +108,7 @@ DataWriterImpl::cleanup ()
     {
       int num_handlers = reactor_->cancel_timer (this);
       ACE_UNUSED_ARG (num_handlers);
+      this->_remove_ref ();
     }
 
   topic_servant_->remove_entity_ref ();
@@ -216,17 +217,18 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
     }
   }
 
+  ReaderIdSeq rd_ids;
+  rd_ids.length (num_remote_associations);
+
+  for (CORBA::ULong i = 0; i < num_remote_associations; i++)
+  {
+    rd_ids[i] = remote_associations[i].remote_id_;
+  }
+
   if (! is_bit_)
   {
     ::DDS::InstanceHandleSeq handles;
     // Create the list of readers repo id.
-    ReaderIdSeq rd_ids;
-    rd_ids.length (num_remote_associations);
-
-    for (CORBA::ULong i = 0; i < num_remote_associations; i++)
-    {
-      rd_ids[i] = remote_associations[i].remote_id_;
-    }
 
     if (this->bit_lookup_instance_handles (rd_ids, handles) == false)
       return;
@@ -302,18 +304,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 
       // Tell the WriteDataContainer to resend all sending/sent
       // samples.
-        // Create the list of readers repo id.
-      TAO::DCPS::RepoId* rd_ids = new TAO::DCPS::RepoId [num_remote_associations];
-
-      for (CORBA::ULong i = 0; i < num_remote_associations; i++)
-      {
-        rd_ids[i] = remote_associations[i].remote_id_;
-        //ACE_DEBUG ((LM_DEBUG, "(%P|%t)reenqueue_all from %d to %d\n", this->get_publication_id (),
-        // rd_ids[i]));
-      }
-
-
-      this->data_container_->reenqueue_all (this, rd_ids, num_remote_associations);
+      this->data_container_->reenqueue_all (this, rd_ids);
       this->publisher_servant_->resend_data_available(this) ;
     }
 }
@@ -1050,7 +1041,10 @@ DataWriterImpl::unregister_all ()
       // The cancel_timer will call handle_close to
       // remove_ref.
       int num_handlers = reactor_->cancel_timer (this, 0);
-      ACE_UNUSED_ARG (num_handlers);
+      if (num_handlers > 0)
+      {
+        this->_remove_ref ();  
+      }
       cancel_timer_ = false;
     }
   data_container_->unregister_all (this);

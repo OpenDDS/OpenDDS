@@ -11,7 +11,6 @@ namespace TAO
       TransportSendElementAllocator* allocator)
       : sample_ (0),
         publication_id_ (publication_id), 
-        subscription_ids_ (0),
         num_subs_ (0),
         group_id_ (0),
         previous_sample_ (0),
@@ -31,7 +30,9 @@ namespace TAO
     {
       sample_ = elem.sample_->duplicate ();
       publication_id_ = elem.publication_id_;
-      subscription_ids_ = elem.subscription_ids_;
+      num_subs_ = elem.publication_id_; 
+      for (CORBA::ULong i = 0; i < num_subs_; ++i)
+        subscription_ids_[i] = elem.subscription_ids_[i];
       group_id_ = elem.group_id_;
       previous_sample_ = elem.previous_sample_;
       next_sample_ = elem.next_sample_;
@@ -52,11 +53,6 @@ namespace TAO
         {
           sample_->release ();
         }
-
-      if (subscription_ids_)
-      {
-        delete [] subscription_ids_;
-      }
     }
  
     ACE_INLINE

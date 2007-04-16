@@ -24,6 +24,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
     {
       entry->int_id_->_remove_ref ();
     }
+    dw_map_.unbind_all ();
   }
 
   {
@@ -34,6 +35,8 @@ TAO::DCPS::TransportImpl::~TransportImpl()
     {
       entry->int_id_->_remove_ref ();
     }
+
+    dr_map_.unbind_all ();
   }
 
   // The DL Cleanup task belongs to the Transportimpl object.
@@ -271,8 +274,7 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_
             "not found\n", pub_id));
         }
     }
-
-  if (safe_cpy) {
+  else if (safe_cpy) {
     dw->_add_ref ();
   }
 
@@ -305,9 +307,11 @@ TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 
   DataReaderImpl* dr = 0;
   int result = this->dr_map_.unbind (sub_id, dr);
-  if (dr != 0)
-    dr->_remove_ref ();
 
+  if (dr != 0)
+  { 
+    dr->_remove_ref ();
+  }
   return result;
 }
 
@@ -326,8 +330,7 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe
             sub_id));
         }
     }
-
-  if (safe_cpy) {
+  else if (safe_cpy) {
     dr->_add_ref ();
   }
 

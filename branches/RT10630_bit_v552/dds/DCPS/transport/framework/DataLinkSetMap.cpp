@@ -81,7 +81,7 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id,
 
   DataLinkSet_rch selected_links = link_set->select_links (remoteIds, num_targets);
 
-  return link_set._retn();
+  return selected_links._retn();
 }
 
 
