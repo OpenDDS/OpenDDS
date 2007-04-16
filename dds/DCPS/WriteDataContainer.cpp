@@ -94,8 +94,7 @@ WriteDataContainer::enqueue(
 
 ::DDS::ReturnCode_t
 WriteDataContainer::reenqueue_all(DataWriterImpl* writer, 
-                                  const TAO::DCPS::RepoId* rds, 
-                                  const CORBA::ULong num_rds)
+                                  const TAO::DCPS::ReaderIdSeq& rds)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
@@ -103,16 +102,15 @@ WriteDataContainer::reenqueue_all(DataWriterImpl* writer,
     ::DDS::RETCODE_ERROR);
 
   // Make a copy of sending_data_ and sent_data_;
-  DataSampleList list;
 
   if (sending_data_.size_ > 0)
   {
-    this->copy_and_append (list, sending_data_, rds, num_rds);
+    this->copy_and_append (this->resend_data_, sending_data_, rds);
   }
 
   if (sent_data_.size_ > 0)
   {
-    this->copy_and_append (list, sent_data_, rds, num_rds);
+    this->copy_and_append (this->resend_data_, sent_data_, rds);
   }
 
   return ::DDS::RETCODE_OK;
@@ -889,23 +887,32 @@ WriteDataContainer::get_next_handle ()
 
 void WriteDataContainer::copy_and_append (DataSampleList& list, 
                                            const DataSampleList& appended, 
-                                           const TAO::DCPS::RepoId* rds, 
-                                           const CORBA::ULong num_rds)
+                                           const TAO::DCPS::ReaderIdSeq& rds)
  {
+   CORBA::ULong num_rds = rds.length ();
+   CORBA::ULong num_iters_per_sample = num_rds / MAX_READERS_PER_ELEM + 1;
+
    DataSampleListElement* cur = appended.head_;
    while (cur)
    {
-     DataSampleListElement* element = 0;
-     ACE_NEW_MALLOC (element,
-       static_cast<DataSampleListElement*>
-       ( sample_list_element_allocator_.malloc
-       ( sizeof (DataSampleListElement) ) ),
-       DataSampleListElement (*cur));
+     CORBA::ULong num_rds_left = num_rds; 
+    
+     for (CORBA::ULong i = 0; i < num_iters_per_sample; ++ i)
+     {
+       DataSampleListElement* element = 0;
+       ACE_NEW_MALLOC (element,
+         static_cast<DataSampleListElement*>
+         ( sample_list_element_allocator_.malloc
+         ( sizeof (DataSampleListElement) ) ),
+         DataSampleListElement (*cur));
+       element->num_subs_ = num_rds_left <= MAX_READERS_PER_ELEM ? num_rds_left : MAX_READERS_PER_ELEM;
 
-     element->subscription_ids_ = ACE_const_cast(TAO::DCPS::RepoId*, rds);
-     element->num_subs_ = num_rds;
+       for (CORBA::ULong j = 0; j < element->num_subs_; ++j)
+         element->subscription_ids_[j] = rds[j + i * MAX_READERS_PER_ELEM];
 
-     list.enqueue_tail_next_send_sample (element);
+       list.enqueue_tail_next_send_sample (element);
+       num_rds_left -= element->num_subs_;
+     }
 
      cur = cur->next_send_sample_; 
    }

@@ -114,9 +114,7 @@ namespace TAO
       * These 
       */
       ::DDS::ReturnCode_t
-      reenqueue_all(DataWriterImpl* writer, 
-                    const TAO::DCPS::RepoId* rds, 
-                    const CORBA::ULong num_rds);
+      reenqueue_all(DataWriterImpl* writer, const TAO::DCPS::ReaderIdSeq& rds);
 
       /**
       * Dynamically allocate a PublicationInstance object and add to
@@ -268,8 +266,7 @@ namespace TAO
 
       void copy_and_append (DataSampleList& list, 
                             const DataSampleList& appended, 
-                            const TAO::DCPS::RepoId* rds, 
-                            const CORBA::ULong num_rds);
+                            const TAO::DCPS::ReaderIdSeq& rds);
 
       /**
       * Remove the oldest sample (head) from the instance history list.

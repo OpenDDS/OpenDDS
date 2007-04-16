@@ -13,6 +13,7 @@ namespace TAO
 
   namespace DCPS
   {
+    const CORBA::ULong MAX_READERS_PER_ELEM = 5;
     typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
                                               TransportSendElementAllocator;
     
@@ -97,8 +98,8 @@ namespace TAO
 
       /// Publication Id used downstream.
       PublicationId          publication_id_ ;
-      TAO::DCPS::RepoId*     subscription_ids_;
       CORBA::ULong           num_subs_;
+      TAO::DCPS::RepoId      subscription_ids_[TAO::DCPS::MAX_READERS_PER_ELEM];
 
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)

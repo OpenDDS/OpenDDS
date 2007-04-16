@@ -107,13 +107,17 @@ DataReaderImpl::~DataReaderImpl (void)
 void
 DataReaderImpl::cleanup ()
 {
+  {
+  ACE_GUARD (ACE_Recursive_Thread_Mutex,
+    guard,
+    this->sample_lock_);
+
   if (liveliness_timer_id_ != -1)
     {
       int num_handlers = reactor_->cancel_timer (this);
-      this->_remove_ref ();
-
       ACE_UNUSED_ARG (num_handlers);
     }
+  }
 
   topic_servant_->remove_entity_ref ();
 }
@@ -1144,37 +1148,35 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   ACE_UNUSED_ARG(arg);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-		    guard,
-		    this->sample_lock_,
-		    ::DDS::RETCODE_ERROR);
+    guard,
+    this->sample_lock_,
+    ::DDS::RETCODE_ERROR);
 
   if (liveliness_timer_id_ != -1)
+  {
+    if (arg == this)
     {
-      this->_remove_ref();
 
-      if (arg == this)
-	{
+      if (DCPS_debug_level >= 5)
+        ACE_DEBUG((LM_DEBUG,
+        "(%P|%t) DataReaderImpl::handle_timeout"
+        " canceling timer for reader %d\n",
+        subscription_id_ ));
 
-	  if (DCPS_debug_level >= 5)
-	    ACE_DEBUG((LM_DEBUG,
-		       "(%P|%t) DataReaderImpl::handle_timeout"
-		       " canceling timer for reader %d\n",
-		       subscription_id_ ));
-
-	  // called from add_associations and there is already a timer
-	  // so cancel the existing timer.
-	  if (reactor_->cancel_timer (this) == -1)
-	    {
-	      // this could fail becaue the reactor's call and
-	      // the add_associations' call to this could overlap
-	      // so it is not a failure.
-	      ACE_DEBUG((LM_DEBUG,
-			 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout, ")
-			 ACE_TEXT(" %p. \n"), "cancel_timer" ));
-	    }
-	  liveliness_timer_id_ = -1;
-	}
+      // called from add_associations and there is already a timer
+      // so cancel the existing timer.
+      if (reactor_->cancel_timer (this->liveliness_timer_id_, &arg) == -1)
+      {
+        // this could fail becaue the reactor's call and
+        // the add_associations' call to this could overlap
+        // so it is not a failure.
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout, ")
+          ACE_TEXT(" %p. \n"), "cancel_timer" ));
+      }
+      liveliness_timer_id_ = -1;
     }
+  }
 
   ACE_Time_Value smallest(ACE_Time_Value::max_time) ;
   ACE_Time_Value next_absolute ;
@@ -1183,50 +1185,46 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
 
   // Iterate over each writer to this reader
   for (WriterMapType::ITERATOR itr(this->writers_);
-       itr.next(entry);
-       itr.advance())
-    {
-      // deal with possibly not being alive or
-      // tell when it will not be alive next (if no activity)
-      next_absolute = entry->int_id_.check_activity(tv);
+    itr.next(entry);
+    itr.advance())
+  {
+    // deal with possibly not being alive or
+    // tell when it will not be alive next (if no activity)
+    next_absolute = entry->int_id_.check_activity(tv);
 
-      if (next_absolute != ACE_Time_Value::max_time)
-	{
-	  alive_writers++;
-	  if (next_absolute < smallest)
-	    {
-	      smallest = next_absolute;
-	    }
-	}
+    if (next_absolute != ACE_Time_Value::max_time)
+    {
+      alive_writers++;
+      if (next_absolute < smallest)
+      {
+        smallest = next_absolute;
+      }
     }
+  }
 
   if (DCPS_debug_level >= 5)
     ACE_DEBUG((LM_DEBUG,
-	       "(%P|%t) %T DataReaderImpl::handle_timeout"
-	       " reader %d has %d live writers; from_reator=%d\n",
-	       subscription_id_, alive_writers, arg == this ? 0 : 1));
+    "(%P|%t) %T DataReaderImpl::handle_timeout"
+    " reader %d has %d live writers; from_reator=%d\n",
+    subscription_id_, alive_writers, arg == this ? 0 : 1));
 
   if (alive_writers)
-    {
-      ACE_Time_Value relative;
-      ACE_Time_Value now = ACE_OS::gettimeofday ();
-      if (now < next_absolute)
-	relative = next_absolute - now;
-      else
-	relative = ACE_Time_Value(0,1); // ASAP
+  {
+    ACE_Time_Value relative;
+    ACE_Time_Value now = ACE_OS::gettimeofday ();
+    if (now < next_absolute)
+      relative = next_absolute - now;
+    else
+      relative = ACE_Time_Value(0,1); // ASAP
 
-      liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
-      if (liveliness_timer_id_ == -1)
-	{
-	  ACE_ERROR((LM_ERROR,
-		     ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout, ")
-		     ACE_TEXT(" %p. \n"), "schedule_timer" ));
-	}
-      else
-	{
-	  this->_add_ref();
-	}
+    liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
+    if (liveliness_timer_id_ == -1)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout, ")
+        ACE_TEXT(" %p. \n"), "schedule_timer" ));
     }
+  }
   else {
     // no live writers so no need to schedule a timer
     // but be sure we don't try to cancel the timer later.
@@ -1329,7 +1327,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
   // this call will start the livilness timer if it is not already set
   ACE_Time_Value now = ACE_OS::gettimeofday ();
   this->handle_timeout (now, this);
-
+  
   if (listener != 0)
     {
       listener->on_liveliness_changed (dr_remote_objref_.in (),
@@ -1338,7 +1336,6 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
       liveliness_changed_status_.active_count_change = 0;
       liveliness_changed_status_.inactive_count_change = 0;
     }
-
 }
 
 void

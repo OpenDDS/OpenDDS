@@ -81,12 +81,12 @@ namespace TAO
         void send_stop();
 
         DataLinkSet* select_links (const RepoId* remoteIds, 
-                                      const CORBA::ULong num_targets);
+                                   const CORBA::ULong num_targets);
 
       private:
 
-      typedef ACE_SYNCH_MUTEX     LockType;
-      typedef ACE_Guard<LockType> GuardType;
+        typedef ACE_SYNCH_MUTEX     LockType;
+        typedef ACE_Guard<LockType> GuardType;
 
         typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
                                             DataLink_rch>            MapType;

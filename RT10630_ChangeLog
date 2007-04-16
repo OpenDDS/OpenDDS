@@ -1,3 +1,24 @@
+Mon Apr 16 23:46:54 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+          
+        * dds\DCPS\WriteDataContainer.cpp:
+        * dds\DCPS\transport\framework\TransportImpl.cpp:
+        * dds\DCPS\transport\framework\DataLinkSet.h:
+        * dds\DCPS\transport\framework\DataLinkSetMap.cpp:
+        * dds\DCPS\DataWriterImpl.cpp:
+        * dds\DCPS\DataSampleList.inl:
+        * dds\DCPS\DataSampleList.h:
+        * dds\DCPS\WriteDataContainer.h:
+ 
+          Made the sub ids list to be an array in the DataSampleElement instead 
+          of allocating on heap. Fixed bug that does not send sample to specific
+          datalinks for the transient local qos.
+          
+        * dds\DCPS\DataReaderImpl.cpp:
+        
+          Fixed a bug that does not synchronize the reference counting 
+          on datareader servant. This causes access violation on TCPListener
+          test sometimes.  
+          
 Mon Apr 16 21:37:34 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
