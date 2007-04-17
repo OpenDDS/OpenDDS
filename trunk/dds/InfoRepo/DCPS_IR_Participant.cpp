@@ -422,6 +422,10 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       delete sub;
     }
   subscriptions_.unbind_all();
+
+  if (um_) {
+    um_->remove (Participant, this->get_id());
+  }
 }
 
 

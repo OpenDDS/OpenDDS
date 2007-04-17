@@ -1,3 +1,13 @@
+Tue Apr 17 18:42:27 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+          Persistant participant (and dependencies) removal is now done by
+          the DCPS_IR_Participant object. This object bypasses the
+          InfoRepo servant in removing dependencies (topics, actors) and
+          therefore needs to directly update the UpdateManager.
+
 Tue Apr 17 15:42:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
