@@ -736,11 +736,6 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
       // Removing the participant failed
       throw TAO::DCPS::Invalid_Participant();
     }
-
-  if (um_)
-    {
-      um_->remove (Participant, participantId);
-    }
 }
 
 

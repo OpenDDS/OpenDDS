@@ -149,6 +149,11 @@ private:
   TAO_DDS_RepoId_Set ignoredPublications_;
   TAO_DDS_RepoId_Set ignoredSubscriptions_;
 
+  // The participant is the only entity that has and deals with
+  //  dependencies (topics, actors). In handling dependencies it
+  //  encompasses a bigger role. Therefore it needs to update
+  //  other entities (specifically the UpdateManager) the
+  //  changes it makes.
   UpdateManager* um_;
 };
 
