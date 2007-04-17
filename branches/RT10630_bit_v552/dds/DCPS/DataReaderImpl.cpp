@@ -94,6 +94,8 @@ DataReaderImpl::DataReaderImpl (void) :
 // the servant.
 DataReaderImpl::~DataReaderImpl (void)
 {
+  DBG_ENTRY_LVL ("DataReaderImpl","~DataReaderImpl", 5);
+
   if (initialized_)
     {
       participant_servant_->_remove_ref ();

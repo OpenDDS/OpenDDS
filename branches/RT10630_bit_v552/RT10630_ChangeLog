@@ -1,3 +1,14 @@
+Mon Apr 17 04:22:25 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\DataWriterImpl.cpp:
+        
+          Corrected the reference counting and added debug logging
+          in destructor.
+          
+        * dds\DCPS\DataReaderImpl.cpp:
+
+          Added debug logging in destructor.
+          
 Mon Apr 16 23:46:54 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           
         * dds\DCPS\WriteDataContainer.cpp:

@@ -87,6 +87,8 @@ DataWriterImpl::DataWriterImpl (void)
 // the servant.
 DataWriterImpl::~DataWriterImpl (void)
 {
+  DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl", 5);
+
   if (initialized_)
     {
       participant_servant_->_remove_ref ();
@@ -106,9 +108,11 @@ DataWriterImpl::cleanup ()
 {
   if (cancel_timer_)
     {
-      int num_handlers = reactor_->cancel_timer (this);
+      // The cancel_timer will call handle_close to
+      // remove_ref.
+      int num_handlers = reactor_->cancel_timer (this, 0);
       ACE_UNUSED_ARG (num_handlers);
-      this->_remove_ref ();
+      cancel_timer_ = false;
     }
 
   topic_servant_->remove_entity_ref ();
@@ -1041,10 +1045,7 @@ DataWriterImpl::unregister_all ()
       // The cancel_timer will call handle_close to
       // remove_ref.
       int num_handlers = reactor_->cancel_timer (this, 0);
-      if (num_handlers > 0)
-      {
-        this->_remove_ref ();  
-      }
+      ACE_UNUSED_ARG (num_handlers);
       cancel_timer_ = false;
     }
   data_container_->unregister_all (this);
