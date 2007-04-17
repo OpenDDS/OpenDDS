@@ -35,7 +35,7 @@ class Updater
   virtual void add(const UpdateManager::DActor& actor) = 0;
 
   // Remove an entity (but not children) from persistence.
-  virtual void remove (const IdType& id) = 0;
+  virtual void remove (ItemType type, const IdType& id) = 0;
 
   // Persist updated Qos parameters for an entity.
   virtual void updateQos(const ItemType& itemType, const IdType& id

@@ -95,7 +95,7 @@ class UpdateManager : public ACE_Service_Object
 
   /// Upstream request to remove entries
   // Remove an entity (but not children) from persistence.
-  void remove (const IdType& id);
+  void remove (ItemType type, const IdType& id);
 
   // Persist updated Qos parameters for an entity.
   void updateQos(const ItemType& itemType, const IdType& id

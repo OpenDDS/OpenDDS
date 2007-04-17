@@ -1,3 +1,16 @@
+Tue Apr 17 15:42:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/Updater.h:
+          Modified remove entity API to indicate entity type to be
+          removed. Entities of different types (Topic, Participant, Actor)
+          can have the same Id.
+
 Mon Apr 16 20:51:19 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/Prst_delayed_subscriber/run_test.pl:

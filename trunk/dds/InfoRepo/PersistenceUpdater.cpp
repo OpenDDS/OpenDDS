@@ -547,39 +547,43 @@ PersistenceUpdater::add(const UpdateManager::DActor& actor)
 }
 
 void
-PersistenceUpdater::remove (const IdType& idType)
+PersistenceUpdater::remove (ItemType type, const IdType& idType)
 {
   IdType_ExtId ext (idType);
-
   PersistenceUpdater::Topic* topic = 0;
-  if (topic_index_->unbind (ext, topic, allocator_) == 0)
-    {
-      topic->cleanup (allocator_);
-      allocator_->free ((void *) topic);
-      ACE_DEBUG ((LM_DEBUG, "Removed persistent topic: %d\n"
-                  , idType));
-      return;
-    }
-
   PersistenceUpdater::Participant* participant = 0;
-  if (participant_index_->unbind (ext, participant, allocator_) == 0) {
-    participant->cleanup (allocator_);
-    allocator_->free ((void *) participant);
-    ACE_DEBUG ((LM_DEBUG, "Removed persistent participant: %d\n"
-                , idType));
-    return;
-  }
-
   PersistenceUpdater::RWActor* actor = 0;
-  if (actor_index_->unbind (ext, actor, allocator_) == 0) {
-    actor->cleanup (allocator_);
-    allocator_->free ((void *) actor);
-    ACE_DEBUG ((LM_DEBUG, "Removed persistent actor: %d\n"
-                , idType));
-    return;
-  }
 
-  ACE_ERROR ((LM_ERROR, "(%P | %t) Unknown entity: %d\n", idType));
+  switch (type)
+    {
+    case ::Topic:
+      if (topic_index_->unbind (ext, topic, allocator_) == 0)
+        {
+          topic->cleanup (allocator_);
+          allocator_->free ((void *) topic);
+          ACE_DEBUG ((LM_DEBUG, "Removed persistent topic: %d\n"
+                      , idType));
+        }
+      break;
+    case ::Participant:
+      if (participant_index_->unbind (ext, participant, allocator_) == 0) {
+        participant->cleanup (allocator_);
+        allocator_->free ((void *) participant);
+        ACE_DEBUG ((LM_DEBUG, "Removed persistent participant: %d\n"
+                    , idType));
+      }
+      break;
+    case ::Actor:
+      if (actor_index_->unbind (ext, actor, allocator_) == 0) {
+        actor->cleanup (allocator_);
+        allocator_->free ((void *) actor);
+        ACE_DEBUG ((LM_DEBUG, "Removed persistent actor: %d\n"
+                    , idType));
+      }
+      break;
+    default:
+      ACE_ERROR ((LM_ERROR, "(%P | %t) Unknown entity: %d\n", idType));
+    }
 }
 
 void

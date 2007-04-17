@@ -347,13 +347,13 @@ UpdateManager::add(const UParticipant& participant)
 }
 
 void
-UpdateManager::remove (const IdType& id)
+UpdateManager::remove (ItemType type, const IdType& id)
 {
   // Invoke remove on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->remove (id);
+    (*iter)->remove (type, id);
   }
 }
 

@@ -381,7 +381,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       ++topicIter;
 
       if (um_) {
-        um_->remove (topic->get_id());
+        um_->remove (Topic, topic->get_id());
       }
       domain_->remove_topic(this, topic);
     }
@@ -402,7 +402,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       pub = (*pubIter).int_id_;
       ++pubIter;
       if (um_) {
-        um_->remove (pub->get_id());
+        um_->remove (Actor, pub->get_id());
       }
 
       delete pub;
@@ -416,7 +416,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       sub = (*subIter).int_id_;
       ++subIter;
       if (um_) {
-        um_->remove (sub->get_id());
+        um_->remove (Actor, sub->get_id());
       }
 
       delete sub;
