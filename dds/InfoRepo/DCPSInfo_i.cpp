@@ -185,7 +185,7 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
   TAO::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
 
   if (um_) {
-    um_->remove (topicId);
+    um_->remove (Topic, topicId);
   }
 
   return removedStatus;
@@ -417,7 +417,7 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
   domainPtr->remove_dead_participants();
 
   if (um_) {
-    um_->remove (publicationId);
+    um_->remove (Actor, publicationId);
   }
 }
 
@@ -615,7 +615,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
   domainPtr->remove_dead_participants();
 
   if (um_) {
-    um_->remove (subscriptionId);
+    um_->remove (Actor, subscriptionId);
   }
 }
 
@@ -739,7 +739,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
 
   if (um_)
     {
-      um_->remove (participantId);
+      um_->remove (Participant, participantId);
     }
 }
 
