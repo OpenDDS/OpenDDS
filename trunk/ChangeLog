@@ -1,7 +1,57 @@
+Wed Apr 18 18:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed tests/DCPS/Messenger_Imr from the list.
+
+        * examples:
+        * examples/DCPS:
+
+          Created new directories.
+	
+        * examples/DCPS/Messenger_IOGR_Imr:
+        * examples/DCPS/Messenger_Imr:
+
+          Moved existing tests from the corresponding directories in
+          tests/DCPS.
+	
+        * tests/DCPS/Messenger_IOGR_Imr:
+        * tests/DCPS/Messenger_IOGR_Imr/Aggregator.h:
+        * tests/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * tests/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/Messenger.idl:
+        * tests/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * tests/DCPS/Messenger_IOGR_Imr/README:
+        * tests/DCPS/Messenger_IOGR_Imr/Writer.h:
+        * tests/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/domain_ids:
+        * tests/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * tests/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * tests/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * tests/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * tests/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * tests/DCPS/Messenger_Imr:
+        * tests/DCPS/Messenger_Imr/DataReaderListener.h:
+        * tests/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * tests/DCPS/Messenger_Imr/Messenger.idl:
+        * tests/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * tests/DCPS/Messenger_Imr/README:
+        * tests/DCPS/Messenger_Imr/Writer.h:
+        * tests/DCPS/Messenger_Imr/Writer.cpp:
+        * tests/DCPS/Messenger_Imr/domain_ids:
+        * tests/DCPS/Messenger_Imr/pub.ini:
+        * tests/DCPS/Messenger_Imr/publisher.cpp:
+        * tests/DCPS/Messenger_Imr/run_test.pl:
+        * tests/DCPS/Messenger_Imr/sub.ini:
+        * tests/DCPS/Messenger_Imr/subscriber.cpp:
+
+          Removed these files.  (They have been moved to examples/DCPS.)
+
 Wed Apr 18 17:00:11 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/DdsDcpsInfrastructure.idl:
-	  Use Long (instead of int) in IDL files.
+          Use Long (instead of int) in IDL files.
 
 Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
@@ -281,20 +331,20 @@ Tue Apr 17 15:42:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
 Mon Apr 16 20:51:19 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
-	  Modify timeouts to account for slower machines.
+          Modify timeouts to account for slower machines.
 
 Mon Apr 16 16:05:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * docs:
         * docs/README_InfoRepo_Persistence:
-	  Document the DCPS InfoRepo persistence API & mechanism.
+          Document the DCPS InfoRepo persistence API & mechanism.
 
 Fri Apr 13 20:54:05 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         Cumulative modifications to add persistence in the DCPS InfoRepo.
 
         * dds/InfoRepo/ArrDelAdapter.h:
-	  Custom auto_ptr for dealing with arrays.
+          Custom auto_ptr for dealing with arrays.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
           Add command line option '-reincarnate' to control restart
