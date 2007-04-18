@@ -8,17 +8,17 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         These main changes are fixing the built-in-topics bugs and
         supporting TRANSIENT_LOCAL_DURABILITY_QOS.
 
-        *  bin\DCPS\CPPTemplate.pm:
+        *  bin/DCPS/CPPTemplate.pm:
 
            Made dispose ignore the case of bit sample not registered
            since it could hanppen.
 
-        *  dds\InfoRepo\DCPSInfoRepo.cpp:
+        *  dds/InfoRepo/DCPSInfoRepo.cpp:
 
           Made poa_manager activate() called before initialize bit.
           Otherwise a TRANSIENT exception will be caught.
 
-        *  dds\InfoRepo\DCPS_IR_Domain.cpp:
+        *  dds/InfoRepo/DCPS_IR_Domain.cpp:
 
           Made the built-in-topic datawriter use the
           TRANSIENT_LOCAL_DURABILITY_QOS instead of using the
@@ -27,9 +27,9 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           domainparticipant in DCPSInfoRepo will not create the
           bit datareader. We may need rename it.
 
-        *  dds\DCPS\DataSampleList.cpp:
-        *  dds\DCPS\DataSampleList.inl:
-        *  dds\DCPS\DataSampleList.h:
+        *  dds/DCPS/DataSampleList.cpp:
+        *  dds/DCPS/DataSampleList.inl:
+        *  dds/DCPS/DataSampleList.h:
 
           Made the next_send_sample_/previous_send_sample link isolated
           from the next_sample_/previous_sample link. When
@@ -40,8 +40,8 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           0 subs which means it will be sent to all datalinks
           otherwise it will be sent to the specified subscribers.
 
-        *  dds\DCPS\DataReaderImpl.h:
-        *  dds\DCPS\DataReaderImpl.cpp:
+        *  dds/DCPS/DataReaderImpl.h:
+        *  dds/DCPS/DataReaderImpl.cpp:
 
           - Added bit flag.
           - Added RepoId->InstanceHandler map to cache the info retrieved
@@ -53,8 +53,8 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
             on datareader servant. This causes access violation on TCPListener
             test sometimes.
 
-        *  dds\DCPS\WriteDataContainer.cpp:
-        *  dds\DCPS\WriteDataContainer.h:
+        *  dds/DCPS/WriteDataContainer.cpp:
+        *  dds/DCPS/WriteDataContainer.h:
 
           - Made all internal list(unsent, sending, released, sent) using
             next_send_sample/previous_send_sample link, instance sample list
@@ -63,23 +63,23 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
             link to hold all samples by the order of write.
           - Supported reenqueue_all to specified subscribers.
 
-        *  dds\DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.cpp:
+        *  dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
 
            Corrected the class name in a debug message.
 
-        *  dds\DCPS\transport\framework\DataLink.h:
-        *  dds\DCPS\transport\framework\DataLinkSetMap.h:
-        *  dds\DCPS\transport\framework\DataLink.cpp:
-        *  dds\DCPS\transport\framework\RepoIdSetMap.h:
-        *  dds\DCPS\transport\framework\DataLink.inl:
-        *  dds\DCPS\transport\framework\RepoIdSet.cpp:
-        *  dds\DCPS\transport\framework\RepoIdSetMap.cpp:
-        *  dds\DCPS\transport\framework\RepoIdSet.h:
-        *  dds\DCPS\transport\framework\DataLinkSet.h:
-        *  dds\DCPS\transport\framework\TransportInterface.inl:
-        *  dds\DCPS\transport\framework\DataLinkSetMap.cpp:
-        *  dds\DCPS\transport\framework\DataLinkSet.cpp:
-        *  dds\DCPS\transport\framework\TransportImpl.cpp:
+        *  dds/DCPS/transport/framework/DataLink.h:
+        *  dds/DCPS/transport/framework/DataLinkSetMap.h:
+        *  dds/DCPS/transport/framework/DataLink.cpp:
+        *  dds/DCPS/transport/framework/RepoIdSetMap.h:
+        *  dds/DCPS/transport/framework/DataLink.inl:
+        *  dds/DCPS/transport/framework/RepoIdSet.cpp:
+        *  dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        *  dds/DCPS/transport/framework/RepoIdSet.h:
+        *  dds/DCPS/transport/framework/DataLinkSet.h:
+        *  dds/DCPS/transport/framework/TransportInterface.inl:
+        *  dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        *  dds/DCPS/transport/framework/DataLinkSet.cpp:
+        *  dds/DCPS/transport/framework/TransportImpl.cpp:
 
            - Supported the samples to send to specific datareaders
            - Fixed a problem that the publisher fully association expect the
@@ -88,8 +88,8 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
              same topic. The pending association set should be a subset of the
              fully association info from subscriber instead of exact same.
 
-        *  dds\DCPS\transport\framework\TransportFactory.h:
-        *  dds\DCPS\transport\framework\TransportFactory.cpp:
+        *  dds/DCPS/transport/framework/TransportFactory.h:
+        *  dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Made the TransportFactory create a new reactor for different
           transport instance. With a single reactor thread, the input of
@@ -98,8 +98,8 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           by repo id fail via built-in-topic datareader during
           fully_association.
 
-        *  dds\DCPS\DataWriterImpl.cpp:
-        *  dds\DCPS\DataWriterImpl.h:
+        *  dds/DCPS/DataWriterImpl.cpp:
+        *  dds/DCPS/DataWriterImpl.h:
 
           - Supported TRANSIENT_LOCAL_QOS on datawriter. The datawriter
             will resend all current sending and sent samples to the new
@@ -110,24 +110,24 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
             will solve the problem that remove_association will fail look
             up the bit information.
 
-        *  dds\DCPS\BuiltInTopicUtils.h:
+        *  dds/DCPS/BuiltInTopicUtils.h:
 
            Changed the fail return to RETCODE_ERROR.
 
-        *  dds\DCPS\Service_Participant.cpp:
-        *  dds\DCPS\Service_Participant.h:
+        *  dds/DCPS/Service_Participant.cpp:
+        *  dds/DCPS/Service_Participant.h:
 
            Made the built-in-topic defaults be on and removed the set_BIT().
            Supported -DCPSBit option in command line and also in DCPS config.
            The commandline option will overwrite the DCPS configuration.
 
-        *  dds\DCPS\Qos_Helper.inl:
-        *  dds\DCPS\PublisherImpl.h:
-        *  dds\DCPS\PublisherImpl.cpp:
+        *  dds/DCPS/Qos_Helper.inl:
+        *  dds/DCPS/PublisherImpl.h:
+        *  dds/DCPS/PublisherImpl.cpp:
 
            Supported TRANSIENT_LOCAL_QOS.
 
-        *  dds\DCPS\SubscriberImpl.cpp:
+        *  dds/DCPS/SubscriberImpl.cpp:
 
           Fixed a deadlock situation that the reactor thread and the
           thread calling delete_participant acquire locks in reverse
@@ -144,59 +144,59 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           the lock while calling remove_all_associations().
 
 
-        *  dds\DdsDcpsInfrastructure.idl:
+        *  dds/DdsDcpsInfrastructure.idl:
 
           Updated the DCPS_DATA_KEY definition for built-in-topic so it can
           generate appropriate KeyLessThan method.
 
-        *  DevGuideExamples\DDS\Messenger\sub_udp.ini:
-        *  DevGuideExamples\DDS\Messenger\run_corbaloc_test.pl:
-        *  DevGuideExamples\DDS\Messenger\pub_mcast.ini:
-        *  DevGuideExamples\DDS\Messenger\sub_mcast.ini:
-        *  DevGuideExamples\DDS\Messenger\pub_udp.ini:
-        *  DevGuideExamples\DDS\Messenger\run_test.pl:
-        *  DevGuideExamples\DDS\Messenger\run_ns_test.pl:
-        *  performance-tests\DCPS\SimpleE2ETest\run_test_rejected.pl:
-        *  performance-tests\DCPS\SimpleE2ETest\run_test_long.pl:
-        *  performance-tests\DCPS\SimpleE2ETest\run_test.pl:
-        *  performance-tests\DCPS\SimpleLatency\run_test.pl:
-        *  performance-tests\DCPS\TCPListenerTest\run_test-1p1s.pl:
-        *  performance-tests\DCPS\TCPListenerTest\run_test-4p1s.pl:
-        *  performance-tests\DCPS\TCPListenerTest\run_test-2p3s.pl:
-        *  performance-tests\DCPS\TCPListenerTest\run_test-1p4s.pl:
-        *  performance-tests\DCPS\McastListenerTest\run_test-1p1s.pl:
-        *  performance-tests\DCPS\McastListenerTest\run_test-1p4s.pl:
-        *  performance-tests\DCPS\McastListenerTest\run_test-2p3s.pl:
-        *  performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
-        *  performance-tests\DCPS\UDPListenerTest\run_test-1p1s.pl:
-        *  performance-tests\DCPS\UDPListenerTest\run_test-1p4s.pl:
-        *  performance-tests\DCPS\UDPListenerTest\run_test-2p3s.pl:
-        *  performance-tests\DCPS\UDPListenerTest\run_test-4p1s.pl:
-        *  performance-tests\DCPS\UDPNoKeyTest\run_test-2pubs.pl:
-        *  performance-tests\DCPS\UDPNoKeyTest\run_test.pl:
-        *  tests\DCPS\Messenger_IOGR_Imr\run_test.pl:
-        *  tests\DCPS\unit\run_test.pl:
-        *  tests\DCPS\Reconnect\run_test.pl:
-        *  tests\DCPS\MultiTopicTest\run_test1.pl:
-        *  tests\DCPS\MultiTopicTest\run_test2.pl:
-        *  tests\DCPS\MultiTopicTest\run_test3.pl:
-        *  tests\DCPS\MultiTopicTest\run_test.pl:
-        *  tests\DCPS\DcpsIntegration\run_test-topic.pl:
-        *  tests\DCPS\DcpsIntegration\run_test-integration.pl:
-        *  tests\DCPS\Prst_delayed_subscriber\run_test.pl:
-        *  tests\DCPS\sub_init_loop\run_test.pl:
-        *  tests\DCPS\Messenger_ZeroCopy\run_test.pl:
-        *  tests\DCPS\FooTest3_0\run_test.pl:
-        *  tests\DCPS\FooTest3_1\run_test_nokey.pl:
-        *  tests\DCPS\FooTest3_1\run_test.pl:
-        *  tests\DCPS\FooTest4_0\run_test.pl:
-        *  tests\DCPS\FooTest3_2\run_test.pl:
-        *  tests\DCPS\FooTest5_0\run_test.pl:
-        *  tests\DCPS\DCPSInfoRepo\run_test.pl:
-        *  tests\DCPS\FooTest4\run_test.pl:
-        *  tests\DCPS\FooTest5\run_test.pl:
-        *  tests\DCPS\LivelinessTest\run_test.pl:
-        *  tests\DCPS\MultiDPTest\run_test.pl:
+        *  DevGuideExamples/DDS/Messenger/sub_udp.ini:
+        *  DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
+        *  DevGuideExamples/DDS/Messenger/pub_mcast.ini:
+        *  DevGuideExamples/DDS/Messenger/sub_mcast.ini:
+        *  DevGuideExamples/DDS/Messenger/pub_udp.ini:
+        *  DevGuideExamples/DDS/Messenger/run_test.pl:
+        *  DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+        *  performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        *  performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        *  performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        *  performance-tests/DCPS/SimpleLatency/run_test.pl:
+        *  performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        *  performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        *  performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        *  performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        *  performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        *  performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        *  performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        *  performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        *  performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        *  performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        *  performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        *  performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        *  performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        *  performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        *  tests/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        *  tests/DCPS/unit/run_test.pl:
+        *  tests/DCPS/Reconnect/run_test.pl:
+        *  tests/DCPS/MultiTopicTest/run_test1.pl:
+        *  tests/DCPS/MultiTopicTest/run_test2.pl:
+        *  tests/DCPS/MultiTopicTest/run_test3.pl:
+        *  tests/DCPS/MultiTopicTest/run_test.pl:
+        *  tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        *  tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        *  tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        *  tests/DCPS/sub_init_loop/run_test.pl:
+        *  tests/DCPS/Messenger_ZeroCopy/run_test.pl:
+        *  tests/DCPS/FooTest3_0/run_test.pl:
+        *  tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        *  tests/DCPS/FooTest3_1/run_test.pl:
+        *  tests/DCPS/FooTest4_0/run_test.pl:
+        *  tests/DCPS/FooTest3_2/run_test.pl:
+        *  tests/DCPS/FooTest5_0/run_test.pl:
+        *  tests/DCPS/DCPSInfoRepo/run_test.pl:
+        *  tests/DCPS/FooTest4/run_test.pl:
+        *  tests/DCPS/FooTest5/run_test.pl:
+        *  tests/DCPS/LivelinessTest/run_test.pl:
+        *  tests/DCPS/MultiDPTest/run_test.pl:
 
           Configured the tests either run with the bit on or
           off.
@@ -212,42 +212,42 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           - The UDP and Mcast test case does not run with bit.
           - other tests run with bit on.
 
-        *  performance-tests\DCPS\SimpleE2ETest\subscriber.cpp:
-        *  performance-tests\DCPS\SimpleE2ETest\publisher.cpp:
+        *  performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        *  performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
 
            Made _var in globle space be destroyed before exit.
 
-        *  performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
-        *  performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
+        *  performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        *  performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
 
            Made the TheParticipantFactoryWithArgs called before user
            application parse command line.
 
-        *  tests\DCPS\unit\Main.cpp:
-        *  tests\DCPS\DcpsIntegration\topic.cpp:
-        *  tests\DCPS\DcpsIntegration\infrastructure.cpp:
+        *  tests/DCPS/unit/Main.cpp:
+        *  tests/DCPS/DcpsIntegration/topic.cpp:
+        *  tests/DCPS/DcpsIntegration/infrastructure.cpp:
 
            Added transport factory shutdown call before service
            participant shutdown.
 
-        *  tests\DCPS\Messenger_Imr\pub.ini:
-        *  tests\DCPS\Messenger_Imr\sub.ini:
+        *  tests/DCPS/Messenger_Imr/pub.ini:
+        *  tests/DCPS/Messenger_Imr/sub.ini:
 
            Added DCPSBit configuration to turn off bit and
            uncommented domainparticipant bit data checking
            since it does not know itself.
 
-        *  tests\DCPS\BuiltInTopic\main.cpp:
-        *  tests\DCPS\FooTest5_0\main.cpp:
+        *  tests/DCPS/BuiltInTopic/main.cpp:
+        *  tests/DCPS/FooTest5_0/main.cpp:
 
            Removed the TheServiceParticipant->set_BIT(true) call.
 
-        *  tests\DCPS\FooTest5\common.cpp:
+        *  tests/DCPS/FooTest5/common.cpp:
 
            Made some test cases not generate the unnecessary transports
            e.g. mcast test will not create SimpleTcp transport.
 
-        *  bin\dcps_tests.lst:
+        *  bin/dcps_tests.lst:
 
           Disabled the reenqueue_all test since it is not applicable.
           The condition of reenqueue_all() call is changed from based
@@ -921,15 +921,15 @@ Tue Feb 27 18:46:29 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
 Fri Feb 23 18:30:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * DCPS\transport\simpleTCP\SimpleTcpTransport.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.h:
-        * DCPS\transport\framework\TransportReceiveStrategy.h:
-        * DCPS\transport\framework\DataLink.h:
-        * DCPS\transport\framework\ThreadSynch.h:
-        * DCPS\transport\framework\TransportImpl.h:
-        * DCPS\transport\framework\TransportFactory.h:
-        * DCPS\transport\framework\TransportInterface.h:
-        * DCPS\transport\framework\TransportSendStrategy.h:
+        * DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * DCPS/transport/framework/TransportReceiveStrategy.h:
+        * DCPS/transport/framework/DataLink.h:
+        * DCPS/transport/framework/ThreadSynch.h:
+        * DCPS/transport/framework/TransportImpl.h:
+        * DCPS/transport/framework/TransportFactory.h:
+        * DCPS/transport/framework/TransportInterface.h:
+        * DCPS/transport/framework/TransportSendStrategy.h:
 
           Added comments to describer the ownership of transport components.
 
@@ -1307,31 +1307,31 @@ Wed Feb  7 16:01:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Mon Feb  5 18:04:11 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * tests\DCPS\FooTest5\run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
 
           Added SimpleTcp service config to mixed_trans test to load the
           SimpleTcp library. This would fix the mixed transport test failure.
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpLoader.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.cpp:
 
           Added transport type checking and print error if an incorrent type
           provided by service config file.
 
-        * dds\DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramLoader.cpp:
 
           Updated incorrect type error message to have ERROR keyword to be easy for
           debugging.
 
 Mon Feb  5 16:24:06 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * bin\dcps_tests.lst:
+        * bin/dcps_tests.lst:
 
           Added missing ":" that makes the build configuration be the
           parameter of test script.
 
-        * dds\DCPS\DataWriterImpl.cpp:
-        * dds\DCPS\DataReaderImpl.cpp:
-        * dds\DCPS\DomainParticipantImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
 
           Fixed warnings due unused or not initialized local variables.
 
@@ -1344,8 +1344,8 @@ Fri Feb  2 23:49:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
 Fri Feb  2 22:36:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * DevGuideExamples\DDS\Messenger\sub_udp.ini:
-        * DevGuideExamples\DDS\Messenger\pub_udp.ini:
+        * DevGuideExamples/DDS/Messenger/sub_udp.ini:
+        * DevGuideExamples/DDS/Messenger/pub_udp.ini:
 
           Removed transport configuration attributes that are for SimpleTcp
           and not for SimpleUdp to avoid confusion.
@@ -1473,9 +1473,9 @@ Thu Feb  1 22:47:13 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Thu Feb  1 21:02:13 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\framework\RepoIdSet.cpp:
-        * dds\DCPS\transport\framework\RepoIdSetMap.cpp:
-        * dds\DCPS\transport\framework\RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
 
           Fixed a bug that the FULLY_ASSOCIATION message serialize
           stream contains size_t data. Since size_t is platform
@@ -1652,14 +1652,14 @@ Tue Jan 30 22:58:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
 Tue Jan 30 20:43:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleUDP:
+        * dds/DCPS/transport/simpleUDP:
 
           Removed the empty directory.
 
 Tue Jan 30 19:10:59 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * DevGuideExamples\DDS\Messenger\pub_mcast.ini:
-        * DevGuideExamples\DDS\Messenger\sub_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/sub_mcast.ini:
 
           Added missing files.
 
@@ -1669,237 +1669,237 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         and supported default transport ids for SimpleMcast. A new library
         - SimpleUnreliableDgram replaced the SimpleUdp and SimpleMcast.(See 9775)
 
-        * DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
-        * DCPS\transport\simpleMCAST\SimpleMcastGenerator.h:
-        * DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
-        * DCPS\transport\simpleMCAST\SimpleMcastLoader.cpp:
-        * DCPS\transport\simpleMCAST\SimpleMcastGenerator.cpp:
-        * DCPS\transport\simpleUDP\SimpleUdpGenerator.cpp:
-        * DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
-        * DCPS\transport\simpleUDP\SimpleUdpGenerator.h:
-        * DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_pch.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpGenerator.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSynchResource.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.vcproj:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpFactory.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpConfiguration.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastSocket.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastGenerator.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramConfiguration_rch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramLoader.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.mpc:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSendStrategy.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_pch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgram_export.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpGenerator.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastConfiguration.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastFactory.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpTransport_rch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUdpSocket.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramDataLink_rch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSocket_rch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport.inl:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramTransport_rch.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleMcastGenerator.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramSynchResource.h:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.cpp:
-        * DCPS\transport\simpleUnreliableDgram\SimpleUnreliableDgramReceiveStrategy.inl:
+        * DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
+        * DCPS/transport/simpleMCAST/SimpleMcastGenerator.h:
+        * DCPS/transport/simpleMCAST/SimpleMcastTransport.cpp:
+        * DCPS/transport/simpleMCAST/SimpleMcastLoader.cpp:
+        * DCPS/transport/simpleMCAST/SimpleMcastGenerator.cpp:
+        * DCPS/transport/simpleUDP/SimpleUdpGenerator.cpp:
+        * DCPS/transport/simpleUDP/SimpleUdpLoader.cpp:
+        * DCPS/transport/simpleUDP/SimpleUdpGenerator.h:
+        * DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramLoader.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram_pch.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpGenerator.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSynchResource.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.vcproj:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastGenerator.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration_rch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramLoader.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.mpc:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram_pch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram_export.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpGenerator.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport_rch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink_rch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket_rch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport_rch.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleMcastGenerator.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSynchResource.h:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.cpp:
+        * DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.inl:
 
           Merged SimpleUdp and SimpleMcast transport together in SimpleUnreliableDgram library.
           The -type parameter in service configuration specifies which transport will register
           with the transport factory. A process can register both "SimpleUdp" and "SimpleMcast"
           or one of the two transports via service configuration.
 
-        * DCPS\transport\framework\TransportDefs.h:
+        * DCPS/transport/framework/TransportDefs.h:
 
           Added two default id for SimpleMcast, one for subscriber (DEFAULT_SIMPLE_MCAST_SUB_ID)
           and one for publisher (DEFAULT_SIMPLE_MCAST_PUB_ID).
 
-        * DCPS\transport\framework\TransportGenerator.h:
-        * DCPS\transport\simpleTCP\SimpleTcpGenerator.h:
-        * DCPS\transport\simpleTCP\SimpleTcpGenerator.cpp:
+        * DCPS/transport/framework/TransportGenerator.h:
+        * DCPS/transport/simpleTCP/SimpleTcpGenerator.h:
+        * DCPS/transport/simpleTCP/SimpleTcpGenerator.cpp:
 
           Added default_transport_ids() function to support multiple default transport
           ids configuration registration and added transport id parameter to new_configuration()
           to provide different default configurations for the transport.
 
-        * DCPS\transport\framework\TransportFactory.h:
-        * DCPS\transport\framework\TransportFactory.cpp:
+        * DCPS/transport/framework/TransportFactory.h:
+        * DCPS/transport/framework/TransportFactory.cpp:
 
           Removed the default transport id parameter from the register_generator (). The default
           ids will be provided by generator via default_transport_ids(). Upon the transport library
           loading, the default transport configurations will be created and registered with the
           transport factory.
 
-        * MPC\config\dcpsexe_with_unreliable_dgram.mpb:
+        * MPC/config/dcpsexe_with_unreliable_dgram.mpb:
 
           Added the project base depend on SimpleUnreliableDgram lib.
 
-        * MPC\config\dcpsexe_with_mcast.mpb:
-        * MPC\config\dcpsexe_with_udp.mpb:
+        * MPC/config/dcpsexe_with_mcast.mpb:
+        * MPC/config/dcpsexe_with_udp.mpb:
 
           Removed these files since we removed SimpleUdp and SimpleMcast lib.
 
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration_rch.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastLoader.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast.mpc:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast_pch.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast_export.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastDataLink_rch.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket_rch.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastGenerator.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport_rch.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastReceiveStrategy.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastLoader.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast_pch.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastFactory.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastGenerator.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp.mpc:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp_pch.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpGenerator.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink_rch.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket_rch.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpFactory.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration_rch.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp_pch.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdp_export.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpGenerator.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpDataLink.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSocket.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport_rch.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastLoader.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.mpc:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_pch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_export.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastDataLink_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastGenerator.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport_rch.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastLoader.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast_pch.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastFactory.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastGenerator.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.mpc:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_pch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpGenerator.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink_rch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket_rch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpFactory.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration_rch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_pch.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdp_export.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpGenerator.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpDataLink.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSocket.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport_rch.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.cpp:
 
           Removed SimpleUdp and SimpleMcast directories.
 
-        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
-        * DevGuideExamples\DDS\Messenger\publisher.cpp:
-        * DevGuideExamples\DDS\Messenger\run_test.pl:
-        * DevGuideExamples\DDS\Messenger\mcast.conf        :
-        * DevGuideExamples\DDS\Messenger\udp.conf:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/mcast.conf        :
+        * DevGuideExamples/DDS/Messenger/udp.conf:
 
           Added mcast and default mcast test cases.
 
-        * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
-        * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
-        * performance-tests\DCPS\McastListenerTest\mcast.conf:
-        * performance-tests\DCPS\McastListenerTest\common.h:
-        * performance-tests\DCPS\UDPListenerTest\udp.conf:
-        * performance-tests\DCPS\UDPListenerTest\common.h:
-        * performance-tests\DCPS\UDPNoKeyTest\udp.conf:
-        * performance-tests\DCPS\UDPNoKeyTest\common.h:
-        * tests\DCPS\MultiTopicTest\common.h:
-        * tests\DCPS\FooTest5_0\main.cpp:
-        * tests\DCPS\FooTest5_0\udp.conf:
-        * tests\DCPS\FooTest5\subscriber.cpp:
-        * tests\DCPS\FooTest5\FooTest5.mpc:
-        * tests\DCPS\FooTest5\mcast.conf:
-        * tests\DCPS\FooTest5\common.cpp:
-        * tests\DCPS\FooTest5\udp.conf:
-        * tests\DCPS\FooTest5\publisher.cpp:
-        * tests\DCPS\LivelinessTest\udp.conf:
-        * tests\DCPS\LivelinessTest\common.h:
-        * tests\transport\mcast_simple\PubDriver.cpp:
-        * tests\transport\mcast_simple\SubDriver.cpp:
-        * tests\transport\mcast_simple\mcast.conf:
-        * tests\transport\udp_simple\PubDriver.cpp:
-        * tests\transport\udp_simple\DDS_transport_udp_simple.mpc:
-        * tests\transport\udp_simple\SubDriver.cpp:
-        * tests\transport\udp_simple\udp.conf:
-        * tests\transport\mcast_simple_n\DDS_transport_mcast_simple_n.mpc:
-        * tests\transport\mcast_simple_n\PubDriver.cpp:
-        * tests\transport\mcast_simple_n\SubDriver.cpp:
-        * tests\transport\mcast_simple_n\mcast.conf:
-        * tests\transport\udp_simple_n\PubDriver.cpp:
-        * tests\transport\udp_simple_n\SubDriver.cpp:
-        * tests\transport\udp_simple_n\DDS_transport_udp_simple_n.mpc:
-        * tests\transport\udp_simple_n\udp.conf:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/McastListenerTest/mcast.conf:
+        * performance-tests/DCPS/McastListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple/mcast.conf:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/DDS_transport_udp_simple.mpc:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple/udp.conf:
+        * tests/transport/mcast_simple_n/DDS_transport_mcast_simple_n.mpc:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/mcast.conf:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple_n/DDS_transport_udp_simple_n.mpc:
+        * tests/transport/udp_simple_n/udp.conf:
 
           Updated tests that use the SimpleMcast and SimpleUdp libraries to
           use SimpleUnreliableDgram library.
 
-        * bin\dcps_tests.lst:
+        * bin/dcps_tests.lst:
 
           Added mcast and default mcast Messenger examples to nightly builds.
 
@@ -1933,10 +1933,10 @@ Thu Jan 25 23:07:30 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Thu Jan 25 15:35:00 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\Transient_Kludge.h:
-        * dds\DCPS\Registered_Data_Types.h:
-        * dds\DCPS\transport\framework\TheTransportFactory.h:
-        * dds\DCPS\Service_Participant.h:
+        * dds/DCPS/Transient_Kludge.h:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/Service_Participant.h:
 
           Disabled warning "C4231: nonstandard extension used : 'extern'
           before template explicit instantiation" for VC6 builds.
@@ -1950,7 +1950,7 @@ Thu Jan 25 17:26:52 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Wed Jan 24 16:02:58 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\framework\DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.inl:
 
           Fixed a compilation error on vc6 build due to returning a value
           in a void return function.
@@ -1968,24 +1968,24 @@ Tue Jan 23 22:56:33 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Tue Jan 23 22:01:54 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastConfiguration.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
-        * dds\DCPS\transport\framework\DataLink.h:
-        * dds\DCPS\transport\framework\ThreadSynchResource.h:
-        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
-        * dds\DCPS\transport\framework\DataLink.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastConfiguration.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/DataLink.inl:
 
           Supported notifications upon backpressure timed out.
           The "max_output_pause_period" configuration is added to
@@ -1996,11 +1996,11 @@ Tue Jan 23 22:01:54 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           and on_*_lost() callbacks will be called. If the value is
           zero, the default, then this check will not be made.
 
-        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Removed a not needed include header.
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
 
           Renamed a parameter in constructor.
 
@@ -2032,13 +2032,13 @@ Tue Jan 23 18:04:50 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Tue Jan 23 17:17:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.cpp:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpConfiguration.inl:
-        * dds\DCPS\transport\framework\ThreadSynchResource.h:
-        * dds\DCPS\transport\framework\ThreadSynchResource.cpp:
-        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
 
           Corrected the timeout passed to handle_write_ready(). The
           default timeout (ACE_Time_Value*) should be nil (wait forever)
@@ -2048,35 +2048,35 @@ Tue Jan 23 17:17:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
 Mon Jan 22 23:50:46 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\framework\ThreadSynchResource.h:
-        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
 
           Added missing headers to fix the compilation error on linux.
 
 Mon Jan 22 23:35:31 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.inl:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.cpp:
-        * dds\DCPS\transport\simpleUDP\SimplUdp.mpc:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSendStrategy.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpSynchResource.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.inl:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUDP/SimplUdp.mpc:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSendStrategy.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpSynchResource.h:
 
           Added backpressure detection even it's unlinkly happen.
 
-        * dds\DCPS\transport\framework\ThreadSynchResource.h:
-        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
-        * dds\DCPS\transport\framework\ThreadSynchResource.inl:
-        * dds\DCPS\transport\framework\TransportSendStrategy.h:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSendStrategy.h:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSendStrategy.cpp:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
+        * dds/DCPS/transport/framework/ThreadSynchResource.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.h:
 
           Refactored the backpressure detection and handling code.
 
@@ -2106,23 +2106,23 @@ Mon Jan 22 16:25:19 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Fri Jan 20 00:25:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * performance-tests\DCPS\McastListenerTest\common.h:
+        * performance-tests/DCPS/McastListenerTest/common.h:
 
           Fixed a compilation error on linux due to the incorrect
           include directory.
 
 Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSynchResource.h:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcast.mpc:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSynchResource.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcast.mpc:
 
           New files added to handle backpressure case.
 
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.inl:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastTransport.cpp:
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSendStrategy.h:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSendStrategy.h:
 
           Added backpressure detection and handling. The backpressure is
           observed with a "resource temporary unavailable" error. The same
@@ -2130,25 +2130,25 @@ Fri Jan 19 23:54:10 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           Upon backpressure, the samples will be queued to the send strategy
           internal queue and wait for resource available and then send.
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpSynchResource.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.h:
 
           Corrected comment.
 
-        * performance-tests\DCPS\McastListenerTest\common.h:
-        * performance-tests\DCPS\McastListenerTest\DataReaderListener.cpp:
-        * performance-tests\DCPS\McastListenerTest\DataReaderListener.h:
-        * performance-tests\DCPS\McastListenerTest\domain_ids:
-        * performance-tests\DCPS\McastListenerTest\mcast.conf:
-        * performance-tests\DCPS\McastListenerTest\McastListener.mpc:
-        * performance-tests\DCPS\McastListenerTest\publisher.cpp:
-        * performance-tests\DCPS\McastListenerTest\subscriber.cpp:
-        * performance-tests\DCPS\McastListenerTest\TestStats.h:
-        * performance-tests\DCPS\McastListenerTest\Writer.cpp:
-        * performance-tests\DCPS\McastListenerTest\Writer.h:
-        * performance-tests\DCPS\McastListenerTest\run_test-1p1s.pl:
-        * performance-tests\DCPS\McastListenerTest\run_test-1p4s.pl:
-        * performance-tests\DCPS\McastListenerTest\run_test-2p3s.pl:
-        * performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/common.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/domain_ids:
+        * performance-tests/DCPS/McastListenerTest/mcast.conf:
+        * performance-tests/DCPS/McastListenerTest/McastListener.mpc:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/TestStats.h:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.h:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
 
           Added multicast performance tests.
 
@@ -2166,15 +2166,15 @@ Fri Jan 19 23:29:49 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Fri Jan 19 18:10:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * tests\DCPS\FooTest3_2\SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
 
           Fixed a warning from a not used variable.
 
 Fri Jan 19 18:00:56 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\Transient_Kludge.h:
-        * dds\DCPS\Registered_Data_Types.h:
-        * dds\DCPS\transport\framework\TheTransportFactory.h:
+        * dds/DCPS/Transient_Kludge.h:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
 
           Fixed the compilation warning on VC6 because the __GNUC__
           is used without checking if it's defined.
@@ -2219,8 +2219,8 @@ Wed Jan 17 19:44:54 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Wed Jan 17 19:36:34 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * tests\transport\mcast_simple\PubDriver.cpp:
-        * tests\transport\mcast_simple_n\PubDriver.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
 
           Fixed the test failures on windows. It appears that we should not
           specify the local_address for the publisher, it should use the
@@ -2229,7 +2229,7 @@ Wed Jan 17 19:36:34 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
 Wed Jan 17 17:39:49 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleMCAST\SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleMCAST/SimpleMcastSocket.inl:
 
           Fixed the mcast test failure on windows. The receiver should
           call join() to the mcast group instead of just open with the
@@ -2300,20 +2300,20 @@ Fri Jan 12 18:59:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         Updated uses of the old TAO::DCPS::servant_to_reference() (explicitly
         listing three template parameters) to the new way (which deduces all
         parameters automatically).  Also, changed cases where
-        poa->servant_to_reference() was used directly to instead use the nex
+        poa->servant_to_reference() was used directly to instead use the new
         TAO::DCPS::servant_to_reference().
 
 Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         This fixed the problem describered in RT9711.
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
           Added the logging of the address provided to the peer in
           SimpleTcpTransport::connection_info_i().
 
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.h:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.h:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpTransport.cpp:
 
           Applied the same mechanism as in SimpleTcp to discover the unique
           port to use as the default SimpleUdp local_address configuration.
@@ -2321,9 +2321,9 @@ Fri Jan 12 20:41:16 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           problem. Use DISCOVER_UNIQUE_PORT_KLUDGE macro to guard the kludge
           related code in case we find a better way to discover a unique port.
 
-        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
-        * DevGuideExamples\DDS\Messenger\publisher.cpp:
-        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
 
           Added default SimpleTcp and SimpleUdp transport id test cases.
 
@@ -2518,8 +2518,8 @@ Wed Jan 10 21:00:07 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
 Tue Jan  9 21:45:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
-        * DevGuideExamples\DDS\Messenger\publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
 
           Removed file based sychnorization code and fixed indentation.
 
@@ -2541,7 +2541,7 @@ Tue Jan  9 15:29:59 UTC 2007  Ciju John  <johnc@ociweb.com>
 
 Mon Jan  8 21:09:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Fixed the recursively acquiring non-recursive lock problem
           in remove_all_control_msgs (). To fix it, move the lock
@@ -2549,8 +2549,8 @@ Mon Jan  8 21:09:41 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
 Mon Jan  8 18:37:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\simpleTCP\SimpleTcpDataLink.cpp:
-        * dds\DCPS\transport\framework\TransportSendStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
 
           Made the terminate_send() called before send graceful
           disconnect message in
@@ -2571,25 +2571,25 @@ Fri Jan  5 22:06:24 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         This fixed the problem that default transport id does not work.
         [See RT8497].
 
-        * dds\DCPS\transport\simpleUDP\SimpleUdpLoader.cpp:
-        * dds\DCPS\transport\framework\TransportFactory.h:
-        * dds\DCPS\transport\framework\TransportFactory.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpLoader.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Added default transport id (TransportIdType) parameter to
           register_generator() so the transport configuation with
           the default transport ID (DEFAULT_SIMPLE_TCP_ID or
           DEFAULT_SIMPLE_UDP_ID) will be registered.
 
-        * DevGuideExamples\DDS\Messenger\subscriber.cpp:
-        * DevGuideExamples\DDS\Messenger\publisher.cpp:
-        * DevGuideExamples\DDS\Messenger\run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
 
           Added default transport id test. The "run_test.pl default"
           tests this bug fix.
 
 Thu Jan  4 18:54:17 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\transport\framework\BasicQueueLinkAllocator_T.h:
+        * dds/DCPS/transport/framework/BasicQueueLinkAllocator_T.h:
 
           Added missing header to fix the compilation errors on DOC
           latest BETA build.
@@ -2662,7 +2662,7 @@ Mon Dec 18 18:10:11 UTC 2006  Ciju John  <johnc@ociweb.com>
 
 Fri Dec 15 22:24:07 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
 
           Made the topic object reference removed from map after deactivated
           from poa.  This would fix access violation in FooTest5 (during
@@ -2670,11 +2670,11 @@ Fri Dec 15 22:24:07 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
 Fri Dec 15 18:11:14 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        * performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
-        * performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
-        * tests\DCPS\FooTest5_0\main.cpp:
-        * dds\InfoRepo\DCPSInfoRepo.cpp:
-        * dds\DCPS\Service_Participant.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/DCPS/Service_Participant.cpp:
 
           Replaced localhost with ACE_LOCALHOST to support platforms that do
           not support name resolutions.
@@ -2939,13 +2939,13 @@ Thu Nov 16 15:36:47 UTC 2006  Chad Elliott  <elliott_c@ociweb.com>
 
 Wed Nov 15 14:07:44 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        * tests\DCPS\FooTest3_0\SimpleSubscriber.cpp:
-        * tests\transport\udp_simple\SimplePublisher.cpp:
-        * tests\transport\udp_simple\SimpleSubscriber.cpp:
-        * tests\transport\udp_simple\SimpleDataWriter.cpp:
-        * tests\transport\simple\SimplePublisher.cpp:
-        * tests\transport\simple\SimpleSubscriber.cpp:
-        * tests\transport\simple\SimpleDataWriter.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
 
           Added missing includes to fix compilation errors on windows.
 
@@ -3243,12 +3243,12 @@ Thu Oct  5 19:55:42 UTC 2006  Ciju John  <johnc@ociweb.com>
 
 Mon Sep 11 07:13:48 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-      * dds\DCPS\transport\framework\DataLink.cpp:
+      * dds/DCPS/transport/framework/DataLink.cpp:
 
         Fixed a problem that send or send_stop could happen after the datalink
         call send strategy to clear samples when keep_link=1.
 
-      * dds\DCPS\transport\framework\TransportInterface.cpp:
+      * dds/DCPS/transport/framework/TransportInterface.cpp:
 
         Fixed a problem that the send_start could send on a nil datalink.
         The problem is the send() could find the local_id with an empty
@@ -3259,27 +3259,27 @@ Mon Sep 11 07:13:48 UTC 2006  Yan Dai  <dai_y@ociweb.com>
         To fix this problem, the two calls above was replaced by a single
         call this->local_map_.insert_link().
 
-      * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
-      * dds\DCPS\transport\framework\TransportSendStrategy.inl:
-      * dds\DCPS\transport\framework\TransportSendStrategy.h:
+      * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+      * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+      * dds/DCPS/transport/framework/TransportSendStrategy.h:
 
         Added new methods to handle the send() calls after clear()
         is called when keep_link=1.
 
 Thu Sep  8 06:19:22 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-      * dds\DCPS\transport\framework\DataLink.h:
-      * dds\DCPS\transport\framework\DataLink.cpp:
-      * dds\DCPS\transport\framework\DataLink.inl:
-      * dds\DCPS\transport\framework\ThreadPerConnectionSendTask.h:
-      * dds\DCPS\transport\framework\ThreadPerConnectionSendTask.cpp:
+      * dds/DCPS/transport/framework/DataLink.h:
+      * dds/DCPS/transport/framework/DataLink.cpp:
+      * dds/DCPS/transport/framework/DataLink.inl:
+      * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+      * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
 
         Made remove_sample() and remove_all_control_msgs() not handled by
         the thread per connection task. This would avoid the access violation
         when the data_delivered is called after sample is moved to release_data
         list and before send strategy remove_sample() is called.
 
-      * dds\DCPS\transport\framework\TransportSendStrategy.cpp:
+      * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
         Made data_delievered/data_dropped call delayed in a few places to handle
         the writer lock and send strategy lock acquired in reverse order when
@@ -3396,12 +3396,12 @@ Wed Sep  7 06:59:35 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
 Thu Aug 24 18:12:24 UTC 2006  Yan Dai  <dai_y@ociweb.com>
 
-        * bin\DCPS\CPPTemplate.pm:
+        * bin/DCPS/CPPTemplate.pm:
 
           Corrected number of chunks for message block allocator in a
           logging message.
 
-        * dds\DCPS\transport\framework\TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
 
           Corrected the DataReaderImpl/DataWriterImpl reference hold
           by TransportImpl. This fixed the memory leak of datawriter.
@@ -3414,19 +3414,19 @@ Sun Aug 13 19:17:53 UTC 2006  Yan Dai  <dai_y@ociweb.com>
           has its default id in that range. The default transports can not
           be configured by the users. [See RT 8497]
 
-        * dds\DCPS\transport\framework\TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
 
           Added definition for DEFAULT_SIMPLE_TCP_ID and
           DEFAULT_SIMPLE_UDP_ID.
 
-        * dds\DCPS\transport\framework\TransportConfiguration.cpp:
-        * dds\DCPS\transport\simpleTCP\SimpleTcpConfiguration.cpp:
-        * dds\DCPS\transport\simpleUDP\SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp:
 
           Increased the size of the section array in load() so it has
           enough space for a big transport id.
 
-        * dds\DCPS\transport\framework\TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Made the load_transport_configuration() check configuration load
           return value.
