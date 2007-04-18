@@ -191,9 +191,18 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
       // DataSampleListElement (pointer) from the current element now,
       // while it is safe.
       DataSampleListElement* next_elem = cur->next_send_sample_;
+      DataLinkSet_rch pub_links;
 
-      DataLinkSet_rch pub_links =
-                          this->local_map_.find_set(cur->publication_id_);
+      if (cur->num_subs_ > 0)
+      {
+        pub_links = this->local_map_.find_set(cur->publication_id_, 
+                                              cur->subscription_ids_,
+                                              cur->num_subs_);
+      }
+      else 
+      {
+        pub_links = this->local_map_.find_set(cur->publication_id_);
+      }
 
       if (pub_links.is_nil())
         {

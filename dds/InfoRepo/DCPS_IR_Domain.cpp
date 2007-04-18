@@ -439,7 +439,7 @@ int DCPS_IR_Domain::init_built_in_topics()
   // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
-  TheTransientKludge->enable ();
+  TheTransientKludge->enable (); 
 
   if (TAO_debug_level > 0)
     {
@@ -661,6 +661,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       ::DDS::DataWriter_var datawriter;
       ::DDS::DataWriterQos dw_qos;
       bitPublisher_->get_default_datawriter_qos (dw_qos);
+      dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
       // Participant DataWriter
       datawriter =
@@ -1091,6 +1092,13 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
 
             participant->set_handle(handle);
 
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_participant_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
+
             bitParticipantDataWriter_->write(data,
                                             handle);
           }
@@ -1157,6 +1165,13 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
               = bitTopicDataWriter_->_cxx_register (data);
 
             topic->set_handle(handle);
+
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_topic_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
 
             bitTopicDataWriter_->write(data,
                                       handle);
@@ -1232,6 +1247,13 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
             subscription->set_handle(handle);
 
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_subscription_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
+
             bitSubscriptionDataWriter_->write(data,
                                               handle);
           }
@@ -1304,6 +1326,13 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
               = bitPublicationDataWriter_->_cxx_register (data);
 
             publication->set_handle(handle);
+
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_publication_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
 
             bitPublicationDataWriter_->write(data,
                                             handle);

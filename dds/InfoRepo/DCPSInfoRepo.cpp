@@ -222,6 +222,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   // Check the non-ORB arguments.
   this->parse_args (argc, argv);
 
+  // Activate the POA manager before initialize built-in-topics
+  // so invocations can be processed.
+  poa_manager_->activate ();
+
   if (use_bits_)
     {
       ACE_INET_Addr address (listen_address_str_.c_str());
@@ -261,10 +265,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
       throw InitError ("Unable to open IOR file.");
   }
   ior_stream << objref_str.in ();
-
-  // Finally activate the POA manager, so invocations
-  //  can be processed.
-  poa_manager_->activate ();
 
   return true;
 }

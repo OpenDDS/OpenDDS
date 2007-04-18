@@ -360,6 +360,9 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 

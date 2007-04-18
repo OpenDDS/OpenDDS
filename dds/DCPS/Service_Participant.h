@@ -63,7 +63,9 @@ namespace TAO
       /** Lanch a thread to run the orb. **/
       virtual int svc ();
 
-      /** Client provides an ORB for the ::DDS client to use. **/
+      /** Client provides an ORB for the ::DDS client to use.
+      **  Note the user is responsible to run the ORB.
+      **/
       int set_ORB (CORBA::ORB_ptr orb);
 
       /** Get the ORB used by ::DDS.
@@ -184,15 +186,6 @@ namespace TAO
       */
       int bit_lookup_duration_msec () const;
       void bit_lookup_duration_msec (int msec);
-
-      ///TBD: Should be removed finally.
-      ///     Added temparary to turn on and off the builtin topic stuff.
-      ///     It defaults to turned off. The BIT test needs enable BIT by
-      ///     calling this function.
-      void set_BIT (bool flag)
-        {
-          bit_enabled_ = flag;
-        }
 
       bool get_BIT ()
         {

@@ -14,18 +14,19 @@ $status = 0;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
 PerlACE::add_lib_path('../FooType');
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                            "-o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBDebugLevel 1 -NOBITS");
+                            "$bit_conf -o $dcpsrepo_ior"
+                            . " -d $domains_file -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf");
 
 
 $Test = new PerlACE::Process ("infrastructure_test",
-                               "-DCPSInfoRepo file://$dcpsrepo_ior");
+                               "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior");
 
 # save output to a faile because the output contaings "ERROR"
 open(SAVEERR, ">&STDERR");

@@ -11,6 +11,8 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
+$repo_bit_opt = "-ORBSvcConf tcp.conf";
+
 if ($ARGV[0] eq 'udp') {
   $svc_conf = " -ORBSvcConf udp.conf ";
 }
@@ -28,7 +30,7 @@ $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file "
+				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = new PerlACE::Process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

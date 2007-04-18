@@ -57,6 +57,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
 
   int created_reactor = 0;
   TransportImpl_rch impl;
+  TransportReactorTask_rch reactor_task;
 
   // We have two ways to go here.  If the impl_factory indicates that
   // it requires a reactor task to be running in order to create the
@@ -65,22 +66,20 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
   // required by the factory).
   if (impl_factory->requires_reactor() == 1)
     {
-      // The impl_factory requires a reactor task.  Do we already have
-      // one?  Or are we going to have to create one here (and activate
-      // it to get it running in its own thread)?
-      if (this->reactor_task_.is_nil())
-        {
-          // We need to create (and activate) the reactor task.
+          // Create a new reactor task for each transport.
+          // We need create (and activate) the reactor task.
+          // In the future, we may let the DDS user choose to 
+          // which reactor to use.
           TransportReactorTask* tp;
           ACE_NEW_THROW_EX (tp,
                             TransportReactorTask(),
                             CORBA::NO_MEMORY ());
-          TransportReactorTask_rch task = tp;
+          reactor_task = tp;
 
           created_reactor = 1;
 
           // Attempt to activate it.
-          if (task->open(0) != 0)
+          if (reactor_task->open(0) != 0)
             {
               ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for "
@@ -89,13 +88,9 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
               throw Transport::MiscProblem();
             }
 
-          // Now we can save it in our data member.
-          this->reactor_task_ = task._retn();
-        }
-
       // Now we can call the create_impl() on the TransportImplFactory
       // object and supply it with a reference to the reactor task.
-      impl = impl_factory->create_impl(this->reactor_task_.in());
+      impl = impl_factory->create_impl(reactor_task.in());
     }
   else
     {
@@ -107,8 +102,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
     {
       if (created_reactor == 1)
         {
-          this->reactor_task_->stop();
-          this->reactor_task_ = 0;
+          reactor_task->stop();
         }
 
       ACE_ERROR((LM_ERROR,
@@ -135,8 +129,8 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
 
   if (created_reactor == 1)
     {
-      this->reactor_task_->stop();
-      this->reactor_task_ = 0;
+      reactor_task->stop();
+      reactor_task = 0;
     }
 
   if (result == 1)
@@ -550,12 +544,6 @@ TAO::DCPS::TransportFactory::release()
 {
   DBG_SUB_ENTRY("TransportFactory","release",1);
   GuardType guard(this->lock_);
-
-  if (!this->reactor_task_.is_nil())
-    {
-      this->reactor_task_->stop();
-      this->reactor_task_ = 0;
-    }
 
   // Iterate over all of the entries in the impl_map_, and
   // each TransportImpl object to shutdown().

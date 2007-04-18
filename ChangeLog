@@ -1,3 +1,255 @@
+Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+ 
+        These main changes are fixing the built-in-topics bugs and 
+        supporting TRANSIENT_LOCAL_DURABILITY_QOS.
+
+        *  bin\DCPS\CPPTemplate.pm:
+        
+           Made dispose ignore the case of bit sample not registered
+           since it could hanppen.
+          
+        *  dds\InfoRepo\DCPSInfoRepo.cpp:
+        
+          Made poa_manager activate() called before initialize bit.
+          Otherwise a TRANSIENT exception will be caught.
+          
+        *  dds\InfoRepo\DCPS_IR_Domain.cpp:
+        
+          Made the built-in-topic datawriter use the 
+          TRANSIENT_LOCAL_DURABILITY_QOS instead of using the 
+          TransientKludge. However, the TransientKludge is still
+          be used for other purpose such as using that so the 
+          domainparticipant in DCPSInfoRepo will not create the 
+          bit datareader. We may need rename it. 
+          
+        *  dds\DCPS\DataSampleList.cpp:
+        *  dds\DCPS\DataSampleList.inl:
+        *  dds\DCPS\DataSampleList.h:
+
+          Made the next_send_sample_/previous_send_sample link isolated 
+          from the next_sample_/previous_sample link. When 
+          inserting/deleting DataSampleElement to one of the links will
+          not change the other link.
+          Added sub list to the DataSampleElement to support the
+          transient local qos. The DataSampleElement defaults to have
+          0 subs which means it will be sent to all datalinks 
+          otherwise it will be sent to the specified subscribers.
+
+        *  dds\DCPS\DataReaderImpl.h:
+        *  dds\DCPS\DataReaderImpl.cpp:
+
+          - Added bit flag.
+          - Added RepoId->InstanceHandler map to cache the info retrieved 
+            upon add_association any operation after will look the cache
+            to get the instance handler such as for listener callback. This
+            will solve the problem that remove_association will fail look 
+            up the bit information.
+          - Fixed a bug that does not synchronize the reference counting 
+            on datareader servant. This causes access violation on TCPListener
+            test sometimes.  
+          
+        *  dds\DCPS\WriteDataContainer.cpp:
+        *  dds\DCPS\WriteDataContainer.h:
+       
+          - Made all internal list(unsent, sending, released, sent) using
+            next_send_sample/previous_send_sample link, instance sample list
+            and waiting instance sample list using next_instance_sample link
+            and added the sample_holder which uses next_sample/previous sample
+            link to hold all samples by the order of write.
+          - Supported reenqueue_all to specified subscribers.
+
+        *  dds\DCPS\transport\simpleUnreliableDgram\SimpleMcastTransport.cpp:
+        
+           Corrected the class name in a debug message.
+
+        *  dds\DCPS\transport\framework\DataLink.h:
+        *  dds\DCPS\transport\framework\DataLinkSetMap.h:
+        *  dds\DCPS\transport\framework\DataLink.cpp:
+        *  dds\DCPS\transport\framework\RepoIdSetMap.h:
+        *  dds\DCPS\transport\framework\DataLink.inl:
+        *  dds\DCPS\transport\framework\RepoIdSet.cpp:
+        *  dds\DCPS\transport\framework\RepoIdSetMap.cpp:
+        *  dds\DCPS\transport\framework\RepoIdSet.h:
+        *  dds\DCPS\transport\framework\DataLinkSet.h:
+        *  dds\DCPS\transport\framework\TransportInterface.inl:
+        *  dds\DCPS\transport\framework\DataLinkSetMap.cpp:
+        *  dds\DCPS\transport\framework\DataLinkSet.cpp:
+        *  dds\DCPS\transport\framework\TransportImpl.cpp:
+                
+           - Supported the samples to send to specific datareaders
+           - Fixed a problem that the publisher fully association expect the
+             same repo set received as in pending association set. This will
+             fail when the subscriber creates multiple datareaders to the 
+             same topic. The pending association set should be a subset of the
+             fully association info from subscriber instead of exact same.
+           
+        *  dds\DCPS\transport\framework\TransportFactory.h:
+        *  dds\DCPS\transport\framework\TransportFactory.cpp:
+
+          Made the TransportFactory create a new reactor for different
+          transport instance. With a single reactor thread, the input of
+          one transport will be blocked while another transport is handling
+          input. This would solve the problem that lookup instance handle
+          by repo id fail via built-in-topic datareader during
+          fully_association.
+
+        *  dds\DCPS\DataWriterImpl.cpp:
+        *  dds\DCPS\DataWriterImpl.h:
+        
+          - Supported TRANSIENT_LOCAL_QOS on datawriter. The datawriter 
+            will resend all current sending and sent samples to the new 
+            associated datareaders.
+          - Added RepoId->InstanceHandler map to cache the info retrieved 
+            upon add_association any operation after will look the cache
+            to get the instance handler such as for listener callback. This
+            will solve the problem that remove_association will fail look 
+            up the bit information.
+
+        *  dds\DCPS\BuiltInTopicUtils.h:
+        
+           Changed the fail return to RETCODE_ERROR.
+
+        *  dds\DCPS\Service_Participant.cpp:
+        *  dds\DCPS\Service_Participant.h:
+
+           Made the built-in-topic defaults be on and removed the set_BIT().
+           Supported -DCPSBit option in command line and also in DCPS config.
+           The commandline option will overwrite the DCPS configuration.
+
+        *  dds\DCPS\Qos_Helper.inl:
+        *  dds\DCPS\PublisherImpl.h:
+        *  dds\DCPS\PublisherImpl.cpp:
+        
+           Supported TRANSIENT_LOCAL_QOS. 
+           
+        *  dds\DCPS\SubscriberImpl.cpp:
+        
+          Fixed a deadlock situation that the reactor thread and the
+          thread calling delete_participant acquire locks in reverse
+          order. The two involved locks are the si_lock_ in SubscriberImpl
+          and the token_ in ACE_Select_Reactor_T. The thread calling
+          delete_participant holds the lock in SubscriberImpl and tries
+          to acquire lock in select reactor to remove handler while the 
+          reactor thread is handling an event which holds the lock in reactor. 
+          The reactor thread delieved the sample to datareader and insert 
+          the datareader to the subscriber internal cotainer which acquire 
+          the lock in SubscriberImpl. Since the lock in SubscriberImpl protects
+          the internal data structure, to fix this problem, the lock scope 
+          in SubscriberImpl was adjusted so that the datareader will not hold
+          the lock while calling remove_all_associations().
+
+         
+        *  dds\DdsDcpsInfrastructure.idl:
+                
+          Updated the DCPS_DATA_KEY definition for built-in-topic so it can
+          generate appropriate KeyLessThan method.
+          
+        *  DevGuideExamples\DDS\Messenger\sub_udp.ini:
+        *  DevGuideExamples\DDS\Messenger\run_corbaloc_test.pl:
+        *  DevGuideExamples\DDS\Messenger\pub_mcast.ini:
+        *  DevGuideExamples\DDS\Messenger\sub_mcast.ini:
+        *  DevGuideExamples\DDS\Messenger\pub_udp.ini:
+        *  DevGuideExamples\DDS\Messenger\run_test.pl:
+        *  DevGuideExamples\DDS\Messenger\run_ns_test.pl:
+        *  performance-tests\DCPS\SimpleE2ETest\run_test_rejected.pl:
+        *  performance-tests\DCPS\SimpleE2ETest\run_test_long.pl:
+        *  performance-tests\DCPS\SimpleE2ETest\run_test.pl:
+        *  performance-tests\DCPS\SimpleLatency\run_test.pl:
+        *  performance-tests\DCPS\TCPListenerTest\run_test-1p1s.pl:
+        *  performance-tests\DCPS\TCPListenerTest\run_test-4p1s.pl:
+        *  performance-tests\DCPS\TCPListenerTest\run_test-2p3s.pl:
+        *  performance-tests\DCPS\TCPListenerTest\run_test-1p4s.pl:
+        *  performance-tests\DCPS\McastListenerTest\run_test-1p1s.pl:
+        *  performance-tests\DCPS\McastListenerTest\run_test-1p4s.pl:
+        *  performance-tests\DCPS\McastListenerTest\run_test-2p3s.pl:
+        *  performance-tests\DCPS\McastListenerTest\run_test-4p1s.pl:
+        *  performance-tests\DCPS\UDPListenerTest\run_test-1p1s.pl:
+        *  performance-tests\DCPS\UDPListenerTest\run_test-1p4s.pl:
+        *  performance-tests\DCPS\UDPListenerTest\run_test-2p3s.pl:
+        *  performance-tests\DCPS\UDPListenerTest\run_test-4p1s.pl:
+        *  performance-tests\DCPS\UDPNoKeyTest\run_test-2pubs.pl:
+        *  performance-tests\DCPS\UDPNoKeyTest\run_test.pl:
+        *  tests\DCPS\Messenger_IOGR_Imr\run_test.pl:
+        *  tests\DCPS\unit\run_test.pl:
+        *  tests\DCPS\Reconnect\run_test.pl:
+        *  tests\DCPS\MultiTopicTest\run_test1.pl:
+        *  tests\DCPS\MultiTopicTest\run_test2.pl:
+        *  tests\DCPS\MultiTopicTest\run_test3.pl:
+        *  tests\DCPS\MultiTopicTest\run_test.pl:
+        *  tests\DCPS\DcpsIntegration\run_test-topic.pl:
+        *  tests\DCPS\DcpsIntegration\run_test-integration.pl:
+        *  tests\DCPS\Prst_delayed_subscriber\run_test.pl:
+        *  tests\DCPS\sub_init_loop\run_test.pl:
+        *  tests\DCPS\Messenger_ZeroCopy\run_test.pl:
+        *  tests\DCPS\FooTest3_0\run_test.pl:
+        *  tests\DCPS\FooTest3_1\run_test_nokey.pl:
+        *  tests\DCPS\FooTest3_1\run_test.pl:
+        *  tests\DCPS\FooTest4_0\run_test.pl:
+        *  tests\DCPS\FooTest3_2\run_test.pl:
+        *  tests\DCPS\FooTest5_0\run_test.pl:
+        *  tests\DCPS\DCPSInfoRepo\run_test.pl:
+        *  tests\DCPS\FooTest4\run_test.pl:
+        *  tests\DCPS\FooTest5\run_test.pl:
+        *  tests\DCPS\LivelinessTest\run_test.pl:
+        *  tests\DCPS\MultiDPTest\run_test.pl:
+
+          Configured the tests either run with the bit on or
+          off.
+          - All performance tests defaults to run with non-bit.
+            The TCPListenerTest has option to run with bit.
+            e.g. run "run_test-1p4s.pl bit"
+          - Some tests that the bit is not applicable.
+            e.g. FooTest3_0, FooTest3_1 and FooTest3_2 
+          - The new tests are run with non-bit.
+            e.g. tests\Messenger_Imr\run_test.pl
+                 tests\DCPS\Messenger_ZeroCopy\run_test.pl
+                 tests\DCPS\Prst_delayed_subscriber\run_test.pl
+          - The UDP and Mcast test case does not run with bit.
+          - other tests run with bit on.
+ 
+        *  performance-tests\DCPS\SimpleE2ETest\subscriber.cpp:
+        *  performance-tests\DCPS\SimpleE2ETest\publisher.cpp:
+        
+           Made _var in globle space be destroyed before exit.
+        
+        *  performance-tests\DCPS\SimpleLatency\sample_pub.cpp:
+        *  performance-tests\DCPS\SimpleLatency\sample_sub.cpp:
+         
+           Made the TheParticipantFactoryWithArgs called before user 
+           application parse command line.
+           
+        *  tests\DCPS\unit\Main.cpp:
+        *  tests\DCPS\DcpsIntegration\topic.cpp:
+        *  tests\DCPS\DcpsIntegration\infrastructure.cpp:
+
+           Added transport factory shutdown call before service 
+           participant shutdown.
+            
+        *  tests\DCPS\Messenger_Imr\pub.ini:
+        *  tests\DCPS\Messenger_Imr\sub.ini:
+        
+           Added DCPSBit configuration to turn off bit and 
+           uncommented domainparticipant bit data checking 
+           since it does not know itself.
+           
+        *  tests\DCPS\BuiltInTopic\main.cpp:
+        *  tests\DCPS\FooTest5_0\main.cpp:
+        
+           Removed the TheServiceParticipant->set_BIT(true) call.
+
+        *  tests\DCPS\FooTest5\common.cpp:
+        
+           Made some test cases not generate the unnecessary transports
+           e.g. mcast test will not create SimpleTcp transport.
+           
+        *  bin\dcps_tests.lst:
+        
+          Disabled the reenqueue_all test since it is not applicable.
+          The condition of reenqueue_all() call is changed from based
+          on TransientKludge to based on TRANSIENT_LOCAL qos and 
+          resend the samples in queue to the new associated datareader 
+          instead of all subscribered datareaders.
+        
 Tue Apr 17 18:42:27 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:

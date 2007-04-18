@@ -1980,7 +1980,7 @@ void
           this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
-  else
+  else if (! this->is_bit ())
   {
     ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ")

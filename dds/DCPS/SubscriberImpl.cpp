@@ -252,32 +252,45 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-  DataReaderMap::iterator it;
+  SubscriberDataReaderInfo* dr_info = 0;
 
-  for (it = datareader_map_.begin ();
-       it != datareader_map_.end ();
-       it ++)
+  {
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+      guard,
+      this->si_lock_,
+      ::DDS::RETCODE_ERROR);
+
+    DataReaderMap::iterator it;
+
+    for (it = datareader_map_.begin ();
+      it != datareader_map_.end ();
+      it ++)
     {
       if (it->second->local_reader_ == dr_servant)
-	{
-	  break;
-	}
+      {
+        break;
+      }
     }
 
 
-  if (it == datareader_map_.end ())
+    if (it == datareader_map_.end ())
     {
       CORBA::String_var topic_name = dr_servant->get_topic_name();
       RepoId id = dr_servant->get_subscription_id ();
       ACE_ERROR_RETURN((LM_ERROR,
-			ACE_TEXT("(%P|%t) ERROR: ")
-			ACE_TEXT("SubscriberImpl::delete_datareader, ")
-			ACE_TEXT("The datareader(topic_name=%s id=%d) is not found\n"),
-			topic_name.in (), id),
-		       ::DDS::RETCODE_ERROR);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::delete_datareader, ")
+        ACE_TEXT("The datareader(topic_name=%s id=%d) is not found\n"),
+        topic_name.in (), id),
+        ::DDS::RETCODE_ERROR);
     }
 
-  SubscriberDataReaderInfo* dr_info = it->second;
+    dr_info = it->second;
+      
+    datareader_map_.erase(it) ;
+    datareader_set_.erase(dr_servant) ;
+  }
+
   RepoId subscription_id  = dr_info->subscription_id_ ;
 
   try
@@ -302,12 +315,6 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       return ::DDS::RETCODE_ERROR;
     }
 
-  datareader_map_.erase(it) ;
-
-  if (datareader_set_.find(dr_servant) != datareader_set_.end())
-    {
-      datareader_set_.erase(dr_servant) ;
-    }
 
   TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
   if (impl.is_nil ())
@@ -335,11 +342,11 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   delete dr_info;
 
   dr_servant->cleanup ();
+
   // Decrease the ref count after the servant is removed
   // from the datareader map.
-  dr_servant->_remove_ref ();
 
-  deactivate_object < ::DDS::DataReader_ptr > (a_datareader);
+  dr_servant->_remove_ref ();
 
   return ::DDS::RETCODE_OK;
 }
@@ -354,11 +361,6 @@ SubscriberImpl::delete_contained_entities (
 {
   ACE_TRACE(ACE_TEXT("SubscriberImpl::delete_contained_entities")) ;
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-		    guard,
-		    this->si_lock_,
-		    ::DDS::RETCODE_ERROR);
-
   if (enabled_ == false)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -371,25 +373,36 @@ SubscriberImpl::delete_contained_entities (
   set_deleted (true);
 
 
-  DataReaderMap::iterator it;
-  DataReaderMap::iterator next;
+  ACE_Vector<DataReaderRemote_ptr> drs ;
 
-  for (it = datareader_map_.begin (); it != datareader_map_.end ();)
+  {
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+      guard,
+      this->si_lock_,
+      ::DDS::RETCODE_ERROR);
+
+    DataReaderMap::iterator it;
+    DataReaderMap::iterator itEnd = datareader_map_.end ();
+    for (it = datareader_map_.begin (); it != datareader_map_.end (); ++it)
     {
-      next = it;  // delete_datareader will invalidate it, so
-      next++;     // save it
-      ::DDS::ReturnCode_t ret =
-	  delete_datareader(it->second->remote_reader_);
-      if (ret != ::DDS::RETCODE_OK)
-	{
-	  ACE_ERROR_RETURN ((LM_ERROR,
-			     ACE_TEXT("(%P|%t) ERROR: ")
-			     ACE_TEXT("SubscriberImpl::delete_contained_entities, ")
-			     ACE_TEXT("failed to delete datareader\n")),
-			    ret);
-	}
-      it = next ;
+       drs.push_back (it->second->remote_reader_);
     }
+  }   
+    
+  size_t num_rds = drs.size ();
+
+  for (size_t i = 0; i < num_rds; ++i)
+  {
+    ::DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+    if (ret != ::DDS::RETCODE_OK)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::delete_contained_entities, ")
+        ACE_TEXT("failed to delete datareader\n")),
+        ret);
+    }
+  }
 
   // the subscriber can now start creating new publications
   set_deleted (false);
@@ -779,11 +792,14 @@ SubscriberImpl::add_associations (
 
   // TBD - pass the priority as part of the associations data
   //       because there is a priority per remote publication.
+
+
+ 
   this->add_publications(reader->get_subscription_id(),
-			 reader,
-			 writers[0].writerQos.transport_priority.value,
-			 length,
-			 associations);
+			                   reader,
+			                   writers[0].writerQos.transport_priority.value,
+			                   length,
+			                   associations);
 
   ACE_UNUSED_ARG(reader_qos) ;  // for now...
 
@@ -804,6 +820,7 @@ SubscriberImpl::remove_associations(
 
   // TMB - I don't know why I need to call it this way, but gcc complains
   //       under linux otherwise.
+
   this->TransportInterface::remove_associations(writers.length(),
 						writers.get_buffer()) ;
 }
@@ -869,6 +886,7 @@ SubscriberImpl::reader_enabled(
   DataReaderMap::iterator it
     = datareader_map_.insert(DataReaderMap::value_type(topic_name,
 						       info));
+
   if (it == datareader_map_.end ())
     {
       ACE_ERROR ((LM_ERROR,
