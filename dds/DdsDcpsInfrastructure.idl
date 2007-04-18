@@ -483,11 +483,11 @@ module DDS {
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[1]"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[2]"
     struct ParticipantBuiltinTopicData {
-		BuiltinTopicKey_t key;
-		UserDataQosPolicy user_data;
-    string hostname;
-    int    process_id;
-		};
+      BuiltinTopicKey_t key;
+      UserDataQosPolicy user_data;
+      string hostname;
+      long    process_id;
+    };
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
