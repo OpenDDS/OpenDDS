@@ -16,13 +16,13 @@ $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
-    $opts =  "-ORBSvcConf udp.conf -t udp";
+    $opts =  "-ORBSvcConf udp.conf -t udp -ORBSvcConf tcp.conf";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
     #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
 elsif ($ARGV[0] eq 'mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -t mcast";
+    $opts =  "-ORBSvcConf mcast.conf -t mcast -ORBSvcConf tcp.conf";
     $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
     #$svc_conf = " -ORBSvcConf mcast.conf -t mcast";
@@ -33,12 +33,12 @@ elsif ($ARGV[0] eq 'default_tcp') {
     $sub_opts = "$opts -t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts =  "-ORBSvcConf udp.conf";
+    $opts =  "-ORBSvcConf udp.conf -ORBSvcConf tcp.conf";
     $pub_opts = "$opts -t default_udp";
     $sub_opts = "$opts -t default_udp";
 }
 elsif ($ARGV[0] eq 'default_mcast') {
-    $opts =  "-ORBSvcConf mcast.conf";
+    $opts =  "-ORBSvcConf mcast.conf -ORBSvcConf tcp.conf";
     $pub_opts = "$opts -t default_mcast_pub";
     $sub_opts = "$opts -t default_mcast_sub";
 }
@@ -49,11 +49,12 @@ elsif ($ARGV[0] ne '') {
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_opt = "-ORBSvcConf tcp.conf";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
 $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
 $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
 

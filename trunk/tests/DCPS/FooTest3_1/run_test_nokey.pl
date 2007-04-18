@@ -30,6 +30,8 @@ $num_writers=1;
 $max_samples_per_instance= 12345678;
 $history_depth=100;
 $blocking_write=0;
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 
 # multiple datawriters test
@@ -69,13 +71,13 @@ unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file -NOBITS");
+                             "$repo_bit_conf -o $dcpsrepo_ior"
+                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $publisher = new PerlACE::Process ("FooTest3NoKey_publisher"
 				   , "$svc_config"
-                                   . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                    . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
                                    . " -m $multiple_instance -i $num_writes_per_thread "
                                    . " -n $max_samples_per_instance -d $history_depth"
@@ -85,7 +87,7 @@ print $publisher->CommandLine(), "\n";
 
 $subscriber = new PerlACE::Process ("FooTest3NoKey_subscriber"
 				    , "$svc_config"
-                                    . "-p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                    . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
                                     . "-n $num_writes -v file://$pubdriver_ior");
 
 print $subscriber->CommandLine(), "\n";

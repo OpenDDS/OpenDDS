@@ -206,7 +206,7 @@ namespace TAO {
               key_pos = 1;
             }
 
-          ::DDS::Subscriber_ptr bit_subscriber
+          ::DDS::Subscriber_var bit_subscriber
             = dp->get_builtin_subscriber () ;
 
           ::DDS::DataReader_var reader
@@ -216,7 +216,7 @@ namespace TAO {
               ACE_ERROR_RETURN ((LM_DEBUG,
                    "ERROR: repo_ids_to_instance_handles() %s not found.\n",
                    bit_name),
-                    1);
+                   ::DDS::RETCODE_ERROR);
             }
 
           BIT_Reader_var bit_reader = BIT_Reader::_narrow (reader.in ());
@@ -225,7 +225,7 @@ namespace TAO {
               ACE_ERROR_RETURN ((LM_DEBUG,
                    "ERROR: repo_ids_to_instance_handles() %s narrow failed.\n",
                    bit_name),
-                    1);
+                   ::DDS::RETCODE_ERROR);
             }
 
           BIT_DataSeq data(max_samples);

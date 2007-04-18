@@ -712,3 +712,13 @@ TAO::DCPS::DataLink::release_resources ()
   return impl_->release_link_resources (this);
   return true;
 }
+
+
+bool 
+TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
+{
+ GuardType guard(this->sub_map_lock_);
+ RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
+
+ return ! pubs.is_nil ();
+}

@@ -23,7 +23,7 @@ if ($ARGV[0] eq "-client_orb") {
 }
 
 $REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-			      , "-o $iorfile -d domain_ids -NOBITS");
+			      , "-o $iorfile -d domain_ids -ORBSvcConf ../../tcp.conf");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $CL = new PerlACE::Process ("DdsDcps_UnitTest"

@@ -220,14 +220,14 @@ namespace TAO
         /// Thread lock used to protect simultaneous access to the maps.
         LockType    lock_;
 
-        /// This is the reactor task that will be used by those TransportImpl
-        /// objects that need it.  It will only be created (and activated)
-        /// if there is at least one TransportImpl that needs it.  It is
-        /// created (and activated) as the result of the first call to
-        /// the TransportFactory::create() method for any TransportImpl that
-        /// requires a reactor.  The point is - we delay creation/activation
-        /// of the reactor task until its first need arises.
-        TransportReactorTask_rch reactor_task_;
+        ///// This is the reactor task that will be used by those TransportImpl
+        ///// objects that need it.  It will only be created (and activated)
+        ///// if there is at least one TransportImpl that needs it.  It is
+        ///// created (and activated) as the result of the first call to
+        ///// the TransportFactory::create() method for any TransportImpl that
+        ///// requires a reactor.  The point is - we delay creation/activation
+        ///// of the reactor task until its first need arises.
+        //TransportReactorTask_rch reactor_task_;
 //MJM: We may need to provide a mechanism to set this from the client
 //MJM: application.
     };

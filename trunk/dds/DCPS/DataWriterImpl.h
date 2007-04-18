@@ -278,6 +278,7 @@ namespace TAO
     * Retreive the unsent data from the WriteDataContainer.
     */
     DataSampleList get_unsent_data ();
+    DataSampleList get_resend_data ();
 
     /**
     * Cache the publication repository id after adding
@@ -455,9 +456,15 @@ namespace TAO
       /// Send the liveliness message.
       void send_liveliness (const ACE_Time_Value& now);
 
-      /// Convert the subscription repo ids to the subscription handle.
-      void repo_ids_to_instance_handles (const ReaderIdSeq& ids,
+      /// Lookup the instance handles by the subscription repo ids 
+      /// via the bit datareader.
+      bool bit_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
+
+      /// Lookup the cache to get the instance handle by the subscription repo ids.
+      bool cache_lookup_instance_handles (const ReaderIdSeq& ids,
+                                         ::DDS::InstanceHandleSeq & hdls);
+
 
       /// The name of associated topic.
       CORBA::String_var               topic_name_;
@@ -499,6 +506,15 @@ namespace TAO
       ACE_Recursive_Thread_Mutex                lock_;
       /// The list of active subscriptions.
       ::DDS::InstanceHandleSeq        subscription_handles_;
+
+      typedef ACE_Hash_Map_Manager_Ex<RepoId,
+        DDS::InstanceHandle_t,
+        ACE_Hash<RepoId>,
+        ACE_Equal_To<RepoId>,
+        ACE_Null_Mutex>        RepoIdToHandleMap;
+
+      RepoIdToHandleMap               id_to_handle_map_;
+
       ReaderIdSeq                     readers_;
 
       /// Status conditions.

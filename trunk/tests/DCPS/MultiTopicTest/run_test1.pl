@@ -86,7 +86,7 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -ORBDebugLevel 1 "
+                             "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
                            . "-o $dcpsrepo_ior");
 
 

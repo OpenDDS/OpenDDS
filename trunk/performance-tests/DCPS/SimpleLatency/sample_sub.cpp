@@ -64,6 +64,12 @@ const TAO::DCPS::TransportIdType TCP_IMPL_ID = 20;
 
 int main(int argc, char *argv[])
 {
+       // Calling TheParticipantFactoryWithArgs before user application parse command
+       // line.
+       /* Create participant */
+       DDS::DomainParticipantFactory_var dpf =
+         TheParticipantFactoryWithArgs (argc, argv);
+
        bool useTCP = true;
        DomainId_t myDomain = 411;
 
@@ -89,9 +95,6 @@ int main(int argc, char *argv[])
 
 
        /* Create participant */
-       DDS::DomainParticipantFactory_var dpf =
-         TheParticipantFactoryWithArgs (argc, argv);
-
        DDS::DomainParticipant_var dp =
               dpf->create_participant (myDomain,
                                        PARTICIPANT_QOS_DEFAULT, 

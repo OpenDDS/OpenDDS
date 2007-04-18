@@ -33,11 +33,11 @@ TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
 
 
 bool
-TAO::DCPS::RepoIdSet::equal (RepoIdSet& map)
+TAO::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
 {
-  DBG_ENTRY_LVL("RepoIdSet","equal",5);
+  DBG_ENTRY_LVL("RepoIdSet","is_subset",5);
 
-  if (this->size () == map.size () && this->size () > 0)
+  if (this->size () <= map.size () && this->size () > 0)
   {
     MapType::ENTRY* entry;
 

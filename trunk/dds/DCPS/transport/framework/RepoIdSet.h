@@ -46,7 +46,7 @@ namespace TAO
         void serialize(Serializer & serializer);
 
         /// Check if contents in the two RepoIdSet are same.
-        bool equal (RepoIdSet& map);
+        bool is_subset (RepoIdSet& map);
 
       private:
 

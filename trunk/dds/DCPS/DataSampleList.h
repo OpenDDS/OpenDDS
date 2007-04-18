@@ -13,9 +13,11 @@ namespace TAO
 
   namespace DCPS
   {
+    const CORBA::ULong MAX_READERS_PER_ELEM = 5;
     typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
                                               TransportSendElementAllocator;
-
+    
+    const int MAX_READERS_TO_RESEND = 5;
 
     class TransportSendListener;
     struct PublicationInstance;
@@ -51,7 +53,7 @@ namespace TAO
     *       send side to count the depth of instance data and to allow the
     *       removal of elements by instance.
     *
-    *   next_send_sample_
+    *   next_send_sample_/previous_send_sample_
     *     - the next sample of data to be sent.  This thread is used
     *       external to the container to maintain a list of data samples
     *       that are to be transmitted over the transport layer. The
@@ -84,6 +86,9 @@ namespace TAO
                              TransportSendListener*  send_listner,
                              PublicationInstance*    handle,
                              TransportSendElementAllocator* allocator);
+
+      DataSampleListElement (const DataSampleListElement& elem);
+
 //remove check all calling locations of the above and rename to send both
       ~DataSampleListElement ();
 
@@ -93,6 +98,8 @@ namespace TAO
 
       /// Publication Id used downstream.
       PublicationId          publication_id_ ;
+      CORBA::ULong           num_subs_;
+      TAO::DCPS::RepoId      subscription_ids_[TAO::DCPS::MAX_READERS_PER_ELEM];
 
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)
@@ -100,16 +107,17 @@ namespace TAO
 
       /// Used to make removal from the
       /// container _much_ more efficient.
+      
+      /// Thread of all data within a DataWriter.
       DataSampleListElement* previous_sample_ ;
-
-      /// Thread of data within the DataWriter.
       DataSampleListElement* next_sample_ ;
 
       /// Thread of data within the instance.
       DataSampleListElement* next_instance_sample_ ;
 
-      /// Thread of data being sent.
+      /// Thread of data being unsent/sending/sent/released.
       DataSampleListElement* next_send_sample_ ;
+      DataSampleListElement* previous_send_sample_;
 
       /// Pointer to object that will be informed when the data has
       /// been delivered.  This needs to be set prior to using the

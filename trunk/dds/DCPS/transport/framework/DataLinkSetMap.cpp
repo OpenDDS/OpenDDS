@@ -65,6 +65,26 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id)
 }
 
 
+TAO::DCPS::DataLinkSet*
+TAO::DCPS::DataLinkSetMap::find_set(RepoId id, 
+                                    const RepoId* remoteIds, 
+                                    const CORBA::ULong num_targets)
+{
+  DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
+  DataLinkSet_rch link_set;
+  GuardType guard(this->map_lock_);
+
+  if (this->map_.find(id, link_set) != 0)
+    {
+      return 0;
+    }
+
+  DataLinkSet_rch selected_links = link_set->select_links (remoteIds, num_targets);
+
+  return selected_links._retn();
+}
+
+
 /// REMEMBER: This really means find_or_create_set_then_insert_link()
 int
 TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
