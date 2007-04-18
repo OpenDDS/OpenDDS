@@ -744,7 +744,7 @@ DDS::ReturnCode_t
     max_samples = (::CORBA::Long)received_data.maximum();
   }
 
-  ::CORBA::Long count(0);
+  ::CORBA::ULong count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -772,8 +772,9 @@ DDS::ReturnCode_t
         {
           // Increase sequence length before adding new element to sequence.
           received_data.length (count + 1);
+          // copy the sample
           received_data[count] =
-              *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+              *((::<%SCOPE%><%TYPE%> *)item->registered_data_ );
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
 
@@ -818,8 +819,8 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read (
-    ::<%MODULE%><%TYPE%>PtrVec & received_data,
-    ::DDS::SampleInfoSeq & info_seq,
+    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+    ::TAO::DCPS::SampleInfoZCSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
@@ -829,12 +830,33 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
+  // OpenDDS does not currenlty support non-zero read with the zero-read sequence.
+  // TBD - ?? should we support it?
+  if (received_data.max_len() != 0)
+	{
+		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read zero-copy, max_len must be zero; not %d\n",
+		received_data.max_len() ));
+		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+	}
+  if ((received_data.maximum() != info_seq.maximum()) ||
+      (received_data.length() != info_seq.length()) ||
+      (received_data.release() != info_seq.release()))
+    {
+      ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read sample and info input sequences do not match.\n" ));
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+  if ((received_data.max_len() == 0) != (received_data.owns() == false))
+	{
+		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read mismatch of max_len and owns\n" ));
+		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+	}
+    
   if ((::CORBA::Long)info_seq.maximum() < max_samples)
     {
       max_samples = (::CORBA::Long)info_seq.maximum();
     }
 
-  ::CORBA::Long count(0);
+  ::CORBA::ULong count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -860,8 +882,10 @@ DDS::ReturnCode_t
       {
         if (item->sample_state_ & sample_states)
         {
-          received_data[count] =
-              (::<%SCOPE%><%TYPE%> *)item->registered_data_ ;
+          // Increase sequence length before adding new element to sequence.
+          received_data.length (count + 1);
+          received_data.assignPtr(count, 
+              (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
@@ -946,7 +970,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)received_data.maximum() ;
     }
 
-  ::CORBA::Long count(0) ;
+  ::CORBA::ULong count(0) ;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1064,8 +1088,8 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take (
-    ::<%MODULE%><%TYPE%>PtrVec & received_data,
-    ::DDS::SampleInfoSeq & info_seq,
+    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+    ::TAO::DCPS::SampleInfoZCSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
@@ -1080,7 +1104,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)info_seq.maximum();
     }
 
-  ::CORBA::Long count(0);
+  ::CORBA::ULong count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1106,12 +1130,11 @@ DDS::ReturnCode_t
       {
         if (item->sample_state_ & sample_states)
         {
-/*
- *        TBD - We need a way to give up ownership of item->registered_data_
- *        if we've used the cached allocator
- */
-          received_data[count] =
-              (::<%SCOPE%><%TYPE%> *)item->registered_data_ ;
+          // Increase sequence length before adding new element to sequence.
+          received_data.length (count + 1);
+          received_data.assignPtr(count, 
+              (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+              
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
@@ -1712,6 +1735,22 @@ DDS::ReturnCode_t
     delete[] buf;
     delete[] info;
   }
+
+  return ::DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::return_loan (
+    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+    ::TAO::DCPS::SampleInfoZCSeq & info_seq
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+  ))
+{
+  // TBD - free up the info_seq
+  // TBD - iterate over the recieved_data and decrement its reference count.
+  // TBD - make access to the recieved_data an error.
 
   return ::DDS::RETCODE_OK;
 }
