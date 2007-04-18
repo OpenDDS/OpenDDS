@@ -128,7 +128,7 @@ namespace TAO
       * samples. The samples will be sent to the subscribers specified.
       */
       ::DDS::ReturnCode_t
-      reenqueue_all(DataWriterImpl* writer, const TAO::DCPS::ReaderIdSeq& rds);
+      reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds);
 
       /**
       * Dynamically allocate a PublicationInstance object and add to

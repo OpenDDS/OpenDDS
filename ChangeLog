@@ -1,3 +1,15 @@
+Wed Apr 18 18:28:20 UTC 2007 Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed unused parameter from reenqueue_all().
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        
+          Fixed "no newline at end of file" warning.
+          
 Wed Apr 18 18:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
