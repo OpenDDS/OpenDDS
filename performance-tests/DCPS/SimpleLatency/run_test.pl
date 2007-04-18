@@ -13,15 +13,17 @@ $status = 0;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
 
-$Subscriber = new PerlACE::Process ("tao_sub", "");
+$Subscriber = new PerlACE::Process ("tao_sub", "$app_bit_conf");
 
-$Publisher = new PerlACE::Process ("tao_pub", "-s 200 -c 10000");
+$Publisher = new PerlACE::Process ("tao_pub", "$app_bit_conf -s 200 -c 10000");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

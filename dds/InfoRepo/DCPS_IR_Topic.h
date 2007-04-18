@@ -48,8 +48,10 @@ public:
 
   /// Adds the publication to the list of publications
   /// Calls the topic description's try associate if successfully added
+  /// 'associate' switch toggles association attempt.
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_publication_reference (DCPS_IR_Publication* publication);
+  int add_publication_reference (DCPS_IR_Publication* publication
+				 , bool associate = true);
 
   /// Removes the publication from the list of publications
   /// Returns 0 if successful

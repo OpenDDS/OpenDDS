@@ -39,9 +39,9 @@ unlink $publisher_ready;
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
+                             "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior"
 #                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file -NOBITS");
+                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
 print $DCPSREPO->CommandLine(), "\n";
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";

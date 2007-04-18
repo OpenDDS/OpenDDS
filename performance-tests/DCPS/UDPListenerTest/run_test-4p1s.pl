@@ -29,18 +29,20 @@ $write_throttle=200000*$num_writers;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
+                             "$repo_bit_conf -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";
 
 
-$sub_parameters = "-ORBSvcConf udp.conf -p $num_writers"
+$sub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
@@ -49,33 +51,33 @@ $sub_parameters = "-ORBSvcConf udp.conf -p $num_writers"
 #use -mxs $num_messages to avoid using the heap 
 #   (could be less than $num_messages but I am not sure of the limit).
 
-$Sub1 = new PerlACE::Process ("subscriber", $sub_parameters . " -a $sub_addr_host:$sub_addr_port");
+$Sub1 = new PerlACE::Process ("subscriber", $sub_parameters . " $app_bit_conf -a $sub_addr_host:$sub_addr_port");
 print $Sub1->CommandLine(), "\n";
 $sub_addr_port++;
 
 
-$pub_parameters = "-ORBSvcConf udp.conf -p 1"
+$pub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -p 1"
 #              . " -DCPSDebugLevel 6"
               . " -r $num_readers" 
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000 -h $write_throttle";
 
-$Pub1 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
+$Pub1 = new PerlACE::Process ("publisher", $pub_parameters . " $app_bit_conf -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
 print $Pub1->CommandLine(), "\n";
 $pub_addr_port++;
 $pub_writer_id++;
 
-$Pub2 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
+$Pub2 = new PerlACE::Process ("publisher", $pub_parameters . " $app_bit_conf -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
 print $Pub2->CommandLine(), "\n";
 $pub_addr_port++;
 $pub_writer_id++;
 
-$Pub3 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
+$Pub3 = new PerlACE::Process ("publisher", $pub_parameters . " $app_bit_conf -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
 print $Pub3->CommandLine(), "\n";
 $pub_addr_port++;
 $pub_writer_id++;
 
-$Pub4 = new PerlACE::Process ("publisher", $pub_parameters . " -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
+$Pub4 = new PerlACE::Process ("publisher", $pub_parameters . " $app_bit_conf -i $pub_writer_id -a $pub_addr_host:$pub_addr_port");
 print $Pub4->CommandLine(), "\n";
 $pub_addr_port++;
 $pub_writer_id++;

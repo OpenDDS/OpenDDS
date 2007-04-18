@@ -51,6 +51,7 @@ namespace TAO
     static bool got_liveliness_factor = false;
     static bool got_bit_transport_port = false;
     static bool got_bit_lookup_duration_msec = false;
+    static bool got_bit_flag = false;
 
     Service_Participant::Service_Participant ()
     : orb_ (CORBA::ORB::_nil ()),
@@ -59,7 +60,7 @@ namespace TAO
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
-      bit_enabled_ (false),
+      bit_enabled_ (true),
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       initialize();
@@ -278,7 +279,7 @@ namespace TAO
                   dp_factory_ = servant_to_reference (dp_factory_servant_);
 
                   // Give ownership to poa.
-                  dp_factory_servant_->_remove_ref ();
+                  //dp_factory_servant_->_remove_ref ();
 
                   if (CORBA::is_nil (dp_factory_.in ()))
                     {
@@ -394,6 +395,12 @@ namespace TAO
               bit_lookup_duration_msec_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_lookup_duration_msec = true;
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBit")) != 0)
+            {
+              bit_enabled_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+              got_bit_flag = true;
             }
           else
             {
@@ -753,6 +760,15 @@ namespace TAO
           else
             {
               GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationMsec", this->bit_lookup_duration_msec_, int)
+            }
+          if (got_bit_flag)
+            {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t)ignore DCPSBit config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBit", this->bit_enabled_, int)
             }
         }
 

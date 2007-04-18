@@ -13,6 +13,7 @@ $status = 0;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
@@ -20,12 +21,12 @@ PerlACE::add_lib_path('../FooType');
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                            "-o $dcpsrepo_ior"
-                            . " -d $domains_file -NOBITS");
+                            "$bit_conf  -o $dcpsrepo_ior"
+                            . " -d $domains_file -ORBSvcConf ../../tcp.conf");
 
 
 $Topic = new PerlACE::Process ("topic_test",
-                               "-DCPSInfoRepo file://$dcpsrepo_ior");
+                               "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {

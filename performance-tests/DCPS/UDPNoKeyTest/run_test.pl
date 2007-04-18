@@ -24,16 +24,19 @@ $sub_addr='localhost:45678';
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
+
 
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
+                             "$repo_bit_conf -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";
-$sub_parameters = "-ORBSvcConf udp.conf -a $sub_addr -p $num_writers"
+$sub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $sub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size"
               . " -msi $num_messages -mxs $num_messages";
@@ -44,7 +47,7 @@ $sub_parameters = "-ORBSvcConf udp.conf -a $sub_addr -p $num_writers"
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "-ORBSvcConf udp.conf -a $pub_addr -p $num_writers"
+$pub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub_addr -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size" 
               . " -msi 1000 -mxs 1000  -h 2000";

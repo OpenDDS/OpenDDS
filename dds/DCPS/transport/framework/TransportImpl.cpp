@@ -24,6 +24,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
     {
       entry->int_id_->_remove_ref ();
     }
+    dw_map_.unbind_all ();
   }
 
   {
@@ -34,6 +35,8 @@ TAO::DCPS::TransportImpl::~TransportImpl()
     {
       entry->int_id_->_remove_ref ();
     }
+
+    dr_map_.unbind_all ();
   }
 
   // The DL Cleanup task belongs to the Transportimpl object.
@@ -47,6 +50,12 @@ void
 TAO::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",5);
+ 
+  if (! this->reactor_task_.is_nil ())
+  {
+    this->reactor_task_->stop ();
+    this->reactor_task_ = 0;  
+  }
 
   this->pre_shutdown_i();
 
@@ -265,8 +274,7 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_
             "not found\n", pub_id));
         }
     }
-
-  if (safe_cpy) {
+  else if (safe_cpy) {
     dw->_add_ref ();
   }
 
@@ -299,9 +307,11 @@ TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 
   DataReaderImpl* dr = 0;
   int result = this->dr_map_.unbind (sub_id, dr);
-  if (dr != 0)
-    dr->_remove_ref ();
 
+  if (dr != 0)
+  { 
+    dr->_remove_ref ();
+  }
   return result;
 }
 
@@ -320,8 +330,7 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe
             sub_id));
         }
     }
-
-  if (safe_cpy) {
+  else if (safe_cpy) {
     dr->_add_ref ();
   }
 
@@ -442,7 +451,7 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 bool
 TAO::DCPS::TransportImpl::acked (RepoId pub_id)
 {
-  return this->pending_sub_map_.equal (this->acked_sub_map_, pub_id);
+  return this->pending_sub_map_.is_subset (this->acked_sub_map_, pub_id);
 }
 
 bool

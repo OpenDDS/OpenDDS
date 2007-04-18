@@ -163,8 +163,41 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic(TAO::DCPS::RepoId_out topicId,
                                                  const ::DDS::TopicQos & qos,
                                                  DCPS_IR_Participant* participantPtr)
 {
-  topicId = get_next_topic_id();
+  topicId = 0;
 
+  TAO::DCPS::RepoId topic_id = get_next_topic_id();
+  TAO::DCPS::TopicStatus status = add_topic_i (topic_id, topicName
+                                               , dataTypeName
+                                               , qos, participantPtr);
+
+  if (status == TAO::DCPS::CREATED) {
+    topicId = topic_id;
+  }
+
+  return status;
+}
+
+TAO::DCPS::TopicStatus
+DCPS_IR_Domain::force_add_topic(TAO::DCPS::RepoId topicId,
+                                const char* topicName,
+                                const char* dataTypeName,
+                                const ::DDS::TopicQos & qos,
+                                DCPS_IR_Participant* participantPtr)
+{
+  this->set_base_topic_id (topicId + 1);
+  TAO::DCPS::TopicStatus status = add_topic_i (topicId, topicName
+                                               , dataTypeName
+                                               , qos, participantPtr);
+
+  return status;
+}
+
+TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
+                                                    const char * topicName,
+                                                    const char * dataTypeName,
+                                                    const ::DDS::TopicQos & qos,
+                                                    DCPS_IR_Participant* participantPtr)
+{
   DCPS_IR_Topic_Description* description;
   int descriptionLookup = find_topic_description(topicName, dataTypeName, description);
   if (1 == descriptionLookup)
@@ -406,7 +439,7 @@ int DCPS_IR_Domain::init_built_in_topics()
   // Tell the DCPS framework to use a limited DURABILITY.kind=TRANSIENT
   // implementation and also indicates that DCPS framework BIT subscriber
   // and datareaders should not be created.
-  TheTransientKludge->enable ();
+  TheTransientKludge->enable (); 
 
   if (TAO_debug_level > 0)
     {
@@ -628,6 +661,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters()
       ::DDS::DataWriter_var datawriter;
       ::DDS::DataWriterQos dw_qos;
       bitPublisher_->get_default_datawriter_qos (dw_qos);
+      dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
       // Participant DataWriter
       datawriter =
@@ -993,6 +1027,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_participant_id ()
   return participantIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_participant_id (TAO::DCPS::RepoId id)
+{
+  return participantIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
@@ -1000,6 +1039,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
   return topicIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_topic_id (TAO::DCPS::RepoId id)
+{
+  return topicIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
@@ -1007,6 +1051,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
   return pubsubIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_publication_id (TAO::DCPS::RepoId id)
+{
+  return pubsubIdGenerator_.set_base_id (id);
+}
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
@@ -1014,6 +1063,11 @@ TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
   return pubsubIdGenerator_.get_next_id ();
 }
 
+bool
+DCPS_IR_Domain::set_base_subscription_id (TAO::DCPS::RepoId id)
+{
+  return pubsubIdGenerator_.set_base_id (id);
+}
 
 
 void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
@@ -1037,6 +1091,13 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
               = bitParticipantDataWriter_->_cxx_register (data);
 
             participant->set_handle(handle);
+
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_participant_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
 
             bitParticipantDataWriter_->write(data,
                                             handle);
@@ -1104,6 +1165,13 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
               = bitTopicDataWriter_->_cxx_register (data);
 
             topic->set_handle(handle);
+
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_topic_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
 
             bitTopicDataWriter_->write(data,
                                       handle);
@@ -1179,6 +1247,13 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
             subscription->set_handle(handle);
 
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_subscription_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
+
             bitSubscriptionDataWriter_->write(data,
                                               handle);
           }
@@ -1251,6 +1326,13 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
               = bitPublicationDataWriter_->_cxx_register (data);
 
             publication->set_handle(handle);
+
+            if (TAO_debug_level > 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, 
+                "(%P|%t)DCPS_IR_Domain::publish_publication_bit: %d %d %d \n", 
+                data.key[0], data.key[1], data.key[2]));
+            }
 
             bitPublicationDataWriter_->write(data,
                                             handle);

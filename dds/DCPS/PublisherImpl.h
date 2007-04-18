@@ -269,6 +269,9 @@ namespace TAO
 
     AttachStatus attach_transport(TransportImpl* impl);
 
+    ::DDS::ReturnCode_t 
+    resend_data_available(DataWriterImpl* writer);
+
     /**
     * This is used to retrieve the listener for a certain status change.
     * If this publisher has a registered listener and the status kind

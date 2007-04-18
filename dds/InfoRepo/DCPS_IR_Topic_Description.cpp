@@ -29,7 +29,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
       DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
       DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
                  ACE_TEXT("name %s  data type name %s\n"),
                  name_.c_str(), dataTypeName_.c_str() ));
@@ -38,7 +38,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
         {
           subscription = *iter;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: Subscription id %d still references this description!\n"),
                      subscription->get_id()
                      ));
@@ -51,7 +51,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
       DCPS_IR_Topic_Set::ITERATOR iter = topics_.begin();
       DCPS_IR_Topic_Set::ITERATOR end = topics_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
                  ACE_TEXT("name %s  data type name %s\n"),
                  name_.c_str(), dataTypeName_.c_str() ));
@@ -60,7 +60,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
         {
           topic = *iter;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: MEMORY LEAK: Topic id %d still held by this description!\n"),
                      topic->get_id()
                      ));
@@ -69,19 +69,24 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
 }
 
 
-int DCPS_IR_Topic_Description::add_subscription_reference (DCPS_IR_Subscription* subscription)
+int DCPS_IR_Topic_Description::add_subscription_reference (DCPS_IR_Subscription* subscription
+                                                           , bool associate)
 {
   int status = subscriptionRefs_.insert(subscription);
 
   switch (status)
     {
     case 0:
-      // Publish the BIT information
-      domain_->publish_subscription_bit(subscription);
 
-      try_associate_subscription(subscription);
-      // Do not check incompatible qos here.  The check is done
-      // in the DCPS_IR_Topic_Description::try_associate_subscription method
+      if (associate)
+        {
+          // Publish the BIT information
+          domain_->publish_subscription_bit(subscription);
+
+          try_associate_subscription(subscription);
+          // Do not check incompatible qos here.  The check is done
+          // in the DCPS_IR_Topic_Description::try_associate_subscription method
+        }
 
       if (TAO_debug_level > 0)
         {
@@ -273,7 +278,7 @@ void DCPS_IR_Topic_Description::try_associate (DCPS_IR_Publication* publication,
     {
       if (TAO_debug_level > 0)
         {
-          ACE_DEBUG((LM_DEBUG, 
+          ACE_DEBUG((LM_DEBUG,
                     ACE_TEXT("DCPS_IR_Topic_Description::try_associate () ")
                     ACE_TEXT("publication %d ignores subscription %d\n"),
                     publication->get_id(),
@@ -287,7 +292,7 @@ void DCPS_IR_Topic_Description::try_associate (DCPS_IR_Publication* publication,
     {
       if (TAO_debug_level > 0)
         {
-          ACE_DEBUG((LM_DEBUG, 
+          ACE_DEBUG((LM_DEBUG,
                     ACE_TEXT("DCPS_IR_Topic_Description::try_associate () ")
                     ACE_TEXT("subscription %d ignores publication %d\n"),
                     subscription->get_id(),

@@ -3,6 +3,7 @@
 #include  "DomainParticipantListener.h"
 #include  "dds/DCPS/Marked_Default_Qos.h"
 #include  "dds/DCPS/Qos_Helper.h"
+#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
 #include "ace/Arg_Shifter.h"
@@ -430,7 +431,8 @@ main (int argc, char *argv[])
                             7);
         }
 
-      TheServiceParticipant->shutdown();
+     TheTransportFactory->release();
+     TheServiceParticipant->shutdown();
     }
   catch (const CORBA::Exception& ex)
     {

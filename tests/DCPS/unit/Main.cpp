@@ -10,6 +10,7 @@
 #include "dds/DdsDcpsTopicC.h"
 #include "MyTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"
@@ -512,6 +513,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           orb_task->wait ();
         }
 
+      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       if (client_orb)

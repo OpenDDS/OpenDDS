@@ -80,7 +80,7 @@ TAO::DCPS::SimpleMcastTransport::connection_info_i
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","connection_info_i",5);
 
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleUdpTransport::connection_info_i %s:%d\n", 
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleMcastTransport::connection_info_i %s:%d\n", 
     this->multicast_group_address_.get_host_addr (), 
     this->multicast_group_address_.get_port_number ()));
 

@@ -87,6 +87,8 @@ DataWriterImpl::DataWriterImpl (void)
 // the servant.
 DataWriterImpl::~DataWriterImpl (void)
 {
+  DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl", 5);
+
   if (initialized_)
     {
       participant_servant_->_remove_ref ();
@@ -106,8 +108,11 @@ DataWriterImpl::cleanup ()
 {
   if (cancel_timer_)
     {
-      int num_handlers = reactor_->cancel_timer (this);
+      // The cancel_timer will call handle_close to
+      // remove_ref.
+      int num_handlers = reactor_->cancel_timer (this, 0);
       ACE_UNUSED_ARG (num_handlers);
+      cancel_timer_ = false;
     }
 
   topic_servant_->remove_entity_ref ();
@@ -168,19 +173,20 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
+  DBG_ENTRY_LVL ("DataWriterImpl","add_associations", 5);
   if (entity_deleted_ == true)
-    {
-      if (DCPS_debug_level >= 1)
-  ACE_DEBUG ((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataWriterImpl::add_associations")
-        ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
-      return;
-    }
+  {
+    if (DCPS_debug_level >= 1)
+      ACE_DEBUG ((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataWriterImpl::add_associations")
+      ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
+    return;
+  }
 
   if (0 == publication_id_)
-    {
-      publication_id_ = yourId;
-    }
+  {
+    publication_id_ = yourId;
+  }
 
 
   {
@@ -194,7 +200,90 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
     this->publisher_servant_->add_associations( readers, this, qos_) ;
   }
 
-  if (TheTransientKludge->is_enabled ())
+}
+
+
+void
+DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
+           size_t                  num_remote_associations,
+           const AssociationData*  remote_associations)
+{
+  DBG_ENTRY_LVL ("DataWriterImpl","fully_associated", 5);
+
+  {
+    // protect readers_
+    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    CORBA::ULong readers_old_length = readers_.length();
+    readers_.length(readers_old_length + num_remote_associations);
+    for (CORBA::ULong reader_cnt = 0; reader_cnt < num_remote_associations; reader_cnt++)
+    {
+      readers_[reader_cnt+readers_old_length] = remote_associations[reader_cnt].remote_id_;
+    }
+  }
+
+  ReaderIdSeq rd_ids;
+  rd_ids.length (num_remote_associations);
+
+  for (CORBA::ULong i = 0; i < num_remote_associations; i++)
+  {
+    rd_ids[i] = remote_associations[i].remote_id_;
+  }
+
+  if (! is_bit_)
+  {
+    ::DDS::InstanceHandleSeq handles;
+    // Create the list of readers repo id.
+
+    if (this->bit_lookup_instance_handles (rd_ids, handles) == false)
+      return;
+
+    {
+      // protect subscription_handles_, publication_match_status_
+      // and status changed flags.
+      ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+      CORBA::ULong rd_len = handles.length ();
+      CORBA::ULong sub_len = subscription_handles_.length();
+      subscription_handles_.length (sub_len + rd_len);
+
+      for (CORBA::ULong i = 0; i < rd_len; i++)
+      {
+        // update the publication_match_status_
+        publication_match_status_.total_count ++;
+        publication_match_status_.total_count_change ++;
+        subscription_handles_[sub_len + i] = handles[i];
+        if (id_to_handle_map_.bind (rd_ids[i], handles[i]) != 0)
+        {
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataWriterImpl::fully_associated "
+            "insert %d - %X to id_to_handle_map_ failed \n", rd_ids[i], handles[i]));
+          return;
+        }
+        publication_match_status_.last_subscription_handle = handles[i];
+      }
+
+
+      set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
+
+      ::POA_DDS::DataWriterListener* listener
+        = listener_for (::DDS::PUBLICATION_MATCH_STATUS);
+
+      if (listener != 0)
+      {
+        listener->on_publication_match (dw_remote_objref_.in (),
+          publication_match_status_);
+
+        // TBD - why does the spec say to change this but not
+        // change the ChangeFlagStatus after a listener call?
+        publication_match_status_.total_count_change = 0;
+      }
+
+      delete [] remote_associations;
+    }
+  }
+
+  // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using TheTransientKludge.
+  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
+    //if (TheTransientKludge->is_enabled ())
     {
       // The above condition is only true for the DCPSInfo Server.
 
@@ -219,110 +308,9 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
 
       // Tell the WriteDataContainer to resend all sending/sent
       // samples.
-      this->data_container_->reenqueue_all (this);
-      this->publisher_servant_->data_available(this) ;
+      this->data_container_->reenqueue_all (this, rd_ids);
+      this->publisher_servant_->resend_data_available(this) ;
     }
-}
-
-
-void
-DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
-           size_t                  num_remote_associations,
-           const AssociationData*  remote_associations)
-{
-  {
-    // protect readers_
-    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    CORBA::ULong readers_old_length = readers_.length();
-    readers_.length(readers_old_length + num_remote_associations);
-    for (CORBA::ULong reader_cnt = 0; reader_cnt < num_remote_associations; reader_cnt++)
-      {
-  readers_[reader_cnt+readers_old_length] = remote_associations[reader_cnt].remote_id_;
-      }
-  }
-
-  ::DDS::InstanceHandleSeq handles;
-
-  if (! is_bit_)
-    {
-      // Create the list of readers repo id.
-      ReaderIdSeq rd_ids;
-      rd_ids.length (num_remote_associations);
-
-      for (CORBA::ULong i = 0; i < num_remote_associations; i++)
-  {
-    rd_ids[i] = remote_associations[i].remote_id_;
-  }
-
-      // TBD: Remove the condition check after we change to default support
-      //      builtin topics.
-      if (TheServiceParticipant->get_BIT () == true)
-  {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-    BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-      ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-      ::DDS::SubscriptionBuiltinTopicDataSeq,
-      ReaderIdSeq > hh;
-
-    ::DDS::ReturnCode_t ret
-        = hh.repo_ids_to_instance_handles(participant_servant_,
-            BUILT_IN_SUBSCRIPTION_TOPIC,
-            rd_ids,
-            handles);
-
-    if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations, ")
-        ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
-        return;
-      }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-  }
-      else
-  {
-    handles.length (num_remote_associations);
-    for (CORBA::ULong i = 0; i < num_remote_associations; i++)
-      {
-        handles[i] = rd_ids[i];
-      }
-  }
-    }
-
-  // protect subscription_handles_, publication_match_status_
-  // and status changed flags.
-  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-  CORBA::ULong rd_len = handles.length ();
-  CORBA::ULong sub_len = subscription_handles_.length();
-  subscription_handles_.length (sub_len + rd_len);
-
-  for (CORBA::ULong i = 0; i < rd_len; i++)
-    {
-      // update the publication_match_status_
-      publication_match_status_.total_count ++;
-      publication_match_status_.total_count_change ++;
-      subscription_handles_[sub_len + i] = handles[i];
-      publication_match_status_.last_subscription_handle = handles[i];
-    }
-
-
-  set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
-
-  ::POA_DDS::DataWriterListener* listener
-      = listener_for (::DDS::PUBLICATION_MATCH_STATUS);
-
-  if (listener != 0)
-    {
-      listener->on_publication_match (dw_remote_objref_.in (),
-              publication_match_status_);
-
-      // TBD - why does the spec say to change this but not
-      // change the ChangeFlagStatus after a listener call?
-      publication_match_status_.total_count_change = 0;
-    }
-
-  delete [] remote_associations;
 }
 
 
@@ -333,97 +321,69 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
               )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
+  CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    ::DDS::InstanceHandleSeq handles;
-
-    if (! is_bit_)
-      {
-  // TBD: Remove the condition check after we change to default support
-  //      builtin topics.
-  if (TheServiceParticipant->get_BIT () == true)
-    {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-      BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-        ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-        ::DDS::SubscriptionBuiltinTopicDataSeq,
-        ReaderIdSeq > hh;
-
-      ::DDS::ReturnCode_t ret
-                = hh.repo_ids_to_instance_handles(participant_servant_,
-              BUILT_IN_SUBSCRIPTION_TOPIC,
-              readers,
-              handles);
-
-      if (ret != ::DDS::RETCODE_OK)
-        {
-    ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::remove_associations, ")
-          ACE_TEXT(" failed to transfer repo ids to instance handles\n")));
-    return;
-        }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-    }
-  else
-    {
-      CORBA::ULong rd_len = readers.length ();
-      handles.length (rd_len);
-      for (CORBA::ULong i = 0; i < rd_len; i++)
-        {
-    handles[i] = readers[i];
-        }
-    }
-      }
-
-
     CORBA::ULong num_orig_readers = readers_.length();
-    CORBA::ULong num_removed_readers = readers.length();
 
     for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; rm_idx++)
-      {
-  for (CORBA::ULong orig_idx = 0;
-       orig_idx < num_orig_readers;
-       orig_idx++)
     {
-      if (readers_[orig_idx] == readers[rm_idx])
+      for (CORBA::ULong orig_idx = 0;
+        orig_idx < num_orig_readers;
+        orig_idx++)
+      {
+        if (readers_[orig_idx] == readers[rm_idx])
         {
-    // move last element to this position.
-    if (orig_idx < num_orig_readers - 1)
-      {
-        readers_[orig_idx] = readers_[num_orig_readers - 1];
-      }
-    num_orig_readers --;
-    readers_.length (num_orig_readers);
-    break;
+          // move last element to this position.
+          if (orig_idx < num_orig_readers - 1)
+          {
+            readers_[orig_idx] = readers_[num_orig_readers - 1];
+          }
+          num_orig_readers --;
+          readers_.length (num_orig_readers);
+          break;
         }
-    }
       }
+    }
 
-
-    CORBA::ULong subed_len = subscription_handles_.length();
-    CORBA::ULong rd_len = handles.length ();
-    for (CORBA::ULong rd_index = 0; rd_index < rd_len; rd_index++)
-      {
-  for (CORBA::ULong subed_index = 0;
-       subed_index < subed_len;
-       subed_index++)
+    if (! is_bit_)
     {
-      if (subscription_handles_[subed_index] == handles[rd_index])
-        {
-    // move last element to this position.
-    if (subed_index < subed_len - 1)
+      ::DDS::InstanceHandleSeq handles;
+
+      if (this->cache_lookup_instance_handles (readers, handles) == false)
+        return;
+
+      CORBA::ULong subed_len = subscription_handles_.length();
+      CORBA::ULong rd_len = handles.length ();
+      for (CORBA::ULong rd_index = 0; rd_index < rd_len; rd_index++)
       {
-        subscription_handles_[subed_index]
-          = subscription_handles_[subed_len - 1];
-      }
-    subed_len --;
-    subscription_handles_.length (subed_len);
-    break;
+        for (CORBA::ULong subed_index = 0;
+          subed_index < subed_len;
+          subed_index++)
+        {
+          if (subscription_handles_[subed_index] == handles[rd_index])
+          {
+            // move last element to this position.
+            if (subed_index < subed_len - 1)
+            {
+              subscription_handles_[subed_index]
+              = subscription_handles_[subed_len - 1];
+            }
+            subed_len --;
+            subscription_handles_.length (subed_len);
+            break;
+          }
         }
-    }
       }
+    }
+
+    for (CORBA::ULong i = 0; i < num_removed_readers; i++)
+    {
+      id_to_handle_map_.unbind (readers[i]);
+    }
   }
+
   this->publisher_servant_->remove_associations (readers);
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
@@ -1069,6 +1029,14 @@ DataWriterImpl::get_unsent_data()
   return data_container_->get_unsent_data ();
 }
 
+
+DataSampleList
+DataWriterImpl::get_resend_data()
+{
+  return data_container_->get_resend_data ();
+}
+
+
 void
 DataWriterImpl::unregister_all ()
 {
@@ -1386,17 +1354,22 @@ DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_disconnected",5);
   PublicationDisconnectedStatus status;
 
-  this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+  if (! is_bit_)
+  {
+    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
+      return;
 
 
-  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-  // is given to this DataWriter then narrow() fails.
-  DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+    // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+    // is given to this DataWriter then narrow() fails.
+    DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_publication_disconnected (this->dw_remote_objref_.in (),
-                 status);
+    if (! CORBA::is_nil (the_listener.in ()))
+      the_listener->on_publication_disconnected (this->dw_remote_objref_.in (),
+      status);
+  }
 }
+
 
 
 void
@@ -1405,16 +1378,20 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_reconnected",5);
   PublicationLostStatus status;
 
-  this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+  if (! is_bit_)
+  {
+    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
+      return;
 
 
-  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-  // is given to this DataWriter then narrow() fails.
-  DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+    // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+    // is given to this DataWriter then narrow() fails.
+    DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_publication_reconnected (this->dw_remote_objref_.in (),
-                status);
+    if (! CORBA::is_nil (the_listener.in ()))
+      the_listener->on_publication_reconnected (this->dw_remote_objref_.in (),
+      status);
+  }
 }
 
 
@@ -1424,16 +1401,20 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",5);
   PublicationLostStatus status;
 
-  this->repo_ids_to_instance_handles (subids, status.subscription_handles);
+  if (! is_bit_)
+  {
+    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
+      return;
 
 
-  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-  // is given to this DataWriter then narrow() fails.
-  DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
+    // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
+    // is given to this DataWriter then narrow() fails.
+    DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
-  if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_publication_lost (this->dw_remote_objref_.in (),
-               status);
+    if (! CORBA::is_nil (the_listener.in ()))
+      the_listener->on_publication_lost (this->dw_remote_objref_.in (),
+      status);
+  }
 }
 
 
@@ -1450,44 +1431,73 @@ DataWriterImpl::notify_connection_deleted ()
     the_listener->on_connection_deleted (this->dw_remote_objref_.in ());
 }
 
-void
-DataWriterImpl::repo_ids_to_instance_handles (const ReaderIdSeq& ids,
+bool
+DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
-  CORBA::ULong cur_sz = ids.length ();
   // TBD: Remove the condition check after we change to default support
   //      builtin topics.
-  if (TheServiceParticipant->get_BIT () == true)
-    {
+  if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
+  {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-  ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-  ::DDS::SubscriptionBuiltinTopicDataSeq,
-  ReaderIdSeq > hh;
+    BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
+      ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
+      ::DDS::SubscriptionBuiltinTopicDataSeq,
+      ReaderIdSeq > hh;
 
-      ::DDS::ReturnCode_t ret
-    = hh.repo_ids_to_instance_handles(participant_servant_,
-              BUILT_IN_SUBSCRIPTION_TOPIC,
-              ids,
-              hdls);
+    ::DDS::ReturnCode_t ret
+      = hh.repo_ids_to_instance_handles(participant_servant_,
+      BUILT_IN_SUBSCRIPTION_TOPIC,
+      ids,
+      hdls);
 
-      if (ret != ::DDS::RETCODE_OK)
-  {
-    ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::repo_ids_to_instance_handles failed\n")));
-    return;
-  }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-    }
-  else
+    if (ret != ::DDS::RETCODE_OK)
     {
-      hdls.length (cur_sz);
-      for (CORBA::ULong i = 0; i < cur_sz; i++)
-  {
-    hdls[i] = ids[i];
-  }
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::bit_lookup_instance_handles failed\n")));
+      return false;
     }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+  }
+  else
+  {
+    CORBA::ULong num_rds = ids.length ();
+    hdls.length (num_rds);
+    for (CORBA::ULong i = 0; i < num_rds; i++)
+    {
+      hdls[i] = ids[i];
+    }
+  }
+
+  return true;
 }
+
+
+bool
+DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
+					      ::DDS::InstanceHandleSeq & hdls)
+{
+  CORBA::ULong num_ids = ids.length ();
+  for (CORBA::ULong i = 0; i < num_ids; ++i)
+  {
+    RepoIdToHandleMap::ENTRY* ientry;
+    if (id_to_handle_map_.find (ids[i], ientry) != 0)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t)ERROR: DataWriterImpl::cache_lookup_instance_handles "
+        "could not find instance handle for writer %d\n", ids[i]),
+        false);
+    }
+    else
+    {
+      CORBA::ULong len = hdls.length ();
+      hdls.length (len + 1);
+      hdls[len] = ientry->int_id_;
+    }
+  }
+
+  return true;
+}
+
 
 } // namespace DCPS
 } // namespace TAO

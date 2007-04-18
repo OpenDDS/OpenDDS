@@ -35,3 +35,12 @@ CORBA::Long DCPS_Entity_Id_Generator::get_next_id ()
   return retValue;
 }
 
+bool
+DCPS_Entity_Id_Generator::set_base_id (CORBA::Long id)
+{
+  if (id > nextEntity_) {
+    nextEntity_ = id;
+  }
+
+  return true;
+}
