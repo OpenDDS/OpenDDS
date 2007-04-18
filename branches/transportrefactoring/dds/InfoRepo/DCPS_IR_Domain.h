@@ -94,6 +94,12 @@ public:
                                    const ::DDS::TopicQos & qos,
                                    DCPS_IR_Participant* participantPtr);
 
+  TAO::DCPS::TopicStatus force_add_topic(TAO::DCPS::RepoId topicId,
+					 const char* topicName,
+					 const char* dataTypeName,
+					 const ::DDS::TopicQos & qos,
+					 DCPS_IR_Participant* participantPtr);
+
   /// Find the topic with the topic name
   /// Does NOT take ownership of any initial memory pointed to by topic
   /// Returns TAO::DCPS::FOUND if exists and topic is changed, -1 otherwise
@@ -121,6 +127,10 @@ public:
   TAO::DCPS::RepoId get_next_publication_id ();
   TAO::DCPS::RepoId get_next_subscription_id ();
 
+  bool set_base_participant_id (TAO::DCPS::RepoId id);
+  bool set_base_topic_id (TAO::DCPS::RepoId id);
+  bool set_base_publication_id (TAO::DCPS::RepoId id);
+  bool set_base_subscription_id (TAO::DCPS::RepoId id);
 
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
@@ -144,6 +154,12 @@ public:
   void dispose_publication_bit (DCPS_IR_Publication* publication);
 
 private:
+  TAO::DCPS::TopicStatus add_topic_i (TAO::DCPS::RepoId topicId,
+				      const char * topicName,
+				      const char * dataTypeName,
+				      const ::DDS::TopicQos & qos,
+				      DCPS_IR_Participant* participantPtr);
+
   /// Takes ownership of the memory pointed to by desc if successful
   /// returns 0 if successful,
   /// 1 if description already exists

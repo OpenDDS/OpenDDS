@@ -479,15 +479,21 @@ module DDS {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[0]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[1]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key[2]"
     struct ParticipantBuiltinTopicData {
-		BuiltinTopicKey_t key;
-		UserDataQosPolicy user_data;
-		};
+      BuiltinTopicKey_t key;
+      UserDataQosPolicy user_data;
+      string hostname;
+      long    process_id;
+    };
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[0]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[1]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key[2]"
     struct TopicBuiltinTopicData {
 		BuiltinTopicKey_t key;
 		string name;
@@ -508,7 +514,9 @@ module DDS {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[0]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[1]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key[2]"
     struct PublicationBuiltinTopicData {
 		BuiltinTopicKey_t key;
 		BuiltinTopicKey_t participant_key;
@@ -530,7 +538,9 @@ module DDS {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[0]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[1]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key[2]"
     struct SubscriptionBuiltinTopicData {
 		BuiltinTopicKey_t key;
 		BuiltinTopicKey_t participant_key;

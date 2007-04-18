@@ -11,10 +11,7 @@
 #ifndef _UPDATE_DATA_TYPES
 #define _UPDATE_DATA_TYPES
 
-#include "dds/DdsDcpsInfrastructureC.h"
-
 #include <vector>
-#include <memory>
 #include <string>
 
 // Enumerations:
@@ -32,9 +29,9 @@ enum ItemType
     , Actor
   };
 
-enum SpecificQosType
+enum SpecificQos
   {
-    DomainParticipantQos
+    ParticipantQos
     , TopicQos
     , DataWriterQos
     , PublisherQos
@@ -44,15 +41,13 @@ enum SpecificQosType
 
 // Typedefs:
 
-typedef std::vector <char> BinStr;
-
-typedef std::pair <ItemType, BinStr> QosType;
-
 typedef long IdType;
 
-typedef std::string StringType;
+typedef std::pair <size_t, char*> BinSeq;
 
-typedef BinStr IORType;
+typedef std::pair <SpecificQos, BinSeq> QosSeq;
+
+typedef BinSeq TransportInterfaceInfo;
 
 // Data Types:
 
@@ -60,10 +55,16 @@ template <typename Q, typename S>
 struct TopicStrt {
   IdType domainId;
   IdType topicId; // Unique system-wide
-  IdType particiapntId;
+  IdType participantId;
   S name;
   S dataType;
   Q topicQos;
+
+  TopicStrt (IdType dom, IdType to, IdType pa
+             , const char* na, const char* da, Q tQos)
+    : domainId (dom), topicId (to), participantId (pa)
+    , name (na), dataType (da), topicQos (tQos)
+  { };
 };
 
 template <typename Q>
@@ -71,29 +72,49 @@ struct ParticipantStrt {
   IdType domainId;
   IdType participantId; // Unique system-wide
   Q participantQos;
+
+  ParticipantStrt (IdType dom, IdType part
+                   , Q pQos)
+    : domainId (dom), participantId (part)
+      , participantQos (pQos)
+  { };
 };
 
-template <typename Q, typename B>
+template <typename PSQ, typename RWQ, typename C, typename T>
 struct ActorStrt {
+  IdType domainId;
   IdType actorId; // Unique system-wide
   IdType topicId;
   IdType participantId;
   ActorType type;
-  B ior;
-  Q pubsubQos;
-  Q drdwQos;
-  //std::vector<TransportInterfaceInfo> transportInterfaceInfo; // TBD
+  C callback;
+  PSQ pubsubQos;
+  RWQ drdwQos;
+  T transportInterfaceInfo;
+
+  ActorStrt (IdType dom, IdType act, IdType top
+             , IdType part
+             , ActorType typ, const char* call
+             , PSQ pub, RWQ drdw, T trans)
+    : domainId (dom), actorId (act), topicId (top)
+    , participantId (part)
+    , type (typ), callback (call), pubsubQos (pub)
+    , drdwQos (drdw), transportInterfaceInfo (trans)
+  { };
 };
 
-typedef struct TopicStrt <QosType, StringType> TopicData;
-typedef struct ParticipantStrt <QosType> ParticipantData;
-typedef struct ActorStrt <QosType, IORType> ActorData;
-
+template <typename T, typename P, typename A, typename W>
 struct ImageData {
+  typedef std::vector <T> TopicSeq;
+  typedef std::vector <P> ParticipantSeq;
+  typedef std::vector <A> ReaderSeq;
+  typedef std::vector <W> WriterSeq;
+
   unsigned long sequenceNumber;
-  std::vector <TopicData> topics;
-  std::vector <ParticipantData> participants;
-  std::vector <ActorData> actors;
+  TopicSeq topics;
+  ParticipantSeq participants;
+  ReaderSeq actors;
+  WriterSeq wActors;
 };
 
 #endif // _UPDATE_DATA_TYPES

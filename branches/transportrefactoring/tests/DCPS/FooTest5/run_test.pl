@@ -33,6 +33,8 @@ $write_interval_ms=0;
 $writer_blocking_ms=0;
 $read_interval_ms=0;
 $mixed_trans=0;
+$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
+$app_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 $arg_idx = 0;
 
@@ -118,23 +120,24 @@ unlink $publisher_ready;
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
-                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file -NOBITS");
+                             "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior"
+                             #. " -ORBDebugLevel 1"
+                             . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 
+$bit_off_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 if ($use_udp == 1) {
-  $svc_config=" -ORBSvcConf udp.conf ";
+  $svc_config=" -ORBSvcConf udp.conf $bit_off_conf";
 }
 elsif ($mixed_trans == 1) {
-  $svc_config= " -ORBSvcConf udp.conf -ORBSvcConf ../../tcp.conf ";
+  $svc_config= " -ORBSvcConf udp.conf -ORBSvcConf ../../tcp.conf $bit_off_conf";
 }
 elsif ($use_mcast == 1) {
-  $svc_config=" -ORBSvcConf mcast.conf ";
+  $svc_config=" -ORBSvcConf mcast.conf $bit_off_conf";
 }
 elsif ($use_reliable_multicast == 1) {
-  $svc_config=" -ORBSvcConf reliable_multicast.conf ";
+  $svc_config=" -ORBSvcConf reliable_multicast.conf $bit_off_conf";
 }
 
 # test multiple cases

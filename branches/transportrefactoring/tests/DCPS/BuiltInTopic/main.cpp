@@ -70,10 +70,6 @@ int init (int argc, ACE_TCHAR *argv[])
 {
   try
     {
-      // TBD: Remove after the framework changed to default to support
-      //      BIT.
-      TheServiceParticipant->set_BIT (true);
-
       participant_factory = TheParticipantFactoryWithArgs(argc, argv);
 
       // Initialize the transport
@@ -88,13 +84,13 @@ int init (int argc, ACE_TCHAR *argv[])
         = participant_factory->create_participant(TEST_DOMAIN,
                                                   PARTICIPANT_QOS_DEFAULT,
                                                   ::DDS::DomainParticipantListener::_nil ());
-
+      
       //SHH create a separate particpant for the subscriber and publisher
 
       // Wait a while to give the transport thread time
       // to read the built-in Topic data from the DCPSInfo
       // TBD - find some way to avoid this.
-  ACE_OS::sleep (10);
+    ACE_OS::sleep (2);
 
       ::Mine::FooTypeSupportImpl* ts_servant = new ::Mine::FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = ts_servant;
@@ -231,6 +227,7 @@ void test_bit_participant ()
                                                 ANY_SAMPLE_STATE,
                                                 ANY_VIEW_STATE,
                                                 ANY_INSTANCE_STATE) ;
+#if 0
       TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
       CORBA::ULong data_len = part_data.length ();
@@ -245,6 +242,12 @@ void test_bit_participant ()
       TEST_CHECK (part_data[0].key[0] == TEST_DOMAIN);
       TEST_CHECK (part_data[0].key[1] == participant_servant->get_id ());
       TEST_CHECK (part_data[0].key[2] == 0);
+#else
+      // The paricipant will not know itself from repo since the
+      // bit participant topic datareader is created after 
+      // DCPS gets add_domain_participant request.
+      TEST_CHECK (ret == ::DDS::RETCODE_NO_DATA);
+#endif
     }
   catch (...)
     {

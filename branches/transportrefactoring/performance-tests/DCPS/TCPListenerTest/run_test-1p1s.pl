@@ -21,6 +21,20 @@ $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
+
+if ($ARGV[0] eq 'bit') {
+  $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
+  $app_bit_conf = "";
+}
+elsif ($ARGV[0] eq '') {
+  # default test with bit off
+}
+else {
+  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+  exit 1;
+}
 
 # need $num_msgs_btwn_rec unread samples plus 20 for good measure
 # (possibly allocated by not yet queue by the transport because of greedy read).
@@ -32,14 +46,14 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBSvcConf repo.conf");
+                             "$repo_bit_conf -o $dcpsrepo_ior"
+                             . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
-$sub_parameters = "-DCPSConfigFile conf.ini -p $num_writers"
+$sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p $num_writers"
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
               . " -i $num_msgs_btwn_rec"
@@ -54,7 +68,7 @@ print $Subscriber->CommandLine(), "\n";
 
 
 #NOTE: above 1000 queue samples does not give any better performance.
-$pub_parameters = "-DCPSConfigFile conf.ini -p 1 -i $pub_writer_id"
+$pub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p 1 -i $pub_writer_id"
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
               . " -n $num_messages -d $data_size"

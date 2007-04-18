@@ -332,9 +332,6 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      TheServiceParticipant->set_BIT(support_client_side_BIT);
-
       ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
       PortableServer::ServantBase_var safe_servant = fts_servant;
 

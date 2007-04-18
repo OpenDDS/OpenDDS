@@ -1,5 +1,6 @@
 #include "DcpsInfo_pch.h"
 #include /**/ "DCPS_IR_Participant.h"
+#include "UpdateManager.h"
 
 #include /**/ "DCPS_IR_Domain.h"
 #include /**/ "DCPS_IR_Subscription.h"
@@ -10,13 +11,15 @@
 
 DCPS_IR_Participant::DCPS_IR_Participant (TAO::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
-                                          ::DDS::DomainParticipantQos qos)
+                                          ::DDS::DomainParticipantQos qos,
+                                          UpdateManager* um)
 : id_(id),
   domain_(domain),
   qos_(qos),
   aliveStatus_(1),
   handle_(0),
-  isBIT_(0)
+  isBIT_(0),
+  um_ (um)
 {
 }
 
@@ -30,7 +33,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Subscription_Map::ITERATOR iter = subscriptions_.begin();
       DCPS_IR_Subscription_Map::ITERATOR end = subscriptions_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
@@ -39,7 +42,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
         {
           subscription = (*iter).int_id_;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: Removing subscription id %d that was still held!\n"),
                      subscription->get_id()
                      ));
@@ -53,7 +56,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Publication_Map::ITERATOR iter = publications_.begin();
       DCPS_IR_Publication_Map::ITERATOR end = publications_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
@@ -62,7 +65,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
         {
           publication = (*iter).int_id_;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: Removing publication id %d that was still held!\n"),
                      publication->get_id()
                      ));
@@ -76,7 +79,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Topic_Map::ITERATOR iter = topicRefs_.begin();
       DCPS_IR_Topic_Map::ITERATOR end = topicRefs_.end();
 
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
@@ -85,7 +88,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
         {
           topicId = (*iter).ext_id_;
           ++iter;
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("\tERROR: Topic id %d still held!\n"),
                      topicId
                      ));
@@ -349,7 +352,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
         }
     }
 
-  // remove all the subscriptions assocaitions
+  // remove all the subscriptions associations
   DCPS_IR_Subscription* sub = 0;
   DCPS_IR_Subscription_Map::ITERATOR subIter = subscriptions_.begin();
   DCPS_IR_Subscription_Map::ITERATOR subEnd = subscriptions_.end();
@@ -377,6 +380,9 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       topic = (*topicIter).int_id_;
       ++topicIter;
 
+      if (um_) {
+        um_->remove (Topic, topic->get_id());
+      }
       domain_->remove_topic(this, topic);
     }
   topicRefs_.unbind_all();
@@ -384,8 +390,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
   // The publications and subscriptions
   // can NOT be deleted until after all
   // the associations have been removed.
-  // Otherwise an access violation can 
-  // occur because a publication and 
+  // Otherwise an access violation can
+  // occur because a publication and
   // subscription of this participant
   // could be associated.
 
@@ -395,6 +401,10 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
     {
       pub = (*pubIter).int_id_;
       ++pubIter;
+      if (um_) {
+        um_->remove (Actor, pub->get_id());
+      }
+
       delete pub;
     }
   publications_.unbind_all();
@@ -405,9 +415,17 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
     {
       sub = (*subIter).int_id_;
       ++subIter;
+      if (um_) {
+        um_->remove (Actor, sub->get_id());
+      }
+
       delete sub;
     }
   subscriptions_.unbind_all();
+
+  if (um_) {
+    um_->remove (Participant, this->get_id());
+  }
 }
 
 
@@ -655,4 +673,3 @@ template class ACE_Unbounded_Set_Iterator<TAO::DCPS::RepoId>;
 #pragma instantiate ACE_Unbounded_Set_Iterator<TAO::DCPS::RepoId>
 
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-

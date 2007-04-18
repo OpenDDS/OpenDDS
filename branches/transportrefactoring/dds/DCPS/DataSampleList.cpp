@@ -79,6 +79,9 @@ namespace TAO
               // Remove from the tail of the list.
               tail_ = stale->previous_sample_ ;
             }
+
+          stale->next_sample_ = 0;
+          stale->previous_sample_ = 0;
         }
 
       return found;
@@ -110,6 +113,9 @@ namespace TAO
               found = true;  
               previous->next_instance_sample_ = stale->next_instance_sample_;
               -- size_ ;
+
+              stale->next_instance_sample_ = 0;
+
               break;
             }
           previous = item;
@@ -153,22 +159,40 @@ namespace TAO
           //
           // Remove from the previous element.
           //
-          stale->previous_sample_->next_sample_ = stale->next_sample_ ;
-          stale->previous_sample_->next_send_sample_ = stale->next_send_sample_ ;
+          //stale->previous_sample_->next_sample_ = stale->next_sample_ ;
+          //stale->previous_sample_->next_send_sample_ = stale->next_send_sample_ ;
+          stale->previous_send_sample_->next_send_sample_ = stale->next_send_sample_ ;
 
           //
           // Remove from the next element.
           //
-          if( stale->next_sample_ != 0) 
+          if( stale->next_send_sample_ != 0) 
             {
               // Remove from the inside of the list.
-              stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
+              stale->next_send_sample_->previous_send_sample_ = stale->previous_send_sample_ ;
             } 
           else 
             {
+              stale->previous_send_sample_->next_send_sample_ = 0;
               // Remove from the tail of the list.
-              tail_ = stale->previous_sample_ ;
+              tail_ = stale->previous_send_sample_ ;
             }
+
+          stale->next_send_sample_ = 0;
+          stale->previous_send_sample_ = 0;
+          ////
+          //// Remove from the next element.
+          ////
+          //if( stale->next_sample_ != 0) 
+          //  {
+          //    // Remove from the inside of the list.
+          //    stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
+          //  } 
+          //else 
+          //  {
+          //    // Remove from the tail of the list.
+          //    tail_ = stale->previous_sample_ ;
+          //  }
         }
 
       return found;
@@ -178,17 +202,17 @@ namespace TAO
     void
     DataSampleList::enqueue_tail_next_send_sample (DataSampleList list)
      {
-       // Make the appended list linked with next_send_sample_ first.
-       DataSampleListElement* cur = list.head_;
+       //// Make the appended list linked with next_send_sample_ first.
+       //DataSampleListElement* cur = list.head_;
 
-       if (list.size_ > 1 && cur->next_send_sample_ == 0)
-        {
-          for (ssize_t i = 0; i < list.size_; i ++)
-            {
-              cur->next_send_sample_ = cur->next_sample_;
-              cur = cur->next_sample_;
-            }
-        }
+       //if (list.size_ > 1 && cur->next_send_sample_ == 0)
+       // {
+       //   for (ssize_t i = 0; i < list.size_; i ++)
+       //     {
+       //       cur->next_send_sample_ = cur->next_sample_;
+       //       cur = cur->next_sample_;
+       //     }
+       // }
 
        if (head_ == 0)
         {
@@ -199,9 +223,10 @@ namespace TAO
        else 
         {
           tail_->next_send_sample_ 
-            = tail_->next_sample_ 
+            //= tail_->next_sample_ 
             = list.head_;
-          list.head_->previous_sample_ = tail_;
+          list.head_->previous_send_sample_ = tail_;
+          //list.head_->previous_sample_ = tail_;
           tail_ = list.tail_;
           size_ = size_ + list.size_;
         }

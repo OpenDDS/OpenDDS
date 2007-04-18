@@ -11,11 +11,13 @@ namespace TAO
       TransportSendElementAllocator* allocator)
       : sample_ (0),
         publication_id_ (publication_id), 
+        num_subs_ (0),
         group_id_ (0),
         previous_sample_ (0),
         next_sample_ (0),
         next_instance_sample_ (0),
         next_send_sample_ (0),
+        previous_send_sample_ (0),
         send_listener_ (send_listner),
         space_available_ (false),
         handle_(handle),
@@ -24,9 +26,30 @@ namespace TAO
     }
 
     ACE_INLINE
+    DataSampleListElement::DataSampleListElement (const DataSampleListElement& elem)
+    {
+      sample_ = elem.sample_->duplicate ();
+      publication_id_ = elem.publication_id_;
+      num_subs_ = elem.publication_id_; 
+      for (CORBA::ULong i = 0; i < num_subs_; ++i)
+        subscription_ids_[i] = elem.subscription_ids_[i];
+      group_id_ = elem.group_id_;
+      previous_sample_ = elem.previous_sample_;
+      next_sample_ = elem.next_sample_;
+      next_instance_sample_ = elem.next_instance_sample_;
+      next_send_sample_ = elem.next_send_sample_;
+      previous_send_sample_ = elem.previous_send_sample_;
+      send_listener_ = elem.send_listener_;
+      space_available_ = elem.space_available_;
+      handle_ = elem.handle_;
+      transport_send_element_allocator_ = elem.transport_send_element_allocator_;
+    }
+
+
+    ACE_INLINE
     DataSampleListElement::~DataSampleListElement ()
     {
-      if (sample_ != 0)
+      if (sample_)
         {
           sample_->release ();
         }
@@ -51,8 +74,8 @@ namespace TAO
     void
     DataSampleList::enqueue_tail_next_sample (DataSampleListElement* sample)
     {
-      sample->previous_sample_ = 0;
-      sample->next_sample_ = 0;
+      //sample->previous_sample_ = 0;
+      //sample->next_sample_ = 0;
       
       ++size_ ;
       if( head_ == 0) 
@@ -96,6 +119,8 @@ namespace TAO
               head_->previous_sample_ = 0;
             }
 
+          stale->next_sample_ = 0;
+          stale->previous_sample_ = 0;
           return true;
         }
     }
@@ -104,9 +129,9 @@ namespace TAO
     void
     DataSampleList::enqueue_tail_next_send_sample (DataSampleListElement* sample)
     {
-      sample->previous_sample_ = 0;
-      sample->next_sample_ = 0;
-      sample->next_send_sample_ = 0;
+      //sample->previous_sample_ = 0;
+      //sample->next_sample_ = 0;
+      //sample->next_send_sample_ = 0;
 
       ++ size_ ;
       if(head_ == 0) 
@@ -117,8 +142,9 @@ namespace TAO
       else 
         {
           // Add to existing list.
-          sample->previous_sample_ = tail_;
-          tail_->next_sample_ = sample;
+          //sample->previous_sample_ = tail_;
+          //tail_->next_sample_ = sample;
+          sample->previous_send_sample_ = tail_;
           tail_->next_send_sample_ = sample ;
           tail_ = sample ;
         }
@@ -140,15 +166,24 @@ namespace TAO
       else
         {
           --size_ ;
+
           head_ = head_->next_send_sample_ ;
           if (head_ == 0)
             {
               tail_ = 0;
             }
-          else 
+          else
             {
-              head_->previous_sample_ = 0;
+              head_->previous_send_sample_ = 0;
             }
+          //else 
+          //  {
+          //    head_->previous_sample_ = 0;
+          //  }
+          
+          stale->next_send_sample_ = 0 ;
+          stale->previous_send_sample_ = 0 ;
+
           return true;
         }
     }
@@ -195,6 +230,8 @@ namespace TAO
             {
               tail_ = 0;
             }
+
+          stale->next_instance_sample_ = 0;
           return true;
         }
     }

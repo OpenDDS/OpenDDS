@@ -49,13 +49,15 @@ elsif ($ARGV[0] ne '') {
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$repo_bit_conf = "-NOBITS";
+$app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
+$Subscriber = new PerlACE::Process ("subscriber", "$app_bit_conf $sub_opts");
+$Publisher = new PerlACE::Process ("publisher", "$app_bit_conf $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();

@@ -18,8 +18,8 @@
  *
  * @brief Used to generate ids for the entities in the DCPSInfoRepo.
  *
- * The ids are intended to be unique but duplicates will be created 
- * after 4,294,967,294 ids have been generated.  Zero (0) will not be 
+ * The ids are intended to be unique but duplicates will be created
+ * after 4,294,967,294 ids have been generated.  Zero (0) will not be
  * generated.  Zero is reservered for an invalid Id.
  */
 class DCPS_Entity_Id_Generator
@@ -29,6 +29,8 @@ public:
   ~DCPS_Entity_Id_Generator(void);
 
   CORBA::Long get_next_id ();
+
+  bool set_base_id (CORBA::Long id);
 
 private:
   /// The next value to be returned.

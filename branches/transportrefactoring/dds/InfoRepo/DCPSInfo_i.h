@@ -20,11 +20,13 @@
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
+#include "UpdateManager.h"
 
 #include /**/ "dds/DdsDcpsInfoS.h"
 #include /**/ "dds/DdsDcpsDataReaderRemoteC.h"
 #include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
 
+#include "tao/ORB_Core.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -48,7 +50,7 @@ class  TAO_DDS_DCPSInfo_i : public virtual POA_TAO::DCPS::DCPSInfo
 {
 public:
   //Constructor
-  TAO_DDS_DCPSInfo_i (void);
+  TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb, bool reincarnate);
 
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i (void);
@@ -66,6 +68,13 @@ public:
       , TAO::DCPS::Invalid_Domain
       , TAO::DCPS::Invalid_Participant
     ));
+
+  bool add_topic (TAO::DCPS::RepoId topicId,
+                  ::DDS::DomainId_t domainId,
+                  TAO::DCPS::RepoId participantId,
+                  const char* topicName,
+                  const char* dataTypeName,
+                  const ::DDS::TopicQos& qos);
 
   virtual TAO::DCPS::TopicStatus find_topic (
       ::DDS::DomainId_t domainId,
@@ -119,6 +128,15 @@ public:
       , TAO::DCPS::Invalid_Topic
     ));
 
+  bool add_publication (::DDS::DomainId_t domainId,
+                        TAO::DCPS::RepoId participantId,
+                        TAO::DCPS::RepoId topicId,
+                        TAO::DCPS::RepoId pubId,
+                        const char* pub_str,
+                        const ::DDS::DataWriterQos & qos,
+                        const TAO::DCPS::TransportInterfaceInfo & transInfo,
+                        const ::DDS::PublisherQos & publisherQos);
+
     virtual void remove_publication (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
@@ -147,6 +165,15 @@ public:
       , TAO::DCPS::Invalid_Topic
     ));
 
+  bool add_subscription (::DDS::DomainId_t domainId,
+                         TAO::DCPS::RepoId participantId,
+                         TAO::DCPS::RepoId topicId,
+                         TAO::DCPS::RepoId subId,
+                         const char* sub_str,
+                         const ::DDS::DataReaderQos & qos,
+                         const TAO::DCPS::TransportInterfaceInfo & transInfo,
+                         const ::DDS::SubscriberQos & subscriberQos);
+
     virtual void remove_subscription (
       ::DDS::DomainId_t domainId,
       TAO::DCPS::RepoId participantId,
@@ -167,6 +194,10 @@ public:
       CORBA::SystemException
       , TAO::DCPS::Invalid_Domain
     ));
+
+  bool add_domain_participant (::DDS::DomainId_t domainId
+                               , TAO::DCPS::RepoId participantId
+                               , const ::DDS::DomainParticipantQos & qos);
 
     virtual void remove_domain_participant (
       ::DDS::DomainId_t domainId,
@@ -227,6 +258,8 @@ public:
 
   /// Called to load the domains
   /// returns the number of domains that were loaded.
+  /// Currently after loading domains, it
+  ///  invoke 'init_persistence'
   int load_domains (const char* filename, bool use_bit);
 
   /// Initialize the transport for the Built-In Topics
@@ -234,10 +267,18 @@ public:
   int init_transport (int listen_address_given,
                       const ACE_INET_Addr listen);
 
+  bool receive_image (const UpdateManager::UImage& image);
+
 private:
 
+  bool init_persistence (void);
+
+private:
   DCPS_IR_Domain_Map domains_;
+  CORBA::ORB_var orb_;
+
   UpdateManager* um_;
+  bool reincarnate_;
 };
 
 

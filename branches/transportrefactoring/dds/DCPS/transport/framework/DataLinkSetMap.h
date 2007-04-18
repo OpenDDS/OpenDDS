@@ -37,6 +37,10 @@ namespace TAO
         /// Will return nil (0) for failure.
         DataLinkSet* find_set(RepoId id);
 
+        DataLinkSet* find_set(RepoId id, 
+                              const RepoId* remoteIds, 
+                              const CORBA::ULong num_targets);
+
       // ciju: Called with TransportImpl Reservation lock held
         /// This method will do the find_or_create_set(id), followed by
         /// an insert() call on the DataLinkSet (the one that was
@@ -79,7 +83,6 @@ namespace TAO
 
         /// Make the map_ empty.
         void clear();
-
 
       private:
 
