@@ -1095,6 +1095,52 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
     }
 }
 
+// zero-copy version of this metod
+void DataReaderImpl::sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
+				 size_t start_idx, size_t count,
+				 ReceivedDataElement *ptr)
+{
+  size_t end_idx = start_idx + count - 1 ;
+  for (size_t i = start_idx ; i <= end_idx ; i++)
+    {
+      info_seq[i].sample_rank = count - (i - start_idx + 1) ;
+
+      // generation_rank =
+      //    (MRSIC.disposed_generation_count +
+      //     MRSIC.no_writers_generation_count)
+      //  - (S.disposed_generation_count +
+      //     S.no_writers_generation_count)
+      //
+      //  info_seq[end_idx] == MRSIC
+      //  info_seq[i].generation_rank ==
+      //      (S.disposed_generation_count +
+      //      (S.no_writers_generation_count) -- calculated in
+      //            InstanceState::sample_info
+
+      info_seq[i].generation_rank =
+	(info_seq[end_idx].disposed_generation_count +
+	 info_seq[end_idx].no_writers_generation_count) -
+	info_seq[i].generation_rank ;
+
+      // absolute_generation_rank =
+      //     (MRS.disposed_generation_count +
+      //      MRS.no_writers_generation_count)
+      //   - (S.disposed_generation_count +
+      //      S.no_writers_generation_count)
+      //
+      // ptr == MRS
+      // info_seq[i].absolute_generation_rank ==
+      //    (S.disposed_generation_count +
+      //     S.no_writers_generation_count)-- calculated in
+      //            InstanceState::sample_info
+      //
+      info_seq[i].absolute_generation_rank =
+	(ptr->disposed_generation_count_ +
+	 ptr->no_writers_generation_count_) -
+	info_seq[i].absolute_generation_rank ;
+    }
+}
+
 void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
 				 size_t start_idx, size_t count,
 				 ReceivedDataElement *ptr)

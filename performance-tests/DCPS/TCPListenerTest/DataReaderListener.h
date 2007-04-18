@@ -23,7 +23,8 @@ public:
   DataReaderListenerImpl (int num_publishers,
                           int num_samples,
                           int data_size,
-                          int read_interval);
+                          int read_interval,
+                          bool use_zero_copy_reads);
 
   //Destructor
   virtual ~DataReaderListenerImpl (void);
@@ -102,6 +103,7 @@ private:
   int total_samples_count_;
 
   int read_interval_;
+  bool use_zero_copy_reads_;
 
   int num_publishers_;
   int num_samples_;

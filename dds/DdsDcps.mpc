@@ -22,6 +22,10 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   Header_Files {
     DCPS/dcps_export.h
   }
+  
+  Template_Files {
+    DCPS/ZeroCopySeq_T.h
+  }
 
   IDL_Files {
     DdsDcpsDomain.idl
