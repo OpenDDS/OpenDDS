@@ -253,10 +253,7 @@ namespace TAO
     * sending.
     */
     ::DDS::ReturnCode_t
-    data_available(DataWriterImpl* writer);
-
-    ::DDS::ReturnCode_t 
-    resend_data_available(DataWriterImpl* writer);
+    data_available(DataWriterImpl* writer, bool resend = false);
 
     /**
     * This is used to retrieve the listener for a certain status change.

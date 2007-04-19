@@ -1,3 +1,15 @@
+Wed Apr 18 23:58:56 UTC 2007 Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        
+          Moved the send() call outside the lock since the 
+          TransportInterface::send() is thread safe and 
+          added another parameter to data_available() to avoid
+          duplicate code of resend_data_available() from 
+          data_available().
+
 Wed Apr 18 18:28:20 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
@@ -5,11 +17,11 @@ Wed Apr 18 18:28:20 UTC 2007 Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataWriterImpl.cpp:
 
           Removed unused parameter from reenqueue_all().
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
-        
+
           Fixed "no newline at end of file" warning.
-          
+
 Wed Apr 18 18:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -20,13 +32,13 @@ Wed Apr 18 18:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * examples/DCPS:
 
           Created new directories.
-	
+
         * examples/DCPS/Messenger_IOGR_Imr:
         * examples/DCPS/Messenger_Imr:
 
           Moved existing tests from the corresponding directories in
           tests/DCPS.
-	
+
         * tests/DCPS/Messenger_IOGR_Imr:
         * tests/DCPS/Messenger_IOGR_Imr/Aggregator.h:
         * tests/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
