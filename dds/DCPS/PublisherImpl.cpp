@@ -554,10 +554,6 @@ void PublisherImpl::get_qos (
       ::DDS::RETCODE_NOT_ENABLED);
     }
 
-  bool send_now = false;
-  DataSampleList available_data_list;
-
-  {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
         guard,
         this->pi_lock_,
@@ -572,13 +568,9 @@ void PublisherImpl::get_qos (
 
   if (suspend_depth_count_ == 0)
     {
-      send_now = true;
-      available_data_list = available_data_list_;
+      this->send (available_data_list_);
       available_data_list_.reset ();
     }
-  }
-      
-  this->send (available_data_list);
 
   return ::DDS::RETCODE_OK;
 }
@@ -857,43 +849,39 @@ PublisherImpl::set_object_reference (const ::DDS::Publisher_ptr& pub)
 PublisherImpl::data_available(DataWriterImpl* writer,
                               bool resend)
 {
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+    guard,
+    this->pi_lock_,
+    ::DDS::RETCODE_ERROR);
+
   DataSampleList list;
-  bool send_now = true;
 
-  {
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
-      ::DDS::RETCODE_ERROR);
+  if (resend)
+    {
+      list = writer->get_resend_data();
+    }
+  else
+    {
+      list = writer->get_unsent_data();
+    }
 
-    if (resend)
-      {
-        list = writer->get_resend_data();
-      }
-    else
-      {
-        list = writer->get_unsent_data();
-      }
-
-    if( this->suspend_depth_count_ > 0)
-      {
-        // append list to the avaliable data list.
-        // Collect samples from all of the Publisher's Datawriters
-        // in this list so when resume_publication is called
-        // the Publisher does not have to iterate over its
-        // DataWriters to get the unsent data samples.
-        available_data_list_.enqueue_tail_next_send_sample (list);
-        send_now = false;
-      }
-  }
-
-  if (send_now)
+  if( this->suspend_depth_count_ > 0)
+    {
+      // append list to the avaliable data list.
+      // Collect samples from all of the Publisher's Datawriters
+      // in this list so when resume_publication is called
+      // the Publisher does not have to iterate over its
+      // DataWriters to get the unsent data samples.
+      available_data_list_.enqueue_tail_next_send_sample (list);
+    }
+  else
     {
       // Do LATENCY_BUDGET processing here.
       // Do coherency processing here.
       // tell the transport to send the data sample(s).
       this->send(list) ;
     }
+    
   return ::DDS::RETCODE_OK;
 }
 
