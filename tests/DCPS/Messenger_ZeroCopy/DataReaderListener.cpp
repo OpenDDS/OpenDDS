@@ -90,7 +90,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         exit(1);
       }
 
-      const MAX_ELEMS_TO_RETURN = 1;
+      const CORBA::Long MAX_ELEMS_TO_RETURN = 1;
 #if 0
       // type NOT supporting zero-copy read
       ::DDS::SampleInfoSeq the_info(MAX_ELEMS_TO_RETURN);

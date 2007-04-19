@@ -46,32 +46,84 @@ namespace TAO
 
             /// These methods are no-ops.
             virtual void *calloc (size_t nbytes, char initial_value = '\0') 
-            {/* no-op */ return (void*)0;};
+            {/* no-op */ 
+              ACE_UNUSED_ARG (nbytes);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
             virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0')
-            {/* no-op */ return (void*)0;};
+            {/* no-op */ 
+              ACE_UNUSED_ARG (n_elem);
+              ACE_UNUSED_ARG (elem_size);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
 
             virtual int remove (void)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              return -1; 
+            };
             virtual int bind (const char *name, void *pointer, int duplicates = 0)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              ACE_UNUSED_ARG (pointer);
+              ACE_UNUSED_ARG (duplicates);
+              return -1; 
+            };
             virtual int trybind (const char *name, void *&pointer)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              ACE_UNUSED_ARG (pointer);
+              return -1; 
+            };
             virtual int find (const char *name, void *&pointer)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              ACE_UNUSED_ARG (pointer);
+              return -1; 
+            };
             virtual int find (const char *name)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              return -1; 
+            };
             virtual int unbind (const char *name)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              return -1; 
+            };
             virtual int unbind (const char *name, void *&pointer)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (name);
+              ACE_UNUSED_ARG (pointer);
+              return -1; 
+            };
             virtual int sync (ssize_t len = -1, int flags = MS_SYNC)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (len);
+              ACE_UNUSED_ARG (flags);
+              return -1; 
+            };
             virtual int sync (void *addr, size_t len, int flags = MS_SYNC)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (addr);
+              ACE_UNUSED_ARG (len);
+              ACE_UNUSED_ARG (flags);
+              return -1; 
+            };
             virtual int protect (ssize_t len = -1, int prot = PROT_RDWR)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (len);
+              ACE_UNUSED_ARG (prot);
+              return -1; 
+            };
             virtual int protect (void *addr, size_t len, int prot = PROT_RDWR)
-            {/* no-op */ return -1; };
+            {/* no-op */ 
+              ACE_UNUSED_ARG (addr);
+              ACE_UNUSED_ARG (len);
+              ACE_UNUSED_ARG (prot);
+              return -1; 
+            };
 #if defined (ACE_HAS_MALLOC_STATS)
             virtual void print_stats (void) const
             {/* no-op */ };
@@ -90,7 +142,6 @@ namespace TAO
 
 
         /// common code for sample data and info zero-copy sequences.
-        template <size_t ZCS_DEFAULT_SIZE>
         class ZeroCopySeqBase
         {
         public:
@@ -103,14 +154,11 @@ namespace TAO
              *                If == 0 then use zero-copy reading.
              *                Defaults to zero hence supporting zero-copy reads/takes.
              *
-             * @param init_size Initial size of the sequence.
-             *
              * @param alloc The allocator used to allocate the array of pointers
              *              to samples. If zero then use the default allocator.
              *
              */
             ZeroCopySeqBase(
-                const size_t init_size = ZCS_DEFAULT_SIZE,
                 const size_t max_len = 0)
                 : length_(0)
                 , max_len_(max_len)
@@ -129,7 +177,7 @@ namespace TAO
              * Set the maximum length of the sequence.
              */
             inline void max_len(CORBA::ULong length) {
-                return max_len_;
+                this->max_len_ = length;
             };
 
 
@@ -204,7 +252,7 @@ namespace TAO
         *
         */
         template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
-        class ZeroCopyDataSeq : public ZeroCopySeqBase<ZCS_DEFAULT_SIZE>
+        class ZeroCopyDataSeq : public ZeroCopySeqBase
         {
         public:
 
@@ -230,7 +278,7 @@ namespace TAO
                 const size_t init_size = ZCS_DEFAULT_SIZE,
                 const size_t max_len = 0,
                 ACE_Allocator* alloc = 0) 
-                : ZeroCopySeqBase<ZCS_DEFAULT_SIZE>(init_size, max_len)
+                : ZeroCopySeqBase(max_len)
                 , ptrs_(init_size, alloc ? alloc : &defaultAllocator_)
             {};
 
@@ -326,7 +374,7 @@ namespace TAO
          */
 
         template <size_t ZCS_DEFAULT_SIZE>
-        class ZeroCopyInfoSeq : public ZeroCopySeqBase<ZCS_DEFAULT_SIZE>
+        class ZeroCopyInfoSeq : public ZeroCopySeqBase
         {
         public:
 
@@ -353,7 +401,7 @@ namespace TAO
                 const size_t init_size = ZCS_DEFAULT_SIZE,
                 const size_t max_len = 0,
                 ACE_Allocator* alloc = 0) 
-                : ZeroCopySeqBase<ZCS_DEFAULT_SIZE>(init_size, max_len)
+                : ZeroCopySeqBase(max_len)
                 , info_(init_size, alloc ? alloc : &defaultAllocator_)
             {};
 
@@ -426,10 +474,10 @@ namespace TAO
             // The default allocator will be very fast for the first
             // allocation but use the standard heap for subsequent allocations
             // such as if the max_size gets bigger.
-            FirstTimeFastAllocator<::DDS::SampleInfo, ZCS_DEFAULT_SIZE> defaultAllocator_;
+            FirstTimeFastAllocator< ::DDS::SampleInfo, ZCS_DEFAULT_SIZE> defaultAllocator_;
 
             //typedef ACE_Array_Base<Sample_T> Ptr_Seq_Type;
-            typedef ACE_Vector<::DDS::SampleInfo, ZCS_DEFAULT_SIZE> Info_Seq_Type;
+            typedef ACE_Vector< ::DDS::SampleInfo, ZCS_DEFAULT_SIZE> Info_Seq_Type;
             Info_Seq_Type info_;
 
         }; // class ZeroCopyInfoSeq
