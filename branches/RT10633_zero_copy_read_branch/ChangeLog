@@ -1,23 +1,30 @@
+Thu Apr 19 17:48:29 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+
+          Resolve gcc build errors and warnings.
+
 Wed Apr 18 18:50:41 GMT 2007  Scott Harris <harris_s@ociweb.com>
 
-        * bin/DCPS/CPPTemplate.pm
-        * bin/DCPS/HTemplate.pm
-        * dds/DCPS/DataReaderImpl.cpp
-        * dds/DCPS/DataReaderImpl.h
-        * dds/DCPS/ZeroCopySeq_T.h
-        * dds/DdsDcps.mpc
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DdsDcps.mpc:
         
           First round of zero-copy read support.
 
-        * performance-tests/DCPS/TCPListenerTest/common.h
-        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp
-        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h
-        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
         
           Make zero-copy read the default for this performance test.
           Changed from 1200 to 700 microseconds per 8KB sample for 1-1 on WinXP.
         
-        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp
+        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
 
 Mon Mar 26 21:52:05 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
