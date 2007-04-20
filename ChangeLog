@@ -1,3 +1,17 @@
+Fri Apr 20 15:31:52 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm
+        * dds/DCPS/ZeroCopySeq_T.h
+          
+          Allow the zero-copy read sequence type to be used with single-copy
+          reads.
+          
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl
+        
+          Modify the test to allow testing of the zero-copy read capable 
+          sequence type with zero or single copy reading.
+
 Thu Apr 19 17:48:29 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:

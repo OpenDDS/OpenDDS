@@ -21,6 +21,19 @@ $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
+$copy_sample=0;
+
+if ($ARGV[0] ne '') {
+    $data_size = $ARGV[0];
+}
+
+if ($ARGV[1] ne '') {
+    $copy_sample = $ARGV[1];
+}
+
+if ($ARGV[2] ne '') {
+    $num_messages = $ARGV[2];
+}
 
 # need $num_msgs_btwn_rec unread samples plus 20 for good measure
 # (possibly allocated by not yet queue by the transport because of greedy read).
@@ -44,7 +57,8 @@ $sub_parameters = "-DCPSConfigFile conf.ini -p $num_writers"
    . "$svc_config"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
-              . " -msi $num_samples -mxs $num_samples";
+              . " -msi $num_samples -mxs $num_samples"
+              . " -c $copy_sample";
 #use -msi $num_messages to avoid rejected samples
 #use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
