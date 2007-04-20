@@ -1,17 +1,17 @@
 Thu Apr 19 20:22:30 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
 
           Rolled back part of changes in last commit - moved
           the send() call inside the lock since it could cause
-          deadlock situation when there are multiple datawriters with 
+          deadlock situation when there are multiple datawriters with
           multiple writing threads in a process. The deadlock situation
-          happens when first writing thread calls send_start(), second 
+          happens when first writing thread calls send_start(), second
           writing thread calls send_start(), first writing thread calls
           send_stop() which hold the lock in DataLinkSet and calls second
           datawriter data_delivered(), the second datawriter holds its
-          writer's lock and stuck on acquiring the lock in DataLinkSet.          
- 
+          writer's lock and stuck on acquiring the lock in DataLinkSet.
+
 Wed Apr 18 23:58:56 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
