@@ -14,8 +14,14 @@
 
 extern long subscriber_delay_msec; // from common.h
 
+// defined this to build with code only supporting the zero-copy type
+// but strongly supporting it.
+// Comment out this line to build with code that supports the default use of zero-copy
+// but also supports the original sequence type.
+#define WITH_ZERO_COPY_ONLY
+
 template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
-int read (::DDS::DataReader_ptr reader)
+int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 {
   // TWF: There is an optimization to the test by
   // using a pointer to the known servant and
@@ -36,8 +42,13 @@ int read (::DDS::DataReader_ptr reader)
     }
 
   const ::CORBA::Long max_read_samples = 100;
+#ifdef WITH_ZERO_COPY_ONLY
+  Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
+  Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
+#else
   Tseq samples(max_read_samples);
   Iseq infos(max_read_samples);
+#endif
 
   int samples_recvd = 0;
   DDS::ReturnCode_t status;
@@ -252,7 +263,9 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 {
   int num_read = 0;
 
+#ifndef WITH_ZERO_COPY_ONLY
   if (use_zero_copy_reads_) {
+#endif
     switch ( num_floats_per_sample_ )
     {
 
@@ -264,7 +277,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt128DataReader_ptr,
                         ::Mine::Pt128DataReader_var,
                         ::Mine::Pt128DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -276,7 +289,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt512DataReader_ptr,
                         ::Mine::Pt512DataReader_var,
                         ::Mine::Pt512DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -288,7 +301,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt2048DataReader_ptr,
                         ::Mine::Pt2048DataReader_var,
                         ::Mine::Pt2048DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -300,7 +313,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt8192DataReader_ptr,
                         ::Mine::Pt8192DataReader_var,
                         ::Mine::Pt8192DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -310,6 +323,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
         break;
     };
 
+#ifndef WITH_ZERO_COPY_ONLY
   }
   else {
 
@@ -325,7 +339,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt128DataReader_ptr,
                         ::Mine::Pt128DataReader_var,
                         ::Mine::Pt128DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -337,7 +351,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt512DataReader_ptr,
                         ::Mine::Pt512DataReader_var,
                         ::Mine::Pt512DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -349,7 +363,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt2048DataReader_ptr,
                         ::Mine::Pt2048DataReader_var,
                         ::Mine::Pt2048DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -361,7 +375,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::Mine::Pt8192DataReader_ptr,
                         ::Mine::Pt8192DataReader_var,
                         ::Mine::Pt8192DataReaderImpl>
-                            (reader);
+                            (reader, use_zero_copy_reads_);
         }
         break;
 
@@ -372,6 +386,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
   };
 
   }
+#endif
 
   stats_.samples_received(num_read);
 

@@ -832,12 +832,12 @@ DDS::ReturnCode_t
 {
   // OpenDDS does not currenlty support non-zero read with the zero-read sequence.
   // TBD - ?? should we support it?
-  if (received_data.max_len() != 0)
-	{
-		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read zero-copy, max_len must be zero; not %d\n",
-		received_data.max_len() ));
-		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-	}
+  //if (received_data.max_len() != 0)
+	//{
+	//	ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read zero-copy, max_len must be zero; not %d\n",
+	//	received_data.max_len() ));
+	//	return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+	//}
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
       (received_data.release() != info_seq.release()))
@@ -884,8 +884,16 @@ DDS::ReturnCode_t
         {
           // Increase sequence length before adding new element to sequence.
           received_data.length (count + 1);
-          received_data.assignPtr(count, 
-              (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          if (received_data.max_len() != 0)
+          {
+            received_data.assignSample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
+          else 
+          {
+            received_data.assignPtr(count, 
+                (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
@@ -1132,8 +1140,16 @@ DDS::ReturnCode_t
         {
           // Increase sequence length before adding new element to sequence.
           received_data.length (count + 1);
-          received_data.assignPtr(count, 
-              (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          if (received_data.max_len() != 0)
+          {
+            received_data.assignSample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
+          else 
+          {
+            received_data.assignPtr(count, 
+                (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
               
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);

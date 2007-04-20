@@ -269,17 +269,14 @@ namespace TAO
              * @param alloc The allocator used to allocate the array of pointers
              *              to samples. If zero then use the default allocator.
              *
-             * @note The order of the constructor parameters allows for the best
-             *       default behavior when switching between a normal sequence 
-             *       and a zero-copy read sequence.
-             *
              */
             ZeroCopyDataSeq(
-                const size_t init_size = ZCS_DEFAULT_SIZE,
                 const size_t max_len = 0,
+                const size_t init_size = ZCS_DEFAULT_SIZE,
                 ACE_Allocator* alloc = 0) 
                 : ZeroCopySeqBase(max_len)
-                , ptrs_(init_size, alloc ? alloc : &defaultAllocator_)
+                , ptrs_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
+                , samples_(max_len > 0 ? this->ptrs_.max_size() : 0)
             {};
 
             //======== DDS specification inspired methods =====
@@ -313,6 +310,10 @@ namespace TAO
                 }
                 if (this->length_ > ptrs_.size()) {
                     this->ptrs_.resize(nextLen, (Sample_T*)0); 
+                }
+                // only need to resize the samples if we are using them.
+                if (this->max_len_ && this->length_ > samples_.size()) {
+                    this->samples_.resize(nextLen, Sample_T()); 
                 }
                 this->length_ = length;
             };
@@ -357,6 +358,11 @@ namespace TAO
                 ptrs_[ii] = ptr;
             }
 
+            void assignSample(::CORBA::ULong ii, const Sample_T& sample) {
+                samples_[ii] = sample;
+                ptrs_[ii]    = &samples_[ii];
+            }
+
         private:
             // The default allocator will be very fast for the first
             // allocation but use the standard heap for subsequent allocations
@@ -367,6 +373,10 @@ namespace TAO
             typedef ACE_Vector<Sample_T*, ZCS_DEFAULT_SIZE> Ptr_Seq_Type;
             Ptr_Seq_Type ptrs_;
 
+            // Note: use default size of zero but constructor may override that
+            //   It is overriden if max_len > 0.
+            typedef ACE_Vector<Sample_T, 0> Sample_Seq_Type;
+            Sample_Seq_Type samples_;
         }; // class ZeroCopyDataSeq
 
         /**
@@ -391,18 +401,13 @@ namespace TAO
              * @param alloc The allocator used to allocate the array of pointers
              *              to samples. If zero then use the default allocator.
              *
-             * @note The order of the constructor parameters allows for the best
-             *       default behavior when switching between a normal sequence 
-             *       and a zero-copy read sequence.
-             *
-
              */
             ZeroCopyInfoSeq(
-                const size_t init_size = ZCS_DEFAULT_SIZE,
                 const size_t max_len = 0,
+                const size_t init_size = ZCS_DEFAULT_SIZE,
                 ACE_Allocator* alloc = 0) 
                 : ZeroCopySeqBase(max_len)
-                , info_(init_size, alloc ? alloc : &defaultAllocator_)
+                , info_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
             {};
 
             //======== CORBA sequence like methods ======
@@ -436,7 +441,6 @@ namespace TAO
                 // collections should disallow changing the length of a collection for which owns==FALSE.
 
                 // NOTE: +20 helps avoid copying every time the Seq length is incremented
-                // and we know that they are pointers so 20 more is no big deal
                 CORBA::ULong nextLen = length+20;
                 if (this->max_len_)
                 {
