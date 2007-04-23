@@ -675,6 +675,8 @@ void
 
           ptr->rcvd_sample_.remove(head_ptr) ;
 
+                  if (0 == head_ptr->dec_ref())
+                  {
          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
           ACE_DES_FREE (delete_ptr,
                         data_allocator_->free,
@@ -682,6 +684,7 @@ void
           ACE_DES_FREE (head_ptr,
                         rd_allocator_->free,
                         ReceivedDataElement);
+          }
         }
 
       delete ptr ;
@@ -830,30 +833,56 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  // OpenDDS does not currenlty support non-zero read with the zero-read sequence.
-  // TBD - ?? should we support it?
-  //if (received_data.max_len() != 0)
-	//{
-	//	ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read zero-copy, max_len must be zero; not %d\n",
-	//	received_data.max_len() ));
-	//	return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-	//}
-  if ((received_data.maximum() != info_seq.maximum()) ||
+  //SPEC ref v1.2 7.1.2.5.3.8 #1
+  if ((received_data.max_slots() != info_seq.max_slots()) ||
+      (received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
       (received_data.release() != info_seq.release()))
     {
-      ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read sample and info input sequences do not match.\n" ));
+      ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET sample and info input sequences do not match.\n" ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
+    
+  //SPEC ref v1.2 7.1.2.5.3.8 #4 but more strict.
   if ((received_data.max_len() == 0) != (received_data.owns() == false))
 	{
-		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read mismatch of max_len and owns\n" ));
+		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET mismatch of max_len %d  and owns %d\n",
+		 received_data.max_len(), received_data.owns() ));
 		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
 	}
-    
-  if ((::CORBA::Long)info_seq.maximum() < max_samples)
+  
+  if (received_data.max_len() == 0)
     {
-      max_samples = (::CORBA::Long)info_seq.maximum();
+      // not in SPEC but needed.
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          max_samples = (::CORBA::Long)received_data.max_slots(); 
+        }
+    }
+    else
+    {
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5a
+          max_samples = received_data.max_len();
+        }
+      else if (max_samples > (::CORBA::Long)received_data.max_len())
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5c
+          ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET max_samples %d > max_len %d\n",
+            max_samples, received_data.max_len() ));
+          return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+          
+        }
+      //else
+      //SPEC ref v1.2 7.1.2.5.3.8 #5b - is true by impl below.
+    }
+  
+  // The spec does not say what to do in this case but it appears to be a good thing.
+  // Note: max_slots is the greater of the sequence's max_len and init_size.
+  if ((::CORBA::Long)received_data.max_slots() < max_samples)
+    {
+      max_samples = (::CORBA::Long)received_data.max_slots();
     }
 
   ::CORBA::ULong count(0);
@@ -883,23 +912,21 @@ DDS::ReturnCode_t
         if (item->sample_state_ & sample_states)
         {
           // Increase sequence length before adding new element to sequence.
-          received_data.length (count + 1);
+          received_data.set_length (count + 1);
           if (received_data.max_len() != 0)
           {
-            received_data.assignSample(count, 
+            received_data.assign_sample(count, 
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
           else 
           {
-            received_data.assignPtr(count, 
-                (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+            received_data.assign_ptr(count, item) ;
           }
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
-          item->zero_copy_flg_ = true ;
 
           ptr->instance_state_.accessed() ;
           count++ ;
@@ -931,6 +958,15 @@ DDS::ReturnCode_t
 
   if (count)
   {
+	if (received_data.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
+	if (info_seq.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
+
     return ::DDS::RETCODE_OK;
   }
   else
@@ -952,6 +988,7 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
+// TBD !!!! update take like read for zero-copy
   if ((received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
       (received_data.release() != info_seq.release()))
@@ -1029,6 +1066,8 @@ DDS::ReturnCode_t
 
                   ptr->rcvd_sample_.remove(item) ;
 
+                  if (0 == item->dec_ref())
+                  {
                  ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
                   ACE_DES_FREE (delete_ptr,
                                 data_allocator_->free,
@@ -1036,6 +1075,7 @@ DDS::ReturnCode_t
                   ACE_DES_FREE (item,
                                 rd_allocator_->free,
                                 ReceivedDataElement);
+                                }
                   item = next ;
                 }
 
@@ -1063,6 +1103,8 @@ DDS::ReturnCode_t
 
             ptr->rcvd_sample_.remove(tail) ;
 
+                  if (0 == tail->dec_ref())
+                  {
             ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
             ACE_DES_FREE (delete_ptr,
                           data_allocator_->free,
@@ -1070,6 +1112,7 @@ DDS::ReturnCode_t
             ACE_DES_FREE (tail,
                           rd_allocator_->free,
                           ReceivedDataElement);
+                          }
           }
         else
           {
@@ -1107,6 +1150,7 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
+// TBD !!!! update take like read for zero-copy
   if ((::CORBA::Long)info_seq.maximum() < max_samples)
     {
       max_samples = (::CORBA::Long)info_seq.maximum();
@@ -1139,16 +1183,15 @@ DDS::ReturnCode_t
         if (item->sample_state_ & sample_states)
         {
           // Increase sequence length before adding new element to sequence.
-          received_data.length (count + 1);
+          received_data.set_length (count + 1);
           if (received_data.max_len() != 0)
           {
-            received_data.assignSample(count, 
+            received_data.assign_sample(count, 
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
           else 
           {
-            received_data.assignPtr(count, 
-                (::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+            received_data.assign_ptr(count, item) ;
           }
               
           // Increase sequence length before adding new element to sequence.
@@ -1156,7 +1199,6 @@ DDS::ReturnCode_t
           ptr->instance_state_.sample_info(info_seq[count], item) ;
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
-          item->zero_copy_flg_ = true ;
 
           ptr->instance_state_.accessed() ;
           count++ ;
@@ -1321,6 +1363,9 @@ DDS::ReturnCode_t
                   next = item->next_data_sample_ ;
 
                   ptr->rcvd_sample_.remove(item) ;
+                  
+                  if (0 == item->dec_ref())
+                  {
 
                  ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
                   ACE_DES_FREE (delete_ptr,
@@ -1329,6 +1374,7 @@ DDS::ReturnCode_t
                   ACE_DES_FREE (item,
                                 rd_allocator_->free,
                                 ReceivedDataElement);
+                  }
                   item = next ;
                 }
 
@@ -1353,6 +1399,8 @@ DDS::ReturnCode_t
 
             ptr->rcvd_sample_.remove(tail) ;
 
+                  if (0 == tail->dec_ref())
+                  {
             ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
             ACE_DES_FREE (delete_ptr,
                           data_allocator_->free,
@@ -1360,6 +1408,7 @@ DDS::ReturnCode_t
             ACE_DES_FREE (tail,
                           rd_allocator_->free,
                           ReceivedDataElement);
+            }
           }
         else
           {
@@ -1559,6 +1608,8 @@ DDS::ReturnCode_t
 
           ptr->rcvd_sample_.remove(item) ;
 
+                  if (0 == item->dec_ref())
+                  {
           ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
           ACE_DES_FREE (delete_ptr,
                         data_allocator_->free,
@@ -1566,7 +1617,7 @@ DDS::ReturnCode_t
           ACE_DES_FREE (item,
                         rd_allocator_->free,
                         ReceivedDataElement);
-
+}
           item = next ;
         }
         count++ ;
@@ -1593,6 +1644,9 @@ DDS::ReturnCode_t
 
       ptr->rcvd_sample_.remove(tail) ;
 
+                  if (0 == tail->dec_ref())
+                  {
+
       ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
       ACE_DES_FREE (delete_ptr,
                     data_allocator_->free,
@@ -1600,6 +1654,7 @@ DDS::ReturnCode_t
       ACE_DES_FREE (tail,
                     rd_allocator_->free,
                     ReceivedDataElement);
+      }
     }
     else
     {
@@ -1745,11 +1800,20 @@ DDS::ReturnCode_t
 
   if (!received_data.release())
   {
-    ::<%SCOPE%><%TYPE%> *buf = received_data.get_buffer();
-    ::DDS::SampleInfo *info = info_seq.get_buffer();
+    // true means the buffer is orphaned - not owned by the sequence
+    ::<%SCOPE%><%TYPE%> *buf = received_data.get_buffer(true);
+    ::DDS::SampleInfo *info = info_seq.get_buffer(true);
+
+
+    // TBD - pool these buffers instead of deleting them
 
     delete[] buf;
     delete[] info;
+    
+    // per DDS spec: set max_len = 0; 
+    // also buffer is null and "owns" is false (CORBA seq "release" == DDS seq "owns")
+    received_data.replace(0,0,0,false);
+    info_seq.replace(0,0,0,false);
   }
 
   return ::DDS::RETCODE_OK;
@@ -1764,10 +1828,55 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  // TBD - free up the info_seq
-  // TBD - iterate over the recieved_data and decrement its reference count.
-  // TBD - make access to the recieved_data an error.
+  // some incomplete tests to see that the data and info are from the same read.
+  if (received_data.release() != info_seq.release())
+    {
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
 
+  if (received_data.length() != info_seq.length())
+    {
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+
+  if (received_data.owns())
+    {
+      // nothing to do because this is not zero-copy data
+      return ::DDS::RETCODE_OK; 
+    }
+  else 
+    {
+      // reset but allow the info buffer to be used again
+      info_seq.max_len(0);
+      info_seq.length(0);
+
+      //??TBD? - put the info buffer in a pool
+
+      // decrement the data references.
+      TAO::DCPS::ReceivedDataElement *item;
+      for (CORBA::ULong ii = 0; ii < received_data.length(); ii++)
+      {
+        item = received_data.getPtr(ii);
+        ACE_ASSERT(item->zero_copy_cnt_ >= 1);
+        item->zero_copy_cnt_--;
+        if (0 == item->dec_ref())
+          {
+             ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+             ACE_DES_FREE (ptr,
+                       data_allocator_->free,
+                       <%TYPE%> );
+
+             ACE_DES_FREE (item,
+                       rd_allocator_->free,
+                       ReceivedDataElement);
+          }
+          
+      }
+      // reset the max_len  per DDS spec
+      // this also makes access to the recieved_data an error (a spec req)
+      received_data.max_len(0);
+      received_data.set_length(0);
+    }
   return ::DDS::RETCODE_OK;
 }
 
@@ -1913,6 +2022,8 @@ void
          TAO::DCPS::ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
          instance_ptr->rcvd_sample_.remove(item) ;
 
+                  if (0 == item->dec_ref())
+                  {
          ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
          ACE_DES_FREE (ptr,
                        data_allocator_->free,
@@ -1921,6 +2032,7 @@ void
          ACE_DES_FREE (item,
                        rd_allocator_->free,
                        ReceivedDataElement);
+         }
       }
     }
 
@@ -1945,6 +2057,7 @@ void
     instance_ptr->last_sequence_ = header.sequence_ ;
 
     instance_ptr->rcvd_sample_.add(ptr) ;
+    ptr->inc_ref() ;
 
     if (instance_ptr->rcvd_sample_.size_ > get_depth())
     {

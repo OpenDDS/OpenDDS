@@ -13,6 +13,11 @@ Version 0.11 of TAO DDS.
 
 New to this version are the following changes:
 
+- Build DDS without Built-In-Topic (BIT) support to reduce the 
+  footprint of DDS.
+    # Generate the makefiles/projects like:
+    mwc.pl -type <yourtype> -features built_in_topics=0 DDS.mwc
+
 =========================================================================
 
 Version 0.10 of TAO DDS.

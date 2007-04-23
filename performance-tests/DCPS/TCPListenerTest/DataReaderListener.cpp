@@ -46,8 +46,8 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
   Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
 #else
-  Tseq samples(max_read_samples);
-  Iseq infos(max_read_samples);
+  Tseq samples(0); //max_read_samples);
+  Iseq infos(0); //max_read_samples);
 #endif
 
   int samples_recvd = 0;
