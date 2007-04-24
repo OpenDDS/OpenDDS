@@ -52,6 +52,7 @@ namespace TAO
     static bool got_bit_transport_port = false;
     static bool got_bit_lookup_duration_msec = false;
     static bool got_bit_flag = false;
+    static bool got_transport_bit_flag = false;
 
     Service_Participant::Service_Participant ()
     : orb_ (CORBA::ORB::_nil ()),
@@ -61,6 +62,7 @@ namespace TAO
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (true),
+      transport_bit_enabled_ (false),
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       initialize();
@@ -279,7 +281,7 @@ namespace TAO
                   dp_factory_ = servant_to_reference (dp_factory_servant_);
 
                   // Give ownership to poa.
-                  //dp_factory_servant_->_remove_ref ();
+                  dp_factory_servant_->_remove_ref ();
 
                   if (CORBA::is_nil (dp_factory_.in ()))
                     {
@@ -401,6 +403,12 @@ namespace TAO
               bit_enabled_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_flag = true;
+            }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSTransportBit")) != 0)
+            {
+              transport_bit_enabled_ = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+              got_transport_bit_flag = true;
             }
           else
             {

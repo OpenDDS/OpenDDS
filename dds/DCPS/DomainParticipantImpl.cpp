@@ -17,6 +17,10 @@
 #include "dds/PublicationBuiltinTopicDataTypeSupportImpl.h"
 #include "dds/SubscriptionBuiltinTopicDataTypeSupportImpl.h"
 #include "dds/TopicBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/TransportAssociationBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/DCPS/transport/framework/TransportInterface.h"
+
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "tao/debug.h"
@@ -1373,7 +1377,7 @@ namespace TAO
       if (ret == ::DDS::RETCODE_OK && ! TheTransientKludge->is_enabled ())
         {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-          if (TheServiceParticipant->get_BIT ())
+          if (TheServiceParticipant->bit_enabled ())
             {
               return init_bit ();
             }
@@ -1541,17 +1545,127 @@ namespace TAO
 #if !defined (DDS_HAS_MINIMUM_BIT)
       ::DDS::ReturnCode_t ret;
 
-      if (((ret = init_bit_subscriber ()) == ::DDS::RETCODE_OK)
-           && ((ret = attach_bit_transport ()) == ::DDS::RETCODE_OK)
-           && ((ret = init_bit_topics ()) == ::DDS::RETCODE_OK)
-           && ((ret = init_bit_datareaders ()) == ::DDS::RETCODE_OK))
-        {
-          return ::DDS::RETCODE_OK;
-        }
-      else
+      if (((ret = init_bit_subscriber ()) != ::DDS::RETCODE_OK)
+           || ((ret = attach_sub_bit_transport ()) != ::DDS::RETCODE_OK)
+           || ((ret = init_sub_bit_topics ()) != ::DDS::RETCODE_OK)
+           || ((ret = init_bit_datareaders ()) != ::DDS::RETCODE_OK))
+      {
+        return ret;
+      }
+
+      if (TheServiceParticipant->transport_bit_enabled ())
+      {
+        if (((ret = init_bit_publisher ()) != ::DDS::RETCODE_OK)
+          || ((ret = attach_pub_bit_transport ()) != ::DDS::RETCODE_OK)
+          || ((ret = init_pub_bit_topics ()) != ::DDS::RETCODE_OK)
+          || ((ret = init_bit_datawriters ()) != ::DDS::RETCODE_OK))
         {
           return ret;
         }
+      }
+      
+      return ret;
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+    }
+
+    ::DDS::ReturnCode_t
+    DomainParticipantImpl::init_pub_bit_topics ()
+    {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+      try
+      {
+        ::DDS::TopicQos topic_qos;
+        this->get_default_topic_qos(topic_qos);
+
+        POA_TAO::DCPS::TypeSupport_ptr type_support =
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), 
+                                                   BUILT_IN_TRANSPORT_TOPIC_TYPE);
+
+        if (0 == type_support)
+          {
+            // Participant topic
+            ::DDS::TransportBuiltinTopicDataTypeSupportImpl* transportTypeSupport_servant
+              = new ::DDS::TransportBuiltinTopicDataTypeSupportImpl();
+            ::DDS::ReturnCode_t ret
+              = transportTypeSupport_servant->register_type(participant_objref_.in (),
+                                                            BUILT_IN_TRANSPORT_TOPIC_TYPE);
+            if (ret != ::DDS::RETCODE_OK)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) ")
+                                  ACE_TEXT("DomainParticipantImpl::init_pub_bit_topics, ")
+                                  ACE_TEXT("register BUILT_IN_TRANSPORT_TOPIC_TYPE returned %d.\n"),
+                                  ret),
+                                  ret);
+              }
+          }
+
+        bit_trans_topic_ = this->create_topic (BUILT_IN_TRANSPORT_TOPIC,
+                                                   BUILT_IN_TRANSPORT_TOPIC_TYPE,
+                                                   topic_qos,
+                                                   ::DDS::TopicListener::_nil());
+        if (CORBA::is_nil (bit_trans_topic_.in ()))
+          {
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               ACE_TEXT("(%P|%t) ")
+                               ACE_TEXT("DomainParticipantImpl::init_pub_bit_topics, ")
+                               ACE_TEXT("Nil %s Topic \n"),
+                               BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE),
+                               ::DDS::RETCODE_ERROR);
+          }
+
+        // Topic topic
+        type_support =
+          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), 
+                                                   BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE);
+
+        if (0 == type_support)
+          {
+            ::DDS::TransportAssociationBuiltinTopicDataTypeSupportImpl* associationTypeSupport_servant =
+              new ::DDS::TransportAssociationBuiltinTopicDataTypeSupportImpl();
+
+            ::DDS::ReturnCode_t ret
+              = associationTypeSupport_servant->register_type(participant_objref_.in (),
+                                                BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE);
+            if (ret != ::DDS::RETCODE_OK)
+              {
+
+                ACE_ERROR_RETURN ((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) ")
+                                  ACE_TEXT("DomainParticipantImpl::init_pub_bit_topics, ")
+                                  ACE_TEXT("register BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE"
+                                  "returned %d.\n"),
+                                  ret),
+                                  ret);
+              }
+          }
+
+        bit_trans_asso_topic_ = this->create_topic (
+                                                   BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC,
+                                                   BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE,
+                                                   topic_qos,
+                                                   ::DDS::TopicListener::_nil());
+        if (CORBA::is_nil (bit_trans_asso_topic_.in ()))
+          {
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               ACE_TEXT("(%P|%t) ")
+                               ACE_TEXT("DomainParticipantImpl::init_pub_bit_topics, ")
+                               ACE_TEXT("Nil %s Topic \n"),
+                               BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE),
+                               ::DDS::RETCODE_ERROR);
+          }
+
+      }
+      catch (const CORBA::Exception& ex)
+        {
+          ex._tao_print_exception (
+            "ERROR: Exception caught in DomainParticipant::init_pub_bit_topics.");
+          return ::DDS::RETCODE_ERROR;
+        }
+
+      return ::DDS::RETCODE_OK;
 #else
       return ::DDS::RETCODE_UNSUPPORTED;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -1559,7 +1673,7 @@ namespace TAO
 
 
     ::DDS::ReturnCode_t
-    DomainParticipantImpl::init_bit_topics ()
+    DomainParticipantImpl::init_sub_bit_topics ()
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       try
@@ -1582,7 +1696,7 @@ namespace TAO
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
                                   ACE_TEXT("(%P|%t) ")
-                                  ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                                  ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                   ACE_TEXT("register BUILT_IN_PARTICIPANT_TOPIC_TYPE returned %d.\n"),
                                   ret),
                                   ret);
@@ -1597,7 +1711,7 @@ namespace TAO
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ")
-                               ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                               ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
                                ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
                                ::DDS::RETCODE_ERROR);
@@ -1620,7 +1734,7 @@ namespace TAO
 
                 ACE_ERROR_RETURN ((LM_ERROR,
                                   ACE_TEXT("(%P|%t) ")
-                                  ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                                  ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                   ACE_TEXT("register BUILT_IN_TOPIC_TOPIC_TYPE returned %d.\n"),
                                   ret),
                                   ret);
@@ -1635,7 +1749,7 @@ namespace TAO
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ")
-                               ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                               ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
                                ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC),
                                ::DDS::RETCODE_ERROR);
@@ -1657,7 +1771,7 @@ namespace TAO
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
                                   ACE_TEXT("(%P|%t) ")
-                                  ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                                  ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                   ACE_TEXT("register BUILT_IN_SUBSCRIPTION_TOPIC_TYPE returned %d.\n"),
                                   ret),
                                   ret);
@@ -1673,7 +1787,7 @@ namespace TAO
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ")
-                               ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                               ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
                                ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
                                ::DDS::RETCODE_ERROR);
@@ -1695,7 +1809,7 @@ namespace TAO
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
                                   ACE_TEXT("(%P|%t) ")
-                                  ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
+                                  ACE_TEXT("DomainParticipantImpl::init_sub_bit_topics, ")
                                   ACE_TEXT("register BUILT_IN_PUBLICATION_TOPIC_TYPE returned %d.\n"),
                                   ret),
                                   ret);
@@ -1710,7 +1824,7 @@ namespace TAO
         if (CORBA::is_nil (bit_pub_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
-                               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_bit_topics, ")
+                               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_sub_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
                                ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC),
                                ::DDS::RETCODE_ERROR);
@@ -1719,7 +1833,7 @@ namespace TAO
       catch (const CORBA::Exception& ex)
         {
           ex._tao_print_exception (
-            "ERROR: Exception caught in DomainParticipant::init_bit_topics.");
+            "ERROR: Exception caught in DomainParticipant::init_sub_bit_topics.");
           return ::DDS::RETCODE_ERROR;
         }
 
@@ -1745,7 +1859,7 @@ namespace TAO
       catch (const CORBA::Exception& ex)
         {
           ex._tao_print_exception (
-            "ERROR: Exception caught in DomainParticipant::create_bit_subscriber.");
+            "ERROR: Exception caught in DomainParticipant::init_bit_subscriber.");
           return ::DDS::RETCODE_ERROR;
         }
 
@@ -1824,20 +1938,111 @@ namespace TAO
 
 
     ::DDS::ReturnCode_t
-    DomainParticipantImpl::attach_bit_transport ()
+    DomainParticipantImpl::init_bit_publisher ()
+    {
+      try
+        {
+          ::DDS::PublisherQos pub_qos;
+          this->get_default_publisher_qos(pub_qos);
+
+          bit_publisher_
+            = this->create_publisher (pub_qos,
+                                       ::DDS::PublisherListener::_nil ());
+        }
+      catch (const CORBA::Exception& ex)
+        {
+          ex._tao_print_exception (
+            "ERROR: Exception caught in DomainParticipant::init_bit_publisher.");
+          return ::DDS::RETCODE_ERROR;
+        }
+
+      return ::DDS::RETCODE_OK;
+    }
+
+   ::DDS::ReturnCode_t
+    DomainParticipantImpl::init_bit_datawriters ()
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-       try
-      {
+      try
+        {
+          ::DDS::DataWriterQos dw_qos;
+          bit_publisher_->get_default_datawriter_qos(dw_qos);
+
+          ::DDS::DataWriter_var dw
+            = bit_publisher_->create_datawriter (bit_trans_topic_.in (),
+                                                  dw_qos,
+                                                  ::DDS::DataWriterListener::_nil ());
+
+          bit_trans_dw_
+            = ::DDS::TransportBuiltinTopicDataDataWriter::_narrow (dw.in ());
+                      
+          dw = bit_publisher_->create_datawriter (bit_trans_asso_topic_.in (),
+                                                  dw_qos,
+                                                  ::DDS::DataWriterListener::_nil ());
+
+          bit_trans_asso_dw_
+            = ::DDS::TransportAssociationBuiltinTopicDataDataWriter::_narrow (dw.in ());
+        }
+      catch (const CORBA::Exception& ex)
+        {
+          ex._tao_print_exception (
+            "ERROR: Exception caught in DomainParticipant::init_bit_datareaders.");
+          return ::DDS::RETCODE_ERROR;
+        }
+
+      return ::DDS::RETCODE_OK;
+#else
+
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+      return ::DDS::RETCODE_OK;
+    }
+
+
+    ::DDS::ReturnCode_t
+    DomainParticipantImpl::attach_sub_bit_transport ()
+    {
+#if !defined (DDS_HAS_MINIMUM_BIT)
         // Attach the Subscriber with the TransportImpl.
         ::TAO::DCPS::SubscriberImpl* sub_servant
           = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl, ::DDS::Subscriber_ptr>
           (bit_subscriber_.in ());
 
+      return this->attach_bit_transport (sub_servant);
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+    }
+
+
+    ::DDS::ReturnCode_t
+    DomainParticipantImpl::attach_pub_bit_transport ()
+    {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+        // Attach the Publisher with the TransportImpl.
+        ::TAO::DCPS::PublisherImpl* pub_servant
+          = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
+          (bit_publisher_.in ());
+
+        return this->attach_bit_transport (pub_servant);
+#else
+      return ::DDS::RETCODE_UNSUPPORTED;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+    }
+
+
+    ::DDS::ReturnCode_t
+    DomainParticipantImpl::attach_bit_transport (TransportInterface* inf)
+    {
+#if !defined (DDS_HAS_MINIMUM_BIT)
+       try
+      {
+
         TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ();
 
         TAO::DCPS::AttachStatus status
-          = sub_servant->attach_transport(impl.in());
+          = inf->attach_transport(impl.in());
 
         if (status != TAO::DCPS::ATTACH_OK)
           {

@@ -595,3 +595,24 @@ TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_addres
 
   return 0;
 }
+
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+void 
+TAO::DCPS::SimpleTcpTransport::set_bit_data (TransportBuiltinTopicData & data) const
+{
+  data.transport_id[2] = this->tcp_config_->transport_id_;
+  data.transport_type = CORBA::string_dup (this->tcp_config_->transport_type_.c_str ());
+  ACE_TCHAR buf [30]; 
+  if (this->tcp_config_->local_address_.addr_to_string (buf, 30) == -1)
+  {
+    ACE_ERROR((LM_ERROR, "(%P|%t)SimpleTcpTransport::set_bit_data %p\n", 
+                         "addr_to_string"));
+  }
+  else
+  {
+    data.endpoint = CORBA::string_dup (buf);
+  }
+}
+#endif
+

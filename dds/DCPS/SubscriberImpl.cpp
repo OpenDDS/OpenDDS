@@ -931,6 +931,24 @@ SubscriberImpl::set_object_reference (const ::DDS::Subscriber_ptr& sub)
   subscriber_objref_ = ::DDS::Subscriber::_duplicate (sub);
 }
 
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+void 
+SubscriberImpl::set_bit_data (TransportBuiltinTopicData & data) const
+{
+  data.transport_id[0] = this->participant_->get_domain_id (); //domanin id
+  data.transport_id[0] = this->participant_->get_id(); //domanin participant id
+}
+
+::DDS::TransportBuiltinTopicDataDataWriter_ptr 
+SubscriberImpl::get_builtin_transport_datawriter () const 
+{
+  return ::DDS::TransportBuiltinTopicDataDataWriter::_duplicate (
+           this->participant_->bit_trans_dw_.in ());
+}
+
+#endif
 } // namespace DCPS
 } // namespace TAO
 

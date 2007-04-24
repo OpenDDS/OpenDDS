@@ -4,6 +4,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportInterface.h"
+#include "dds/DdsDcpsTransportC.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -67,9 +68,35 @@ TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
     this->impl_ = impl;
   }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+  if (! publish_transport_bit ())
+    return ATTACH_ERROR;
+#endif
+
   return ATTACH_OK;
 }
 
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+bool 
+TAO::DCPS::TransportInterface::publish_transport_bit ()
+{
+  TransportBuiltinTopicData data;
+  this->set_bit_data (data);
+  this->impl_->set_bit_data (data);
+
+  ::DDS::TransportBuiltinTopicDataDataWriter_var dw = this->get_builtin_transport_datawriter ();
+
+  ::DDS::InstanceHandle_t handle = dw->_cxx_register (data);
+  ::DDS::ReturnCode_t ret = dw->write(data, handle);
+  if (ret != ::DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN ((LM_DEBUG,
+      "ERROR: TransportInterface::publish_transport_bit() write failed.\n"),
+      false);
+  }
+  return true;
+}
+#endif
 
 /// This is called by the client application or a subclass of
 /// TransportInterface when it has decided to detach this TransportInterface
@@ -145,6 +172,12 @@ TAO::DCPS::TransportInterface::add_associations
 {
   DBG_ENTRY_LVL("TransportInterface","add_associations",5);
 
+  bool publisher_side = ACE_OS::strcmp (local_id_str, "publisher_id") == 0;
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+  TransportAssociationBuiltinTopicData* data 
+    = new TransportAssociationBuiltinTopicData[num_remote_associations];
+#endif 
   if (this->impl_.is_nil())
     {
       // There is no TransportImpl object - the transport must have
@@ -160,49 +193,64 @@ TAO::DCPS::TransportInterface::add_associations
     TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
     for (size_t i = 0; i < num_remote_associations; ++i)
+    {
+      RepoId remote_id = remote_associations[i].remote_id_;
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+      if (publisher_side)
       {
-  RepoId remote_id = remote_associations[i].remote_id_;
+        data[i].pub_key[2] = local_id;
+        data[i].sub_key[2] = remote_id;
+      }
+      else
+      {
+        data[i].pub_key[2] = remote_id;
+        data[i].sub_key[2] = local_id;
+      }
+#endif
+      DataLink_rch link;
 
-  DataLink_rch link;
+      // There are two ways to reserve the DataLink -- as a local publisher,
+      // or as a local subscriber.  If the receive_listener argument is
+      // a NULL pointer (0), then use the local publisher version.  Otherwise,
+      // use the local subscriber version.
+      if (receive_listener == 0)
+      {
+        VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
+          local_id, remote_id));
+        // Local publisher, remote subscriber.
+        link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+          remote_id,
+          local_id,
+          priority);
+      }
+      else
+      {
+        VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
+          local_id, remote_id));
+        // Local subscriber, remote publisher.
+        link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+          remote_id,
+          local_id,
+          receive_listener,
+          priority);
+      }
 
-  // There are two ways to reserve the DataLink -- as a local publisher,
-  // or as a local subscriber.  If the receive_listener argument is
-  // a NULL pointer (0), then use the local publisher version.  Otherwise,
-  // use the local subscriber version.
-  if (receive_listener == 0)
+    if (link.is_nil())
+      {
+        // reserve_datalink failure
+        ACE_ERROR_RETURN((LM_ERROR,
+              "(%P|%t) ERROR: Failed to reserve a DataLink with the "
+              "TransportImpl for association from local "
+              "[%s %d] to remote [%s %d].\n",
+              local_id_str,local_id,
+              remote_id_str,remote_id),
+            -1);
+      }
+    else
     {
-      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
-      local_id, remote_id));
-      // Local publisher, remote subscriber.
-      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-             remote_id,
-             local_id,
-             priority);
+      //link->get_connectio_info (data[i].local_endpoint, data[i].remote_endpoint);
     }
-  else
-    {
-      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
-      local_id, remote_id));
-      // Local subscriber, remote publisher.
-      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-             remote_id,
-             local_id,
-             receive_listener,
-             priority);
-    }
-
-  if (link.is_nil())
-    {
-      // reserve_datalink failure
-      ACE_ERROR_RETURN((LM_ERROR,
-            "(%P|%t) ERROR: Failed to reserve a DataLink with the "
-            "TransportImpl for association from local "
-            "[%s %d] to remote [%s %d].\n",
-            local_id_str,local_id,
-            remote_id_str,remote_id),
-           -1);
-    }
-
   // At this point, the DataLink knows about our association.
 
   //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
@@ -291,16 +339,20 @@ TAO::DCPS::TransportInterface::add_associations
   return -1;
       } // for scope
 
-    if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
+      if (publisher_side)
       {
-  if (this->impl_->add_pending_association (local_id,
-              num_remote_associations,
-              remote_associations) != 0)
-    return -1;
+        if (this->impl_->add_pending_association (local_id,
+          num_remote_associations,
+          remote_associations) != 0)
+          return -1;
       }
-    // We completed everything without a problem.
+
+      // We completed everything without a problem.
   } // guard scope
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+  //return publish_transport_association_bit;
+#endif
   return 0;
 }
 
@@ -362,3 +414,5 @@ TAO::DCPS::TransportInterface::transport_detached()
   // implementation of the transport_detached_i() method.
   this->transport_detached_i();
 }
+
+

@@ -72,11 +72,17 @@ struct ParticipantStrt {
   IdType domainId;
   IdType participantId; // Unique system-wide
   Q participantQos;
+  CORBA::String_var hostname;
+  CORBA::Long       process_id;
 
   ParticipantStrt (IdType dom, IdType part
-                   , Q pQos)
+                   , Q pQos
+                   , const char * hn
+                   , CORBA::Long  pid)
     : domainId (dom), participantId (part)
       , participantQos (pQos)
+      , hostname (CORBA::string_dup (hn))
+      , process_id (pid)
   { };
 };
 

@@ -56,11 +56,17 @@ struct ParticipantStrt <QosSeq>
   IdType domainId;
   IdType participantId; // Unique system-wide
   QosSeq participantQos;
+  CORBA::String_var hostname;
+  CORBA::Long       process_id;
 
   ParticipantStrt (const IdType& dId, const IdType& pId
-                   , const QosSeq& pQos)
+                   , const QosSeq& pQos
+                   , const char * hn
+                   , CORBA::Long  pid)
     : domainId (dId), participantId (pId)
       , participantQos (pQos)
+      , hostname (CORBA::string_dup (hn))
+      , process_id (pid)
   {}
 
   ParticipantStrt (const UpdateManager::DParticipant& participant
@@ -417,7 +423,9 @@ PersistenceUpdater::requestImage (void)
       QosSeq qos (ParticipantQos, in_seq);
       UpdateManager::DParticipant dparticipant (participant->domainId
                                                 , participant->participantId
-                                                , qos);
+                                                , qos
+                                                , participant->hostname.in ()
+                                                , participant->process_id);
       image.participants.push_back (dparticipant);
     }
 

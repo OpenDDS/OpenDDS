@@ -12,14 +12,18 @@
 DCPS_IR_Participant::DCPS_IR_Participant (TAO::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
                                           ::DDS::DomainParticipantQos qos,
-                                          UpdateManager* um)
+                                          UpdateManager* um,
+                                          const char * hostname,
+                                          ::CORBA::Long process_id)
 : id_(id),
   domain_(domain),
   qos_(qos),
   aliveStatus_(1),
   handle_(0),
   isBIT_(0),
-  um_ (um)
+  um_ (um),
+  hostname_ (CORBA::string_dup (hostname)),
+  process_id_ (process_id)
 {
 }
 
@@ -439,6 +443,18 @@ void DCPS_IR_Participant::mark_dead ()
 TAO::DCPS::RepoId DCPS_IR_Participant::get_id ()
 {
   return id_;
+}
+
+
+const char* DCPS_IR_Participant::get_hostname ()
+{
+  return CORBA::string_dup (hostname_.in ());
+}
+
+
+CORBA::Long DCPS_IR_Participant::get_process_id ()
+{
+  return process_id_;
 }
 
 

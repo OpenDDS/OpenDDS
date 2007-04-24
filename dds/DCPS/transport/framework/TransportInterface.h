@@ -9,6 +9,8 @@
 #include "DataLinkSetMap.h"
 #include "TransportDefs.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportC.h"
+
 #include "ace/Synch.h"
 
 class ACE_Message_Block;
@@ -138,6 +140,11 @@ namespace TAO
         /// Default implementation does nothing.
         virtual void transport_detached_i();
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+        virtual void set_bit_data (TransportBuiltinTopicData & data) const = 0 ;
+    
+        virtual ::DDS::TransportBuiltinTopicDataDataWriter_ptr get_builtin_transport_datawriter () const = 0;
+#endif
 
       private:
 
@@ -152,6 +159,10 @@ namespace TAO
         /// still associated with the TransportImpl.
         void transport_detached();
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+        bool TransportInterface::publish_transport_bit ();
+#endif
+
         /// Generic algorithm used by add_publications and add_subscriptions,
         /// with the arguments determining the context (ie, local vs. remote
         /// and subscriber vs. publisher).
@@ -163,7 +174,6 @@ namespace TAO
                         size_t                    num_remote_associations,
                         const AssociationData*    remote_associations,
                         TransportReceiveListener* receive_listener = 0);
-
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;

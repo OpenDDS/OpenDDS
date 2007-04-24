@@ -10,6 +10,8 @@
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "TransportBuiltinTopicDataTypeSupportC.h"
+
 #include "ace/Synch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -224,6 +226,14 @@ namespace TAO
     //void cleanup();
 
     ::POA_DDS::SubscriberListener* listener_for (::DDS::StatusKind kind);
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+    virtual void set_bit_data (TransportBuiltinTopicData & data) const;
+
+    virtual ::DDS::TransportBuiltinTopicDataDataWriter_ptr get_builtin_transport_datawriter () const;
+
+#endif
 
     private:
 

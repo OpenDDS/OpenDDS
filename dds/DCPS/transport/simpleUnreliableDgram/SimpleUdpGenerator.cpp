@@ -28,11 +28,9 @@ TAO::DCPS::SimpleUdpGenerator::new_factory()
 TAO::DCPS::TransportConfiguration* 
 TAO::DCPS::SimpleUdpGenerator::new_configuration(const TransportIdType id)
 {
-  ACE_UNUSED_ARG (id);
-
   SimpleUdpConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config, 
-                 SimpleUdpConfiguration(), 
+                 SimpleUdpConfiguration(id), 
                  0);
   return trans_config;
 }

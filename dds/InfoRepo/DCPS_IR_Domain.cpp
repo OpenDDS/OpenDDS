@@ -1086,7 +1086,8 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
             data.key[1] = participant->get_id();
             data.key[2]= 0;
             data.user_data = participantQos->user_data;
-
+            data.hostname = participant->get_hostname();
+            data.process_id = participant->get_process_id();
             ::DDS::InstanceHandle_t handle
               = bitParticipantDataWriter_->_cxx_register (data);
 

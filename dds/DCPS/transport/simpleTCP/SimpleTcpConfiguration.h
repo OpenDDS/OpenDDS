@@ -20,7 +20,7 @@ namespace TAO
     {
       public:
 
-        SimpleTcpConfiguration();
+        SimpleTcpConfiguration(const TransportIdType& id);
         virtual ~SimpleTcpConfiguration();
         virtual int load (const TransportIdType& id,
                           ACE_Configuration_Heap& cf);

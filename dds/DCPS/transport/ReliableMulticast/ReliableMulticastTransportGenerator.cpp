@@ -24,11 +24,9 @@ TAO::DCPS::ReliableMulticastTransportGenerator::new_factory()
 TAO::DCPS::TransportConfiguration*
 TAO::DCPS::ReliableMulticastTransportGenerator::new_configuration(const TransportIdType id)
 {
-  ACE_UNUSED_ARG (id);
-
   ReliableMulticastTransportConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config,
-                 ReliableMulticastTransportConfiguration(),
+                 ReliableMulticastTransportConfiguration(id),
                  0);
   return trans_config;
 }

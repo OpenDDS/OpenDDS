@@ -15,6 +15,7 @@
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportC.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 #include "ace/Vector_T.h"
@@ -165,6 +166,7 @@ namespace TAO
         /// returned.
         TransportReactorTask* reactor_task();
 
+        virtual void set_bit_data (TransportBuiltinTopicData & data) const = 0;
 
       private:
 

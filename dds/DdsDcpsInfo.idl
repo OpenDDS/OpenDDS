@@ -113,7 +113,9 @@ module TAO {
       // returns the id of the added participant
       // 0 is an invalid id
       RepoId add_domain_participant (in ::DDS::DomainId_t domain,
-                                     in ::DDS::DomainParticipantQos qos)
+                                     in ::DDS::DomainParticipantQos qos,
+                                     in string hostname,
+                                     in long   process_id)
         raises (Invalid_Domain);
 
 

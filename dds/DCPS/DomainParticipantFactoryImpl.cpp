@@ -58,8 +58,13 @@ namespace TAO
 
       try
         {
+          ACE_INET_Addr addr;
+          const char * hostname = addr.get_host_name ();
+          CORBA::Long process_id = static_cast <CORBA::Long> (ACE_OS::thr_self ());
           dp_id = repo->add_domain_participant (domainId,
-                                                qos);
+                                                qos,
+                                                hostname,
+                                                process_id);
         }
       catch (const CORBA::SystemException& sysex)
         {

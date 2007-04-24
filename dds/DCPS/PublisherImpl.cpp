@@ -902,6 +902,25 @@ PublisherImpl::listener_for (::DDS::StatusKind kind)
     }
 }
 
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+void 
+PublisherImpl::set_bit_data (TransportBuiltinTopicData & data) const
+{
+  data.transport_id[0] = this->participant_->get_domain_id (); //domanin id
+  data.transport_id[0] = this->participant_->get_id(); //domanin participant id
+}
+
+
+::DDS::TransportBuiltinTopicDataDataWriter_ptr 
+PublisherImpl::get_builtin_transport_datawriter () const 
+{
+  return ::DDS::TransportBuiltinTopicDataDataWriter::_duplicate (
+           this->participant_->bit_trans_dw_.in ());
+}
+
+#endif
 } // namespace DCPS
 } // namespace TAO
 

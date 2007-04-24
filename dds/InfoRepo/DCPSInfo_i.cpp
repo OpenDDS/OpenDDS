@@ -622,7 +622,9 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
 
 TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     ::DDS::DomainId_t domain,
-    const ::DDS::DomainParticipantQos & qos
+    const ::DDS::DomainParticipantQos & qos,
+    const char * hostname,
+    ::CORBA::Long process_id
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -645,7 +647,10 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
                  DCPS_IR_Participant(
                    participantId,
                    domainPtr,
-                   qos, um_),
+                   qos, 
+                   um_,
+                   hostname,
+                   process_id),
                  0);
 
   int status = domainPtr->add_participant (participant);
@@ -662,7 +667,8 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
   if (um_)
     {
       UpdateManager::UParticipant participant
-        (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
+        (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos),
+         hostname, process_id);
 
       um_->add (participant);
     }
@@ -673,7 +679,9 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 bool
 TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                                             , TAO::DCPS::RepoId participantId
-                                            , const ::DDS::DomainParticipantQos & qos)
+                                            , const ::DDS::DomainParticipantQos & qos
+                                            , const char * hostname
+                                            , ::CORBA::Long process_id)
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
@@ -696,7 +704,10 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
   ACE_NEW_RETURN (participant,
                  DCPS_IR_Participant( participantId,
                                       domainPtr,
-                                      qos, um_), 0);
+                                      qos, 
+                                      um_,
+                                      hostname,
+                                      process_id), 0);
 
   int status = domainPtr->add_participant (participant);
 
@@ -991,8 +1002,11 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
     {
       const UpdateManager::UParticipant* part = *iter;
 
-      if (!this->add_domain_participant (part->domainId, part->participantId
-                                         , part->participantQos)) {
+      if (!this->add_domain_participant (part->domainId, 
+                                         part->participantId,
+                                         part->participantQos,
+                                         part->hostname.in (),
+                                         part->process_id)) {
         ACE_ERROR ((LM_ERROR, "Failed to add Domain Participant.\n"));
         return false;
       }

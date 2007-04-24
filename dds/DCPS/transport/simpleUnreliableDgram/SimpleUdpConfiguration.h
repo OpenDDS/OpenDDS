@@ -20,7 +20,7 @@ namespace TAO
     {
       public:
 
-        SimpleUdpConfiguration();
+        SimpleUdpConfiguration(const TransportIdType& id);
         virtual ~SimpleUdpConfiguration();
 
         virtual int load (const TransportIdType& id, 

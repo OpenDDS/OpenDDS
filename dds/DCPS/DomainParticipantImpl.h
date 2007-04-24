@@ -18,6 +18,8 @@
 #include "dds/PublicationBuiltinTopicDataTypeSupportC.h"
 #include "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
 #include "dds/TopicBuiltinTopicDataTypeSupportC.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportC.h"
+#include "dds/TransportAssociationBuiltinTopicDataTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
@@ -37,6 +39,7 @@ namespace TAO
   {
     class PublisherImpl;
     class SubscriberImpl;
+    class TransportInterface;
 
     /**
     * @class DomainParticipantImpl
@@ -355,14 +358,24 @@ namespace TAO
 
       /// Initialize the built in topic.
       ::DDS::ReturnCode_t init_bit ();
-      /// Initialize the built in topic topics
-      ::DDS::ReturnCode_t init_bit_topics ();
+      /// Initialize the built in topic topics used by subscriber.
+      ::DDS::ReturnCode_t init_sub_bit_topics ();
+      /// Initialize the built in topic topics used by publisher.
+      ::DDS::ReturnCode_t init_pub_bit_topics ();
       /// Create the built in topic subscriber.
       ::DDS::ReturnCode_t init_bit_subscriber ();
+      /// Create the built in topic publisher.
+      ::DDS::ReturnCode_t init_bit_publisher ();
       /// Initialize the built in topic datareaders.
       ::DDS::ReturnCode_t init_bit_datareaders ();
+      /// Initialize the built in topic datawriters.   
+      ::DDS::ReturnCode_t init_bit_datawriters ();
       /// Attach the subscriber with the transport.
-      ::DDS::ReturnCode_t attach_bit_transport ();
+      ::DDS::ReturnCode_t attach_sub_bit_transport ();
+      /// Attach the publisher with the transport.
+      ::DDS::ReturnCode_t attach_pub_bit_transport ();
+      /// Attach either subscriber or publisher with the transport.
+      ::DDS::ReturnCode_t attach_bit_transport (TransportInterface* inf);
 
       /// The default topic qos.
       ::DDS::TopicQos        default_topic_qos_;
@@ -405,6 +418,11 @@ namespace TAO
       /// Object reference to the DCPSInfo.
       DCPSInfo_var                 repository_;
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+      friend class PublisherImpl;
+      friend class SubscriberImpl;
+
       /// The built in topic subscriber.
       ::DDS::Subscriber_var        bit_subscriber_;
 
@@ -417,7 +435,6 @@ namespace TAO
       /// The topic for built in topic subscription.
       ::DDS::Topic_var       bit_sub_topic_;
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
       /// The datareader for built in topic participant.
       ::DDS::ParticipantBuiltinTopicDataDataReader_var  bit_part_dr_;
       /// The datareader for built in topic topic.
@@ -426,6 +443,19 @@ namespace TAO
       ::DDS::PublicationBuiltinTopicDataDataReader_var  bit_pub_dr_;
       /// The datareader for built in topic subscription.
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
+
+      /// The built in topic publisher.
+      ::DDS::Publisher_var        bit_publisher_;
+
+      /// The transport built in topic.
+      ::DDS::Topic_var       bit_trans_topic_;
+      /// The transport association built in topic.
+      ::DDS::Topic_var       bit_trans_asso_topic_;
+
+      /// The transport built in topic datawriter.
+      ::DDS::TransportBuiltinTopicDataDataWriter_var            bit_trans_dw_;
+      /// The pub/sub-transport association built in topic datawriter.
+      ::DDS::TransportAssociationBuiltinTopicDataDataWriter_var bit_trans_asso_dw_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     };
 

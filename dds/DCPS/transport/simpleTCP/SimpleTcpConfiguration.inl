@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
+TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration(const TransportIdType& id)
   : enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),
@@ -17,6 +17,7 @@ TAO::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
   DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",5);
 
   transport_type_ = "SimpleTcp";
+  transport_id_ = id;
 
   if (local_address_.set (static_cast<unsigned short> (0),
                 static_cast<ACE_UINT32> (INADDR_ANY),

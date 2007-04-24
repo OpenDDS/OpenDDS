@@ -28,11 +28,9 @@ TAO::DCPS::SimpleTcpGenerator::new_factory()
 TAO::DCPS::TransportConfiguration* 
 TAO::DCPS::SimpleTcpGenerator::new_configuration(const TransportIdType id)
 {
-  ACE_UNUSED_ARG (id);
-
   SimpleTcpConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config, 
-                 SimpleTcpConfiguration(), 
+                 SimpleTcpConfiguration(id), 
                  0);
   return trans_config;
 }
