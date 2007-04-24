@@ -12,8 +12,16 @@
 #ifndef ZEROCOPYSEQ_H
 #define ZEROCOPYSEQ_H
 
+#include /**/ "ace/pre.h"
+
+// not needed export for templates #include "dcps_export.h"
+#include "dds/DCPS/ZeroCopySeqBase.h"
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include <ace/Vector_T.h>
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #define DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE 10
 
@@ -22,208 +30,48 @@ namespace TAO
     namespace DCPS
     {
 
-        template<class T, std::size_t N>
+        template <class T, std::size_t N>
             // This allocator is "Fast" because it's pool can be on the stack (if the object is on the stack 
             //               and hence it does not require the cost of allocating and deallocating on the heap.
             //!!!! The object using this allocator must not have a scope smaller than this object.
         class FirstTimeFastAllocator : public ACE_Allocator
         {
         public:
-            FirstTimeFastAllocator() : firstTime_(1) {};
-            virtual void *malloc (size_t nbytes) { 
-                if (firstTime_ && nbytes <= N * sizeof(T)) {
-                    firstTime_ = 0;
-                    return (void*) pool_;
-                }
-                else {
-                    return ACE_OS::malloc(nbytes);
-                }
-            };
-            virtual void free (void *ptr) {
-                if (ptr != (void*) pool_) {
-                    ACE_OS::free(ptr);
-                }
-            };
+            FirstTimeFastAllocator();
+            virtual void *malloc (size_t nbytes);
+            virtual void free (void *ptr);
 
             /// These methods are no-ops.
-            virtual void *calloc (size_t nbytes, char initial_value = '\0') 
-            {/* no-op */ 
-              ACE_UNUSED_ARG (nbytes);
-              ACE_UNUSED_ARG (initial_value);
-              return (void*)0;
-            };
-            virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0')
-            {/* no-op */ 
-              ACE_UNUSED_ARG (n_elem);
-              ACE_UNUSED_ARG (elem_size);
-              ACE_UNUSED_ARG (initial_value);
-              return (void*)0;
-            };
-
-            virtual int remove (void)
-            {/* no-op */ 
-              return -1; 
-            };
-            virtual int bind (const char *name, void *pointer, int duplicates = 0)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              ACE_UNUSED_ARG (pointer);
-              ACE_UNUSED_ARG (duplicates);
-              return -1; 
-            };
-            virtual int trybind (const char *name, void *&pointer)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              ACE_UNUSED_ARG (pointer);
-              return -1; 
-            };
-            virtual int find (const char *name, void *&pointer)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              ACE_UNUSED_ARG (pointer);
-              return -1; 
-            };
-            virtual int find (const char *name)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              return -1; 
-            };
-            virtual int unbind (const char *name)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              return -1; 
-            };
-            virtual int unbind (const char *name, void *&pointer)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (name);
-              ACE_UNUSED_ARG (pointer);
-              return -1; 
-            };
-            virtual int sync (ssize_t len = -1, int flags = MS_SYNC)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (len);
-              ACE_UNUSED_ARG (flags);
-              return -1; 
-            };
-            virtual int sync (void *addr, size_t len, int flags = MS_SYNC)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (addr);
-              ACE_UNUSED_ARG (len);
-              ACE_UNUSED_ARG (flags);
-              return -1; 
-            };
-            virtual int protect (ssize_t len = -1, int prot = PROT_RDWR)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (len);
-              ACE_UNUSED_ARG (prot);
-              return -1; 
-            };
-            virtual int protect (void *addr, size_t len, int prot = PROT_RDWR)
-            {/* no-op */ 
-              ACE_UNUSED_ARG (addr);
-              ACE_UNUSED_ARG (len);
-              ACE_UNUSED_ARG (prot);
-              return -1; 
-            };
+            virtual void *calloc (size_t nbytes, char initial_value = '\0'); 
+            virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0');
+            virtual int remove (void);
+            virtual int bind (const char *name, void *pointer, int duplicates = 0);
+            virtual int trybind (const char *name, void *&pointer);
+            virtual int find (const char *name, void *&pointer);
+            virtual int find (const char *name);
+            virtual int unbind (const char *name);
+            virtual int unbind (const char *name, void *&pointer);
+            virtual int sync (ssize_t len = -1, int flags = MS_SYNC);
+            virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
+            virtual int protect (ssize_t len = -1, int prot = PROT_RDWR);
+            virtual int protect (void *addr, size_t len, int prot = PROT_RDWR);
 #if defined (ACE_HAS_MALLOC_STATS)
-            virtual void print_stats (void) const
-            {/* no-op */ };
+            virtual void print_stats (void) const;
 #endif /* ACE_HAS_MALLOC_STATS */
-            virtual void dump (void) const
-            {/* no-op */ };
+            virtual void dump (void) const;
 
         private:
             // do not allow copies.
             FirstTimeFastAllocator(const FirstTimeFastAllocator&);
             FirstTimeFastAllocator& operator=(const FirstTimeFastAllocator&);
 
+            /// is this the first time this is allocated?
             int firstTime_;
+
+            /// the pool of allocated memory.
             T pool_[N];
         };
 
-
-        /// common code for sample data and info zero-copy sequences.
-        class ZeroCopySeqBase
-        {
-        public:
-
-            /**
-             * Construct a sequence of sample data values that is supports
-             * zero-copy reads.
-             *
-             * @param max_len Maximum number of samples to insert into the sequence.
-             *                If == 0 then use zero-copy reading.
-             *                Defaults to zero hence supporting zero-copy reads/takes.
-             *
-             * @param alloc The allocator used to allocate the array of pointers
-             *              to samples. If zero then use the default allocator.
-             *
-             */
-            ZeroCopySeqBase(
-                const size_t max_len = 0)
-                : length_(0)
-                , max_len_(max_len)
-                , owns_(max_len ? true : false)
-            {};
-
-            //======== DDS specification inspired methods =====
-            /**
-             * The maximum length of the sequence.
-             */
-            inline CORBA::ULong max_len() const {
-                return this->max_len_;
-            };
-
-            /**
-             * Set the maximum length of the sequence.
-             */
-            inline void max_len(CORBA::ULong length) {
-                this->max_len_ = length;
-            };
-
-
-            /**
-             * Return the ownership.
-             * If true then the samples are copies.
-             * If false then the samples are "on loan" and should be returned
-             * via a call to xxxDataReader::return_loan.
-             */
-            inline bool owns() const {
-                return this->owns_;
-            };
-
-            /**
-             * Set the ownership of the sequence.
-             */
-            inline void owns(bool owns) {
-                this->owns_ = owns;
-            };
-
-            //======== CORBA sequence like methods ======
-
-            /**
-             * See owns().
-             *
-             * @note "owns" does not map one-to-one with the
-             *   CORBA sequence.  This method may be bogus.
-             */
-            inline CORBA::Boolean release() const {
-                return this->owns_;
-            }
-
-
-        protected:
-            /// current number of samples in the sequence.
-            CORBA::ULong length_;
-
-            /// maximum length defined by the user
-            CORBA::ULong max_len_;
-
-            /// true if true then this sequence owns the data;
-            /// otherwise it is on loan from the DCPS framework.
-            bool owns_;
-
-        }; // class ZeroCopySeqBase
 
         /**
         * Provides [] operators returning sample references
@@ -274,94 +122,24 @@ namespace TAO
             ZeroCopyDataSeq(
                 const size_t max_len = 0,
                 const size_t init_size = ZCS_DEFAULT_SIZE,
-                ACE_Allocator* alloc = 0) 
-                : ZeroCopySeqBase(max_len)
-                , is_zero_copy_(max_len == 0)
-                , loaner_(0)
-                , ptrs_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
-                , samples_(max_len > 0 ? this->ptrs_.max_size() : 0)
-            {};
+                ACE_Allocator* alloc = 0);
 
 
-            ~ZeroCopyDataSeq()
-            {
-              if (loaner_) {
-                loaner_->auto_return_loan(this);
-                loaner_ = 0;
-              }
-            }
+            ~ZeroCopyDataSeq();
 
             //======== DDS specification inspired methods =====
             /** get the current length of the sequence.
              */
-            inline CORBA::ULong length() const {
-                return this->length_;
-            };
+            CORBA::ULong length() const;
 
             /** Set the length of the sequence. (for user code)
              */
-            inline void length(CORBA::ULong length) {
-                // Support spec saying:
-                // To avoid potential memory leaks, the implementation of the Data and SampleInfo 
-                // collections should disallow changing the length of a collection for which owns==FALSE.
-                ACE_ASSERT(this->owns() == true);
-                ACE_ASSERT(length <= this->max_slots());
-
-/* this is too complicated since we are not supporting resizing
-
-                // NOTE: +20 helps avoid copying every time the Seq length is incremented
-                // and we know that they are pointers so 20 more is no big deal
-                CORBA::ULong nextLen = length+20;
-                if (this->max_len_)
-                {
-                    if (nextLen > this->max_len_) {
-                        nextLen = length;
-                    }
-                    if (nextLen > this->max_len_) {
-                        ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max_len %d -- no allowed.\n", 
-                            length, this->max_len_));
-                        // TBD - it would be nice to tell the calling code that this did not work.
-                        return;  
-                    }
-                }
-                if (this->length_ > ptrs_.max_size()) {
-
-                    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-                            length, ptrs_.max_size()));
-                    ACE_ASSERT(this->length_ <= ptrs_.max_size()); // make it easier to debug
-                    return;
-                    // TBD allow resizing? - must copy the pointers
-                    //     I do not think it is required per the spec.
-                    // Note - resize does not copy the existing values.
-                    //this->ptrs_.resize(nextLen, (TAO::DCPS::ReceivedDataElement*)0); 
-                }
-                // only need to resize the samples if we are using them.
-                if (this->max_len_ && this->length_ > samples_.max_size()) {
-
-                    // the above check should handle this but better safe than sorry.
-                    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-                            length, ptrs_.max_size()));
-                    ACE_ASSERT(this->length_ <= samples_.max_size()); // make it easier to debug
-                    return;
-                    // TBD allow resizing? - must copy the pointers
-                    //     I do not think it is required per the spec.
-                    // Note - resize does not copy the existing values.
-                    this->samples_.resize(nextLen, Sample_T()); 
-                }
-*/
-                this->length_ = length;
-            };
+            void length(CORBA::ULong length);
 
             //======== CORBA sequence like methods ======
 
             /// read reference to the sample at the given index.
-            inline Sample_T const & operator[](CORBA::ULong i) const {
-                // TBD? should we make it a violation to reference when max_len=0?
-                if (is_zero_copy_) 
-                    return *((Sample_T*)this->ptrs_[i]->registered_data_);
-                else
-                    return this->samples_[i];
-            };
+            Sample_T const & operator[](CORBA::ULong i) const;
 
             /** Write reference to the sample at the given index.
              *
@@ -369,20 +147,12 @@ namespace TAO
              * The spec says the DCPS layer will not change the sample's value
              * but it does not restrict the user/application from changing it.
              */
-            inline Sample_T & operator[](CORBA::ULong i) {
-                // TBD? should we make it a violation to reference when max_len=0?
-                if (is_zero_copy_) 
-                    return *((Sample_T*)this->ptrs_[i]->registered_data_);
-                else
-                    return this->samples_[i];
-            };
+            Sample_T & operator[](CORBA::ULong i);
 
             /**
              * The CORBA sequence like version of max_len();
              */
-            inline CORBA::ULong maximum() const {
-                return this->max_len();
-            };
+            CORBA::ULong maximum() const;
 
             /**
              * Current allocated number of sample slots.
@@ -392,93 +162,28 @@ namespace TAO
              *       way of knowing the internally allocated slots 
              *       for sample pointers that is not "max_len".
              */
-            inline CORBA::ULong max_slots() const {
-                if (this->is_zero_copy_ == true)
-                  {
-                    return this->ptrs_.max_size();
-                  }
-                else
-                  {
-                    return this->samples_.max_size();
-                  } 
-            };
+            CORBA::ULong max_slots() const;
 
             // TBD: ?support replace, get_buffer, allocbuf 
             //       and freebuf 
 
-            // ==== OpenDDS unique methods =====
+            // ==== OpenDDS internal methods =====
+            //!!!!!! User code should not use this methods.
 
             // ?TBD - make this operator not available to the DDS user.
             void assign_ptr(::CORBA::ULong ii, 
                             ::TAO::DCPS::ReceivedDataElement* item,
-                            ::TAO::DCPS::DataReaderImpl* loaner) {
-                ACE_ASSERT(this->is_zero_copy_ == true);
-                item->inc_ref();
-                item->zero_copy_cnt_++;
-                loaner_ = loaner; // remember which DataReadr contains this data
-                ptrs_[ii] = item;
-            }
+                            ::TAO::DCPS::DataReaderImpl* loaner);
 
-            TAO::DCPS::ReceivedDataElement* getPtr(::CORBA::ULong ii) const {
-                ACE_ASSERT(this->is_zero_copy_ == true);
-                return ptrs_[ii];
-            }
-            void assign_sample(::CORBA::ULong ii, const Sample_T& sample) {
-                ACE_ASSERT(this->is_zero_copy_ == false);
-                samples_[ii] = sample;
-            }
+            TAO::DCPS::ReceivedDataElement* getPtr(::CORBA::ULong ii) const;
+
+            void assign_sample(::CORBA::ULong ii, const Sample_T& sample);
 
             /**
              * This method is like length(len) but is for 
              * internal DCPS layer use to avoid the resizing when owns=false safty check.
              */
-            inline void set_length(CORBA::ULong length) {
-                ACE_ASSERT(length <= this->max_slots());
-
-/* this is too complicated since we are not supporting resizing
-
-                // NOTE: +20 helps avoid copying every time the Seq length is incremented
-                // and we know that they are pointers so 20 more is no big deal
-                CORBA::ULong nextLen = length+20;
-                if (this->max_len_)
-                {
-                    if (nextLen > this->max_len_) {
-                        nextLen = length;
-                    }
-                    if (nextLen > this->max_len_) {
-                        ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max_len %d -- no allowed.\n", 
-                            length, this->max_len_));
-                        // TBD - it would be nice to tell the calling code that this did not work.
-                        return;  
-                    }
-                }
-                if (this->length_ > ptrs_.max_size()) {
-
-                    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-                            length, ptrs_.max_size()));
-                    ACE_ASSERT(this->length_ <= ptrs_.max_size()); // make it easier to debug
-                    return;
-                    // TBD allow resizing? - must copy the pointers
-                    //     I do not think it is required per the spec.
-                    // Note - resize does not copy the existing values.
-                    //this->ptrs_.resize(nextLen, (TAO::DCPS::ReceivedDataElement*)0); 
-                }
-                // only need to resize the samples if we are using them.
-                if (this->max_len_ && this->length_ > samples_.max_size()) {
-
-                    // the above check should handle this but better safe than sorry.
-                    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-                            length, ptrs_.max_size()));
-                    ACE_ASSERT(this->length_ <= samples_.max_size()); // make it easier to debug
-                    return;
-                    // TBD allow resizing? - must copy the pointers
-                    //     I do not think it is required per the spec.
-                    // Note - resize does not copy the existing values.
-                    this->samples_.resize(nextLen, Sample_T()); 
-                }
-*/
-                this->length_ = length;
-            };
+            void set_length(CORBA::ULong length);
 
         private:
 
@@ -528,17 +233,12 @@ namespace TAO
             ZeroCopyInfoSeq(
                 const size_t max_len = 0,
                 const size_t init_size = ZCS_DEFAULT_SIZE,
-                ACE_Allocator* alloc = 0) 
-                : ZeroCopySeqBase(max_len)
-                , info_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
-            {};
+                ACE_Allocator* alloc = 0);
 
             //======== CORBA sequence like methods ======
 
             /// read reference to the sample at the given index.
-            inline ::DDS::SampleInfo const & operator[](CORBA::ULong i) const {
-                return this->info_[i];
-            };
+            ::DDS::SampleInfo const & operator[](CORBA::ULong i) const;
 
             /** Write reference to the sample at the given index.
              *
@@ -546,30 +246,21 @@ namespace TAO
              * The spec says the DCPS layer will not change the sample's value
              * but it does not restrict the user/application from changing it.
              */
-            inline ::DDS::SampleInfo & operator[](CORBA::ULong i) {
-                return this->info_[i];
-            };
+            ::DDS::SampleInfo & operator[](CORBA::ULong i);
 
             /** get the current length of the sequence.
              */
-            inline CORBA::ULong length() const {
-                return this->length_;
-            };
+            CORBA::ULong length() const;
 
             /** Set the length of the sequence.
              */
-            inline void length(CORBA::ULong length) {
-                // TBD - support resizing.
-                this->length_ = length;
-            };
+            void length(CORBA::ULong length);
 
 
             /**
              * The CORBA sequence like version of max_len();
              */
-            inline CORBA::ULong maximum() const {
-                return this->max_len();
-            };
+            CORBA::ULong maximum() const;
 
             /**
              * Current allocated number of sample slots.
@@ -579,9 +270,7 @@ namespace TAO
              *       way of knowing the internally allocated slots 
              *       for sample pointers that is not "max_len".
              */
-            inline CORBA::ULong max_slots() const {
-                return this->info_.max_size();
-            };
+            CORBA::ULong max_slots() const;
 
 
         private:
@@ -598,5 +287,19 @@ namespace TAO
 
     } // namespace  ::DDS
 } // namespace TAO
+
+#if defined (__ACE_INLINE__)
+#include "dds/DCPS/ZeroCopySeq_T.inl"
+#endif /* __ACE_INLINE__ */
+
+#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
+#include "dds/DCPS/ZeroCopySeq_T.cpp"
+#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
+
+#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
+#pragma implementation ("ZeroCopySeq_T.cpp")
+#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
+
+#include /**/ "ace/post.h"
 
 #endif /* ZEROCOPYSEQ_H  */
