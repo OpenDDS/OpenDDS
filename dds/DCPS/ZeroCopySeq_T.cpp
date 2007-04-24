@@ -1,0 +1,209 @@
+// -*- C++ -*-
+// ============================================================================
+/**
+ *  @file   ZeroCopySeq_T.cpp
+ *
+ *  $Id$
+ *
+ *
+ */
+// ============================================================================
+
+#ifndef ZEROCOPYSEQ_T_CPP
+#define ZEROCOPYSEQ_T_CPP
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "dds/DCPS/ZeroCopySeq_T.h"
+
+#if !defined (__ACE_INLINE__)
+#include "dds/DCPS/ZeroCopySeq_T.inl"
+#endif /* __//ACE_INLINE__ */
+
+namespace TAO
+{
+    namespace DCPS
+    {
+
+
+//=============================================================
+// These methods are no-ops.
+//=============================================================
+template <class T, std::size_t N>
+void *
+FirstTimeFastAllocator<T, N>::calloc (size_t nbytes, char initial_value) 
+            {/* no-op */ 
+              ACE_UNUSED_ARG (nbytes);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            }
+
+template <class T, std::size_t N>
+void *
+FirstTimeFastAllocator<T, N>::calloc (size_t n_elem, size_t elem_size, char initial_value)
+            {/* no-op */ 
+              ACE_UNUSED_ARG (n_elem);
+              ACE_UNUSED_ARG (elem_size);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            }
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::remove (void)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::bind (const char *name, void *pointer, int duplicates = 0)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    ACE_UNUSED_ARG (pointer);
+    ACE_UNUSED_ARG (duplicates);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::trybind (const char *name, void *&pointer)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    ACE_UNUSED_ARG (pointer);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::find (const char *name, void *&pointer)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    ACE_UNUSED_ARG (pointer);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::find (const char *name)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::unbind (const char *name)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::unbind (const char *name, void *&pointer)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (name);
+    ACE_UNUSED_ARG (pointer);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::sync (ssize_t len = -1, int flags = MS_SYNC)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (len);
+    ACE_UNUSED_ARG (flags);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::sync (void *addr, size_t len, int flags = MS_SYNC)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (addr);
+    ACE_UNUSED_ARG (len);
+    ACE_UNUSED_ARG (flags);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::protect (ssize_t len = -1, int prot = PROT_RDWR)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (len);
+    ACE_UNUSED_ARG (prot);
+    return -1; 
+}
+
+template <class T, std::size_t N>
+int 
+FirstTimeFastAllocator<T, N>::protect (void *addr, size_t len, int prot = PROT_RDWR)
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+    ACE_UNUSED_ARG (addr);
+    ACE_UNUSED_ARG (len);
+    ACE_UNUSED_ARG (prot);
+    return -1; 
+}
+
+#if defined (ACE_HAS_MALLOC_STATS)
+
+template <class T, std::size_t N>
+void 
+FirstTimeFastAllocator<T, N>::print_stats (void) const
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+}
+#endif /* ACE_HAS_MALLOC_STATS */
+
+template <class T, std::size_t N>
+void 
+FirstTimeFastAllocator<T, N>::dump (void) const
+{/* no-op */ 
+    ACE_ASSERT("not supported" ==0);
+}
+
+//============================================================================
+//============================================================================
+//============================================================================
+
+
+
+//============================================================================
+//============================================================================
+//============================================================================
+
+template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
+ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::~ZeroCopyDataSeq()
+{
+    if (loaner_) {
+        loaner_->auto_return_loan(this);
+        loaner_ = 0;
+    }
+}
+
+//============================================================================
+//============================================================================
+//============================================================================
+
+    } // namespace  ::DDS
+} // namespace TAO
+
+
+#endif /* ZEROCOPYSEQ_H  */
+
+
+
