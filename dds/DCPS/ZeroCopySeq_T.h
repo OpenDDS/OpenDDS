@@ -277,9 +277,19 @@ namespace TAO
                 ACE_Allocator* alloc = 0) 
                 : ZeroCopySeqBase(max_len)
                 , is_zero_copy_(max_len == 0)
+                , loaner_(0)
                 , ptrs_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
                 , samples_(max_len > 0 ? this->ptrs_.max_size() : 0)
             {};
+
+
+            ~ZeroCopyDataSeq()
+            {
+              if (loaner_) {
+                loaner_->auto_return_loan(this);
+                loaner_ = 0;
+              }
+            }
 
             //======== DDS specification inspired methods =====
             /** get the current length of the sequence.
@@ -399,10 +409,13 @@ namespace TAO
             // ==== OpenDDS unique methods =====
 
             // ?TBD - make this operator not available to the DDS user.
-            void assign_ptr(::CORBA::ULong ii, TAO::DCPS::ReceivedDataElement* item) {
+            void assign_ptr(::CORBA::ULong ii, 
+                            ::TAO::DCPS::ReceivedDataElement* item,
+                            ::TAO::DCPS::DataReaderImpl* loaner) {
                 ACE_ASSERT(this->is_zero_copy_ == true);
                 item->inc_ref();
                 item->zero_copy_cnt_++;
+                loaner_ = loaner; // remember which DataReadr contains this data
                 ptrs_[ii] = item;
             }
 
@@ -471,6 +484,8 @@ namespace TAO
 
             /// true if this sequence is supporting zero-copy reads/takes
             bool is_zero_copy_;
+
+            ::TAO::DCPS::DataReaderImpl* loaner_;
 
             // The default allocator will be very fast for the first
             // allocation but use the standard heap for subsequent allocations
