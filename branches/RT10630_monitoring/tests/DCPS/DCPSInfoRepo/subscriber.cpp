@@ -3,6 +3,7 @@
 #include  "dds/DCPS/Service_Participant.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/INET_Addr.h"
 
 
 const char *ior = "file://dcps_ir.ior";
@@ -80,8 +81,12 @@ main (int argc, char *argv[])
       // check adding a participant
       ::DDS::DomainParticipantQos_var dpQos = new ::DDS::DomainParticipantQos;
       CORBA::Long domainId = 911;
+      ACE_INET_Addr addr;
+      const char * hostname = addr.get_host_name ();
+      CORBA::Long process_id = static_cast <CORBA::Long> (ACE_OS::thr_self ());
 
-      CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in());
+      CORBA::Long dpId = info->add_domain_participant(domainId, dpQos.in(),
+                                                      hostname, process_id);
       if (0 == dpId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_domain_participant failed!\n") ));

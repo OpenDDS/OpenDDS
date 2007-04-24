@@ -187,10 +187,8 @@ namespace TAO
       int bit_lookup_duration_msec () const;
       void bit_lookup_duration_msec (int msec);
 
-      bool get_BIT ()
-        {
-          return bit_enabled_;
-        }
+      bool bit_enabled ();
+      bool transport_bit_enabled ();
 
       /** Create the TransportImpl for all builtin topics.
        */
@@ -297,6 +295,8 @@ namespace TAO
 
 
       bool bit_enabled_;
+
+      bool transport_bit_enabled_;
 
       /// The timeout for lookup data from the builtin topic datareader.
       int                                    bit_lookup_duration_msec_;

@@ -50,7 +50,9 @@ public:
   DCPS_IR_Participant (TAO::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
-		       UpdateManager* um);
+		                   UpdateManager* um,
+                       const char* hostname,
+                       int         process_id);
 
   virtual ~DCPS_IR_Participant();
 
@@ -102,6 +104,10 @@ public:
   void mark_dead ();
 
   TAO::DCPS::RepoId get_id ();
+
+  const char* get_hostname ();
+
+  CORBA::Long get_process_id ();
 
   CORBA::Boolean is_alive ();
   void set_alive (CORBA::Boolean alive);
@@ -155,6 +161,9 @@ private:
   //  other entities (specifically the UpdateManager) the
   //  changes it makes.
   UpdateManager* um_;
+
+  CORBA::String_var  hostname_;
+  CORBA::Long        process_id_;
 };
 
 

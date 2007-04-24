@@ -20,6 +20,12 @@ namespace TAO {
     const char* BUILT_IN_PUBLICATION_TOPIC = "DCPSPublication";
     const char* BUILT_IN_PUBLICATION_TOPIC_TYPE = "PUBLICATION_BUILT_IN_TOPIC_TYPE";
 
+    const char* BUILT_IN_TRANSPORT_TOPIC = "DCPSTransport";
+    const char* BUILT_IN_TRANSPORT_TOPIC_TYPE = "TRANSPORT_BUILT_IN_TOPIC_TYPE";
+
+    const char* BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC = "DCPSTransportAssociation";
+    const char* BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE = "TRANSPORT_ASSOCIATION_BUILT_IN_TOPIC_TYPE";
+
 
   } // End of namespace DCPS
 }; // End of namespace TAO

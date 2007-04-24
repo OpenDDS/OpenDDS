@@ -25,7 +25,7 @@ namespace TAO
       : public TransportConfiguration
     {
     public:
-      ReliableMulticastTransportConfiguration();
+      ReliableMulticastTransportConfiguration(const TransportIdType& id);
       virtual ~ReliableMulticastTransportConfiguration();
 
       virtual int load(

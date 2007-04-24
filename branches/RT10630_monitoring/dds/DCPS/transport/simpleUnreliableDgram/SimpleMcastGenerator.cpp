@@ -30,11 +30,8 @@ TAO::DCPS::SimpleMcastGenerator::new_configuration(const TransportIdType id)
 {
   SimpleMcastConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config, 
-                 SimpleMcastConfiguration(), 
+                 SimpleMcastConfiguration(id), 
                  0);
-
-  if (id == TAO::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID)
-    trans_config->receiver_ = true;
 
   return trans_config;
 }

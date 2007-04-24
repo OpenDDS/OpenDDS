@@ -31,6 +31,10 @@ namespace TAO
         virtual void deliver_sample(ReceivedDataSample&  sample,
                             const ACE_INET_Addr& remote_address);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+        virtual void  set_bit_data (TransportBuiltinTopicData & data) const;
+#endif
+
       private:
 
         ACE_INET_Addr local_address_;

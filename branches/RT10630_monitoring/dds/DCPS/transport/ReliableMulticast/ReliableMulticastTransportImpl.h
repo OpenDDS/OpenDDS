@@ -15,6 +15,8 @@
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportC.h"
+
 #include <map>
 
 namespace TAO
@@ -44,6 +46,10 @@ namespace TAO
       virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
 
       virtual void release_datalink_i(TAO::DCPS::DataLink* link);
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+      virtual void set_bit_data (TransportBuiltinTopicData & data) const;
+#endif
 
     private:
       ReliableMulticastTransportConfiguration* configuration_;

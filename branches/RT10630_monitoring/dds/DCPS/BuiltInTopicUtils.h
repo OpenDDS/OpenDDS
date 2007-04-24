@@ -35,6 +35,11 @@ namespace TAO {
     TAO_DdsDcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
     TAO_DdsDcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
+    TAO_DdsDcps_Export extern const char* BUILT_IN_TRANSPORT_TOPIC;
+    TAO_DdsDcps_Export extern const char* BUILT_IN_TRANSPORT_TOPIC_TYPE;
+    TAO_DdsDcps_Export extern const char* BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC;
+    TAO_DdsDcps_Export extern const char* BUILT_IN_TRANSPORT_ASSOCIATION_TOPIC_TYPE;
+
     enum BuiltInTopicTransportTypeId
     {
       BIT_SIMPLE_TCP = 0xb17b17

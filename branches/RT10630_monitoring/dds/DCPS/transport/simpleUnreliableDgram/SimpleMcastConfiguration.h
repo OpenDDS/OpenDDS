@@ -19,7 +19,7 @@ namespace TAO
     {
       public:
 
-        SimpleMcastConfiguration();
+        SimpleMcastConfiguration(const TransportIdType& id);
         virtual ~SimpleMcastConfiguration();
 
         virtual int load (const TransportIdType& id, 

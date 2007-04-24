@@ -98,4 +98,22 @@ TAO::DCPS::SimpleMcastTransport::connection_info_i
 }
 
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+void 
+TAO::DCPS::SimpleMcastTransport::set_bit_data (TransportBuiltinTopicData & data) const
+{
+  data.transport_id[2] = this->config_->transport_id_;
+  data.transport_type = CORBA::string_dup (this->config_->transport_type_.c_str ());
+  ACE_TCHAR buf [30]; 
+  if (this->multicast_group_address_.addr_to_string (buf, 30) == -1)
+  {
+    ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: ReliableMulticastTransportImpl::set_bit_data %p\n", 
+                         "addr_to_string"));
+  }
+  else
+  {
+    data.endpoint = CORBA::string_dup (buf);
+  }
+}
+#endif
 

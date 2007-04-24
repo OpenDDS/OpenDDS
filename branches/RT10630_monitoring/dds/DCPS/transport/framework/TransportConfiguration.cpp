@@ -21,6 +21,14 @@ TAO::DCPS::TransportConfiguration::~TransportConfiguration()
 int
 TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configuration_Heap& cf)
 {
+  if (this->transport_id_ != id)
+  {
+    ACE_ERROR_RETURN((LM_ERROR, 
+      "(%P|%t)ERROR: TransportConfiguration::load with different id "
+      "(this->transport_id=%d id=%u).\n", this->transport_id_, id),
+      -1);
+  }
+
   char section [50];
   ACE_OS::sprintf (section, "%s%u", TRANSPORT_SECTION_NAME_PREFIX, id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();

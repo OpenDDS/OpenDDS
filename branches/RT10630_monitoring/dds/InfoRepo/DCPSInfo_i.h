@@ -188,7 +188,9 @@ public:
 
   virtual TAO::DCPS::RepoId add_domain_participant (
       ::DDS::DomainId_t domain,
-      const ::DDS::DomainParticipantQos & qos
+      const ::DDS::DomainParticipantQos & qos,
+      const char * hostname,
+      ::CORBA::Long process_id
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -197,7 +199,9 @@ public:
 
   bool add_domain_participant (::DDS::DomainId_t domainId
                                , TAO::DCPS::RepoId participantId
-                               , const ::DDS::DomainParticipantQos & qos);
+                               , const ::DDS::DomainParticipantQos & qos
+                               , const char * hostname
+                               , ::CORBA::Long process_id);
 
     virtual void remove_domain_participant (
       ::DDS::DomainId_t domainId,

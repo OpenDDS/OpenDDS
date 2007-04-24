@@ -11,6 +11,8 @@
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/TransportBuiltinTopicDataTypeSupportC.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
@@ -66,6 +68,9 @@ namespace TAO
         /// Called by the DataLink to release itself.
         virtual void release_datalink_i(DataLink* link);
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+        virtual void set_bit_data (TransportBuiltinTopicData & data) const;
+#endif
       private:
 
         /// The SimpleTcpConnection is our friend.  It tells us when it

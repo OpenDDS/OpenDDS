@@ -199,5 +199,17 @@ namespace TAO
       return initial_SubscriberQos_;
     }
 
+    ACE_INLINE
+    bool Service_Participant::bit_enabled ()
+    {
+      return bit_enabled_ == true;
+    }
+
+    ACE_INLINE
+    bool Service_Participant::transport_bit_enabled ()
+    {
+      return transport_bit_enabled_ == true;
+    }
+
   } // namespace ::DDS
 } // namespace TAO

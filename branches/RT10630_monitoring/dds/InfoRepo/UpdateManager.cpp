@@ -176,7 +176,9 @@ UpdateManager::pushImage (const DImage& image)
       UParticipant* u_part;
       ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
                                               , part.participantId
-                                              , *qos));
+                                              , *qos
+                                              , part.hostname.in ()
+                                              , part.process_id));
       parts.push_back (u_part);
 
       // push newly created UParticipant into UImage Participant bucket
@@ -336,7 +338,8 @@ UpdateManager::add(const UParticipant& participant)
 
   QosSeq p (ParticipantQos, qos_bin);
   DParticipant paticipant_data
-    (participant.domainId, participant.participantId, p);
+    (participant.domainId, participant.participantId, p, 
+     participant.hostname.in (), participant.process_id);
 
   // Invoke add on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
@@ -406,7 +409,9 @@ UpdateManager::add (const DParticipant& participant)
   // Pass participant info to infoRepo.
   info_->add_domain_participant (participant.domainId
                                  , participant.participantId
-                                 , qos);
+                                 , qos
+                                 , participant.hostname
+                                 , participant.process_id);
 }
 
 void

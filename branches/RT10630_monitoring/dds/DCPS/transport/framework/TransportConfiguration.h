@@ -97,6 +97,8 @@ namespace TAO
         /// associations are removed.
         bool keep_link_;
 
+        TransportIdType transport_id_;
+
       protected:
 
         /// Default ctor.
