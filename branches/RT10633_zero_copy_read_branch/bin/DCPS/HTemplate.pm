@@ -507,6 +507,14 @@ public:
       CORBA::SystemException
     ));
 
+ virtual 
+ DDS::ReturnCode_t auto_return_loan(void* seq);
+
+ void
+ <%TYPE%>DataReaderImpl::release_loan (
+           ::<%MODULE%><%TYPE%>ZCSeq & received_data
+           );
+
  protected:
 
     virtual void demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;

@@ -920,7 +920,7 @@ DDS::ReturnCode_t
           }
           else 
           {
-            received_data.assign_ptr(count, item) ;
+            received_data.assign_ptr(count, item, this) ;
           }
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
@@ -1191,7 +1191,7 @@ DDS::ReturnCode_t
           }
           else 
           {
-            received_data.assign_ptr(count, item) ;
+            received_data.assign_ptr(count, item, this) ;
           }
               
           // Increase sequence length before adding new element to sequence.
@@ -1819,6 +1819,33 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_OK;
 }
 
+void
+<%TYPE%>DataReaderImpl::release_loan (
+           ::<%MODULE%><%TYPE%>ZCSeq & received_data
+           )
+{
+      // decrement the data references.
+      TAO::DCPS::ReceivedDataElement *item;
+      for (CORBA::ULong ii = 0; ii < received_data.length(); ii++)
+      {
+        item = received_data.getPtr(ii);
+        ACE_ASSERT(item->zero_copy_cnt_ >= 1);
+        item->zero_copy_cnt_--;
+        if (0 == item->dec_ref())
+          {
+             ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+             ACE_DES_FREE (ptr,
+                       data_allocator_->free,
+                       <%TYPE%> );
+
+             ACE_DES_FREE (item,
+                       rd_allocator_->free,
+                       ReceivedDataElement);
+          }
+          
+      }
+}
+
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
     ::<%MODULE%><%TYPE%>ZCSeq & received_data,
@@ -1852,26 +1879,8 @@ DDS::ReturnCode_t
 
       //??TBD? - put the info buffer in a pool
 
-      // decrement the data references.
-      TAO::DCPS::ReceivedDataElement *item;
-      for (CORBA::ULong ii = 0; ii < received_data.length(); ii++)
-      {
-        item = received_data.getPtr(ii);
-        ACE_ASSERT(item->zero_copy_cnt_ >= 1);
-        item->zero_copy_cnt_--;
-        if (0 == item->dec_ref())
-          {
-             ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
-             ACE_DES_FREE (ptr,
-                       data_allocator_->free,
-                       <%TYPE%> );
-
-             ACE_DES_FREE (item,
-                       rd_allocator_->free,
-                       ReceivedDataElement);
-          }
-          
-      }
+      this->release_loan(received_data);
+      
       // reset the max_len  per DDS spec
       // this also makes access to the recieved_data an error (a spec req)
       received_data.max_len(0);
@@ -2162,6 +2171,18 @@ void
   ACE_DES_FREE (data,
                 data_allocator_->free,
                 <%TYPE%> );
+}
+
+DDS::ReturnCode_t 
+<%TYPE%>DataReaderImpl::auto_return_loan(void* seq)
+{
+  ::<%MODULE%><%TYPE%>ZCSeq& received_data = *(::<%MODULE%><%TYPE%>ZCSeq*)seq;
+  
+  if (!received_data.owns())
+    {
+      this->release_loan(received_data);
+    }
+  return ::DDS::RETCODE_OK; 
 }
 
 //TAO::DCPS::DataReaderRemote_ptr

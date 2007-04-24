@@ -486,8 +486,18 @@ int main (int argc, char *argv[])
 
 
       // wait for association establishement before writing.
-      ACE_OS::sleep(5); //REMOVE if not needed
-
+      // -- replaced this sleep with the while loop below; 
+      //    waiting on the one association we expect.
+      //  ACE_OS::sleep(5); //REMOVE if not needed
+      ::DDS::InstanceHandleSeq handles;
+      while (1)
+      {
+          fast_dw->get_matched_subscriptions(handles);
+          if (handles.length() > 0)
+              break;
+          else
+              ACE_OS::sleep(ACE_Time_Value(0,200000));
+      }
 
       // =============== do the test ====
 
@@ -517,8 +527,15 @@ int main (int argc, char *argv[])
 
     try { // the real testing.
       ::Test::Simple foo;
+      ::Test::MyLongSeq ls;
+      //::Test::Simple::_ls_seq ls;
+      ls.length(1);
+      ls[0] = 5;
       foo.key  = 1;
       foo.count = 1;
+      foo.text = CORBA::string_dup("t1");
+      foo.ls = ls;
+      
 
       handle
           = fast_dw->_cxx_register (foo);
@@ -636,6 +653,7 @@ int main (int argc, char *argv[])
 
         // this should change the value returned by the next read
         data1[0].count = 888;
+        data1[0].text = CORBA::string_dup("t2");
 
         SimpleZCSeq                  data2 (max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info2 (max_samples);
@@ -652,7 +670,17 @@ int main (int argc, char *argv[])
         if (data1[0].count == data2[0].count)
         {
             ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t2 ERROR: single-copy test failed.\n") ));
+                    ACE_TEXT("(%P|%t) t2 ERROR: single-copy test failed for scalar.\n") ));
+            test_failed = 1;
+
+        }
+
+        //ACE_DEBUG((LM_DEBUG,"%s != %s\n", data1[0].text.in(), data2[0].text.in() ));
+
+        if (0 == strcmp(data1[0].text.in(), data2[0].text.in()))
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t2 ERROR: single-copy test failed for string.\n") ));
             test_failed = 1;
 
         }
@@ -666,6 +694,15 @@ int main (int argc, char *argv[])
                                       , info1 );
 
         check_return_loan_status(status, data1, 1, max_samples, "t2 return_loan1");
+
+        // END OF BLOCK destruction.
+        // 4/24/07 Note: breakpoint in the ls sequence destructor 
+        // (part of Simple sample type) showed it was called when this 
+        // block went out of scope (because the data1 and data2 are destroyed).
+        // Good!
+        // 4/24/07 Note: breakpoint in ACE_Array destructor showed 
+        // it was called for the ZeroCopyInfoSeq. Good!
+
       } // t2
 
       {
@@ -732,8 +769,9 @@ int main (int argc, char *argv[])
                             ACE_TEXT("(%P|%t) t3 ERROR: timeout waiting for data.\n")),
                             1);
 
-      SimpleZCSeq                  data2 (0, max_samples);
+        SimpleZCSeq                  data2 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+
         status = fast_dr->read(  data2 
                                 , info2
                                 , max_samples
@@ -766,6 +804,15 @@ int main (int argc, char *argv[])
 
         check_return_loan_status(status, data2, 0, 0, "t3 return_loan2");
 
+        // This return_loan will free the memory because the sample
+        // has already been "lost" from the instance container.
+
+        // 4/24/07 Note: breakpoint in the ls sequence destructor 
+        // (part of Simple sample type) showed it was called when this 
+        // block went out of scope. Good!
+        // Note: the info sequence data is not destroyed/freed until
+        //       the info1 object goes out of scope -- so it can 
+        //       be reused without alloc & free.
         status = fast_dr->return_loan(  data1 
                                         , info1 );
 
@@ -775,7 +822,7 @@ int main (int argc, char *argv[])
       {
         //=====================================================
         // 4) show that the default is zero-copy read
-        //    and return_loan is not needed (hard to show this).
+        //    and automatic loan_return works.
         //=====================================================
         ACE_DEBUG((LM_INFO,"==== TEST 4 : show that the default is zero-copy read\n"));
         const CORBA::Long max_samples = 2;
@@ -817,19 +864,7 @@ int main (int argc, char *argv[])
                 test_failed = 1;
 
             }
-#if 1
-            //!!!! the auto-return_loan feature is not yet implemented.
-            // TBD - implement it and change the #if 1 to #if 0
-        status = fast_dr->return_loan(data2, info2 );
 
-        check_return_loan_status(status, data2, 0, 0, "t4 return_loan2");
-
-        status = fast_dr->return_loan(data1, info1 );
-
-        check_return_loan_status(status, data1, 0, 0, "t4 return_loan1");
-          }
-        } // t4
-#else
             item = data2.getPtr(0);
             if (item->ref_count_ != 3)
             {
@@ -853,8 +888,94 @@ int main (int argc, char *argv[])
                     ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 1\n"), item->ref_count_ ));
             test_failed = 1;
         }
-#endif
 
+      {
+        //=====================================================
+        // 5) show that return_loan and then read with same sequence works.
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 5 : show that return_loan and then read with same sequence works.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // 0 means zero-copy
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1;
+        foo.count = 1;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t5 read2");
+
+        if (data1[0].count != 1)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t5 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        foo.key  = 1;
+        foo.count = 2;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        status = fast_dr->return_loan(  data1 
+                                        , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
+
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t5 read2");
+
+        if (data1[0].count != 2)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t5 ERROR: unexpected value for data2.\n") ));
+            test_failed = 1;
+
+        }
+
+        status = fast_dr->return_loan(  data1 
+                                        , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
+
+      } // t5
     }
   catch (const TestException&)
     {

@@ -1,3 +1,18 @@
+Tue Apr 24 20:10:51 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm
+        * bin/DCPS/HTemplate.pm
+        * dds/DCPS/DataReaderImpl.h
+        * dds/DCPS/ZeroCopySeq_T.h
+        
+          Implement automatic return_loan.
+        
+        * tests/DCPS/ZeroCopyRead/main.cpp
+        * tests/DCPS/ZeroCopyRead/Simple.idl
+        
+          Add automatic return_loan test.
+          Test to be sure sample and Info destructors are called.
+
 Mon Apr 23 23:35:36 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm
