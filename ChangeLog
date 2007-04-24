@@ -1,3 +1,24 @@
+Mon Apr 23 23:35:36 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm
+
+          Fix a delete while zero-copy sequence has reference bug.
+
+        * dds/DCPS/DataReaderImpl.cpp
+
+          Minor comment change.
+
+        * tests/DCPS/ZeroCopyRead
+        * tests/DCPS/ZeroCopyRead/domain_ids
+        * tests/DCPS/ZeroCopyRead/main.cpp
+        * tests/DCPS/ZeroCopyRead/README
+        * tests/DCPS/ZeroCopyRead/run_test.pl
+        * tests/DCPS/ZeroCopyRead/Simple.idl
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc
+
+          Create a functional test for zero-copy read.
+
+
 Mon Apr 23 18:52:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm

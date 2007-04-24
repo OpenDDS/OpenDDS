@@ -891,7 +891,7 @@ DataReaderImpl::get_requested_deadline_missed_status (
     }
   //else using value from Service_Participant
 
-  // enable the type specific part of this DataWriter
+  // enable the type specific part of this DataReader
   this->enable_specific ();
 
   //Note: the QoS used to set n_chunks_ is Changable=No so

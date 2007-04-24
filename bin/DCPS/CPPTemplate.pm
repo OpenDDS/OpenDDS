@@ -675,13 +675,13 @@ void
 
           ptr->rcvd_sample_.remove(head_ptr) ;
 
-                  if (0 == head_ptr->dec_ref())
-                  {
-         ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
-          ACE_DES_FREE (delete_ptr,
+          if (0 == head_ptr->dec_ref())
+          {
+            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+            ACE_DES_FREE (delete_ptr,
                         data_allocator_->free,
                         <%TYPE%> );
-          ACE_DES_FREE (head_ptr,
+            ACE_DES_FREE (head_ptr,
                         rd_allocator_->free,
                         ReceivedDataElement);
           }
@@ -2081,13 +2081,16 @@ void
         }
       }
 
-      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
-      ACE_DES_FREE (delete_ptr,
-                    data_allocator_->free,
-                    <%TYPE%> );
-      ACE_DES_FREE (head_ptr,
-                    rd_allocator_->free,
-                    ReceivedDataElement);
+      if (0 == head_ptr->dec_ref())
+      {
+		::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(head_ptr->registered_data_);
+		ACE_DES_FREE (delete_ptr,
+						data_allocator_->free,
+						<%TYPE%> );
+		ACE_DES_FREE (head_ptr,
+						rd_allocator_->free,
+						ReceivedDataElement);
+      }
     }
 
     TAO::DCPS::SubscriberImpl* sub = get_subscriber_servant () ;
