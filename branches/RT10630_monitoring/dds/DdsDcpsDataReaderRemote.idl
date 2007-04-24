@@ -1,0 +1,56 @@
+// -*- C++ -*-
+// $Id$
+#ifndef TAO_DDS_DCPS_DATAREADER_IDL
+#define TAO_DDS_DCPS_DATAREADER_IDL
+
+#include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsSubscription.idl"
+
+module TAO {
+  module DCPS {
+
+    struct WriterAssociation {
+      TAO::DCPS::TransportInterfaceInfo writerTransInfo;
+      TAO::DCPS::RepoId     writerId;
+      ::DDS::PublisherQos  pubQos;
+      ::DDS::DataWriterQos writerQos;
+    };
+
+    typedef sequence<WriterAssociation> WriterAssociationSeq;
+
+    typedef sequence<TAO::DCPS::RepoId> WriterIdSeq;
+
+    // This interface contains TAO specific interfaces
+    // related to a DDS::DataReader servant.
+    // It is split out so the DDS::DataReader interface can be local.
+    interface DataReaderRemote : ::DDS::DataReader {
+
+      // will tell transport and call on_subscription_match() 
+      oneway void add_associations(
+        in TAO::DCPS::RepoId yourId,
+        in WriterAssociationSeq writers
+        );
+
+      // will tell transport that associations are going away 
+      // The notify_lost flag true indicates the remove_association is invoked
+      // by the InfoRepo after it detected a lost writer. The InfoRepo detects
+      // the lost writer when the add_association/remove_association invocations
+      // on the writer object reference fail. The datareader need notify the
+      // the DataReaderListener on_publication_lost.
+      oneway void remove_associations(
+        in WriterIdSeq writers,
+        in boolean notify_lost
+        );
+
+      // Supporting - DataReaderListener::on_offered_incompatible_qos()
+      // May get called even if add_associations() is not called.
+      oneway void update_incompatible_qos(
+        in TAO::DCPS::IncompatibleQosStatus status
+        );
+
+    };
+  }; // module DDS
+}; // module TAO
+
+#endif // TAO_DDS_DCPS_DATAREADER_IDL
