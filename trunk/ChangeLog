@@ -1,3 +1,12 @@
+Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added a configuration NO_BUILT_IN_TOPICS that will identify builds
+          that have BIT support disabled.  Once these tests are uncommented,
+          they will be not be run on builds that have NO_BUILT_IN_TOPICS set as
+          a configuration.
+
 Wed Apr 25 00:38:56 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * DCPS/transport/framework/TransportSendStrategy.cpp:
@@ -8,22 +17,22 @@ Wed Apr 25 00:38:56 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
 Tue Apr 25 00:15:33 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\DataWriterImpl.cpp:
-        
+        * dds/DCPS/DataWriterImpl.cpp:
+
           Fixed a bug in built-in-topic datawriter that should resend
           data in sending and sent list instead of sending unsent list.
-          
-        * dds\DCPS\DomainParticipantImpl.cpp:
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
 
           Rolled back the work around.
-          
+
 Tue Apr 24 18:41:35 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
 
-          Added 2 seconds delay after participant creates the built-in-topic 
-          datareaders. This is a work around for the problem of the 
-          built-in-topic data lost during fully association period. We need 
+          Added 2 seconds delay after participant creates the built-in-topic
+          datareaders. This is a work around for the problem of the
+          built-in-topic data lost during fully association period. We need
           find a better solution to synchronize the bit data publishing and
           subscribering.
 
@@ -46,11 +55,11 @@ Wed Apr 18 23:58:56 UTC 2007 Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/PublisherImpl.h:
         * dds/DCPS/PublisherImpl.cpp:
-        
-          Moved the send() call outside the lock since the 
-          TransportInterface::send() is thread safe and 
+
+          Moved the send() call outside the lock since the
+          TransportInterface::send() is thread safe and
           added another parameter to data_available() to avoid
-          duplicate code of resend_data_available() from 
+          duplicate code of resend_data_available() from
           data_available().
 
 Wed Apr 18 18:28:20 UTC 2007 Yan Dai  <dai_y@ociweb.com>
@@ -323,9 +332,9 @@ Wed Apr 18 16:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           - Some tests that the bit is not applicable.
             e.g. FooTest3_0, FooTest3_1 and FooTest3_2
           - The new tests are run with non-bit.
-            e.g. tests\Messenger_Imr\run_test.pl
-                 tests\DCPS\Messenger_ZeroCopy\run_test.pl
-                 tests\DCPS\Prst_delayed_subscriber\run_test.pl
+            e.g. tests/Messenger_Imr/run_test.pl
+                 tests/DCPS/Messenger_ZeroCopy/run_test.pl
+                 tests/DCPS/Prst_delayed_subscriber/run_test.pl
           - The UDP and Mcast test case does not run with bit.
           - other tests run with bit on.
 
