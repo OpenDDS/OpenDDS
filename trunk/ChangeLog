@@ -1,3 +1,11 @@
+Wed Apr 25 00:38:56 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed bug of creation of incorrect queues when clear() was
+          called.  The elems_ and queue_ were being given the wrong sized
+          queues.
+
 Tue Apr 25 00:15:33 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\DataWriterImpl.cpp:
