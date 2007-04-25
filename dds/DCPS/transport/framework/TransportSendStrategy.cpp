@@ -840,9 +840,9 @@ TAO::DCPS::TransportSendStrategy::clear (SendMode mode)
       }
 
     elems = this->elems_;
-    this->elems_ = new QueueType (this->config_->queue_messages_per_pool_,this->config_->queue_initial_pools_);
+    this->elems_ = new QueueType (1,this->config_->max_samples_per_packet_);
     queue = this->queue_;
-    this->queue_ = new QueueType (1,this->config_->max_samples_per_packet_);
+    this->queue_ = new QueueType (this->config_->queue_messages_per_pool_,this->config_->queue_initial_pools_);
 
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
