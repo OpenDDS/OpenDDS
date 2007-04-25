@@ -97,6 +97,8 @@ tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/reliable_multicast/unittest: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN !STATIC
+# run with single-copy read (the default is zero-copy read)
+performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl 13 1 500: !DCPS_MIN !STATIC
 performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN !STATIC
 performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl: !DCPS_MIN !STATIC
 performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN !STATIC

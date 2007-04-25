@@ -846,7 +846,7 @@ DataReaderImpl::get_requested_deadline_missed_status (
     }
   //else using value from Service_Participant
 
-  // enable the type specific part of this DataWriter
+  // enable the type specific part of this DataReader
   this->enable_specific ();
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
@@ -1049,6 +1049,52 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
   else
     {
       return fast_listener_;
+    }
+}
+
+// zero-copy version of this metod
+void DataReaderImpl::sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
+				 size_t start_idx, size_t count,
+				 ReceivedDataElement *ptr)
+{
+  size_t end_idx = start_idx + count - 1 ;
+  for (size_t i = start_idx ; i <= end_idx ; i++)
+    {
+      info_seq[i].sample_rank = count - (i - start_idx + 1) ;
+
+      // generation_rank =
+      //    (MRSIC.disposed_generation_count +
+      //     MRSIC.no_writers_generation_count)
+      //  - (S.disposed_generation_count +
+      //     S.no_writers_generation_count)
+      //
+      //  info_seq[end_idx] == MRSIC
+      //  info_seq[i].generation_rank ==
+      //      (S.disposed_generation_count +
+      //      (S.no_writers_generation_count) -- calculated in
+      //            InstanceState::sample_info
+
+      info_seq[i].generation_rank =
+	(info_seq[end_idx].disposed_generation_count +
+	 info_seq[end_idx].no_writers_generation_count) -
+	info_seq[i].generation_rank ;
+
+      // absolute_generation_rank =
+      //     (MRS.disposed_generation_count +
+      //      MRS.no_writers_generation_count)
+      //   - (S.disposed_generation_count +
+      //      S.no_writers_generation_count)
+      //
+      // ptr == MRS
+      // info_seq[i].absolute_generation_rank ==
+      //    (S.disposed_generation_count +
+      //     S.no_writers_generation_count)-- calculated in
+      //            InstanceState::sample_info
+      //
+      info_seq[i].absolute_generation_rank =
+	(ptr->disposed_generation_count_ +
+	 ptr->no_writers_generation_count_) -
+	info_seq[i].absolute_generation_rank ;
     }
 }
 
@@ -1623,6 +1669,14 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 bool DataReaderImpl::is_bit () const
 {
   return this->is_bit_;
+}
+
+//REMOVE this when we can change this method back to a pure virtual method.
+DDS::ReturnCode_t 
+DataReaderImpl::auto_return_loan(void* seq) // = 0;
+{
+    ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
+    return ::DDS::RETCODE_ERROR;
 }
 
 } // namespace DCPS

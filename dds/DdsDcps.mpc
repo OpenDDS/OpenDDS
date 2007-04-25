@@ -21,6 +21,19 @@ project : orbsvcslib, core, portableserver, dcps_bits {
 
   Header_Files {
     DCPS/dcps_export.h
+    DCPS/ZeroCopySeq_T.h
+    DCPS/ZeroCopyInfoSeq_T.h
+    DCPS/ZeroCopyAllocator_T.h
+  }
+  
+  Inline_Files {
+    *.inl
+  }
+
+  Template_Files {
+    DCPS/ZeroCopySeq_T.cpp
+    DCPS/ZeroCopyInfoSeq_T.cpp
+    DCPS/ZeroCopyAllocator_T.cpp
   }
 
   IDL_Files {
