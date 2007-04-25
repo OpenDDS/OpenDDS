@@ -33,6 +33,7 @@ long subscriber_delay_msec = 0;
 
 int num_datawriters = 1;
 int num_datareaders = 1;
+bool use_zero_copy_reads = true;
 unsigned id = 0;
 // largest positive value of a long is 2147483647
 CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED; 
