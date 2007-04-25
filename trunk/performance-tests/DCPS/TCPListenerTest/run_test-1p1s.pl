@@ -23,16 +23,29 @@ $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
+$copy_sample=0;
 
-if ($ARGV[0] eq 'bit') {
+if ($ARGV[0] ne '') {
+    $data_size = $ARGV[0];
+}
+
+if ($ARGV[1] ne '') {
+    $copy_sample = $ARGV[1];
+}
+
+if ($ARGV[2] ne '') {
+    $num_messages = $ARGV[2];
+}
+
+if ($ARGV[3] eq 'bit') {
   $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
   $app_bit_conf = "";
 }
-elsif ($ARGV[0] eq '') {
+elsif ($ARGV[3] eq '' or $ARGV[3] eq 'nobit') {
   # default test with bit off
 }
 else {
-  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+  print STDERR "ERROR: invalid parameter $ARGV[3] \n";
   exit 1;
 }
 
@@ -58,7 +71,8 @@ $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p $num_writers"
    . "$svc_config"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
-              . " -msi $num_samples -mxs $num_samples";
+              . " -msi $num_samples -mxs $num_samples"
+              . " -c $copy_sample";
 #use -msi $num_messages to avoid rejected samples
 #use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
