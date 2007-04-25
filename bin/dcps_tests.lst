@@ -80,11 +80,11 @@ tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN !STATIC
 
 # Commented builtin topic since they are not well implemented.
 
-#tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN
-#tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN
-#tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN
-#tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN
-#tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN
+#tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS
+#tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
 tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN

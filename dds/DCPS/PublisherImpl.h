@@ -252,7 +252,7 @@ namespace TAO
     * sending.
     */
     ::DDS::ReturnCode_t
-    data_available(DataWriterImpl* writer);
+    data_available(DataWriterImpl* writer, bool resend = false);
 
     /*
      * Exposed TransportImpl methods
@@ -268,9 +268,6 @@ namespace TAO
     int remove_all_control_msgs(RepoId pub_id);
 
     AttachStatus attach_transport(TransportImpl* impl);
-
-    ::DDS::ReturnCode_t 
-    resend_data_available(DataWriterImpl* writer);
 
     /**
     * This is used to retrieve the listener for a certain status change.

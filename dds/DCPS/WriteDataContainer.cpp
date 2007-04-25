@@ -93,8 +93,7 @@ WriteDataContainer::enqueue(
 }
 
 ::DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(DataWriterImpl* writer, 
-                                  const TAO::DCPS::ReaderIdSeq& rds)
+WriteDataContainer::reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
