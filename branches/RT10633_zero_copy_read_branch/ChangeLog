@@ -1,3 +1,12 @@
+Wed Apr 25 16:23:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopySeqBase.h:
+
+          Get it to build with gcc v 3.4.4.
+
 Wed Apr 25 15:45:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

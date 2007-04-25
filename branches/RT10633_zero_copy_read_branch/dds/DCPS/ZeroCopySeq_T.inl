@@ -18,9 +18,9 @@ namespace TAO
 
 template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::ZeroCopyDataSeq(
-    const size_t max_len = 0,
-    const size_t init_size = ZCS_DEFAULT_SIZE,
-    ACE_Allocator* alloc = 0) 
+    const size_t max_len,
+    const size_t init_size,
+    ACE_Allocator* alloc) 
     : ZeroCopySeqBase(max_len)
     , is_zero_copy_(max_len == 0)
     , loaner_(0)
