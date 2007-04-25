@@ -1,3 +1,10 @@
+Wed Apr 25 23:11:43 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        
+          Tell Subversion that these are resolved -- svn novice.
+
 Wed Apr 25 22:38:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
           Merge RT10633_zero_copy_read_branch from start, 564, to revision 625.
