@@ -1,3 +1,14 @@
+Tue Apr 25 00:15:33 UTC 2007 Yan Dai  <dai_y@ociweb.com>
+
+        * dds\DCPS\DataWriterImpl.cpp:
+        
+          Fixed a bug in built-in-topic datawriter that should resend
+          data in sending and sent list instead of sending unsent list.
+          
+        * dds\DCPS\DomainParticipantImpl.cpp:
+
+          Rolled back the work around.
+          
 Tue Apr 24 18:41:35 UTC 2007 Yan Dai  <dai_y@ociweb.com>
 
         * dds\DCPS\DomainParticipantImpl.cpp:

@@ -1802,11 +1802,6 @@ namespace TAO
 
           bit_sub_dr_
             = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ());
-
-          // TBD: This is a work around for the problem of the built-in-topic 
-          // data lost during fully association period. We need find a better 
-          // solution to synchronize the bit data publishing and subscribering.
-          ACE_OS::sleep (2);
         }
       catch (const CORBA::Exception& ex)
         {
