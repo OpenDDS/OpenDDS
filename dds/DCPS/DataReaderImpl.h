@@ -20,7 +20,7 @@
 #include "InstanceState.h"
 #include "DomainParticipantImpl.h"
 #include "Cached_Allocator_With_Overflow_T.h"
-#include "ZeroCopySeq_T.h"
+#include "ZeroCopyInfoSeq_T.h"
 
 
 #include "ace/String_Base.h"

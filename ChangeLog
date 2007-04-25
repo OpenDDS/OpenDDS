@@ -1,3 +1,20 @@
+Wed Apr 25 15:45:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.inl:
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DdsDcps.mpc:
+
+          Gave each class its own set of files (.h, .inl, .cpp) 
+          to avoid a circular include problem.
+
 Tue Apr 24 23:42:46 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:
