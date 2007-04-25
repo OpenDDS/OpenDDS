@@ -1802,7 +1802,6 @@ namespace TAO
 
           bit_sub_dr_
             = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (dr.in ());
-
         }
       catch (const CORBA::Exception& ex)
         {

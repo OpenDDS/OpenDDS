@@ -722,3 +722,4 @@ TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
 
  return ! pubs.is_nil ();
 }
+

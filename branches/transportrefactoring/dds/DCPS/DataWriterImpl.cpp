@@ -308,8 +308,8 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 
       // Tell the WriteDataContainer to resend all sending/sent
       // samples.
-      this->data_container_->reenqueue_all (this, rd_ids);
-      this->publisher_servant_->resend_data_available(this) ;
+      this->data_container_->reenqueue_all (rd_ids);
+      this->publisher_servant_->data_available(this, true) ;
     }
 }
 

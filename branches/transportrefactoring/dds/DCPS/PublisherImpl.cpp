@@ -569,7 +569,7 @@ void PublisherImpl::get_qos (
   if (suspend_depth_count_ == 0)
     {
       transport_interface_.send (available_data_list_);
-      available_data_list_.head_ = available_data_list_.tail_ = 0;
+      available_data_list_.reset ();
     }
 
   return ::DDS::RETCODE_OK;
@@ -847,14 +847,24 @@ PublisherImpl::set_object_reference (const ::DDS::Publisher_ptr& pub)
 }
 
 ::DDS::ReturnCode_t
-PublisherImpl::data_available(DataWriterImpl* writer)
+PublisherImpl::data_available(DataWriterImpl* writer,
+                              bool resend)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->pi_lock_,
-        ::DDS::RETCODE_ERROR);
+    guard,
+    this->pi_lock_,
+    ::DDS::RETCODE_ERROR);
 
-  DataSampleList list = writer->get_unsent_data() ;
+  DataSampleList list;
+
+  if (resend)
+    {
+      list = writer->get_resend_data();
+    }
+  else
+    {
+      list = writer->get_unsent_data();
+    }
 
   if( this->suspend_depth_count_ > 0)
     {
@@ -872,6 +882,7 @@ PublisherImpl::data_available(DataWriterImpl* writer)
       // tell the transport to send the data sample(s).
       transport_interface_.send(list) ;
     }
+    
   return ::DDS::RETCODE_OK;
 }
 
@@ -905,35 +916,6 @@ AttachStatus
 PublisherImpl::attach_transport(TransportImpl* impl)
 {
   return transport_interface_.attach_transport(impl);
-}
-
-::DDS::ReturnCode_t
-PublisherImpl::resend_data_available(DataWriterImpl* writer)
-{
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->pi_lock_,
-        ::DDS::RETCODE_ERROR);
-
-  DataSampleList list = writer->get_resend_data() ;
-
-  if( this->suspend_depth_count_ > 0)
-    {
-      // append list to the avaliable data list.
-      // Collect samples from all of the Publisher's Datawriters
-      // in this list so when resume_publication is called
-      // the Publisher does not have to iterate over its
-      // DataWriters to get the unsent data samples.
-      available_data_list_.enqueue_tail_next_send_sample (list);
-    }
-  else
-    {
-      // Do LATENCY_BUDGET processing here.
-      // Do coherency processing here.
-      // tell the transport to send the data sample(s).
-      transport_interface_.send(list) ;
-    }
-  return ::DDS::RETCODE_OK;
 }
 
 ::POA_DDS::PublisherListener*
