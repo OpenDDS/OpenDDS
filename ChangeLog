@@ -1,3 +1,9 @@
+Wed Apr 25 23:31:31 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+          Turn off BIT on the client side (since it is off on the InfoRepo).
+
 Wed Apr 25 23:11:43 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

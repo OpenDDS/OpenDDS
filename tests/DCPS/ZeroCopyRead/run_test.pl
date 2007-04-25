@@ -33,7 +33,7 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 # -b
-$parameters = "$svc_config -r $num_readers -t $use_take"
+$parameters = "-DcpsBit 0 $svc_config -r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
 
 if ($ARGV[0] eq 'udp') {
