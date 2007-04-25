@@ -17,9 +17,9 @@ namespace TAO
 
 template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq(
-    const size_t max_len = 0,
-    const size_t init_size = ZCS_DEFAULT_SIZE,
-    ACE_Allocator* alloc = 0) 
+    const size_t max_len,
+    const size_t init_size,
+    ACE_Allocator* alloc) 
     : ZeroCopySeqBase(max_len)
     , info_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
 {};

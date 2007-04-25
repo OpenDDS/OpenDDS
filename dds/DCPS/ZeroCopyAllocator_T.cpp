@@ -60,7 +60,7 @@ FirstTimeFastAllocator<T, N>::remove (void)
 
 template <class T, std::size_t N>
 int 
-FirstTimeFastAllocator<T, N>::bind (const char *name, void *pointer, int duplicates = 0)
+FirstTimeFastAllocator<T, N>::bind (const char *name, void *pointer, int duplicates)
 {/* no-op */ 
     ACE_ASSERT("not supported" ==0);
     ACE_UNUSED_ARG (name);
@@ -119,7 +119,7 @@ FirstTimeFastAllocator<T, N>::unbind (const char *name, void *&pointer)
 
 template <class T, std::size_t N>
 int 
-FirstTimeFastAllocator<T, N>::sync (ssize_t len = -1, int flags = MS_SYNC)
+FirstTimeFastAllocator<T, N>::sync (ssize_t len, int flags)
 {/* no-op */ 
     ACE_ASSERT("not supported" ==0);
     ACE_UNUSED_ARG (len);
@@ -129,7 +129,7 @@ FirstTimeFastAllocator<T, N>::sync (ssize_t len = -1, int flags = MS_SYNC)
 
 template <class T, std::size_t N>
 int 
-FirstTimeFastAllocator<T, N>::sync (void *addr, size_t len, int flags = MS_SYNC)
+FirstTimeFastAllocator<T, N>::sync (void *addr, size_t len, int flags)
 {/* no-op */ 
     ACE_ASSERT("not supported" ==0);
     ACE_UNUSED_ARG (addr);
@@ -140,7 +140,7 @@ FirstTimeFastAllocator<T, N>::sync (void *addr, size_t len, int flags = MS_SYNC)
 
 template <class T, std::size_t N>
 int 
-FirstTimeFastAllocator<T, N>::protect (ssize_t len = -1, int prot = PROT_RDWR)
+FirstTimeFastAllocator<T, N>::protect (ssize_t len, int prot)
 {/* no-op */ 
     ACE_ASSERT("not supported" ==0);
     ACE_UNUSED_ARG (len);
@@ -150,7 +150,7 @@ FirstTimeFastAllocator<T, N>::protect (ssize_t len = -1, int prot = PROT_RDWR)
 
 template <class T, std::size_t N>
 int 
-FirstTimeFastAllocator<T, N>::protect (void *addr, size_t len, int prot = PROT_RDWR)
+FirstTimeFastAllocator<T, N>::protect (void *addr, size_t len, int prot)
 {/* no-op */ 
     ACE_ASSERT("not supported" ==0);
     ACE_UNUSED_ARG (addr);
