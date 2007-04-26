@@ -485,8 +485,6 @@ module DDS {
     struct ParticipantBuiltinTopicData {
       BuiltinTopicKey_t key;
       UserDataQosPolicy user_data;
-      string hostname;
-      long    process_id;
     };
 
 // These pragmas are TAO specific
