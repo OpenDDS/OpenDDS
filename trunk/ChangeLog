@@ -1,3 +1,9 @@
+Thu Apr 26 16:01:23 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added zero-copy functional test, tests/DCPS/ZeroCopyRead/run_test.pl
+
 Thu Apr 26 14:44:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/HTemplate.pm:
