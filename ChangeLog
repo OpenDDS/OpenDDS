@@ -1,3 +1,10 @@
+Thu Apr 26 19:14:04 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Removed process_id and hostname from ParticipantBuiltinTopicData
+          struct. These fields are accidently added during previous commit.
+
 Thu Apr 26 16:01:23 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -43,7 +50,7 @@ Thu Apr 26 14:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           removes all assoications related to the remote id provided by
           the DCPSInfoRepo. It should just remove the association of
           the remote id and local id and the link only used by them.
-          
+
         * bin/dcps_tests.lst:
 
           Added TransientLocalTest test.
@@ -64,8 +71,8 @@ Thu Apr 26 14:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/TransientLocalTest/subscriber.cpp:
         * tests/DCPS/TransientLocalTest/tcp.conf:
 
-          Added new test to test DataWriter with TRANSIENT_LOCAL durability 
-          will resend samples in sent list and sending list to the new 
+          Added new test to test DataWriter with TRANSIENT_LOCAL durability
+          will resend samples in sent list and sending list to the new
           associated datareaders.
 
 Wed Apr 25 23:31:31 UTC 2007  Scott Harris <harris_s@ociweb.com>
