@@ -1,3 +1,15 @@
+Thu Apr 26 14:44:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+
+          Method declarations within the class definition should not have the
+          class's scope resolution prepended.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+
+          Added an export macro on this class.  Thanks to Wallace Zhang for
+          reporting this one.
+
 Thu Apr 26 14:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

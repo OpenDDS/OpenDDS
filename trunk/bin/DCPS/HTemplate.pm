@@ -507,13 +507,10 @@ public:
       CORBA::SystemException
     ));
 
- virtual 
- DDS::ReturnCode_t auto_return_loan(void* seq);
+  virtual 
+  DDS::ReturnCode_t auto_return_loan(void* seq);
 
- void
- <%TYPE%>DataReaderImpl::release_loan (
-           ::<%MODULE%><%TYPE%>ZCSeq & received_data
-           );
+  void release_loan (::<%MODULE%><%TYPE%>ZCSeq & received_data);
 
  protected:
 

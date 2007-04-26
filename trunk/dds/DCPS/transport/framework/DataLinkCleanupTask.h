@@ -28,7 +28,7 @@ namespace TAO
      * @brief Active Object responsible for cleaning up DataLink resources.
      *
      */
-    class DataLinkCleanupTask : public QueueTaskBase <DataLink_rch>
+    class TAO_DdsDcps_Export DataLinkCleanupTask : public QueueTaskBase <DataLink_rch>
     {
     public:
       /// Constructor.
