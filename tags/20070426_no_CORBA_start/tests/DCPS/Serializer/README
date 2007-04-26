@@ -1,0 +1,6 @@
+run_test.pl
+  - run all standalone serializer tests.
+
+run_test.pl --generate
+  - create test data files in big and little endian styles.
+
