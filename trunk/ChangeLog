@@ -1,3 +1,46 @@
+Thu Apr 26 23:18:51 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enabled the builtintopic unit test and added the new 
+          builtintopic test.
+          
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Uncommented some debugging message.
+          
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Messenger.idl:
+        * tests/DCPS/BuiltInTopicTest/README:
+        * tests/DCPS/BuiltInTopicTest/Writer.h:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/domain_ids:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/tcp.conf:
+
+          Added the built-in-topic test to verify if a new 
+          participant or old participant receive the same 
+          built-in-topic data.
+          
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+
+          Added missing files.
+          
+        * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+
+          Removed these files since it's idl and template generated
+          code.
+
 Thu Apr 26 19:14:04 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
