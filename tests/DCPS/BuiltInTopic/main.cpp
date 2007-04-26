@@ -200,14 +200,14 @@ int init (int argc, ACE_TCHAR *argv[])
 #if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_participant ()
 {
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::ParticipantBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::ParticipantBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::TopicBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::TopicBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::PublicationBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::PublicationBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::SubscriptionBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::SubscriptionBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::ParticipantBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::ParticipantBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::TopicBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::TopicBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::PublicationBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::PublicationBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::SubscriptionBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::SubscriptionBuiltinTopicData) ));
 
   try
     {
