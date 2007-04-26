@@ -735,14 +735,15 @@ void PublisherImpl::add_associations (
 }
 
 void PublisherImpl::remove_associations(
-          const ReaderIdSeq & readers)
+          const ReaderIdSeq & readers,
+          const RepoId&       writer)
 {
   // Delegate to the (inherited) TransportInterface version.
 
   // TMB - I don't know why I have to do it this way, but the compiler
   //       on linux complains with an error otherwise.
   this->TransportInterface::remove_associations(readers.length(),
-            readers.get_buffer());
+            readers.get_buffer(), writer, true); // as pub side
 }
 
 ::DDS::ReturnCode_t PublisherImpl::writer_enabled(

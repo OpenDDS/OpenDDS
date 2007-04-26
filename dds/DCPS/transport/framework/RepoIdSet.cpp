@@ -56,3 +56,23 @@ TAO::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
   return false;
 }
 
+bool
+TAO::DCPS::RepoIdSet::exist (const RepoId& local_id,
+                             bool& last)
+{
+  DBG_ENTRY_LVL("RepoIdSet","exist",5);
+
+  last = true;
+
+  RepoId remote;
+  if (this->map_.find(local_id, remote) == -1)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)RepoIdSet::exist could not find local %d "
+      "in map.\n", local_id));
+
+    return false;
+  }
+
+  last = this->map_.current_size () == 1;
+  return true;
+}

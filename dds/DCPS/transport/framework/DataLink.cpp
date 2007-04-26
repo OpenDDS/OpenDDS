@@ -240,6 +240,7 @@ TAO::DCPS::DataLink::make_reservation
 /// DataLink's make_reservation() methods.
 void
 TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
+                                          RepoId          local_id,
                                           DataLinkSetMap& released_locals)
 {
   DBG_ENTRY_LVL("DataLink","release_reservations",5);
@@ -249,7 +250,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
   {
     GuardType guard(this->pub_map_lock_);
-    listener_set = this->pub_map_.remove_set(remote_id);
+    listener_set = this->pub_map_.find(remote_id);
   }
 
   if (listener_set.is_nil())
@@ -260,7 +261,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
       {
         GuardType guard(this->sub_map_lock_);
-        id_set = this->sub_map_.remove_set(remote_id);
+        id_set = this->sub_map_.find(remote_id);
       }
 
       if (id_set.is_nil())
@@ -276,8 +277,17 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
           //guard.release ();
           // The remote_id is a subscriber_id.
           this->release_remote_subscriber(remote_id,
-                                          id_set.in(),
+                                          local_id,
+                                          id_set,
                                           released_locals);
+
+          if (id_set->size () == 0)
+          {
+            // Remove the remote_id(sub) after the remote/local ids is released 
+            // and there are no local pubs associated with this sub.
+            id_set = this->sub_map_.remove_set(remote_id);
+          }
+
           //guard.acquire ();
         }
     }
@@ -287,8 +297,17 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
       //guard.release ();
       // The remote_id is a publisher_id.
       this->release_remote_publisher(remote_id,
-                                     listener_set.in(),
+                                     local_id,
+                                     listener_set,
                                      released_locals);
+
+      if (listener_set->size() == 0)
+      {
+        GuardType guard(this->pub_map_lock_);
+        // Remove the remote_id(pub) after the remote/local ids is released 
+        // and there are no local subs associated with this pub.
+        listener_set = this->pub_map_.remove_set (remote_id);
+      }
       //guard.acquire ();
     }
 
@@ -392,7 +411,8 @@ TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 void
 TAO::DCPS::DataLink::release_remote_subscriber
 (RepoId          subscriber_id,
- RepoIdSet*      pubid_set,
+ RepoId          publisher_id,
+ RepoIdSet_rch&      pubid_set,
  DataLinkSetMap& released_publishers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_subscriber",5);
@@ -402,21 +422,29 @@ TAO::DCPS::DataLink::release_remote_subscriber
        itr.next(entry);
        itr.advance())
     {
-      RepoId publisher_id = entry->ext_id_;
-
-      // Remove the publisher_id => subscriber_id association.
-      if (this->pub_map_.release_subscriber(publisher_id,
-                                            subscriber_id) == 1)
-        {
-          // This means that this release() operation has caused the
-          // publisher_id to no longer be associated with *any* subscribers.
-          released_publishers.insert_link(publisher_id,this);
+      if (publisher_id == entry->ext_id_)
+      {
+        // Remove the publisher_id => subscriber_id association.
+        if (this->pub_map_.release_subscriber(publisher_id,
+                                              subscriber_id) == 1)
           {
-            GuardType guard(this->released_local_lock_);
-            released_local_pubs_.insert_id (publisher_id);
+            // This means that this release() operation has caused the
+            // publisher_id to no longer be associated with *any* subscribers.
+            released_publishers.insert_link(publisher_id,this);
+            {
+              GuardType guard(this->released_local_lock_);
+              released_local_pubs_.insert_id (publisher_id, subscriber_id);
+            }
           }
-        }
+       }
     }
+
+  // remove the publisher_id from the pubset that associate with the remote sub.
+  if (pubid_set->remove_id (publisher_id) == -1)
+      ACE_ERROR ((LM_ERROR,
+                        "(%P|%t) ERROR: DataLink::release_remote_subscriber"
+                        " failed to remove pub %d from PubSet.", 
+                        publisher_id)); 
 }
 
 
@@ -426,7 +454,8 @@ TAO::DCPS::DataLink::release_remote_subscriber
 void
 TAO::DCPS::DataLink::release_remote_publisher
 (RepoId              publisher_id,
- ReceiveListenerSet* listener_set,
+ RepoId              subscriber_id,
+ ReceiveListenerSet_rch& listener_set,
  DataLinkSetMap&     released_subscribers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_publisher",5);
@@ -436,20 +465,29 @@ TAO::DCPS::DataLink::release_remote_publisher
        itr.next(entry);
        itr.advance())
     {
-      RepoId subscriber_id = entry->ext_id_;
-
-      // Remove the publisher_id => subscriber_id association.
-      if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
-        {
-          // This means that this release() operation has caused the
-          // subscriber_id to no longer be associated with *any* publishers.
-          released_subscribers.insert_link(subscriber_id,this);
+      if (subscriber_id == entry->ext_id_)
+      {
+        // Remove the publisher_id => subscriber_id association.
+        if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
           {
-            GuardType guard(this->released_local_lock_);
-            released_local_subs_.insert_id (subscriber_id);
+            // This means that this release() operation has caused the
+            // subscriber_id to no longer be associated with *any* publishers.
+            released_subscribers.insert_link(subscriber_id,this);
+            {
+              GuardType guard(this->released_local_lock_);
+              released_local_subs_.insert_id (subscriber_id, publisher_id);
+            }
           }
-        }
+      }
     }
+
+  if (listener_set->remove (subscriber_id) == -1)
+  {
+      ACE_ERROR ((LM_ERROR,
+                        "(%P|%t) ERROR: DataLink::release_remote_publisher"
+                        " failed to remove sub %d from ListenerSet.", 
+                        subscriber_id)); 
+  }
 }
 
 
@@ -721,5 +759,26 @@ TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
  RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
 
  return ! pubs.is_nil ();
+}
+
+
+bool 
+TAO::DCPS::DataLink::exist (const RepoId& remote_id,
+                            const RepoId& local_id,
+                            const bool&   pub_side,
+                            bool& last)
+{
+  if (pub_side)
+  {
+    GuardType guard(this->pub_map_lock_);
+    RepoIdSet_rch pubs = this->sub_map_.find(remote_id);
+    return pubs->exist (local_id, last);
+  }
+  else
+  {
+    GuardType guard(this->sub_map_lock_);
+    ReceiveListenerSet_rch subs = this->pub_map_.find(remote_id);
+    return subs->exist (local_id, last);
+  }
 }
 

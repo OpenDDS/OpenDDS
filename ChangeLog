@@ -1,3 +1,55 @@
+Thu Apr 26 14:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed bug in transport and DCPS layer that remove_association()
+          removes all assoications related to the remote id provided by
+          the DCPSInfoRepo. It should just remove the association of
+          the remote id and local id and the link only used by them.
+          
+        * bin/dcps_tests.lst:
+
+          Added TransientLocalTest test.
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+        * tests/DCPS/TransientLocalTest/Messenger.idl:
+        * tests/DCPS/TransientLocalTest/README:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/Writer.h:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/domain_ids:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/tcp.conf:
+
+          Added new test to test DataWriter with TRANSIENT_LOCAL durability 
+          will resend samples in sent list and sending list to the new 
+          associated datareaders.
+
 Wed Apr 25 23:31:31 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * tests/DCPS/ZeroCopyRead/run_test.pl:
@@ -8,7 +60,7 @@ Wed Apr 25 23:11:43 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
-        
+
           Tell Subversion that these are resolved -- svn novice.
 
 Wed Apr 25 22:38:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
@@ -17,158 +69,158 @@ Wed Apr 25 22:38:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
           "start is defined by tags/RT10633_zero_copy_read.
 
         * bin/dcps_tests.lst:
-        
+
           Make performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl run
           both with zero-copy read (the default) and single-copy read.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
-        
-          The following unit test projects: DcpsFooType, DdsDcps_UnitTest, 
+
+          The following unit test projects: DcpsFooType, DdsDcps_UnitTest,
           and dcpsinfo_test_subscriber do not allow the DataReaderImpl
           to have pure virtual methods like auto_return_loan.
 
 
         * dds/DCPS/DataReaderImpl.h:
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
-        
+
           Resolved conflicts in the above files.
 
-	Wed Apr 25 16:23:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+        Wed Apr 25 16:23:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* dds/DCPS/ZeroCopyAllocator_T.cpp:
-			* dds/DCPS/ZeroCopySeq_T.inl:
-			* dds/DCPS/ZeroCopyInfoSeq_T.inl:
-			* dds/DCPS/ZeroCopySeqBase.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeqBase.h:
 
-			Get it to build with gcc v 3.4.4.
+                        Get it to build with gcc v 3.4.4.
 
-	Wed Apr 25 15:45:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+        Wed Apr 25 15:45:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* dds/DCPS/DataReaderImpl.h:
-			* dds/DCPS/ZeroCopyAllocator_T.cpp:
-			* dds/DCPS/ZeroCopyAllocator_T.h:
-			* dds/DCPS/ZeroCopyAllocator_T.inl:
-			* dds/DCPS/ZeroCopyInfoSeq_T.cpp:
-			* dds/DCPS/ZeroCopyInfoSeq_T.h:
-			* dds/DCPS/ZeroCopyInfoSeq_T.inl:
-			* dds/DCPS/ZeroCopySeq_T.cpp:
-			* dds/DCPS/ZeroCopySeq_T.h:
-			* dds/DCPS/ZeroCopySeq_T.inl:
-			* dds/DdsDcps.mpc:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopyAllocator_T.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeq_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DdsDcps.mpc:
 
-			Gave each class its own set of files (.h, .inl, .cpp) 
-			to avoid a circular include problem.
+                        Gave each class its own set of files (.h, .inl, .cpp)
+                        to avoid a circular include problem.
 
-	Tue Apr 24 23:42:46 UTC 2007  Scott Harris <harris_s@ociweb.com>
+        Tue Apr 24 23:42:46 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* dds/DCPS/ZeroCopySeq_T.cpp:
-			* dds/DCPS/ZeroCopySeq_T.h:
-			* dds/DCPS/ZeroCopySeq_T.inl:
-			* dds/DCPS/ZeroCopySeqBase.cpp:
-			* dds/DCPS/ZeroCopySeqBase.h:
-			* dds/DCPS/ZeroCopySeqBase.inl:
-			* dds/DdsDcps.mpc:
-	        
-			Properly inline zero-copy read support classes.
+                        * dds/DCPS/ZeroCopySeq_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DCPS/ZeroCopySeqBase.cpp:
+                        * dds/DCPS/ZeroCopySeqBase.h:
+                        * dds/DCPS/ZeroCopySeqBase.inl:
+                        * dds/DdsDcps.mpc:
 
-	Tue Apr 24 20:10:51 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        Properly inline zero-copy read support classes.
 
-			* bin/DCPS/CPPTemplate.pm:
-			* bin/DCPS/HTemplate.pm:
-			* dds/DCPS/DataReaderImpl.h:
-			* dds/DCPS/ZeroCopySeq_T.h:
-	        
-			Implement automatic return_loan.
-	        
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-			* tests/DCPS/ZeroCopyRead/Simple.idl:
-	        
-			Add automatic return_loan test.
-			Test to be sure sample and Info destructors are called.
+        Tue Apr 24 20:10:51 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-	Mon Apr 23 23:35:36 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        * bin/DCPS/CPPTemplate.pm:
+                        * bin/DCPS/HTemplate.pm:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
 
-			* bin/DCPS/CPPTemplate.pm:
+                        Implement automatic return_loan.
 
-			Fix a delete while zero-copy sequence has reference bug.
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/Simple.idl:
 
-			* dds/DCPS/DataReaderImpl.cpp:
+                        Add automatic return_loan test.
+                        Test to be sure sample and Info destructors are called.
 
-			Minor comment change.
+        Mon Apr 23 23:35:36 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* tests/DCPS/ZeroCopyRead:
-			* tests/DCPS/ZeroCopyRead/domain_ids:
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-			* tests/DCPS/ZeroCopyRead/README:
-			* tests/DCPS/ZeroCopyRead/run_test.pl:
-			* tests/DCPS/ZeroCopyRead/Simple.idl:
-			* tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+                        * bin/DCPS/CPPTemplate.pm:
 
-			Create a functional test for zero-copy read.
+                        Fix a delete while zero-copy sequence has reference bug.
+
+                        * dds/DCPS/DataReaderImpl.cpp:
+
+                        Minor comment change.
+
+                        * tests/DCPS/ZeroCopyRead:
+                        * tests/DCPS/ZeroCopyRead/domain_ids:
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
+                        * tests/DCPS/ZeroCopyRead/run_test.pl:
+                        * tests/DCPS/ZeroCopyRead/Simple.idl:
+                        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+                        Create a functional test for zero-copy read.
 
 
-	Mon Apr 23 18:52:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
+        Mon Apr 23 18:52:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* bin/DCPS/CPPTemplate.pm:
-			* dds/DCPS/ReceivedDataElementList.h:
-			* dds/DCPS/ZeroCopySeq_T.h:
-	        
-			Implement zero-copy read FoodDataReaderImpl::return_loan "template".
-			Add reference counting of sample data to avoid deleting
-			samples out from under a zero-copy read sequence.
-			Make zero-copy read code support single-copy and zero-copy reads.
-			Make additional check defined by the DDS specification.
+                        * bin/DCPS/CPPTemplate.pm:
+                        * dds/DCPS/ReceivedDataElementList.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
 
-			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
-	          
-			Do "zero-copy" read using the basic sample sequence.
+                        Implement zero-copy read FoodDataReaderImpl::return_loan "template".
+                        Add reference counting of sample data to avoid deleting
+                        samples out from under a zero-copy read sequence.
+                        Make zero-copy read code support single-copy and zero-copy reads.
+                        Make additional check defined by the DDS specification.
 
-			* DDS_release_notes.txt:
-	          
-			Show how to build without BIT support.
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
 
-	Fri Apr 20 15:31:52 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        Do "zero-copy" read using the basic sample sequence.
 
-			* bin/DCPS/CPPTemplate.pm:
-			* dds/DCPS/ZeroCopySeq_T.h:
-	          
-			Allow the zero-copy read sequence type to be used with single-copy
-			reads.
-	          
-			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
-			* performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
-	        
-			Modify the test to allow testing of the zero-copy read capable 
-			sequence type with zero or single copy reading.
+                        * DDS_release_notes.txt:
 
-	Thu Apr 19 17:48:29 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        Show how to build without BIT support.
 
-			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
-			* dds/DCPS/ZeroCopySeq_T.h:
+        Fri Apr 20 15:31:52 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			Resolve gcc build errors and warnings.
+                        * bin/DCPS/CPPTemplate.pm:
+                        * dds/DCPS/ZeroCopySeq_T.h:
 
-	Wed Apr 18 18:50:41 GMT 2007  Scott Harris <harris_s@ociweb.com>
+                        Allow the zero-copy read sequence type to be used with single-copy
+                        reads.
 
-			* bin/DCPS/CPPTemplate.pm:
-			* bin/DCPS/HTemplate.pm:
-			* dds/DCPS/DataReaderImpl.cpp:
-			* dds/DCPS/DataReaderImpl.h:
-			* dds/DCPS/ZeroCopySeq_T.h:
-			* dds/DdsDcps.mpc:
-	        
-			First round of zero-copy read support.
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+                        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
 
-			* performance-tests/DCPS/TCPListenerTest/common.h:
-			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
-			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
-			* performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
-	        
-			Make zero-copy read the default for this performance test.
-			Changed from 1200 to 700 microseconds per 8KB sample for 1-1 on WinXP.
-	        
-			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+                        Modify the test to allow testing of the zero-copy read capable
+                        sequence type with zero or single copy reading.
+
+        Thu Apr 19 17:48:29 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+
+                        Resolve gcc build errors and warnings.
+
+        Wed Apr 18 18:50:41 GMT 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+                        * bin/DCPS/HTemplate.pm:
+                        * dds/DCPS/DataReaderImpl.cpp:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DdsDcps.mpc:
+
+                        First round of zero-copy read support.
+
+                        * performance-tests/DCPS/TCPListenerTest/common.h:
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+                        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+                        Make zero-copy read the default for this performance test.
+                        Changed from 1200 to 700 microseconds per 8KB sample for 1-1 on WinXP.
+
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
 
 
 Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>

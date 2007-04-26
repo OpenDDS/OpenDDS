@@ -46,8 +46,8 @@ namespace TAO
         /// DataLink in this set.  The supplied 'released' map will be
         /// updated with all of the local_id to DataLink reservations that
         /// were made invalid as a result of the release operation.
-        void release_reservations(RepoId          remote_id,
-                                  DataLinkSetMap& released_locals);
+        //void release_reservations(RepoId          remote_id,
+        //                          DataLinkSetMap& released_locals);
 
       // ciju: This method was called without any locks held from TransportInterface.
         /// Send to each DataLink in the set.
@@ -82,6 +82,15 @@ namespace TAO
 
         DataLinkSet* select_links (const RepoId* remoteIds, 
                                    const CORBA::ULong num_targets);
+
+        /// Find the datalink with association of remote/local ids. If the remote/local
+        /// pair is the only association in the link then the link will be removed
+        /// from the map.
+        DataLink* find_link(const RepoId remoteId,
+                            const RepoId localId,
+                            const bool   pub_side);
+        
+        bool empty ();
 
       private:
 

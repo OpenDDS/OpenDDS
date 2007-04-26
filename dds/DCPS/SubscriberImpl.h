@@ -202,7 +202,8 @@ namespace TAO
                 const ::DDS::DataReaderQos reader_qos) ;
 
     void remove_associations(
-        const WriterIdSeq& writers
+        const WriterIdSeq& writers,
+        const RepoId&      reader
       ) ;
 
     /*

@@ -112,7 +112,10 @@ namespace TAO
         ///
         /// Conversely, Publishers will supply an array of subscriber ids,
         /// and view this as a call to "remove subscriptions".
-        void remove_associations(ssize_t size, const RepoId* remote_ids);
+        void remove_associations(ssize_t       size,
+                                 const RepoId* remote_ids,
+                                 const RepoId  local_id,
+                                 const bool pub_side);
 
         /// Send samples to remote subscribers through the appropriate
         /// DataLink(s).
