@@ -305,6 +305,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
         subscription_match_status_.total_count ++;
         subscription_match_status_.total_count_change ++;
         publication_handles_[pub_len + i] = handles[i];
+
         if (id_to_handle_map_.bind (wr_ids[i], handles[i]) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataReaderImpl::add_associations "
@@ -388,14 +389,14 @@ void DataReaderImpl::remove_associations (
     if (liveliness_changed_status_.active_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
         ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
       return;
     }
     if (liveliness_changed_status_.inactive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
         ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
       return;
     }
@@ -404,7 +405,7 @@ void DataReaderImpl::remove_associations (
       liveliness_changed_status_.inactive_count) )
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
         ACE_TEXT(" liveliness count does not match the number of writers.\n")));
       return;
     }
@@ -415,8 +416,14 @@ void DataReaderImpl::remove_associations (
 
   if (! is_bit_)
   {
+    // The writer should be in the id_to_handle map at this time so
+    // log with error.
     if (this->cache_lookup_instance_handles (writers, handles) == false)
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::remove_associations "
+        "cache_lookup_instance_handles failed\n"));
       return;
+    }
 
     CORBA::ULong pubed_len = publication_handles_.length();
     //CORBA::ULong wr_len = handles.length();
@@ -448,7 +455,7 @@ void DataReaderImpl::remove_associations (
     }
   }
 
-  this->subscriber_servant_->remove_associations(writers);
+  this->subscriber_servant_->remove_associations(writers, this->subscription_id_);
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost writer then make a callback to notify
@@ -1522,20 +1529,22 @@ void
 DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",5);
-  SubscriptionLostStatus status;
-
   if (! this->is_bit_)
     {
-      if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
-        return;
-
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
       // is given to this DataReader then narrow() fails.
       DataReaderListener_var the_listener
         = DataReaderListener::_narrow (this->listener_.in ());
       if (! CORBA::is_nil (the_listener.in ()))
+      {
+        SubscriptionLostStatus status;
+
+        // Since this callback may come after remove_association which removes
+        // the writer from id_to_handle map, we can ignore this error.
+        this->cache_lookup_instance_handles (pubids, status.publication_handles);
         the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
         status);
+      }
     }
 }
 
@@ -1547,18 +1556,24 @@ DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 
   if (! this->is_bit_)
   {
-    SubscriptionLostStatus status;
-
-    if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
-      return;
-
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
     DataReaderListener_var the_listener
       = DataReaderListener::_narrow (this->listener_.in ());
     if (! CORBA::is_nil (the_listener.in ()))
+    {
+      SubscriptionLostStatus status;
+
+      // If it's reconnected then the reader should be in id_to_handle map otherwise
+      // log with an error.
+      if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::notify_subscription_reconnected "
+          "cache_lookup_instance_handles failed\n"));
+      }
       the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
-      status);
+        status);
+    }
   }
 }
 
@@ -1570,18 +1585,20 @@ DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
   
   if (! this->is_bit_)
   {
-    SubscriptionLostStatus status;
-
-    if (this->cache_lookup_instance_handles (pubids, status.publication_handles) == false)
-      return;
-
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
     DataReaderListener_var the_listener
       = DataReaderListener::_narrow (this->listener_.in ());
     if (! CORBA::is_nil (the_listener.in ()))
+    {
+      SubscriptionLostStatus status;
+
+      // Since this callback may come after remove_association which removes
+      // the writer from id_to_handle map, we can ignore this error.
+      this->cache_lookup_instance_handles (pubids, status.publication_handles);
       the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
-      status);
+        status);
+    }
   }
 }
 
@@ -1644,25 +1661,26 @@ bool
 DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 					      ::DDS::InstanceHandleSeq & hdls)
 {
+  bool ret = true;
   CORBA::ULong num_ids = ids.length ();
   for (CORBA::ULong i = 0; i < num_ids; ++i)
   {
     RepoIdToHandleMap::ENTRY* ientry;
+    hdls.length (i + 1);
     if (id_to_handle_map_.find (ids[i], ientry) != 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t)ERROR: DataReaderImpl::cache_lookup_instance_handles "
-        "could not find instance handle for writer %d\n", ids[i]),
-        false);
+      ACE_DEBUG ((LM_WARNING, "(%P|%t)DataReaderImpl::cache_lookup_instance_handles "
+        "could not find instance handle for writer %d\n", ids[i]));
+      hdls[i] = -1;
+      ret = false;
     }
     else
     {
-      CORBA::ULong len = hdls.length ();
-      hdls.length (len + 1);
-      hdls[len] = ientry->int_id_;
+      hdls[i] = ientry->int_id_;
     }
   }
 
-  return true;
+  return ret;
 }
 
 

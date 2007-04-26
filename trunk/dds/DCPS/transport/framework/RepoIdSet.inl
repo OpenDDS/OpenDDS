@@ -14,10 +14,10 @@ TAO::DCPS::RepoIdSet::RepoIdSet()
 
 
 ACE_INLINE int
-TAO::DCPS::RepoIdSet::insert_id(RepoId id)
+TAO::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
   DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
-  return this->map_.bind(id, id);
+  return this->map_.bind(key, value);
 }
 
 

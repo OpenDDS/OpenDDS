@@ -46,6 +46,10 @@ namespace TAO
         MapType& map();
         const MapType& map() const;
 
+        /// Check if the key is in the map and if it's the only left entry
+        /// in the map.
+        bool exist (const RepoId& key, 
+                    bool& last);
 
       private:
 

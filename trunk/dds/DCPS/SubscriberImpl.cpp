@@ -808,8 +808,8 @@ SubscriberImpl::add_associations (
 
 void
 SubscriberImpl::remove_associations(
-				    const WriterIdSeq& writers
-				    )
+				    const WriterIdSeq& writers,
+            const RepoId&      reader)
 {
   /// Delegate to the (inherited) TransportInterface version.
 
@@ -822,7 +822,7 @@ SubscriberImpl::remove_associations(
   //       under linux otherwise.
 
   this->TransportInterface::remove_associations(writers.length(),
-						writers.get_buffer()) ;
+						writers.get_buffer(), reader, false) ; // as sub side
 }
 
 

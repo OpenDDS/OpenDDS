@@ -128,32 +128,34 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 }
 
 
-void
-TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
-                                             DataLinkSetMap& released_locals)
-{
-  DBG_ENTRY_LVL("DataLinkSet","release_reservations",5);
-  // Simply iterate over our set of DataLinks, and ask each one to perform
-  // the release_reservations operation upon itself.
-  MapType::ENTRY* entry;
-
-  { // guard scope
-    GuardType guard(this->lock_);
-
-    for (MapType::ITERATOR itr(*map_);
-   itr.next(entry);
-   itr.advance())
-      {
-  entry->int_id_->release_reservations(remote_id, released_locals);
-      }
-  }
-}
+//void
+//TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
+//                                            DataLinkSetMap& released_locals)
+//{
+//  DBG_ENTRY_LVL("DataLinkSet","release_reservations",5);
+//  // Simply iterate over our set of DataLinks, and ask each one to perform
+//  // the release_reservations operation upon itself.
+//  MapType::ENTRY* entry;
+//
+//  { // guard scope
+//    GuardType guard(this->lock_);
+//
+//    for (MapType::ITERATOR itr(*map_);
+//  itr.next(entry);
+//  itr.advance())
+//      {
+//  entry->int_id_->release_reservations(remote_id, released_locals);
+//      }
+//  }
+//}
 
 
 TAO::DCPS::DataLinkSet*
 TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
                                       const CORBA::ULong num_targets)
 {
+  DBG_ENTRY_LVL("DataLinkSet","select_links",5);
+
   DataLinkSet_rch selected_links = new DataLinkSet ();
 
   MapType::ENTRY* entry;
@@ -179,4 +181,51 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
   }
 
   return selected_links._retn ();
+}
+
+
+TAO::DCPS::DataLink*
+TAO::DCPS::DataLinkSet::find_link(const RepoId remoteId,
+                                     const RepoId localId, 
+                                     const bool   pub_side)
+{
+  DBG_ENTRY_LVL("DataLinkSet","find_link",5);
+
+  MapType::ENTRY* entry;
+
+  { // guard scope
+    GuardType guard(this->lock_);
+
+    for (MapType::ITERATOR itr(*map_);
+      itr.next(entry);
+      itr.advance())
+    {
+       bool last = true;
+       if (entry->int_id_->exist (remoteId, localId, pub_side, last))
+        {
+          DataLink_rch link = entry->int_id_;
+
+          if (last)
+          {
+            if (this->map_->unbind(entry->ext_id_, &map_entry_allocator_) != 0)
+            {
+              ACE_ERROR ((LM_ERROR, "(%P|%t)DataLinkSet::find_linkcan not remove"
+                " link for localId=%d pub_side=%d \n", localId, pub_side));
+            }
+          }
+          return link._retn ();
+        }
+    }
+  }
+
+  return 0;
+}
+
+
+bool 
+TAO::DCPS::DataLinkSet::empty ()
+{
+  GuardType guard(this->lock_);
+
+  return this->map_->current_size() == 0;
 }

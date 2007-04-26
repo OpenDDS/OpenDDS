@@ -79,6 +79,7 @@ namespace TAO
         /// RepoId is considered to be a remote id.  It could be a
         /// remote subscriber or a remote publisher.
         void release_reservations(RepoId          remote_id,
+                                  RepoId          local_id,
                                   DataLinkSetMap& released_locals);
 
         /// A hook for the concrete transport to do something special on
@@ -152,6 +153,13 @@ namespace TAO
         /// with the provided sub.
         bool is_target (const RepoId& sub_id);
 
+        /// Check if the remote_id/local_id is associated with this link
+        /// and if they are the last assoication using this link.
+        bool exist (const RepoId& remote_id,
+                    const RepoId& local_id,
+                    const bool&   pub_side,
+                    bool& last);
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class
@@ -199,17 +207,21 @@ namespace TAO
         const char* connection_notice_as_str (enum ConnectionNotice notice);
 
         /// Used by release_reservations() once it has determined that the
-        /// remote_id being released is, in fact, a remote subscriber id.
+        /// remote_id/local_id being released is, in fact, 
+        /// a remote subscriber id/a local publisher id.
         void release_remote_subscriber(RepoId          subscriber_id,
-                                       RepoIdSet*      pubid_set,
+                                       RepoId          publisher_id,
+                                       RepoIdSet_rch&     pubid_set,
                                        DataLinkSetMap& released_publishers);
 
         /// Used by release_reservations() once it has determined that the
-        /// remote_id being released is, in fact, a remote publisher id.
+        /// remote_id/local_id being released is, in fact, 
+        /// a remote publisher id/a local subscriber.
         void release_remote_publisher
-                                 (RepoId              publisher_id,
-                                  ReceiveListenerSet* listener_set,
-                                  DataLinkSetMap&     released_subscribers);
+                                 (RepoId               publisher_id,
+                                  RepoId               subscriber_id,
+                                  ReceiveListenerSet_rch& listener_set,
+                                  DataLinkSetMap&      released_subscribers);
 
         typedef ACE_SYNCH_MUTEX     LockType;
 

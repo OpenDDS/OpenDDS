@@ -104,7 +104,9 @@ void
 TAO::DCPS::DataLinkSetMap::release_reservations
                                        (ssize_t         num_remote_ids,
                                         const RepoId*   remote_ids,
-                                        DataLinkSetMap& released_locals)
+                                        const RepoId    local_id, 
+                                        DataLinkSetMap& released_locals,
+                                        const bool pub_side)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","release_reservations",5);
   // Note: The keys are known to always represent "remote ids" in this
@@ -112,34 +114,45 @@ TAO::DCPS::DataLinkSetMap::release_reservations
   //       DataLink associations that result from removing the remote ids
   //       (the keys) here.
   GuardType guard(this->map_lock_);
+
   for (ssize_t i = 0; i < num_remote_ids; ++i)
     {
-      RepoId remote_id = remote_ids[i];
-
       DataLinkSet_rch link_set;
+      if (this->map_.find(remote_ids[i], link_set) != 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Failed to find remote_id (%d) "
+          "from map_ for local_id %d. Skipping this remote_id.\n",
+          remote_ids[i], local_id));
+        continue;
+      }
 
-      if (this->map_.unbind(remote_id,link_set) != 0)
+     // find the link has the local/remote id association.
+     DataLink_rch link = link_set->find_link(remote_ids[i], local_id, pub_side);
+
+     if (link_set->empty ())
+      {
+        if (this->map_.unbind(remote_ids[i],link_set) != 0)
         {
           VDBG((LM_DEBUG,
-                     "(%P|%t) Warning: Failed to unbind remote_id (%d) "
-                     "from map_. Skipping this remote_id.\n",
-                     remote_id));
+            "(%P|%t) Warning: Failed to unbind remote_id (%d) "
+            "from map_. Skipping this remote_id.\n",
+            remote_ids[i]));
 
           continue;
         }
-
-      { // guard release scope
-  guard.release (); //release guard before DataLinkSet call
-
-  // Ask the DataLinkSet to invoke release_reservations() on each
-  // DataLink object within the set.  This can cause the released_locals
-  // map to be updated with local_id to DataLink "associations" that
-  // become invalid as a result of these reservation releases on
-  // behalf of the remote_id.
-  link_set->release_reservations(remote_id,released_locals);
-
-  guard.acquire ();
       }
+
+       // guard release scope
+       guard.release (); //release guard before DataLinkSet call
+
+       // Invoke release_reservations() on the DataLink.  This can cause the 
+       // released_locals map to be updated with local_id to DataLink "associations" 
+       // that become invalid as a result of these reservation releases on
+       // behalf of the remote_id.
+       link->release_reservations(remote_ids[i], local_id, released_locals);
+
+       guard.acquire ();  
     }
 }
 
@@ -234,3 +247,5 @@ TAO::DCPS::DataLinkSetMap::clear()
   GuardType guard(this->map_lock_);
   this->map_.close();
 }
+
+

@@ -238,7 +238,8 @@ namespace TAO
     */
     void remove_associations(
         // sequence of reader ids
-        const ReaderIdSeq & readers);
+        const ReaderIdSeq & readers,
+        const RepoId&       writer);
 
     /**
     * Cache the publisher's object reference.

@@ -32,7 +32,7 @@ namespace TAO
         RepoIdSet();
         virtual ~RepoIdSet();
 
-        int insert_id(RepoId id);
+        int insert_id(RepoId key, RepoId value);
         int remove_id(RepoId id);
 
         size_t size() const;
@@ -47,6 +47,9 @@ namespace TAO
 
         /// Check if contents in the two RepoIdSet are same.
         bool is_subset (RepoIdSet& map);
+
+        bool exist (const RepoId& remote_id, 
+                    bool& last);
 
       private:
 

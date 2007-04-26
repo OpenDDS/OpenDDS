@@ -307,7 +307,9 @@ TAO::DCPS::TransportInterface::add_associations
 
 void
 TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
-                                                   const RepoId* remote_ids)
+                                                   const RepoId* remote_ids,
+                                                   const RepoId  local_id,
+                                                   const bool pub_side)
 {
   DBG_ENTRY_LVL("TransportInterface","remove_associations",5);
 
@@ -322,7 +324,7 @@ TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
     // Ask the remote_map_ to do the dirty work.  It will also populate
     // the supplied DataLinkSetMap (released_locals) with any local_id to link_id
     // associations that are no longer valid following this remove operation.
-    this->remote_map_.release_reservations(size,remote_ids,released_locals);
+    this->remote_map_.release_reservations(size,remote_ids, local_id, released_locals, pub_side);
 
     // Now we need to ask our local_map_ to remove any released_locals.
     this->local_map_.remove_released(released_locals);
