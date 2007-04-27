@@ -1,14 +1,20 @@
+Fri Apr 27 15:07:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Fixed the case of "monitor.cpp" in the mpc file.
+
 Thu Apr 26 23:18:51 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-          Enabled the builtintopic unit test and added the new 
+          Enabled the builtintopic unit test and added the new
           builtintopic test.
-          
+
         * tests/DCPS/BuiltInTopic/main.cpp:
 
           Uncommented some debugging message.
-          
+
         * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
@@ -25,15 +31,15 @@ Thu Apr 26 23:18:51 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
         * tests/DCPS/BuiltInTopicTest/tcp.conf:
 
-          Added the built-in-topic test to verify if a new 
-          participant or old participant receive the same 
+          Added the built-in-topic test to verify if a new
+          participant or old participant receive the same
           built-in-topic data.
-          
+
         * tests/DCPS/TransientLocalTest/pub.ini:
         * tests/DCPS/TransientLocalTest/sub.ini:
 
           Added missing files.
-          
+
         * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
         * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
         * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:

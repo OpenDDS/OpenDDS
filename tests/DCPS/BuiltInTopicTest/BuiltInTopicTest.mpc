@@ -62,6 +62,6 @@ project(DDS*Monitor) : taoexe, portableserver, dcps {
   exename   = monitor
 
   Source_Files {
-    Monitor.cpp
+    monitor.cpp
   }
 }
