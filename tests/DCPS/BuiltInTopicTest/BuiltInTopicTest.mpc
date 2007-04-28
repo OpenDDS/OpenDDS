@@ -60,6 +60,7 @@ project(DDS*Subscriber) : taoexe, portableserver, dcps {
 project(DDS*Monitor) : taoexe, portableserver, dcps {
   
   exename   = monitor
+  requires += built_in_topics
 
   Source_Files {
     monitor.cpp
