@@ -1,3 +1,9 @@
+Sat Apr 28 19:04:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Added a 'requires' for the built_in_topics MPC feature.
+
 Fri Apr 27 15:07:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
