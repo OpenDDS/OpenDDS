@@ -747,7 +747,7 @@ DDS::ReturnCode_t
     max_samples = (::CORBA::Long)received_data.maximum();
   }
 
-  ::CORBA::ULong count(0);
+  ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -842,7 +842,7 @@ DDS::ReturnCode_t
       ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET sample and info input sequences do not match.\n" ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-    
+
   //SPEC ref v1.2 7.1.2.5.3.8 #4 but more strict.
   if ((received_data.max_len() == 0) != (received_data.owns() == false))
 	{
@@ -850,13 +850,13 @@ DDS::ReturnCode_t
 		 received_data.max_len(), received_data.owns() ));
 		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
 	}
-  
+
   if (received_data.max_len() == 0)
     {
       // not in SPEC but needed.
       if (max_samples == ::DDS::LENGTH_UNLIMITED)
         {
-          max_samples = (::CORBA::Long)received_data.max_slots(); 
+          max_samples = (::CORBA::Long)received_data.max_slots();
         }
     }
     else
@@ -872,12 +872,12 @@ DDS::ReturnCode_t
           ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET max_samples %d > max_len %d\n",
             max_samples, received_data.max_len() ));
           return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-          
+
         }
       //else
       //SPEC ref v1.2 7.1.2.5.3.8 #5b - is true by impl below.
     }
-  
+
   // The spec does not say what to do in this case but it appears to be a good thing.
   // Note: max_slots is the greater of the sequence's max_len and init_size.
   if ((::CORBA::Long)received_data.max_slots() < max_samples)
@@ -885,7 +885,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)received_data.max_slots();
     }
 
-  ::CORBA::ULong count(0);
+  ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -915,10 +915,10 @@ DDS::ReturnCode_t
           received_data.set_length (count + 1);
           if (received_data.max_len() != 0)
           {
-            received_data.assign_sample(count, 
+            received_data.assign_sample(count,
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
-          else 
+          else
           {
             received_data.assign_ptr(count, item, this) ;
           }
@@ -1015,7 +1015,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)received_data.maximum() ;
     }
 
-  ::CORBA::ULong count(0) ;
+  ::CORBA::Long count(0) ;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1156,7 +1156,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)info_seq.maximum();
     }
 
-  ::CORBA::ULong count(0);
+  ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1186,14 +1186,14 @@ DDS::ReturnCode_t
           received_data.set_length (count + 1);
           if (received_data.max_len() != 0)
           {
-            received_data.assign_sample(count, 
+            received_data.assign_sample(count,
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
-          else 
+          else
           {
             received_data.assign_ptr(count, item, this) ;
           }
-              
+
           // Increase sequence length before adding new element to sequence.
           info_seq.length (count + 1);
           ptr->instance_state_.sample_info(info_seq[count], item) ;
@@ -1363,7 +1363,7 @@ DDS::ReturnCode_t
                   next = item->next_data_sample_ ;
 
                   ptr->rcvd_sample_.remove(item) ;
-                  
+
                   if (0 == item->dec_ref())
                   {
 
@@ -1809,8 +1809,8 @@ DDS::ReturnCode_t
 
     delete[] buf;
     delete[] info;
-    
-    // per DDS spec: set max_len = 0; 
+
+    // per DDS spec: set max_len = 0;
     // also buffer is null and "owns" is false (CORBA seq "release" == DDS seq "owns")
     received_data.replace(0,0,0,false);
     info_seq.replace(0,0,0,false);
@@ -1842,7 +1842,7 @@ void
                        rd_allocator_->free,
                        ReceivedDataElement);
           }
-          
+
       }
 }
 
@@ -1869,9 +1869,9 @@ DDS::ReturnCode_t
   if (received_data.owns())
     {
       // nothing to do because this is not zero-copy data
-      return ::DDS::RETCODE_OK; 
+      return ::DDS::RETCODE_OK;
     }
-  else 
+  else
     {
       // reset but allow the info buffer to be used again
       info_seq.max_len(0);
@@ -1880,7 +1880,7 @@ DDS::ReturnCode_t
       //??TBD? - put the info buffer in a pool
 
       this->release_loan(received_data);
-      
+
       // reset the max_len  per DDS spec
       // this also makes access to the recieved_data an error (a spec req)
       received_data.max_len(0);
@@ -2173,16 +2173,16 @@ void
                 <%TYPE%> );
 }
 
-DDS::ReturnCode_t 
+DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::auto_return_loan(void* seq)
 {
   ::<%MODULE%><%TYPE%>ZCSeq& received_data = *(::<%MODULE%><%TYPE%>ZCSeq*)seq;
-  
+
   if (!received_data.owns())
     {
       this->release_loan(received_data);
     }
-  return ::DDS::RETCODE_OK; 
+  return ::DDS::RETCODE_OK;
 }
 
 //TAO::DCPS::DataReaderRemote_ptr
@@ -2204,4 +2204,3 @@ DDS::ReturnCode_t
 }
 
 1;
-

@@ -1,3 +1,8 @@
+Mon Apr 30 16:00:52 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/DCPS/CPPTemplate.pm:
+	  Modify ULong to Long to get rid of scoreboard warnings.
+
 Sat Apr 28 19:04:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
