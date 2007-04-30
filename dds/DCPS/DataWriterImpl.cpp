@@ -825,22 +825,20 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
            data,
            source_timestamp) ;
 
-  SendControlStatus status;
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
-    status = this->publisher_servant_->send_control(publication_id_,
+    SendControlStatus status = this->publisher_servant_->send_control(publication_id_,
                 this,
                 registered_sample) ;
-  }
-
-  if (status == SEND_CONTROL_ERROR)
+    if (status == SEND_CONTROL_ERROR)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance, ")
        ACE_TEXT(" send_control failed. \n")),
       ::DDS::RETCODE_ERROR);
     }
+  }
 
   return ret;
 }
@@ -882,22 +880,20 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
            unregistered_sample_data,
            source_timestamp) ;
 
-  SendControlStatus status;
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
-    status = this->publisher_servant_->send_control(publication_id_,
+    SendControlStatus status = this->publisher_servant_->send_control(publication_id_,
                 this,
                 message) ;
-  }
-
-  if (status == SEND_CONTROL_ERROR)
+    if (status == SEND_CONTROL_ERROR)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister, ")
        ACE_TEXT(" send_control failed. \n")),
       ::DDS::RETCODE_ERROR);
     }
+  }
 
   return ret;
 }
@@ -993,22 +989,20 @@ DataWriterImpl::write ( DataSample* data,
            registered_sample_data,
            source_timestamp) ;
 
-  SendControlStatus status;
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
-    status  = this->publisher_servant_->send_control(publication_id_,
-                 this,
-                 message) ;
-  }
-
-  if (status == SEND_CONTROL_ERROR)
+    SendControlStatus status = this->publisher_servant_->send_control(publication_id_,
+                this,
+                message) ;
+    if (status == SEND_CONTROL_ERROR)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose, ")
        ACE_TEXT(" send_control failed. \n")),
       ::DDS::RETCODE_ERROR);
     }
+  }
 
   return ret;
 }
@@ -1313,25 +1307,23 @@ DataWriterImpl::send_liveliness (const ACE_Time_Value& now)
   ACE_Message_Block* liveliness_msg
     = this->create_control_message(DATAWRITER_LIVELINESS, 0, t) ;
 
-  SendControlStatus status;
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
 
-    status = this->publisher_servant_->send_control(publication_id_,
+    SendControlStatus status = this->publisher_servant_->send_control(publication_id_,
                 this,
                 liveliness_msg) ;
-  }
-
-  if (status == SEND_CONTROL_ERROR)
+    if (status == SEND_CONTROL_ERROR)
     {
       ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness, ")
       ACE_TEXT(" send_control failed. \n")));
     }
-  else
+    else
     {
       last_liveliness_activity_time_ = now;
     }
+  }
 }
 
 
@@ -1475,7 +1467,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
 
 bool
 DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
-					      ::DDS::InstanceHandleSeq & hdls)
+                ::DDS::InstanceHandleSeq & hdls)
 {
   CORBA::ULong num_ids = ids.length ();
   for (CORBA::ULong i = 0; i < num_ids; ++i)
