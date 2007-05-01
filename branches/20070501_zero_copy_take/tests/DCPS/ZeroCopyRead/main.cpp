@@ -60,6 +60,73 @@ enum TransportInstanceId
 };
 
 
+/// This is an allocator that simply uses malloc and free.
+/// A real allocator would most likely use a pool of memory.
+template<class T, std::size_t N>
+class BogusExampleAllocator : public ACE_Allocator
+{
+public:
+    BogusExampleAllocator()
+        : num_allocs_(0)
+        , num_frees_(0)
+    {};
+
+    int num_allocs() { return num_allocs_;};
+    int num_frees()  { return num_frees_;};
+
+    virtual void *malloc (size_t nbytes) { 
+        num_allocs_++;
+        return ACE_OS::malloc(nbytes);
+    };
+    virtual void free (void *ptr) {
+        num_frees_++;
+        ACE_OS::free(ptr);
+    };
+
+  /// These methods are no-ops.
+  virtual void *calloc (size_t nbytes, char initial_value = '\0') 
+        {/* no-op */ return (void*)0;};
+  virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0')
+        {/* no-op */ return (void*)0;};
+
+  virtual int remove (void)
+        {/* no-op */ return -1; };
+  virtual int bind (const char *name, void *pointer, int duplicates = 0)
+        {/* no-op */ return -1; };
+  virtual int trybind (const char *name, void *&pointer)
+        {/* no-op */ return -1; };
+  virtual int find (const char *name, void *&pointer)
+        {/* no-op */ return -1; };
+  virtual int find (const char *name)
+        {/* no-op */ return -1; };
+  virtual int unbind (const char *name)
+        {/* no-op */ return -1; };
+  virtual int unbind (const char *name, void *&pointer)
+        {/* no-op */ return -1; };
+  virtual int sync (ssize_t len = -1, int flags = MS_SYNC)
+        {/* no-op */ return -1; };
+  virtual int sync (void *addr, size_t len, int flags = MS_SYNC)
+        {/* no-op */ return -1; };
+  virtual int protect (ssize_t len = -1, int prot = PROT_RDWR)
+        {/* no-op */ return -1; };
+  virtual int protect (void *addr, size_t len, int prot = PROT_RDWR)
+        {/* no-op */ return -1; };
+#if defined (ACE_HAS_MALLOC_STATS)
+  virtual void print_stats (void) const
+        {/* no-op */ };
+#endif /* ACE_HAS_MALLOC_STATS */
+  virtual void dump (void) const
+        {/* no-op */ };
+
+private:
+    // do not allow copies. - I am not sure this restriction is necessary.
+    BogusExampleAllocator(const BogusExampleAllocator&);
+    BogusExampleAllocator& operator=(const BogusExampleAllocator&);
+
+    int num_allocs_;
+    int num_frees_;
+};
+
 
 int init_tranport ()
 {
@@ -1145,6 +1212,118 @@ int main (int argc, char *argv[])
         check_return_loan_status(status, data1, 0, 0, "t7 return_loan1");
 
       } // t7
+
+      const CORBA::Long max_samples = 2;
+      // scope must be larger than the sequences that use the allocator.
+      BogusExampleAllocator<Test::Simple*,max_samples> the_allocator;
+      {
+        //=====================================================
+        // 8) Show that an allocator can be provided.
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 8 : Show that an allocator can be provided.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // Note: the default allocator for a ZCSeq is very fast because
+        // it will allocate from a pool on the stack and thus avoid
+        // a heap allocation.
+        // Note: because of the read/take preconditions the sequence does not need to resize.
+        SimpleZCSeq                  data1 (0, max_samples, &the_allocator);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1; 
+        foo.count = 8;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t8 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t8 read2");
+
+        if (1 != the_allocator.num_allocs())
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != 8)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples, &the_allocator);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data2, 1, "t8 take");
+
+        if (2 != the_allocator.num_allocs())
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != data2[0].count)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: zero-copy read or take failed to provide same data.\n") ));
+            test_failed = 1;
+
+        }
+
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        // Note: the samples are freed in return_loan (if not reference by something else)
+        //       but the sequence of pointers is not freed until data2 goes out of scope.
+
+        check_return_loan_status(status, data2, 0, 0, "t8 return_loan2");
+
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t8 return_loan1");
+
+
+      } // Note: the sequence memory (pointers to samples) is freed here
+        //       so the same sequence can be used over and over without
+        //       allocating and freeing the array of pointers.
+      if (2 != the_allocator.num_frees())
+      {
+          ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used to free.\n") ));
+          test_failed = 1;
+      }
+
     }
   catch (const TestException&)
     {

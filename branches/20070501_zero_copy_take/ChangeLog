@@ -1,3 +1,15 @@
+Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * DDS_zero-copy.mwc:
+        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        
+          Cleanup/simplify this zero-copy example.
+          
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        
+          Add test of providing an allocator.
+
+
 Tue May  1 22:08:44 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
