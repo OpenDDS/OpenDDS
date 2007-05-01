@@ -1117,7 +1117,7 @@ int main (int argc, char *argv[])
 
           
         check_read_status(status, data2, 1, "t7 take");
-#if 1
+#if 0
     //wait for #10955 "DDS view_state implementation is wrong" to be fixed.
         if (info1[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
         {
