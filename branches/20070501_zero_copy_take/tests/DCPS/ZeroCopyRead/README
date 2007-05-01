@@ -1,14 +1,15 @@
-Functional test of zero-copy reads.
+Functional test of zero-copy reads and tests.
 
 Both publication and subscription work in the main thread
 to simplify the coordination of writes and reads.
 
 
+run_test.pl will run the test but here is how to do it by hand:
 
 
 It needs to launch DCPSInfoRepo:
 
-  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+  ../../../bin/DCPSInfoRepo -o repo.ior -d domain_ids
 
 
 Command line option:
@@ -20,3 +21,7 @@ Command line option:
 
 
 !!! do not use -d because the test depends upon a value of 1
+
+# run the test
+
+./main -DcpsBit 0  -ORBSvcConf ../../tcp.conf  -r 1 -t 0 -m 0 -i 3
