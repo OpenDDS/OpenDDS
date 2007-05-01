@@ -973,6 +973,178 @@ int main (int argc, char *argv[])
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
 
       } // t5
+      {
+        //=====================================================
+        // 6) show that take takes 
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 6 : show that take takes.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // 0 means zero-copy
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1;
+        foo.count = 1;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t6 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->take(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t6 read2");
+
+        if (data1[0].count != 1)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t6 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        if (status != ::DDS::RETCODE_NO_DATA)
+        {
+            ACE_ERROR ((LM_ERROR,
+            ACE_TEXT("(%P|%t) %s ERROR: expected NO_DATA status from take!\n"), 
+            "t6"));
+            test_failed = 1;
+
+        }
+
+        // ?OK to return an empty loan?
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        check_return_loan_status(status, data2, 0, 0, "t6 return_loan2");
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t6 return_loan1");
+
+      } // t6
+
+      {
+        //=====================================================
+        // 7) show we can zero-copy read and then take and changes view state
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 7 : show we can zero-copy read and then take and changes view state.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // 0 means zero-copy
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        // It is important that the last test case took all of the samples!
+
+        foo.key  = 7; // a new instance - this is important to get the correct view_state.
+        foo.count = 7;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t7 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t7 read2");
+
+        if (info1[0].view_state != ::DDS::NEW_VIEW_STATE)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: expected NEW view state.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != 7)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data2, 1, "t7 take");
+#if 1
+    //wait for #10955 "DDS view_state implementation is wrong" to be fixed.
+        if (info1[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: expected NOT NEW view state.\n") ));
+            test_failed = 1;
+        }
+#endif
+        if (data1[0].count != data2[0].count)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: zero-copy read or take failed to provide same data.\n") ));
+            test_failed = 1;
+
+        }
+
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        check_return_loan_status(status, data2, 0, 0, "t7 return_loan2");
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t7 return_loan1");
+
+      } // t7
     }
   catch (const TestException&)
     {
