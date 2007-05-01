@@ -83,40 +83,120 @@ public:
         ACE_OS::free(ptr);
     };
 
-  /// These methods are no-ops.
-  virtual void *calloc (size_t nbytes, char initial_value = '\0') 
-        {/* no-op */ return (void*)0;};
-  virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0')
-        {/* no-op */ return (void*)0;};
+    void *calloc (size_t nbytes, char initial_value) 
+            {/* no-op */ 
+              ACE_UNUSED_ARG (nbytes);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
 
-  virtual int remove (void)
-        {/* no-op */ return -1; };
-  virtual int bind (const char *name, void *pointer, int duplicates = 0)
-        {/* no-op */ return -1; };
-  virtual int trybind (const char *name, void *&pointer)
-        {/* no-op */ return -1; };
-  virtual int find (const char *name, void *&pointer)
-        {/* no-op */ return -1; };
-  virtual int find (const char *name)
-        {/* no-op */ return -1; };
-  virtual int unbind (const char *name)
-        {/* no-op */ return -1; };
-  virtual int unbind (const char *name, void *&pointer)
-        {/* no-op */ return -1; };
-  virtual int sync (ssize_t len = -1, int flags = MS_SYNC)
-        {/* no-op */ return -1; };
-  virtual int sync (void *addr, size_t len, int flags = MS_SYNC)
-        {/* no-op */ return -1; };
-  virtual int protect (ssize_t len = -1, int prot = PROT_RDWR)
-        {/* no-op */ return -1; };
-  virtual int protect (void *addr, size_t len, int prot = PROT_RDWR)
-        {/* no-op */ return -1; };
+    void *calloc (size_t n_elem, size_t elem_size, char initial_value)
+            {/* no-op */ 
+              ACE_UNUSED_ARG (n_elem);
+              ACE_UNUSED_ARG (elem_size);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
+
+    int remove (void)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                return -1; 
+            };
+
+    int bind (const char *name, void *pointer, int duplicates)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                ACE_UNUSED_ARG (duplicates);
+                return -1; 
+            };
+
+    int trybind (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int find (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int find (const char *name)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                return -1; 
+            };
+
+    int unbind (const char *name)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                return -1; 
+            };
+
+    int unbind (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int sync (ssize_t len, int flags)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (flags);
+                return -1; 
+            };
+
+    int sync (void *addr, size_t len, int flags)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (addr);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (flags);
+                return -1; 
+            };
+
+    int protect (ssize_t len, int prot)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (prot);
+                return -1; 
+            };
+
+    int protect (void *addr, size_t len, int prot)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (addr);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (prot);
+                return -1; 
+            };
+
 #if defined (ACE_HAS_MALLOC_STATS)
-  virtual void print_stats (void) const
-        {/* no-op */ };
+
+    void print_stats (void) const
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+            };
 #endif /* ACE_HAS_MALLOC_STATS */
-  virtual void dump (void) const
-        {/* no-op */ };
+
+    void dump (void) const
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+            };
 
 private:
     // do not allow copies. - I am not sure this restriction is necessary.
