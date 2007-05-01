@@ -1,0 +1,13 @@
+project(DcpsFooTest3): dcpsexe, portableserver {
+  exename   = FooTest3
+  libs     +=  DcpsFooType3
+  libpaths += ../FooType3
+  after    += DcpsFooType3
+
+  Source_Files {
+    main.cpp
+    InstanceDataMap.cpp
+    Writer.cpp
+  }
+}
+
