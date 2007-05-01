@@ -1,3 +1,9 @@
+Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        
+          Avoid build warnings.
+
 Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * DDS_zero-copy.mwc:
