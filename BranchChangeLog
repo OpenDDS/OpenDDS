@@ -1,3 +1,16 @@
+Wed May  2 14:01:45 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataView.h:
+        * dds/DCPS/transport/framework/DataView.inl:
+        * dds/DCPS/transport/framework/DataView.cpp:
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Added a DataView class that will be used in a one-per-transport
+          fashion to break apart messages into suitably-sized chunks.
+
 Mon Apr 30 17:05:45 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

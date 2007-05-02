@@ -7,6 +7,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "LinkCallback.h"
 #include "Transport.h"
+#include "ace/Message_Block.h"
 #include "ace/Synch.h"
 #include <queue>
 
@@ -23,13 +24,13 @@ namespace TAO
       : public TransportAPI::LinkCallback
     {
     public:
-      LinkImpl(TransportAPI::Transport::Link& link);
+      LinkImpl(TransportAPI::Transport::Link& link, size_t max_transport_buffer_size);
       virtual ~LinkImpl();
 
-      TransportAPI::Status connect(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
-      TransportAPI::Status disconnect(const TransportAPI::Id& requestId);
+      TransportAPI::Status connect(TransportAPI::BLOB* endpoint);
+      TransportAPI::Status disconnect();
 
-      TransportAPI::Status send(const TransportAPI::iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId);
+      TransportAPI::Status send(ACE_Message_Block& mb);
 
       virtual void connected(const TransportAPI::Id& requestId);
       virtual void disconnected(const TransportAPI::failure_reason& reason);
@@ -42,20 +43,31 @@ namespace TAO
     private:
       typedef ACE_Guard<ACE_Thread_Mutex> Guard;
 
-      void enqueue(const Guard&, const TransportAPI::iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId);
+      bool enqueue(const Guard&, ACE_Message_Block& mb, const TransportAPI::Id& requestId);
+      TransportAPI::Id getNextRequestId(const Guard&);
 
       struct IOItem
       {
-        IOItem(const TransportAPI::iovec buffersIn[], size_t iovecSizeIn, const TransportAPI::Id& requestIdIn);
+        IOItem(
+          ACE_Message_Block& mb,
+          char* data,
+          size_t size,
+          const TransportAPI::Id& requestIdIn
+          );
+        IOItem(const IOItem& rhs);
         ~IOItem();
 
-        const TransportAPI::iovec* buffers;
-        size_t iovecSize;
-        TransportAPI::Id requestId;
+        ACE_Message_Block mb_;
+        char* data_begin_;
+        size_t data_size_;
+        TransportAPI::Id requestId_;
       };
 
       TransportAPI::Transport::Link& link_;
+      size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;
+      TransportAPI::Id currentRequestId_;
+      bool connected_;
       bool queueing_;
       std::queue<IOItem> queue_;
     };

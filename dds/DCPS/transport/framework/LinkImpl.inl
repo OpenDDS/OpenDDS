@@ -6,27 +6,42 @@
 #include <stdexcept>
 
 TAO::DCPS::LinkImpl::IOItem::IOItem(
-  const TransportAPI::iovec buffersIn[],
-  size_t iovecSizeIn,
+  ACE_Message_Block& mb,
+  char* data,
+  size_t size,
   const TransportAPI::Id& requestIdIn
   )
-  : buffers(&buffersIn[0])
-  , iovecSize(iovecSizeIn)
-  , requestId(requestIdIn)
+  : mb_(mb, 0)
+  , data_begin_(data)
+  , data_size_(size)
+  , requestId_(requestIdIn)
 {
   // TBD!
+}
+
+TAO::DCPS::LinkImpl::IOItem::IOItem(
+  const TAO::DCPS::LinkImpl::IOItem::IOItem& rhs
+  )
+  : mb_(rhs.mb_, 0)
+  , data_begin_(rhs.data_begin_)
+  , data_size_(rhs.data_size_)
+  , requestId_(rhs.requestId_)
+{
 }
 
 TAO::DCPS::LinkImpl::IOItem::~IOItem(
   )
 {
-  delete [] buffers;
 }
 
 TAO::DCPS::LinkImpl::LinkImpl(
-  TransportAPI::Transport::Link& link
+  TransportAPI::Transport::Link& link,
+  size_t max_transport_buffer_size
   )
   : link_(link)
+  , max_transport_buffer_size_(max_transport_buffer_size)
+  , currentRequestId_(0)
+  , connected_(false)
   , queueing_(false)
 {
   link_.setCallback(this);

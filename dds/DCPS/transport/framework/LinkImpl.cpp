@@ -9,55 +9,55 @@
 #include "LinkImpl.inl"
 #endif /* __ACE_INLINE__ */
 
+#include "DataView.h"
 #include "ace/Guard_T.h"
 
 TransportAPI::Status
 TAO::DCPS::LinkImpl::connect(
-  TransportAPI::BLOB* endpoint,
-  const TransportAPI::Id& requestId
+  TransportAPI::BLOB* endpoint
   )
 {
   Guard guard(lock_);
+  TransportAPI::Id requestId(getNextRequestId(guard));
   return link_.connect(endpoint, requestId);
 }
 
 TransportAPI::Status
 TAO::DCPS::LinkImpl::disconnect(
-  const TransportAPI::Id& requestId
   )
 {
   Guard guard(lock_);
+  TransportAPI::Id requestId(getNextRequestId(guard));
   return link_.disconnect(requestId);
 }
 
 TransportAPI::Status
 TAO::DCPS::LinkImpl::send(
-  const TransportAPI::iovec buffers[],
-  size_t iovecSize,
-  const TransportAPI::Id& requestId
+  ACE_Message_Block& mb
   )
 {
   Guard guard(lock_);
-  if (!queueing_ && queue_.empty())
+  TransportAPI::Id requestId(getNextRequestId(guard));
+  ACE_Message_Block copy(mb, 0);
+  if (!enqueue(guard, copy, requestId))
   {
-    return link_.send(buffers, iovecSize, requestId);
+    // Error enqueueing request
   }
-  else
-  {
-    enqueue(guard, buffers, iovecSize, requestId);
-  }
+  return TransportAPI::make_status();
 }
 
 void
 TAO::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
+  connected_ = true;
 }
 
 void
 TAO::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
+  connected_ = false;
 }
 
 void
@@ -85,14 +85,29 @@ TAO::DCPS::LinkImpl::received(const TransportAPI::iovec buffers[], size_t iovecS
   Guard guard(lock_);
 }
 
-void
+TransportAPI::Id
+TAO::DCPS::LinkImpl::getNextRequestId(
+  const Guard&
+  )
+{
+  return ++currentRequestId_;
+}
+
+bool
 TAO::DCPS::LinkImpl::enqueue(
   const Guard&,
-  const TransportAPI::iovec buffers[],
-  size_t iovecSize,
+  ACE_Message_Block& mb,
   const TransportAPI::Id& requestId
   )
 {
-  IOItem item(buffers, iovecSize, requestId);
-  queue_.push(item);
+  DataView view(mb, max_transport_buffer_size_);
+  DataView::View packets;
+
+  view.get(packets);
+  for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
+  {
+    IOItem item(mb, iter->first, iter->second, requestId);
+    queue_.push(item);
+  }
+  return true;
 }
