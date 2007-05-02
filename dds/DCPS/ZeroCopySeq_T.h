@@ -24,8 +24,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#define DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE 10
-
 namespace TAO
 {
     namespace DCPS
@@ -38,7 +36,15 @@ namespace TAO
         *     an "array" of pointers to the samples so they can be
         *     "loaned" to the application code.
         *
-        * @NOTE:  I did not inherit from ACE_Vector or ACE_Array_base because
+        * @note: This class does not support resizing the maximum slots.
+        *        Resizing is not needed because of the preconditions for read/take.
+        *        hmm - but if init_size is < read's max_samples parametr then
+        *              read will return just init_size elements (if max_len == 0).
+        *        TBD - should we remove this limitation?
+        *        TBD - should the "init_size" constructor parameter be renamed to
+        *              "max_slots" in recognition of the non-resizing?
+        *
+        * @note:  I did not inherit from ACE_Vector or ACE_Array_base because
         * I needed to override the [] operator and I did not
         * want to confuse things by having the inherited methods/operators
         * return pointers while the overridden methods/operators 
@@ -49,13 +55,6 @@ namespace TAO
         * return a reference to Sample_T instead of the pointer.
         *
         * @note: Also have an interface as described in the DDS specification.
-        *
-        * @note Open issues:
-        * 1) How to support spec saying: "To avoid potential memory leaks, 
-        *    the implementation of the Data and SampleInfo collections should 
-        *    disallow changing the length of a collection for which owns==FALSE."
-        * 2) What does spec mean by: "Furthermore, deleting a collection for which 
-        *    owns==FALSE should be considered an error."
         *
         */
         template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
@@ -128,7 +127,9 @@ namespace TAO
             // ==== OpenDDS internal methods =====
             //!!!!!! User code should not use this methods.
 
-            // ?TBD - make this operator not available to the DDS user.
+            // ?TBD - make this method not available to the DDS user.
+            //   idea: make this private and a friend helper class
+            //      used by type impls.
             void assign_ptr(::CORBA::ULong ii, 
                             ::TAO::DCPS::ReceivedDataElement* item,
                             ::TAO::DCPS::DataReaderImpl* loaner);
@@ -148,21 +149,25 @@ namespace TAO
             /// true if this sequence is supporting zero-copy reads/takes
             bool is_zero_copy_;
 
+            /// The datareader that loaned its samples.
             ::TAO::DCPS::DataReaderImpl* loaner_;
 
-            // The default allocator will be very fast for the first
-            // allocation but use the standard heap for subsequent allocations
-            // such as if the max_size gets bigger.
+            /// the default allocator
             FirstTimeFastAllocator<Sample_T*, ZCS_DEFAULT_SIZE> defaultAllocator_;
 
-            //typedef ACE_Array_Base<Sample_T> Ptr_Seq_Type;
             typedef ACE_Vector<TAO::DCPS::ReceivedDataElement*, ZCS_DEFAULT_SIZE> Ptr_Seq_Type;
+
+            /// "array" of pointers if the sequence is supporting zero-copy reads
             Ptr_Seq_Type ptrs_;
 
             // Note: use default size of zero but constructor may override that
             //   It is overriden if max_len > 0.
             typedef ACE_Vector<Sample_T, 0> Sample_Seq_Type;
+
+            /// "array" of samples if the sequence is supporting single-copy reads;
+            ///  otherwise it is an empty container.
             Sample_Seq_Type samples_;
+
         }; // class ZeroCopyDataSeq
 
     } // namespace  ::DDS

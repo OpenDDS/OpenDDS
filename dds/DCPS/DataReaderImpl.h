@@ -340,7 +340,11 @@ namespace TAO
 
       //NOTE: this cannot be pure virtual because of unit test projects like
       //      DcpsFooType, DdsDcps_UnitTest, and dcpsinfo_test_subscriber.
+      /// return loand of zero-copy sequence.
       virtual DDS::ReturnCode_t auto_return_loan(void* seq); // = 0;
+
+      /// return the number of outstanding zero-copy samples loaned out.
+      virtual int num_zero_copies();
 
     protected:
 

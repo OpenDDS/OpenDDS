@@ -1399,6 +1399,73 @@ int main (int argc, char *argv[])
           test_failed = 1;
       }
 
+      {
+        //=====================================================
+        // 9) Show that loans are checked by delete_datareader.
+        //=====================================================
+      // !!!! note - this test should be the last because it deletes the datareader
+        ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
+
+        const CORBA::Long max_samples = 2;
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1; 
+        foo.count = 9;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t9 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t9 read2");
+
+        if (data1[0].count != 9)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+        }
+
+        status =   sub->delete_datareader(dr.in ());
+
+        if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite should have returned PRECONDITION_NOT_MET but returned retcode %d.\n"), status ));
+            test_failed = 1;
+        }
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t9 return_loan");
+
+        status =   sub->delete_datareader(dr.in ());
+
+        if (status != ::DDS::RETCODE_OK)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite failed with retcode %d.\n"), status ));
+            test_failed = 1;
+        }
+
+
+      }
     }
   catch (const TestException&)
     {
@@ -1417,7 +1484,7 @@ int main (int argc, char *argv[])
       //clean up subscriber objects
 //      sub->delete_contained_entities() ;
 
-      sub->delete_datareader(dr.in ());
+      //done above - in the tests sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
       // clean up common objects

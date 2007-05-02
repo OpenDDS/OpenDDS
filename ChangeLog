@@ -1,3 +1,25 @@
+Wed May  2 19:43:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/ZeroCopyRead/README:
+        
+          Add no existing loans precondition check to delete_datawriter.
+          And test for it.
+
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.inl:
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeqBase.h:
+        
+          Code cleanup.
+
 Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * tests/DCPS/ZeroCopyRead/main.cpp:
