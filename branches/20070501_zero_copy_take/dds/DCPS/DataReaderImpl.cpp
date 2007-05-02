@@ -1697,5 +1697,31 @@ DataReaderImpl::auto_return_loan(void* seq) // = 0;
     return ::DDS::RETCODE_ERROR;
 }
 
+int 
+DataReaderImpl::num_zero_copies()
+{
+  int loans = 0;
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    1 /* assume we have loans */);
+
+  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
+       pos != instances_.end() ;
+       ++pos)
+    {
+      SubscriptionInstance *ptr = (*pos).int_id_;
+
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+            item != 0 ; item = item->next_data_sample_)
+        {
+            loans += item->zero_copy_cnt_;
+        }
+    }
+
+    //ACE_ASSERT("DataReaderImpl::num_zero_copies not implemented"==0);
+    return loans;
+}
+
 } // namespace DCPS
 } // namespace TAO

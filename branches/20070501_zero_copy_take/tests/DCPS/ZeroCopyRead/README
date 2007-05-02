@@ -11,6 +11,7 @@ It needs to launch DCPSInfoRepo:
 
   ../../../bin/DCPSInfoRepo -o repo.ior -d domain_ids
 
+  ..\..\..\bin\DCPSInfoRepo -o repo.ior -d domain_ids
 
 Command line option:
 
