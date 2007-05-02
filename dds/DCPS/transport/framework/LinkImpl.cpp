@@ -80,7 +80,7 @@ TAO::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const Transport
 }
 
 void
-TAO::DCPS::LinkImpl::received(const TransportAPI::iovec buffers[], size_t iovecSize)
+TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 {
   Guard guard(lock_);
 }

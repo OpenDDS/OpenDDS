@@ -1,6 +1,7 @@
 #ifndef TRANSPORTAPI_TRANSPORTTYPES_H
 #define TRANSPORTAPI_TRANSPORTTYPES_H
 
+#include <ace/OS_NS_sys_uio.h>
 #include <string>
 #include <vector>
 #include <utility>
@@ -10,19 +11,28 @@ namespace TransportAPI
   /// Request identifier
   typedef unsigned long Id;
 
+  /// Name-value pair support
+  typedef std::pair<std::string, std::string> NVP;
+  typedef std::vector<NVP> NVPList;
+
   /// An opaque BLOB type
   /// @note The BLOB should contain information related to the current endpoint, and
   /// ideally enough to communicate to a remote endpoint how it should connect to
   /// this one.
-  struct BLOB
+  class BLOB
   {
-    size_t size;
-    void* data;
-  };
+  public:
+    const std::string& getIdentifier() const;
+    const NVPList& getParameters() const;
 
-  /// Name-value pair support
-  typedef std::pair<std::string, std::string> NVP;
-  typedef std::vector<NVP> NVPList;
+  protected:
+    void setIdentifier(const std::string& identifier);
+    NVPList& getParameters();
+
+  private:
+    std::string identifier_;
+    NVPList parameters_;
+  };
 
   /// A class to represent reasons for operational failure
   class failure_reason
@@ -64,17 +74,11 @@ namespace TransportAPI
 
   typedef std::pair<bool, failure_reason> Status;
 
-  Status make_status(bool success = true, const failure_reason& reason = failure_reason())
+  inline Status
+  make_status(bool success = true, const failure_reason& reason = failure_reason())
   {
     return std::make_pair(success, reason);
   }
-
-  // An iovec struct
-  struct iovec
-  {
-    void* iov_base;
-    size_t iov_len;
-  };
 }
 
 #endif /* TRANSPORTAPI_TRANSPORTTYPES_H */

@@ -38,7 +38,7 @@ namespace TAO
       virtual void sendSucceeded(const TransportAPI::Id& requestId);
       virtual void sendFailed(const TransportAPI::failure_reason& reason);
       virtual void backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason);
-      virtual void received(const TransportAPI::iovec buffers[], size_t iovecSize);
+      virtual void received(const iovec buffers[], size_t iovecSize);
 
     private:
       typedef ACE_Guard<ACE_Thread_Mutex> Guard;
