@@ -1382,7 +1382,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
   // this call will start the livilness timer if it is not already set
   ACE_Time_Value now = ACE_OS::gettimeofday ();
   this->handle_timeout (now, this);
-  
+
   if (listener != 0)
     {
       listener->on_liveliness_changed (dr_remote_objref_.in (),
@@ -1582,7 +1582,7 @@ void
 DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
 {
   DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",5);
-  
+
   if (! this->is_bit_)
   {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
@@ -1653,7 +1653,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
       hdls[i] = ids[i];
     }
   }
-  
+
   return true;
 }
 
@@ -1690,8 +1690,8 @@ bool DataReaderImpl::is_bit () const
 }
 
 //REMOVE this when we can change this method back to a pure virtual method.
-DDS::ReturnCode_t 
-DataReaderImpl::auto_return_loan(void* seq) // = 0;
+DDS::ReturnCode_t
+DataReaderImpl::auto_return_loan(void* ) // = 0;
 {
     ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
     return ::DDS::RETCODE_ERROR;

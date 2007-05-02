@@ -73,9 +73,6 @@ int init_tranport ()
       TAO::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
@@ -90,9 +87,6 @@ int init_tranport ()
                                                       TAO::DCPS::DONT_AUTO_CONFIG);
       TAO::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
-
-      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -197,7 +191,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"), 
+          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -205,7 +199,7 @@ void check_read_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"), 
+          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -251,7 +245,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_NO_DATA)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"), 
+          ACE_TEXT("(%P|%t) %s ERROR: reader received NO_DATA!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -259,7 +253,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"), 
+          ACE_TEXT("(%P|%t) %s ERROR: reader received PRECONDITION_NOT_MET!\n"),
           where));
         test_failed = 1;
         throw TestException();
@@ -483,7 +477,7 @@ int main (int argc, char *argv[])
 
 
       // wait for association establishement before writing.
-      // -- replaced this sleep with the while loop below; 
+      // -- replaced this sleep with the while loop below;
       //    waiting on the one association we expect.
       //  ACE_OS::sleep(5); //REMOVE if not needed
       ::DDS::InstanceHandleSeq handles;
@@ -532,7 +526,7 @@ int main (int argc, char *argv[])
       foo.count = 1;
       foo.text = CORBA::string_dup("t1");
       foo.ls = ls;
-      
+
 
       handle
           = fast_dw->_cxx_register (foo);
@@ -547,7 +541,7 @@ int main (int argc, char *argv[])
                            ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
                            1);
 
-      
+
       TAO::DCPS::ReceivedDataElement *item;
       {
         //=====================================================
@@ -559,16 +553,16 @@ int main (int argc, char *argv[])
         SimpleZCSeq                  data1 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
 
-          
+
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t1 read2");
 
         // this should change the value returned by the next read
@@ -576,14 +570,14 @@ int main (int argc, char *argv[])
 
         SimpleZCSeq                  data2 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
-        status = fast_dr->read(  data2 
+        status = fast_dr->read(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data2, 1, "t1 read2");
 
         if (data1[0].count != data2[0].count)
@@ -631,21 +625,21 @@ int main (int argc, char *argv[])
         // 2) show that single-copy is makes copies
         //=====================================================
         ACE_DEBUG((LM_INFO,"==== TEST 2 : show that single-copy is makes copies\n"));
-          
+
         const CORBA::Long max_samples = 2;
-        // types supporting zero-copy read 
+        // types supporting zero-copy read
         SimpleZCSeq                  data1 (max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info1 (max_samples);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t1 read2");
 
         // this should change the value returned by the next read
@@ -654,14 +648,14 @@ int main (int argc, char *argv[])
 
         SimpleZCSeq                  data2 (max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info2 (max_samples);
-        status = fast_dr->read(  data2 
+        status = fast_dr->read(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data2, 1, "t2 read2");
 
         if (data1[0].count == data2[0].count)
@@ -682,22 +676,22 @@ int main (int argc, char *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 1, max_samples, "t2 return_loan2");
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 1, max_samples, "t2 return_loan1");
 
         // END OF BLOCK destruction.
-        // 4/24/07 Note: breakpoint in the ls sequence destructor 
-        // (part of Simple sample type) showed it was called when this 
+        // 4/24/07 Note: breakpoint in the ls sequence destructor
+        // (part of Simple sample type) showed it was called when this
         // block went out of scope (because the data1 and data2 are destroyed).
         // Good!
-        // 4/24/07 Note: breakpoint in ACE_Array destructor showed 
+        // 4/24/07 Note: breakpoint in ACE_Array destructor showed
         // it was called for the ZeroCopyInfoSeq. Good!
 
       } // t2
@@ -716,7 +710,7 @@ int main (int argc, char *argv[])
         SimpleZCSeq                  data1 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
 
-              
+
         foo.key  = 1;
         foo.count = 1;
 
@@ -732,14 +726,14 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t3 read2");
 
         if (data1[0].count != 1)
@@ -769,14 +763,14 @@ int main (int argc, char *argv[])
         SimpleZCSeq                  data2 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
 
-        status = fast_dr->read(  data2 
+        status = fast_dr->read(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data2, 1, "t3 read2");
 
         if (data1[0].count != 1)
@@ -796,7 +790,7 @@ int main (int argc, char *argv[])
             test_failed = 1;
 
         }
-        status = fast_dr->return_loan(  data2 
+        status = fast_dr->return_loan(  data2
                                         , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t3 return_loan2");
@@ -804,13 +798,13 @@ int main (int argc, char *argv[])
         // This return_loan will free the memory because the sample
         // has already been "lost" from the instance container.
 
-        // 4/24/07 Note: breakpoint in the ls sequence destructor 
-        // (part of Simple sample type) showed it was called when this 
+        // 4/24/07 Note: breakpoint in the ls sequence destructor
+        // (part of Simple sample type) showed it was called when this
         // block went out of scope. Good!
         // Note: the info sequence data is not destroyed/freed until
-        //       the info1 object goes out of scope -- so it can 
+        //       the info1 object goes out of scope -- so it can
         //       be reused without alloc & free.
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t3 return_loan1");
@@ -826,16 +820,16 @@ int main (int argc, char *argv[])
         SimpleZCSeq                  data1;
         ::TAO::DCPS::SampleInfoZCSeq info1;
 
-          
+
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t4 read2");
 
         // this should change the value returned by the next read
@@ -844,14 +838,14 @@ int main (int argc, char *argv[])
         {
             SimpleZCSeq                  data2;
             ::TAO::DCPS::SampleInfoZCSeq info2;
-            status = fast_dr->read(  data2 
+            status = fast_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
                                     , ::DDS::ANY_VIEW_STATE
                                     , ::DDS::ANY_INSTANCE_STATE );
 
-              
+
             check_read_status(status, data2, 1, "t4 read2");
 
             if (data1[0].count != data2[0].count)
@@ -870,7 +864,7 @@ int main (int argc, char *argv[])
                 test_failed = 1;
             }
 
-        } // data2 goes out of scope here and automatically return_loan'd 
+        } // data2 goes out of scope here and automatically return_loan'd
             if (item->ref_count_ != 2)
             {
                 ACE_ERROR ((LM_ERROR,
@@ -896,7 +890,7 @@ int main (int argc, char *argv[])
         // 0 means zero-copy
         SimpleZCSeq                  data1 (0, max_samples);
         ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
-         
+
         foo.key  = 1;
         foo.count = 1;
 
@@ -911,14 +905,14 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t5 read2");
 
         if (data1[0].count != 1)
@@ -944,19 +938,19 @@ int main (int argc, char *argv[])
                             ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
                             1);
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
 
-        status = fast_dr->read(  data1 
+        status = fast_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+
         check_read_status(status, data1, 1, "t5 read2");
 
         if (data1[0].count != 2)
@@ -967,7 +961,7 @@ int main (int argc, char *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data1 
+        status = fast_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");

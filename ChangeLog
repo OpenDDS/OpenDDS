@@ -1,3 +1,15 @@
+Wed May  2 14:32:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+	  Removed unused parameters to cleanup scoreboard warnings.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+          minor cleanup.
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+          Remove unused variables to cleanup scoreboard warnings.
+
 Mon Apr 30 16:00:52 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/DCPS/CPPTemplate.pm:
