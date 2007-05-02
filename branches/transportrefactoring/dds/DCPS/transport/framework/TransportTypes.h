@@ -29,7 +29,7 @@ namespace TransportAPI
     : public std::exception
   {
   public:
-    explicit failure_reason(const std::string& reason, const Id& id = 0)
+    explicit failure_reason(const std::string& reason = std::string(), const Id& id = 0)
       : std::exception()
       , reason_(reason)
       , id_(id)
@@ -63,6 +63,11 @@ namespace TransportAPI
   };
 
   typedef std::pair<bool, failure_reason> Status;
+
+  Status make_status(bool success = true, const failure_reason& reason = failure_reason())
+  {
+    return std::make_pair(success, reason);
+  }
 
   // An iovec struct
   struct iovec
