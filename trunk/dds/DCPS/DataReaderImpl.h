@@ -340,7 +340,7 @@ namespace TAO
 
       //NOTE: this cannot be pure virtual because of unit test projects like
       //      DcpsFooType, DdsDcps_UnitTest, and dcpsinfo_test_subscriber.
-      virtual DDS::ReturnCode_t auto_return_loan(void* seq); // = 0;
+      virtual DDS::ReturnCode_t auto_return_loan(void* ); // = 0;
 
     protected:
 
@@ -396,7 +396,7 @@ namespace TAO
 
     private:
 
-      /// Lookup the instance handles by the publication repo ids 
+      /// Lookup the instance handles by the publication repo ids
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
