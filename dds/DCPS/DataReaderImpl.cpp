@@ -1693,8 +1693,9 @@ bool DataReaderImpl::is_bit () const
 DDS::ReturnCode_t 
 DataReaderImpl::auto_return_loan(void* seq) // = 0;
 {
-    ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
-    return ::DDS::RETCODE_ERROR;
+  ACE_UNUSED_ARG (seq);
+  ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
+  return ::DDS::RETCODE_ERROR;
 }
 
 int 
@@ -1719,7 +1720,6 @@ DataReaderImpl::num_zero_copies()
         }
     }
 
-    //ACE_ASSERT("DataReaderImpl::num_zero_copies not implemented"==0);
     return loans;
 }
 
