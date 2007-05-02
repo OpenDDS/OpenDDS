@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // ============================================================================
 /**
- *  @file   ZeroCopySeq_T.h
+ *  @file   ZeroCopyInfoSeq_T.h
  *
  *  $Id$
  *
@@ -22,8 +22,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#define DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE 10
 
 namespace TAO
 {

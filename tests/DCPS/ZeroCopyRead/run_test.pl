@@ -11,8 +11,6 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-
 # single reader with single instances test
 $multiple_instance=0;
 $num_samples_per_reader=3;

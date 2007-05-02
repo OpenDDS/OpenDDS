@@ -252,6 +252,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
+  int loans = dr_servant->num_zero_copies ();
+  if (0 != loans)
+    {
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+  
   SubscriberDataReaderInfo* dr_info = 0;
 
   {
