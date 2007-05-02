@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // ============================================================================
 /**
- *  @file   ZeroCopySeq_T.h
+ *  @file   ZeroCopyAllocator_T.h
  *
  *  $Id$
  *
@@ -25,10 +25,12 @@ namespace TAO
     namespace DCPS
     {
 
+        /// This allocator is "Fast" because it's pool can be on the stack 
+        ///   (If the object is on the stack and hence it does not require the 
+        ///    cost of allocating and deallocating on the heap.  It object is on the
+        ///    heap then it requires just one allocation; not two.)
+        /// @WARNING The object using this allocator must not have a scope smaller than this object !!!
         template <class T, std::size_t N>
-            // This allocator is "Fast" because it's pool can be on the stack (if the object is on the stack 
-            //               and hence it does not require the cost of allocating and deallocating on the heap.
-            //!!!! The object using this allocator must not have a scope smaller than this object.
         class FirstTimeFastAllocator : public ACE_Allocator
         {
         public:

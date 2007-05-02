@@ -21,6 +21,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#define DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE 20
+
 namespace TAO
 {
     namespace DCPS

@@ -1,3 +1,63 @@
+Wed May  2 22:03:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+      Merged https://svn.dre.vanderbilt.edu/DOC/DDS/branches/20070501_zero_copy_take
+      branch (from 644 to 654) with changes indented below.
+      
+	Wed May  2 19:43:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+			* dds/DCPS/DataReaderImpl.cpp:
+			* dds/DCPS/DataReaderImpl.h:
+			* dds/DCPS/SubscriberImpl.cpp:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+			* tests/DCPS/ZeroCopyRead/README:
+	        
+			Add no existing loans precondition check to delete_datawriter.
+			And test for it.
+
+			* dds/DCPS/ZeroCopyAllocator_T.cpp:
+			* dds/DCPS/ZeroCopyAllocator_T.h:
+			* dds/DCPS/ZeroCopyAllocator_T.inl:
+			* dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+			* dds/DCPS/ZeroCopyInfoSeq_T.h:
+			* dds/DCPS/ZeroCopyInfoSeq_T.inl:
+			* dds/DCPS/ZeroCopySeq_T.h:
+			* dds/DCPS/ZeroCopySeqBase.h:
+	        
+			Code cleanup.
+
+	Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+	        
+			Avoid build warnings.
+
+	Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+			* DDS_zero-copy.mwc:
+			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+	        
+			Cleanup/simplify this zero-copy example.
+	          
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+	        
+			Add test of providing an allocator.
+
+
+	Tue May  1 22:08:44 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+			* bin/DCPS/CPPTemplate.pm:
+	        
+			Support zero-copy take.
+	          
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+			* tests/DCPS/ZeroCopyRead/README:
+	        
+			Update test to cover zero-copy take.
+
+			* tests/DCPS/ZeroCopyRead/run_test.pl:
+	        
+			Remove unneeded code.
+
 Wed May  2 14:32:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/DataReaderImpl.h:

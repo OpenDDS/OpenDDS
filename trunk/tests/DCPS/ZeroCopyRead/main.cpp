@@ -60,6 +60,153 @@ enum TransportInstanceId
 };
 
 
+/// This is an allocator that simply uses malloc and free.
+/// A real allocator would most likely use a pool of memory.
+template<class T, std::size_t N>
+class BogusExampleAllocator : public ACE_Allocator
+{
+public:
+    BogusExampleAllocator()
+        : num_allocs_(0)
+        , num_frees_(0)
+    {};
+
+    int num_allocs() { return num_allocs_;};
+    int num_frees()  { return num_frees_;};
+
+    virtual void *malloc (size_t nbytes) { 
+        num_allocs_++;
+        return ACE_OS::malloc(nbytes);
+    };
+    virtual void free (void *ptr) {
+        num_frees_++;
+        ACE_OS::free(ptr);
+    };
+
+    void *calloc (size_t nbytes, char initial_value) 
+            {/* no-op */ 
+              ACE_UNUSED_ARG (nbytes);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
+
+    void *calloc (size_t n_elem, size_t elem_size, char initial_value)
+            {/* no-op */ 
+              ACE_UNUSED_ARG (n_elem);
+              ACE_UNUSED_ARG (elem_size);
+              ACE_UNUSED_ARG (initial_value);
+              return (void*)0;
+            };
+
+    int remove (void)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                return -1; 
+            };
+
+    int bind (const char *name, void *pointer, int duplicates)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                ACE_UNUSED_ARG (duplicates);
+                return -1; 
+            };
+
+    int trybind (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int find (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int find (const char *name)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                return -1; 
+            };
+
+    int unbind (const char *name)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                return -1; 
+            };
+
+    int unbind (const char *name, void *&pointer)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (name);
+                ACE_UNUSED_ARG (pointer);
+                return -1; 
+            };
+
+    int sync (ssize_t len, int flags)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (flags);
+                return -1; 
+            };
+
+    int sync (void *addr, size_t len, int flags)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (addr);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (flags);
+                return -1; 
+            };
+
+    int protect (ssize_t len, int prot)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (prot);
+                return -1; 
+            };
+
+    int protect (void *addr, size_t len, int prot)
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+                ACE_UNUSED_ARG (addr);
+                ACE_UNUSED_ARG (len);
+                ACE_UNUSED_ARG (prot);
+                return -1; 
+            };
+
+#if defined (ACE_HAS_MALLOC_STATS)
+
+    void print_stats (void) const
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+            };
+#endif /* ACE_HAS_MALLOC_STATS */
+
+    void dump (void) const
+            {/* no-op */ 
+                ACE_ASSERT("not supported" ==0);
+            };
+
+private:
+    // do not allow copies. - I am not sure this restriction is necessary.
+    BogusExampleAllocator(const BogusExampleAllocator&);
+    BogusExampleAllocator& operator=(const BogusExampleAllocator&);
+
+    int num_allocs_;
+    int num_frees_;
+};
+
 
 int init_tranport ()
 {
@@ -967,6 +1114,357 @@ int main (int argc, char *argv[])
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
 
       } // t5
+      {
+        //=====================================================
+        // 6) show that take takes 
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 6 : show that take takes.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // 0 means zero-copy
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1;
+        foo.count = 1;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t6 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->take(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t6 read2");
+
+        if (data1[0].count != 1)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t6 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        if (status != ::DDS::RETCODE_NO_DATA)
+        {
+            ACE_ERROR ((LM_ERROR,
+            ACE_TEXT("(%P|%t) %s ERROR: expected NO_DATA status from take!\n"), 
+            "t6"));
+            test_failed = 1;
+
+        }
+
+        // ?OK to return an empty loan?
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        check_return_loan_status(status, data2, 0, 0, "t6 return_loan2");
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t6 return_loan1");
+
+      } // t6
+
+      {
+        //=====================================================
+        // 7) show we can zero-copy read and then take and changes view state
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 7 : show we can zero-copy read and then take and changes view state.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // 0 means zero-copy
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        // It is important that the last test case took all of the samples!
+
+        foo.key  = 7; // a new instance - this is important to get the correct view_state.
+        foo.count = 7;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t7 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t7 read2");
+
+        if (info1[0].view_state != ::DDS::NEW_VIEW_STATE)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: expected NEW view state.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != 7)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data2, 1, "t7 take");
+#if 0
+    //wait for #10955 "DDS view_state implementation is wrong" to be fixed.
+        if (info1[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: expected NOT NEW view state.\n") ));
+            test_failed = 1;
+        }
+#endif
+        if (data1[0].count != data2[0].count)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t7 ERROR: zero-copy read or take failed to provide same data.\n") ));
+            test_failed = 1;
+
+        }
+
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        check_return_loan_status(status, data2, 0, 0, "t7 return_loan2");
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t7 return_loan1");
+
+      } // t7
+
+      const CORBA::Long max_samples = 2;
+      // scope must be larger than the sequences that use the allocator.
+      BogusExampleAllocator<Test::Simple*,max_samples> the_allocator;
+      {
+        //=====================================================
+        // 8) Show that an allocator can be provided.
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 8 : Show that an allocator can be provided.\n"));
+
+        const CORBA::Long max_samples = 2;
+        // Note: the default allocator for a ZCSeq is very fast because
+        // it will allocate from a pool on the stack and thus avoid
+        // a heap allocation.
+        // Note: because of the read/take preconditions the sequence does not need to resize.
+        SimpleZCSeq                  data1 (0, max_samples, &the_allocator);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1; 
+        foo.count = 8;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t8 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t8 read2");
+
+        if (1 != the_allocator.num_allocs())
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != 8)
+        {
+            // test to see the accessing the "lost" (because of history.depth)
+            // but still held by zero-copy sequence value works.
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+
+        }
+
+        // 0 means zero-copy
+        SimpleZCSeq                  data2 (0, max_samples, &the_allocator);
+        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        status = fast_dr->take(  data2 
+                                , info2
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data2, 1, "t8 take");
+
+        if (2 != the_allocator.num_allocs())
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used.\n") ));
+            test_failed = 1;
+        }
+
+        if (data1[0].count != data2[0].count)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t8 ERROR: zero-copy read or take failed to provide same data.\n") ));
+            test_failed = 1;
+
+        }
+
+        status = fast_dr->return_loan(  data2 
+                                      , info2 );
+
+        // Note: the samples are freed in return_loan (if not reference by something else)
+        //       but the sequence of pointers is not freed until data2 goes out of scope.
+
+        check_return_loan_status(status, data2, 0, 0, "t8 return_loan2");
+
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t8 return_loan1");
+
+
+      } // Note: the sequence memory (pointers to samples) is freed here
+        //       so the same sequence can be used over and over without
+        //       allocating and freeing the array of pointers.
+      if (2 != the_allocator.num_frees())
+      {
+          ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) t8 ERROR: the allocator was not used to free.\n") ));
+          test_failed = 1;
+      }
+
+      {
+        //=====================================================
+        // 9) Show that loans are checked by delete_datareader.
+        //=====================================================
+      // !!!! note - this test should be the last because it deletes the datareader
+        ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
+
+        const CORBA::Long max_samples = 2;
+        SimpleZCSeq                  data1 (0, max_samples);
+        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+         
+        foo.key  = 1; 
+        foo.count = 9;
+
+        // since depth=1 the previous sample will be "lost"
+        // from the instance container.
+        fast_dw->write(foo, handle);
+
+        // wait for write to propogate
+        if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+                            ACE_TEXT("(%P|%t) t9 ERROR: timeout waiting for data.\n")),
+                            1);
+
+        DDS::ReturnCode_t status  ;
+        status = fast_dr->read(  data1 
+                                , info1
+                                , max_samples
+                                , ::DDS::ANY_SAMPLE_STATE
+                                , ::DDS::ANY_VIEW_STATE
+                                , ::DDS::ANY_INSTANCE_STATE );
+
+          
+        check_read_status(status, data1, 1, "t9 read2");
+
+        if (data1[0].count != 9)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: unexpected value for data1-pre.\n") ));
+            test_failed = 1;
+        }
+
+        status =   sub->delete_datareader(dr.in ());
+
+        if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite should have returned PRECONDITION_NOT_MET but returned retcode %d.\n"), status ));
+            test_failed = 1;
+        }
+
+        status = fast_dr->return_loan(  data1 
+                                      , info1 );
+
+        check_return_loan_status(status, data1, 0, 0, "t9 return_loan");
+
+        status =   sub->delete_datareader(dr.in ());
+
+        if (status != ::DDS::RETCODE_OK)
+        {
+            ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite failed with retcode %d.\n"), status ));
+            test_failed = 1;
+        }
+
+
+      }
     }
   catch (const TestException&)
     {
@@ -985,7 +1483,7 @@ int main (int argc, char *argv[])
       //clean up subscriber objects
 //      sub->delete_contained_entities() ;
 
-      sub->delete_datareader(dr.in ());
+      //done above - in the tests sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
       // clean up common objects
