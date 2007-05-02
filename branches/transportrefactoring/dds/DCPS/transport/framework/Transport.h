@@ -29,8 +29,8 @@ namespace TransportAPI
      *  @name Link creation / deletion methods (synchronous)
      */
     //@{
-    virtual Link* createLink();
-    virtual void destroyLink(Link* link);
+    virtual Link* createLink() = 0;
+    virtual void destroyLink(Link* link) = 0;
     //@}
 
     class Link
@@ -48,7 +48,7 @@ namespace TransportAPI
        */
       //@{
       virtual Status connect(BLOB* endpoint, const Id& requestId) = 0;
-      virtual Status disconnect(const Id& requestId);
+      virtual Status disconnect(const Id& requestId) = 0;
       //@}
 
       /**

@@ -1,3 +1,13 @@
+Wed May  2 18:53:08 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+        * dds/DCPS/transport/framework/Transport.h:
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Changed BLOB to have a more defined user interface.  And added an
+          include to get iovec from ACE.
+
 Wed May  2 14:01:45 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/DataView.h:
