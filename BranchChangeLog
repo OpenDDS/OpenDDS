@@ -1,3 +1,15 @@
+Thu May  3 17:13:58 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.h:
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+
+          Updated the Link to use ACE_Task_Base to read from the stream when
+          it is passive.
+ 
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Removed the name value pair list.
+
 Thu May  3 15:13:17 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.h:
