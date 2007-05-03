@@ -25,15 +25,12 @@ namespace TransportAPI
     virtual ~BLOB();
 
     const std::string& getIdentifier() const;
-    const NVPList& getParameters() const;
 
   protected:
     void setIdentifier(const std::string& identifier);
-    NVPList& getParameters();
 
   private:
     std::string identifier_;
-    NVPList parameters_;
   };
 
   /// A class to represent reasons for operational failure
