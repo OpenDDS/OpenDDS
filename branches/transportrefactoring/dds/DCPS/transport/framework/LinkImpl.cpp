@@ -19,7 +19,7 @@ TAO::DCPS::LinkImpl::connect(
 {
   Guard guard(lock_);
   TransportAPI::Id requestId(getNextRequestId(guard));
-  return link_.connect(endpoint, requestId);
+  return link_.establish(endpoint, requestId);
 }
 
 TransportAPI::Status
@@ -28,7 +28,7 @@ TAO::DCPS::LinkImpl::disconnect(
 {
   Guard guard(lock_);
   TransportAPI::Id requestId(getNextRequestId(guard));
-  return link_.disconnect(requestId);
+  return link_.shutdown(requestId);
 }
 
 TransportAPI::Status

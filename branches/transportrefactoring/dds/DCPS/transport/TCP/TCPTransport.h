@@ -2,6 +2,8 @@
 #define TCPTRANSPORT_H
 
 #include "dds/DCPS/transport/framework/Transport.h"
+#include <ace/INET_Addr.h>
+#include <ace/SOCK_Acceptor.h>
 #include <ace/SOCK_Stream.h>
 #include <ace/Task.h>
 
@@ -50,8 +52,8 @@ private:
 
     virtual TransportAPI::Status setCallback(TransportAPI::LinkCallback* callback);
 
-    virtual TransportAPI::Status connect(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
-    virtual TransportAPI::Status disconnect(const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status shutdown(const TransportAPI::Id& requestId);
 
     virtual TransportAPI::Status send(const iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId);
 
@@ -64,6 +66,8 @@ private:
     bool done_;
     TransportAPI::LinkCallback* callback_;
     ACE_SOCK_Stream stream_;
+    ACE_INET_Addr addr_;
+    ACE_SOCK_Acceptor acceptor_;
   };
 
   // This is necessary for some compilers to access BLOB

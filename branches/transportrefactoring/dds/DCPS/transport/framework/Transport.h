@@ -47,8 +47,8 @@ namespace TransportAPI
        *  @name Connection methods (asynchronous)
        */
       //@{
-      virtual Status connect(BLOB* endpoint, const Id& requestId) = 0;
-      virtual Status disconnect(const Id& requestId) = 0;
+      virtual Status establish(BLOB* endpoint, const Id& requestId) = 0;
+      virtual Status shutdown(const Id& requestId) = 0;
       //@}
 
       /**
