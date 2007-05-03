@@ -1,3 +1,16 @@
+Thu May  3 15:13:17 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.h:
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+        * dds/DCPS/transport/TCP/TCPTransport.mpc:
+
+          Added a partial implementation of the TransportAPI::Transport
+          interface for TCP/IP.
+
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Added a virtual destructor to allow dynamic casting.
+
 Wed May  2 18:53:08 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:
