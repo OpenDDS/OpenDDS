@@ -132,8 +132,8 @@ TCPTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 }
 
 TransportAPI::Status
-TCPTransport::Link::connect(TransportAPI::BLOB* endpoint,
-                            const TransportAPI::Id& requestId)
+TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
+                              const TransportAPI::Id& requestId)
 {
   // Get down to our BLOB type
   TCPTransport::BLOB* blob = dynamic_cast<TCPTransport::BLOB*>(endpoint);
@@ -143,17 +143,17 @@ TCPTransport::Link::connect(TransportAPI::BLOB* endpoint,
                                        "Endpoint is not a TCP/IP endpoint"));
   }
 
-  // Connect to the hostname_:port_
   ACE_INET_Addr addr(blob->getPort(), blob->getHostname().c_str());
-  ACE_SOCK_Connector connector;
-  if (connector.connect(stream_, addr) == -1) {
-    return TransportAPI::make_status(false,
-                                     TransportAPI::failure_reason(
-                                       "Unable to connect to " +
-                                       blob->getHostname()));
-  }
-
   if (blob->getActive()) {
+    // Connect to the hostname_:port_
+    ACE_SOCK_Connector connector;
+    if (connector.connect(stream_, addr) == -1) {
+      return TransportAPI::make_status(false,
+                                       TransportAPI::failure_reason(
+                                         "Unable to connect to " +
+                                         blob->getHostname()));
+    }
+
     // Enable asynchronous I/O
     if (stream_.enable(ACE_NONBLOCK) == -1) {
       return TransportAPI::make_status(false,
@@ -162,6 +162,7 @@ TCPTransport::Link::connect(TransportAPI::BLOB* endpoint,
     }
   }
   else {
+    addr_ = addr;
     if (activate() != 0) {
       return TransportAPI::make_status(false,
                                        TransportAPI::failure_reason(
@@ -174,7 +175,7 @@ TCPTransport::Link::connect(TransportAPI::BLOB* endpoint,
 }
 
 TransportAPI::Status
-TCPTransport::Link::disconnect(const TransportAPI::Id& requestId)
+TCPTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
   if (stream_.close() == 0) {
     done_ = true;
@@ -211,26 +212,40 @@ TCPTransport::Link::send(const iovec buffers[],
 int
 TCPTransport::Link::svc()
 {
-  char buffer[bufferSize];
-  while(!done_) {
-    ssize_t amount = stream_.recv(buffer, bufferSize);
-    if (amount == 0) {
-      done_ = true;
-    }
-    else if (amount > 0) {
-      // It may be better for the callback to take just
-      // a character buffer
-      iovec iov[1];
-      iov[0].iov_len  = amount;
-      iov[0].iov_base = buffer;
-      callback_->received(iov, 1);
-    }
-    else {
-      if (errno != EINTR) {
+  if (acceptor_.open(addr_) == 0 && acceptor_.accept(stream_) == 0) {
+    char buffer[bufferSize];
+    while(!done_) {
+      ssize_t amount = stream_.recv(buffer, bufferSize);
+      if (amount == 0) {
         done_ = true;
-        // TBD: Log this error
+      }
+      else if (amount > 0) {
+        // It may be better for the callback to take just
+        // a character buffer
+        iovec iov[1];
+        iov[0].iov_len  = amount;
+        iov[0].iov_base = buffer;
+        try {
+          callback_->received(iov, 1);
+        }
+        catch(const std::exception& ex) {
+          // TBD: Log this exception
+        }
+        catch(...) {
+          // TBD: Log this exception
+        }
+      }
+      else {
+        if (errno != EINTR) {
+          done_ = true;
+          // TBD: Log this error
+        }
       }
     }
+    acceptor_.close();
+  }
+  else {
+    // TBD: Log this error
   }
   return 0;
 }
