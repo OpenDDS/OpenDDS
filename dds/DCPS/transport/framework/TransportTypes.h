@@ -22,6 +22,8 @@ namespace TransportAPI
   class BLOB
   {
   public:
+    virtual ~BLOB();
+
     const std::string& getIdentifier() const;
     const NVPList& getParameters() const;
 
