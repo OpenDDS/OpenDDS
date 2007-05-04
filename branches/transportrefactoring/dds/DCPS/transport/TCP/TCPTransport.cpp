@@ -34,9 +34,9 @@ TransportAPI::Status
 TCPTransport::isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const
 {
   if (endpoint != 0 && endpoint->getIdentifier() == BLOBIdentifier) {
-    return TransportAPI::make_status();
+    return TransportAPI::make_success();
   }
-  return TransportAPI::make_status(false,
+  return TransportAPI::make_failure(
                                    TransportAPI::failure_reason(
                                      "Identifier: " +
                                      endpoint->getIdentifier() +
@@ -58,9 +58,9 @@ TCPTransport::configure(const TransportAPI::NVPList& configuration)
     }
   }
   if (hostname_.length() != 0 && port_ != 0) {
-    return TransportAPI::make_status();
+    return TransportAPI::make_success();
   }
-  return TransportAPI::make_status(false,
+  return TransportAPI::make_failure(
                                    TransportAPI::failure_reason(
                                      "Configuration requires a hostname "
                                      "and a port number"));
@@ -128,7 +128,7 @@ TransportAPI::Status
 TCPTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 {
   callback_ = callback;
-  return TransportAPI::make_status();
+  return TransportAPI::make_success();
 }
 
 TransportAPI::Status
@@ -138,7 +138,7 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
   // Get down to our BLOB type
   TCPTransport::BLOB* blob = dynamic_cast<TCPTransport::BLOB*>(endpoint);
   if (blob == 0) {
-    return TransportAPI::make_status(false,
+    return TransportAPI::make_failure(
                                      TransportAPI::failure_reason(
                                        "Endpoint is not a TCP/IP endpoint"));
   }
@@ -148,7 +148,7 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
     // Connect to the hostname_:port_
     ACE_SOCK_Connector connector;
     if (connector.connect(stream_, addr) == -1) {
-      return TransportAPI::make_status(false,
+      return TransportAPI::make_failure(
                                        TransportAPI::failure_reason(
                                          "Unable to connect to " +
                                          blob->getHostname()));
@@ -156,7 +156,7 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
 
     // Enable asynchronous I/O
     if (stream_.enable(ACE_NONBLOCK) == -1) {
-      return TransportAPI::make_status(false,
+      return TransportAPI::make_failure(
                                        TransportAPI::failure_reason(
                                          ACE_OS::strerror(errno)));
     }
@@ -164,14 +164,14 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
   else {
     addr_ = addr;
     if (activate() != 0) {
-      return TransportAPI::make_status(false,
+      return TransportAPI::make_failure(
                                        TransportAPI::failure_reason(
                                          "Unable to activate link"));
     }
   }
 
   callback_->connected(requestId);
-  return TransportAPI::make_status();
+  return TransportAPI::make_success();
 }
 
 TransportAPI::Status
@@ -179,10 +179,10 @@ TCPTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
   if (stream_.close() == 0) {
     done_ = true;
-    return TransportAPI::make_status();
+    return TransportAPI::make_success();
   }
 
-  return TransportAPI::make_status(false,
+  return TransportAPI::make_failure(
                                    TransportAPI::failure_reason(
                                      ACE_OS::strerror(errno)));
 }
@@ -198,15 +198,15 @@ TCPTransport::Link::send(const iovec buffers[],
     total += buffers[i].iov_len;
   }
 
-  // Send with built-in ACE retry 
+  // Send with built-in ACE retry
   if (stream_.sendv_n(buffers, iovecSize) != total) {
     TransportAPI::failure_reason reason("Unable to send iovec ");
     callback_->sendFailed(reason);
-    return TransportAPI::make_status(false, reason);
+    return TransportAPI::make_failure(reason);
   }
 
   callback_->sendSucceeded(requestId);
-  return TransportAPI::make_status();
+  return TransportAPI::make_success();
 }
 
 int

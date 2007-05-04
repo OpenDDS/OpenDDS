@@ -1,3 +1,17 @@
+Fri May  4 14:11:24 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Updated status type.
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Added in more functionality - worker thread, outline of
+          behavior.
+
 Thu May  3 18:26:04 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.h:
