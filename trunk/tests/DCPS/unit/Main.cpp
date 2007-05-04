@@ -184,7 +184,7 @@ int run_domain_test ()
             (new_topic.in ());
 
   ::DDS::Duration_t timeout;
-  timeout.sec = find_topic_timeout.sec ();
+  timeout.sec = static_cast<long>(find_topic_timeout.sec ());
   timeout.nanosec = find_topic_timeout.usec ();
 
   // find existent topic
@@ -530,6 +530,3 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   return 0;
 }
-
-
-

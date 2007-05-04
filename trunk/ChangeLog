@@ -1,3 +1,8 @@
+Fri May  4 16:07:37 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/unit/Main.cpp:
+	  explicit cast to clear scoreboard warnings.
+
 Fri May  4 15:38:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
