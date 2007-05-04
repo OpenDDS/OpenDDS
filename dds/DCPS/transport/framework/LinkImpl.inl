@@ -5,13 +5,20 @@
 #include "LinkImpl.h"
 #include <stdexcept>
 
+TAO::DCPS::LinkImpl::IOItem::IOItem()
+  : data_begin_(0)
+  , data_size_(0)
+  , requestId_(0)
+{
+}
+
 TAO::DCPS::LinkImpl::IOItem::IOItem(
   ACE_Message_Block& mb,
   char* data,
   size_t size,
   const TransportAPI::Id& requestIdIn
   )
-  : mb_(mb, 0)
+  : mb_(new ACE_Message_Block(mb, 0))
   , data_begin_(data)
   , data_size_(size)
   , requestId_(requestIdIn)
@@ -22,7 +29,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
 TAO::DCPS::LinkImpl::IOItem::IOItem(
   const TAO::DCPS::LinkImpl::IOItem::IOItem& rhs
   )
-  : mb_(rhs.mb_, 0)
+  : mb_(new ACE_Message_Block(*rhs.mb_, 0))
   , data_begin_(rhs.data_begin_)
   , data_size_(rhs.data_size_)
   , requestId_(rhs.requestId_)
@@ -32,6 +39,21 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
 TAO::DCPS::LinkImpl::IOItem::~IOItem(
   )
 {
+}
+
+TAO::DCPS::LinkImpl::IOItem&
+TAO::DCPS::LinkImpl::IOItem::operator=(
+  const TAO::DCPS::LinkImpl::IOItem::IOItem& rhs
+  )
+{
+  if (this != &rhs)
+  {
+    mb_.reset(new ACE_Message_Block(*rhs.mb_, 0));
+    data_begin_ = rhs.data_begin_;
+    data_size_ = rhs.data_size_;
+    requestId_ = rhs.requestId_;
+  }
+  return *this;
 }
 
 TAO::DCPS::LinkImpl::LinkImpl(

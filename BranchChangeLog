@@ -1,3 +1,12 @@
+Fri May  4 17:16:26 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Allow an IOItem to be copied. Also added beginnings of sending
+          a queue item downstream.
+
 Fri May  4 14:11:24 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.cpp:
