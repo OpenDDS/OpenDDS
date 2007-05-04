@@ -71,7 +71,8 @@ TAO::DCPS::LinkImpl::svc()
       running_ = false;
       return 0;
     }
-    bool extract = false;
+    bool extract = true;
+    IOItem entry;
     while (!queueEmpty && connected && !backpressure)
     {
       // Try to send the head of the queue
@@ -82,7 +83,8 @@ TAO::DCPS::LinkImpl::svc()
         if (extract)
         {
           queue_.pop();
-          //entry = queue_.front();
+          entry = queue_.front();
+          extract = false;
         }
         queueEmpty = queue_.empty();
         connected = connected_;
@@ -91,6 +93,11 @@ TAO::DCPS::LinkImpl::svc()
       if (!queueEmpty)
       {
         // Process the head of the queue
+        iovec iovs[2];
+        iovs[0].iov_base = 0; // TBD: Marshal a simple header into a buffer
+        iovs[0].iov_len = 0;
+        iovs[1].iov_base = entry.data_begin_;
+        iovs[1].iov_len = entry.data_size_;
       }
     }
   }

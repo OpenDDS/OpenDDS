@@ -59,6 +59,7 @@ namespace TAO
 
       struct IOItem
       {
+        IOItem();
         IOItem(
           ACE_Message_Block& mb,
           char* data,
@@ -68,7 +69,9 @@ namespace TAO
         IOItem(const IOItem& rhs);
         ~IOItem();
 
-        ACE_Message_Block mb_;
+        IOItem& operator=(const IOItem& rhs);
+
+        std::auto_ptr<ACE_Message_Block> mb_;
         char* data_begin_;
         size_t data_size_;
         TransportAPI::Id requestId_;
