@@ -12,6 +12,91 @@
 #include "DataView.h"
 #include "ace/Guard_T.h"
 
+int
+TAO::DCPS::LinkImpl::open(void* args)
+{
+  Guard guard(lock_);
+  if (running_)
+  {
+    return -1;
+  }
+  running_ = (activate() == 0);
+
+  return running_ ? 0 : -1;
+}
+
+int
+TAO::DCPS::LinkImpl::close(u_long flags)
+{
+  Guard guard(lock_);
+  if (!running_ || shutdown_)
+  {
+    return -1;
+  }
+  shutdown_ = true;
+  condition_.signal();
+  if (threadId_ != ACE_OS::thr_self())
+  {
+    wait();
+  }
+  return 0;
+}
+
+int
+TAO::DCPS::LinkImpl::svc()
+{
+  {
+    Guard guard(lock_);
+    threadId_ = ACE_OS::thr_self();
+  }
+  while (true)
+  {
+    bool shutdown = false;
+    bool queueEmpty = true;
+    bool connected = false;
+    bool backpressure = true;
+    {
+      Guard guard(lock_);
+      while (!shutdown_ && queue_.empty() && !connected_ && backpressure_)
+      {
+        condition_.wait();
+      }
+      shutdown = shutdown_;
+      queueEmpty = queue_.empty();
+      connected = connected_;
+      backpressure = backpressure_;
+    }
+    if (shutdown)
+    {
+      running_ = false;
+      return 0;
+    }
+    bool extract = false;
+    while (!queueEmpty && connected && !backpressure)
+    {
+      // Try to send the head of the queue
+      // If we get immediate success as the return value, then remove it and
+      // try the next element.
+      {
+        Guard guard(lock_);
+        if (extract)
+        {
+          queue_.pop();
+          //entry = queue_.front();
+        }
+        queueEmpty = queue_.empty();
+        connected = connected_;
+        backpressure = backpressure_;
+      }
+      if (!queueEmpty)
+      {
+        // Process the head of the queue
+      }
+    }
+  }
+  return 0;
+}
+
 TransportAPI::Status
 TAO::DCPS::LinkImpl::connect(
   TransportAPI::BLOB* endpoint
@@ -43,14 +128,19 @@ TAO::DCPS::LinkImpl::send(
   {
     // Error enqueueing request
   }
-  return TransportAPI::make_status();
+  return TransportAPI::make_success();
 }
 
 void
 TAO::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
+  if (connected_)
+  {
+    return;
+  }
   connected_ = true;
+  condition_.signal();
 }
 
 void
@@ -76,13 +166,13 @@ void
 TAO::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
-  queueing_ = applyBackpressure;
 }
 
 void
 TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 {
   Guard guard(lock_);
+  ACE_Message_Block mb;
 }
 
 TransportAPI::Id
@@ -108,6 +198,11 @@ TAO::DCPS::LinkImpl::enqueue(
   {
     IOItem item(mb, iter->first, iter->second, requestId);
     queue_.push(item);
+  }
+  // Only signal if we're connected!
+  if (connected_)
+  {
+    condition_.signal();
   }
   return true;
 }

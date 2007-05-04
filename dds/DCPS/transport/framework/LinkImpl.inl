@@ -40,9 +40,13 @@ TAO::DCPS::LinkImpl::LinkImpl(
   )
   : link_(link)
   , max_transport_buffer_size_(max_transport_buffer_size)
+  , condition_(lock_)
+  , threadId_(0)
   , currentRequestId_(0)
+  , running_(false)
+  , shutdown_(false)
   , connected_(false)
-  , queueing_(false)
+  , backpressure_(false)
 {
   link_.setCallback(this);
 }

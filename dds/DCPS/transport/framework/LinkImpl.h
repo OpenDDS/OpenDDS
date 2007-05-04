@@ -7,8 +7,9 @@
 #include "dds/DCPS/dcps_export.h"
 #include "LinkCallback.h"
 #include "Transport.h"
-#include "ace/Message_Block.h"
-#include "ace/Synch.h"
+#include <ace/Message_Block.h>
+#include <ace/Synch.h>
+#include <ace/Task.h>
 #include <queue>
 
 namespace TAO
@@ -22,10 +23,20 @@ namespace TAO
      */
     class TAO_DdsDcps_Export LinkImpl
       : public TransportAPI::LinkCallback
+      , public ACE_Task_Base
     {
     public:
       LinkImpl(TransportAPI::Transport::Link& link, size_t max_transport_buffer_size);
       virtual ~LinkImpl();
+
+      /**
+       * ACE_Task_Base methods
+       */
+      //@{
+      virtual int open(void* args = 0);
+      virtual int close(u_long flags = 0);
+      virtual int svc();
+      //@}
 
       TransportAPI::Status connect(TransportAPI::BLOB* endpoint);
       TransportAPI::Status disconnect();
@@ -66,9 +77,13 @@ namespace TAO
       TransportAPI::Transport::Link& link_;
       size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;
+      ACE_Condition<ACE_Thread_Mutex> condition_;
+      ACE_thread_t threadId_;
       TransportAPI::Id currentRequestId_;
+      bool running_;
+      bool shutdown_;
       bool connected_;
-      bool queueing_;
+      bool backpressure_;
       std::queue<IOItem> queue_;
     };
 

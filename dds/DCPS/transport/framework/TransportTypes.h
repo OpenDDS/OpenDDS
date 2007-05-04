@@ -71,12 +71,31 @@ namespace TransportAPI
     Id id_;
   };
 
-  typedef std::pair<bool, failure_reason> Status;
+  enum Resolution
+  {
+    SUCCESS,
+    FAILURE,
+    DEFERRED
+  };
+
+  typedef std::pair<Resolution, failure_reason> Status;
 
   inline Status
-  make_status(bool success = true, const failure_reason& reason = failure_reason())
+  make_success(const failure_reason& reason = failure_reason())
   {
-    return std::make_pair(success, reason);
+    return std::make_pair(SUCCESS, reason);
+  }
+
+  inline Status
+  make_failure(const failure_reason& reason = failure_reason())
+  {
+    return std::make_pair(FAILURE, reason);
+  }
+
+  inline Status
+  make_deferred(const failure_reason& reason = failure_reason())
+  {
+    return std::make_pair(DEFERRED, reason);
   }
 }
 
