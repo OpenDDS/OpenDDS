@@ -27,10 +27,10 @@ TcpSubscriber::~TcpSubscriber()
 
 
 void
-TcpSubscriber::init(TestStats*     stats,
-                    ACE_Reactor*   r,
-                    TestAllocator* allocator,
-                    unsigned       block_size)
+TcpSubscriber::initSubscriber(TestStats*     stats,
+                              ACE_Reactor*   r,
+                              TestAllocator* allocator,
+                              unsigned       block_size)
 {
   TcpSubscriber::stats_      = stats;
   TcpSubscriber::r_          = r;

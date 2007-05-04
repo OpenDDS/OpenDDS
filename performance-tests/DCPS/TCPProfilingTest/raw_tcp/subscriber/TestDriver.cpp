@@ -30,7 +30,7 @@ TestDriver::run(int& argc, char* argv[])
 {
   parse_args(argc, argv);
   init();
-  run();
+  run_i();
 }
 
 
@@ -164,7 +164,7 @@ TestDriver::init()
 
 
 void
-TestDriver::run()
+TestDriver::run_i()
 {
   ACE_Reactor* reactor = new ACE_Reactor();
 
@@ -179,7 +179,7 @@ TestDriver::run()
 
   // Supply the stats object, the reactor, the buffer, and the buffer size
   // to the TcpSubscriber *class*.
-  TcpSubscriber::init(&stats_, reactor, &allocator, block_size);
+  TcpSubscriber::initSubscriber(&stats_, reactor, &allocator, block_size);
 
   TcpSubscriber_Acceptor acceptor;
 

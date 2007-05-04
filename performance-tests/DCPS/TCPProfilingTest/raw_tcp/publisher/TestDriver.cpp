@@ -35,7 +35,7 @@ TestDriver::run(int& argc, char* argv[])
 {
   parse_args(argc, argv);
   init();
-  run();
+  run_i();
 }
 
 
@@ -172,7 +172,7 @@ TestDriver::init()
 
 
 void
-TestDriver::run()
+TestDriver::run_i()
 {
   ACE_DEBUG((LM_DEBUG, "(%T) Publisher running.\n"));
 

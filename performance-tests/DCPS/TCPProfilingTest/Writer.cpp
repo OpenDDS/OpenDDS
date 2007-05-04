@@ -36,21 +36,17 @@ void write (long id,
     ::TAO::DCPS::reference_to_servant< testMsgDataWriterImpl, testMsgDataWriter_ptr>
             (pt_dw.in ());
 
-  //SHH remove this kludge when the transport is fixed.
-  //ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
   ::DDS::InstanceHandle_t handle
       = pt_dw->_cxx_register (data);
 
-  {  // Extra scope for VC6
   for (int i = 0; i < num_messages; i ++)
   {
     data.count = i;
     pt_servant->write(data,
                       handle);
-  }
   }
 }
 

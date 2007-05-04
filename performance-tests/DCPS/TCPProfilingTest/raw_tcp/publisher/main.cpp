@@ -12,7 +12,7 @@ main(int argc, char* argv[])
     driver.run(argc, argv);
     return 0;
   }
-  catch (const TestException& e)
+  catch (const TestException&)
   {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Publisher TestException.\n"));

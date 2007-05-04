@@ -55,7 +55,7 @@ TestDriver::run(int& argc, char* argv[])
   set_rt();
   parse_args(argc, argv);
   init();
-  run();
+  run_i();
 }
 
 
@@ -167,7 +167,7 @@ TestDriver::init()
 
 
 void
-TestDriver::run()
+TestDriver::run_i()
 {
 
   ACE_Message_Block buffer (1000000);

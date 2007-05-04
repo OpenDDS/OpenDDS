@@ -19,7 +19,7 @@ class TestDriver
 
     void parse_args(int& argc, char* argv[]);
     void init();
-    void run();
+    void run_i();
 
     unsigned num_publishers_;
     unsigned num_packets_;

@@ -19,7 +19,7 @@ class TestDriver
 
     void parse_args(int& argc, char* argv[]);
     void init();
-    void run();
+    void run_i();
 
     ACE_INET_Addr parse_address(const std::string& spec);
 

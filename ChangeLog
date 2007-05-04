@@ -1,3 +1,50 @@
+Fri May 04 21:39:50 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/README:
+
+          Added information about new tests.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
+
+          Fixed unreferenced variable warning.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/raw_tcp_publisher.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/raw_tcp_subscriber.mpc:
+
+          Replaced deprecated command
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
+
+          Fixed warnings and removed commented out code.
+
+        * performance-tests/DCPS/TCPProfilingTest/repo.conf:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+
+          Removed unnecessary config file.
+
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+
+          Removed old vc6 code.
+
 Fri May  4 16:07:37 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/unit/Main.cpp:
