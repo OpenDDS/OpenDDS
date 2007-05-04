@@ -49,7 +49,7 @@ namespace TAO
 
           virtual void close();
 
-          virtual void receive(
+          virtual void receive_packet_from(
             const Packet& packet,
             const ACE_INET_Addr& peer
             );

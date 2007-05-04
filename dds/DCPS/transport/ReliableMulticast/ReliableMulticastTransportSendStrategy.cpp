@@ -68,7 +68,7 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec iov[],
     ++packet
     )
   {
-    sender_->send(*packet);
+    sender_->send_packet(*packet);
   }
 
   return sent;
