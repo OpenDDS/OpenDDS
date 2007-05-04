@@ -17,10 +17,10 @@ class TcpSubscriber : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
     TcpSubscriber();
     virtual ~TcpSubscriber();
 
-    static void init(TestStats*     stats,
-                     ACE_Reactor*   r,
-                     TestAllocator* allocator,
-                     unsigned       block_size);
+    static void initSubscriber(TestStats*     stats,
+                               ACE_Reactor*   r,
+                               TestAllocator* allocator,
+                               unsigned       block_size);
 
     virtual int open(void*);
     virtual int close(u_long);

@@ -53,7 +53,7 @@ TestDriver::run(int& argc, char* argv[])
   set_rt();
   parse_args(argc, argv);
   init();
-  run();
+  run_i();
 }
 
 
@@ -162,7 +162,7 @@ TestDriver::init()
 
 
 void
-TestDriver::run()
+TestDriver::run_i()
 {
 
   TcpPublisher publisher_(subscriber_addr_,
@@ -178,7 +178,7 @@ TestDriver::run()
   for (unsigned i = 0; i < total_packets; i++) {
     packet_->set_packet_id(i+1);
     publisher_.send_bytes(num_bytes, bytes);
-  } // for (unsigned i = 0; i < num_packets_; i++)
+  }
 
   publisher_.dump_stats();
 

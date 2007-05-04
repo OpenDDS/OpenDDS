@@ -1,6 +1,6 @@
 project (DCPS_Perf*) : aceexe {
   exename = raw_tcp_subscriber
-  install = ..
+  exeout  = ..
 
   includes += ../common
 

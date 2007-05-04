@@ -11,8 +11,6 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../TypeNoKeyBounded');
-
 
 # single reader with single instances test
 $num_messages=500;
@@ -33,7 +31,7 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "-NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBSvcConf repo.conf");
+                             . " -d $domains_file");
 
 
 print $DCPSREPO->CommandLine(), "\n";

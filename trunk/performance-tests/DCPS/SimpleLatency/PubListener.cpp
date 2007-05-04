@@ -41,8 +41,6 @@ add_stats (
     )
 {
   data = data / (ACE_hrtime_t) 1000;
-    //std::cout << data << std::endl;
-    // make the above compile under VC++ v6.0
     std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data)) 
               << std::endl;
 
