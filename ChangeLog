@@ -1,62 +1,62 @@
 Thu May 03 23:50:40 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
-        * DCPS/SimpleLatency/raw_tcp/common/TestData.h:
-        * DCPS/SimpleLatency/raw_tcp/common/TestException.h:
-        * DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
-        * DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
-        * DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
-        * DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.h:
-        * DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
-        * DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
-        * DCPS/SimpleLatency/raw_tcp/run_test_1x1.pl:
-        * DCPS/SimpleLatency/raw_tcp/split_pub.pl:
-        * DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
-        * DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
-        * DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
-        * DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
-        * DCPS/SimpleLatency/raw_tcp/subscriber/TestStats.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestException.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/split_pub.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestStats.h:
 
          Added a raw tcp latency test to allow for comparison.
 
-        * DCPS/TCPProfilingTest/common.h:
-        * DCPS/TCPProfilingTest/conf.ini:
-        * DCPS/TCPProfilingTest/DataReaderListener.cpp:
-        * DCPS/TCPProfilingTest/DataReaderListener.h:
-        * DCPS/TCPProfilingTest/domain_ids:
-        * DCPS/TCPProfilingTest/publisher.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/common:
-        * DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
-        * DCPS/TCPProfilingTest/raw_tcp/common/TestException.h:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/raw_tcp_publisher.mpc:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.h:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
-        * DCPS/TCPProfilingTest/raw_tcp/run_test_1x1.pl:
-        * DCPS/TCPProfilingTest/raw_tcp/run_test_1xn.pl:
-        * DCPS/TCPProfilingTest/raw_tcp/run_test_nx1.pl:
-        * DCPS/TCPProfilingTest/raw_tcp/run_test_nxn.pl:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/raw_tcp_subscriber.mpc:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.h:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
-        * DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
-        * DCPS/TCPProfilingTest/README:
-        * DCPS/TCPProfilingTest/repo.conf:
-        * DCPS/TCPProfilingTest/run_test-1p1s.pl:
-        * DCPS/TCPProfilingTest/run_test-1p4s.pl:
-        * DCPS/TCPProfilingTest/run_test-2p3s.pl:
-        * DCPS/TCPProfilingTest/run_test-4p1s.pl:
-        * DCPS/TCPProfilingTest/subscriber.cpp:
-        * DCPS/TCPProfilingTest/TCPProfiling.mpc:
-        * DCPS/TCPProfilingTest/testMessage.idl:
-        * DCPS/TCPProfilingTest/TestStats.h:
-        * DCPS/TCPProfilingTest/Writer.cpp:
-        * DCPS/TCPProfilingTest/Writer.h:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/conf.ini:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/domain_ids:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestException.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/raw_tcp_publisher.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1xn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nx1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nxn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/raw_tcp_subscriber.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/README:
+        * performance-tests/DCPS/TCPProfilingTest/repo.conf:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/TCPProfiling.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/testMessage.idl:
+        * performance-tests/DCPS/TCPProfilingTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.h:
 
           Adding a throughput test that uses SimpleTcp transport.
           The best comparison is to change the idl to a bounded sequence.
@@ -470,7 +470,7 @@ Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
 Wed Apr 25 00:38:56 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
-        * DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Fixed bug of creation of incorrect queues when clear() was
           called.  The elems_ and queue_ were being given the wrong sized
