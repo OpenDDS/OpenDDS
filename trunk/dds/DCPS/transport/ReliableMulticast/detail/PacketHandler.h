@@ -43,14 +43,11 @@ namespace TAO
               ++iter
               )
             {
-              TAO::DCPS::ReliableMulticast::detail::PacketHandler::send(
-                *iter,
-                dest
-                );
+              send_packet_to(*iter, dest);
             }
           }
 
-          virtual void send(
+          virtual void send_packet_to(
             const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
             const ACE_INET_Addr& dest
             );
@@ -61,7 +58,7 @@ namespace TAO
             const ACE_INET_Addr& peer
             );
 
-          virtual void receive(
+          virtual void receive_packet_from(
             const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
             const ACE_INET_Addr& peer
             ) = 0;

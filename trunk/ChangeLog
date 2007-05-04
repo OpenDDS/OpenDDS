@@ -1,3 +1,17 @@
+Fri May  4 15:38:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+
+          Renamed methods that were overriding inherited virtual methods.
+          This fixes warnings from Borland and SunCC.
+
 Thu May 03 23:50:40 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
@@ -65,67 +79,67 @@ Wed May  2 22:03:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
       Merged https://svn.dre.vanderbilt.edu/DOC/DDS/branches/20070501_zero_copy_take
       branch (from 644 to 654) with changes indented below.
-      
-	Wed May  2 19:43:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* dds/DCPS/DataReaderImpl.cpp:
-			* dds/DCPS/DataReaderImpl.h:
-			* dds/DCPS/SubscriberImpl.cpp:
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-			* tests/DCPS/ZeroCopyRead/README:
-	        
-			Add no existing loans precondition check to delete_datawriter.
-			And test for it.
+        Wed May  2 19:43:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* dds/DCPS/ZeroCopyAllocator_T.cpp:
-			* dds/DCPS/ZeroCopyAllocator_T.h:
-			* dds/DCPS/ZeroCopyAllocator_T.inl:
-			* dds/DCPS/ZeroCopyInfoSeq_T.cpp:
-			* dds/DCPS/ZeroCopyInfoSeq_T.h:
-			* dds/DCPS/ZeroCopyInfoSeq_T.inl:
-			* dds/DCPS/ZeroCopySeq_T.h:
-			* dds/DCPS/ZeroCopySeqBase.h:
-	        
-			Code cleanup.
+                        * dds/DCPS/DataReaderImpl.cpp:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/SubscriberImpl.cpp:
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
 
-	Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        Add no existing loans precondition check to delete_datawriter.
+                        And test for it.
 
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-	        
-			Avoid build warnings.
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopyAllocator_T.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeqBase.h:
 
-	Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+                        Code cleanup.
 
-			* DDS_zero-copy.mwc:
-			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
-	        
-			Cleanup/simplify this zero-copy example.
-	          
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-	        
-			Add test of providing an allocator.
+        Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+                        Avoid build warnings.
+
+        Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * DDS_zero-copy.mwc:
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+
+                        Cleanup/simplify this zero-copy example.
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+                        Add test of providing an allocator.
 
 
-	Tue May  1 22:08:44 UTC 2007  Scott Harris <harris_s@ociweb.com>
+        Tue May  1 22:08:44 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
-			* bin/DCPS/CPPTemplate.pm:
-	        
-			Support zero-copy take.
-	          
-			* tests/DCPS/ZeroCopyRead/main.cpp:
-			* tests/DCPS/ZeroCopyRead/README:
-	        
-			Update test to cover zero-copy take.
+                        * bin/DCPS/CPPTemplate.pm:
 
-			* tests/DCPS/ZeroCopyRead/run_test.pl:
-	        
-			Remove unneeded code.
+                        Support zero-copy take.
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
+
+                        Update test to cover zero-copy take.
+
+                        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+                        Remove unneeded code.
 
 Wed May  2 14:32:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
-	  Removed unused parameters to cleanup scoreboard warnings.
+          Removed unused parameters to cleanup scoreboard warnings.
 
         * tests/DCPS/FooTest5/run_test.pl:
           minor cleanup.
@@ -136,7 +150,7 @@ Wed May  2 14:32:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
 Mon Apr 30 16:00:52 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/DCPS/CPPTemplate.pm:
-	  Modify ULong to Long to get rid of scoreboard warnings.
+          Modify ULong to Long to get rid of scoreboard warnings.
 
 Sat Apr 28 19:04:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

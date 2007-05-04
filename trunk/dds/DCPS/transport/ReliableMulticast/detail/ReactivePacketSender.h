@@ -43,9 +43,9 @@ namespace TAO
 
           virtual void close();
 
-          virtual void send(const Packet& p);
+          void send_packet(const Packet& p);
 
-          virtual void receive(
+          virtual void receive_packet_from(
             const Packet& packet,
             const ACE_INET_Addr& peer
             );
