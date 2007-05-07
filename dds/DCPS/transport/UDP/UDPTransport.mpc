@@ -1,0 +1,4 @@
+project : dcps {
+  sharedname   = Udp
+  dynamicflags = UDP_BUILD_DLL
+}
