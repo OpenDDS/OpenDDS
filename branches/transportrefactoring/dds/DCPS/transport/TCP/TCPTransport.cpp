@@ -177,8 +177,8 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
 TransportAPI::Status
 TCPTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
+  done_ = true;
   if (stream_.close() == 0) {
-    done_ = true;
     return TransportAPI::make_success();
   }
 
@@ -220,8 +220,6 @@ TCPTransport::Link::svc()
         done_ = true;
       }
       else if (amount > 0) {
-        // It may be better for the callback to take just
-        // a character buffer
         iovec iov[1];
         iov[0].iov_len  = amount;
         iov[0].iov_base = buffer;
@@ -253,7 +251,7 @@ TCPTransport::Link::svc()
 void
 TCPTransport::Link::finish()
 {
-  stream_.close();
   done_ = true;
+  stream_.close();
   wait();
 }

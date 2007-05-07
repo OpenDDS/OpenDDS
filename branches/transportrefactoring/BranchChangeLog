@@ -1,3 +1,16 @@
+Mon May  7 13:29:18 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+
+          Changed to set the "done" flag before closing the socket.
+
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+        * dds/DCPS/transport/UDP/UDPTransport.mpc:
+
+          Added a partial implementation of the TransportAPI::Transport
+          interface for UDP.
+
 Fri May  4 17:16:26 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:
