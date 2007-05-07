@@ -90,14 +90,42 @@ TAO::DCPS::LinkImpl::svc()
         connected = connected_;
         backpressure = backpressure_;
       }
-      if (!queueEmpty)
+      if (!queueEmpty && connected && !backpressure)
       {
         // Process the head of the queue
+        unsigned char buffer[8];
         iovec iovs[2];
-        iovs[0].iov_base = 0; // TBD: Marshal a simple header into a buffer
-        iovs[0].iov_len = 0;
+
+        buffer[0] = entry.requestId_ >> 24;
+        buffer[1] = entry.requestId_ >> 16;
+        buffer[2] = entry.requestId_ >> 8;
+        buffer[3] = entry.requestId_ & 255;
+        buffer[4] = entry.sequenceNumber_ >> 24;
+        buffer[5] = entry.sequenceNumber_ >> 16;
+        buffer[6] = entry.sequenceNumber_ >> 8;
+        buffer[7] = entry.sequenceNumber_ & 255;
+
+        iovs[0].iov_base = buffer; // TBD: Marshal a simple header into a buffer
+        iovs[0].iov_len = sizeof(buffer);
         iovs[1].iov_base = entry.data_begin_;
         iovs[1].iov_len = entry.data_size_;
+
+        TransportAPI::Status status = link_.send(iovs, 2, 0);
+        while (status.first == TransportAPI::DEFERRED)
+        {
+          Guard guard(lock_);
+          deferred_ = true;
+          deferredStatus_ = TransportAPI::make_failure();
+          while (deferred_)
+          {
+            condition_.wait();
+          }
+          status = deferredStatus_;
+        }
+        if (status.first == TransportAPI::SUCCESS)
+        {
+          extract = true;
+        }
       }
     }
   }
@@ -161,12 +189,24 @@ void
 TAO::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
+  // TBD: check requestId w/front of queue
+  if (deferred_)
+  {
+    deferredStatus_ = TransportAPI::make_success();
+  }
+  condition_.signal();
 }
 
 void
 TAO::DCPS::LinkImpl::sendFailed(const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
+  // TBD: check requestId w/front of queue
+  if (deferred_)
+  {
+    deferredStatus_ = TransportAPI::make_failure();
+  }
+  condition_.signal();
 }
 
 void
@@ -201,10 +241,12 @@ TAO::DCPS::LinkImpl::enqueue(
   DataView::View packets;
 
   view.get(packets);
+  size_t sequenceNumber = 0;
   for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
   {
-    IOItem item(mb, iter->first, iter->second, requestId);
+    IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber);
     queue_.push(item);
+    ++sequenceNumber;
   }
   // Only signal if we're connected!
   if (connected_)

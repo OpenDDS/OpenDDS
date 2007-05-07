@@ -9,6 +9,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem()
   : data_begin_(0)
   , data_size_(0)
   , requestId_(0)
+  , sequenceNumber_(0)
 {
 }
 
@@ -16,12 +17,14 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   ACE_Message_Block& mb,
   char* data,
   size_t size,
-  const TransportAPI::Id& requestIdIn
+  const TransportAPI::Id& requestIdIn,
+  size_t sequenceNumber
   )
   : mb_(new ACE_Message_Block(mb, 0))
   , data_begin_(data)
   , data_size_(size)
   , requestId_(requestIdIn)
+  , sequenceNumber_(sequenceNumber)
 {
   // TBD!
 }
@@ -33,6 +36,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , data_begin_(rhs.data_begin_)
   , data_size_(rhs.data_size_)
   , requestId_(rhs.requestId_)
+  , sequenceNumber_(rhs.sequenceNumber_)
 {
 }
 
@@ -52,6 +56,7 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
     data_begin_ = rhs.data_begin_;
     data_size_ = rhs.data_size_;
     requestId_ = rhs.requestId_;
+    sequenceNumber_ = rhs.sequenceNumber_;
   }
   return *this;
 }
@@ -69,6 +74,8 @@ TAO::DCPS::LinkImpl::LinkImpl(
   , shutdown_(false)
   , connected_(false)
   , backpressure_(false)
+  , deferred_(false)
+  , deferredStatus_(TransportAPI::make_failure())
 {
   link_.setCallback(this);
 }

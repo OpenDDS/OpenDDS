@@ -64,7 +64,8 @@ namespace TAO
           ACE_Message_Block& mb,
           char* data,
           size_t size,
-          const TransportAPI::Id& requestIdIn
+          const TransportAPI::Id& requestIdIn,
+          size_t sequenceNumber
           );
         IOItem(const IOItem& rhs);
         ~IOItem();
@@ -75,6 +76,7 @@ namespace TAO
         char* data_begin_;
         size_t data_size_;
         TransportAPI::Id requestId_;
+        size_t sequenceNumber_;
       };
 
       TransportAPI::Transport::Link& link_;
@@ -87,6 +89,8 @@ namespace TAO
       bool shutdown_;
       bool connected_;
       bool backpressure_;
+      bool deferred_;
+      TransportAPI::Status deferredStatus_;
       std::queue<IOItem> queue_;
     };
 
