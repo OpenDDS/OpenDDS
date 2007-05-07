@@ -1,3 +1,11 @@
+Mon May  7 16:27:38 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Added more logic for deferred sends.
+
 Mon May  7 13:29:18 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.cpp:
