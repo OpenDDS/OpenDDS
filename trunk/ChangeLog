@@ -1,3 +1,10 @@
+Mon May  7 22:18:31 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes to summarize some of the work that's been done
+          since the 0.11 release.  This isn't complete yet.
+
 Fri May 04 21:39:50 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/README:
@@ -48,7 +55,7 @@ Fri May 04 21:39:50 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 Fri May  4 16:07:37 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/unit/Main.cpp:
-	  explicit cast to clear scoreboard warnings.
+          explicit cast to clear scoreboard warnings.
 
 Fri May  4 15:38:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

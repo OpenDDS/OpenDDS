@@ -7,16 +7,22 @@ New to this version are the following changes:
   the serialization buffer does not allocate enough memory for the 
   registered sample.
   
+- Build DDS without Built-In-Topic (BIT) support to reduce the 
+  footprint of DDS.
+    # Generate the makefiles/projects like:
+    mwc.pl -type <yourtype> -features built_in_topics=0 DDS.mwc
+
+- The reliable multicast transport was added.  See the DDS developers guide
+  for details.
+
 =========================================================================
 
 Version 0.11 of TAO DDS.
 
 New to this version are the following changes:
 
-- Build DDS without Built-In-Topic (BIT) support to reduce the 
-  footprint of DDS.
-    # Generate the makefiles/projects like:
-    mwc.pl -type <yourtype> -features built_in_topics=0 DDS.mwc
+- None, Version 0.11 was just a re-release of 0.10 with the version numbers
+  corrected.
 
 =========================================================================
 
