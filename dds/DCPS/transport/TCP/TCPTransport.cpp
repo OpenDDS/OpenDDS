@@ -36,11 +36,10 @@ TCPTransport::isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const
   if (endpoint != 0 && endpoint->getIdentifier() == BLOBIdentifier) {
     return TransportAPI::make_success();
   }
-  return TransportAPI::make_failure(
-                                   TransportAPI::failure_reason(
-                                     "Identifier: " +
-                                     endpoint->getIdentifier() +
-                                     " does not match " + BLOBIdentifier));
+  return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                      "Identifier: " +
+                                      endpoint->getIdentifier() +
+                                      " does not match " + BLOBIdentifier));
 }
 
 TransportAPI::Status
@@ -60,10 +59,9 @@ TCPTransport::configure(const TransportAPI::NVPList& configuration)
   if (hostname_.length() != 0 && port_ != 0) {
     return TransportAPI::make_success();
   }
-  return TransportAPI::make_failure(
-                                   TransportAPI::failure_reason(
-                                     "Configuration requires a hostname "
-                                     "and a port number"));
+  return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                      "Configuration requires a hostname "
+                                      "and a port number"));
 }
 
 TransportAPI::Transport::Link*
@@ -138,35 +136,32 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
   // Get down to our BLOB type
   TCPTransport::BLOB* blob = dynamic_cast<TCPTransport::BLOB*>(endpoint);
   if (blob == 0) {
-    return TransportAPI::make_failure(
-                                     TransportAPI::failure_reason(
-                                       "Endpoint is not a TCP/IP endpoint"));
+    return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                        "Endpoint is not a TCP/IP endpoint"));
   }
 
-  ACE_INET_Addr addr(blob->getPort(), blob->getHostname().c_str());
+  ACE_SOCK_Stream::PEER_ADDR addr(blob->getPort(),
+                                  blob->getHostname().c_str());
   if (blob->getActive()) {
     // Connect to the hostname_:port_
     ACE_SOCK_Connector connector;
     if (connector.connect(stream_, addr) == -1) {
-      return TransportAPI::make_failure(
-                                       TransportAPI::failure_reason(
-                                         "Unable to connect to " +
-                                         blob->getHostname()));
+      return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                          "Unable to connect to " +
+                                          blob->getHostname()));
     }
 
     // Enable asynchronous I/O
     if (stream_.enable(ACE_NONBLOCK) == -1) {
-      return TransportAPI::make_failure(
-                                       TransportAPI::failure_reason(
-                                         ACE_OS::strerror(errno)));
+      return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                          ACE_OS::strerror(errno)));
     }
   }
   else {
     addr_ = addr;
     if (activate() != 0) {
-      return TransportAPI::make_failure(
-                                       TransportAPI::failure_reason(
-                                         "Unable to activate link"));
+      return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                          "Unable to activate link"));
     }
   }
 
@@ -182,9 +177,8 @@ TCPTransport::Link::shutdown(const TransportAPI::Id& requestId)
     return TransportAPI::make_success();
   }
 
-  return TransportAPI::make_failure(
-                                   TransportAPI::failure_reason(
-                                     ACE_OS::strerror(errno)));
+  return TransportAPI::make_failure(TransportAPI::failure_reason(
+                                      ACE_OS::strerror(errno)));
 }
 
 TransportAPI::Status
@@ -218,6 +212,7 @@ TCPTransport::Link::svc()
       ssize_t amount = stream_.recv(buffer, bufferSize);
       if (amount == 0) {
         done_ = true;
+        callback_->disconnected(TransportAPI::failure_reason());
       }
       else if (amount > 0) {
         iovec iov[1];
@@ -236,6 +231,8 @@ TCPTransport::Link::svc()
       else {
         if (errno != EINTR) {
           done_ = true;
+          callback_->disconnected(TransportAPI::failure_reason(
+                                    ACE_OS::strerror(errno)));
           // TBD: Log this error
         }
       }

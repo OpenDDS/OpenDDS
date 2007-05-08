@@ -21,7 +21,8 @@ UDPTransport::~UDPTransport()
 void
 UDPTransport::getBLOB(TransportAPI::BLOB*& endpoint) const
 {
-  endpoint = new BLOB(hostname_, port_, active_, timeout_);
+  endpoint = new BLOB(hostname_, port_, remoteHostname_, remotePort_,
+                      active_, timeout_);
 }
 
 size_t
@@ -52,6 +53,12 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
     else if (configuration[i].first == "port") {
       port_ = ACE_OS::atoi(configuration[i].second.c_str());
     }
+    else if (configuration[i].first == "remoteHostname") {
+      remoteHostname_ = configuration[i].second;
+    }
+    else if (configuration[i].first == "remotePort") {
+      remotePort_ = ACE_OS::atoi(configuration[i].second.c_str());
+    }
     else if (configuration[i].first == "active") {
       active_ = ACE_OS::atoi(configuration[i].second.c_str());
     }
@@ -59,7 +66,8 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
       timeout_ = ACE_OS::strtol(configuration[i].second.c_str(), 0, 10);
     }
   }
-  if (hostname_.length() != 0 && port_ != 0) {
+  if (hostname_.length() != 0 && port_ != 0 &&
+      remoteHostname_.length() != 0 && remotePort_ != 0) {
     return TransportAPI::make_success();
   }
   return TransportAPI::make_failure(TransportAPI::failure_reason(
@@ -88,11 +96,15 @@ UDPTransport::destroyLink(TransportAPI::Transport::Link* link)
 
 UDPTransport::BLOB::BLOB(const std::string& hostname,
                          unsigned short port,
+                         const std::string& remoteHostname,
+                         unsigned short remotePort,
                          bool active,
                          unsigned long timeout)
  : active_(active),
    hostname_(hostname),
    port_(port),
+   remoteHostname_(remoteHostname),
+   remotePort_(remotePort),
    timeout_(timeout)
 {
   setIdentifier(BLOBIdentifier);
@@ -108,6 +120,18 @@ unsigned short
 UDPTransport::BLOB::getPort() const
 {
   return port_;
+}
+
+const std::string&
+UDPTransport::BLOB::getRemoteHostname() const
+{
+  return remoteHostname_;
+}
+
+unsigned short
+UDPTransport::BLOB::getRemotePort() const
+{
+  return remotePort_;
 }
 
 bool
@@ -153,13 +177,16 @@ UDPTransport::Link::establish(TransportAPI::BLOB* endpoint,
                                         "Endpoint is not a UDP/IP endpoint"));
   }
 
-  // Connect to the hostname_:port_
-  ACE_INET_Addr addr(blob->getPort(), blob->getHostname().c_str());
+  // Open a socket on  hostname_:port_
+  ACE_SOCK_Dgram::PEER_ADDR addr(blob->getPort(),
+                                 blob->getHostname().c_str());
   if (local_.open(addr) == -1) {
     return TransportAPI::make_failure(TransportAPI::failure_reason(
                                         "Unable to connect to " +
                                         blob->getHostname()));
   }
+  remote_.set(blob->getRemotePort(),
+              blob->getHostname().c_str());
 
   if (blob->getActive()) {
     unsigned long ms = blob->getTimeout();
@@ -202,7 +229,6 @@ UDPTransport::Link::send(const iovec buffers[],
                          const TransportAPI::Id& requestId)
 {
   for(size_t i = 0; i < iovecSize; i++) {
-    // Send with built-in ACE retry
     if (local_.send(buffers[i].iov_base,
                     buffers[i].iov_len,
                     remote_,
@@ -210,12 +236,12 @@ UDPTransport::Link::send(const iovec buffers[],
                     timeout_) != static_cast<ssize_t> (buffers[i].iov_len)) {
       int err = errno;
       TransportAPI::failure_reason
-        reason(err == EWOULDBLOCK ?
+        reason(err == EWOULDBLOCK || err == ETIME ?
                "Sending would the iovec would "
                "take longer than the specified timeout" :
                ACE_OS::strerror(err));
       callback_->sendFailed(reason);
-      if (err == EWOULDBLOCK) {
+      if (err == EWOULDBLOCK || err == ETIME) {
         return TransportAPI::make_deferred(reason);
       }
       else {
@@ -232,8 +258,11 @@ int
 UDPTransport::Link::svc()
 {
   char buffer[bufferSize];
+  const ACE_Time_Value timeout(1, 0);
   while(!done_) {
-    ssize_t amount = local_.recv(buffer, bufferSize, remote_);
+    ssize_t amount = local_.recv(buffer, bufferSize, remote_,
+                                 0, &timeout);
+
     if (amount == 0) {
       done_ = true;
     }

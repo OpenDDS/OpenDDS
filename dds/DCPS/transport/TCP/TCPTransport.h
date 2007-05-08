@@ -2,7 +2,6 @@
 #define TCPTRANSPORT_H
 
 #include "dds/DCPS/transport/framework/Transport.h"
-#include <ace/INET_Addr.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/SOCK_Stream.h>
 #include <ace/Task.h>
@@ -66,7 +65,7 @@ private:
     bool done_;
     TransportAPI::LinkCallback* callback_;
     ACE_SOCK_Stream stream_;
-    ACE_INET_Addr addr_;
+    ACE_SOCK_Stream::PEER_ADDR addr_;
     ACE_SOCK_Acceptor acceptor_;
   };
 

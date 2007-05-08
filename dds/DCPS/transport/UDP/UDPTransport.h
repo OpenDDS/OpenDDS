@@ -2,7 +2,6 @@
 #define UDPTRANSPORT_H
 
 #include "dds/DCPS/transport/framework/Transport.h"
-#include <ace/INET_Addr.h>
 #include <ace/SOCK_Dgram.h>
 #include <ace/Task.h>
 
@@ -25,6 +24,8 @@ private:
   bool active_;
   std::string hostname_;
   unsigned short port_;
+  std::string remoteHostname_;
+  unsigned short remotePort_;
   unsigned long timeout_;
 
   class BLOB: public TransportAPI::BLOB
@@ -32,10 +33,14 @@ private:
   public:
     BLOB(const std::string& hostname,
          unsigned short port,
+         const std::string& remoteHostname,
+         unsigned short remotePort,
          bool active,
          unsigned long);
     const std::string& getHostname() const;
     unsigned short getPort() const;
+    const std::string& getRemoteHostname() const;
+    unsigned short getRemotePort() const;
     bool getActive() const;
     unsigned long getTimeout() const;
 
@@ -43,6 +48,8 @@ private:
     bool active_;
     std::string hostname_;
     unsigned short port_;
+    std::string remoteHostname_;
+    unsigned short remotePort_;
     unsigned long timeout_;
   };
 
@@ -69,7 +76,7 @@ private:
     bool done_;
     TransportAPI::LinkCallback* callback_;
     ACE_SOCK_Dgram local_;
-    ACE_INET_Addr remote_;
+    ACE_SOCK_Dgram::PEER_ADDR remote_;
     ACE_Time_Value* timeout_;
   };
 

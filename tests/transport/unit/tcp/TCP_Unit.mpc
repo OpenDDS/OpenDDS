@@ -1,0 +1,17 @@
+project(*server): dcpsexe_with_tcp, portableserver {
+  exename = publisher
+  libs += Tcp
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*client): dcpsexe_with_tcp, portableserver {
+  exename = subscriber
+  libs += Tcp
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
