@@ -1,3 +1,18 @@
+Tue May  8 19:12:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed ACE_THROW_SPEC(()) clauses from functions that aren't
+          overrides of skeleton functions.  ACE_THROW_SPEC is not necessary and
+          causes problems on platforms that check exceptions against the
+          throw() clause.  In this case, we saw test failures because
+          servant_to_reference didn't declare CORBA::UserException even though,
+          as the comments indicated, it can throw POA::ObjectNotActive and
+          other user exceptions.  The common C++ point of view these days is
+          that throw() clauses are more trouble than they're worth.
+
 Tue May  8 16:09:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * rules.dds.GNU:
