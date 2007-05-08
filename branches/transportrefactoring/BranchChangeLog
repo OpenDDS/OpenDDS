@@ -1,3 +1,32 @@
+Tue May  8 14:43:39 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.h:
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+
+          Switch to using the PEER_ADDR typedef instead of ACE_INET_Addr
+          directly.
+
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+
+          Added the missing setting of the remove address.
+
+        * dds/DCPS/transport/framework/TransportTypes.cpp:
+
+          This should have been added as part of the commit on Wed May  2
+          18:53:08 UTC 2007.
+
+        * tests/transport/unit/tcp/TCP_Unit.mpc:
+        * tests/transport/unit/tcp/publisher.cpp:
+        * tests/transport/unit/tcp/run_test.pl:
+        * tests/transport/unit/tcp/subscriber.cpp:
+        * tests/transport/unit/udp/UDP_Unit.mpc:
+        * tests/transport/unit/udp/publisher.cpp:
+        * tests/transport/unit/udp/run_test.pl:
+        * tests/transport/unit/udp/subscriber.cpp:
+
+          Added unit tests for the TCP and UDP transports.
+
 Mon May  7 16:27:38 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:
