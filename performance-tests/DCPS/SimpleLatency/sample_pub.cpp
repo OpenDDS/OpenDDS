@@ -77,11 +77,12 @@ int main(int argc, char *argv[])
          TheParticipantFactoryWithArgs (argc, argv);
 
        bool useTCP = true;
+       bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
        setbuf( stdout, NULL );		/* no buffering for standard-out */
 
-       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("c:u"));
+       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("c:ut"));
        int ich;
        while ((ich = get_opts ()) != EOF) {
         switch (ich) {
@@ -99,7 +100,11 @@ int main(int argc, char *argv[])
           case 'u': /* u specifies that UDP should be used */
             useTCP = false;
             break;
-        
+
+          case 't': /* t specifies that zero copy read should be used */
+            useZeroCopyRead = true;
+            break;
+
           default: /* no parameters */
           break;
                
@@ -233,7 +238,7 @@ int main(int argc, char *argv[])
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-       listener_servant.init(dr.in(), dw.in());
+       listener_servant.init(dr.in(), dw.in(), useZeroCopyRead);
 
        // sleep here to wait for the connections.
        ACE_OS::sleep(1);

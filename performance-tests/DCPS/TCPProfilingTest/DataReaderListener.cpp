@@ -9,7 +9,7 @@
 extern long subscriber_delay_msec; // from common.h
 
 
-int read (::DDS::DataReader_ptr reader)
+int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
 {
   // TWF: There is an optimization to the test by
   // using a pointer to the known servant and
@@ -30,32 +30,68 @@ int read (::DDS::DataReader_ptr reader)
     }
 
   const ::CORBA::Long max_read_samples = 100;
-  testMsgSeq samples(max_read_samples);
-  ::DDS::SampleInfoSeq infos(max_read_samples);
-
   int samples_recvd = 0;
   DDS::ReturnCode_t status;
   // initialize to zero.
 
-  status = dr_servant->read (
-    samples,
-    infos,
-    max_read_samples,
-    ::DDS::NOT_READ_SAMPLE_STATE,
-    ::DDS::ANY_VIEW_STATE,
-    ::DDS::ANY_INSTANCE_STATE);
+  if (useZeroCopy)
+    {
+      testMsgZCSeq samplesZC(0,max_read_samples);
+      ::TAO::DCPS::SampleInfoZCSeq infosZC(0,max_read_samples);
 
-  if (status == ::DDS::RETCODE_OK)
-    {
-      samples_recvd = samples.length ();
-    }
-  else if (status == ::DDS::RETCODE_NO_DATA)
-    {
-      ACE_ERROR((LM_ERROR, " Empty read!\n"));
+      status = dr_servant->read (
+        samplesZC,
+        infosZC,
+        max_read_samples,
+        ::DDS::NOT_READ_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ANY_INSTANCE_STATE);
+
+      if (status == ::DDS::RETCODE_OK)
+        {
+          samples_recvd = samplesZC.length ();
+        }
+      else if (status == ::DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR((LM_ERROR, " Empty read [ZC]!\n"));
+        }
+      else
+        {
+            ACE_OS::printf (" read  data [ZC]: Error: %d\n", status) ;
+        }
+
+      status = dr_servant->return_loan (samplesZC, infosZC);
+
+      if (status != ::DDS::RETCODE_OK)
+        {
+            ACE_OS::printf (" read  data [ZC return loan]: Error: %d\n", status) ;
+        }
     }
   else
     {
-        ACE_OS::printf (" read  data: Error: %d\n", status) ;
+      testMsgSeq samples(max_read_samples);
+      ::DDS::SampleInfoSeq infos(max_read_samples);
+
+      status = dr_servant->read (
+        samples,
+        infos,
+        max_read_samples,
+        ::DDS::NOT_READ_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ANY_INSTANCE_STATE);
+
+      if (status == ::DDS::RETCODE_OK)
+        {
+          samples_recvd = samples.length ();
+        }
+      else if (status == ::DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR((LM_ERROR, " Empty read!\n"));
+        }
+      else
+        {
+            ACE_OS::printf (" read  data: Error: %d\n", status) ;
+        }
     }
 
   return samples_recvd;
@@ -75,7 +111,8 @@ int read (::DDS::DataReader_ptr reader)
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,
-                                                int read_interval)
+                                                int read_interval,
+                                                bool use_zero_copy)
 :
   samples_lost_count_(0),
   samples_rejected_count_(0),
@@ -84,7 +121,8 @@ DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
   read_interval_ (read_interval),
   num_publishers_(num_publishers),
   num_samples_ (num_samples),
-  data_size_ (data_size)
+  data_size_ (data_size),
+  use_zero_copy_(use_zero_copy)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
@@ -234,7 +272,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 {
   int num_read = 0;
 
-  num_read = read (reader);
+  num_read = read (reader, use_zero_copy_);
 
 
   stats_.samples_received(num_read);
