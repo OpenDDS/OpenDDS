@@ -142,11 +142,7 @@ namespace TAO
         register_instance (
           ::DDS::InstanceHandle_t&  instance_handle,
           DataSample*&              registered_sample
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
-
+        );
 
       /**
       * Remove the provided instance from the instances_ list.
@@ -162,10 +158,7 @@ namespace TAO
           DataSample*& registered_sample,
           DataWriterImpl*         writer,
           bool                    dup_registered_sample = true
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
+        );
 
 
       /**
@@ -180,10 +173,7 @@ namespace TAO
           ::DDS::InstanceHandle_t handle,
           DataSample*& registered_sample,
           bool                    dup_registered_sample = true
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
+        );
 
       /**
       * Return the number of samples for the given instance.
