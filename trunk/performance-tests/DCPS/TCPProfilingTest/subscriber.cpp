@@ -45,6 +45,7 @@ int parse_args (int argc, char *argv[])
     // -msi <max samples per instance>
     // -mxs <max samples>
     // -mxi <max instances>
+    // -t  [use zero copy read]
     // -z  <verbose transport debug>
 
     const char *currentArg = 0;
@@ -94,6 +95,11 @@ int parse_args (int argc, char *argv[])
     {
       subscriber_delay_msec = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp("-t") == 0)
+    {
+      USE_ZERO_COPY_READ = true;
+      arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
     {
@@ -266,7 +272,8 @@ int main (int argc, char *argv[])
         new DataReaderListenerImpl(num_datawriters,
                                    NUM_SAMPLES,
                                    DATA_SIZE,
-                                   RECVS_BTWN_READS);
+                                   RECVS_BTWN_READS,
+                                   USE_ZERO_COPY_READ);
 
       PortableServer::ServantBase_var safe_servant = dr_listener_impl;
 

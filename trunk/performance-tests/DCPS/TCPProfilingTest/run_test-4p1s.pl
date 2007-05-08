@@ -36,7 +36,7 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 print $DCPSREPO->CommandLine(), "\n";
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
-$sub_parameters = "-DCPSConfigFile conf.ini"
+$sub_parameters = "-DCPSConfigFile conf.ini -DcpsBit 0 "
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
               . "  -p $num_writers"
@@ -52,7 +52,7 @@ print $Sub1->CommandLine(), "\n";
 
 
 #NOTE: above 1000 queue samples does not give any better performance.
-$pub_parameters = "-DCPSConfigFile conf.ini"
+$pub_parameters = "-DCPSConfigFile conf.ini -DcpsBit 0"
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
               . " -p 1"

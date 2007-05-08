@@ -25,7 +25,7 @@ public:
   //Constructor
   AckDataReaderListenerImpl (CORBA::Long size);
 
-  void init (DDS::DataReader_ptr dr, DDS::DataWriter_ptr dw);
+  void init (DDS::DataReader_ptr dr, DDS::DataWriter_ptr dw, bool use_zero_copy_read);
   //Destructor
   virtual ~AckDataReaderListenerImpl (void);
 
@@ -82,6 +82,7 @@ private:
   CORBA::Long sample_num_;
   int   done_;
   ACE_High_Res_Timer timer_;
+  bool  use_zero_copy_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

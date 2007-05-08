@@ -100,7 +100,8 @@ AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long size)
    handle_ (),
    size_ (size),
    sample_num_(1),
-   done_ (0)
+   done_ (0),
+   use_zero_copy_(false)
 {
   //
   // init timing statistics 
@@ -115,10 +116,12 @@ AckDataReaderListenerImpl::~AckDataReaderListenerImpl ()
 }
 
 void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
-                                    DDS::DataWriter_ptr dw)
+                                    DDS::DataWriter_ptr dw,
+                                    bool use_zero_copy_read)
 {
   this->writer_ = DDS::DataWriter::_duplicate (dw);
   this->reader_ = DDS::DataReader::_duplicate (dr);
+  use_zero_copy_ = use_zero_copy_read;
 
   AckMessageDataReader_var ackmessage_dr = 
     AckMessageDataReader::_narrow(this->reader_.in());
@@ -139,14 +142,36 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
 void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {
-    static DDSPerfTest::AckMessage message;
-    static DDS::SampleInfo si;
-    DDS::ReturnCode_t status = this->dr_servant_->take_next_sample(message, si) ;
+    CORBA::Long sequence_number;
+    DDS::ReturnCode_t status;
 
-    timer_.stop();
+    if (use_zero_copy_)
+    {
+      ::CORBA::Long max_read_samples = 1;
+      AckMessageZCSeq messageZC(0, max_read_samples);
+      ::TAO::DCPS::SampleInfoZCSeq siZC(0, max_read_samples);
+      status = this->dr_servant_->read(messageZC,
+                                       siZC,
+                                       max_read_samples,
+                                       ::DDS::NOT_READ_SAMPLE_STATE,
+                                       ::DDS::ANY_VIEW_STATE,
+                                       ::DDS::ANY_INSTANCE_STATE);
 
-    CORBA::Long sequence_number = message.seqnum;
+      timer_.stop();
 
+      sequence_number = messageZC[0].seqnum;
+      status = this->dr_servant_->return_loan(messageZC, siZC);
+    }
+    else
+    {
+      static DDSPerfTest::AckMessage message;
+      static DDS::SampleInfo si;
+      status = this->dr_servant_->take_next_sample(message, si) ;
+
+      timer_.stop();
+
+      sequence_number = message.seqnum;
+    }
 
     if (status == DDS::RETCODE_OK) {
 //      cout << "AckMessage: seqnum    = " << message.seqnum << endl;

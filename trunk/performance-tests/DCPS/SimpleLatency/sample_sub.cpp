@@ -71,17 +71,21 @@ int main(int argc, char *argv[])
          TheParticipantFactoryWithArgs (argc, argv);
 
        bool useTCP = true;
+       bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
        setbuf (stdout, NULL);
 
-       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("u"));
+       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("ut"));
 
        int ich;
        while ((ich = get_opts ()) != EOF) {
         switch (ich) {
           case 'u': /* u specifies that UDP should be used */
             useTCP = false;
+            break;
+          case 't': /* t specifies that zero copy read should be used */
+            useZeroCopyRead = true;
             break;
 
           default: /* no parameters */
@@ -215,7 +219,7 @@ int main(int argc, char *argv[])
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-       listener_servant.init(dr.in(), dw.in());
+       listener_servant.init(dr.in(), dw.in(), useZeroCopyRead);
 
        PubMessageDataReader_var pubmessage_reader = 
          PubMessageDataReader::_narrow (dr);

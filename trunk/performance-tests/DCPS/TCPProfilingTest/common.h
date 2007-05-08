@@ -30,6 +30,7 @@ int DATA_SIZE = 128;
 int RECVS_BTWN_READS = 10;
 CORBA::ULong max_mili_sec_blocking = 5000;
 long subscriber_delay_msec = 0;
+bool USE_ZERO_COPY_READ = false;
 
 int num_datawriters = 1;
 int num_datareaders = 1;

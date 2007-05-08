@@ -22,7 +22,7 @@ class PubDataReaderListenerImpl
 public:
   //Constructor
   PubDataReaderListenerImpl ();
-  void init (DDS::DataReader_ptr dr, DDS::DataWriter_ptr dw);
+  void init (DDS::DataReader_ptr dr, DDS::DataWriter_ptr dw, bool use_zero_copy_read);
 
 
   //Destructor
@@ -80,6 +80,7 @@ private:
   //  DDS::DataReader_var reader_;
   CORBA::Long  sample_num_;
   int   done_;
+  bool  use_zero_copy_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
