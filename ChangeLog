@@ -1,3 +1,9 @@
+Tue May  8 16:09:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          Added the default value (1) for built_in_topics.
+
 Mon May  7 22:18:31 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:

@@ -23,6 +23,9 @@ ifeq (,$(findstring -I$(DDS_ROOT),$(INCLDIRS)))
   INCLDIRS += -I$(DDS_ROOT)
 endif
 
+# Set defaults for gnumake macros corresponding to MPC features used by DDS
+built_in_topics ?= 1
+
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,
 # minor and beta) to run, but applications with dependencies on libraries
