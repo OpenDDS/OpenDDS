@@ -1,3 +1,18 @@
+Wed May  9 14:07:17 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportTypes.cpp:
+
+          Added the precompiled header include.
+
+Wed May  9 13:59:16 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.h:
+        * dds/DCPS/transport/TCP/tcp_export.h:
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/udp_export.h:
+
+          Added exports for compilers that support it.
+
 Tue May  8 14:43:39 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.h:
