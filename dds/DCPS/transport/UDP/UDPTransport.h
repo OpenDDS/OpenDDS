@@ -1,12 +1,13 @@
 #ifndef UDPTRANSPORT_H
 #define UDPTRANSPORT_H
 
+#include "udp_export.h"
 #include "dds/DCPS/transport/framework/Transport.h"
 #include <ace/SOCK_Dgram.h>
 #include <ace/Task.h>
 
 /// Implements the TransportAPI::Transport interface using UDP.
-class UDPTransport: public TransportAPI::Transport
+class Udp_Export UDPTransport: public TransportAPI::Transport
 {
 public:
   UDPTransport();

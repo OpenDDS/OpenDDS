@@ -1,13 +1,14 @@
 #ifndef TCPTRANSPORT_H
 #define TCPTRANSPORT_H
 
+#include "tcp_export.h"
 #include "dds/DCPS/transport/framework/Transport.h"
 #include <ace/SOCK_Acceptor.h>
 #include <ace/SOCK_Stream.h>
 #include <ace/Task.h>
 
 /// Implements the TransportAPI::Transport interface using TCP/IP.
-class TCPTransport: public TransportAPI::Transport
+class Tcp_Export TCPTransport: public TransportAPI::Transport
 {
 public:
   TCPTransport();
