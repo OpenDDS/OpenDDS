@@ -7,13 +7,22 @@ New to this version are the following changes:
   the serialization buffer does not allocate enough memory for the 
   registered sample.
   
-- Build DDS without Built-In-Topic (BIT) support to reduce the 
-  footprint of DDS.
+- It is now possible to build DDS without Built-In-Topic (BIT) support in order
+  to reduce the footprint of DDS.
     # Generate the makefiles/projects like:
     mwc.pl -type <yourtype> -features built_in_topics=0 DDS.mwc
+  Also, if <yourtype> happens to be gnuace, add "built_in_topics=0" to the
+  platform_macros.GNU file or the MAKEFLAGS environment variable.
 
 - The reliable multicast transport was added.  See the DDS developers guide
   for details.
+
+- Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
+
+- Support for Built-In-Topics and the TRANSIENT_LOCAL value for DURABILITY QoS
+  is now complete.  This means that BITs will now work as specified.  Some of
+  the information at the end of this document on the limiations of BITs is now
+  obsolete.
 
 =========================================================================
 
