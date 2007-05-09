@@ -4,16 +4,18 @@ BUILDING DDS
 
 * Supported platform:
 
-  We have built DDS examples on Win32 using MSVC 2003 .NET and gcc on 
-  Linux and Solaris.
+  We have built DDS examples on Win32 using Visual Studio .NET 2003 (VC 7.1)
+  and Visual Studio 2005 (VC 8), as well as gcc 3.3 on Solaris/x86 and gcc 3.4,
+  and 4.x on Linux.
 
 * Compiling:
 
-    DDS requires the PortableServer orbsvcs and dependent libraries to build.
+    DDS requires the TAO PortableServer and dependent libraries to build.  It
+    is preferable to have a complete build of TAO's core (every library under
+    $TAO_ROOT/tao) before attempting to build DDS.
 
   1 Build ACE and TAO.
 
-    Don't forget to build the PortableServer library.
     See the instructions in ACE_wrappers/ACE-INSTALL.html and
     ACE_wrappers/TAO/TAO-INSTALL.html or the relevant sections
     in OCI's TAO Developer's Guide.
@@ -23,7 +25,7 @@ BUILDING DDS
     Set DDS_ROOT to the location of the DDS checkout.  The default
     value for DDS_ROOT is $TAO_ROOT/DDS
 
-    Add $DDS_ROOT/bin to the PATH
+    Add $DDS_ROOT/bin to the PATH (on, windows add %DDS_ROOT%\bin)
 
     Add $DDS_ROOT/lib to the LD_LIBRARY_PATH (or %DDS_ROOT%\lib to
     the PATH for windows)
@@ -33,16 +35,16 @@ BUILDING DDS
 
   3 Generate the makefiles.
 
-    DDS uses MPC for generating makefiles.
+    DDS uses MPC for generating makefiles or project files.
 
      On linux or Solaris:
       cd $DDS_ROOT
-      perl $ACE_ROOT/bin/mwc.pl DDS.mwc
+      perl $ACE_ROOT/bin/mwc.pl -type gnuace DDS.mwc
 
      On Windows:
       cd %DDS_ROOT%
       perl %ACE_ROOT%\bin\mwc.pl -type [InsertCompilerType] DDS.mwc
-
+        "CompilerTypes" tested include vc71, vc8, and nmake
 
   4 Build
 
@@ -57,4 +59,4 @@ BUILDING DDS
   5 Test
 
     cd $DDS_ROOT/tests
-    $DDS_ROOT/bin/all_tests.pl
+    $DDS_ROOT/bin/auto_run_tests.pl

@@ -1,3 +1,9 @@
+Wed May  9 13:48:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/INSTALL:
+
+          Added some information on supported platforms and building DDS.
+
 Tue May 08 23:41:25 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
@@ -11,7 +17,7 @@ Tue May 08 23:41:25 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
         * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
         * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
 
-          Added option to use Zero copy read. 
+          Added option to use Zero copy read.
 
         * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
         * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
