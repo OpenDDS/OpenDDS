@@ -340,10 +340,23 @@ namespace TAO
 
       //NOTE: this cannot be pure virtual because of unit test projects like
       //      DcpsFooType, DdsDcps_UnitTest, and dcpsinfo_test_subscriber.
-      /// return loand of zero-copy sequence.
+      /** This method provides virtual access to type specific code
+       * that is used when loans are automatically returned.
+       * The destructor of the sequence supporing zero-copy read calls this
+       * method on the datareader that provided the loan.
+       *
+       * @param seq - The sequence of loaned values.
+       *
+       * @returns Always RETCODE_OK.
+       *
+       * @thows NONE.
+       */
       virtual DDS::ReturnCode_t auto_return_loan(void* ); // = 0;
 
-      /// return the number of outstanding zero-copy samples loaned out.
+      /** This method is used for a precondition check of delete_datareader.
+       *
+       * @returns the number of outstanding zero-copy samples loaned out.
+       */
       virtual int num_zero_copies();
 
     protected:
@@ -355,6 +368,10 @@ namespace TAO
           CORBA::SystemException
         )) = 0;
 
+      /**
+       * Set the sample_ranks, generation_ranks, and
+       * absolute_generation_ranks for this info_seq.
+       */
       void sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
                        size_t start_idx, size_t count,
                        ReceivedDataElement *ptr) ;
