@@ -22,10 +22,10 @@
 #include "ace/Get_Opt.h"
 
 int delay_before_read_sec = 0;
-int num_parts = 4;
-int num_topics = 2;
-int num_subs = 1;
-int num_pubs = 1;
+unsigned int num_parts = 4;
+unsigned int num_topics = 2;
+unsigned int num_subs = 1;
+unsigned int num_pubs = 1;
 char* topic_name = "Movie Discussion List";
 char* topic_type_name = "Messenger";
 
