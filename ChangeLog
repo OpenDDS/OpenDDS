@@ -1,3 +1,9 @@
+Wed May  9 14:02:02 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Use unsigned ints to eliminated signed/unsigned mismatch warnings.
+
 Wed May  9 13:48:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * docs/INSTALL:
