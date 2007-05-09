@@ -1,3 +1,10 @@
+Wed May  9 15:23:33 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Pass -NOBITS on the DCPSInfoRepo command line since this test doesn't
+          use BITS.  This makes the test compatible with static builds.
+
 Wed May  9 14:02:02 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:

@@ -14,15 +14,12 @@ my $debug = 0 ;
 
 $domains_file = PerlACE::LocalFile ("domainids.txt");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                            "$repo_bit_conf -o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBSvcConf ../../tcp.conf");
-
+                                  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
 
 $PUBLISHER = new PerlACE::Process ("publisher",
                             "-k file://$dcpsrepo_ior -q");
