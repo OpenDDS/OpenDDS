@@ -846,8 +846,8 @@ DDS::ReturnCode_t
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-  //SPEC ref v1.2 7.1.2.5.3.8 #4 but more strict.
-  if ((received_data.max_len() == 0) != (received_data.owns() == false))
+  //SPEC ref v1.2 7.1.2.5.3.8 #4
+  if ((received_data.max_len() > 0) && (received_data.owns() == false))
 	{
 		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET mismatch of max_len %d  and owns %d\n",
 		 received_data.max_len(), received_data.owns() ));
@@ -967,9 +967,11 @@ DDS::ReturnCode_t
   {
 	if (received_data.max_len() == 0)
 	{
-		received_data.max_len(received_data.max_slots());
+	    received_data.owns(false); // per 7.1.2.5.3.8 rule #3
+	  	received_data.max_len(received_data.max_slots());
 		// preconditions ensure data and info sequences are the same.
-		received_data.max_len(received_data.max_slots());
+		info_seq.max_len(received_data.max_slots());
+		info_seq.owns(false);
 	}
 
     return ::DDS::RETCODE_OK;
@@ -1168,8 +1170,8 @@ DDS::ReturnCode_t
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-  //SPEC ref v1.2 7.1.2.5.3.8 #4 but more strict.
-  if ((received_data.max_len() == 0) != (received_data.owns() == false))
+  //SPEC ref v1.2 7.1.2.5.3.8 #4
+  if ((received_data.max_len() > 0) && (received_data.owns() == false))
 	{
 		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET mismatch of max_len %d  and owns %d\n",
 		 received_data.max_len(), received_data.owns() ));
@@ -1337,9 +1339,11 @@ DDS::ReturnCode_t
     {
 	  if (received_data.max_len() == 0)
 	  {
+	    received_data.owns(false); // per 7.1.2.5.3.8 rule #3
 	  	received_data.max_len(received_data.max_slots());
 		// preconditions ensure data and info sequences are the same.
-		received_data.max_len(received_data.max_slots());
+		info_seq.max_len(received_data.max_slots());
+		info_seq.owns(false);
 	  }
 
       return ::DDS::RETCODE_OK;
