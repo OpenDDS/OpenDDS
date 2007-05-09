@@ -1,3 +1,4 @@
+#include "DCPS/DdsDcps_pch.h"
 #include "TransportTypes.h"
 
 namespace TransportAPI
