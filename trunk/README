@@ -110,7 +110,7 @@ This release of TAO DDS has been tested using the following compilers:
 ** gcc 4.0.2 with Red Hat modifications
 ** gcc 4.1.0 with Red Hat modifications
 ** gcc 4.1.1 with Red Hat modifications
-** QNX gcc 2.95.3
+** QNX gcc 3.3.5
 ** Sun C++ 5.8
 
 * Building and Installing
