@@ -1,0 +1,118 @@
+The TAO DDS is an open-source C++ implementation of the Object
+Management Group's specification ""Data Distribution Service for
+Real-time Systems". TAO DDS is built on the ACE
+(http://www.theaceorb.com/product/aboutace.html) abstraction layer to
+provide platform portability. TAO DDS also leverages capabilities of
+TAO (http://www.theaceorb.com/), such as its IDL compiler and as the
+basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+ 
+The primary development of TAO DDS was done by the ACE/TAO development
+team at Object Computing, Incorporated (http://www.ociweb.com) in St
+Louis and Phoenix. It is released under the same generous license
+terms as ACE, TAO and MPC.
+
+This directory structure contains TAO DDS 0.11.
+
+Note that this release is considered beta quality software and
+therefore some small interface changes may occur before version 1.0 is
+released.
+
+* Support
+
+OCI strives to make TAO DDS as bug free as possible. If you encounter
+any problems with this release please fill out the PROBLEM-REPORT-FORM
+file found in this directory and send to support@ociweb.com.
+
+If you desire responsive commerical support for OCI on any problems
+you encounter, we strongly recommend that you set up an account before
+you actually need help. There is no cost to establish a normal
+account.  Support charges only apply to work actually delivered.
+However, we do offer premium level accounts for customers with
+specific support and enhancement needs, and there may be ongoing
+charges for such premium service.  To set up a support account or to
+find out more about the support options available, please contact
+sales@ociweb.com.
+
+* Features
+
+This release of TAO DDS is based on the DDS Specification
+formal/04-12-02. It features the following transport protocols:
+
+** TCP
+** Unreliable and reliable multicast
+** UDP
+
+TAO DDS has been found to perform better than other similar TAO
+services (notification and real-time event channel) by a factor of two
+or three. The features offered by the RTEC and NS are similar to DDS,
+but not identical, so carefully examine your use-cases before choosing
+one service over another. Speed is not the only criterion.
+
+Currently TAO DDS does not support the Data Local Reconstruction Layer
+(DLRL) portion of the DDS specification. In addition, support for some
+Quality of Service policies is not currently available in TAO DDS. See
+the chapter Data Distribution Service that is part of the TAO
+Developer's Guide for further information on TAO DDS compliance with
+the DDS specification. This chapter is freely available as a PDF file
+from the same location where TAO DDS can be downloaded. If you would
+like have OCI add a features to TAO DDS please see the Support section
+for contact information.
+
+* Dependencies
+
+** TAO
+
+TAO DDS requires the use of TAO. This release of TAO DDS has been
+tested against the versions of TAO given below. Note that the 1.xa
+releases are from OCI and can be obtained from
+http://www.theaceorb.com/. The DOC Group releases can be obtained from
+http://download.dre.vanderbilt.edu/. For responsive support from OCI
+it is recommended that the latest version of the OCI release of TAO
+used for TAO DDS development and testing be used.
+
+*** TAO 1.4a patch 16
+*** TAO 1.5a
+*** A current snapshot of DOC Group's 1.5.x
+
+** MPC
+
+The Makefile, Project, and Workspace Creator (MPC) software is another
+OCI developed open source tool and is used to target multiple build
+systems from a single set of files. MPC is used for generating TAO DDS
+build files such as GNU makefiles or Microsoft Visual Studio solution
+files. You can obtain the latest version at
+http://www.ociweb.com/products/mpc.
+
+** GNU Make
+
+GNU Make 3.8 was used for automating the compiling and linking of TAO
+DDS on Unix and Linux systems.
+
+* Build Targets
+
+* Operating Systems
+
+This release of TAO DDS has been tested under the following platforms:
+
+** Windows XP
+** Linux Fedore Core 3
+** Linux Fedore Core 6
+** SunOS 5.9
+** SunOS 5.10
+
+* Compilers
+
+This release of TAO DDS has been tested using the following compilers:
+
+** Visual C++ 7.1
+** Visual C++ 8
+** gcc 3.3.2
+** gcc 4.0.2 with Red Hat modifications
+** gcc 4.1.0 with Red Hat modifications
+** gcc 4.1.1 with Red Hat modifications
+** QNX gcc 2.95.3
+** Sun C++ 5.8
+
+* Building and Installing
+
+For building and installation instructions see docs/INSTALL.
