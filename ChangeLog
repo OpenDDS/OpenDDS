@@ -1,19 +1,31 @@
+Thu May 10 14:50:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Test scripts that redirect stdout or stderr need to not close the
+          file handles after the redirection is done.  This prevents the
+          remainder of the script from producing output.
+
 Wed May 09 22:46:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * dds/DCPS/DataReaderImpl.h:
         * DDS_release_notes.txt:
-        
+
           Cleanup of zero-copy implementation per review.
 
         * DDS_info.txt:
-        
+
           Add note on what it looks like when the TCP transport library is unavailable.
 
         * tests/DCPS/Messenger_ZeroCopy:
         * bin/dcps_tests.lst:
 
-          Moved tets/DCPS/Messenger_ZeroCopy to 
+          Moved tets/DCPS/Messenger_ZeroCopy to
               DevGuideExamples/DDS/Messenger_ZeroCopy.
           And removed it from the nightly build tests because it
           is an example and the ZeroCopyRead test is a true test.
