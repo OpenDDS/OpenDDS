@@ -1,3 +1,125 @@
+Thu May 10 18:06:58 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_no_CORBA.mwc:
+
+          Temporary addition.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/dcps_ts.pl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/DdsDcpsTypeSupportTao.idl:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        
+          First round of making the entity interfaces local
+          and merging the sample sequence types.
+          
+          These changes requires changes to the TAO_IDL compiler
+          to support the native <Foo>Seq type.
+          
+			The DDS entities (e.g. DomainParticipant, FooDataReader) have changed from
+			*remote* IDL types to *local* IDL types and the data sequence and info sequence
+			types have changed from normal IDL sequences to types with  
+			extra functionality required to support zero-copy reads.
+
+			1) The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
+			The <Foo>Seq and DDS::SampleInfoSeq have been changed 
+			to support both single-copy reads (as before) and zero-copy reads
+			(like <Foo>ZCSeq should have).
+			   
+			The default constructor for <Foo>Seq enables zero-copy reads.
+			Constructing a <Foo>Seq(num) with num > 0 enables single-copy reads.
+			   
+			2) Listeners will not inherit from DDS::<enity>Listner
+			instead of POA_DDS::<entity> or POA_TAO::DCPS::DataReader/WriterListener
+			and should inherit as a local object (not a servant)
+
+			for example:   
+			   
+				class DataReaderListenerImpl
+				: public virtual POA_TAO::DCPS::DataReaderListener,
+				public virtual PortableServer::RefCountServantBase
+				{
+
+			will become:
+			   
+				class DataReaderListenerImpl
+				: public virtual DDS::DataReaderListener,
+				public virtual TAO_Local_RefCounted_Object
+				{
+			   
+			but the header and implementation should require no other changes.
+			  
+			TBD - is the TAO_Local_RefCounted_Object inheritance necessary?
+
+			2) The need to user reference_to_servant() to increase performance
+			of an application has been reduced by making the entity interfaces local.
+			An application may still do so.
+			   
+			3) if the user defined DDS type is in a module then the generated types will also.
+
+				Given a "Foo" DDS type defined in the module "Test":
+							old           new
+						--------      ------------
+				type      Test::Foo     Test::Foo
+				sequence  FooSeq        Test::FooSeq
+				reader    FooDataReader Test::FooDataReader
+				writer    FooDataWriter Tets::FooDataWriter
+
+			4) Using the --module option to dcps_ts.pl behaves differently.
+			It does not change the scope of <Foo>Seq.
+			But it will continue to override the scope of the generated
+			FooTypeSupport, FooDataReader and FooDataWriter.
+			   
+			5) what did not change.
+			You may use the following:
+			<entity>_var, <entity>_ptr 
+			<entity>::_narrrow()    // might use this for a listener
+			<entity>::_duplicate()
+			TAO::DCSP::servant_to_reference()
+			TAO::DCPS::reference_to_servant()
+			TAO::DCPS::deactivate() // now a no-op
+			   
+			6) Changes to OpenDDS implemenation code that should not impact user application code:
+
+			There are no longer any stubs (.e.g POA_DDS::DataReaderListener).
+			They are now handled as references DDS::DataReaderListener
+			but this should not impact user code.
+			   
+			The RemoteDataReader/Writer are now contained by the DAtaReader/Writer
+			instead of inheriting from them.
+          
+
 Thu Apr 26 16:01:23 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -328,6 +328,7 @@ namespace TAO
           return 0;
         }
 
+#ifdef DDS_USING_REMOTE_INTERFACES
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
       T_impl* the_servant = ACE_dynamic_cast (T_impl*,
@@ -337,10 +338,14 @@ namespace TAO
       // Use the ServantBase_var so that the servant's reference
       // count will not be changed by this operation.
       PortableServer::ServantBase_var servant = the_servant;
+#else
+    T_impl* the_servant = ACE_dynamic_cast (T_impl*, p);
+#endif
 
       return the_servant;
     }
 
+#ifdef DDS_USING_REMOTE_INTERFACES
     /// @throws PortableServer::POA::ServantNotActive,
     ///         PortableServer::POA::WrongPolicy
     template <class T>
@@ -360,7 +365,40 @@ namespace TAO
       typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow (obj.in ());
       return the_obj;
     }
+#else
+    /// @throws PortableServer::POA::ServantNotActive,
+    ///         PortableServer::POA::WrongPolicy
+    template <class T>
+    typename T::_stub_ptr_type servant_to_remote_reference (
+      T *servant
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
+    {
+      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
+      PortableServer::ObjectId_var oid = poa->activate_object (servant);
+
+      CORBA::Object_var obj = poa->id_to_reference (oid.in ());
+
+      typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow (obj.in ());
+      return the_obj;
+    }
+
+    // for local interfaces
+    template <class T>
+    typename T::_ptr_type servant_to_reference (
+      T *servant
+    )
+    {
+      typename T::_ptr_type the_obj = 
+          T::_narrow (servant);
+      return the_obj;
+    }
+#endif
+
+#ifdef DDS_USING_REMOTE_INTERFACES
     template <class T>
     void deactivate_object (
       T obj
@@ -374,6 +412,32 @@ namespace TAO
         poa->reference_to_id (obj);
       poa->deactivate_object (oid.in ());
     }
+#else
+    template <class T>
+    void deactivate_remote_object (
+      T obj
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
+    {
+      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+      PortableServer::ObjectId_var oid =
+        poa->reference_to_id (obj);
+      poa->deactivate_object (oid.in ());
+    }
+
+    template <class T>
+    void deactivate_object (
+      T 
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
+    {
+        // no-op
+    }
+#endif
 
   } // namespace DCPS
 } // namespace TAO

@@ -285,7 +285,7 @@ namespace TAO
                   dp_factory_ = servant_to_reference (dp_factory_servant_);
 
                   // Give ownership to poa.
-                  //dp_factory_servant_->_remove_ref ();
+                  //REMOVE SHH ???? dp_factory_servant_->_remove_ref ();
 
                   if (CORBA::is_nil (dp_factory_.in ()))
                     {

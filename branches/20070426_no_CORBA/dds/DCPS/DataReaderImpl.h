@@ -31,6 +31,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace DDS
+{
+  typedef TAO::DCPS::ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoSeq;
+}
+
 namespace TAO
 {
   namespace DCPS
@@ -42,7 +47,7 @@ namespace TAO
     typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
-    typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
+    //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class TAO_DdsDcps_Export WriterInfo {
@@ -84,8 +89,7 @@ namespace TAO
     /**
     * @class DataReaderImpl
     *
-    * @brief Implements the ::TAO::DCPS::ReaderRemote interfaces and
-    *        ::DDS::DataReader interfaces.
+    * @brief Implements the ::DDS::DataReader interface.
     *
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
@@ -95,7 +99,7 @@ namespace TAO
     *
     */
     class TAO_DdsDcps_Export DataReaderImpl
-      : public virtual POA_TAO::DCPS::DataReaderRemote,
+      : public virtual DDS::DataReader,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
         public virtual ACE_Event_Handler
@@ -145,7 +149,7 @@ namespace TAO
     * Otherwise, the query for the listener is propagated up to the
     * factory/subscriber.
     */
-    ::POA_DDS::DataReaderListener* listener_for (::DDS::StatusKind kind);
+    ::DDS::DataReaderListener* listener_for (::DDS::StatusKind kind);
 
 
     /// Handle the assert liveliness timeout.
@@ -175,7 +179,8 @@ namespace TAO
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
-        DataReaderRemote_ptr          dr_remote_objref
+        ::DDS::DataReader_ptr         dr_objref,
+        ::TAO::DCPS::DataReaderRemote_ptr dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -351,9 +356,9 @@ namespace TAO
           CORBA::SystemException
         )) = 0;
 
-      void sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
-                       size_t start_idx, size_t count,
-                       ReceivedDataElement *ptr) ;
+      //xvoid sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
+      //x                 size_t start_idx, size_t count,
+      //x                 ReceivedDataElement *ptr) ;
 
       void sample_info(::DDS::SampleInfoSeq & info_seq,
                        size_t start_idx, size_t count,
@@ -411,12 +416,13 @@ namespace TAO
       ::DDS::TopicDescription_var     topic_desc_ ;
       ::DDS::StatusKindMask           listener_mask_;
       ::DDS::DataReaderListener_var   listener_;
-      ::POA_DDS::DataReaderListener*  fast_listener_;
+      ::DDS::DataReaderListener*  fast_listener_;
       DomainParticipantImpl*          participant_servant_;
       ::DDS::DomainId_t               domain_id_;
       SubscriberImpl*                 subscriber_servant_;
       ::DDS::Subscriber_var           subscriber_objref_;
       DataReaderRemote_var            dr_remote_objref_;
+      ::DDS::DataReader_var           dr_local_objref_;
       RepoId                          subscription_id_;
 
       CORBA::Long                     depth_ ;

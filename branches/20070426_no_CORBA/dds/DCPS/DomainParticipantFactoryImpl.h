@@ -10,6 +10,7 @@
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Unbounded_Set.h"
+#include "tao/LocalObject.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -35,10 +36,17 @@ namespace TAO
     *
     */
     class TAO_DdsDcps_Export DomainParticipantFactoryImpl
-      : public virtual POA_DDS::DomainParticipantFactory,
-        public virtual PortableServer::RefCountServantBase
+      : public virtual DDS::DomainParticipantFactory,
+        public virtual TAO_Local_RefCounted_Object
     {
     public:
+
+      // to support servant_to_reference for local interface
+      typedef DDS::DomainParticipantFactory::_ptr_type _ptr_type;
+      // to support servant_to_reference for local interface
+      static  DDS::DomainParticipantFactory::_ptr_type _narrow (::CORBA::Object_ptr obj)
+        { return DDS::DomainParticipantFactory::_narrow(obj); };
+
 
       typedef Objref_Servant_Pair <DomainParticipantImpl,
                                    ::DDS::DomainParticipant,
