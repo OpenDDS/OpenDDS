@@ -1,0 +1,17 @@
+// $Id$
+
+workspace {
+  cmdline = -include $PWD/MPC/config
+  
+  dds
+  //tests/DCPS/Messenger_ZeroCopy
+  // a zero-copy type test
+  tests/DCPS/ZeroCopyRead
+  // an old single-copy type test
+  tests/DCPS/FooType5
+  tests/DCPS/FooTest5
+  //performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc
+  performance-tests/DCPS/TCPListenerTest/TCPListener.mpc
+  performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc
+}
+

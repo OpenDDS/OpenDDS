@@ -3,6 +3,8 @@
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PublisherImpl.h"
+#include "DataWriterImpl.h"
+#include "DataWriterRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "DataWriterImpl.h"
 #include "Service_Participant.h"
@@ -58,7 +60,7 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
     {
-      fast_listener_ = reference_to_servant<POA_DDS::PublisherListener,
+      fast_listener_ = reference_to_servant<DDS::PublisherListener,
   DDS::PublisherListener_ptr>
   (listener_.in());
     }
@@ -146,7 +148,7 @@ PublisherImpl::~PublisherImpl (void)
     ::DDS::Topic_ptr>
     (a_topic);
 
-  POA_TAO::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
+  TAO::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
 
   if (typesupport == 0)
     {
@@ -159,7 +161,7 @@ PublisherImpl::~PublisherImpl (void)
       return ::DDS::DataWriter::_nil ();
     }
 
-  DataWriterRemote_var dw_obj = typesupport->create_datawriter ();
+  ::DDS::DataWriter_var dw_obj = typesupport->create_datawriter ();
 
   DataWriterImpl* dw_servant = reference_to_servant <DataWriterImpl,
     ::DDS::DataWriter_ptr>
@@ -167,6 +169,15 @@ PublisherImpl::~PublisherImpl (void)
 
   // Give owner ship to poa.
   dw_servant->_remove_ref ();
+
+  DataWriterRemoteImpl* writer_remote_impl = 0;
+  ACE_NEW_RETURN(writer_remote_impl,
+                 DataWriterRemoteImpl(dw_servant),
+                 ::DDS::DataWriter::_nil());
+
+  ::TAO::DCPS::DataWriterRemote_var dw_remote_obj = 
+      servant_to_remote_reference(writer_remote_impl);
+
 
   DomainParticipantImpl* participant
     = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
@@ -179,7 +190,8 @@ PublisherImpl::~PublisherImpl (void)
         participant,
         publisher_objref_.in (),
         this,
-        dw_obj.in ());
+        dw_obj.in (),
+        dw_remote_obj.in ());
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1)
@@ -265,7 +277,7 @@ PublisherImpl::~PublisherImpl (void)
          publication_id),
         ::DDS::RETCODE_ERROR);
       }
-    local_writer = it->second->local_writer_;
+    local_writer = it->second->local_writer_impl_;
 
     PublisherDataWriterInfo* dw_info = it->second;
 
@@ -392,7 +404,7 @@ PublisherImpl::~PublisherImpl (void)
     }
   else
     {
-      return ::DDS::DataWriter::_duplicate (it->second->remote_writer_);
+      return ::DDS::DataWriter::_duplicate (it->second->local_writer_objref_);
     }
 }
 
@@ -427,7 +439,7 @@ PublisherImpl::~PublisherImpl (void)
       // the iterator will be invalid after deletion.
       next = it;
       next ++;
-      ::DDS::ReturnCode_t ret = delete_datawriter (it->second->remote_writer_);
+      ::DDS::ReturnCode_t ret = delete_datawriter (it->second->local_writer_objref_);
       if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
@@ -503,7 +515,7 @@ void PublisherImpl::get_qos (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::POA_DDS::PublisherListener,
+    = reference_to_servant< ::DDS::PublisherListener,
     ::DDS::PublisherListener_ptr >
     (listener_.in ());
   return ::DDS::RETCODE_OK;
@@ -747,16 +759,18 @@ void PublisherImpl::remove_associations(
 }
 
 ::DDS::ReturnCode_t PublisherImpl::writer_enabled(
-              DataWriterRemote_ptr     writer,
+              ::TAO::DCPS::DataWriterRemote_ptr remote_writer,
+              ::DDS::DataWriter_ptr    local_writer,
               const char*              topic_name,
               //BuiltinTopicKey_t topic_key
               RepoId                   topic_id)
 {
   PublisherDataWriterInfo* info = new PublisherDataWriterInfo;
-  info->remote_writer_ = writer ;
-  info->local_writer_
-    = reference_to_servant<DataWriterImpl, DataWriterRemote_ptr>
-    (writer);
+  info->remote_writer_objref_ = remote_writer ;
+  info->local_writer_objref_ = local_writer ;
+  info->local_writer_impl_
+    = reference_to_servant<DataWriterImpl, ::DDS::DataWriter_ptr>
+    (local_writer);
 
   info->topic_id_      = topic_id ;
   // all other info memebers default in constructor
@@ -766,7 +780,7 @@ void PublisherImpl::remove_associations(
   try
     {
       ::DDS::DataWriterQos qos;
-      info->remote_writer_->get_qos(qos);
+      info->local_writer_objref_->get_qos(qos);
 
       TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
 
@@ -775,11 +789,11 @@ void PublisherImpl::remove_associations(
                participant_->get_domain_id (), // Loaded during Publisher construction
                participant_->get_id (),  // Loaded during Publisher construction.
                info->topic_id_, // Loaded during DataWriter construction.
-               info->remote_writer_,
+               info->remote_writer_objref_,
                qos,
                trans_conf_info ,   // Obtained during setup.
                qos_) ;
-      info->local_writer_->set_publication_id (info->publication_id_);
+      info->local_writer_impl_->set_publication_id (info->publication_id_);
     }
   catch (const CORBA::SystemException& sysex)
     {
@@ -826,7 +840,7 @@ void PublisherImpl::remove_associations(
 
     // Increase ref count when the servant is added to the
     // datawriter/publication map.
-    info->local_writer_->_add_ref ();
+    info->local_writer_impl_->_add_ref ();
   }
 
   return ::DDS::RETCODE_OK;
@@ -887,7 +901,7 @@ PublisherImpl::data_available(DataWriterImpl* writer,
 }
 
 
-::POA_DDS::PublisherListener*
+::DDS::PublisherListener*
 PublisherImpl::listener_for (::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status

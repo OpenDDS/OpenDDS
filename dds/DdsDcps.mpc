@@ -37,11 +37,14 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   }
 
   IDL_Files {
+    // specification defined
+    DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsTopic.idl
     DdsDcps.idl
+    // TAO specific below
     DdsDcpsInfo.idl
     DdsDcpsDataReaderRemote.idl
     DdsDcpsDataWriterRemote.idl

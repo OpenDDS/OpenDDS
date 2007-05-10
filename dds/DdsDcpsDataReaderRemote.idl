@@ -24,7 +24,7 @@ module TAO {
     // This interface contains TAO specific interfaces
     // related to a DDS::DataReader servant.
     // It is split out so the DDS::DataReader interface can be local.
-    interface DataReaderRemote : ::DDS::DataReader {
+    interface DataReaderRemote  { //x : ::DDS::DataReader {
 
       // will tell transport and call on_subscription_match() 
       oneway void add_associations(

@@ -969,7 +969,7 @@ namespace TAO
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::DomainParticipantListener::_duplicate(a_listener);
       fast_listener_
-        = reference_to_servant< ::POA_DDS::DomainParticipantListener,
+        = reference_to_servant< ::DDS::DomainParticipantListener,
                                 ::DDS::DomainParticipantListener_ptr >
             (listener_.in ());
       return ::DDS::RETCODE_OK;
@@ -1434,7 +1434,7 @@ namespace TAO
           return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
         }
 
-      POA_TAO::DCPS::TypeSupport_ptr type_support =
+      TAO::DCPS::TypeSupport_ptr type_support =
         TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (),type_name);
 
       if (0 == type_support)
@@ -1460,7 +1460,6 @@ namespace TAO
         }
 
       ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
-
 
       // Give ownership to poa.
       topic_servant->_remove_ref ();
@@ -1521,7 +1520,7 @@ namespace TAO
         participant_objref_ = ::DDS::DomainParticipant::_duplicate (dp);
     }
 
-    ::POA_DDS::DomainParticipantListener*
+    ::DDS::DomainParticipantListener*
     DomainParticipantImpl::listener_for (::DDS::StatusKind kind)
     {
       if ((listener_mask_ & kind) == 0)
@@ -1567,7 +1566,7 @@ namespace TAO
         ::DDS::TopicQos topic_qos;
         this->get_default_topic_qos(topic_qos);
 
-        POA_TAO::DCPS::TypeSupport_ptr type_support =
+        TAO::DCPS::TypeSupport_ptr type_support =
           TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
         if (0 == type_support)

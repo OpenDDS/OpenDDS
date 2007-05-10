@@ -31,9 +31,11 @@ namespace TAO
     /// Information about a DataWriter
     struct TAO_DdsDcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
-      DataWriterRemote_ptr         remote_writer_ ;
+      ::TAO::DCPS::DataWriterRemote_ptr  remote_writer_objref_ ;
+      /// The local datawriter object reference.
+      ::DDS::DataWriter_ptr        local_writer_objref_ ;
       /// The datawriter servant.
-      DataWriterImpl*              local_writer_;
+      DataWriterImpl*              local_writer_impl_;
       /// The topic id from repository.
       RepoId			   topic_id_;
       /// The datawriter/publication id from repository.
@@ -62,11 +64,17 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export PublisherImpl
-      : public virtual POA_DDS::Publisher,
+      : public virtual DDS::Publisher,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
     public:
+      // to support servant_to_reference for local interface
+      typedef DDS::Publisher::_ptr_type _ptr_type;
+      // to support servant_to_reference for local interface
+      static  DDS::Publisher::_ptr_type _narrow (::CORBA::Object_ptr obj)
+        { return DDS::Publisher::_narrow(obj); };
+
       typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
 
       ///Constructor
@@ -218,7 +226,8 @@ namespace TAO
     * a new datawriter/publication is associated with the topic.
     */
     ::DDS::ReturnCode_t writer_enabled (
-        DataWriterRemote_ptr    writer,
+        ::TAO::DCPS::DataWriterRemote_ptr remote_writer,
+        ::DDS::DataWriter_ptr    local_writer,
         const char *            topic_name,
         //BuiltinTopicKey_t topic_key
         RepoId                  topic_id);
@@ -263,7 +272,7 @@ namespace TAO
     * Otherwise, the query for listener is propagated up to the
     * factory/DomainParticipant.
     */
-    ::POA_DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
+    ::DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
 
     private:
       /// Publisher QoS policy list.
@@ -277,7 +286,7 @@ namespace TAO
       /// Used to notify the entity for relevant events.
       ::DDS::PublisherListener_var  listener_;
       /// The publisher listener servant.
-      ::POA_DDS::PublisherListener* fast_listener_;
+      ::DDS::PublisherListener* fast_listener_;
       /// This map is used to support datawriter lookup by topic name.
       DataWriterMap                 datawriter_map_;
       /// This map is used to support datawriter lookup by datawriter

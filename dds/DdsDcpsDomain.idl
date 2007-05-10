@@ -10,13 +10,13 @@
 
 module DDS {
 
-    interface DomainParticipantListener : TopicListener, PublisherListener,
+    local interface DomainParticipantListener : TopicListener, PublisherListener,
                                     SubscriberListener
       {
       };
 
     // ----------------------------------------------------------------------
-    interface DomainParticipant : Entity
+    local interface DomainParticipant : Entity
       {
   // Factory     interfaces
   Publisher create_publisher(
@@ -107,7 +107,7 @@ module DDS {
       };
 
 
-    interface DomainParticipantFactory
+    local interface DomainParticipantFactory
       {
 
         // Note:

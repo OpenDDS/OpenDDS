@@ -16,7 +16,7 @@ namespace TAO
     TopicImpl::TopicImpl (const RepoId                   topic_id,
                           const char*                    topic_name,
                           const char*                    type_name,
-                          POA_TAO::DCPS::TypeSupport_ptr type_support,
+                          TAO::DCPS::TypeSupport_ptr type_support,
                           const ::DDS::TopicQos &        qos,
                           ::DDS::TopicListener_ptr       a_listener,
                           ::DDS::DomainParticipant_ptr   participant)
@@ -103,7 +103,7 @@ namespace TAO
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::TopicListener::_duplicate(a_listener);
       fast_listener_
-        = reference_to_servant< ::POA_DDS::TopicListener,
+        = reference_to_servant< ::DDS::TopicListener,
                                 ::DDS::TopicListener_ptr >
           (listener_.in ());
       return ::DDS::RETCODE_OK;

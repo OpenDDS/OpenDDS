@@ -12,7 +12,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DCPS_DomainParticipantListener_i
-class TAO_DCPS_DomainParticipantListener_i : public virtual POA_DDS::DomainParticipantListener
+class TAO_DCPS_DomainParticipantListener_i : public virtual DDS::DomainParticipantListener
 {
 public:
   //Constructor

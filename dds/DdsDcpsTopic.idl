@@ -6,23 +6,23 @@
 #include "dds/DdsDcpsInfrastructure.idl"
 
 module DDS {
-    interface DomainParticipant;
-    interface Topic;
+    local interface DomainParticipant;
+    local interface Topic;
 
     // ----------------------------------------------------------------------
-    interface TopicDescription {
+    local interface TopicDescription {
 		string get_type_name();
 		string get_name();
 		DomainParticipant get_participant();
 		};
 
-    interface TopicListener : Listener {
+    local interface TopicListener : Listener {
 		void on_inconsistent_topic(
 			in Topic the_topic,
 			in InconsistentTopicStatus status);
 		};
 
-    interface Topic : Entity, TopicDescription {
+    local interface Topic : Entity, TopicDescription {
       ReturnCode_t set_qos(
         in TopicQos qos);
 
@@ -37,7 +37,7 @@ module DDS {
       InconsistentTopicStatus get_inconsistent_topic_status();
     };
 
-    interface TypeSupport {
+    local interface TypeSupport {
 		 //	ReturnCode_t register_type(
 		 //		in DomainParticipant domain, 
 		 //		in string type_name);

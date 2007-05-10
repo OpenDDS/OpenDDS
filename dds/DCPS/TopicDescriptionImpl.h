@@ -26,13 +26,19 @@ namespace TAO
     *
     */
     class TAO_DdsDcps_Export TopicDescriptionImpl
-      : public virtual POA_DDS::TopicDescription
+      : public virtual DDS::TopicDescription
     {
     public:
+      // to support servant_to_reference for local interface
+      typedef DDS::TopicDescription::_ptr_type _ptr_type;
+      // to support servant_to_reference for local interface
+      static  DDS::TopicDescription::_ptr_type _narrow (::CORBA::Object_ptr obj)
+        { return DDS::TopicDescription::_narrow(obj); };
+
       //Constructor
       TopicDescriptionImpl (const char*                    topic_name,
                             const char*                    type_name,
-                            POA_TAO::DCPS::TypeSupport_ptr type_support,
+                            TAO::DCPS::TypeSupport_ptr type_support,
                             ::DDS::DomainParticipant_ptr   participant);
 
       //Destructor
@@ -61,7 +67,7 @@ namespace TAO
       *  internal use.
       *  Return the type support of the topic.
       */
-      POA_TAO::DCPS::TypeSupport_ptr get_type_support ();
+      TAO::DCPS::TypeSupport_ptr get_type_support ();
 
     protected:
       /// The name of the topic.
@@ -73,7 +79,7 @@ namespace TAO
       ::DDS::DomainParticipant_ptr   participant_;
 
       /// The type_support for this topic.
-      POA_TAO::DCPS::TypeSupport_ptr type_support_;
+      TAO::DCPS::TypeSupport_ptr type_support_;
     };
 
 
