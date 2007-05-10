@@ -199,7 +199,6 @@ if ($ir != 0) {
 }
 
 # Stop capturing the output
-close(STDERR);
 open(STDERR, ">&SAVEERR");
 
 unlink $dcpsrepo_ior;

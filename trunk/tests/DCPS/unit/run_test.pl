@@ -40,15 +40,14 @@ if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
 
 print $CL->CommandLine() . "\n" if $debug ;
 
-# save output to a faile because the output contaings "ERROR"
+# save output to a file because the output contains the text "ERROR", but we
+# don't want it flagged as a failure on the scoreboard (ERRORs are expected)
 open(SAVEERR, ">&STDERR");
 open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 $client = $CL->SpawnWaitKill (30);
 
-close(STDERR);
 open(STDERR, ">&SAVEERR") || die "ERROR: Can't redirect stderr";
-close (SAVEERR);
 
 if ($client != 0) {
     print STDERR "ERROR: client returned $client\n";

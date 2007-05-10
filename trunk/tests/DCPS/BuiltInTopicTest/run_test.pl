@@ -88,8 +88,6 @@ if ($ir != 0) {
 }
 
 
-close (STDERR);
-close (STDOUT);
 open (STDOUT, ">&OLDOUT");
 open (STDERR, ">&OLDERR");
 
