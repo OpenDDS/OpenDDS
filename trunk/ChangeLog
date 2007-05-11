@@ -1,3 +1,10 @@
+Fri May 11 16:25:43 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc:
+        * etc/dds.doxygen:
+
+          Added a Doxygen configuration file for DDS.
+
 Fri May 11 14:41:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
