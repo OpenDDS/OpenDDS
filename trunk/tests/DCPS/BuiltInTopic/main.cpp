@@ -20,6 +20,10 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tests/DCPS/common/TestSupport.h"
 
+#if !defined(DDS_HAS_MINIMUM_BIT)
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
