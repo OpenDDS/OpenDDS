@@ -87,7 +87,8 @@ if ($ir != 0) {
     $status = 1;
 }
 
-
+close (STDERR);
+close (STDOUT);
 open (STDOUT, ">&OLDOUT");
 open (STDERR, ">&OLDERR");
 

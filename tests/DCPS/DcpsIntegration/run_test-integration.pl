@@ -41,6 +41,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
 
 $TestResult = $Test->SpawnWaitKill (60);
 
+close(STDERR);
 open(STDERR, ">&SAVEERR") || die "ERROR: Can't redirect stderr";
 
 if ($TestResult != 0) {

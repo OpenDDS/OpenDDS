@@ -58,6 +58,8 @@ while ($line = <DATA>)
    }
 }
 
+close (STDERR);
+close (STDOUT);
 open (STDOUT, ">&OLDOUT");
 open (STDERR, ">&OLDERR");
 
