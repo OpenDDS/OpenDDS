@@ -1,3 +1,21 @@
+Fri May 11 14:41:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Re-enabled the Reconnect test.
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Reverted some of my changes from...
+          Thu May 10 14:50:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          ...it turns out that the redirected STDERR or STDOUT needs to be
+          closed before STDERR or STDOUT is re-opened.  The part of yesterday's
+          change that remains is that the "saved" streams are not closed.
+
 Fri May 11 14:01:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         Changes to allow BIT functionality in static builds (for now anyway,
@@ -2641,7 +2659,7 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DevGuideExamples/DDS/Messenger/subscriber.cpp:
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
         * DevGuideExamples/DDS/Messenger/run_test.pl:
-        * DevGuideExamples/DDS/Messenger/mcast.conf        :
+        * DevGuideExamples/DDS/Messenger/mcast.conf:
         * DevGuideExamples/DDS/Messenger/udp.conf:
 
           Added mcast and default mcast test cases.

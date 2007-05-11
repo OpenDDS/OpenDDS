@@ -47,6 +47,7 @@ open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 $client = $CL->SpawnWaitKill (30);
 
+close(STDERR);
 open(STDERR, ">&SAVEERR") || die "ERROR: Can't redirect stderr";
 
 if ($client != 0) {
