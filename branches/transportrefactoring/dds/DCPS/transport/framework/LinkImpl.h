@@ -53,8 +53,11 @@ namespace TAO
 
     private:
       typedef ACE_Guard<ACE_Thread_Mutex> Guard;
+      struct IOItem;
 
       bool enqueue(const Guard&, ACE_Message_Block& mb, const TransportAPI::Id& requestId);
+      bool trySending(IOItem& item, bool locked = true);
+      void handleDeferredResolution();
       TransportAPI::Id getNextRequestId(const Guard&);
 
       struct IOItem

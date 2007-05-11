@@ -92,40 +92,7 @@ TAO::DCPS::LinkImpl::svc()
       }
       if (!queueEmpty && connected && !backpressure)
       {
-        // Process the head of the queue
-        unsigned char buffer[8];
-        iovec iovs[2];
-
-        buffer[0] = entry.requestId_ >> 24;
-        buffer[1] = entry.requestId_ >> 16;
-        buffer[2] = entry.requestId_ >> 8;
-        buffer[3] = entry.requestId_ & 255;
-        buffer[4] = entry.sequenceNumber_ >> 24;
-        buffer[5] = entry.sequenceNumber_ >> 16;
-        buffer[6] = entry.sequenceNumber_ >> 8;
-        buffer[7] = entry.sequenceNumber_ & 255;
-
-        iovs[0].iov_base = buffer; // TBD: Marshal a simple header into a buffer
-        iovs[0].iov_len = sizeof(buffer);
-        iovs[1].iov_base = entry.data_begin_;
-        iovs[1].iov_len = entry.data_size_;
-
-        TransportAPI::Status status = link_.send(iovs, 2, 0);
-        while (status.first == TransportAPI::DEFERRED)
-        {
-          Guard guard(lock_);
-          deferred_ = true;
-          deferredStatus_ = TransportAPI::make_failure();
-          while (deferred_)
-          {
-            condition_.wait();
-          }
-          status = deferredStatus_;
-        }
-        if (status.first == TransportAPI::SUCCESS)
-        {
-          extract = true;
-        }
+        extract = trySending(entry, false);
       }
     }
   }
@@ -183,6 +150,7 @@ TAO::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
   connected_ = false;
+  condition_.signal();
 }
 
 void
@@ -213,6 +181,8 @@ void
 TAO::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
+  backpressure_ = applyBackpressure;
+  condition_.signal();
 }
 
 void
@@ -242,16 +212,83 @@ TAO::DCPS::LinkImpl::enqueue(
 
   view.get(packets);
   size_t sequenceNumber = 0;
+  bool enqueued = false;
   for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
   {
     IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber);
-    queue_.push(item);
+    if (!queue_.empty())
+    {
+      queue_.push(item);
+      enqueued = true;
+    }
+    else if (!trySending(item, true))
+    {
+      queue_.push(item);
+      enqueued = true;
+    }
     ++sequenceNumber;
   }
   // Only signal if we're connected!
-  if (connected_)
+  if (connected_ && enqueued)
   {
     condition_.signal();
   }
   return true;
+}
+
+bool
+TAO::DCPS::LinkImpl::trySending(
+  IOItem& item,
+  bool locked
+  )
+{
+  // Process the head of the queue
+  unsigned char buffer[8];
+  iovec iovs[2];
+
+  buffer[0] = item.requestId_ >> 24;
+  buffer[1] = item.requestId_ >> 16;
+  buffer[2] = item.requestId_ >> 8;
+  buffer[3] = item.requestId_ & 255;
+  buffer[4] = item.sequenceNumber_ >> 24;
+  buffer[5] = item.sequenceNumber_ >> 16;
+  buffer[6] = item.sequenceNumber_ >> 8;
+  buffer[7] = item.sequenceNumber_ & 255;
+
+  iovs[0].iov_base = buffer; // TBD: Marshal a simple header into a buffer
+  iovs[0].iov_len = sizeof(buffer);
+  iovs[1].iov_base = item.data_begin_;
+  iovs[1].iov_len = item.data_size_;
+
+  TransportAPI::Status status = link_.send(iovs, 2, 0);
+  while (status.first == TransportAPI::DEFERRED)
+  {
+    if (!locked)
+    {
+      Guard guard(lock_);
+      handleDeferredResolution();
+    }
+    else
+    {
+      handleDeferredResolution();
+    }
+    status = deferredStatus_;
+  }
+  if (status.first == TransportAPI::SUCCESS)
+  {
+    return true;
+  }
+  return false;
+}
+
+void
+TAO::DCPS::LinkImpl::handleDeferredResolution(
+  )
+{
+  deferred_ = true;
+  deferredStatus_ = TransportAPI::make_failure();
+  while (deferred_)
+  {
+    condition_.wait();
+  }
 }
