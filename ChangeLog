@@ -1,3 +1,24 @@
+Fri May 11 14:01:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        Changes to allow BIT functionality in static builds (for now anyway,
+        BIT always uses SimpleTCP as its transport implementation).
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Initialize the Loader object in the ACE Service Configurator.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepo_bits.mpb:
+
+          Link the SimpleTCP library and initialize it as long as the MPC
+          feature built_in_topics = 1.
+
+        * tests/DCPS/BuiltInTopic/BuiltInTopic.mpc:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Modified to work in static builds.
+
 Thu May 10 14:50:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/run_test.pl:
