@@ -31,41 +31,39 @@ TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 {
   DBG_ENTRY_LVL("TransportInterface","attach_transport",5);
 
-  { // guard scope
-    GuardType guard(this->lock_);
+  GuardType guard(this->lock_);
 
-    if (!this->impl_.is_nil())
-      {
-  // This TransportInterface object is currently attached to
-  // a TransportImpl.
-  return ATTACH_BAD_TRANSPORT;
-      }
-
-    // Ask the impl for the swap_bytes() value, and cache the answer in
-    // a data member (this->swap_bytes_) so that we don't have to ask
-    // the impl for it anymore.
-    this->swap_bytes_ = impl->swap_bytes();
-    //MJM: Of course the OO way would be to have a mutator and do it thus:
-    //MJM:   this->swap_bytes( impl->swap_bytes());
-
-    // Ask the impl for the connection_info() value, and cache the answer in
-    // a data member (this->connection_info_) so that we don't have to ask
-    // the impl for it anymore.
-    impl->connection_info(this->connection_info_);
-
-    // Attempt to attach ourselves to the TransportImpl object now.
-    if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT)
-      {
-  // The TransportImpl didn't accept our attachment for some reason.
-  return ATTACH_BAD_TRANSPORT;
-      }
-
-    // Now the TransportImpl object knows about us.  Let's remember the
-    // TransportImpl object by saving a "copy" of the reference to our
-    // impl_ data member.
-    impl->_add_ref();
-    this->impl_ = impl;
+  if (!this->impl_.is_nil())
+  {
+    // This TransportInterface object is currently attached to
+    // a TransportImpl.
+    return ATTACH_BAD_TRANSPORT;
   }
+
+  // Ask the impl for the swap_bytes() value, and cache the answer in
+  // a data member (this->swap_bytes_) so that we don't have to ask
+  // the impl for it anymore.
+  this->swap_bytes_ = impl->swap_bytes();
+  //MJM: Of course the OO way would be to have a mutator and do it thus:
+  //MJM:   this->swap_bytes( impl->swap_bytes());
+
+  // Ask the impl for the connection_info() value, and cache the answer in
+  // a data member (this->connection_info_) so that we don't have to ask
+  // the impl for it anymore.
+  impl->connection_info(this->connection_info_);
+
+  // Attempt to attach ourselves to the TransportImpl object now.
+  if (impl->attach_interface(this) == ATTACH_BAD_TRANSPORT)
+  {
+    // The TransportImpl didn't accept our attachment for some reason.
+    return ATTACH_BAD_TRANSPORT;
+  }
+
+  // Now the TransportImpl object knows about us.  Let's remember the
+  // TransportImpl object by saving a "copy" of the reference to our
+  // impl_ data member.
+  impl->_add_ref();
+  this->impl_ = impl;
 
   return ATTACH_OK;
 }
@@ -152,7 +150,6 @@ TAO::DCPS::TransportInterface::add_associations
       return -1;
     }
 
-  {
     // We need to acquire the reservation lock from the TransportImpl object.
     // Once we have acquired the lock, we know that other TransportInterface
     // objects that share our TransportImpl object will not be able to
@@ -299,7 +296,6 @@ TAO::DCPS::TransportInterface::add_associations
     return -1;
       }
     // We completed everything without a problem.
-  } // guard scope
 
   return 0;
 }
@@ -313,20 +309,18 @@ TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
 
   DataLinkSetMap released_locals;
 
-  { // guard scope
-    // We need to perform the remove_associations logic while we know that
-    // no other TransportInterface objects (that share our TransportImpl)
-    // will be able to add or remove associations.
-    TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
+  // We need to perform the remove_associations logic while we know that
+  // no other TransportInterface objects (that share our TransportImpl)
+  // will be able to add or remove associations.
+  TransportImpl::ReservationGuardType guard(this->impl_->reservation_lock());
 
-    // Ask the remote_map_ to do the dirty work.  It will also populate
-    // the supplied DataLinkSetMap (released_locals) with any local_id to link_id
-    // associations that are no longer valid following this remove operation.
-    this->remote_map_.release_reservations(size,remote_ids,released_locals);
+  // Ask the remote_map_ to do the dirty work.  It will also populate
+  // the supplied DataLinkSetMap (released_locals) with any local_id to link_id
+  // associations that are no longer valid following this remove operation.
+  this->remote_map_.release_reservations(size,remote_ids,released_locals);
 
-    // Now we need to ask our local_map_ to remove any released_locals.
-    this->local_map_.remove_released(released_locals);
-  }
+  // Now we need to ask our local_map_ to remove any released_locals.
+  this->local_map_.remove_released(released_locals);
 }
 
 
@@ -341,11 +335,11 @@ TAO::DCPS::TransportInterface::transport_detached()
     GuardType guard(this->lock_);
 
     if (this->impl_.is_nil())
-      {
-        // This TransportInterface is not currently attached to any
-        // TransportImpl, so we can leave right now.
-        return;
-      }
+    {
+      // This TransportInterface is not currently attached to any
+      // TransportImpl, so we can leave right now.
+      return;
+    }
 
     // Drop our reference to the TransportImpl.
     this->impl_ = 0;
