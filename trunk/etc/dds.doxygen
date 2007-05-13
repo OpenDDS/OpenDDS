@@ -51,7 +51,7 @@ WARN_FORMAT           = "$file:$line: $text"
 
 INPUT                 = dds
 FILE_PATTERNS         = *.cpp *.h *.i *.inl *.idl *.pidl *.txt
-RECURSIVE             =
+RECURSIVE             = YES
 EXCLUDE               =
 EXCLUDE_PATTERNS      =
 EXAMPLE_PATH          =
