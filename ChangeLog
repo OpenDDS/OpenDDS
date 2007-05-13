@@ -1,3 +1,12 @@
+Sun May 13 21:53:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Partially reverted the change from...
+          Fri May 11 14:01:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          ...since even though it worked for static builds, it broke many of
+          the shared-library builds.
+
 Sun May 13 21:10:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
