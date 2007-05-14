@@ -1,3 +1,10 @@
+Mon May 14 18:55:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Use ACE_Time_Value to compare times in order to hide platform
+          differences in signed/unsigned time values.
+
 Mon May 14 17:57:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
