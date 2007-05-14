@@ -18,13 +18,17 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   char* data,
   size_t size,
   const TransportAPI::Id& requestIdIn,
-  size_t sequenceNumber
+  size_t sequenceNumber,
+  bool beginning,
+  bool ending
   )
   : mb_(new ACE_Message_Block(mb, 0))
   , data_begin_(data)
   , data_size_(size)
   , requestId_(requestIdIn)
   , sequenceNumber_(sequenceNumber)
+  , beginning_(beginning)
+  , ending_(ending)
 {
   // TBD!
 }
@@ -67,6 +71,7 @@ TAO::DCPS::LinkImpl::LinkImpl(
   )
   : link_(link)
   , max_transport_buffer_size_(max_transport_buffer_size)
+  , connectedCondition_(lock_)
   , condition_(lock_)
   , threadId_(0)
   , currentRequestId_(0)
@@ -74,7 +79,9 @@ TAO::DCPS::LinkImpl::LinkImpl(
   , shutdown_(false)
   , connected_(false)
   , backpressure_(false)
+  , connectionDeferred_(false)
   , deferred_(false)
+  , deferredConnectionStatus_(TransportAPI::make_failure())
   , deferredStatus_(TransportAPI::make_failure())
 {
   link_.setCallback(this);
