@@ -1,3 +1,14 @@
+Mon May 14 17:57:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Reinstated a corrected version of the change that was reverted in...
+          Sun May 13 21:53:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/INSTALL:
+
+          Updated installation instructions.
+
 Sun May 13 21:53:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
