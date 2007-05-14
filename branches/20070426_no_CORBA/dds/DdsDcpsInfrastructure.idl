@@ -589,6 +589,8 @@ module DDS {
 		long absolute_generation_rank;
 		};
 
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
+
     native SampleInfoSeq; // support zero-copy read
     //typedef sequence<SampleInfo> SampleInfoSeq;
 

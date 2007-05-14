@@ -778,7 +778,7 @@ DDS::ReturnCode_t
     }
   //---- end of preconditions common to read and take -----
 
-  ::CORBA::ULong count(0);
+  ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1485,7 +1485,6 @@ DDS::ReturnCode_t
   TAO::DCPS::SubscriptionInstance * ptr =
     this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
-  TAO::DCPS::ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {

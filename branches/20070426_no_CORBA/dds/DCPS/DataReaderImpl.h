@@ -31,11 +31,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace DDS
-{
-  typedef TAO::DCPS::ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoSeq;
-}
-
 namespace TAO
 {
   namespace DCPS
