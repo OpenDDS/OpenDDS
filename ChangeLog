@@ -1,3 +1,33 @@
+Mon May 14 19:14:12 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        
+          Removed --Module and changes related to that.
+          Changed the listener to be a local interface.
+
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DdsDcpsInfrastructure.idl:
+        
+          Added #pragma DCPS_ZUPPORT_ZERO_COPY_READ to IDLTemplate.pm.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/SubscriberImpl.cpp:
+        
+          Avoid warnings from gcc.
+
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/DataReaderImpl.h:
+
+          Moved DDS::SampleInfoSeq from DataReaderImpl.h to 
+          DdsDcpsInfrastructureC.h (also TAO_IDL changes).
+          
 Fri May 11 23:36:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/DataReaderRemoteImpl.cpp:

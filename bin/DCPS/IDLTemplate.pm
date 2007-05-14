@@ -33,6 +33,7 @@ sub contents { return <<'!EOT'
 
 <%MODULESTART%>
 
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
 //typedef sequence<<%SCOPE%><%TYPE%>> <%TYPE%>Seq;
 native <%TYPE%>Seq;
 

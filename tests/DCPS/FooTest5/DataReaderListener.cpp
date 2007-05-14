@@ -236,20 +236,20 @@ void DataReaderListenerImpl::on_subscription_match (
     if (no_key)
     {
       ret = read <Xyz::FooNoKey,
-            ::Mine::FooNoKeySeq,
-            ::Mine::FooNoKeyDataReader,
-            ::Mine::FooNoKeyDataReader_ptr,
-            ::Mine::FooNoKeyDataReader_var,
-            ::Mine::FooNoKeyDataReaderImpl> (reader);
+            ::Xyz::FooNoKeySeq,
+            ::Xyz::FooNoKeyDataReader,
+            ::Xyz::FooNoKeyDataReader_ptr,
+            ::Xyz::FooNoKeyDataReader_var,
+            ::Xyz::FooNoKeyDataReaderImpl> (reader);
     }
     else
     {
       ret = read <Xyz::Foo,
-        ::Mine::FooSeq,
-        ::Mine::FooDataReader,
-        ::Mine::FooDataReader_ptr,
-        ::Mine::FooDataReader_var,
-        ::Mine::FooDataReaderImpl> (reader);
+        ::Xyz::FooSeq,
+        ::Xyz::FooDataReader,
+        ::Xyz::FooDataReader_ptr,
+        ::Xyz::FooDataReader_var,
+        ::Xyz::FooDataReaderImpl> (reader);
     }
 
     if (ret != 0)

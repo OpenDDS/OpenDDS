@@ -19,6 +19,10 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.h"
 #include <ace/Vector_T.h>
 
+// kludge to be sure TAO_Local_RefCounted_Object is defined in DdsDcpsInfrastructureC.h
+#include "tao/LocalObject.h"
+
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -34,7 +38,7 @@ namespace TAO
          * Sequence of ::DDS::SampleInfos supportting zero-copy read/take operations.
          */
 
-        template <size_t ZCS_DEFAULT_SIZE>
+      template <class InfoType, size_t ZCS_DEFAULT_SIZE>
         class ZeroCopyInfoSeq : public ZeroCopySeqBase
         {
         public:
@@ -61,7 +65,7 @@ namespace TAO
             //======== CORBA sequence like methods ======
 
             /// read reference to the sample at the given index.
-            ::DDS::SampleInfo const & operator[](CORBA::ULong i) const;
+            InfoType const & operator[](CORBA::ULong i) const;
 
             /** Write reference to the sample at the given index.
              *
@@ -69,7 +73,7 @@ namespace TAO
              * The spec says the DCPS layer will not change the sample's value
              * but it does not restrict the user/application from changing it.
              */
-            ::DDS::SampleInfo & operator[](CORBA::ULong i);
+            InfoType & operator[](CORBA::ULong i);
 
             /** get the current length of the sequence.
              */
@@ -100,10 +104,10 @@ namespace TAO
             // The default allocator will be very fast for the first
             // allocation but use the standard heap for subsequent allocations
             // such as if the max_size gets bigger.
-            FirstTimeFastAllocator< ::DDS::SampleInfo, ZCS_DEFAULT_SIZE> defaultAllocator_;
+            FirstTimeFastAllocator< InfoType, ZCS_DEFAULT_SIZE> defaultAllocator_;
 
             //typedef ACE_Array_Base<Sample_T> Ptr_Seq_Type;
-            typedef ACE_Vector< ::DDS::SampleInfo, ZCS_DEFAULT_SIZE> Info_Seq_Type;
+            typedef ACE_Vector< InfoType, ZCS_DEFAULT_SIZE> Info_Seq_Type;
             Info_Seq_Type info_;
 
         }; // class ZeroCopyInfoSeq

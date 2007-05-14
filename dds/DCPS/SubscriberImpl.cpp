@@ -383,7 +383,7 @@ SubscriberImpl::delete_contained_entities (
   set_deleted (true);
 
 
-  ACE_Vector<::DDS::DataReader_ptr> drs ;
+  ACE_Vector< ::DDS::DataReader_ptr> drs ;
 
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
