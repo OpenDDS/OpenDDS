@@ -31,6 +31,8 @@ namespace TAO
     namespace DCPS
     {
 
+        class DataReaderImpl;
+
         /**
         * Provides [] operators returning sample references
         *     like the the CORBA sequence used by the normal
