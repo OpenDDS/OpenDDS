@@ -57,7 +57,6 @@ namespace TAO
 
       bool enqueue(const Guard&, ACE_Message_Block& mb, const TransportAPI::Id& requestId);
       bool trySending(IOItem& item, bool locked = true);
-      void handleDeferredResolution();
       TransportAPI::Id getNextRequestId(const Guard&);
 
       struct IOItem
@@ -68,7 +67,9 @@ namespace TAO
           char* data,
           size_t size,
           const TransportAPI::Id& requestIdIn,
-          size_t sequenceNumber
+          size_t sequenceNumber,
+          bool beginning,
+          bool ending
           );
         IOItem(const IOItem& rhs);
         ~IOItem();
@@ -80,11 +81,14 @@ namespace TAO
         size_t data_size_;
         TransportAPI::Id requestId_;
         size_t sequenceNumber_;
+        bool beginning_;
+        bool ending_;
       };
 
       TransportAPI::Transport::Link& link_;
       size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;
+      ACE_Condition<ACE_Thread_Mutex> connectedCondition_;
       ACE_Condition<ACE_Thread_Mutex> condition_;
       ACE_thread_t threadId_;
       TransportAPI::Id currentRequestId_;
@@ -92,7 +96,9 @@ namespace TAO
       bool shutdown_;
       bool connected_;
       bool backpressure_;
+      bool connectionDeferred_;
       bool deferred_;
+      TransportAPI::Status deferredConnectionStatus_;
       TransportAPI::Status deferredStatus_;
       std::queue<IOItem> queue_;
     };

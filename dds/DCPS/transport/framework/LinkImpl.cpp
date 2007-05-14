@@ -12,6 +12,24 @@
 #include "DataView.h"
 #include "ace/Guard_T.h"
 
+namespace
+{
+  template <typename ConditionVariable>
+  TransportAPI::Status
+  handleDeferredResolution(
+    bool& deferred,
+    ConditionVariable& condition,
+    TransportAPI::Status& status
+    )
+  {
+    while (deferred)
+    {
+      condition.wait();
+    }
+    return status;
+  }
+}
+
 int
 TAO::DCPS::LinkImpl::open(void* args)
 {
@@ -105,8 +123,24 @@ TAO::DCPS::LinkImpl::connect(
   )
 {
   Guard guard(lock_);
-  TransportAPI::Id requestId(getNextRequestId(guard));
-  return link_.establish(endpoint, requestId);
+  if (!connected_)
+  {
+    TransportAPI::Id requestId(getNextRequestId(guard));
+    deferredConnectionStatus_ = TransportAPI::make_deferred();
+    connectionDeferred_ = true;
+    TransportAPI::Status status = link_.establish(endpoint, requestId);
+    if (status.first == TransportAPI::DEFERRED)
+    {
+      // Wait for deferred resolution
+      status = handleDeferredResolution(connectionDeferred_, connectedCondition_, deferredConnectionStatus_);
+    }
+    else
+    {
+      connectionDeferred_ = false;
+    }
+    return status;
+  }
+  return TransportAPI::make_success();
 }
 
 TransportAPI::Status
@@ -114,8 +148,24 @@ TAO::DCPS::LinkImpl::disconnect(
   )
 {
   Guard guard(lock_);
-  TransportAPI::Id requestId(getNextRequestId(guard));
-  return link_.shutdown(requestId);
+  if (connected_)
+  {
+    TransportAPI::Id requestId(getNextRequestId(guard));
+    deferredConnectionStatus_ = TransportAPI::make_deferred();
+    connectionDeferred_ = true;
+    TransportAPI::Status status = link_.shutdown(requestId);
+    if (status.first == TransportAPI::DEFERRED)
+    {
+      // Wait for deferred resolution
+      status = handleDeferredResolution(connectionDeferred_, connectedCondition_, deferredConnectionStatus_);
+    }
+    else
+    {
+      connectionDeferred_ = false;
+    }
+    return status;
+  }
+  return TransportAPI::make_success();
 }
 
 TransportAPI::Status
@@ -137,12 +187,12 @@ void
 TAO::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
-  if (connected_)
-  {
-    return;
-  }
   connected_ = true;
-  condition_.signal();
+  if (connectionDeferred_)
+  {
+    connectionDeferred_ = false;
+    connectedCondition_.signal();
+  }
 }
 
 void
@@ -150,7 +200,11 @@ TAO::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
   connected_ = false;
-  condition_.signal();
+  if (connectionDeferred_)
+  {
+    connectionDeferred_ = false;
+    connectedCondition_.signal();
+  }
 }
 
 void
@@ -213,9 +267,17 @@ TAO::DCPS::LinkImpl::enqueue(
   view.get(packets);
   size_t sequenceNumber = 0;
   bool enqueued = false;
+  if (packets.empty())
+  {
+    return true;
+  }
+
+  DataView::View::iterator first = packets.begin();
+  DataView::View::iterator last = packets.end();
+  --last;
   for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
   {
-    IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber);
+    IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == first, iter == last);
     if (!queue_.empty())
     {
       queue_.push(item);
@@ -243,7 +305,7 @@ TAO::DCPS::LinkImpl::trySending(
   )
 {
   // Process the head of the queue
-  unsigned char buffer[8];
+  unsigned char buffer[10];
   iovec iovs[2];
 
   buffer[0] = item.requestId_ >> 24;
@@ -254,41 +316,41 @@ TAO::DCPS::LinkImpl::trySending(
   buffer[5] = item.sequenceNumber_ >> 16;
   buffer[6] = item.sequenceNumber_ >> 8;
   buffer[7] = item.sequenceNumber_ & 255;
+  buffer[8] = (item.beginning_ ? 1 : 0);
+  buffer[9] = (item.ending_ ? 1 : 0);
 
   iovs[0].iov_base = buffer; // TBD: Marshal a simple header into a buffer
   iovs[0].iov_len = sizeof(buffer);
   iovs[1].iov_base = item.data_begin_;
   iovs[1].iov_len = item.data_size_;
 
+  if (!locked)
+  {
+    Guard guard(lock_);
+    deferred_ = true;
+    deferredStatus_ = TransportAPI::make_failure();
+  }
+  else
+  {
+    deferred_ = true;
+    deferredStatus_ = TransportAPI::make_failure();
+  }
   TransportAPI::Status status = link_.send(iovs, 2, 0);
   while (status.first == TransportAPI::DEFERRED)
   {
     if (!locked)
     {
       Guard guard(lock_);
-      handleDeferredResolution();
+      status = handleDeferredResolution(deferred_, condition_, deferredStatus_);
     }
     else
     {
-      handleDeferredResolution();
+      status = handleDeferredResolution(deferred_, condition_, deferredStatus_);
     }
-    status = deferredStatus_;
   }
   if (status.first == TransportAPI::SUCCESS)
   {
     return true;
   }
   return false;
-}
-
-void
-TAO::DCPS::LinkImpl::handleDeferredResolution(
-  )
-{
-  deferred_ = true;
-  deferredStatus_ = TransportAPI::make_failure();
-  while (deferred_)
-  {
-    condition_.wait();
-  }
 }
