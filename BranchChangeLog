@@ -1,3 +1,9 @@
+Mon May 14 18:47:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+
+          Fixed the copy-constructor's parameter type.
+
 Fri May 11 14:13:52 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:

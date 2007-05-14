@@ -30,7 +30,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
 }
 
 TAO::DCPS::LinkImpl::IOItem::IOItem(
-  const TAO::DCPS::LinkImpl::IOItem::IOItem& rhs
+  const TAO::DCPS::LinkImpl::IOItem& rhs
   )
   : mb_(new ACE_Message_Block(*rhs.mb_, 0))
   , data_begin_(rhs.data_begin_)
