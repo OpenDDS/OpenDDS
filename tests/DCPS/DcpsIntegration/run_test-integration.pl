@@ -26,11 +26,8 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 
 $Test = new PerlACE::Process ("infrastructure_test",
-                               "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior");
-
-# save output to a faile because the output contaings "ERROR"
-open(SAVEERR, ">&STDERR");
-open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
+                              "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior " .
+                              "-ORBLogFile $testoutputfilename");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
@@ -40,9 +37,6 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
 }
 
 $TestResult = $Test->SpawnWaitKill (60);
-
-close(STDERR);
-open(STDERR, ">&SAVEERR") || die "ERROR: Can't redirect stderr";
 
 if ($TestResult != 0) {
     print STDERR "ERROR: test returned $TestResult\n";
