@@ -1,3 +1,9 @@
+Tue May 15 04:01:27 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/DataReaderListener.cpp:
+
+          Update per updates to the Dev. Guide.
+
 Mon May 14 18:55:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/unit/Main.cpp:
