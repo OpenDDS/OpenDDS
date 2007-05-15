@@ -1,3 +1,14 @@
+Tue May 15 15:47:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Removed redirection of STDOUT and STDERR streams in Perl.  This turns
+          out to be incompatible with a Perl process in Windows that itself has
+          its output or error streams redirected to files.  Instead we now use
+          -ORBLogFile to redirect test error/log messages to a file.
+
 Tue May 15 04:01:27 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger_ZeroCopy/DataReaderListener.cpp:

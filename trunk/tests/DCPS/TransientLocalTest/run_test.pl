@@ -21,10 +21,14 @@ $repo_bit_opt = "-ORBSvcConf tcp.conf";
 
 unlink $dcpsrepo_ior;
 
+$data_file = PerlACE::LocalFile ("test_run.data");
+unlink $data_file;
+
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+$Subscriber = new PerlACE::Process ("subscriber", "$sub_opts");
+$Publisher = new PerlACE::Process ("publisher", "$pub_opts " .
+                                   "-ORBLogFile $data_file");
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -37,15 +41,6 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-$data_file = PerlACE::LocalFile ("test_run.data");
-
-unlink $data_file;
-
-open (OLDOUT, ">&STDOUT");
-open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
-open (OLDERR, ">&STDERR");
-open (STDERR, ">&STDOUT") or die "can't redirect stderror: $!";
-
 $Publisher->Spawn ();
     
 open (DATA, $data_file);
@@ -57,11 +52,6 @@ while ($line = <DATA>)
     break;
    }
 }
-
-close (STDERR);
-close (STDOUT);
-open (STDOUT, ">&OLDOUT");
-open (STDERR, ">&OLDERR");
 
 $Subscriber->Spawn ();
 
