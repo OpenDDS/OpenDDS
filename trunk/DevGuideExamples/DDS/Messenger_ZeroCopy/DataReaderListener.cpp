@@ -34,7 +34,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         exit(1);
       }
 
-      const CORBA::Long MAX_ELEMS_TO_RETURN = 1;
+      CORBA::Long MAX_ELEMS_TO_RETURN = 3;
       // using types supporting zero-copy read 
       // Note: the 0 enables zero-copy reads/takes.
       //       A value > 0 will enable single-copy reads/takes
