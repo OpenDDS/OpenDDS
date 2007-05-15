@@ -323,22 +323,24 @@ PersistenceUpdater::parse (int argc, ACE_TCHAR *argv[])
     {
       if (ACE_OS::strcasecmp (argv[count], "-file") == 0)
         {
-          if ((count + 1) < argc) {
-            persistence_file_ = argv[count+1];
-            count++;
-          }
+          if ((count + 1) < argc)
+            {
+              persistence_file_ = argv[count+1];
+              count++;
+            }
         }
       else if (ACE_OS::strcasecmp (argv[count], "-reset") == 0)
         {
-          if ((count + 1) < argc) {
-            int val = ACE_OS::atoi (argv[count+1]);
-            reset_ = true;
+          if ((count + 1) < argc)
+            {
+              int val = ACE_OS::atoi (argv[count+1]);
+              reset_ = true;
 
-            if (val == 0) {
-              reset_ = false;
+              if (val == 0) {
+                reset_ = false;
+              }
+              count++;
             }
-            count++;
-          }
         }
       else {
         ACE_DEBUG ((LM_DEBUG, "Unknown option %s\n"
@@ -489,7 +491,6 @@ PersistenceUpdater::add(const UpdateManager::DTopic& topic)
   // Initialize TopicData
   PersistenceUpdater::Topic* topic_data
     = new (buffer) PersistenceUpdater::Topic (topic, allocator_);
-  ACE_DEBUG ((LM_DEBUG, "add> Topic id: %d\n", topic_data->topicId));
 
   IdType_ExtId ext (topic.topicId);
   // bind TopicData with the topicId
@@ -561,24 +562,18 @@ PersistenceUpdater::remove (ItemType type, const IdType& idType)
         {
           topic->cleanup (allocator_);
           allocator_->free ((void *) topic);
-          ACE_DEBUG ((LM_DEBUG, "Removed persistent topic: %d\n"
-                      , idType));
         }
       break;
     case ::Participant:
       if (participant_index_->unbind (ext, participant, allocator_) == 0) {
         participant->cleanup (allocator_);
         allocator_->free ((void *) participant);
-        ACE_DEBUG ((LM_DEBUG, "Removed persistent participant: %d\n"
-                    , idType));
       }
       break;
     case ::Actor:
       if (actor_index_->unbind (ext, actor, allocator_) == 0) {
         actor->cleanup (allocator_);
         allocator_->free ((void *) actor);
-        ACE_DEBUG ((LM_DEBUG, "Removed persistent actor: %d\n"
-                    , idType));
       }
       break;
     default:

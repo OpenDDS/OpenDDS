@@ -52,7 +52,7 @@ private:
   ACE_TString listen_address_str_;
   int listen_address_given_;
   bool use_bits_;
-  bool reincarnate_;
+  bool resurrect_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
@@ -60,7 +60,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , domain_file_ (ACE_TEXT("domain_ids"))
     , listen_address_given_ (0)
     , use_bits_ (true)
-    , reincarnate_ (true)
+    , resurrect_ (true)
 {
   listen_address_str_ = ACE_LOCALHOST;
   listen_address_str_ += ":2839";
@@ -95,7 +95,7 @@ InfoRepo::usage (const ACE_TCHAR * cmd)
               ACE_TEXT ("    -d <file> load domain ids from file\n")
               ACE_TEXT ("    -NOBITS disable the Built-In Topics\n")
               ACE_TEXT ("    -z turn on verbose Transport logging\n")
-              ACE_TEXT ("    -l turn on local file based persistence\n")
+              ACE_TEXT ("    -r Resurrect from persistent file\n")
               ACE_TEXT ("    -?\n")
               ACE_TEXT ("\n"),
               cmd));
@@ -118,13 +118,13 @@ InfoRepo::parse_args (int argc,
           arg_shifter.consume_arg();
         }
       else if ((current_arg = arg_shifter.get_the_parameter
-                ("-reincarnate")) != 0)
+                ("-r")) != 0)
         {
           int p = ACE_OS::atoi (current_arg);
-          reincarnate_ = true;
+          resurrect_ = true;
 
           if (p == 0) {
-            reincarnate_ = false;
+            resurrect_ = false;
           }
           arg_shifter.consume_arg ();
         }
@@ -169,7 +169,7 @@ bool
 InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 {
   orb_ = CORBA::ORB_init (argc, argv, "");
-  info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), reincarnate_));
+  info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
 
   // ciju: Hard-code the 'RW' wait strategy directive.
   // Deadlocks have been observed to occur otherwise under stress conditions.
