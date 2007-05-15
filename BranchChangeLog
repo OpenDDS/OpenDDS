@@ -1,3 +1,11 @@
+Tue May 15 14:38:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+
+          Same fix as
+          Mon May 14 18:47:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          except for the copy-assignment operator this time.
+
 Mon May 14 19:49:19 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:
