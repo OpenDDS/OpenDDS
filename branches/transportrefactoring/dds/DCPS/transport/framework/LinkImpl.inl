@@ -51,7 +51,7 @@ TAO::DCPS::LinkImpl::IOItem::~IOItem(
 
 TAO::DCPS::LinkImpl::IOItem&
 TAO::DCPS::LinkImpl::IOItem::operator=(
-  const TAO::DCPS::LinkImpl::IOItem::IOItem& rhs
+  const TAO::DCPS::LinkImpl::IOItem& rhs
   )
 {
   if (this != &rhs)
