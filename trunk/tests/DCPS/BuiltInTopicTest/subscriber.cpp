@@ -18,6 +18,8 @@
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
 
