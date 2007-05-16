@@ -418,6 +418,3 @@ Note: A list of test that are run in the nightly automated build/test
 * TAO/orbsvcs/tests/DDS/DCPS/FooTest5/run_test.pl blocking
   Occasionally cores while shutting down on Solaris box
   but passes on Linux and Windows.
-
- LocalWords:  gcc SimpleTcpReconnectTask linux datawriter datalink backpressure
- LocalWords:  datalinks builtin idl coredump udp
