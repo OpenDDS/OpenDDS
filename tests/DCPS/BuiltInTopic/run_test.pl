@@ -39,12 +39,14 @@ unlink $iorfile;
 $status = 0;
 $client_orb = "";
 
+$dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
+    ? '' : '-ORBSvcConf ../../tcp.conf';
 
-$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", 
-                              "-o $iorfile -d domain_ids -ORBSvcConf ../../tcp.conf"
-                              );
+$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                              "-o $iorfile -d domain_ids $dynamic_tcp");
 #                              . " -ORBDebugLevel 1");
-$CL = new PerlACE::Process ("bit", "-ORBSvcConf ../../tcp.conf -DCPSInfoRepo file://$iorfile -i $ignore_kind");
+$CL = new PerlACE::Process ("bit", "-DCPSInfoRepo file://$iorfile " .
+                            "$dynamic_tcp -i $ignore_kind");
 
 $REPO->Spawn ();
 
@@ -52,7 +54,7 @@ if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;
-} 
+}
 
 $result = $CL->SpawnWaitKill (60);
 
