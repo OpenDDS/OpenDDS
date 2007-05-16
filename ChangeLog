@@ -1,10 +1,16 @@
+Wed May 16 17:42:27 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/debug.cpp:
+
+          Added newline at end of file to avoid warning from gcc.
+
 Wed May 16 16:01:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/sub_init_loop/Writer.cpp:
         * tests/DCPS/sub_init_loop/publisher.cpp:
         * tests/DCPS/sub_init_loop/run_test.pl:
         * tests/DCPS/sub_init_loop/subscriber.cpp:
-	  Layout changes. Remove comments.
+          Layout changes. Remove comments.
 
 Wed May 16 15:09:05 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
