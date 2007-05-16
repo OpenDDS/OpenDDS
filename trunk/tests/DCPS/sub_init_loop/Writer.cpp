@@ -9,10 +9,10 @@
 #include "ace/OS_NS_sys_stat.h"
 
 Writer::Writer (::DDS::DataWriter_ptr writer
-    , const char* sub_fin_file_name
-    , bool verbose
-    , int write_delay_ms
-    , int num_instances_per_writer)
+                , const char* sub_fin_file_name
+                , bool verbose
+                , int write_delay_ms
+                , int num_instances_per_writer)
   : writer_ (::DDS::DataWriter::_duplicate (writer))
   , sub_fin_file_name_ (sub_fin_file_name)
   , verbose_ (verbose)
@@ -33,11 +33,11 @@ Writer::start ()
   // Each thread writes one instance which uses the thread id as the
   // key value.
   if (activate (THR_NEW_LWP | THR_JOINABLE
-    , this->num_instances_per_writer_) == -1) {
+                , this->num_instances_per_writer_) == -1) {
     ACE_ERROR_RETURN ((LM_ERROR,
-           "Writer::start(): activate failed.\n")
-          , false);
-      }
+                       "Writer::start(): activate failed.\n")
+                      , false);
+  }
 
   return true;
 }
@@ -47,18 +47,18 @@ Writer::svc ()
 {
   if (this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
-         ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
+               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
   }
 
   try
     {
       MessageDataWriter_var message_dw
-  = MessageDataWriter::_narrow(writer_.in());
+        = MessageDataWriter::_narrow(writer_.in());
       if (CORBA::is_nil (message_dw.in ())) {
-  ACE_ERROR_RETURN ((LM_ERROR,
-         "Data Writer could not be narrowed.\n")
-        , -1);
-    }
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "Data Writer could not be narrowed.\n")
+                          , -1);
+      }
 
       Messenger::Message message;
       message.subject_id = 99;
@@ -71,49 +71,63 @@ Writer::svc ()
 
       char *sub_fin_file_name = const_cast<char*>(this->sub_fin_file_name_.c_str());
 
-      ACE_DEBUG((LM_DEBUG,
-     ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+      if (this->verbose_) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+      }
+
+      // Wait for subscribers
       while (true)
-  {
-    ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
-
-    if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
-        ACE_TEXT ("write() returned %d.\n")
-        , ret));
-        if (ret == ::DDS::RETCODE_TIMEOUT) {
-    timeout_writes_ ++;
-        }
-      }
-
-    message.count++;
-    if (this->write_delay_ms_ > 0) {
-      ACE_OS::sleep (ACE_Time_Value (write_delay_ms_/1000, write_delay_ms_%1000*1000));
-    }
-
-    // Wait for the subscriber to be finish.
-    ACE_stat stats;
-    if  (ACE_OS::stat (sub_fin_file_name, &stats) != -1)
-      {
-        if (this->verbose_) {
-    ACE_DEBUG ((LM_DEBUG,
-            "(%P|%t) Subscriber has exited. "
-          "No need to publish any further.\n"));
+        {
+          ::DDS::InstanceHandleSeq handles;
+          message_dw->get_matched_subscriptions(handles);
+          if (handles.length() > 0) {
+            break;
+          }
+          ACE_Time_Value small (0,250000);
+          ACE_OS::sleep (small);
         }
 
-        return 0;
-      }
-  } // for (int i = 0; i< num_writes; ++i)
+      // Begin write cycle.
+      while (true)
+        {
+          ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
+
+          if (ret != ::DDS::RETCODE_OK)
+            {
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                          ACE_TEXT ("write() returned %d.\n")
+                          , ret));
+              if (ret == ::DDS::RETCODE_TIMEOUT) {
+                timeout_writes_ ++;
+              }
+            }
+
+          message.count++;
+          if (this->write_delay_ms_ > 0) {
+            ACE_OS::sleep (ACE_Time_Value (write_delay_ms_/1000, write_delay_ms_%1000*1000));
+          }
+
+          // Wait for the subscriber to finish.
+          ACE_stat stats;
+          if  (ACE_OS::stat (sub_fin_file_name, &stats) != -1)
+            {
+              if (this->verbose_) {
+                ACE_DEBUG ((LM_DEBUG,
+                            "(%P|%t) Subscriber has exited. "
+                            "No need to publish any further.\n"));
+              }
+
+              break;
+            }
+        } // while (true)
     }
   catch (CORBA::Exception& e) {
     ACE_ERROR_RETURN ((LM_ERROR, "Exception caught in svc: %s (%s).\n"
-           ,  e._name (), e._rep_id ())
-          , -1);
+                       ,  e._name (), e._rep_id ())
+                      , -1);
   }
-
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
   return 0;
 }
