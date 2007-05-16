@@ -11,11 +11,22 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in St
 Louis and Phoenix. It is released under the same generous license
 terms as ACE, TAO and MPC.
 
-This directory structure contains TAO DDS 0.11.
+This directory structure contains TAO DDS 0.12.
 
 Note that this release is considered beta quality software and
 therefore some small interface changes may occur before version 1.0 is
 released.
+
+======================================================================
+* Documentation
+
+A developer's guide to TAO DDS is available at 
+http://download.ociweb.com/DDS/ .
+
+It is also available as a chapter of the TAO Devloper's Guide book
+set that can be purchased from 
+http://www.theaceorb.com/purchase/index.html .
+
 
 ======================================================================
 * Support
@@ -153,17 +164,17 @@ DataWriter,DataReader, Subscriber, all Listeners.
     classes).
 
 -- listener calls supported ---
---- publisher side --
-- on_offered_incompatible_qos
-- on_publication_match
---- subscriber side
-- on_requested_incompatible_qos
-- on_sample_rejected
-- on_liveliness_changed
-- on_data_available
-- on_subscription_match
-- on_sample_lost
-- on_data_on_readers
+  --- publisher side --
+  - on_offered_incompatible_qos
+  - on_publication_match
+  --- subscriber side
+  - on_requested_incompatible_qos
+  - on_sample_rejected
+  - on_liveliness_changed
+  - on_data_available
+  - on_subscription_match
+  - on_sample_lost
+  - on_data_on_readers
 
   Other call are not supported because they are related to QoS that
   is not supported.
@@ -183,10 +194,14 @@ It may not contain interfaces or value types.
 Zero or more keys can be specified for a data type.
 
 ---- supported transports ---
-- SimpleTCPTransport
+- SimpleTCP
   A TCP based transport.
-- SimpleUDPTransport
+- SimpleUDP
   A UDP based transport (unreliable delivery).
+- SimpleMcast
+  A UDP multicast transport (unreliable delivery).
+- ReliableMulticast
+  A reliable UDP multicast transport
 
 The TAO implementation provides a transport framework that makes it
 easy to add a new transport.
@@ -283,23 +298,23 @@ This limitation can be worked around by specifying multiple keys such that
 all of the base types in the complex type are specified.
 
 -------------------------------------------------------------------------------
-) Zero-copy reads (see "2.1.2.5.3.8 read" in the spec) is not supported
-  and not tested but it is partially implemented but not tested.
-
-  **** Users should not use the zero-copy read functionality ****
-  This includes read/take interfaces with <typename>PtrVec parameters,
-  return_loan() or passing a <typeName>Seq to read/take with max_len==0.
-  **********************************************************************
-
-  zero-copy read implementation has the following issues:
-  - the zero-copy read impl in TAO outputs a std::vector of sample pointers.
-    Should use an ACE_vector or use delayed demarshaling for zero-copy impl.
-  - The return_loan() operation is not overloaded to return std::vector.
-  - the return_loan() may not "do no harm" if the FooSeq was not zero-copied.
-  - The read operation with FooSeq does an "allocate and copy" when the
-    FooSeq indicates that it should zero-copy.
-  - Only read() and take() implement the zero copy. Other read and
-    take interfaces should.
+) Zero-copy reads (see "2.1.2.5.3.8 read" in the spec) 
+  have been implemented but with the following limitations:
+  1) different sample and info sequence types must be used
+     to support zero-copy read.
+     --- single-copy read only type ---
+     <typename>Seq and ::DDS::SampleInfoSeq
+     --- supporting zero-copy read and single-copy read ---
+     <typename>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq
+     
+   2) Only the read and take methods support zero-copy read.
+      The read_instance, read_next_instance, take_instance
+      and take_next_instance do not support zero-copy read.
+      
+  !!!! NOTICE: the next release of TAO DDS will resolve the
+               limitations listed above.
+               The <typename>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq
+               types will be removed.
 
 -------------------------------------------------------------------------------
 ) Users must ensure that TopicDescriptions are not used after there
@@ -330,34 +345,15 @@ all of the base types in the complex type are specified.
 -------------------------------------------------------------------------------
 ) Built-in Topic (BIT) support has the following problems:
 
-  1) It is possible that Build-In Topic samples will not
-     arrive.
-     This caused by the DCPSInfoRepo writing the values
-     before associations use by BIT are fully established
-     (as described in the previous limitation note).
-
-  2) The DURABILITY.kind=TRANSIENT_LOCAL implementation supporting
-     Built-in Topics is a kludge that results in the BIT sample
-     values being resent to every subscriber when a new subscriber
-     is associated.
-     This has little impact on functionality of BIT except
-     that the sample state may say it is NOT_READ after
-     a client has already read the sample.
-
-  3) The framework reads samples in support of its operations
-     and hence the sample state may be READ when the client
-     has never read the sample.
-
-  4) The QoS values in BIT data samples are not updated when an entities QoS
+  1)  The QoS values in BIT data samples are not updated when an entities QoS
      is set (because the DCPSInfoRepo is not told of the set/update).
      So looking at USER_DATA will work if the USER_DATA was assigned in
      the initial creation of the entity but not if it was set_qos() later.
      But using the USER_DATA QoS is not yet supported anyway.
 
 -------------------------------------------------------------------------------
-) When Built-in Topic support is not enabled,
-  by Service_Participant->set_bit(true), the InstanceHanlde_t values in
-  statuses actually RepoIDs.
+) When Built-in Topic support is not disabled the InstanceHanlde_t values in
+  statuses are actually RepoIDs.
   One way to know what it is is to know if your application has enabled BIT.
   Another is that if the InstanceHandle_t value is < 9999 then it
   is not a valid instance handle value but is a RepoId value.
@@ -400,16 +396,9 @@ all of the base types in the complex type are specified.
   the instance).
 
 -------------------------------------------------------------------------------
-) We have implemented formal/04-12-02 but there is a new version of the
-  DDS specification, ptc/05-03-10 that has various improvements and
-  clarifications.
-
--------------------------------------------------------------------------------
-) We currently allocate buffers that are too large for the Application data
-  on the subscriber side.  This means that our memory usage is greater
-  than it should be for some data types, especially those containing
-  large strings, arrays, or structures.
-
+) We have implemented to formal/04-12-02 (v 1.0 of the DDS spec) 
+  but version 1.2 has come out since with various improvements and
+  clarifications that may not be implemented.
 
 ======================================================================
 * Test Failures

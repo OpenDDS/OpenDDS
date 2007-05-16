@@ -20,9 +20,7 @@ New to this version are the following changes:
 - Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
 
 - Support for Built-In-Topics and the TRANSIENT_LOCAL value for DURABILITY QoS
-  is now complete.  This means that BITs will now work as specified.  Some of
-  the information at the end of this document on the limiations of BITs is now
-  obsolete.
+  is now complete.  This means that BITs will now work as specified. 
 
 - Implemented support for zero-copy read.
   
