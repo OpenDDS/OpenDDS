@@ -351,8 +351,14 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
     {
       ::DDS::InstanceHandleSeq handles;
 
+      // The reader should be in the id_to_handle map at this time so
+      // log with error.
       if (this->cache_lookup_instance_handles (readers, handles) == false)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)DataWriterImpl::remove_associations "
+          "cache_lookup_instance_handles failed\n"));
         return;
+      }
 
       CORBA::ULong subed_len = subscription_handles_.length();
       CORBA::ULong rd_len = handles.length ();
@@ -384,7 +390,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
     }
   }
 
-  this->publisher_servant_->remove_associations (readers);
+  this->publisher_servant_->remove_associations (readers, this->publication_id_);
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
   // subscription lost.
@@ -1344,21 +1350,22 @@ void
 DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_disconnected",5);
-  PublicationDisconnectedStatus status;
 
   if (! is_bit_)
   {
-    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
-      return;
-
-
     // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
     // is given to this DataWriter then narrow() fails.
     DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
     if (! CORBA::is_nil (the_listener.in ()))
+    {
+      PublicationDisconnectedStatus status;
+      // Since this callback may come after remove_association which removes
+      // the reader from id_to_handle map, we can ignore this error.
+      this->cache_lookup_instance_handles (subids, status.subscription_handles);
       the_listener->on_publication_disconnected (this->dw_remote_objref_.in (),
-      status);
+        status);
+    }
   }
 }
 
@@ -1368,21 +1375,28 @@ void
 DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_reconnected",5);
-  PublicationLostStatus status;
 
   if (! is_bit_)
   {
-    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
-      return;
-
-
     // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
     // is given to this DataWriter then narrow() fails.
     DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
     if (! CORBA::is_nil (the_listener.in ()))
+    {
+      PublicationDisconnectedStatus status;
+
+      // If it's reconnected then the reader should be in id_to_handle map otherwise
+      // log with an error.
+      if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)DataWriterImpl::notify_publication_reconnected "
+          "cache_lookup_instance_handles failed\n"));
+      }
+
       the_listener->on_publication_reconnected (this->dw_remote_objref_.in (),
       status);
+    }
   }
 }
 
@@ -1391,21 +1405,22 @@ void
 DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",5);
-  PublicationLostStatus status;
-
   if (! is_bit_)
   {
-    if (this->cache_lookup_instance_handles (subids, status.subscription_handles) == false)
-      return;
-
-
     // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
     // is given to this DataWriter then narrow() fails.
     DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
     if (! CORBA::is_nil (the_listener.in ()))
+    {
+      PublicationLostStatus status;
+
+      // Since this callback may come after remove_association which removes
+      // the reader from id_to_handle map, we can ignore this error.
+      this->cache_lookup_instance_handles (subids, status.subscription_handles);
       the_listener->on_publication_lost (this->dw_remote_objref_.in (),
       status);
+    }
   }
 }
 
@@ -1469,25 +1484,26 @@ bool
 DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
+  bool ret = true;
   CORBA::ULong num_ids = ids.length ();
   for (CORBA::ULong i = 0; i < num_ids; ++i)
   {
+    hdls.length (i + 1);
     RepoIdToHandleMap::ENTRY* ientry;
     if (id_to_handle_map_.find (ids[i], ientry) != 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, "(%P|%t)ERROR: DataWriterImpl::cache_lookup_instance_handles "
-        "could not find instance handle for writer %d\n", ids[i]),
-        false);
+      ACE_DEBUG ((LM_WARNING, "(%P|%t)DataWriterImpl::cache_lookup_instance_handles "
+        "could not find instance handle for writer %d\n", ids[i]));
+      hdls[i] = -1;
+      ret = false;
     }
     else
     {
-      CORBA::ULong len = hdls.length ();
-      hdls.length (len + 1);
-      hdls[len] = ientry->int_id_;
+      hdls[i] = ientry->int_id_;
     }
   }
 
-  return true;
+  return ret;
 }
 
 

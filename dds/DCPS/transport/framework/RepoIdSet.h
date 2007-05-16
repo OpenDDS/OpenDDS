@@ -32,7 +32,7 @@ namespace TAO
         RepoIdSet();
         virtual ~RepoIdSet();
 
-        int insert_id(RepoId id);
+        int insert_id(RepoId key, RepoId value);
         int remove_id(RepoId id);
 
         size_t size() const;
@@ -41,12 +41,15 @@ namespace TAO
         MapType& map();
         const MapType& map() const;
 
-        /// Serialize the map. The data order in the serialized 
+        /// Serialize the map. The data order in the serialized
         /// stream: size of map, list of keys in the map.
         void serialize(Serializer & serializer);
 
         /// Check if contents in the two RepoIdSet are same.
         bool is_subset (RepoIdSet& map);
+
+        bool exist (const RepoId& remote_id,
+                    bool& last);
 
       private:
 

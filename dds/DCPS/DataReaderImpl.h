@@ -20,6 +20,7 @@
 #include "InstanceState.h"
 #include "DomainParticipantImpl.h"
 #include "Cached_Allocator_With_Overflow_T.h"
+#include "ZeroCopyInfoSeq_T.h"
 
 
 #include "ace/String_Base.h"
@@ -40,6 +41,8 @@ namespace TAO
 
     typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
+
+    typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class TAO_DdsDcps_Export WriterInfo {
@@ -335,6 +338,27 @@ namespace TAO
 
       bool is_bit () const;
 
+      //NOTE: this cannot be pure virtual because of unit test projects like
+      //      DcpsFooType, DdsDcps_UnitTest, and dcpsinfo_test_subscriber.
+      /** This method provides virtual access to type specific code
+       * that is used when loans are automatically returned.
+       * The destructor of the sequence supporing zero-copy read calls this
+       * method on the datareader that provided the loan.
+       *
+       * @param seq - The sequence of loaned values.
+       *
+       * @returns Always RETCODE_OK.
+       *
+       * @thows NONE.
+       */
+      virtual DDS::ReturnCode_t auto_return_loan(void* ); // = 0;
+
+      /** This method is used for a precondition check of delete_datareader.
+       *
+       * @returns the number of outstanding zero-copy samples loaned out.
+       */
+      virtual int num_zero_copies();
+
     protected:
 
       // type specific DataReader's part of enable.
@@ -343,6 +367,14 @@ namespace TAO
         ACE_THROW_SPEC ((
           CORBA::SystemException
         )) = 0;
+
+      /**
+       * Set the sample_ranks, generation_ranks, and
+       * absolute_generation_ranks for this info_seq.
+       */
+      void sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
+                       size_t start_idx, size_t count,
+                       ReceivedDataElement *ptr) ;
 
       void sample_info(::DDS::SampleInfoSeq & info_seq,
                        size_t start_idx, size_t count,
@@ -385,7 +417,7 @@ namespace TAO
 
     private:
 
-      /// Lookup the instance handles by the publication repo ids 
+      /// Lookup the instance handles by the publication repo ids
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);

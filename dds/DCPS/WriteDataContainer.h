@@ -44,25 +44,25 @@ namespace TAO
     * This container contains threaded lists of all data written to a given
     * DataWriter. The real data sample is represented by the DataSampleListElement.
     * The data_holder_ holds all DataSampleListElement in the writing order
-    * via the next_sample_/previous_sample_ thread. The instance list 
+    * via the next_sample_/previous_sample_ thread. The instance list
     * in PublicationInstance links samples via the next_instance_sample_ thread.
     *
     * There are four state transition lists - unsent, sending, sent and released
-    * during the data writing. These lists are linked via the 
+    * during the data writing. These lists are linked via the
     * next_send_sample_/previous_send_sample_ thread. Any DataSampleListElement should
     * be in one of these four lists and SHOULD NOT be shared between these four lists.
     * A normal transition of a DataSampleListElement would be unsent->sending->sent,
     * but a DataSampleListElement could be moved from sending to released list when
     * the instance reaches maximum samples allowed and the transport is still
-    * using the sample. A DataSampleListElement is removed from released or  
-    * sent list after it's delivered or dropped and is freed when it's 
-    * removed from release list or when the instance queue needs more space. 
+    * using the sample. A DataSampleListElement is removed from released or
+    * sent list after it's delivered or dropped and is freed when it's
+    * removed from release list or when the instance queue needs more space.
     * The real data sample will be freed when the reference counting goes 0.
     * The resend list is only used when the datawriter uses
     * TRANSIENT_LOCAL_DURABILITY_QOS. It holds the DataSampleElements for the
-    * data sample duplicates of the sending and sent list and are pushed to 
+    * data sample duplicates of the sending and sent list and are pushed to
     * the released list after giving to the transport.
-    * 
+    *
     *
     *
     * @note: 1)The PublicationInstance object is not removed from this container
@@ -124,7 +124,7 @@ namespace TAO
           ::DDS::InstanceHandle_t instance);
 
       /**
-      * Create a resend list with the copies of all current "sending" and "sent" 
+      * Create a resend list with the copies of all current "sending" and "sent"
       * samples. The samples will be sent to the subscribers specified.
       */
       ::DDS::ReturnCode_t
@@ -142,11 +142,7 @@ namespace TAO
         register_instance (
           ::DDS::InstanceHandle_t&  instance_handle,
           DataSample*&              registered_sample
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
-
+        );
 
       /**
       * Remove the provided instance from the instances_ list.
@@ -162,10 +158,7 @@ namespace TAO
           DataSample*& registered_sample,
           DataWriterImpl*         writer,
           bool                    dup_registered_sample = true
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
+        );
 
 
       /**
@@ -180,10 +173,7 @@ namespace TAO
           ::DDS::InstanceHandle_t handle,
           DataSample*& registered_sample,
           bool                    dup_registered_sample = true
-        )
-        ACE_THROW_SPEC ((
-          CORBA::SystemException
-        ));
+        );
 
       /**
       * Return the number of samples for the given instance.
@@ -203,10 +193,10 @@ namespace TAO
       DataSampleList get_unsent_data() ;
 
       /**
-      * Obtain a list of data for resending. This is only used when 
+      * Obtain a list of data for resending. This is only used when
       * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on
       * the list returned is moved from the resend list to
-      * the released list as part of this call.  
+      * the released list as part of this call.
       */
       DataSampleList get_resend_data() ;
 
@@ -282,8 +272,8 @@ namespace TAO
 
     private:
 
-      void copy_and_append (DataSampleList& list, 
-                            const DataSampleList& appended, 
+      void copy_and_append (DataSampleList& list,
+                            const DataSampleList& appended,
                             const TAO::DCPS::ReaderIdSeq& rds);
 
       /**
@@ -325,9 +315,9 @@ namespace TAO
       DataSampleList   data_holder_;
 
       /// List of the data reenqueued to support the TRANSIENT_LOCAL_DURABILITY_QOS
-      /// policy. It duplicates the samples in sent and sending list. These 
-      /// DataSampleListElement will be appended to released_data_ list after passing 
-      /// to the transport. 
+      /// policy. It duplicates the samples in sent and sending list. These
+      /// DataSampleListElement will be appended to released_data_ list after passing
+      /// to the transport.
       DataSampleList   resend_data_ ;
 
       /// The individual instance queue threads in the

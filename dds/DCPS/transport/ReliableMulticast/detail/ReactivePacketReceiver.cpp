@@ -80,7 +80,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::close(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive(
+TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive_packet_from(
   const Packet& packet,
   const ACE_INET_Addr& peer
   )

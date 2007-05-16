@@ -24,44 +24,35 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   num_reads_ ++;
 
-  try
-    {
-      MessageDataReaderImpl* dr_impl =
-        ::TAO::DCPS::reference_to_servant< MessageDataReaderImpl,
-        MessageDataReader_ptr> (MessageDataReader::_narrow (reader));
-      if (0 == dr_impl) {
-        cerr << "Failed to obtain DataReader Implementation\n" << endl;
-        exit(1);
-      }
-
-      ::DDS::SampleInfoSeq the_info(1);
-      MessagePtrVec the_data (1);
-
-      // Use the zero-copy API to get data buffers directly.
-      DDS::ReturnCode_t status = dr_impl->take (the_data
-                                                , the_info
-                                                , 1
-                                                , ::DDS::ANY_SAMPLE_STATE
-                                                , ::DDS::ANY_VIEW_STATE
-                                                , ::DDS::ANY_INSTANCE_STATE);
-
-      if (status == DDS::RETCODE_OK) {
-        cout << "Message: subject    = " << the_data[0]->subject.in() << endl
-             << "         subject_id = " << the_data[0]->subject_id   << endl
-             << "         from       = " << the_data[0]->from.in()    << endl
-             << "         count      = " << the_data[0]->count        << endl
-             << "         text       = " << the_data[0]->text.in()    << endl;
-        cout << "SampleInfo.sample_rank = " << the_info[0].sample_rank << endl;
-      } else if (status == DDS::RETCODE_NO_DATA) {
-        cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-      } else {
-        cerr << "ERROR: read Message: Error: " <<  status << endl;
-      }
-
-      // Currently there is no API to release the buffer.
-      //dr_impl->return_loan (the_data, the_info);
+  try {
+    MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
+    if (CORBA::is_nil (message_dr.in ())) {
+      cerr << "read: _narrow failed." << endl;
+      exit(1);
     }
-  catch (CORBA::Exception& e) {
+
+    Messenger::Message message;
+    DDS::SampleInfo si ;
+    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+    // Alternate code to read directlty via the servant
+    //MessageDataReaderImpl* dr_servant =
+    //  reference_to_servant< MessageDataReaderImpl,
+    //                        MessageDataReader_ptr>(message_dr.in());
+    //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
+
+    if (status == DDS::RETCODE_OK) {
+      cout << "Message: subject    = " << message.subject.in() << endl
+           << "         subject_id = " << message.subject_id   << endl
+           << "         from       = " << message.from.in()    << endl
+           << "         count      = " << message.count        << endl
+           << "         text       = " << message.text.in()    << endl;
+      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+    } else if (status == DDS::RETCODE_NO_DATA) {
+      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
+    } else {
+      cerr << "ERROR: read Message: Error: " <<  status << endl;
+    }
+  } catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;
     exit(1);
   }

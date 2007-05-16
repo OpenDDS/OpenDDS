@@ -77,7 +77,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::close()
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::send(
+TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
   const Packet& p
   )
 {
@@ -91,7 +91,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::send(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive(
+TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_from(
   const Packet& packet,
   const ACE_INET_Addr& peer
   )
@@ -119,6 +119,6 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::handle_timeout(
     ACE_Guard<ACE_Thread_Mutex> lock(heartbeat_mutex_);
     sender_logic_.make_heartbeat(heartbeat);
   }
-  PacketHandler::send(heartbeat, multicast_group_address_);
+  PacketHandler::send_packet_to(heartbeat, multicast_group_address_);
   return 0;
 }

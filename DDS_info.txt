@@ -14,6 +14,19 @@ Date:
 DDS version: 
 
 -----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 5/9/07 
+DDS version: 0.12
+The following error message means that the SimpleTcp transport has not been
+built or is not in the library path.
+
+ACE (1932|3468) LN::open_dll - Failed to open SimpleTcp: Error: check log for details.
+ACE (1932|3468) Unable to create service object for DCPS_SimpleTcpLoader
+
+-----------------------------------------------------------------------------
 Date: 3/24/06
 DDS version: 0.7/0.8
 Chunks are related to using cached allocators to improve performance

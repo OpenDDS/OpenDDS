@@ -16,7 +16,7 @@ project(DDS*idl): dcps {
 
 
 project(DDS*Publisher) : taoexe, portableserver, dcps {
-  
+ 
   exename   = publisher
   after    += DDS*idl
 
@@ -37,7 +37,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
 }
 
 project(DDS*Subscriber) : taoexe, portableserver, dcps {
-  
+ 
   exename   = subscriber
   after    += DDS*idl
 

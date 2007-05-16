@@ -32,7 +32,7 @@ TAO::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
                        -1);
     }
 
-  int result = id_set->insert_id(value);
+  int result = id_set->insert_id(value, key);
 
   if (result == -1)
     {
@@ -271,6 +271,10 @@ TAO::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
       itr.next(entry);
       itr.advance())
     {
-      keys.insert_id (entry->ext_id_);
+      keys.insert_id (entry->ext_id_, entry->ext_id_);
     }
 }
+
+
+
+

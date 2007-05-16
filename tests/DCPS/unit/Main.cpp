@@ -184,7 +184,7 @@ int run_domain_test ()
             (new_topic.in ());
 
   ::DDS::Duration_t timeout;
-  timeout.sec = find_topic_timeout.sec ();
+  timeout.sec = static_cast<long>(find_topic_timeout.sec ());
   timeout.nanosec = find_topic_timeout.usec ();
 
   // find existent topic
@@ -242,14 +242,16 @@ int run_domain_test ()
 
   // find a non-existent topic - return nil
   ACE_High_Res_Timer timer;
-  ACE_hrtime_t elapsedTime = 0;
+  ACE_Time_Value elapsedTime;
   timer.start ();
   found_topic = new_dp->find_topic(OTHER_TOPIC, timeout);
   timer.stop();
-  timer.elapsed_microseconds(elapsedTime);
-  elapsedTime += 10000; // some systems can be short by up to 10 milliseconds
+  timer.elapsed_time(elapsedTime);
+  ACE_Time_Value tenMillis (0, 10000);
+  elapsedTime += tenMillis;
+  // some systems can be short by up to 10 milliseconds
   TEST_CHECK (CORBA::is_nil(found_topic.in ())
-    && long(elapsedTime) >= find_topic_timeout.sec () * 1000000 + find_topic_timeout.usec ());
+              && elapsedTime >= find_topic_timeout);
 
   // delete the existent participant
   ret = dpf->delete_participant(new_dp.in ());
@@ -530,6 +532,3 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   return 0;
 }
-
-
-

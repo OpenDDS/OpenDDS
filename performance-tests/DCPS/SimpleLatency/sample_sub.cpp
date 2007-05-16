@@ -30,7 +30,7 @@ using namespace DDSPerfTest;
 
 /* void set_rt() */
 /*      Attempt to set the real time priority and lock memory */
-void set_rt() 
+void set_rt()
 {
   ACE_Sched_Params params(ACE_SCHED_FIFO,
                           ACE_DEFAULT_THREAD_PRIORITY,
@@ -71,17 +71,21 @@ int main(int argc, char *argv[])
          TheParticipantFactoryWithArgs (argc, argv);
 
        bool useTCP = true;
+       bool useZeroCopyRead = false;
        DomainId_t myDomain = 411;
 
        setbuf (stdout, NULL);
 
-       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("u"));
+       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("ut"));
 
        int ich;
        while ((ich = get_opts ()) != EOF) {
         switch (ich) {
           case 'u': /* u specifies that UDP should be used */
             useTCP = false;
+            break;
+          case 't': /* t specifies that zero copy read should be used */
+            useZeroCopyRead = true;
             break;
 
           default: /* no parameters */
@@ -97,34 +101,34 @@ int main(int argc, char *argv[])
        /* Create participant */
        DDS::DomainParticipant_var dp =
               dpf->create_participant (myDomain,
-                                       PARTICIPANT_QOS_DEFAULT, 
+                                       PARTICIPANT_QOS_DEFAULT,
                                        DDS::DomainParticipantListener::_nil ());
        if (CORBA::is_nil (dp.in ()) ) {
          cout << argv[0] << "SAMPLE_SUB: ERROR - Create participant failed." << endl;
          exit (1);
        }
-       
+ 
        /* Create publisher */
        DDS::Publisher_var p =
          dp->create_publisher (PUBLISHER_QOS_DEFAULT,
                                DDS::PublisherListener::_nil ());
-       
+ 
        /* Initialize the transport for publisher*/
        TAO::DCPS::TransportImpl_rch pub_tcp_impl;
        if (useTCP) {
-         pub_tcp_impl 
+         pub_tcp_impl
            = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                         "SimpleTcp", 
+                                                         "SimpleTcp",
                                                          ::TAO::DCPS::AUTO_CONFIG);
        } else {
-         pub_tcp_impl 
+         pub_tcp_impl
            = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
-                                                         "SimpleUdp", 
+                                                         "SimpleUdp",
                                                          TAO::DCPS::DONT_AUTO_CONFIG);
-         TAO::DCPS::TransportConfiguration_rch config 
+         TAO::DCPS::TransportConfiguration_rch config
            = TheTransportFactory->create_configuration (UDP_IMPL_ID, "SimpleUdp");
 
-         TAO::DCPS::SimpleUdpConfiguration* udp_config 
+         TAO::DCPS::SimpleUdpConfiguration* udp_config
            = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          std::string addrStr(ACE_LOCALHOST);
@@ -142,22 +146,22 @@ int main(int argc, char *argv[])
 
        /* Create topic for datawriter */
        AckMessageTypeSupportImpl* ackmessage_dt = new AckMessageTypeSupportImpl;
-       ackmessage_dt->register_type (dp.in (), 
+       ackmessage_dt->register_type (dp.in (),
                                     "DDSPerfTest::AckMessage");
        DDS::Topic_var ackmessage_topic = dp->create_topic ("ackmessage_topic", // topic name
                                                            "DDSPerfTest::AckMessage", // topic type
-                                                           TOPIC_QOS_DEFAULT, 
+                                                           TOPIC_QOS_DEFAULT,
                                                            DDS::TopicListener::_nil ());
 
        /* Create PubMessage data writer */
        DDS::DataWriter_var dw = p->create_datawriter (ackmessage_topic.in (),
                                                       DATAWRITER_QOS_DEFAULT,
                                                       DDS::DataWriterListener::_nil ());
-       AckMessageDataWriter_var ackmessage_writer = 
+       AckMessageDataWriter_var ackmessage_writer =
          AckMessageDataWriter::_narrow (dw);
-       
+ 
 
-       /* Create the subscriber */ 
+       /* Create the subscriber */
        DDS::Subscriber_var s =
          dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                DDS::SubscriberListener::_nil());
@@ -166,20 +170,20 @@ int main(int argc, char *argv[])
        /* Initialize the transport for subscriber */
        TAO::DCPS::TransportImpl_rch sub_tcp_impl;
        if (useTCP) {
-         sub_tcp_impl 
-           = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1, 
-                                                         "SimpleTcp", 
+         sub_tcp_impl
+           = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1,
+                                                         "SimpleTcp",
                                                          ::TAO::DCPS::AUTO_CONFIG);
        } else {
-         sub_tcp_impl 
+         sub_tcp_impl
            = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
-                                                        "SimpleUdp", 
+                                                        "SimpleUdp",
                                                         TAO::DCPS::DONT_AUTO_CONFIG);
-         TAO::DCPS::TransportConfiguration_rch config 
+         TAO::DCPS::TransportConfiguration_rch config
            = TheTransportFactory->create_configuration (UDP_IMPL_ID+1,
            "SimpleUdp");
 
-         TAO::DCPS::SimpleUdpConfiguration* udp_config 
+         TAO::DCPS::SimpleUdpConfiguration* udp_config
            = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          std::string addrStr(ACE_LOCALHOST);
@@ -197,17 +201,17 @@ int main(int argc, char *argv[])
 
        /* Create topic for datareader */
        PubMessageTypeSupportImpl* pubmessage_dt = new PubMessageTypeSupportImpl;
-       pubmessage_dt->register_type (dp.in (), 
+       pubmessage_dt->register_type (dp.in (),
                                      "DDSPerfTest::PubMessage");
        DDS::Topic_var pubmessage_topic = dp->create_topic ("pubmessage_topic", // topic name
                                                            "DDSPerfTest::PubMessage", // topic type
-                                                           TOPIC_QOS_DEFAULT, 
+                                                           TOPIC_QOS_DEFAULT,
                                                            DDS::TopicListener::_nil ());
 
        /* Create the listener for datareader */
        PubDataReaderListenerImpl  listener_servant;
        DDS::DataReaderListener_var listener =
-	     ::TAO::DCPS::servant_to_reference(&listener_servant);
+       ::TAO::DCPS::servant_to_reference(&listener_servant);
 
 
        /* Create AckMessage datareader */
@@ -215,12 +219,12 @@ int main(int argc, char *argv[])
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-       listener_servant.init(dr.in(), dw.in());
+       listener_servant.init(dr.in(), dw.in(), useZeroCopyRead);
 
-       PubMessageDataReader_var pubmessage_reader = 
+       PubMessageDataReader_var pubmessage_reader =
          PubMessageDataReader::_narrow (dr);
 
-       while (listener_servant.done () == 0) 
+       while (listener_servant.done () == 0)
        {
          ACE_OS::sleep (1);
        };
@@ -233,7 +237,7 @@ int main(int argc, char *argv[])
        dpf->delete_participant (dp.in ());
        TheTransportFactory->release ();
        TheServiceParticipant->shutdown ();
-              
+ 
        return(0);
 
 }

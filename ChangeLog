@@ -1,3 +1,761 @@
+Wed May 16 16:01:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+          Layout changes. Remove comments.
+
+Wed May 16 15:09:05 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/debug.cpp:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Create a function to set the DCPS_debug_level.
+
+Tue May 15 19:39:55 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Rename variables to descriptive names.
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+          removed couple of debug messages.
+
+Tue May 15 15:47:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Removed redirection of STDOUT and STDERR streams in Perl.  This turns
+          out to be incompatible with a Perl process in Windows that itself has
+          its output or error streams redirected to files.  Instead we now use
+          -ORBLogFile to redirect test error/log messages to a file.
+
+Tue May 15 04:01:27 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/DataReaderListener.cpp:
+
+          Update per updates to the Dev. Guide.
+
+Mon May 14 18:55:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Use ACE_Time_Value to compare times in order to hide platform
+          differences in signed/unsigned time values.
+
+Mon May 14 17:57:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Reinstated a corrected version of the change that was reverted in...
+          Sun May 13 21:53:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/INSTALL:
+
+          Updated installation instructions.
+
+Sun May 13 21:53:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Partially reverted the change from...
+          Fri May 11 14:01:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          ...since even though it worked for static builds, it broke many of
+          the shared-library builds.
+
+Sun May 13 21:10:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/dds.doxygen:
+
+          Fixed the Doxygen config to pick up all library source files.
+
+Fri May 11 16:25:43 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc:
+        * etc/dds.doxygen:
+
+          Added a Doxygen configuration file for DDS.
+
+Fri May 11 14:41:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Re-enabled the Reconnect test.
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Reverted some of my changes from...
+          Thu May 10 14:50:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+          ...it turns out that the redirected STDERR or STDOUT needs to be
+          closed before STDERR or STDOUT is re-opened.  The part of yesterday's
+          change that remains is that the "saved" streams are not closed.
+
+Fri May 11 14:01:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        Changes to allow BIT functionality in static builds (for now anyway,
+        BIT always uses SimpleTCP as its transport implementation).
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.cpp:
+
+          Initialize the Loader object in the ACE Service Configurator.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepo_bits.mpb:
+
+          Link the SimpleTCP library and initialize it as long as the MPC
+          feature built_in_topics = 1.
+
+        * tests/DCPS/BuiltInTopic/BuiltInTopic.mpc:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Modified to work in static builds.
+
+Thu May 10 14:50:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Test scripts that redirect stdout or stderr need to not close the
+          file handles after the redirection is done.  This prevents the
+          remainder of the script from producing output.
+
+Wed May 09 22:46:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * DDS_release_notes.txt:
+
+          Cleanup of zero-copy implementation per review.
+
+        * DDS_info.txt:
+
+          Add note on what it looks like when the TCP transport library is unavailable.
+
+        * tests/DCPS/Messenger_ZeroCopy:
+        * bin/dcps_tests.lst:
+
+          Moved tets/DCPS/Messenger_ZeroCopy to
+              DevGuideExamples/DDS/Messenger_ZeroCopy.
+          And removed it from the nightly build tests because it
+          is an example and the ZeroCopyRead test is a true test.
+
+        * DDS_zero-copy.mwc:
+
+          Removed DDS_zero-copy.mwc becuase it was temporary.
+
+Wed May  9 15:52:21 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Continued documenting changes since 0.11 was released.
+
+Wed May  9 15:23:33 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Pass -NOBITS on the DCPSInfoRepo command line since this test doesn't
+          use BITS.  This makes the test compatible with static builds.
+
+Wed May  9 14:02:02 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Use unsigned ints to eliminated signed/unsigned mismatch warnings.
+
+Wed May  9 13:48:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/INSTALL:
+
+          Added some information on supported platforms and building DDS.
+
+Tue May 08 23:41:25 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+
+          Added option to use Zero copy read.
+
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+
+          Changed to disable Built In Topic usage.
+
+Tue May  8 19:12:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed ACE_THROW_SPEC(()) clauses from functions that aren't
+          overrides of skeleton functions.  ACE_THROW_SPEC is not necessary and
+          causes problems on platforms that check exceptions against the
+          throw() clause.  In this case, we saw test failures because
+          servant_to_reference didn't declare CORBA::UserException even though,
+          as the comments indicated, it can throw POA::ObjectNotActive and
+          other user exceptions.  The common C++ point of view these days is
+          that throw() clauses are more trouble than they're worth.
+
+Tue May  8 16:09:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          Added the default value (1) for built_in_topics.
+
+Mon May  7 22:18:31 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes to summarize some of the work that's been done
+          since the 0.11 release.  This isn't complete yet.
+
+Fri May 04 21:39:50 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/README:
+
+          Added information about new tests.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
+
+          Fixed unreferenced variable warning.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/raw_tcp_publisher.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/raw_tcp_subscriber.mpc:
+
+          Replaced deprecated command
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
+
+          Fixed warnings and removed commented out code.
+
+        * performance-tests/DCPS/TCPProfilingTest/repo.conf:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+
+          Removed unnecessary config file.
+
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+
+          Removed old vc6 code.
+
+Fri May  4 16:07:37 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/unit/Main.cpp:
+          explicit cast to clear scoreboard warnings.
+
+Fri May  4 15:38:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketHandler.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketReceiver.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+
+          Renamed methods that were overriding inherited virtual methods.
+          This fixes warnings from Borland and SunCC.
+
+Thu May 03 23:50:40 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestException.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/split_pub.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestStats.h:
+
+         Added a raw tcp latency test to allow for comparison.
+
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/conf.ini:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/domain_ids:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestException.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/raw_tcp_publisher.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TcpPublisher.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1xn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nx1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nxn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/raw_tcp_subscriber.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/README:
+        * performance-tests/DCPS/TCPProfilingTest/repo.conf:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/TCPProfiling.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/testMessage.idl:
+        * performance-tests/DCPS/TCPProfilingTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.h:
+
+          Adding a throughput test that uses SimpleTcp transport.
+          The best comparison is to change the idl to a bounded sequence.
+
+Wed May  2 22:03:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+      Merged https://svn.dre.vanderbilt.edu/DOC/DDS/branches/20070501_zero_copy_take
+      branch (from 644 to 654) with changes indented below.
+
+        Wed May  2 19:43:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * dds/DCPS/DataReaderImpl.cpp:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/SubscriberImpl.cpp:
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
+
+                        Add no existing loans precondition check to delete_datawriter.
+                        And test for it.
+
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopyAllocator_T.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeqBase.h:
+
+                        Code cleanup.
+
+        Tue May  1 23:32:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+                        Avoid build warnings.
+
+        Tue May  1 23:22:14 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * DDS_zero-copy.mwc:
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+
+                        Cleanup/simplify this zero-copy example.
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+                        Add test of providing an allocator.
+
+
+        Tue May  1 22:08:44 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+
+                        Support zero-copy take.
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
+
+                        Update test to cover zero-copy take.
+
+                        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+                        Remove unneeded code.
+
+Wed May  2 14:32:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+          Removed unused parameters to cleanup scoreboard warnings.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+          minor cleanup.
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+          Remove unused variables to cleanup scoreboard warnings.
+
+Mon Apr 30 16:00:52 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/DCPS/CPPTemplate.pm:
+          Modify ULong to Long to get rid of scoreboard warnings.
+
+Sat Apr 28 19:04:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Added a 'requires' for the built_in_topics MPC feature.
+
+Fri Apr 27 15:07:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Fixed the case of "monitor.cpp" in the mpc file.
+
+Thu Apr 26 23:18:51 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enabled the builtintopic unit test and added the new
+          builtintopic test.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Uncommented some debugging message.
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Messenger.idl:
+        * tests/DCPS/BuiltInTopicTest/README:
+        * tests/DCPS/BuiltInTopicTest/Writer.h:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/domain_ids:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/tcp.conf:
+
+          Added the built-in-topic test to verify if a new
+          participant or old participant receive the same
+          built-in-topic data.
+
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+
+          Added missing files.
+
+        * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+
+          Removed these files since it's idl and template generated
+          code.
+
+Thu Apr 26 19:14:04 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Removed process_id and hostname from ParticipantBuiltinTopicData
+          struct. These fields are accidently added during previous commit.
+
+Thu Apr 26 16:01:23 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added zero-copy functional test, tests/DCPS/ZeroCopyRead/run_test.pl
+
+Thu Apr 26 14:44:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+
+          Method declarations within the class definition should not have the
+          class's scope resolution prepended.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+
+          Added an export macro on this class.  Thanks to Wallace Zhang for
+          reporting this one.
+
+Thu Apr 26 14:25:09 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed bug in transport and DCPS layer that remove_association()
+          removes all assoications related to the remote id provided by
+          the DCPSInfoRepo. It should just remove the association of
+          the remote id and local id and the link only used by them.
+
+        * bin/dcps_tests.lst:
+
+          Added TransientLocalTest test.
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+        * tests/DCPS/TransientLocalTest/Messenger.idl:
+        * tests/DCPS/TransientLocalTest/README:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/Writer.h:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/domain_ids:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/tcp.conf:
+
+          Added new test to test DataWriter with TRANSIENT_LOCAL durability
+          will resend samples in sent list and sending list to the new
+          associated datareaders.
+
+Wed Apr 25 23:31:31 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+          Turn off BIT on the client side (since it is off on the InfoRepo).
+
+Wed Apr 25 23:11:43 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+
+          Tell Subversion that these are resolved -- svn novice.
+
+Wed Apr 25 22:38:56 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+          Merge RT10633_zero_copy_read_branch from start, 564, to revision 625.
+          "start is defined by tags/RT10633_zero_copy_read.
+
+        * bin/dcps_tests.lst:
+
+          Make performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl run
+          both with zero-copy read (the default) and single-copy read.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          The following unit test projects: DcpsFooType, DdsDcps_UnitTest,
+          and dcpsinfo_test_subscriber do not allow the DataReaderImpl
+          to have pure virtual methods like auto_return_loan.
+
+
+        * dds/DCPS/DataReaderImpl.h:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+
+          Resolved conflicts in the above files.
+
+        Wed Apr 25 16:23:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeqBase.h:
+
+                        Get it to build with gcc v 3.4.4.
+
+        Wed Apr 25 15:45:49 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+                        * dds/DCPS/ZeroCopyAllocator_T.h:
+                        * dds/DCPS/ZeroCopyAllocator_T.inl:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+                        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+                        * dds/DCPS/ZeroCopySeq_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DdsDcps.mpc:
+
+                        Gave each class its own set of files (.h, .inl, .cpp)
+                        to avoid a circular include problem.
+
+        Tue Apr 24 23:42:46 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * dds/DCPS/ZeroCopySeq_T.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DCPS/ZeroCopySeq_T.inl:
+                        * dds/DCPS/ZeroCopySeqBase.cpp:
+                        * dds/DCPS/ZeroCopySeqBase.h:
+                        * dds/DCPS/ZeroCopySeqBase.inl:
+                        * dds/DdsDcps.mpc:
+
+                        Properly inline zero-copy read support classes.
+
+        Tue Apr 24 20:10:51 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+                        * bin/DCPS/HTemplate.pm:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+
+                        Implement automatic return_loan.
+
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/Simple.idl:
+
+                        Add automatic return_loan test.
+                        Test to be sure sample and Info destructors are called.
+
+        Mon Apr 23 23:35:36 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+
+                        Fix a delete while zero-copy sequence has reference bug.
+
+                        * dds/DCPS/DataReaderImpl.cpp:
+
+                        Minor comment change.
+
+                        * tests/DCPS/ZeroCopyRead:
+                        * tests/DCPS/ZeroCopyRead/domain_ids:
+                        * tests/DCPS/ZeroCopyRead/main.cpp:
+                        * tests/DCPS/ZeroCopyRead/README:
+                        * tests/DCPS/ZeroCopyRead/run_test.pl:
+                        * tests/DCPS/ZeroCopyRead/Simple.idl:
+                        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+                        Create a functional test for zero-copy read.
+
+
+        Mon Apr 23 18:52:20 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+                        * dds/DCPS/ReceivedDataElementList.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+
+                        Implement zero-copy read FoodDataReaderImpl::return_loan "template".
+                        Add reference counting of sample data to avoid deleting
+                        samples out from under a zero-copy read sequence.
+                        Make zero-copy read code support single-copy and zero-copy reads.
+                        Make additional check defined by the DDS specification.
+
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+                        Do "zero-copy" read using the basic sample sequence.
+
+                        * DDS_release_notes.txt:
+
+                        Show how to build without BIT support.
+
+        Fri Apr 20 15:31:52 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+
+                        Allow the zero-copy read sequence type to be used with single-copy
+                        reads.
+
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+                        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+
+                        Modify the test to allow testing of the zero-copy read capable
+                        sequence type with zero or single copy reading.
+
+        Thu Apr 19 17:48:29 UTC 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+
+                        Resolve gcc build errors and warnings.
+
+        Wed Apr 18 18:50:41 GMT 2007  Scott Harris <harris_s@ociweb.com>
+
+                        * bin/DCPS/CPPTemplate.pm:
+                        * bin/DCPS/HTemplate.pm:
+                        * dds/DCPS/DataReaderImpl.cpp:
+                        * dds/DCPS/DataReaderImpl.h:
+                        * dds/DCPS/ZeroCopySeq_T.h:
+                        * dds/DdsDcps.mpc:
+
+                        First round of zero-copy read support.
+
+                        * performance-tests/DCPS/TCPListenerTest/common.h:
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+                        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+                        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+                        Make zero-copy read the default for this performance test.
+                        Changed from 1200 to 700 microseconds per 8KB sample for 1-1 on WinXP.
+
+                        * tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+
+
+Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added a configuration NO_BUILT_IN_TOPICS that will identify builds
+          that have BIT support disabled.  Once these tests are uncommented,
+          they will be not be run on builds that have NO_BUILT_IN_TOPICS set as
+          a configuration.
+
+Wed Apr 25 17:49:12 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          If DDS is compiled with built_in_topics=0 then default 'bit_enabled'
+          to false.
+
 Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -9,7 +767,7 @@ Wed Apr 25 13:11:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
 Wed Apr 25 00:38:56 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
-        * DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Fixed bug of creation of incorrect queues when clear() was
           called.  The elems_ and queue_ were being given the wrong sized
@@ -1982,7 +2740,7 @@ Tue Jan 30 18:27:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * DevGuideExamples/DDS/Messenger/subscriber.cpp:
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
         * DevGuideExamples/DDS/Messenger/run_test.pl:
-        * DevGuideExamples/DDS/Messenger/mcast.conf        :
+        * DevGuideExamples/DDS/Messenger/mcast.conf:
         * DevGuideExamples/DDS/Messenger/udp.conf:
 
           Added mcast and default mcast test cases.

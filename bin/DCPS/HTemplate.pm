@@ -32,8 +32,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
-
-#include <vector>
+#include "dds/DCPS/ZeroCopySeq_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -41,7 +40,7 @@ sub contents { return <<'!EOT'
 
 <%NAMESPACESTART%>
   // for support of zero-copy read
-  typedef std::vector<<%SCOPE%><%TYPE%>*> <%TYPE%>PtrVec;
+  typedef ::TAO::DCPS::ZeroCopyDataSeq<<%SCOPE%><%TYPE%>, DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> <%TYPE%>ZCSeq;
 <%NAMESPACEEND%>
 
 <%NAMESPACESTART%>
@@ -370,8 +369,8 @@ public:
   // zero-copy overloaded version
   virtual
   DDS::ReturnCode_t read (
-      ::<%MODULE%><%TYPE%>PtrVec & received_data,
-      ::DDS::SampleInfoSeq & info_seq,
+      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
@@ -396,8 +395,8 @@ public:
 
   virtual
   DDS::ReturnCode_t take (
-      ::<%MODULE%><%TYPE%>PtrVec & received_data,
-      ::DDS::SampleInfoSeq & info_seq,
+      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
@@ -491,6 +490,15 @@ public:
     ));
 
   virtual
+  DDS::ReturnCode_t return_loan (
+      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
+      ::TAO::DCPS::SampleInfoZCSeq & info_seq
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
+
+  virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
@@ -498,6 +506,11 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  virtual 
+  DDS::ReturnCode_t auto_return_loan(void* seq);
+
+  void release_loan (::<%MODULE%><%TYPE%>ZCSeq & received_data);
 
  protected:
 

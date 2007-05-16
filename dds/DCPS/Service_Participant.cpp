@@ -60,7 +60,13 @@ namespace TAO
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
-      bit_enabled_ (true),
+      bit_enabled_ (
+#ifdef DDS_HAS_MINIMUM_BIT
+                    false
+#else
+                    true
+#endif
+                    ),
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       initialize();
@@ -73,7 +79,7 @@ namespace TAO
       // from being created.
 
       return
-	TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance ();
+  TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance ();
     }
 
     int
@@ -344,7 +350,7 @@ namespace TAO
 
           if ((currentArg = arg_shifter.get_the_parameter("-DCPSDebugLevel")) != 0)
             {
-              DCPS_debug_level = ACE_OS::atoi (currentArg);
+              set_DCPS_debug_level (ACE_OS::atoi (currentArg));
               arg_shifter.consume_arg ();
               got_debug_level = true;
             }

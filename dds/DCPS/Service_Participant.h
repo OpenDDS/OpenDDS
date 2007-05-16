@@ -319,9 +319,6 @@ namespace TAO
     T_impl* reference_to_servant (
       T_ptr p
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
     {
       if (CORBA::is_nil (p))
         {
@@ -347,9 +344,6 @@ namespace TAO
     typename T::_stub_ptr_type servant_to_reference (
       T *servant
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
@@ -365,9 +359,6 @@ namespace TAO
     void deactivate_object (
       T obj
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
       PortableServer::ObjectId_var oid =

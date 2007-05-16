@@ -20,6 +20,10 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tests/DCPS/common/TestSupport.h"
 
+#if !defined(DDS_HAS_MINIMUM_BIT)
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
@@ -84,7 +88,7 @@ int init (int argc, ACE_TCHAR *argv[])
         = participant_factory->create_participant(TEST_DOMAIN,
                                                   PARTICIPANT_QOS_DEFAULT,
                                                   ::DDS::DomainParticipantListener::_nil ());
-      
+ 
       //SHH create a separate particpant for the subscriber and publisher
 
       // Wait a while to give the transport thread time
@@ -200,14 +204,14 @@ int init (int argc, ACE_TCHAR *argv[])
 #if !defined (DDS_HAS_MINIMUM_BIT)
 void test_bit_participant ()
 {
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::ParticipantBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::ParticipantBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::TopicBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::TopicBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::PublicationBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::PublicationBuiltinTopicData) ));
-  ACE_DEBUG((LM_INFO,"sizeof(::DDS::SubscriptionBuiltinTopicData) = %d\n",
-                     sizeof(::DDS::SubscriptionBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::ParticipantBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::ParticipantBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::TopicBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::TopicBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::PublicationBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::PublicationBuiltinTopicData) ));
+  //ACE_DEBUG((LM_INFO,"sizeof(::DDS::SubscriptionBuiltinTopicData) = %d\n",
+  //                   sizeof(::DDS::SubscriptionBuiltinTopicData) ));
 
   try
     {
@@ -244,7 +248,7 @@ void test_bit_participant ()
       TEST_CHECK (part_data[0].key[2] == 0);
 #else
       // The paricipant will not know itself from repo since the
-      // bit participant topic datareader is created after 
+      // bit participant topic datareader is created after
       // DCPS gets add_domain_participant request.
       TEST_CHECK (ret == ::DDS::RETCODE_NO_DATA);
 #endif
