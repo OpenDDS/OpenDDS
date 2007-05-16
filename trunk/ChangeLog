@@ -1,8 +1,15 @@
+Wed May 16 21:39:59 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp(unregister_all):
+
+          Added a check for a NULL DataSampleListElement in sending_data_.  The
+          sub_init_loop stress test has shown a segfault here.
+
 Wed May 16 20:05:37 UTC 2007  Byron Harris  <harris_b@ociweb.com>
 
         * README:
 
-	  Removed spell checker content brought over from the release notes.
+          Removed spell checker content brought over from the release notes.
 
 Wed May 16 19:27:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
