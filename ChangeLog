@@ -1,3 +1,9 @@
+Wed May 16 20:05:37 UTC 2007  Byron Harris  <harris_b@ociweb.com>
+
+        * README:
+
+	  Removed spell checker content brought over from the release notes.
+
 Wed May 16 19:27:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/run_test.pl:
@@ -17,7 +23,7 @@ Wed May 16 19:24:12 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_release_notes.txt:
         * README:
-        
+
           Removed obsolete notes and made other improvements.
 
 Wed May 16 18:09:17 UTC 2007  Adam Mitz  <mitza@ociweb.com>
