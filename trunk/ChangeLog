@@ -1,3 +1,11 @@
+Wed May 16 19:24:12 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+        
+          Removed obsolete notes and made other improvements.
+          
+
 Wed May 16 18:09:17 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/run_test.pl:
