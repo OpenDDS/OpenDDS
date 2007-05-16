@@ -23,50 +23,6 @@
 
 TAO::DCPS::TransportIdType transport_impl_id = 1;
 
-int
-parse_args (int argc, char *argv[])
-{
-  ACE_Get_Opt get_opts (argc, argv, "t:");
-  int c;
-
-  while ((c = get_opts ()) != -1)
-  {
-    switch (c)
-    {
-    case 't':
-      if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
-        transport_impl_id = 2;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "mcast") == 0) {
-        transport_impl_id = 3;
-      }
-      // test with DEFAULT_SIMPLE_TCP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
-      }
-      // test with DEFAULT_SIMPLE_UDP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_UDP_ID;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_mcast_sub") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
-      }
-      break;
-    case '?':
-    default:
-      ACE_ERROR_RETURN ((LM_ERROR,
-        "usage:  %s "
-        "-t <tcp/udp/default> "
-        "\n",
-        argv [0]),
-        -1);
-    }
-  }
-  // Indicates sucessful parsing of the command line
-  return 0;
-}
-
-
 int main (int argc, char *argv[])
 {
   try
@@ -81,10 +37,6 @@ int main (int argc, char *argv[])
       if (CORBA::is_nil (participant.in ())) {
         cerr << "create_participant failed." << endl;
         return 1 ;
-      }
-
-      if (parse_args (argc, argv) == -1) {
-        return -1;
       }
 
       MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
@@ -109,8 +61,8 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      TAO::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      TAO::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::TAO::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -175,8 +127,7 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-
-      int expected = 10;
+      int expected = 5;
       while ( listener_servant.num_reads() < expected) {
         ACE_OS::sleep (1);
       }
@@ -191,7 +142,6 @@ int main (int argc, char *argv[])
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
-
     }
   catch (CORBA::Exception& e)
     {

@@ -1,60 +1,118 @@
+The TAO DDS is an open-source C++ implementation of the Object
+Management Group's specification ""Data Distribution Service for
+Real-time Systems". TAO DDS is built on the ACE
+(http://www.theaceorb.com/product/aboutace.html) abstraction layer to
+provide platform portability. TAO DDS also leverages capabilities of
+TAO (http://www.theaceorb.com/), such as its IDL compiler and as the
+basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+ 
+The primary development of TAO DDS was done by the ACE/TAO development
+team at Object Computing, Incorporated (http://www.ociweb.com) in St
+Louis and Phoenix. It is released under the same generous license
+terms as ACE, TAO and MPC.
 
-BUILDING DDS
-========================
+This directory structure contains TAO DDS 0.11.
 
-* Supported platform:
+Note that this release is considered beta quality software and
+therefore some small interface changes may occur before version 1.0 is
+released.
 
-  We have built DDS examples on Win32 using MSVC 2003 .NET and gcc on 
-  Linux and Solaris.
+* Support
 
-* Compiling:
+OCI strives to make TAO DDS as bug free as possible. If you encounter
+any problems with this release please fill out the PROBLEM-REPORT-FORM
+file found in this directory and send to support@ociweb.com.
 
-    DDS requires the PortableServer orbsvcs and dependent libraries to build.
+If you desire responsive commerical support for OCI on any problems
+you encounter, we strongly recommend that you set up an account before
+you actually need help. There is no cost to establish a normal
+account.  Support charges only apply to work actually delivered.
+However, we do offer premium level accounts for customers with
+specific support and enhancement needs, and there may be ongoing
+charges for such premium service.  To set up a support account or to
+find out more about the support options available, please contact
+sales@ociweb.com.
 
-  1 Build ACE and TAO.
+* Features
 
-    Don't forget to build the PortableServer library.
-    See the instructions in ACE_wrappers/ACE-INSTALL.html and
-    ACE_wrappers/TAO/TAO-INSTALL.html or the relevant sections
-    in OCI's TAO Developer's Guide.
+This release of TAO DDS is based on the DDS Specification
+formal/04-12-02. It features the following transport protocols:
 
-  2 Set the environment variables.
+** TCP
+** Unreliable and reliable multicast
+** UDP
 
-    Set DDS_ROOT to the location of the DDS checkout.  The default
-    value for DDS_ROOT is $TAO_ROOT/DDS
+TAO DDS has been found to perform better than other similar TAO
+services (notification and real-time event channel) by a factor of two
+or three. The features offered by the RTEC and NS are similar to DDS,
+but not identical, so carefully examine your use-cases before choosing
+one service over another. Speed is not the only criterion.
 
-    Add $DDS_ROOT/bin to the PATH
+Currently TAO DDS does not support the Data Local Reconstruction Layer
+(DLRL) portion of the DDS specification. In addition, support for some
+Quality of Service policies is not currently available in TAO DDS. See
+the chapter Data Distribution Service that is part of the TAO
+Developer's Guide for further information on TAO DDS compliance with
+the DDS specification. This chapter is freely available as a PDF file
+from the same location where TAO DDS can be downloaded. If you would
+like have OCI add a features to TAO DDS please see the Support section
+for contact information.
 
-    Add $DDS_ROOT/lib to the LD_LIBRARY_PATH (or %DDS_ROOT%\lib to
-    the PATH for windows)
+* Dependencies
 
-    Make sure that MPC_ROOT and the other normal ACE/TAO environment
-    variables are defined.
+** TAO
 
-  3 Generate the makefiles.
+TAO DDS requires the use of TAO. This release of TAO DDS has been
+tested against the versions of TAO given below. Note that the 1.xa
+releases are from OCI and can be obtained from
+http://www.theaceorb.com/. The DOC Group releases can be obtained from
+http://download.dre.vanderbilt.edu/. For responsive support from OCI
+it is recommended that the latest version of the OCI release of TAO
+used for TAO DDS development and testing be used.
 
-    DDS uses MPC for generating makefiles.
+*** TAO 1.4a patch 16
+*** TAO 1.5a
+*** A current snapshot of DOC Group's 1.5.x
 
-     On linux or Solaris:
-      cd $DDS_ROOT
-      perl $ACE_ROOT/bin/mwc.pl DDS.mwc
+** MPC
 
-     On Windows:
-      cd %DDS_ROOT%
-      perl %ACE_ROOT%\bin\mwc.pl -type [InsertCompilerType] DDS.mwc
+The Makefile, Project, and Workspace Creator (MPC) software is another
+OCI developed open source tool and is used to target multiple build
+systems from a single set of files. MPC is used for generating TAO DDS
+build files such as GNU makefiles or Microsoft Visual Studio solution
+files. You can obtain the latest version at
+http://www.ociweb.com/products/mpc.
 
+** GNU Make
 
-  4 Build
+GNU Make 3.8 was used for automating the compiling and linking of TAO
+DDS on Unix and Linux systems.
 
-    On linux or Solaris:
-    make
+* Build Targets
 
-    On Windows:
-    load the DDS solution (or workspace) into the compiler and
-    build all.
+* Operating Systems
 
+This release of TAO DDS has been tested under the following platforms:
 
-  5 Test
+** Windows XP
+** Linux Fedore Core 3
+** Linux Fedore Core 6
+** SunOS 5.9
+** SunOS 5.10
 
-    cd $DDS_ROOT/tests
-    $DDS_ROOT/bin/all_tests.pl
+* Compilers
+
+This release of TAO DDS has been tested using the following compilers:
+
+** Visual C++ 7.1
+** Visual C++ 8
+** gcc 3.3.2
+** gcc 4.0.2 with Red Hat modifications
+** gcc 4.1.0 with Red Hat modifications
+** gcc 4.1.1 with Red Hat modifications
+** QNX gcc 3.3.5
+** Sun C++ 5.8
+
+* Building and Installing
+
+For building and installation instructions see docs/INSTALL.

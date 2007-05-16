@@ -120,9 +120,6 @@ WriteDataContainer::reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds)
 WriteDataContainer::register_instance(
                                       ::DDS::InstanceHandle_t&      instance_handle,
                                       DataSample*&                  registered_sample)
-                                      ACE_THROW_SPEC ((
-                                      CORBA::SystemException
-                                      ))
 {
   PublicationInstance* instance = NULL;
 
@@ -182,9 +179,6 @@ WriteDataContainer::unregister(
                                DataSample*&              registered_sample,
                                DataWriterImpl*           writer,
                                bool                      dup_registered_sample)
-                               ACE_THROW_SPEC ((
-                               CORBA::SystemException
-                               ))
 {
   PublicationInstance* instance = 0;
 
@@ -219,9 +213,6 @@ WriteDataContainer::dispose(
                             ::DDS::InstanceHandle_t       instance_handle,
                             DataSample*&                  registered_sample,
                             bool                          dup_registered_sample)
-                            ACE_THROW_SPEC ((
-                            CORBA::SystemException
-                            ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
@@ -468,7 +459,7 @@ WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by
 
   // If the transport initiates the data dropping, we need do same thing
   // as data_delivered. e.g. remove the sample from the internal list
-  // and the instance list. We do not need aquire the lock here since 
+  // and the instance list. We do not need aquire the lock here since
   // the data_delivered acquires the lock.
   if (dropped_by_transport)
   {
@@ -480,7 +471,7 @@ WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by
   //  this->lock_);
 
 
-  //Here, the data_dropped call results from the remove_sample, 
+  //Here, the data_dropped call results from the remove_sample,
   //hence it's called in the same thread that calls remove_sample
   //which is already guarded so we do not need acquire lock here.
 
@@ -884,8 +875,8 @@ WriteDataContainer::get_next_handle ()
 }
 
 
-void WriteDataContainer::copy_and_append (DataSampleList& list, 
-                                           const DataSampleList& appended, 
+void WriteDataContainer::copy_and_append (DataSampleList& list,
+                                           const DataSampleList& appended,
                                            const TAO::DCPS::ReaderIdSeq& rds)
  {
    CORBA::ULong num_rds = rds.length ();
@@ -894,8 +885,8 @@ void WriteDataContainer::copy_and_append (DataSampleList& list,
    DataSampleListElement* cur = appended.head_;
    while (cur)
    {
-     CORBA::ULong num_rds_left = num_rds; 
-    
+     CORBA::ULong num_rds_left = num_rds;
+ 
      for (CORBA::ULong i = 0; i < num_iters_per_sample; ++ i)
      {
        DataSampleListElement* element = 0;
@@ -913,7 +904,7 @@ void WriteDataContainer::copy_and_append (DataSampleList& list,
        num_rds_left -= element->num_subs_;
      }
 
-     cur = cur->next_send_sample_; 
+     cur = cur->next_send_sample_;
    }
  }
 

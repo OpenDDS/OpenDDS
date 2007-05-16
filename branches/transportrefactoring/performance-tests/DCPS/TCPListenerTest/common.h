@@ -33,9 +33,10 @@ long subscriber_delay_msec = 0;
 
 int num_datawriters = 1;
 int num_datareaders = 1;
+bool use_zero_copy_reads = true;
 unsigned id = 0;
 // largest positive value of a long is 2147483647
-CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED; 
+CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_SAMPLES = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_INSTANCES = ::DDS::LENGTH_UNLIMITED;
 
@@ -57,15 +58,15 @@ enum TransportInstanceId
 
 int init_reader_tranport ()
 {
-  reader_transport_impl 
+  reader_transport_impl
     = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config 
+  TAO::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->get_configuration (SUB_TRAFFIC);
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-      
+ 
   if (0 != ACE_OS::strcmp("default", reader_address_str) )
     {
       ACE_INET_Addr reader_address (reader_address_str);
@@ -86,15 +87,15 @@ int init_reader_tranport ()
 
 int init_writer_tranport ()
 {
-  writer_transport_impl 
+  writer_transport_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config 
+  TAO::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->get_configuration (PUB_TRAFFIC);
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-      
+ 
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);

@@ -7,7 +7,7 @@
 #include <ace/streams.h>
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
+const int num_messages = 5;
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -46,16 +46,6 @@ Writer::svc ()
 
   ::DDS::InstanceHandleSeq handles;
   try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
     MessageDataWriter_var message_dw
       = MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
@@ -90,9 +80,23 @@ Writer::svc ()
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+   << e << endl;
   }
 
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing. \n"));
+
+  // After send all samples, the datareader started and it should receive
+  // all samples since datawriter will resend it.
+  while (1)
+    {
+      writer_->get_matched_subscriptions(handles);
+      if (handles.length() > 0)
+        break;
+      else
+        ACE_OS::sleep(1);
+    }
+
+  // wait for datareader finish.
   while (1)
     {
       writer_->get_matched_subscriptions(handles);
@@ -101,6 +105,7 @@ Writer::svc ()
       else
         ACE_OS::sleep(1);
     }
+
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
   finished_instances_ ++;

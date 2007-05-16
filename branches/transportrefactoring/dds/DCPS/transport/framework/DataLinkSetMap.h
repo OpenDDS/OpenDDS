@@ -37,8 +37,8 @@ namespace TAO
         /// Will return nil (0) for failure.
         DataLinkSet* find_set(RepoId id);
 
-        DataLinkSet* find_set(RepoId id, 
-                              const RepoId* remoteIds, 
+        DataLinkSet* find_set(RepoId id,
+                              const RepoId* remoteIds,
                               const CORBA::ULong num_targets);
 
       // ciju: Called with TransportImpl Reservation lock held
@@ -56,14 +56,17 @@ namespace TAO
         /// the "remote map".
         ///
         /// For each remote_id in the array of remote_ids, this method
-        /// will cause the remote_id's DataLinkSet to be removed from
-        /// our map_, followed by informing the removed DataLinkSet
-        /// object to release the remote_id from each of the set's DataLinks.
-        /// The DataLinks will update the released_locals as it successfully
+        /// will cause the remote_id/local_id DataLink be removed from
+        /// remote_id's DataLinkSet if the remote_id/local_id is the
+        /// last association in the DataLink, followed by informing the
+        /// remote_id/local_id DataLink to release the remote_id/local_id.
+        /// The DataLink will update the released_locals as it successfully
         /// handles its release_reservation() requests.
         void release_reservations(ssize_t         num_remote_ids,
                                   const RepoId*   remote_ids,
-                                  DataLinkSetMap& released_locals);
+                                  const RepoId    local_id,
+                                  DataLinkSetMap& released_locals,
+                                  const bool pub_side);
 
       // ciju: Called with TransportImpl Reservation lock held
         /// Called when the TransportInterface is detaching from the

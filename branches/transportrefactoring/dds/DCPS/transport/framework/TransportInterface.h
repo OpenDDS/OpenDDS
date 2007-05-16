@@ -28,8 +28,8 @@ namespace TAO
 
 
     /**
-     * This class provides the methods that the DSPS components use to call 
-     * into the Transport layer. This is the main mechanism by which the 
+     * This class provides the methods that the DSPS components use to call
+     * into the Transport layer. This is the main mechanism by which the
      * application sends data to subscriptions and manages associations between
      * publications and subscriptions in the service.
      */
@@ -48,7 +48,7 @@ namespace TAO
         int swap_bytes() const;
 
         /// These methods are made public for the need of datawriter,
-        /// but they are just for internal use. 
+        /// but they are just for internal use.
 
         /// Send the control message to remote subscribers through the
         /// appropriate DataLink(s).
@@ -110,7 +110,10 @@ namespace TAO
         ///
         /// Conversely, Publishers will supply an array of subscriber ids,
         /// and view this as a call to "remove subscriptions".
-        void remove_associations(ssize_t size, const RepoId* remote_ids);
+        void remove_associations(ssize_t       size,
+                                 const RepoId* remote_ids,
+                                 const RepoId  local_id,
+                                 const bool pub_side);
 
         /// Send samples to remote subscribers through the appropriate
         /// DataLink(s).
@@ -175,12 +178,12 @@ namespace TAO
         TransportImpl_rch impl_;
 
         /// Note: Not protected by any lock.
-        /// The (cached) connection information (blob) obtained  
+        /// The (cached) connection information (blob) obtained
         /// from the TransportImpl during attach_transport().
         TransportInterfaceInfo connection_info_;
 
         /// Note: Not protected by any lock.
-        /// The (cached) swap bytes configuration value obtained  
+        /// The (cached) swap bytes configuration value obtained
         /// from the TransportImpl during attach_transport().
         int swap_bytes_;
 

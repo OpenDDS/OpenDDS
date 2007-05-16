@@ -40,6 +40,7 @@ int parse_args (int argc, char *argv[])
   while (arg_shifter.is_anything_left ())
   {
     // options:
+    // -c <0/1> 1 = copy data 0 = uze zero-copy reads
     // -p  <num data writers>
     // -n  <num samples>
     // -d  <data size>
@@ -55,6 +56,11 @@ int parse_args (int argc, char *argv[])
     if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    {
+      use_zero_copy_reads = ! ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
@@ -323,7 +329,8 @@ int main (int argc, char *argv[])
         new DataReaderListenerImpl(num_datawriters,
                                    NUM_SAMPLES,
                                    DATA_SIZE,
-                                   RECVS_BTWN_READS);
+                                   RECVS_BTWN_READS,
+                                   use_zero_copy_reads);
 
       PortableServer::ServantBase_var safe_servant = dr_listener_impl;
 

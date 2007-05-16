@@ -41,9 +41,7 @@ add_stats (
     )
 {
   data = data / (ACE_hrtime_t) 1000;
-    //std::cout << data << std::endl;
-    // make the above compile under VC++ v6.0
-    std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data)) 
+    std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
               << std::endl;
 
     stats.average = (stats.count * stats.average + data)/(stats.count + 1);
@@ -75,7 +73,7 @@ std_dev (stats_type& stats)
   if (stats.count >=2)
   {
     return sqrt ((static_cast<double>(stats.count) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum2) -
-                  ACE_UINT64_DBLCAST_ADAPTER (stats.sum) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum)) / 
+                  ACE_UINT64_DBLCAST_ADAPTER (stats.sum) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum)) /
                 (static_cast<double>(stats.count) * static_cast<double>(stats.count - 1)));
   }
   return 0.0;
@@ -102,10 +100,11 @@ AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long size)
    handle_ (),
    size_ (size),
    sample_num_(1),
-   done_ (0)
+   done_ (0),
+   use_zero_copy_(false)
 {
   //
-  // init timing statistics 
+  // init timing statistics
   //
   init_stats (round_trip, "round_trip");
 
@@ -117,12 +116,14 @@ AckDataReaderListenerImpl::~AckDataReaderListenerImpl ()
 }
 
 void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
-                                    DDS::DataWriter_ptr dw)
+                                    DDS::DataWriter_ptr dw,
+                                    bool use_zero_copy_read)
 {
   this->writer_ = DDS::DataWriter::_duplicate (dw);
   this->reader_ = DDS::DataReader::_duplicate (dr);
+  use_zero_copy_ = use_zero_copy_read;
 
-  AckMessageDataReader_var ackmessage_dr = 
+  AckMessageDataReader_var ackmessage_dr =
     AckMessageDataReader::_narrow(this->reader_.in());
   this->dr_servant_ =
     ::TAO::DCPS::reference_to_servant< AckMessageDataReaderImpl,
@@ -141,14 +142,36 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
 void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {
-    static DDSPerfTest::AckMessage message;
-    static DDS::SampleInfo si;
-    DDS::ReturnCode_t status = this->dr_servant_->take_next_sample(message, si) ;
+    CORBA::Long sequence_number;
+    DDS::ReturnCode_t status;
 
-    timer_.stop();
+    if (use_zero_copy_)
+    {
+      ::CORBA::Long max_read_samples = 1;
+      AckMessageZCSeq messageZC(0, max_read_samples);
+      ::TAO::DCPS::SampleInfoZCSeq siZC(0, max_read_samples);
+      status = this->dr_servant_->read(messageZC,
+                                       siZC,
+                                       max_read_samples,
+                                       ::DDS::NOT_READ_SAMPLE_STATE,
+                                       ::DDS::ANY_VIEW_STATE,
+                                       ::DDS::ANY_INSTANCE_STATE);
 
-    CORBA::Long sequence_number = message.seqnum;
+      timer_.stop();
 
+      sequence_number = messageZC[0].seqnum;
+      status = this->dr_servant_->return_loan(messageZC, siZC);
+    }
+    else
+    {
+      static DDSPerfTest::AckMessage message;
+      static DDS::SampleInfo si;
+      status = this->dr_servant_->take_next_sample(message, si) ;
+
+      timer_.stop();
+
+      sequence_number = message.seqnum;
+    }
 
     if (status == DDS::RETCODE_OK) {
 //      cout << "AckMessage: seqnum    = " << message.seqnum << endl;
@@ -160,7 +183,7 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 
     if (sequence_number != this->sample_num_)
     {
-      fprintf(stderr, 
+      fprintf(stderr,
               "ERROR - TAO_Pub: recieved seqnum %d on %d\n",
               sequence_number, this->sample_num_);
 
@@ -204,17 +227,17 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       this->done_ = 1;
       return;
     }
-    
+ 
     this->sample_num_++;
-    
+ 
     DDSPerfTest::PubMessage msg;
     msg.seqnum = this->sample_num_;
 
     timer_.reset();
     timer_.start();
     this->dw_servant_->write (msg, this->handle_);
-    
-    return;    
+ 
+    return;
 }
 
 void AckDataReaderListenerImpl::on_requested_deadline_missed (

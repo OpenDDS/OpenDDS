@@ -15,7 +15,7 @@ typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
 typedef TAO::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
 
 void
-TAO::DCPS::ReliableMulticast::detail::PacketHandler::send(
+TAO::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
   const Packet& packet,
   const ACE_INET_Addr& dest
   )
@@ -45,5 +45,5 @@ TAO::DCPS::ReliableMulticast::detail::PacketHandler::receive(
   Packet packet;
 
   packetSerializer.serializeFromTo(buffer, size, packet);
-  receive(packet, peer);
+  receive_packet_from(packet, peer);
 }
