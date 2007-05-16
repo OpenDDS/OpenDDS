@@ -38,27 +38,7 @@ namespace TAO
       virtual int svc();
       //@}
 
-      TransportAPI::Status connect(TransportAPI::BLOB* endpoint);
-      TransportAPI::Status disconnect();
-
-      TransportAPI::Status send(ACE_Message_Block& mb);
-
-      virtual void connected(const TransportAPI::Id& requestId);
-      virtual void disconnected(const TransportAPI::failure_reason& reason);
-
-      virtual void sendSucceeded(const TransportAPI::Id& requestId);
-      virtual void sendFailed(const TransportAPI::failure_reason& reason);
-      virtual void backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason);
-      virtual void received(const iovec buffers[], size_t iovecSize);
-
-    private:
-      typedef ACE_Guard<ACE_Thread_Mutex> Guard;
-      struct IOItem;
-
-      bool enqueue(const Guard&, ACE_Message_Block& mb, const TransportAPI::Id& requestId);
-      bool trySending(IOItem& item, bool locked = true);
-      TransportAPI::Id getNextRequestId(const Guard&);
-
+      // Public for testing
       struct IOItem
       {
         IOItem();
@@ -85,6 +65,40 @@ namespace TAO
         bool ending_;
       };
 
+      bool performWork(
+        ACE_Thread_Mutex& extLock,
+        ACE_Condition<ACE_Thread_Mutex>& extCondition,
+        bool& extShutdown,
+        std::queue<IOItem>& extQueue,
+        bool& extConnected,
+        bool& extBackpressure,
+        bool& extRunning
+        );
+
+      TransportAPI::Status connect(TransportAPI::BLOB* endpoint);
+      TransportAPI::Status disconnect();
+
+      TransportAPI::Status send(ACE_Message_Block& mb);
+
+      virtual void connected(const TransportAPI::Id& requestId);
+      virtual void disconnected(const TransportAPI::failure_reason& reason);
+
+      virtual void sendSucceeded(const TransportAPI::Id& requestId);
+      virtual void sendFailed(const TransportAPI::failure_reason& reason);
+      virtual void backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason);
+      virtual void received(const iovec buffers[], size_t iovecSize);
+
+    private:
+      typedef ACE_Guard<ACE_Thread_Mutex> Guard;
+
+      bool deliver(
+        const Guard&,
+        ACE_Message_Block& mb,
+        const TransportAPI::Id& requestId
+        );
+      bool trySending(IOItem& item, bool locked = true);
+      TransportAPI::Id getNextRequestId(const Guard&);
+
       TransportAPI::Transport::Link& link_;
       size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;
@@ -101,6 +115,8 @@ namespace TAO
       TransportAPI::Status deferredConnectionStatus_;
       TransportAPI::Status deferredStatus_;
       std::queue<IOItem> queue_;
+      std::vector<IOItem> bufferedData_;
+      std::pair<TransportAPI::Id, size_t> lastReceived_;
     };
 
   } /* namespace DCPS */

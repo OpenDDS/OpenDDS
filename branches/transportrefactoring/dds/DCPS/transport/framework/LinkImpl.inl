@@ -83,6 +83,7 @@ TAO::DCPS::LinkImpl::LinkImpl(
   , deferred_(false)
   , deferredConnectionStatus_(TransportAPI::make_failure())
   , deferredStatus_(TransportAPI::make_failure())
+  , lastReceived_(std::make_pair(0, 0))
 {
   link_.setCallback(this);
 }
