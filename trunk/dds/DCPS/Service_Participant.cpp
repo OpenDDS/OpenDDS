@@ -350,7 +350,7 @@ namespace TAO
 
           if ((currentArg = arg_shifter.get_the_parameter("-DCPSDebugLevel")) != 0)
             {
-              DCPS_debug_level = ACE_OS::atoi (currentArg);
+              set_DCPS_debug_level (ACE_OS::atoi (currentArg));
               arg_shifter.consume_arg ();
               got_debug_level = true;
             }
