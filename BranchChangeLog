@@ -1,3 +1,11 @@
+Wed May 16 16:09:11 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          More refactoring, logic, and fixed a Win32 build error.
+
 Tue May 15 14:38:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.inl:

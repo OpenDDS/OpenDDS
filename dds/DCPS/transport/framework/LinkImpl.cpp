@@ -67,54 +67,78 @@ TAO::DCPS::LinkImpl::svc()
     Guard guard(lock_);
     threadId_ = ACE_OS::thr_self();
   }
-  while (true)
+  bool ok = true;
+  while (ok)
   {
-    bool shutdown = false;
-    bool queueEmpty = true;
-    bool connected = false;
-    bool backpressure = true;
-    {
-      Guard guard(lock_);
-      while (!shutdown_ && queue_.empty() && !connected_ && backpressure_)
-      {
-        condition_.wait();
-      }
-      shutdown = shutdown_;
-      queueEmpty = queue_.empty();
-      connected = connected_;
-      backpressure = backpressure_;
-    }
-    if (shutdown)
-    {
-      running_ = false;
-      return 0;
-    }
-    bool extract = true;
-    IOItem entry;
-    while (!queueEmpty && connected && !backpressure)
-    {
-      // Try to send the head of the queue
-      // If we get immediate success as the return value, then remove it and
-      // try the next element.
-      {
-        Guard guard(lock_);
-        if (extract)
-        {
-          queue_.pop();
-          entry = queue_.front();
-          extract = false;
-        }
-        queueEmpty = queue_.empty();
-        connected = connected_;
-        backpressure = backpressure_;
-      }
-      if (!queueEmpty && connected && !backpressure)
-      {
-        extract = trySending(entry, false);
-      }
-    }
+    ok = performWork(
+      lock_,
+      condition_,
+      shutdown_,
+      queue_,
+      connected_,
+      backpressure_,
+      running_
+      );
   }
   return 0;
+}
+
+bool
+TAO::DCPS::LinkImpl::performWork(
+  ACE_Thread_Mutex& extLock,
+  ACE_Condition<ACE_Thread_Mutex>& extCondition,
+  bool& extShutdown,
+  std::queue<IOItem>& extQueue,
+  bool& extConnected,
+  bool& extBackpressure,
+  bool& extRunning
+  )
+{
+  bool shutdown = false;
+  bool queueEmpty = true;
+  bool connected = false;
+  bool backpressure = true;
+  {
+    Guard guard(extLock);
+    while (!extShutdown && extQueue.empty() && !extConnected && extBackpressure)
+    {
+      extCondition.wait();
+    }
+    shutdown = extShutdown;
+    queueEmpty = extQueue.empty();
+    connected = extConnected;
+    backpressure = extBackpressure;
+  }
+  if (shutdown)
+  {
+    extRunning = false;
+    return false;
+  }
+  bool extract = true;
+  IOItem entry;
+  while (!queueEmpty && connected && !backpressure)
+  {
+    // Try to send the head of the queue
+    // If we get immediate success as the return value, then remove it and
+    // try the next element.
+    {
+      Guard guard(extLock);
+      if (extract)
+      {
+        extQueue.pop();
+        entry = extQueue.front();
+        extract = false;
+      }
+      queueEmpty = extQueue.empty();
+      connected = extConnected;
+      backpressure = extBackpressure;
+    }
+    if (!queueEmpty && connected && !backpressure)
+    {
+      extract = trySending(entry, false);
+    }
+  }
+  return true;
 }
 
 TransportAPI::Status
@@ -176,9 +200,9 @@ TAO::DCPS::LinkImpl::send(
   Guard guard(lock_);
   TransportAPI::Id requestId(getNextRequestId(guard));
   ACE_Message_Block copy(mb, 0);
-  if (!enqueue(guard, copy, requestId))
+  if (!deliver(guard, copy, requestId))
   {
-    // Error enqueueing request
+    // Error delivering request
   }
   return TransportAPI::make_success();
 }
@@ -239,11 +263,133 @@ TAO::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const Transport
   condition_.signal();
 }
 
+namespace
+{
+  void addToAMB(
+    void* buffer,
+    size_t bufferSize,
+    ACE_Message_Block& mb
+    )
+  {
+    std::copy(
+      reinterpret_cast<char*>(buffer),
+      reinterpret_cast<char*>(buffer) + bufferSize,
+      mb.wr_ptr()
+      );
+    mb.wr_ptr(bufferSize);
+  }
+
+  void iovecToAMB(
+    const iovec buffers[],
+    size_t iovecSize,
+    ACE_Message_Block& mb
+    )
+  {
+    for (size_t idx = 0; idx != iovecSize; ++idx)
+    {
+      addToAMB(buffers[idx].iov_base, buffers[idx].iov_len, mb);
+    }
+  }
+
+  size_t getTotalSize(
+    const iovec buffers[],
+    size_t iovecSize
+    )
+  {
+    size_t totalSize = 0;
+    for (size_t idx = 0; idx != iovecSize; ++idx)
+    {
+      totalSize += buffers[idx].iov_len;
+    }
+    return totalSize;
+  }
+}
+
 void
 TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 {
   Guard guard(lock_);
-  ACE_Message_Block mb;
+  ACE_Message_Block mb(getTotalSize(buffers, iovecSize));
+  iovecToAMB(buffers, iovecSize, mb);
+  char* buffer = mb.rd_ptr();
+
+  TransportAPI::Id requestId =
+    buffer[0] << 24 +
+    buffer[1] << 16 +
+    buffer[2] << 8 +
+    buffer[3];
+
+  size_t sequenceNumber =
+    buffer[4] << 24 +
+    buffer[5] << 16 +
+    buffer[6] << 8 +
+    buffer[7];
+
+  bool beginning = (buffer[8] != 0);
+  bool ending = (buffer[9] != 0);
+
+  mb.rd_ptr(10);
+
+  IOItem item(
+    mb,
+    mb.rd_ptr(),
+    mb.length(),
+    requestId,
+    sequenceNumber,
+    beginning,
+    ending
+    );
+
+  if (
+    (requestId == lastReceived_.first) &&
+    (sequenceNumber == lastReceived_.second + 1)
+    )
+  {
+    if (ending)
+    {
+      // TBD Deliver
+      bufferedData_.clear();
+    }
+    else
+    {
+      bufferedData_.push_back(item);
+    }
+    lastReceived_ = std::make_pair(requestId, sequenceNumber);
+  }
+  else
+  {
+    bufferedData_.clear();
+    if (beginning)
+    {
+      if (ending)
+      {
+        // TBD Deliver
+      }
+      else
+      {
+        bufferedData_.push_back(item);
+      }
+      lastReceived_ = std::make_pair(requestId, sequenceNumber);
+    }
+  }
+  // Read header
+  // If block is last block + 1
+  //   If block is end of block
+  //     Deliver all buffered blocks and the latest
+  //     Clear cache
+  //   Else
+  //     Buffer block
+  //   End If
+  // Else
+  //   Clear cache
+  //   If block is beginning
+  //     If block is ending
+  //       Deliver block
+  //     Else
+  //       Buffer block
+  //     End If
+  //   End If
+  // End If
 }
 
 TransportAPI::Id
@@ -255,7 +401,7 @@ TAO::DCPS::LinkImpl::getNextRequestId(
 }
 
 bool
-TAO::DCPS::LinkImpl::enqueue(
+TAO::DCPS::LinkImpl::deliver(
   const Guard&,
   ACE_Message_Block& mb,
   const TransportAPI::Id& requestId
@@ -319,7 +465,7 @@ TAO::DCPS::LinkImpl::trySending(
   buffer[8] = (item.beginning_ ? 1 : 0);
   buffer[9] = (item.ending_ ? 1 : 0);
 
-  iovs[0].iov_base = buffer; // TBD: Marshal a simple header into a buffer
+  iovs[0].iov_base = reinterpret_cast<char*>(buffer); // TBD: Marshal a simple header into a buffer
   iovs[0].iov_len = sizeof(buffer);
   iovs[1].iov_base = item.data_begin_;
   iovs[1].iov_len = item.data_size_;
