@@ -1,7 +1,23 @@
+Thu May 17 18:17:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * ChangeLog:
+
+          Fixed a reference to the previous ChangeLog.
+
+        * DDS_info.txt:
+
+          Added an example of using -DCPSInfoRepo.
+
+        * DDS_release_notes.txt:
+        * README:
+        
+          Corrected spelling errors.
+
 Thu May 17 18:16:18 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
-	  Add note regards reliable multicast default configuration
+        
+          Add note regards reliable multicast default configuration
           status.
 
 Thu May 17 15:28:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
@@ -8276,7 +8292,7 @@ Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
                        ACE_wrappers\bin\DCPS
           were moved over.
 
-          See the ACE_wrappers\TAO\Changeklog_dds_branch
+          See the ocitao/ACE_wrappers/TAO/Changelog_dds_branch
           on the AAC-DDS-1_4_3_branch branch
           in cvs.ociweb.com:/cvs for the original
           developement history.

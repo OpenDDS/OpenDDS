@@ -50,7 +50,7 @@ New to this version are the following changes:
   the default read/take implementation.
 
   Performance note: Testing has shown that samples of size 8KB or
-  less do not benifit from using zero-copy reads but there is no
+  less do not benefit from using zero-copy reads but there is no
   negative impact on performance when using zero-copy reads for
   smaller sized samples.
 
@@ -221,7 +221,7 @@ New to this version are the following changes:
 
 --- status of nightly build tests ---
 
-    - The builtin topic tests failure are expected since the builtin topic was not
+    - The built-in topic tests failure are expected since the builtin topic was not
       supported and tested.
 
     - tests failed intermittently
@@ -359,7 +359,7 @@ New to this version are the following changes:
 
   - Fixed a problem that add_association() failed when multiple
     publishers/subscribers start simultaneously. Added a lock
-    to pretect the internal map in DataLinkSetMap to fix the
+    to protect the internal map in DataLinkSetMap to fix the
     problem.
 
 --- more notes and limitations ---
@@ -440,3 +440,4 @@ TAO's DDS implementation consists of the following:
 * Functional tests in $DDS_ROOT/tests
 
 * Performance tests in $DDS_ROOT/performance-tests
+
