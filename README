@@ -4,7 +4,7 @@ Real-time Systems". TAO DDS is built on the ACE
 (http://www.theaceorb.com/product/aboutace.html) abstraction layer to
 provide platform portability. TAO DDS also leverages capabilities of
 TAO (http://www.theaceorb.com/), such as its IDL compiler and as the
-basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+basis of the TAO DDS DCPS Information Repository (DCPSInfoRepo).
  
 The primary development of TAO DDS was done by the ACE/TAO development
 team at Object Computing, Incorporated (http://www.ociweb.com) in
@@ -35,7 +35,7 @@ OCI strives to make TAO DDS as bug free as possible. If you encounter
 any problems with this release please fill out the PROBLEM-REPORT-FORM
 file found in this directory and send to support@ociweb.com.
 
-If you desire responsive commerical support for OCI on any problems
+If you desire responsive commercial support for OCI on any problems
 you encounter, we strongly recommend that you set up an account before
 you actually need help. There is no cost to establish a normal
 account.  Support charges only apply to work actually delivered.
@@ -412,5 +412,6 @@ tests/DCPS/Reconnect/run_test.pl bp_timeout
 tests/DCPS/sub_init_loop/run_test.pl
 
 All three of these were disabled for the prior (0.11) release.  These tests are
-for unusal (but not unexpected) situtations where applications crash and then
+for unusual (but not unexpected) situations where applications crash and then
 subsequently restart.
+
