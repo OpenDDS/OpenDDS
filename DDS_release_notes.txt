@@ -21,8 +21,10 @@ New to this version are the following changes:
 
 - The reliable multicast transport was added.  See the DDS developers guide
   for details.
-  NOTE: The reliable multicast unlike the unreliable multicast transport
-  	currently doesn't provide a default configuration.
+  NOTE: The reliable multicast (unlike the unreliable multicast) transport
+  	currently doesn't provide a default configuration.  The use of the
+        transport IDs TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID and
+        TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID is unsupported.
 
 - Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
 
@@ -414,9 +416,6 @@ New to this version are the following changes:
 =========================================================================
 
 This is the first release of a Data Distribution Service (DDS).
-
-Point of contact: Scott Harris     harris_s@ociweb.com
-                  Paul Calabrese   calabrese_p@ociweb.com
 
 See the User's Guide for an user introduction to the service.
 

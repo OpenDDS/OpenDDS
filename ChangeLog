@@ -1,3 +1,10 @@
+Thu May 17 18:40:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Minor claifications and removed contact info (email addrs) since it's
+          now in README.
+
 Thu May 17 18:17:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * ChangeLog:
@@ -10,13 +17,13 @@ Thu May 17 18:17:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * DDS_release_notes.txt:
         * README:
-        
+
           Corrected spelling errors.
 
 Thu May 17 18:16:18 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
-        
+
           Add note regards reliable multicast default configuration
           status.
 
