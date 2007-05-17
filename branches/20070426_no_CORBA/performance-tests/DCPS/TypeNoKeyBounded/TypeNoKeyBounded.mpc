@@ -4,7 +4,8 @@ project(DCPS_Perf*) : dcps, portableserver {
   dynamicflags = PTTYPELIB_BUILD_DLL
   pch_header   =
   pch_source   =
-  dcps_ts_flags += --export=PTTypeLib_Export --module=Mine
+  dcps_ts_flags += --export=PTTypeLib_Export 
+// --module=Mine
 
   TypeSupport_Files {
     PTDef.idl >> Pt128TypeSupport.idl Pt128TypeSupportImpl.h Pt128TypeSupportImpl.cpp Pt2048TypeSupport.idl Pt2048TypeSupportImpl.h Pt2048TypeSupportImpl.cpp Pt512TypeSupport.idl Pt512TypeSupportImpl.h Pt512TypeSupportImpl.cpp Pt8192TypeSupport.idl Pt8192TypeSupportImpl.h Pt8192TypeSupportImpl.cpp
