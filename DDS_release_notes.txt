@@ -21,6 +21,8 @@ New to this version are the following changes:
 
 - The reliable multicast transport was added.  See the DDS developers guide
   for details.
+  NOTE: The reliable multicast unlike the unreliable multicast transport
+  	currently doesn't provide a default configuration.
 
 - Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
 
