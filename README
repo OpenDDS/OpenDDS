@@ -7,8 +7,8 @@ TAO (http://www.theaceorb.com/), such as its IDL compiler and as the
 basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
  
 The primary development of TAO DDS was done by the ACE/TAO development
-team at Object Computing, Incorporated (http://www.ociweb.com) in St
-Louis and Phoenix. It is released under the same generous license
+team at Object Computing, Incorporated (http://www.ociweb.com) in
+St. Louis and Phoenix. It is released under the same generous license
 terms as ACE, TAO and MPC.
 
 This directory structure contains TAO DDS 0.12.
@@ -403,18 +403,14 @@ all of the base types in the complex type are specified.
 ======================================================================
 * Test Failures
 
-Note: A list of test that are run in the nightly automated build/test
+Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
-      The nightly automated build/test is run on a Windows XP with
-      VC++ 7.1, Red Hat Linux v9 with gcc and Solaris/x86 with gcc.
 
-* DCPS/BuiltInTopic/run_test.pl <all>
-  Occasionally fails.  This is due to BIT limitations given above.
+The following tests currently fail on a significant percentage of builds:
+tests/DCPS/Reconnect/run_test.pl restart_pub
+tests/DCPS/Reconnect/run_test.pl bp_timeout
+tests/DCPS/sub_init_loop/run_test.pl
 
-* TAO/orbsvcs/tests/DDS/DCPS/FooTest3_0/run_test.pl resume
-  Occasionally fails on Solaris box but passes on Linux and Windows.
-  I believe it is a test related timing issue.
-
-* TAO/orbsvcs/tests/DDS/DCPS/FooTest5/run_test.pl blocking
-  Occasionally cores while shutting down on Solaris box
-  but passes on Linux and Windows.
+All three of these were disabled for the prior (0.11) release.  These tests are
+for unusal (but not unexpected) situtations where applications crash and then
+subsequently restart.
