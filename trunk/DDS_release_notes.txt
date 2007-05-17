@@ -2,11 +2,16 @@ Version 0.12 of TAO DDS.
 
 New to this version are the following changes:
 
-- Fixed a bug on registration sample marshalling when data type has 
+- DCPSInfoRepo service now has a file based persistence mechanism. This
+  can be configured to actively persist the InfoRepo's current state
+  and in cause of a fatal failure to resurrect the same into the
+  saved state.
+
+- Fixed a bug on registration sample marshalling when data type has
   unbounded size and registers with variable size data. The problem is
-  the serialization buffer does not allocate enough memory for the 
+  the serialization buffer does not allocate enough memory for the
   registered sample.
-  
+
 - It is now possible to build DDS without Built-In-Topic (BIT) support in order
   to reduce the footprint of DDS.
     # Generate the makefiles/projects like:
@@ -20,24 +25,24 @@ New to this version are the following changes:
 - Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
 
 - Support for Built-In-Topics and the TRANSIENT_LOCAL value for DURABILITY QoS
-  is now complete.  This means that BITs will now work as specified. 
+  is now complete.  This means that BITs will now work as specified.
 
 - Implemented support for zero-copy read.
-  
+
   Per the spec, when the sequences given to read/take have max_len = 0
   the samples are not copied but are loaned to the application.
-  
+
   Each data type has a <type>Seq and a <type>ZCSeq sequence.
   The <type>ZCSeq supports zero-copy reads but the <type>Seq does not.
-  
+
   The default <type>ZCSeq constructor enables zero-copy read/take.
   The first parameter of the constructor defines the max_len.
   If max_len == 0 then zero-copy reading/taking is enabled.
   If max_len > 0 then single-copy reading/taking is enabled.
   See dds/DCPS/ZeroCopySeq_T.h for more details.
-  
+
   In the next release there will be just one data sequence type
-  per DDS type, <type>Seq, that supports single-copy and 
+  per DDS type, <type>Seq, that supports single-copy and
   zero-copy reads (like <type>ZCSeq).  This will simplify the
   implementation of application code and make zero-copy read
   the default read/take implementation.
@@ -46,11 +51,11 @@ New to this version are the following changes:
   less do not benifit from using zero-copy reads but there is no
   negative impact on performance when using zero-copy reads for
   smaller sized samples.
-  
+
   Note: zero-copy read is supported by the read and take methods but
   it should also be supported by the read_instance and take_instance
   methods.  This will be fixed in the next release.
-  
+
 =========================================================================
 
 Version 0.11 of TAO DDS.
