@@ -7,6 +7,8 @@
 #include "ace/Synch.h"
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "TestStats.h"
+#include "tao/LocalObject.h"
+
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -14,11 +16,17 @@
 
 
 //Class DataReaderListenerImpl
-class DataReaderListenerImpl
-: public virtual POA_DDS::DataReaderListener,
-  public virtual PortableServer::RefCountServantBase
-{
+	class DataReaderListenerImpl
+	: public virtual DDS::DataReaderListener,
+      public virtual TAO_Local_RefCounted_Object
+	{
 public:
+      // to support servant_to_reference for local interface
+      typedef DDS::DataReaderListener::_ptr_type _ptr_type;
+      // to support servant_to_reference for local interface
+      static  DDS::DataReaderListener::_ptr_type _narrow (::CORBA::Object_ptr obj)
+        { return DDS::DataReaderListener::_narrow(obj); };
+
   //Constructor
   DataReaderListenerImpl (int num_publishers,
                           int num_samples,

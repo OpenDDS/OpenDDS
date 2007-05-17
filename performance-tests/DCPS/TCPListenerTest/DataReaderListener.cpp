@@ -263,118 +263,53 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 {
   int num_read = 0;
 
-#ifndef WITH_ZERO_COPY_ONLY
-  if (use_zero_copy_reads_) {
-#endif
     switch ( num_floats_per_sample_ )
     {
 
     case 128:
         {
-        num_read = read < ::Mine::Pt128ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt128DataReader,
-                        ::Mine::Pt128DataReader_ptr,
-                        ::Mine::Pt128DataReader_var,
-                        ::Mine::Pt128DataReaderImpl>
+        num_read = read < ::Xyz::Pt128Seq,
+                          ::DDS::SampleInfoSeq,
+                        ::Xyz::Pt128DataReader,
+                        ::Xyz::Pt128DataReader_ptr,
+                        ::Xyz::Pt128DataReader_var,
+                        ::Xyz::Pt128DataReaderImpl>
                             (reader, use_zero_copy_reads_);
         }
         break;
 
     case 512:
         {
-        num_read = read < ::Mine::Pt512ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt512DataReader,
-                        ::Mine::Pt512DataReader_ptr,
-                        ::Mine::Pt512DataReader_var,
-                        ::Mine::Pt512DataReaderImpl>
+        num_read = read < ::Xyz::Pt512Seq,
+                          ::DDS::SampleInfoSeq,
+                        ::Xyz::Pt512DataReader,
+                        ::Xyz::Pt512DataReader_ptr,
+                        ::Xyz::Pt512DataReader_var,
+                        ::Xyz::Pt512DataReaderImpl>
                             (reader, use_zero_copy_reads_);
         }
         break;
 
     case 2048:
         {
-        num_read = read < ::Mine::Pt2048ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt2048DataReader,
-                        ::Mine::Pt2048DataReader_ptr,
-                        ::Mine::Pt2048DataReader_var,
-                        ::Mine::Pt2048DataReaderImpl>
+        num_read = read < ::Xyz::Pt2048Seq,
+                          ::DDS::SampleInfoSeq,
+                        ::Xyz::Pt2048DataReader,
+                        ::Xyz::Pt2048DataReader_ptr,
+                        ::Xyz::Pt2048DataReader_var,
+                        ::Xyz::Pt2048DataReaderImpl>
                             (reader, use_zero_copy_reads_);
         }
         break;
 
     case 8192:
         {
-        num_read = read < ::Mine::Pt8192ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt8192DataReader,
-                        ::Mine::Pt8192DataReader_ptr,
-                        ::Mine::Pt8192DataReader_var,
-                        ::Mine::Pt8192DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    default:
-        ACE_ERROR((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
-        return 0;
-        break;
-    };
-
-#ifndef WITH_ZERO_COPY_ONLY
-  }
-  else {
-
-
-    switch ( num_floats_per_sample_ )
-    {
-
-    case 128:
-        {
-        num_read = read < ::Mine::Pt128Seq,
+        num_read = read < ::Xyz::Pt8192Seq,
                           ::DDS::SampleInfoSeq,
-                        ::Mine::Pt128DataReader,
-                        ::Mine::Pt128DataReader_ptr,
-                        ::Mine::Pt128DataReader_var,
-                        ::Mine::Pt128DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 512:
-        {
-        num_read = read < ::Mine::Pt512Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt512DataReader,
-                        ::Mine::Pt512DataReader_ptr,
-                        ::Mine::Pt512DataReader_var,
-                        ::Mine::Pt512DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 2048:
-        {
-        num_read = read < ::Mine::Pt2048Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt2048DataReader,
-                        ::Mine::Pt2048DataReader_ptr,
-                        ::Mine::Pt2048DataReader_var,
-                        ::Mine::Pt2048DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 8192:
-        {
-        num_read = read < ::Mine::Pt8192Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt8192DataReader,
-                        ::Mine::Pt8192DataReader_ptr,
-                        ::Mine::Pt8192DataReader_var,
-                        ::Mine::Pt8192DataReaderImpl>
+                        ::Xyz::Pt8192DataReader,
+                        ::Xyz::Pt8192DataReader_ptr,
+                        ::Xyz::Pt8192DataReader_var,
+                        ::Xyz::Pt8192DataReaderImpl>
                             (reader, use_zero_copy_reads_);
         }
         break;
@@ -384,9 +319,6 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
         return 0;
         break;
   };
-
-  }
-#endif
 
   stats_.samples_received(num_read);
 
