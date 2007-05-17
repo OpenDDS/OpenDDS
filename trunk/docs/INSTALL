@@ -22,8 +22,7 @@ BUILDING DDS
 
   2 Set the environment variables.
 
-    Set DDS_ROOT to the location of the DDS checkout.  The default
-    value for DDS_ROOT is $TAO_ROOT/DDS
+    Set DDS_ROOT to the location of the DDS checkout.
 
     Add $DDS_ROOT/bin to the PATH (on, windows add %DDS_ROOT%\bin)
 
@@ -46,16 +45,6 @@ BUILDING DDS
       perl %ACE_ROOT%\bin\mwc.pl -type [InsertCompilerType] DDS.mwc
         "CompilerTypes" tested include vc71, vc8, and nmake
 
-     Note: If you are using one of the following versions of TAO
-        OCI TAO 1.4a_p15 or earlier
-        OCI TAO 1.5a_p0
-        DOC group 1.5.7 or earlier
-     You will need to add the following arguments to mwc.pl:
-        Unix:
-                -include $DDS_ROOT/MPC/config-legacy
-        Windows:
-                -include %DDS_ROOT%\MPC\config-legacy
-
 
   4 Build
 
@@ -63,7 +52,7 @@ BUILDING DDS
     make
 
     On Windows:
-    load the DDS solution (or workspace) into the compiler and
+    load the DDS solution (or workspace) into visual studio and
     build all.
 
 
