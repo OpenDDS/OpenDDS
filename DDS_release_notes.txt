@@ -19,6 +19,11 @@ New to this version are the following changes:
   Also, if <yourtype> happens to be gnuace, add "built_in_topics=0" to the
   platform_macros.GNU file or the MAKEFLAGS environment variable.
 
+  If you are building against TAO 1.5a (patch level "0") and are NOT disabling
+  the built_in_topics, you will need to add "built_in_topics=1" to the
+  platform_macros.GNU file or the MAKEFLAGS environemnt variable since the
+  inclusion of rules.dds.GNU does not work with that version of ACE+TAO.
+
 - The reliable multicast transport was added.  See the DDS developers guide
   for details.
   NOTE: The reliable multicast (unlike the unreliable multicast) transport

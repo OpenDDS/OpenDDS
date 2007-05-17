@@ -1,3 +1,10 @@
+Thu May 17 19:16:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added a note on a work-around needed to properly build the tests with
+          TAO 1.5a patch level "0".
+
 Thu May 17 18:40:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
