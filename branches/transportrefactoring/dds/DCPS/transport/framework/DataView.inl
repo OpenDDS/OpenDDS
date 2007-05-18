@@ -31,7 +31,7 @@ TAO::DCPS::DataView::follow_next_chain(ACE_Message_Block& mb, View& packets)
   while (mbptr != 0)
   {
     size_t size = mbptr->wr_ptr() - mbptr->rd_ptr();
-    if (size > max_size_)
+    if ((max_size_ != 0) && (size > max_size_))
     {
       size = max_size_;
     }
