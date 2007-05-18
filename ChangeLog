@@ -1,3 +1,22 @@
+Fri May 18 14:51:25 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+
+          Extended the DevGuideExample to work with reliable multicast.  Thanks
+          to Ciju for actually doing this work.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+
+          Read the configuration from the transport section of the ini file.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+          Just like UDP, always report the transport ask "acked" because the
+          acknowledgement for connection establishment doesn't actually happen
+          in reliable multicast.
+
 Thu May 17 19:16:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
