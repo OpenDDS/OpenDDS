@@ -1,3 +1,11 @@
+Fri May 18 16:14:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/reliable_mcast.conf:
+        * DevGuideExamples/DDS/Messenger/sub_reliable_mcast.ini:
+
+          Added configuration files for reliable multicast.
+
 Fri May 18 15:08:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
