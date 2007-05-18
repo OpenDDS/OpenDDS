@@ -1,3 +1,9 @@
+Fri May 18 15:08:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added DevGuideExamples/DDS/Messenger using reliable multicast.
+
 Fri May 18 14:51:25 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:
