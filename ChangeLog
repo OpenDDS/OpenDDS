@@ -1,3 +1,23 @@
+Fri May 18 20:32:11 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Support moving ZeroCopyDataSeq instantiation from FooC.h 
+          to FooTypeSupportC.h (where it was when it was sequence<Foo>)
+          by adding #PRAGMA DCPS*ZERO_COPY* and resolving circular includes.
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Support the assignment operator -- needed for BIT.
+
 Thu May 17 20:07:21 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:

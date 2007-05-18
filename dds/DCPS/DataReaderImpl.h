@@ -11,14 +11,12 @@
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
+#include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "Definitions.h"
-#include "TopicImpl.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "SubscriptionInstance.h"
-#include "SubscriberImpl.h"
 #include "InstanceState.h"
-#include "DomainParticipantImpl.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
 
@@ -38,6 +36,7 @@ namespace TAO
     class SubscriberImpl;
     class DomainParticipantImpl;
     class SubscriptionInstance ;
+    class TopicImpl;
 
     typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
@@ -313,7 +312,7 @@ namespace TAO
       ::DDS::DataReader_ptr get_dr_obj_ref();
       //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref () = 0;
 
-      char *get_topic_name() const { return topic_servant_->get_name() ; }
+      char *get_topic_name() const;
 
       bool have_sample_states(::DDS::SampleStateMask sample_states) const ;
       bool have_view_states(::DDS::ViewStateMask view_states) const ;
