@@ -401,7 +401,7 @@ namespace TAO
     int         control_dropped_count_;
     int         control_delivered_count_;
 
-    /// Called by transport after transport received the FYULLY_ASSOCIATED
+    /// Called by transport after transport received the FULLY_ASSOCIATED
     /// ack from the associated subscriber.
     void fully_associated (
       ::TAO::DCPS::RepoId     yourId,
