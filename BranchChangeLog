@@ -1,3 +1,10 @@
+Fri May 18 21:24:02 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataView.inl:
+
+          Updated to not fragment if the transport doesn't require it
+          AND the data is in one message.
+
 Wed May 16 17:44:40 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * ChangeLog:
