@@ -1,0 +1,11 @@
+project: dcpsexe_with_tcp, portableserver {
+  exename   = bit
+  libpaths += ../FooType4
+  libs     +=  DcpsFooType4
+  after    += DcpsFooType4
+
+  Source_Files {
+    main.cpp
+    common.cpp
+  }
+}

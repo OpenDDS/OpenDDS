@@ -1,0 +1,7 @@
+// -*- MPC -*-
+// $Id$
+
+project : dcpsexe {
+  libs        += SimpleUnreliableDgram
+  after       += SimpleUnreliableDgram
+}
