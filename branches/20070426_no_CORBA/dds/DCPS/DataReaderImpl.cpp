@@ -989,6 +989,12 @@ void DataReaderImpl::set_subscription_id(RepoId subscription_id)
   subscription_id_ = subscription_id ;
 }
 
+char *
+DataReaderImpl::get_topic_name() const 
+{ 
+  return topic_servant_->get_name() ; 
+}
+
 bool DataReaderImpl::have_sample_states(
 					::DDS::SampleStateMask sample_states) const
 {

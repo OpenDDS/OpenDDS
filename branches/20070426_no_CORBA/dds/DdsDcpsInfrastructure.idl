@@ -31,6 +31,9 @@
 
 module DDS {
 
+// make the IDL compiler produce include of zero-copy read info sequence template
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
+
     typedef DOMAINID_TYPE_NATIVE DomainId_t;
     typedef HANDLE_TYPE_NATIVE InstanceHandle_t;
     typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKey_t[3];
@@ -588,8 +591,6 @@ module DDS {
 		long generation_rank;
 		long absolute_generation_rank;
 		};
-
-#pragma DCPS_SUPPORT_ZERO_COPY_READ
 
     native SampleInfoSeq; // support zero-copy read
     //typedef sequence<SampleInfo> SampleInfoSeq;

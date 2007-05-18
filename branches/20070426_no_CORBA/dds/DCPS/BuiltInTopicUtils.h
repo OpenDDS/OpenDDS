@@ -17,8 +17,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
-#include "DomainParticipantImpl.h"
-
 
 namespace TAO {
   namespace DCPS {

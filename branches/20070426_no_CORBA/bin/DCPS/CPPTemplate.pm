@@ -31,6 +31,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublicationInstance.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "<%TYPE%>TypeSupportImpl.h"

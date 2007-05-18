@@ -17,7 +17,6 @@
 // not needed export for templates #include "dcps_export.h"
 #include "dds/DCPS/ZeroCopySeqBase.h"
 #include "dds/DCPS/ZeroCopyAllocator_T.h"
-#include "dds/DCPS/ReceivedDataElementList.h"
 #include <ace/Vector_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -32,6 +31,7 @@ namespace TAO
     {
 
         class DataReaderImpl;
+        class ReceivedDataElement;  // avoid circular reference with DdsDcpsInfrastructureC.h
 
         /**
         * Provides [] operators returning sample references
@@ -86,6 +86,8 @@ namespace TAO
 
 
             ~ZeroCopyDataSeq();
+
+            ZeroCopyDataSeq& operator= (const ZeroCopyDataSeq & frm);
 
             //======== DDS specification inspired methods =====
             /** get the current length of the sequence.
@@ -179,6 +181,7 @@ namespace TAO
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
+#pragma message ("ZeroCopySeq_T.cpp template inst")
 #pragma implementation ("ZeroCopySeq_T.cpp")
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
