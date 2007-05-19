@@ -1,3 +1,11 @@
+Sat May 19 00:02:15 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Resolve build errors and warnings from gcc.
+
 Fri May 18 20:32:11 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
