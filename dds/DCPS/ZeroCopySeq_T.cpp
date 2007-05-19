@@ -59,7 +59,7 @@ ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator= (const ZeroCopyDataSeq<Sa
         {
           this->ptrs_    = frm.ptrs_;
           // increment reference counts.
-          for (Ptr_Seq_Type::size_type ii = 0; ii < this->length_; ii++)
+          for (size_t /* Ptr_Seq_Type::size_type */ ii = 0; ii < this->length_; ii++)
             {
               ptrs_[ii]->inc_ref();
               ptrs_[ii]->zero_copy_cnt_++;
