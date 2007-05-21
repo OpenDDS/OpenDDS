@@ -78,7 +78,8 @@ namespace TAO
       TransportAPI::Status connect(TransportAPI::BLOB* endpoint);
       TransportAPI::Status disconnect();
 
-      TransportAPI::Status send(ACE_Message_Block& mb);
+      TransportAPI::Status send(ACE_Message_Block& mb, TransportAPI::Id& requestId);
+      TransportAPI::Status recall(const TransportAPI::Id& requestId);
 
       virtual void connected(const TransportAPI::Id& requestId);
       virtual void disconnected(const TransportAPI::failure_reason& reason);

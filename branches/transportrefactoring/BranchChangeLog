@@ -1,3 +1,11 @@
+Mon May 21 17:14:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Updated to fix Win32 compiler warnings.
+          Added beginnings of recall logic.
+
 Mon May 21 15:37:42 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.cpp:

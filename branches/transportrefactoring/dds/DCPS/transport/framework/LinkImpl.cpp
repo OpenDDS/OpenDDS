@@ -194,16 +194,26 @@ TAO::DCPS::LinkImpl::disconnect(
 
 TransportAPI::Status
 TAO::DCPS::LinkImpl::send(
-  ACE_Message_Block& mb
+  ACE_Message_Block& mb,
+  TransportAPI::Id& requestId
   )
 {
   Guard guard(lock_);
-  TransportAPI::Id requestId(getNextRequestId(guard));
+  requestId = getNextRequestId(guard);
   ACE_Message_Block copy(mb, 0);
   if (!deliver(guard, copy, requestId))
   {
     // Error delivering request
   }
+  return TransportAPI::make_success();
+}
+
+TransportAPI::Status
+TAO::DCPS::LinkImpl::recall(
+  const TransportAPI::Id& requestId
+  )
+{
+  Guard guard(lock_);
   return TransportAPI::make_success();
 }
 
@@ -453,11 +463,12 @@ TAO::DCPS::LinkImpl::trySending(
   // Process the head of the queue
   unsigned char buffer[10];
   iovec iovs[2];
+  typedef unsigned char uchar;
 
-  buffer[0] = (item.requestId_ >> 24) & 0xff;
-  buffer[1] = (item.requestId_ >> 16) & 0xff;
-  buffer[2] = (item.requestId_ >> 8) & 0xff;
-  buffer[3] = item.requestId_ & 255;
+  buffer[0] = uchar(item.requestId_ >> 24);
+  buffer[1] = uchar(item.requestId_ >> 16);
+  buffer[2] = uchar(item.requestId_ >> 8);
+  buffer[3] = uchar(item.requestId_ & 255);
   buffer[4] = (item.sequenceNumber_ >> 24) & 0xff;
   buffer[5] = (item.sequenceNumber_ >> 16) & 0xff;
   buffer[6] = (item.sequenceNumber_ >> 8) & 0xff;
