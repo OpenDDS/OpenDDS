@@ -1,3 +1,9 @@
+Mon May 21 15:50:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Added const to get rid of warnings on the scoreboard.
+
 Fri May 18 19:47:13 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
