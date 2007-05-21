@@ -1,3 +1,9 @@
+Mon May 21 18:24:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/dds.doxygen:
+
+          Updated for Doxygen 1.5.  Thanks to Scott Harris for doing this.
+
 Mon May 21 15:50:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
