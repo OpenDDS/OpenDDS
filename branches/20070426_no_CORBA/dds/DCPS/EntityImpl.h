@@ -6,7 +6,7 @@
 
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "ace/Atomic_Op_T.h"
-#include "tao/LocalObject.h"
+#include "dds/DCPS/LocalObject.h"
 
 #include <map>
 
@@ -29,7 +29,7 @@ namespace TAO
     */
     class TAO_DdsDcps_Export EntityImpl
     : public virtual DDS::Entity,
-      public virtual TAO_Local_RefCounted_Object
+      public virtual LocalObject
     {
     public:
       ///Constructor

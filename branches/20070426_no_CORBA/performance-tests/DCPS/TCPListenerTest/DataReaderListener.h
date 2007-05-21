@@ -7,7 +7,6 @@
 #include "ace/Synch.h"
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "TestStats.h"
-#include "tao/LocalObject.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -18,7 +17,7 @@
 //Class DataReaderListenerImpl
 	class DataReaderListenerImpl
 	: public virtual DDS::DataReaderListener,
-      public virtual TAO_Local_RefCounted_Object
+    public virtual TAO::DCPS::LocalObject
 	{
 public:
       // to support servant_to_reference for local interface

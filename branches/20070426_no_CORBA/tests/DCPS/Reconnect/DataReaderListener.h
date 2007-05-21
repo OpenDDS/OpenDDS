@@ -14,7 +14,7 @@
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
   : public virtual TAO::DCPS::DataReaderListener, // note: TAO specific extensions
-    public virtual TAO_Local_RefCounted_Object
+    public virtual TAO::DCPS::LocalObject
 {
 public:
   // to support servant_to_reference for local interface

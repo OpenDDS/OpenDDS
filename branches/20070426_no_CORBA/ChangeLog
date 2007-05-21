@@ -1,3 +1,19 @@
+Mon May 21 23:51:16 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+
+          Change fron using TAO_Local_RefCounted_Object to a typedef
+          of it named TAO::DCPS::LocalObject in case we wish to
+          extend its functionallity in the future.
+
 Mon May 21 22:12:46 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * bin/DCPS/IDLTemplate.pm:

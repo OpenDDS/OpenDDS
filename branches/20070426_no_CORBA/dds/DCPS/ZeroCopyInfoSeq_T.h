@@ -19,8 +19,10 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.h"
 #include <ace/Vector_T.h>
 
-// kludge to be sure TAO_Local_RefCounted_Object is defined in DdsDcpsInfrastructureC.h
-#include "tao/LocalObject.h"
+// kludge to be sure LocalObject is defined in DdsDcpsInfrastructureC.h
+// because a listener might be defined without #including
+// any non-listener entitiy implementations.
+#include "dds/DCPS/LocalObject.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

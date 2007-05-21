@@ -32,7 +32,6 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
-#include "tao/LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -47,7 +46,7 @@ sub contents { return <<'!EOT'
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
   : public virtual <%TYPE%>TypeSupport,
-    public virtual TAO_Local_RefCounted_Object
+    public virtual TAO::DCPS::LocalObject
 {
 public:
   // to support servant_to_reference for local interface
@@ -107,7 +106,7 @@ public:
 class <%EXPORT%> <%TYPE%>DataWriterImpl
   : public virtual <%TYPE%>DataWriter,
     public virtual TAO::DCPS::DataWriterImpl,
-    public virtual TAO_Local_RefCounted_Object
+    public virtual TAO::DCPS::LocalObject
 {
 public:
   // to support servant_to_reference for local interface
@@ -313,7 +312,7 @@ private:
 class <%EXPORT%> <%TYPE%>DataReaderImpl
   : public virtual <%TYPE%>DataReader,
     public virtual TAO::DCPS::DataReaderImpl,
-    public virtual TAO_Local_RefCounted_Object
+    public virtual TAO::DCPS::LocalObject
 {
 public:
   // to support servant_to_reference for local interface
