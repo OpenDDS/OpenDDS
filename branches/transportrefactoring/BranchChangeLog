@@ -1,3 +1,9 @@
+Mon May 21 15:37:42 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Updated to fix Win32 compiler warnings.
+
 Mon May 21 14:19:50 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * ChangeLog:

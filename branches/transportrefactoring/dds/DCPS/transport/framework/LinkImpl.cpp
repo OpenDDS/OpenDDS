@@ -314,15 +314,15 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
   char* buffer = mb.rd_ptr();
 
   TransportAPI::Id requestId =
-    buffer[0] << 24 +
-    buffer[1] << 16 +
-    buffer[2] << 8 +
+    (buffer[0] << 24) +
+    (buffer[1] << 16) +
+    (buffer[2] << 8) +
     buffer[3];
 
   size_t sequenceNumber =
-    buffer[4] << 24 +
-    buffer[5] << 16 +
-    buffer[6] << 8 +
+    (buffer[4] << 24) +
+    (buffer[5] << 16) +
+    (buffer[6] << 8) +
     buffer[7];
 
   bool beginning = (buffer[8] != 0);
@@ -454,13 +454,13 @@ TAO::DCPS::LinkImpl::trySending(
   unsigned char buffer[10];
   iovec iovs[2];
 
-  buffer[0] = item.requestId_ >> 24;
-  buffer[1] = item.requestId_ >> 16;
-  buffer[2] = item.requestId_ >> 8;
+  buffer[0] = (item.requestId_ >> 24) & 0xff;
+  buffer[1] = (item.requestId_ >> 16) & 0xff;
+  buffer[2] = (item.requestId_ >> 8) & 0xff;
   buffer[3] = item.requestId_ & 255;
-  buffer[4] = item.sequenceNumber_ >> 24;
-  buffer[5] = item.sequenceNumber_ >> 16;
-  buffer[6] = item.sequenceNumber_ >> 8;
+  buffer[4] = (item.sequenceNumber_ >> 24) & 0xff;
+  buffer[5] = (item.sequenceNumber_ >> 16) & 0xff;
+  buffer[6] = (item.sequenceNumber_ >> 8) & 0xff;
   buffer[7] = item.sequenceNumber_ & 255;
   buffer[8] = (item.beginning_ ? 1 : 0);
   buffer[9] = (item.ending_ ? 1 : 0);
