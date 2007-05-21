@@ -13,10 +13,16 @@
 
 //Class DataWriterListenerImpl
 class DataWriterListenerImpl
-  : public virtual POA_TAO::DCPS::DataWriterListener,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::DataWriterListener, // note: TAO specific extensions
+    public virtual TAO_Local_RefCounted_Object
 {
 public:
+  // to support servant_to_reference for local interface
+  typedef DDS::DataWriterListener::_ptr_type _ptr_type;
+  // to support servant_to_reference for local interface
+  static  DDS::DataWriterListener::_ptr_type _narrow (::CORBA::Object_ptr obj)
+    { return DDS::DataWriterListener::_narrow(obj); };
+
   //Constructor
   DataWriterListenerImpl ();
 

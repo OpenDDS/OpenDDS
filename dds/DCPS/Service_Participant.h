@@ -316,6 +316,33 @@ namespace TAO
     ///         PortableServer::POA::WrongAdapter
     ///         PortableServer::POA::WongPolicy
     template <class T_impl, class T_ptr>
+    T_impl* remote_reference_to_servant (
+      T_ptr p
+    )
+    {
+      if (CORBA::is_nil (p))
+        {
+          return 0;
+        }
+
+      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
+
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*,
+           poa->reference_to_servant (
+              p) );
+
+      // Use the ServantBase_var so that the servant's reference
+      // count will not be changed by this operation.
+      PortableServer::ServantBase_var servant = the_servant;
+
+      return the_servant;
+    }
+
+    /// Get a servant pointer given a local object reference.
+    /// @throws PortableServer::POA::OjbectNotActive,
+    ///         PortableServer::POA::WrongAdapter
+    ///         PortableServer::POA::WongPolicy
+    template <class T_impl, class T_ptr>
     T_impl* reference_to_servant (
       T_ptr p
     )
@@ -328,44 +355,12 @@ namespace TAO
           return 0;
         }
 
-#ifdef DDS_USING_REMOTE_INTERFACES
-      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*,
-           poa->reference_to_servant (
-              p) );
-
-      // Use the ServantBase_var so that the servant's reference
-      // count will not be changed by this operation.
-      PortableServer::ServantBase_var servant = the_servant;
-#else
-    T_impl* the_servant = ACE_dynamic_cast (T_impl*, p);
-#endif
+      T_impl* the_servant = ACE_dynamic_cast (T_impl*, p);
 
       return the_servant;
     }
 
-#ifdef DDS_USING_REMOTE_INTERFACES
-    /// @throws PortableServer::POA::ServantNotActive,
-    ///         PortableServer::POA::WrongPolicy
-    template <class T>
-    typename T::_stub_ptr_type servant_to_reference (
-      T *servant
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
-    {
-      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-
-      PortableServer::ObjectId_var oid = poa->activate_object (servant);
-
-      CORBA::Object_var obj = poa->id_to_reference (oid.in ());
-
-      typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow (obj.in ());
-      return the_obj;
-    }
-#else
+    /// Given a servant, return the emote object reference from the local POA.
     /// @throws PortableServer::POA::ServantNotActive,
     ///         PortableServer::POA::WrongPolicy
     template <class T>
@@ -396,23 +391,7 @@ namespace TAO
           T::_narrow (servant);
       return the_obj;
     }
-#endif
 
-#ifdef DDS_USING_REMOTE_INTERFACES
-    template <class T>
-    void deactivate_object (
-      T obj
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
-    {
-      PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-      PortableServer::ObjectId_var oid =
-        poa->reference_to_id (obj);
-      poa->deactivate_object (oid.in ());
-    }
-#else
     template <class T>
     void deactivate_remote_object (
       T obj
@@ -437,7 +416,6 @@ namespace TAO
     {
         // no-op
     }
-#endif
 
   } // namespace DCPS
 } // namespace TAO

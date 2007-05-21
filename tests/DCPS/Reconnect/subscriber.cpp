@@ -105,8 +105,8 @@ int main (int argc, char *argv[])
       return 1 ;
     }
 
-    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-    PortableServer::ServantBase_var safe_servant = mts_servant;
+    Messenger::MessageTypeSupportImpl* mts_servant = new Messenger::MessageTypeSupportImpl();
+    //x PortableServer::ServantBase_var safe_servant = mts_servant;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {

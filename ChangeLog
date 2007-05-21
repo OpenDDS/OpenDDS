@@ -1,3 +1,29 @@
+Mon May 21 22:12:46 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DCPS/Service_Participant.h:
+        
+          Updates per Adam's code review posted Fri May 18 17:07:25 2007 CDT.
+
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        
+          Created the InfoSeq assignment operator and tested 
+          the zero-copy Seq assignment operator.
+
+        * DDS_no_CORBA.mwc:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+
+          Updated the reconnection test to verify that the TAO DDS specific
+          reconnection listener callbacks are made.
+
 Sat May 19 00:02:15 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:
