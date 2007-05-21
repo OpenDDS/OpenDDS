@@ -105,5 +105,6 @@ DevGuideExamples/DDS/Messenger/run_test.pl udp: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_test.pl default_udp: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_test.pl mcast: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_test.pl default_mcast: !DCPS_MIN !STATIC
+DevGuideExamples/DDS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl: !DCPS_MIN !STATIC
 DevGuideExamples/DDS/Messenger/run_ns_test.pl: !DCPS_MIN !STATIC

@@ -1,3 +1,39 @@
+Mon May 21 14:19:50 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * ChangeLog:
+        * DDS_info.txt:
+        * DDS_release_notes.txt:
+        * DevGuideExamples/DDS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/reliable_mcast.conf:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * MPC/config/vc8_warnings.mpb:
+        * PROBLEM-REPORT-FORM:
+        * README:
+        * VERSION:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+        * dds/Version.h:
+        * docs/INSTALL:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * MPC/config-legacy:
+        * MPC/config-legacy/README.txt:
+        * MPC/config-legacy/vc8_warnings.mpb:
+
+          svn merge https://svn.dre.vanderbilt.edu/DOC/DDS/trunk@706 https://svn.dre.vanderbilt.edu/DOC/DDS/tags/DDS-0_12
+
 Fri May 18 21:24:02 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/DataView.inl:

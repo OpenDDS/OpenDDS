@@ -17,6 +17,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
