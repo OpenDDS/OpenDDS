@@ -1,3 +1,9 @@
+Mon May 21 21:50:06 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportTypes.h:
+
+          Added an export for the BLOB class.
+
 Mon May 21 17:14:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:
