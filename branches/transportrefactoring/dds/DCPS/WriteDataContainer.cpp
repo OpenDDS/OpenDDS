@@ -773,6 +773,12 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   {
     DataSampleListElement* old_head = sending_data_.head_;
 
+    if (old_head == 0)
+      {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all, NULL element at head of sending_data_\n")));
+        break;
+      }
+
     // Tell transport remove all samples currently
     // transport is processing.
     writer->remove_sample (old_head);

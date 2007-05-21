@@ -14,3 +14,10 @@ ACE_INLINE
 TAO::DCPS::ReliableMulticastTransportImpl::~ReliableMulticastTransportImpl()
 {
 }
+
+ACE_INLINE
+bool
+TAO::DCPS::ReliableMulticastTransportImpl::acked(RepoId)
+{
+  return true;
+}

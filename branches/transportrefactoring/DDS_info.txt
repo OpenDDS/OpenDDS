@@ -14,8 +14,15 @@ Date:
 DDS version: 
 
 -----------------------------------------------------------------------------
-Date: 
-DDS version: 
+Date: 5/17/07
+DDS version: 0.12 (but it applies to older versions)
+How to run the InfoRepo without using a file for its IOR.
+
+DCPSInfoRepo.EXE -d domain_ids -ORBEndpoint iiop://RepoHostName:12345
+
+./subscriber -DCPSInfoRepo corbaloc:iiop:RepoHostName:12345/DCPSInfoRepo
+
+./publisher -DCPSInfoRepo corbaloc:iiop:RepoHostName:12345/DCPSInfoRepo
 
 -----------------------------------------------------------------------------
 Date: 5/9/07 

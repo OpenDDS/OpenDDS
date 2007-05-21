@@ -40,6 +40,9 @@ parse_args (int argc, char *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "mcast") == 0) {
         transport_impl_id = 3;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), "reliable_mcast") == 0) {
+        transport_impl_id = 4;
+      }
       // test with DEFAULT_SIMPLE_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
         transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
@@ -109,8 +112,8 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      TAO::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      TAO::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::TAO::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding

@@ -401,7 +401,7 @@ namespace TAO
     int         control_dropped_count_;
     int         control_delivered_count_;
 
-    /// Called by transport after transport received the FYULLY_ASSOCIATED
+    /// Called by transport after transport received the FULLY_ASSOCIATED
     /// ack from the associated subscriber.
     void fully_associated (
       ::TAO::DCPS::RepoId     yourId,
@@ -456,7 +456,7 @@ namespace TAO
       /// Send the liveliness message.
       void send_liveliness (const ACE_Time_Value& now);
 
-      /// Lookup the instance handles by the subscription repo ids 
+      /// Lookup the instance handles by the subscription repo ids
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);

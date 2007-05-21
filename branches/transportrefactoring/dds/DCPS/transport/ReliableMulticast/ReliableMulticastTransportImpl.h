@@ -45,6 +45,8 @@ namespace TAO
 
       virtual void release_datalink_i(TAO::DCPS::DataLink* link);
 
+      virtual bool acked(RepoId);
+
     private:
       ReliableMulticastTransportConfiguration* configuration_;
       // JSP: Add transport configuration storage

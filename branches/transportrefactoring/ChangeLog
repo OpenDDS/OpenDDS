@@ -1,3 +1,165 @@
+Fri May 18 19:26:02 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS version 0_12 released.
+
+Fri May 18 18:05:41 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/reliable_mcast.conf:
+
+          Fixed config file.
+
+Fri May 18 16:14:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DDS/Messenger/reliable_mcast.conf:
+        * DevGuideExamples/DDS/Messenger/sub_reliable_mcast.ini:
+
+          Added configuration files for reliable multicast.
+
+Fri May 18 15:08:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added DevGuideExamples/DDS/Messenger using reliable multicast.
+
+Fri May 18 14:51:25 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+
+          Extended the DevGuideExample to work with reliable multicast.  Thanks
+          to Ciju for actually doing this work.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+
+          Read the configuration from the transport section of the ini file.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+          Just like UDP, always report the transport ask "acked" because the
+          acknowledgement for connection establishment doesn't actually happen
+          in reliable multicast.
+
+Thu May 17 19:16:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added a note on a work-around needed to properly build the tests with
+          TAO 1.5a patch level "0".
+
+Thu May 17 18:40:09 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Minor clarifications and removed contact info (email addrs) since
+          it's now in README.
+
+Thu May 17 18:17:51 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * ChangeLog:
+
+          Fixed a reference to the previous ChangeLog.
+
+        * DDS_info.txt:
+
+          Added an example of using -DCPSInfoRepo.
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Corrected spelling errors.
+
+Thu May 17 18:16:18 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+
+          Add note regards reliable multicast default configuration
+          status.
+
+Thu May 17 15:28:44 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Documented the current state of the tests.
+
+Thu May 17 14:15:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/vc8_warnings.mpb:
+
+          Moved vc8_warnings.mpb here instead of having it in config-legacy.
+
+        * MPC/config-legacy:
+        * MPC/config-legacy/README.txt:
+        * MPC/config-legacy/vc8_warnings.mpb:
+
+          Removed these files.
+
+        * docs/INSTALL:
+
+          Documented this change.
+
+Thu May 17 13:55:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+          Add entry about InfoRepo persistence mechanism.
+
+Wed May 16 21:39:59 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp(unregister_all):
+
+          Added a check for a NULL DataSampleListElement in sending_data_.  The
+          sub_init_loop stress test has shown a segfault here.
+
+Wed May 16 20:05:37 UTC 2007  Byron Harris  <harris_b@ociweb.com>
+
+        * README:
+
+          Removed spell checker content brought over from the release notes.
+
+Wed May 16 19:27:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          When -Config STATIC is used, don't use -ORBSvcConf tcp.conf since it
+          uses dynamic loading.
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Linked with SimpleTCP so that static builds can work too.
+
+Wed May 16 19:24:12 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Removed obsolete notes and made other improvements.
+
+Wed May 16 18:09:17 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Increased timeout to be more tolerant of slow machines, fixed logic
+          errors in the perl script (using an uninitialized variable).
+
+Wed May 16 17:46:01 UTC 2007  Byron Harris  <harris_b@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Moved content in the release notes not related to changes
+          between releases to the README.
+
+Wed May 16 17:42:27 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/debug.cpp:
+
+          Added newline at end of file to avoid warning from gcc.
+
 Wed May 16 16:01:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/sub_init_loop/Writer.cpp:
@@ -8187,7 +8349,7 @@ Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
                        ACE_wrappers\bin\DCPS
           were moved over.
 
-          See the ACE_wrappers\TAO\Changeklog_dds_branch
+          See the ocitao/ACE_wrappers/TAO/Changelog_dds_branch
           on the AAC-DDS-1_4_3_branch branch
           in cvs.ociweb.com:/cvs for the original
           developement history.
