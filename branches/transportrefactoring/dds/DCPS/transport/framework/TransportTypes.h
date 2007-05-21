@@ -1,6 +1,7 @@
 #ifndef TRANSPORTAPI_TRANSPORTTYPES_H
 #define TRANSPORTAPI_TRANSPORTTYPES_H
 
+#include #include "dds/DCPS/dcps_export.h"
 #include <ace/OS_NS_sys_uio.h>
 #include <string>
 #include <vector>
@@ -19,7 +20,7 @@ namespace TransportAPI
   /// @note The BLOB should contain information related to the current endpoint, and
   /// ideally enough to communicate to a remote endpoint how it should connect to
   /// this one.
-  class BLOB
+  class TAO_DdsDcps_Export BLOB
   {
   public:
     virtual ~BLOB();
