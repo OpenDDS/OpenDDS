@@ -25,8 +25,6 @@ sub contents { return <<'!EOT'
 #include "dds/DdsDcpsTopic.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
-//#include "dds/DdsDcpsDataWriter.idl"
-//#include "dds/DdsDcpsDataReader.idl"
 #include "dds/DdsDcpsTypeSupportTao.idl"
 
 #include "<%SUBDIR%><%IDLFILE%>"

@@ -589,10 +589,29 @@ int main (int argc, char *argv[])
         }
 
         item = data2.getPtr(0);
+
+        // test the assignment operator.
+        Test::SimpleSeq copy;
+        ::DDS::SampleInfoSeq copyInfo;
+        copy     = data2;
+        copyInfo = info2;
+        if (   copy.length() != data2.length() 
+            || copy[0].count != data2[0].count
+            || item->ref_count_ != 4)
+          {
+            ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) t1 ERROR: assignment operator failed\n") ));
+            test_failed = 1;
+          }
+            
+        status = fast_dr->return_loan(copy, copyInfo );
+
+        check_return_loan_status(status, copy, 0, 0, "t1 return_loan copy");
+
         if (item->ref_count_ != 3)
         {
             ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
+                ACE_TEXT("(%P|%t) t1 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
             test_failed = 1;
         }
 
@@ -675,6 +694,23 @@ int main (int argc, char *argv[])
             test_failed = 1;
 
         }
+
+        // test the assignment operator.
+        Test::SimpleSeq      copy (max_samples+1);
+        ::DDS::SampleInfoSeq copyInfo (max_samples+1);
+        copy     = data2;
+        copyInfo = info2;
+        if (   copy.length() != data2.length() 
+            || copy[0].count != data2[0].count )
+          {
+            ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) t2 ERROR: assignment operator failed\n") ));
+            test_failed = 1;
+          }
+            
+        status = fast_dr->return_loan(copy, copyInfo );
+
+        check_return_loan_status(status, copy, 1, max_samples, "t2 return_loan copy");
 
         status = fast_dr->return_loan(  data2 
                                       , info2 );

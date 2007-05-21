@@ -32,7 +32,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   num_reads_ ++;
 
   try {
-    MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
+    Messenger::MessageDataReader_var message_dr = Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
       ACE_DEBUG ((LM_DEBUG ,
         "(%P|%t)read: _narrow failed.\n"));

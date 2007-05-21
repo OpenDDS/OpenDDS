@@ -45,7 +45,6 @@ template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
 ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &
 ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator= (const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &frm)
 {
-  //REMOVE TBD SHH test this method!!!
   if (this != &frm)
     {
       if (loaner_) 

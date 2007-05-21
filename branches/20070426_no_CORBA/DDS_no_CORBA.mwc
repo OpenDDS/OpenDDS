@@ -10,6 +10,7 @@ workspace {
   // an old single-copy type test
   tests/DCPS/FooType5
   tests/DCPS/FooTest5
+  tests/DCPS/Reconnect
   //performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc
   performance-tests/DCPS/TCPListenerTest/TCPListener.mpc
   performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc
