@@ -56,7 +56,7 @@ Fri May 18 14:51:25 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
-          Just like UDP, always report the transport ask "acked" because the
+          Just like UDP, always report the transport as "acked" because the
           acknowledgement for connection establishment doesn't actually happen
           in reliable multicast.
 
