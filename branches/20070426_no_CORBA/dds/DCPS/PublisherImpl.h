@@ -64,16 +64,11 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export PublisherImpl
-      : public virtual DDS::Publisher,
+      : public virtual TAO::DCPS::LocalObject<DDS::Publisher>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
     public:
-      // to support servant_to_reference for local interface
-      typedef DDS::Publisher::_ptr_type _ptr_type;
-      // to support servant_to_reference for local interface
-      static  DDS::Publisher::_ptr_type _narrow (::CORBA::Object_ptr obj)
-        { return DDS::Publisher::_narrow(obj); };
 
       typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
 

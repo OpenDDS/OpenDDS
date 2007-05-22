@@ -12,17 +12,13 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
-#include "dds/DCPS/ZeroCopySeq_T.h"
+#include "tao/LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-  // for support of zero-copy read
-  typedef ::TAO::DCPS::ZeroCopyDataSeq<Messenger::Message, DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> MessageZCSeq;
-
-
+namespace Messenger {
 
 /** Servant for TypeSuport interface of Message data type.
  *
@@ -31,10 +27,16 @@
  *
  */
 class  MessageTypeSupportImpl
-  : public virtual POA_MessageTypeSupport,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual MessageTypeSupport,
+    public virtual TAO_Local_RefCounted_Object
 {
 public:
+  // to support servant_to_reference for local interface
+  typedef MessageTypeSupport::_ptr_type _ptr_type;
+  // to support servant_to_reference for local interface
+  static  MessageTypeSupport::_ptr_type _narrow (::CORBA::Object_ptr obj)
+    { return MessageTypeSupport::_narrow(obj); };
+
   //Constructor
   MessageTypeSupportImpl (void);
 
@@ -58,14 +60,14 @@ public:
     ));
 
   virtual
-  ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
+  ::DDS::DataWriter_ptr create_datawriter (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual
-  ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
+  ::DDS::DataReader_ptr create_datareader (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -74,8 +76,10 @@ public:
   private:
     CORBA::String_var type_name_;
 };
+}; // Messenger
 
 
+namespace Messenger {
 
 
 /** Servant for DataWriter interface of the Message data type.
@@ -84,11 +88,17 @@ public:
  * this interface.
  */
 class  MessageDataWriterImpl
-  : public virtual POA_MessageDataWriter,
+  : public virtual MessageDataWriter,
     public virtual TAO::DCPS::DataWriterImpl,
-    public virtual PortableServer::RefCountServantBase
+    public virtual TAO_Local_RefCounted_Object
 {
 public:
+  // to support servant_to_reference for local interface
+  typedef MessageDataWriter::_ptr_type _ptr_type;
+  // to support servant_to_reference for local interface
+  static  MessageDataWriter::_ptr_type _narrow (::CORBA::Object_ptr obj)
+    { return MessageDataWriter::_narrow(obj); };
+
   typedef std::map<Messenger::Message, DDS::InstanceHandle_t,
       MessageKeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
@@ -202,7 +212,8 @@ public:
         TAO::DCPS::DomainParticipantImpl*      participant_servant,
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
-        TAO::DCPS::DataWriterRemote_ptr        dw_remote
+        ::DDS::DataWriter_ptr                  dw_objref,
+        ::TAO::DCPS::DataWriterRemote_ptr      dw_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -270,8 +281,10 @@ private:
    ::TAO::DCPS::MessageBlockAllocator* mb_allocator_;
    ::TAO::DCPS::DataBlockAllocator*    db_allocator_;
 };
+}; // Messenger
 
 
+namespace Messenger {
 
 /** Servant for DateReader interface of Message data type.
  *
@@ -283,11 +296,17 @@ private:
  *
  */
 class  MessageDataReaderImpl
-  : public virtual POA_MessageDataReader,
+  : public virtual MessageDataReader,
     public virtual TAO::DCPS::DataReaderImpl,
-    public virtual PortableServer::RefCountServantBase
+    public virtual TAO_Local_RefCounted_Object
 {
 public:
+  // to support servant_to_reference for local interface
+  typedef MessageDataReader::_ptr_type _ptr_type;
+  // to support servant_to_reference for local interface
+  static  MessageDataReader::_ptr_type _narrow (::CORBA::Object_ptr obj)
+    { return MessageDataReader::_narrow(obj); };
+
   typedef std::map<Messenger::Message, DDS::InstanceHandle_t,
       MessageKeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Cached_Allocator_With_Overflow<Messenger::Message, ACE_Null_Mutex>  DataAllocator;
@@ -317,6 +336,7 @@ public:
         TAO::DCPS::DomainParticipantImpl*        participant,
         TAO::DCPS::SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr                    subscriber_objref,
+        ::DDS::DataReader_ptr					 dr_objerf,
         TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
       )
         ACE_THROW_SPEC ((
@@ -335,34 +355,7 @@ public:
 
   virtual
   DDS::ReturnCode_t read (
-      ::MessageSeq & received_data,
-      ::DDS::SampleInfoSeq & info_seq,
-      ::CORBA::Long max_samples,
-      ::DDS::SampleStateMask sample_states,
-      ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
-  // zero-copy overloaded version
-  virtual
-  DDS::ReturnCode_t read (
-      ::MessageZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
-      ::CORBA::Long max_samples,
-      ::DDS::SampleStateMask sample_states,
-      ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
-  virtual
-  DDS::ReturnCode_t take (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
@@ -375,8 +368,8 @@ public:
 
   virtual
   DDS::ReturnCode_t take (
-      ::MessageZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
+      ::Messenger::MessageSeq & received_data,
+      ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
@@ -406,7 +399,7 @@ public:
 
   virtual
   DDS::ReturnCode_t read_instance (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -420,7 +413,7 @@ public:
 
   virtual
   DDS::ReturnCode_t take_instance (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -434,7 +427,7 @@ public:
 
   virtual
   DDS::ReturnCode_t read_next_instance (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -448,7 +441,7 @@ public:
 
   virtual
   DDS::ReturnCode_t take_next_instance (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -462,17 +455,8 @@ public:
 
   virtual
   DDS::ReturnCode_t return_loan (
-      ::MessageSeq & received_data,
+      ::Messenger::MessageSeq & received_data,
       ::DDS::SampleInfoSeq & info_seq
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
-  virtual
-  DDS::ReturnCode_t return_loan (
-      ::MessageZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -487,13 +471,10 @@ public:
       CORBA::SystemException
     ));
 
- virtual 
- DDS::ReturnCode_t auto_return_loan(void* seq);
+  virtual 
+  DDS::ReturnCode_t auto_return_loan(void* seq);
 
- void
- MessageDataReaderImpl::release_loan (
-           ::MessageZCSeq & received_data
-           );
+  void release_loan (::Messenger::MessageSeq & received_data);
 
  protected:
 
@@ -513,6 +494,7 @@ public:
    DataAllocator* data_allocator_;
 };
 
+}; // Messenger
 
 
 #endif /* MESSAGETYPESUPPORTI_H_  */

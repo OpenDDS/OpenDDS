@@ -10,8 +10,22 @@ namespace TAO
 {
   namespace DCPS
   {
-    /// just in case we want to extend this for DDS specific needs in the future
-    typedef TAO_Local_RefCounted_Object LocalObject;
+    /// TAO::DCPS::LocalObject resolves ambigously-inherited members like
+    /// _narrow and _ptr_type.  It is used from client code like so:
+    /// class MyReaderListener
+    ///   : public TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener> {...};
+    template <class Stub>
+    class LocalObject
+      : public virtual Stub
+      , public virtual TAO_Local_RefCounted_Object
+    {
+    public:
+      typedef typename Stub::_ptr_type _ptr_type;
+      static _ptr_type _narrow (::CORBA::Object_ptr obj)
+      { 
+        return Stub::_narrow(obj);
+      }
+    };
 
   };
 };

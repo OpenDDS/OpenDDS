@@ -51,17 +51,11 @@ namespace TAO
 
     //Class SubscriberImpl
     class TAO_DdsDcps_Export SubscriberImpl
-      : public virtual DDS::Subscriber,
+      : public virtual TAO::DCPS::LocalObject<DDS::Subscriber>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
     public:
-
-      // to support servant_to_reference for local interface
-      typedef DDS::Subscriber::_ptr_type _ptr_type;
-      // to support servant_to_reference for local interface
-      static  DDS::Subscriber::_ptr_type _narrow (::CORBA::Object_ptr obj)
-        { return DDS::Subscriber::_narrow(obj); };
 
       //Constructor
       SubscriberImpl (const ::DDS::SubscriberQos & qos,

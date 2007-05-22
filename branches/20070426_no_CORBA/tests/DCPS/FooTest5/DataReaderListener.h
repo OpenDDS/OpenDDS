@@ -13,8 +13,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual DDS::DataReaderListener,
-    public virtual TAO::DCPS::LocalObject
+  : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   // to support servant_to_reference for local interface

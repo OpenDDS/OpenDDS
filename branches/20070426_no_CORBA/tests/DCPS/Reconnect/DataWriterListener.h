@@ -12,9 +12,9 @@
 
 
 //Class DataWriterListenerImpl
-class DataWriterListenerImpl
-  : public virtual TAO::DCPS::DataWriterListener, // note: TAO specific extensions
-    public virtual TAO::DCPS::LocalObject
+class DataWriterListenerImpl 
+  // note: TAO specific extensions
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataWriterListener>
 {
 public:
   // to support servant_to_reference for local interface
