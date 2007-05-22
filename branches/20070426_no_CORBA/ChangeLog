@@ -1,3 +1,48 @@
+Tue May 22 19:04:06 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_no_CORBA.mwc:
+
+          Added more tests that now compile on this branch.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+
+          Changed to use new LocalObject class template.
+
+        * tests/DCPS/FooType4/DcpsFooType4.mpc:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/Writer.h:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+
+          Removed the --module switch from dcps_ts.pl, changed all uses of the
+          "Mine" namespace to "Xyz".
+
+        * tests/DCPS/FooType/FooType.idl:
+
+          Change to use local IDL interfaces.
+
+        * tests/DCPS/FooType3/DcpsFooType3.mpc:
+        * tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+        * tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+
+          Removed the --module switch from dcps_ts.pl.  Test code that uses the
+          "Mine" namespace still needs to be updated.
+
+        * tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+        * tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+
+          Removed these files.  They should never have been in SVN.
+
 Tue May 22 16:12:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_no_CORBA.mwc:
@@ -10,7 +55,7 @@ Tue May 22 16:12:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
           this change should be part of the merge back to trunk or if we should
           change the code or if more changes need to be made to the --module
           support.
-        
+
         * dds/DCPS/LocalObject.h:
 
           Made TAO::DCPS::LocalObject into a class template so it can
