@@ -22,7 +22,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   bool beginning,
   bool ending
   )
-  : mb_(new ACE_Message_Block(mb, 0))
+  : mb_(new ACE_Message_Block(mb, 1))
   , data_begin_(data)
   , data_size_(size)
   , requestId_(requestIdIn)
@@ -36,7 +36,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
 TAO::DCPS::LinkImpl::IOItem::IOItem(
   const TAO::DCPS::LinkImpl::IOItem& rhs
   )
-  : mb_(new ACE_Message_Block(*rhs.mb_, 0))
+  : mb_(new ACE_Message_Block(*rhs.mb_, 1))
   , data_begin_(rhs.data_begin_)
   , data_size_(rhs.data_size_)
   , requestId_(rhs.requestId_)
@@ -56,7 +56,7 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
 {
   if (this != &rhs)
   {
-    mb_.reset(new ACE_Message_Block(*rhs.mb_, 0));
+    mb_.reset(new ACE_Message_Block(*rhs.mb_, 1));
     data_begin_ = rhs.data_begin_;
     data_size_ = rhs.data_size_;
     requestId_ = rhs.requestId_;
