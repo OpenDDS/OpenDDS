@@ -1,0 +1,35 @@
+
+project(*Server) : taoexe, portableserver, iortable {
+  exename = syncServer
+
+  IDL_Files {
+    Sync.idl
+  }
+
+  Source_Files {
+    SyncServer_i.cpp
+    SyncServer.cpp
+  }
+}
+
+project(*ServerLib) : taolib, portableserver, iortable {
+   sharedname = SyncServer
+   after += *Server
+
+  Source_Files {
+    SyncServer_i.cpp
+    SyncC.cpp
+    SyncS.cpp
+  }
+}
+
+project(*Client) : taolib {
+  sharedname = SyncClient
+  after += *Server
+
+  Source_Files {
+    SyncC.cpp
+    SyncS.cpp
+    SyncClient_i.cpp
+  }
+}
