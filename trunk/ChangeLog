@@ -1,3 +1,48 @@
+Tue May 22 21:52:14 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/Sync:
+        * performance-tests/DCPS/Sync/InitError.h:
+        * performance-tests/DCPS/Sync/InitError.cpp:
+        * performance-tests/DCPS/Sync/README:
+        * performance-tests/DCPS/Sync/Sync.idl:
+        * performance-tests/DCPS/Sync/Sync.mpc:
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+	  Framework for pub-sub synchronization.
+
+        * performance-tests/DCPS/InfoRepo_population:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.cpp:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/InfoRepo_population/Messenger.idl:
+        * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.h:
+        * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.cpp:
+        * performance-tests/DCPS/InfoRepo_population/SyncExt.idl:
+        * performance-tests/DCPS/InfoRepo_population/SyncExt_i.h:
+        * performance-tests/DCPS/InfoRepo_population/SyncExt_i.cpp:
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.h:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/domain_ids:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/tcp.conf:
+          Stress test for InfoRepo.
+
+        * bin/dcps_tests.lst:
+          Turn on InfoRepo_population in nightly builds.
+
 Mon May 21 18:24:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
