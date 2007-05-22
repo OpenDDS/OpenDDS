@@ -316,9 +316,7 @@ namespace TAO
     ///         PortableServer::POA::WrongAdapter
     ///         PortableServer::POA::WongPolicy
     template <class T_impl, class T_ptr>
-    T_impl* remote_reference_to_servant (
-      T_ptr p
-    )
+    T_impl* remote_reference_to_servant (T_ptr p)
     {
       if (CORBA::is_nil (p))
         {
@@ -327,9 +325,8 @@ namespace TAO
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*,
-           poa->reference_to_servant (
-              p) );
+      T_impl* the_servant =
+        dynamic_cast<T_impl*>(poa->reference_to_servant(p));
 
       // Use the ServantBase_var so that the servant's reference
       // count will not be changed by this operation.
@@ -339,20 +336,10 @@ namespace TAO
     }
 
     /// Get a servant pointer given a local object reference.
-    /// @throws PortableServer::POA::OjbectNotActive,
-    ///         PortableServer::POA::WrongAdapter
-    ///         PortableServer::POA::WongPolicy
     template <class T_impl, class T_ptr>
-    T_impl* reference_to_servant (
-      T_ptr p
-    )
+    T_impl* reference_to_servant (T_ptr p)
     {
-      if (CORBA::is_nil (p))
-        {
-          return 0;
-        }
-
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*, p);
+      T_impl* the_servant = dynamic_cast<T_impl*> (p);
 
       return the_servant;
     }
@@ -384,12 +371,7 @@ namespace TAO
     }
 
     template <class T>
-    void deactivate_remote_object (
-      T obj
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
+    void deactivate_remote_object (T obj)
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
       PortableServer::ObjectId_var oid =
@@ -398,12 +380,7 @@ namespace TAO
     }
 
     template <class T>
-    void deactivate_object (
-      T 
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
+    void deactivate_object (T)
     {
         // no-op
     }
