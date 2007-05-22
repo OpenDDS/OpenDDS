@@ -1,3 +1,10 @@
+Tue May 22 14:46:40 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+
+          Completed writing recall logic.
+
 Tue May 22 13:00:49 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportTypes.h:

@@ -88,7 +88,7 @@ TAO::DCPS::LinkImpl::performWork(
   ACE_Thread_Mutex& extLock,
   ACE_Condition<ACE_Thread_Mutex>& extCondition,
   bool& extShutdown,
-  std::queue<IOItem>& extQueue,
+  std::deque<IOItem>& extQueue,
   bool& extConnected,
   bool& extBackpressure,
   bool& extRunning
@@ -125,7 +125,7 @@ TAO::DCPS::LinkImpl::performWork(
       Guard guard(extLock);
       if (extract)
       {
-        extQueue.pop();
+        extQueue.pop_front();
         entry = extQueue.front();
         extract = false;
       }
@@ -208,13 +208,75 @@ TAO::DCPS::LinkImpl::send(
   return TransportAPI::make_success();
 }
 
+namespace
+{
+  struct RemoveItemsTest
+  {
+    RemoveItemsTest(const TransportAPI::Id& id)
+      : id_(id)
+      , foundBeginning_(false)
+    {
+    }
+
+    bool operator()(const TAO::DCPS::LinkImpl::IOItem& item)
+    {
+      if (item.requestId_ == id_)
+      {
+        if (item.beginning_)
+        {
+          foundBeginning_ = true;
+        }
+        return foundBeginning_;
+      }
+      return false;
+    }
+
+    TransportAPI::Id id_;
+    bool foundBeginning_;
+  };
+}
+
 TransportAPI::Status
 TAO::DCPS::LinkImpl::recall(
   const TransportAPI::Id& requestId
   )
 {
   Guard guard(lock_);
-  return TransportAPI::make_success();
+  bool found = false;
+  bool done = false;
+  std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator beginIter = queue_.begin();
+  std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator endIter = queue_.begin();
+  RemoveItemsTest shouldRemove(requestId);
+
+  for (
+    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    iter != queue_.end() && !done;
+    ++iter
+    )
+  {
+    if (shouldRemove(*iter))
+    {
+      if (!found)
+      {
+        beginIter = iter;
+      }
+      else
+      {
+        endIter = iter;
+      }
+    }
+    else if (found)
+    {
+      done = true;
+    }
+  }
+  if (found)
+  {
+    ++endIter;
+    queue_.erase(beginIter, endIter);
+    return TransportAPI::make_success();
+  }
+  return TransportAPI::make_failure();
 }
 
 void
@@ -422,26 +484,25 @@ TAO::DCPS::LinkImpl::deliver(
 
   view.get(packets);
   size_t sequenceNumber = 0;
-  bool enqueued = false;
   if (packets.empty())
   {
     return true;
   }
 
+  bool enqueued = !queue_.empty();
   DataView::View::iterator first = packets.begin();
   DataView::View::iterator last = packets.end();
   --last;
   for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
   {
     IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == first, iter == last);
-    if (!queue_.empty())
+    if (enqueued)
     {
-      queue_.push(item);
-      enqueued = true;
+      queue_.push_back(item);
     }
     else if (!trySending(item, true))
     {
-      queue_.push(item);
+      queue_.push_back(item);
       enqueued = true;
     }
     ++sequenceNumber;
