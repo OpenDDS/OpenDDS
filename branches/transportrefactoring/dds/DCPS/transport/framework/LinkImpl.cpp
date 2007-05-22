@@ -203,7 +203,7 @@ TAO::DCPS::LinkImpl::send(
   ACE_Message_Block copy(mb, 0);
   if (!deliver(guard, copy, requestId))
   {
-    // Error delivering request
+    return TransportAPI::make_failure();
   }
   return TransportAPI::make_success();
 }
@@ -553,7 +553,7 @@ TAO::DCPS::LinkImpl::trySending(
     deferred_ = true;
     deferredStatus_ = TransportAPI::make_failure();
   }
-  TransportAPI::Status status = link_.send(iovs, 2, 0);
+  TransportAPI::Status status = link_.send(iovs, 2, item.requestId_);
   while (status.first == TransportAPI::DEFERRED)
   {
     if (!locked)
