@@ -1,8 +1,6 @@
 // $Id$
 
 workspace {
-  ../TAO/TAO_IDL
-  
   dds
   //tests/DCPS/Messenger_ZeroCopy
   // a zero-copy type test
