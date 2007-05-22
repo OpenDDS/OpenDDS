@@ -28,16 +28,21 @@ void
 TAO::DCPS::DataView::follow_next_chain(ACE_Message_Block& mb, View& packets)
 {
   ACE_Message_Block* mbptr = &mb;
+  if (mbptr == 0)
+  {
+    return;
+  }
+  char* end = mbptr->rd_ptr() + mbptr->size();
   while (mbptr != 0)
   {
-    size_t size = mbptr->wr_ptr() - mbptr->rd_ptr();
+    size_t size = end - mbptr->rd_ptr();
     if ((max_size_ != 0) && (size > max_size_))
     {
       size = max_size_;
     }
     packets.push_back(std::make_pair(mbptr->rd_ptr(), size));
     mbptr->rd_ptr(size);
-    if (mbptr->rd_ptr() == mbptr->wr_ptr())
+    if (mbptr->rd_ptr() == end)
     {
       mbptr = mbptr->next();
     }

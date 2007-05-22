@@ -200,7 +200,7 @@ TAO::DCPS::LinkImpl::send(
 {
   Guard guard(lock_);
   requestId = getNextRequestId(guard);
-  ACE_Message_Block copy(mb, 0);
+  ACE_Message_Block copy(mb, 1);
   if (!deliver(guard, copy, requestId))
   {
     return TransportAPI::make_failure();

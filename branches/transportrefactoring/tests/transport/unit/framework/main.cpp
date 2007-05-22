@@ -39,11 +39,11 @@ namespace
     TransportAPI::Transport::Link* link_;
   };
 
-  void testSuccess()
+  void testNoFragmentationSend()
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), transport.getMaximumBufferSize());
+    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     assertTrue(transport.log_.empty());
 
@@ -56,12 +56,44 @@ namespace
     transport.log_.clear();
 
     ACE_Message_Block testMessage(1024);
+    testMessage.wr_ptr(1024);
     TransportAPI::Id id(0);
     status = linkImpl.send(testMessage, id);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(id == 2);
+    assertTrue(transport.log_.size() == 1);
     assertTrue(transport.log_[0].first == "send");
     assertTrue(transport.log_[0].second == id);
+    transport.log_.clear();
+  }
+
+  void testFragmentationSend()
+  {
+    DummyTransport transport;
+    LinkGuard linkGuard(transport, transport.createLink());
+    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 800);
+
+    assertTrue(transport.log_.empty());
+
+    TransportAPI::BLOB* blob = 0;
+    TransportAPI::Status status = linkImpl.connect(blob);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(transport.log_.size() == 1);
+    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].second == 1);
+    transport.log_.clear();
+
+    ACE_Message_Block testMessage(1024);
+    testMessage.wr_ptr(1024);
+    TransportAPI::Id id(0);
+    status = linkImpl.send(testMessage, id);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(id == 2);
+    assertTrue(transport.log_.size() == 2);
+    assertTrue(transport.log_[0].first == "send");
+    assertTrue(transport.log_[0].second == id);
+    assertTrue(transport.log_[1].first == "send");
+    assertTrue(transport.log_[1].second == id);
     transport.log_.clear();
   }
 }
@@ -75,7 +107,8 @@ main(
   ACE_UNUSED_ARG(argc);
   ACE_UNUSED_ARG(argv);
 
-  testSuccess();
+  testNoFragmentationSend();
+  testFragmentationSend();
 
   return 0;
 }
