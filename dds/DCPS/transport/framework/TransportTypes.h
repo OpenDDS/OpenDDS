@@ -1,7 +1,7 @@
 #ifndef TRANSPORTAPI_TRANSPORTTYPES_H
 #define TRANSPORTAPI_TRANSPORTTYPES_H
 
-#include #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/dcps_export.h"
 #include <ace/OS_NS_sys_uio.h>
 #include <string>
 #include <vector>
