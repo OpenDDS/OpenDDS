@@ -346,9 +346,6 @@ namespace TAO
     T_impl* reference_to_servant (
       T_ptr p
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
     {
       if (CORBA::is_nil (p))
         {
@@ -367,9 +364,6 @@ namespace TAO
     typename T::_stub_ptr_type servant_to_remote_reference (
       T *servant
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
@@ -381,15 +375,12 @@ namespace TAO
       return the_obj;
     }
 
-    // for local interfaces
+    // for local interfaces servant_to_reference is a no-op
+    // we are guaranteed that the "servant" type is convertible to T*
     template <class T>
-    typename T::_ptr_type servant_to_reference (
-      T *servant
-    )
+    T *servant_to_reference (T *servant)
     {
-      typename T::_ptr_type the_obj = 
-          T::_narrow (servant);
-      return the_obj;
+      return servant;
     }
 
     template <class T>

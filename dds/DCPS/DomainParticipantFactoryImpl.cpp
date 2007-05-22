@@ -94,10 +94,6 @@ namespace TAO
       ::DDS::DomainParticipant_ptr dp_obj
         = servant_to_reference (dp);
 
-
-      // Give ownership to poa.
-      dp->_remove_ref ();
-
       if (CORBA::is_nil (dp_obj))
         {
           ACE_ERROR ((LM_ERROR,

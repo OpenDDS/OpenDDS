@@ -5,22 +5,26 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsDataWriterRemote.idl"
-#include "dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
+//#include "dds/DdsDcpsDataWriter.idl"
+//#include "dds/DdsDcpsDataReader.idl"
 #include "dds/DdsDcpsTypeSupportTao.idl"
 
 #include "Messenger.idl"
 
+module Messenger {
 
 
-typedef sequence<Messenger::Message> MessageSeq;
+//typedef sequence<Messenger::Message> MessageSeq;
+native MessageSeq;
 
 /** Support topic registartion for Message data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface MessageTypeSupport : TAO::DCPS::TypeSupport {
+local interface MessageTypeSupport : TAO::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
                 in DDS::DomainParticipant participant,
                 in string type_name);
@@ -31,7 +35,7 @@ interface MessageTypeSupport : TAO::DCPS::TypeSupport {
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface MessageDataWriter : TAO::DCPS::DataWriterRemote {
+local interface MessageDataWriter : DDS::DataWriter {
     DDS::InstanceHandle_t register(
                 in Messenger::Message instance_data);
 
@@ -83,7 +87,7 @@ interface MessageDataWriter : TAO::DCPS::DataWriterRemote {
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface MessageDataReader : TAO::DCPS::DataReaderRemote {
+local interface MessageDataReader : DDS::DataReader {
     DDS::ReturnCode_t read(
                 inout MessageSeq received_data,
                 inout DDS::SampleInfoSeq info_seq,
@@ -153,5 +157,6 @@ interface MessageDataReader : TAO::DCPS::DataReaderRemote {
                 in DDS::InstanceHandle_t handle);
 };
 
+};
 
 

@@ -178,9 +178,6 @@ SubscriberImpl::create_datareader (
   ::TAO::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
-  // Give ownership to poa.
-  dr_servant->_remove_ref ();
-
   DomainParticipantImpl* participant =
     reference_to_servant<DomainParticipantImpl,
     ::DDS::DomainParticipant_ptr>(

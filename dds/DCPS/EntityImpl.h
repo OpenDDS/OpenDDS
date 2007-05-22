@@ -28,8 +28,7 @@ namespace TAO
     * e.g. DomainParticipantImpl, PublisherImpl ...
     */
     class TAO_DdsDcps_Export EntityImpl
-    : public virtual DDS::Entity,
-      public virtual LocalObject
+      : public virtual LocalObject<DDS::Entity>
     {
     public:
       ///Constructor

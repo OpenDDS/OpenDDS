@@ -26,14 +26,9 @@ namespace TAO
     *
     */
     class TAO_DdsDcps_Export TopicDescriptionImpl
-      : public virtual DDS::TopicDescription
+      : public virtual TAO::DCPS::LocalObject<DDS::TopicDescription>
     {
     public:
-      // to support servant_to_reference for local interface
-      typedef DDS::TopicDescription::_ptr_type _ptr_type;
-      // to support servant_to_reference for local interface
-      static  DDS::TopicDescription::_ptr_type _narrow (::CORBA::Object_ptr obj)
-        { return DDS::TopicDescription::_narrow(obj); };
 
       //Constructor
       TopicDescriptionImpl (const char*                    topic_name,

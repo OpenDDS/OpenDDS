@@ -107,9 +107,6 @@ namespace TAO
       ::DDS::Publisher_ptr pub_obj
         = servant_to_reference (pub);
 
-      // Give ownership to poa.
-      pub->_remove_ref ();
-
       pub->set_object_reference (pub_obj);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -249,9 +246,6 @@ namespace TAO
 
       ::DDS::Subscriber_ptr sub_obj
         = servant_to_reference (sub);
-
-      // Give ownership to poa.
-      sub->_remove_ref ();
 
       sub->set_object_reference (sub_obj);
 
@@ -1460,9 +1454,6 @@ namespace TAO
         }
 
       ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
-
-      // Give ownership to poa.
-      topic_servant->_remove_ref ();
 
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 

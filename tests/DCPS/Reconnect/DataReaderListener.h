@@ -13,15 +13,10 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual TAO::DCPS::DataReaderListener, // note: TAO specific extensions
-    public virtual TAO::DCPS::LocalObject
+  // note: TAO specific extensions
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
 {
 public:
-  // to support servant_to_reference for local interface
-  typedef DDS::DataReaderListener::_ptr_type _ptr_type;
-  // to support servant_to_reference for local interface
-  static  DDS::DataReaderListener::_ptr_type _narrow (::CORBA::Object_ptr obj)
-    { return DDS::DataReaderListener::_narrow(obj); };
 
   //Constructor
   DataReaderListenerImpl ();

@@ -28,16 +28,11 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export TopicImpl
-      : public virtual DDS::Topic,
+      : public virtual TAO::DCPS::LocalObject<DDS::Topic>,
         public virtual EntityImpl,
         public virtual TopicDescriptionImpl
     {
     public:
-      // to support servant_to_reference for local interface
-      typedef DDS::Topic::_ptr_type _ptr_type;
-      // to support servant_to_reference for local interface
-      static  DDS::Topic::_ptr_type _narrow (::CORBA::Object_ptr obj)
-        { return DDS::Topic::_narrow(obj); };
 
       //Constructor
       TopicImpl (const RepoId                   topic_id,

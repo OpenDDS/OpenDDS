@@ -45,15 +45,9 @@ sub contents { return <<'!EOT'
  *
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
-  : public virtual <%TYPE%>TypeSupport,
-    public virtual TAO::DCPS::LocalObject
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>TypeSupport>
 {
 public:
-  // to support servant_to_reference for local interface
-  typedef <%TYPE%>TypeSupport::_ptr_type _ptr_type;
-  // to support servant_to_reference for local interface
-  static  <%TYPE%>TypeSupport::_ptr_type _narrow (::CORBA::Object_ptr obj)
-    { return <%TYPE%>TypeSupport::_narrow(obj); };
 
   //Constructor
   <%TYPE%>TypeSupportImpl (void);
@@ -104,16 +98,10 @@ public:
  * this interface.
  */
 class <%EXPORT%> <%TYPE%>DataWriterImpl
-  : public virtual <%TYPE%>DataWriter,
-    public virtual TAO::DCPS::DataWriterImpl,
-    public virtual TAO::DCPS::LocalObject
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataWriter>,
+    public virtual TAO::DCPS::DataWriterImpl
 {
 public:
-  // to support servant_to_reference for local interface
-  typedef <%TYPE%>DataWriter::_ptr_type _ptr_type;
-  // to support servant_to_reference for local interface
-  static  <%TYPE%>DataWriter::_ptr_type _narrow (::CORBA::Object_ptr obj)
-    { return <%TYPE%>DataWriter::_narrow(obj); };
 
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
@@ -310,16 +298,10 @@ private:
  *
  */
 class <%EXPORT%> <%TYPE%>DataReaderImpl
-  : public virtual <%TYPE%>DataReader,
-    public virtual TAO::DCPS::DataReaderImpl,
-    public virtual TAO::DCPS::LocalObject
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataReader>,
+    public virtual TAO::DCPS::DataReaderImpl
 {
 public:
-  // to support servant_to_reference for local interface
-  typedef <%TYPE%>DataReader::_ptr_type _ptr_type;
-  // to support servant_to_reference for local interface
-  static  <%TYPE%>DataReader::_ptr_type _narrow (::CORBA::Object_ptr obj)
-    { return <%TYPE%>DataReader::_narrow(obj); };
 
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;

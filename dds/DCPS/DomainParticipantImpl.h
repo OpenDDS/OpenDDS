@@ -51,15 +51,10 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export DomainParticipantImpl
-      : public virtual DDS::DomainParticipant,
+      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipant>,
         public virtual TAO::DCPS::EntityImpl
     {
     public:
-      // to support servant_to_reference for local interface
-      typedef DDS::DomainParticipant::_ptr_type _ptr_type;
-      // to support servant_to_reference for local interface
-      static  DDS::DomainParticipant::_ptr_type _narrow (::CORBA::Object_ptr obj)
-        { return DDS::DomainParticipant::_narrow(obj); };
 
       typedef Objref_Servant_Pair <SubscriberImpl,
                                    ::DDS::Subscriber,

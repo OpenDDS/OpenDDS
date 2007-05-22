@@ -167,9 +167,6 @@ PublisherImpl::~PublisherImpl (void)
     ::DDS::DataWriter_ptr>
     (dw_obj.in ());
 
-  // Give owner ship to poa.
-  dw_servant->_remove_ref ();
-
   DataWriterRemoteImpl* writer_remote_impl = 0;
   ACE_NEW_RETURN(writer_remote_impl,
                  DataWriterRemoteImpl(dw_servant),
