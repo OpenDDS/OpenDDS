@@ -1,3 +1,14 @@
+Tue May 22 15:26:46 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+        * tests/transport/unit/framework:
+        * tests/transport/unit/framework/DummyTransport.h:
+        * tests/transport/unit/framework/DummyTransport.cpp:
+        * tests/transport/unit/framework/framework_Unit.mpc:
+        * tests/transport/unit/framework/main.cpp:
+
+          Adding a bugfix and the beginnings of a unit test for the LinkImpl.
+
 Tue May 22 14:46:40 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:

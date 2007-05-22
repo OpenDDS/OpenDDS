@@ -1,0 +1,81 @@
+#include "DummyTransport.h"
+#include "dds/DCPS/transport/framework/LinkImpl.h"
+#include <stdexcept>
+
+namespace
+{
+  void
+  assertTrue(bool condition)
+  {
+    if (!condition)
+    {
+      throw std::runtime_error("failure");
+    }
+  }
+
+  // We need this class to guarantee that the link exists as long as we have
+  // a LinkImpl. See the test code below.
+  class LinkGuard
+  {
+  public:
+    LinkGuard(TransportAPI::Transport& transport, TransportAPI::Transport::Link* link)
+      : transport_(transport)
+      , link_(link)
+    {
+    }
+
+    ~LinkGuard()
+    {
+      transport_.destroyLink(link_);
+    }
+
+    TransportAPI::Transport::Link& get()
+    {
+      return *link_;
+    }
+
+  private:
+    TransportAPI::Transport& transport_;
+    TransportAPI::Transport::Link* link_;
+  };
+
+  void testSuccess()
+  {
+    DummyTransport transport;
+    LinkGuard linkGuard(transport, transport.createLink());
+    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), transport.getMaximumBufferSize());
+
+    assertTrue(transport.log_.empty());
+
+    TransportAPI::BLOB* blob = 0;
+    TransportAPI::Status status = linkImpl.connect(blob);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(transport.log_.size() == 1);
+    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].second == 1);
+    transport.log_.clear();
+
+    ACE_Message_Block testMessage(1024);
+    TransportAPI::Id id(0);
+    status = linkImpl.send(testMessage, id);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(id == 2);
+    assertTrue(transport.log_[0].first == "send");
+    assertTrue(transport.log_[0].second == id);
+    transport.log_.clear();
+  }
+}
+
+int
+main(
+  int argc,
+  char* argv[]
+  )
+{
+  ACE_UNUSED_ARG(argc);
+  ACE_UNUSED_ARG(argv);
+
+  testSuccess();
+
+  return 0;
+}
