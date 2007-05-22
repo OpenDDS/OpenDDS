@@ -6,7 +6,6 @@ project(*) : dcps, portableserver {
   pch_header   =
   pch_source   =
   dcps_ts_flags += --export=FooLib_Export 
-  //REMOVE TBD SSH --module=Mine
 
   TypeSupport_Files {
     FooDef.idl >> FooNoKeyTypeSupport.idl FooNoKeyTypeSupportImpl.h FooNoKeyTypeSupportImpl.cpp FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp

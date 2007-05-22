@@ -33,7 +33,7 @@ private:
   ::DDS::DomainParticipant_var dp_ ;
   ::DDS::Publisher_var pub_ ;
   ::DDS::DataWriter_var dw_ ;
-  ::Mine::FooDataWriterImpl* fast_dw_ ;
+  ::Xyz::FooDataWriterImpl* fast_dw_ ;
 };
 
 #endif /* READER_H */

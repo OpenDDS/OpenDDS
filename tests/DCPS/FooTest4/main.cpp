@@ -17,6 +17,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
+#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
@@ -110,10 +111,9 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
 
-      ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
-      ::Mine::FooTypeSupport_var fts =
+      ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
