@@ -69,7 +69,7 @@ namespace TAO
         ACE_Thread_Mutex& extLock,
         ACE_Condition<ACE_Thread_Mutex>& extCondition,
         bool& extShutdown,
-        std::queue<IOItem>& extQueue,
+        std::deque<IOItem>& extQueue,
         bool& extConnected,
         bool& extBackpressure,
         bool& extRunning
@@ -115,7 +115,7 @@ namespace TAO
       bool deferred_;
       TransportAPI::Status deferredConnectionStatus_;
       TransportAPI::Status deferredStatus_;
-      std::queue<IOItem> queue_;
+      std::deque<IOItem> queue_;
       std::vector<IOItem> bufferedData_;
       std::pair<TransportAPI::Id, size_t> lastReceived_;
     };
