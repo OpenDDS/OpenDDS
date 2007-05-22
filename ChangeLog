@@ -1,3 +1,14 @@
+Tue May 22 20:26:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+
+          Eliminated build warnings.
+
+        * dds/DCPS/Service_Participant.h:
+
+          Whitespace formatting and removed ACE_dynamic_cast since it's
+          deprecated.
+
 Tue May 22 19:04:06 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_no_CORBA.mwc:
