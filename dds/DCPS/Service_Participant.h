@@ -339,9 +339,7 @@ namespace TAO
     template <class T_impl, class T_ptr>
     T_impl* reference_to_servant (T_ptr p)
     {
-      T_impl* the_servant = dynamic_cast<T_impl*> (p);
-
-      return the_servant;
+      return dynamic_cast<T_impl*> (p);
     }
 
     /// Given a servant, return the emote object reference from the local POA.
@@ -362,8 +360,9 @@ namespace TAO
       return the_obj;
     }
 
-    // for local interfaces servant_to_reference is a no-op
-    // we are guaranteed that the "servant" type is convertible to T*
+    // For local interfaces, servant_to_reference is a no-op.
+    // We are guaranteed that the "servant" type is convertible
+    // to the interface's stub type.
     template <class T>
     T *servant_to_reference (T *servant)
     {
