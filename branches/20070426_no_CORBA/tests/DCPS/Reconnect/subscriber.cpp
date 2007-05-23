@@ -144,8 +144,7 @@ int main (int argc, char *argv[])
 
     // Attach the subscriber to the transport.
     TAO::DCPS::SubscriberImpl* sub_impl =
-      ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
-                                         DDS::Subscriber_ptr> (sub.in ());
+      TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant\n" << endl;
       exit(1);

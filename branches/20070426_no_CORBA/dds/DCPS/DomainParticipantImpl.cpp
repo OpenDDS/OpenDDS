@@ -152,9 +152,7 @@ namespace TAO
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      PublisherImpl* the_servant
-        = reference_to_servant<PublisherImpl, ::DDS::Publisher_ptr>
-            (p);
+      PublisherImpl* the_servant = reference_to_servant<PublisherImpl> (p);
 
       if (the_servant->is_clean () == 0)
         {
@@ -292,9 +290,7 @@ namespace TAO
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      SubscriberImpl* the_servant
-        = reference_to_servant<SubscriberImpl, ::DDS::Subscriber_ptr>
-            (s);
+      SubscriberImpl* the_servant = reference_to_servant<SubscriberImpl> (s);
 
       if (the_servant->is_clean () == 0)
         {
@@ -541,17 +537,14 @@ namespace TAO
         // The servant's ref count should be greater than 2 at this point,
         // one referenced by poa, one referenced by the topic map and
         // others referenced by the datareader/datawriter.
-        TopicImpl* the_topic_servant
-          = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-              (a_topic);
+        TopicImpl* the_topic_servant = reference_to_servant<TopicImpl> (a_topic);
 
         CORBA::String_var topic_name = the_topic_servant->get_name();
 
         ::DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
 
-        DomainParticipantImpl* the_dp_servant
-          = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-              (dp.in());
+        DomainParticipantImpl* the_dp_servant =
+          reference_to_servant<DomainParticipantImpl> (dp.in ());
 
         if (the_dp_servant != this)
           {
@@ -963,9 +956,7 @@ namespace TAO
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::DomainParticipantListener::_duplicate(a_listener);
       fast_listener_
-        = reference_to_servant< ::DDS::DomainParticipantListener,
-                                ::DDS::DomainParticipantListener_ptr >
-            (listener_.in ());
+        = reference_to_servant<DDS::DomainParticipantListener> (listener_.in ());
       return ::DDS::RETCODE_OK;
     }
 
@@ -1816,8 +1807,7 @@ namespace TAO
       {
         // Attach the Subscriber with the TransportImpl.
         ::TAO::DCPS::SubscriberImpl* sub_servant
-          = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl, ::DDS::Subscriber_ptr>
-          (bit_subscriber_.in ());
+          = reference_to_servant<TAO::DCPS::SubscriberImpl> (bit_subscriber_.in ());
 
         TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ();
 

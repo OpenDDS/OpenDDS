@@ -60,9 +60,8 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
     {
-      fast_listener_ = reference_to_servant<DDS::PublisherListener,
-  DDS::PublisherListener_ptr>
-  (listener_.in());
+      fast_listener_ =
+        reference_to_servant<DDS::PublisherListener> (listener_.in ());
     }
 }
 
@@ -143,10 +142,7 @@ PublisherImpl::~PublisherImpl (void)
       return ::DDS::DataWriter::_nil();
     }
 
-  TopicImpl* topic_servant
-    = reference_to_servant<TopicImpl,
-    ::DDS::Topic_ptr>
-    (a_topic);
+  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic);
 
   TAO::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
 
@@ -163,9 +159,8 @@ PublisherImpl::~PublisherImpl (void)
 
   ::DDS::DataWriter_var dw_obj = typesupport->create_datawriter ();
 
-  DataWriterImpl* dw_servant = reference_to_servant <DataWriterImpl,
-    ::DDS::DataWriter_ptr>
-    (dw_obj.in ());
+  DataWriterImpl* dw_servant =
+    reference_to_servant <DataWriterImpl> (dw_obj.in ());
 
   DataWriterRemoteImpl* writer_remote_impl = 0;
   ACE_NEW_RETURN(writer_remote_impl,
@@ -177,8 +172,7 @@ PublisherImpl::~PublisherImpl (void)
 
 
   DomainParticipantImpl* participant
-    = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-    (participant_objref_.in ());
+    = reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
 
   dw_servant->init (a_topic,
         topic_servant,
@@ -245,8 +239,7 @@ PublisherImpl::~PublisherImpl (void)
     }
 
   DataWriterImpl* dw_servant
-    = reference_to_servant <DataWriterImpl, ::DDS::DataWriter_ptr>
-    (a_datawriter);
+    = reference_to_servant <DataWriterImpl> (a_datawriter);
 
   if (dw_servant->get_publisher_servant () != this)
     {
@@ -512,9 +505,7 @@ void PublisherImpl::get_qos (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::DDS::PublisherListener,
-    ::DDS::PublisherListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::PublisherListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
@@ -766,8 +757,7 @@ void PublisherImpl::remove_associations(
   info->remote_writer_objref_ = remote_writer ;
   info->local_writer_objref_ = local_writer ;
   info->local_writer_impl_
-    = reference_to_servant<DataWriterImpl, ::DDS::DataWriter_ptr>
-    (local_writer);
+    = reference_to_servant<DataWriterImpl> (local_writer);
 
   info->topic_id_      = topic_id ;
   // all other info memebers default in constructor

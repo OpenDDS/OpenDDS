@@ -132,8 +132,8 @@ Writer::svc ()
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
   write<Xyz::Foo,
-        ::Mine::FooDataWriter,
-        ::Mine::FooDataWriter_var>
+        ::Xyz::FooDataWriter,
+        ::Xyz::FooDataWriter_var>
         (writer_id_, timeout_writes_, writer_.in ());
 
   ACE_DEBUG((LM_DEBUG,

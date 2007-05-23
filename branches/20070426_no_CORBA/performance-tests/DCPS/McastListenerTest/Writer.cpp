@@ -50,8 +50,7 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   Wimpl* pt_servant =
-    ::TAO::DCPS::reference_to_servant< Wimpl, W_ptr>
-            (pt_dw.in ());
+    TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));

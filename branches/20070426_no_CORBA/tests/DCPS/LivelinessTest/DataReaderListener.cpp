@@ -163,10 +163,8 @@ void DataReaderListenerImpl::on_subscription_match (
                ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       }
 
-    ::Xyz::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl,
-                                           ::Xyz::FooDataReader_ptr>
-            (foo_dr.in ());
+    ::Xyz::FooDataReaderImpl* dr_servant
+      = TAO::DCPS::reference_to_servant<::Xyz::FooDataReaderImpl>(foo_dr.in());
 
     ::Xyz::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

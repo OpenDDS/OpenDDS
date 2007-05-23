@@ -200,10 +200,8 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in());
 
       if (0 == pub_impl)
         {

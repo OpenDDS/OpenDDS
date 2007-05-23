@@ -45,10 +45,8 @@ Reader::start ()
       throw TestException() ;
     }
 
-    ::Xyz::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl,
-                                           ::Xyz::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<::Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     char action[5] ;
     if (use_take_)
@@ -148,10 +146,8 @@ Reader::start1 ()
       throw TestException() ;
     }
 
-    ::Xyz::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl,
-                                           ::Xyz::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     char action[14] ;
     if (use_take_)
@@ -390,10 +386,8 @@ Reader::start2 ()
       throw TestException() ;
     }
 
-    ::Xyz::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl,
-                                           ::Xyz::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     ::Xyz::FooSeq foo;
     ::DDS::SampleInfoSeq si ;

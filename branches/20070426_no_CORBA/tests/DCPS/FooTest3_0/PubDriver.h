@@ -89,8 +89,8 @@ class PubDriver
     ::TAO::DCPS::PublisherImpl*  publisher_servant_;
     ::DDS::DataWriter_var        datawriter_;
     ::TAO::DCPS::DataWriterImpl* datawriter_servant_;
-    ::Mine::FooDataWriter_var    foo_datawriter_;
-    ::Mine::FooDataWriterImpl*   foo_datawriter_servant_;
+    ::Xyz::FooDataWriter_var    foo_datawriter_;
+    ::Xyz::FooDataWriterImpl*   foo_datawriter_servant_;
 
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;

@@ -7,6 +7,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
@@ -82,9 +83,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   try
     {
+      MessageDataReader_var mdr = MessageDataReader::_narrow (reader);
       MessageDataReaderImpl* dr_impl =
-        ::TAO::DCPS::reference_to_servant< MessageDataReaderImpl,
-        MessageDataReader_ptr> (MessageDataReader::_narrow (reader));
+        TAO::DCPS::reference_to_servant<MessageDataReaderImpl> (mdr.in());
       if (0 == dr_impl) {
         cerr << "Failed to obtain DataReader Implementation\n" << endl;
         exit(1);
@@ -98,7 +99,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 #else
 
       // types supporting zero-copy read 
-      ::TAO::DCPS::SampleInfoZCSeq the_info(0,MAX_ELEMS_TO_RETURN);
+      DDS::SampleInfoSeq the_info(0, MAX_ELEMS_TO_RETURN);
 
   #if 0
       // This is an example of the user-code providing its
@@ -114,7 +115,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       // The user might create a pooled allocator at a higher scope
       // (like a class member) that can reuse the allocator's pool 
       // and thus allow for fast and large sequences.
-      MessageZCSeq the_data (0, MAX_ELEMS_TO_RETURN);
+      MessageSeq the_data (0, MAX_ELEMS_TO_RETURN);
   #endif
 
       //======= begin old std::vector impl ======

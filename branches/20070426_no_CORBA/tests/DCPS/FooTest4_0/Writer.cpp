@@ -41,10 +41,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the publisher to the transport.
-  ::TAO::DCPS::PublisherImpl* pub_impl
-      = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                              ::DDS::Publisher_ptr>
-                              (pub_.in ());
+  TAO::DCPS::PublisherImpl* pub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -83,9 +81,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ = ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl,
-                                                ::Xyz::FooDataWriter_ptr>
-                (foo_dw.in ());
+  fast_dw_ =
+    TAO::DCPS::reference_to_servant<::Xyz::FooDataWriterImpl> (foo_dw.in ());
 
 }
 

@@ -152,9 +152,8 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
 
   if (! CORBA::is_nil (listener_.in()))
     {
-      fast_listener_ = reference_to_servant<DDS::DataWriterListener,
-  DDS::DataWriterListener_ptr>
-  (listener_.in());
+      fast_listener_ =
+        reference_to_servant<DDS::DataWriterListener> (listener_.in());
     }
   participant_servant_ = participant_servant;
   participant_servant_->_add_ref ();
@@ -516,9 +515,7 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::DDS::DataWriterListener,
-    ::DDS::DataWriterListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::DataWriterListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 

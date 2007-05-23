@@ -36,8 +36,7 @@ Writer::Writer(PubDriver*            pubdriver,
   pubdriver_ (pubdriver)
 {
   writer_servant_
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (writer_.in ());
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl> (writer_.in ());
 }
 
 void
@@ -89,8 +88,8 @@ Writer::svc ()
       foo.a_long_value = default_key;
     }
 
-    ::Mine::FooDataWriter_var foo_dw
-      = ::Mine::FooDataWriter::_narrow(writer_.in ());
+    ::Xyz::FooDataWriter_var foo_dw
+      = ::Xyz::FooDataWriter::_narrow(writer_.in ());
 
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 

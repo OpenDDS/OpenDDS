@@ -771,8 +771,8 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
         }
 
       // Attach the Publisher with the TransportImpl.
-      ::TAO::DCPS::PublisherImpl* pubServant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
+      TAO::DCPS::PublisherImpl* pubServant
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
         (bitPublisher_.in ());
 
       TAO::DCPS::AttachStatus status

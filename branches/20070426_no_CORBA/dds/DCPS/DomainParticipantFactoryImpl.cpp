@@ -186,8 +186,7 @@ namespace TAO
       // The servant's ref count should be 2 at this point, one referenced
       // by the poa and the other referenced by the map.
       DomainParticipantImpl* the_servant
-        = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-            (a_participant);
+        = reference_to_servant<DomainParticipantImpl> (a_participant);
 
       if (the_servant->is_clean () == 0)
         {

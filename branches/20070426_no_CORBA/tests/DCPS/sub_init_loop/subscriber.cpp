@@ -22,6 +22,8 @@
 #include <ace/Get_Opt.h>
 #include "ace/OS_NS_sys_stat.h"
 
+using namespace Messenger;
+
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
@@ -81,7 +83,6 @@ int main (int argc, char *argv[])
     }
 
     MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-    PortableServer::ServantBase_var safe_servant = mts_servant;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {
@@ -145,8 +146,7 @@ int main (int argc, char *argv[])
 
   // Attach the subscriber to the transport.
   TAO::DCPS::SubscriberImpl* sub_impl =
-    ::TAO::DCPS::reference_to_servant
-    < TAO::DCPS::SubscriberImpl, DDS::Subscriber_ptr> (sub.in ());
+    TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
   if (0 == sub_impl) {
     ACE_ERROR_RETURN ((LM_ERROR,
            "(%P|%t) Failed to obtain subscriber servant.\n")

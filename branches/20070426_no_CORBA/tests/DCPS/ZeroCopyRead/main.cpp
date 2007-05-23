@@ -376,10 +376,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                             ::DDS::Subscriber_ptr>
-                              (sub.in ());
+      TAO::DCPS::SubscriberImpl* sub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -392,10 +390,8 @@ int main (int argc, char *argv[])
 
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -457,9 +453,8 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataWriterImpl* fast_dw =
-        ::TAO::DCPS::reference_to_servant< Test::SimpleDataWriterImpl,
-                                           Test::SimpleDataWriter_ptr>
-                (foo_dw.in ());
+        TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
+        (foo_dw.in ());
 
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
@@ -471,9 +466,8 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataReaderImpl* fast_dr =
-        ::TAO::DCPS::reference_to_servant< Test::SimpleDataReaderImpl,
-                                           Test::SimpleDataReader_ptr>
-                (foo_dr.in ());
+        TAO::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
+        (foo_dr.in ());
 
 
       // wait for association establishement before writing.
