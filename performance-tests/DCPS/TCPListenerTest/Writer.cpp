@@ -39,10 +39,12 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant = TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
+  // Note: in v 0.12 and before interfaces were remote (although collocated) 
+  //       and using the servant directly rather than the DataReader reference
+  //       had performance benefits but with the change to local
+  //       interfaces this is no longer needed.
+  // Wimpl* pt_servant = TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
 
-  //SHH remove this kludge when the transport is fixed.
-  //ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
@@ -53,8 +55,8 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
-    pt_servant->write(data,
-                      handle);
+    pt_dw->write(data,
+                 handle);
   }
   }
 }

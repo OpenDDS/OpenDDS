@@ -1,3 +1,21 @@
+Wed May 23 21:00:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+
+          Resolved a problem with reference counting.
+
+        * DDS_release_notes.txt:
+
+          Added more notes about servants vs object references.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Changed the tests to not use servants for the write and read calls.
+          There is no longer a performance benefit (thanks to local interfaces).
+          Added comments to that effect.
+
 Wed May 23 17:19:02 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/publisher.cpp:

@@ -50,20 +50,73 @@ New to this version are the following changes:
     
     3) Stub/implemenation reference counting cleanup object like:
        should change from:
+       
           FooTypeSupportImpl* fts_servant
-            = new FooTypeSupportImpl();
+            = new FooTypeSupportImpl;
           PortableServer::ServantBase_var safe_servant = fts_servant;
+       
        to:
+       
           FooTypeSupportImpl* fts_servant
-            = new FooTypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = fts_servant;;
+            = new FooTypeSupportImpl;
+          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+       
+       But even better would be:
+       
+          FooTypeSupport_var fts_servant = new FooTypeSupportImpl;
+          
+       because it avoids the safe_servant line and 
+       the need for code like:
+       
+           SimpleTypeSupport_var fts =
+                TAO::DCPS::servant_to_reference (sts_servant);
+                
+       to get the reference.
+       
+       For example:
+		SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
+		PortableServer::ServantBase_var safe_servant = sts_servant;
 
+		SimpleTypeSupport_var fts =
+			TAO::DCPS::servant_to_reference (sts_servant);
 
-	4) The need to user reference_to_servant() to increase performance
+		if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
+
+       becomes:
+
+		SimpleTypeSupport_var fts = new SimpleTypeSupportImpl;
+
+		if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
+		
+	   
+	   
+    4) Since the DCPS interfaces are not local, there is very little 
+       performance gain to convert from _var to a servant pointer.
+       
+       For example:
+           ::DDS::DataWriter_var dw = 
+                 pub->create_datawriter(topic.in (),
+                                        dw_qos,
+                                        ::DDS::DataWriterListener::_nil());
+
+			Test::SimpleDataWriter_var foo_dw
+				= Test::SimpleDataWriter::_narrow(dw.in ());
+
+			// This is unnesesary but will still work.
+			// Previously fast_dw was used to increase the 
+			// performance of writing samples.
+			Test::SimpleDataWriterImpl* fast_dw =
+			    TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
+			    (foo_dw.in ());
+		
+		Also, a pointer to the servant is no longer needed for making
+		calls on zero-copy read supporting overloaded methods.
+
+	5) The need to user reference_to_servant() to increase performance
 	of an application has been reduced by making the entity interfaces local.
 	An application may still do so.
 
-	5) If the user defined DDS type is in a module then the generated types will
+	6) If the user defined DDS type is in a module then the generated types will
 	also be in that same module.
 
 			Given a "Foo" DDS type defined in the module "Test":
@@ -74,10 +127,10 @@ New to this version are the following changes:
 			reader    FooDataReader Test::FooDataReader
 			writer    FooDataWriter Test::FooDataWriter
 
-	6) The --module option to dcps_ts.pl is no longer supported. 
-	   The module is set as described in point #5 above.
+	7) The --module option to dcps_ts.pl is no longer supported. 
+	   The module is set as described in point #6 above.
 
-	7) What did not change.
+	8) What did not change.
 	You may use the following:
 	<entity>_var, <entity>_ptr 
 	<entity>::_narrrow()    // might use this for a listener
