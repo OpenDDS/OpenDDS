@@ -49,7 +49,6 @@ GetOptions( "verbose!"    => \$verbose,
             "dir|S=s"     => \$subdir,
             "export|X=s"  => \$exportmacro,
             "pch=s"       => \$pchfile,
-            "module|M=s"  => \$modulepath,
             "idl=s"       => \$file,
             "timestamp|t" => \$backup,
             "backup!"     => \$backup,
@@ -134,7 +133,7 @@ my $namespaceend   = "" ;
 my $module         = "" ;
 # default to the same modulepath as the scope path (new for v0.12 5/9/07)
 if ($modulepath) {
-  &console( "The Module scope was specified.") ;
+  &console( "The Module scope was specified. -- SHOULD NEVER HAPPEN the option was removed.") ;
 } else {
   &console( "Defaulting Module scope to the path scope $scopepath minus ::.") ;
   $modulepath = $scopepath;
@@ -381,7 +380,6 @@ perl ./dcps_ts.pl [options] [IDLfile]
  --dir=S     - subdirectory for input and output files
  --export=S  - export macro to use
  --pch=S     - PreCompiled Header file to be included
- --module=S  - module path for generated TypeSupport
  --idl=S     - IDL defining types to be supported
  --timestamp - append a timestamp to generated filenames
  --nobackup  - do NOT append a timestamp to generated filenames
@@ -426,12 +424,6 @@ generated code.
 Indicates the Precompiled Header file to be included in the generated C++
 implementation code.  If not specified, there will be no inclue placed 
 in the generated code.
-
-=item B<--module | -M> = string
-
-Indicates the IDL module in which to locate the generated IDL
-TypeSupport code.  If not specified, the generated code will be located
-in the global namespace.
 
 =item B<--idl> = string
 

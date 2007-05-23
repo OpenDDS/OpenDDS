@@ -92,10 +92,10 @@ int init (int argc, ACE_TCHAR *argv[])
       // TBD - find some way to avoid this.
     ACE_OS::sleep (2);
 
-      ::Mine::FooTypeSupportImpl* ts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = ts_servant;
+      ::Xyz::FooTypeSupportImpl* ts_servant = new ::Xyz::FooTypeSupportImpl();
+      TAO::DCPS::LocalObject_var safe_servant = ts_servant;
 
-      ::Mine::FooTypeSupport_var ts =
+      ::Xyz::FooTypeSupport_var ts =
         TAO::DCPS::servant_to_reference (ts_servant);
 
       if (::DDS::RETCODE_OK != ts->register_type(participant.in (), TEST_TOPIC_TYPE))
