@@ -46,13 +46,15 @@ TAO::DCPS::LinkImpl::open(void* args)
 int
 TAO::DCPS::LinkImpl::close(u_long flags)
 {
-  Guard guard(lock_);
-  if (!running_ || shutdown_)
   {
-    return -1;
+    Guard guard(lock_);
+    if (!running_ || shutdown_)
+    {
+      return -1;
+    }
+    shutdown_ = true;
+    condition_.signal();
   }
-  shutdown_ = true;
-  condition_.signal();
   if (threadId_ != ACE_OS::thr_self())
   {
     wait();
@@ -100,6 +102,7 @@ TAO::DCPS::LinkImpl::performWork(
   bool backpressure = true;
   {
     Guard guard(extLock);
+
     while (!extShutdown && extQueue.empty() && !extConnected && extBackpressure)
     {
       extCondition.wait();
@@ -121,21 +124,31 @@ TAO::DCPS::LinkImpl::performWork(
     // Try to send the head of the queue
     // If we get immediate success as the return value, then remove it and
     // try the next element.
+    bool haveEntry = false;
     {
       Guard guard(extLock);
       if (extract)
       {
-        extQueue.pop_front();
         entry = extQueue.front();
         extract = false;
+        haveEntry = true;
       }
-      queueEmpty = extQueue.empty();
       connected = extConnected;
       backpressure = extBackpressure;
     }
-    if (!queueEmpty && connected && !backpressure)
+    if (haveEntry && connected && !backpressure)
     {
       extract = trySending(entry, false);
+      if (extract)
+      {
+        Guard guard(extLock);
+        extQueue.pop_front();
+        queueEmpty = extQueue.empty();
+      }
+    }
+    else
+    {
+      return true;
     }
   }
   return true;
@@ -161,6 +174,7 @@ TAO::DCPS::LinkImpl::connect(
     else
     {
       connectionDeferred_ = false;
+      connected_ = (status.first == TransportAPI::SUCCESS);
     }
     return status;
   }
@@ -496,7 +510,7 @@ TAO::DCPS::LinkImpl::deliver(
   for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
   {
     IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == first, iter == last);
-    if (enqueued)
+    if (enqueued || backpressure_)
     {
       queue_.push_back(item);
     }
@@ -507,8 +521,7 @@ TAO::DCPS::LinkImpl::deliver(
     }
     ++sequenceNumber;
   }
-  // Only signal if we're connected!
-  if (connected_ && enqueued)
+  if (enqueued)
   {
     condition_.signal();
   }
