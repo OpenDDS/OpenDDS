@@ -41,10 +41,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the subscriber to the transport.
-  ::TAO::DCPS::SubscriberImpl* sub_impl
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                         ::DDS::Subscriber_ptr>
-                    (sub_.in ());
+  TAO::DCPS::SubscriberImpl* sub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub_.in ());
 
   if (0 == sub_impl)
   {
@@ -153,9 +151,7 @@ Reader::read (const SampleInfoMap& si_map,
       }
 
       ::Xyz::FooDataReaderImpl* dr_servant =
-          ::TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl,
-                                             ::Xyz::FooDataReader_ptr>
-              (foo_dr.in ());
+        TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,

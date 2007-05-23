@@ -48,9 +48,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
       throw TestException() ;
     }
 
-  Rimpl* dr_servant =
-      ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr.in());
+  Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (pt_dr.in ());
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);

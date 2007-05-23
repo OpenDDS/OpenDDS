@@ -29,10 +29,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   R_var var_dr
     = R::_narrow(reader);
 
-  R_ptr pt_dr = var_dr.ptr();
-  Rimpl* dr_servant =
-      ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr);
+  Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
 
   if (subscriber_delay_msec)
     {

@@ -135,8 +135,7 @@ int main (int argc, char *argv[]) {
 
     // Attach the publisher to the transport.
     TAO::DCPS::PublisherImpl* pub_impl =
-      ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl,
-                                         DDS::Publisher_ptr>(pub.in ());
+      TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
       exit(1);

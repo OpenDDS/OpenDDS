@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the publishing entity */
        TAO::DCPS::PublisherImpl* p_impl =
-         ::TAO::DCPS::reference_to_servant <TAO::DCPS::PublisherImpl, DDS::Publisher_ptr> (p);
+         TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (p);
        p_impl->attach_transport (pub_tcp_impl.in ());
 
 
@@ -190,8 +190,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the subscribing entity */
        TAO::DCPS::SubscriberImpl* sub_impl =
-         ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
-                               DDS::Subscriber_ptr> (s.in ());
+         TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (s.in ());
        sub_impl->attach_transport(sub_tcp_impl.in());
 
 

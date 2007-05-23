@@ -122,10 +122,9 @@ int main (int argc, char *argv[])
         dp->lookup_topicdescription(MY_TOPIC);
       TEST_CHECK (! CORBA::is_nil (description.in ()));
 
-      ::TAO::DCPS::TopicDescriptionImpl* ti
-        = ::TAO::DCPS::reference_to_servant<TAO::DCPS::TopicDescriptionImpl,
-                                            ::DDS::TopicDescription_ptr>
-          (description.in ());
+      TAO::DCPS::TopicDescriptionImpl* ti =
+        TAO::DCPS::reference_to_servant<TAO::DCPS::TopicDescriptionImpl>
+        (description.in ());
       TEST_CHECK (ti != 0);
 
       ::DDS::DataReader_var dr =

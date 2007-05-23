@@ -158,9 +158,8 @@ void DataReaderImpl::init (
 
   if (! CORBA::is_nil (listener_.in()))
     {
-      fast_listener_ = reference_to_servant<DDS::DataReaderListener,
-	DDS::DataReaderListener_ptr>
-	(listener_.in());
+      fast_listener_ =
+        reference_to_servant<DDS::DataReaderListener> (listener_.in ());
     }
   participant_servant_ = participant;
   participant_servant_->_add_ref ();
@@ -612,9 +611,7 @@ void DataReaderImpl::get_qos (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::DDS::DataReaderListener,
-    ::DDS::DataReaderListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::DataReaderListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 

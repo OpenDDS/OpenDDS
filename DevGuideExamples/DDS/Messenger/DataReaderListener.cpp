@@ -36,8 +36,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
     // Alternate code to read directlty via the servant
     //MessageDataReaderImpl* dr_servant =
-    //  reference_to_servant< MessageDataReaderImpl,
-    //                        MessageDataReader_ptr>(message_dr.in());
+    //  reference_to_servant<MessageDataReaderImpl>(message_dr.in());
     //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {

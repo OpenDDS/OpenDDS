@@ -59,9 +59,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
   if (! CORBA::is_nil (a_listener))
     {
       fast_listener_ =
-	reference_to_servant<DDS::SubscriberListener,
-	DDS::SubscriberListener_ptr>
-	(listener_.in ());
+        reference_to_servant<DDS::SubscriberListener> (listener_.in ());
     }
 }
 
@@ -108,10 +106,7 @@ SubscriberImpl::create_datareader (
 
   ::DDS::DataReaderQos dr_qos;
 
-  TopicImpl* topic_servant =
-    reference_to_servant<TopicImpl,
-    DDS::TopicDescription_ptr>(
-			       a_topic_desc);
+  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic_desc);
 
   if (qos == DATAREADER_QOS_DEFAULT)
     {
@@ -167,8 +162,7 @@ SubscriberImpl::create_datareader (
     ::DDS::DataReader_var dr_obj = typesupport->create_datareader();
 
   DataReaderImpl* dr_servant =
-    reference_to_servant<DataReaderImpl, ::DDS::DataReader_ptr>
-    (dr_obj.in ());
+    reference_to_servant<DataReaderImpl> (dr_obj.in ());
 
   DataReaderRemoteImpl* reader_remote_impl = 0;
   ACE_NEW_RETURN(reader_remote_impl,
@@ -179,9 +173,7 @@ SubscriberImpl::create_datareader (
       servant_to_remote_reference(reader_remote_impl);
 
   DomainParticipantImpl* participant =
-    reference_to_servant<DomainParticipantImpl,
-    ::DDS::DomainParticipant_ptr>(
-				  participant_objref_.in ());
+    reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
 
   dr_servant->init (topic_servant,
 		    dr_qos,
@@ -251,8 +243,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   DataReaderImpl* dr_servant
-    = reference_to_servant <DataReaderImpl, ::DDS::DataReader_ptr>
-    (a_datareader);
+    = reference_to_servant<DataReaderImpl> (a_datareader);
 
   if (dr_servant->get_subscriber_servant () != this)
     {
@@ -586,9 +577,7 @@ SubscriberImpl::set_listener (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::DDS::SubscriberListener,
-    ::DDS::SubscriberListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::SubscriberListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 

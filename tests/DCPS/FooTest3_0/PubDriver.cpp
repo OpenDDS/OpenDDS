@@ -220,10 +220,9 @@ PubDriver::initialize(int& argc, char *argv[])
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-  ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-   PortableServer::ServantBase_var safe_servant = fts_servant;
+  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
-  ::Mine::FooTypeSupport_var fts =
+  ::Xyz::FooTypeSupport_var fts =
     ::TAO::DCPS::servant_to_reference (fts_servant);
 
   participant_ =
@@ -263,8 +262,8 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in ());
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+    (publisher_.in ());
 
   attach_to_transport ();
 
@@ -332,11 +331,9 @@ PubDriver::initialize(int& argc, char *argv[])
   // the topics should point to the same servant
   // but not the same Object Reference.
   TopicImpl* topic_got_servant
-    = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_got.in ());
+    = reference_to_servant<TopicImpl> (topic_got.in ());
   TopicImpl* topic_servant
-    = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_.in ());
+    = reference_to_servant<TopicImpl> (topic_.in ());
 
   TEST_CHECK (topic_got_servant == topic_servant);
 
@@ -384,17 +381,16 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (datawriter_.in ());
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl> (datawriter_.in ());
 
   foo_datawriter_
-    = ::Mine::FooDataWriter::_narrow(datawriter_.in ());
+    = ::Xyz::FooDataWriter::_narrow(datawriter_.in ());
 
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
-    = ::TAO::DCPS::reference_to_servant < ::Mine::FooDataWriterImpl, ::Mine::FooDataWriter_ptr>
-      (foo_datawriter_.in ());
+    = TAO::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
+    (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);
 }

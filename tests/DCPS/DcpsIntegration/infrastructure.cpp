@@ -87,7 +87,6 @@ main (int argc, char *argv[])
       // --
 
       TAO_DCPS_DomainParticipantListener_i* dpListenerImpl = new TAO_DCPS_DomainParticipantListener_i;
-      PortableServer::ServantBase_var safe_dpListenerImpl = dpListenerImpl;
 
       ::DDS::DomainParticipantListener_var dpListener =
         ::TAO::DCPS::servant_to_reference (dpListenerImpl);

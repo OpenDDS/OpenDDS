@@ -106,9 +106,8 @@ int init (int argc, ACE_TCHAR *argv[])
       }
 
       participant_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DomainParticipantImpl,
-                                              ::DDS::DomainParticipant_ptr>
-          (participant.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+        (participant.in ());
 
       topic = participant->create_topic (TEST_TOPIC,
                                          TEST_TOPIC_TYPE,
@@ -116,18 +115,15 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::TopicListener::_nil ());
 
       topic_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::TopicImpl,
-                                              ::DDS::Topic_ptr>
-          (topic.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl> (topic.in ());
 
       subscriber
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
                                          ::DDS::SubscriberListener::_nil ());
 
       subscriber_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl,
-                                              ::DDS::Subscriber_ptr>
-          (subscriber.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>
+        (subscriber.in ());
 
       // Attach the subscriber to transport
       if (0 != attach_subscriber_transport() )
@@ -146,9 +142,8 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::PublisherListener::_nil ());
 
       publisher_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl,
-                                              ::DDS::Publisher_ptr>
-          (publisher.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+        (publisher.in ());
 
       // Attach the publisher to transport
       if (0 != attach_publisher_transport() )
@@ -171,9 +166,8 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::DataReaderListener::_nil ());
 
       datareader_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataReaderImpl,
-                                              ::DDS::DataReader_ptr>
-          (datareader.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::DataReaderImpl>
+        (datareader.in ());
 
       datawriter
         = publisher->create_datawriter (topic.in (),
@@ -181,9 +175,8 @@ int init (int argc, ACE_TCHAR *argv[])
                                         ::DDS::DataWriterListener::_nil ());
 
       datawriter_servant
-        = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::DataWriterImpl,
-                                              ::DDS::DataWriter_ptr>
-          (datawriter.in ());
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl>
+        (datawriter.in ());
   }
   catch (...)
     {

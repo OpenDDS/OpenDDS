@@ -72,7 +72,6 @@ main (int argc, char *argv[])
 
 
       TAO_DCPS_DomainParticipantListener_i* dpListenerImpl = new TAO_DCPS_DomainParticipantListener_i;
-      PortableServer::ServantBase_var safe_dpListenerImpl = dpListenerImpl;
 
       ::DDS::DomainParticipantListener_var dpListener =
         ::TAO::DCPS::servant_to_reference (dpListenerImpl);
@@ -98,7 +97,6 @@ main (int argc, char *argv[])
 
       // Intialize the type support
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_fts_servant = fts_servant;
 
       FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
@@ -284,7 +282,6 @@ main (int argc, char *argv[])
 
 
       TAO_DCPS_TopicListener_i* topicListenerImpl = new TAO_DCPS_TopicListener_i;
-      PortableServer::ServantBase_var safe_topicListenerImpl = topicListenerImpl;
 
       ::DDS::TopicListener_var topicListener =
         ::TAO::DCPS::servant_to_reference (topicListenerImpl);
