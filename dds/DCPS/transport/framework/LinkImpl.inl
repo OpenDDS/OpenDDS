@@ -92,4 +92,5 @@ TAO::DCPS::LinkImpl::~LinkImpl(
   )
 {
   link_.setCallback(0);
+  close(0);
 }
