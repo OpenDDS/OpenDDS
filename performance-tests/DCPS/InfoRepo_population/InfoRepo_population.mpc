@@ -4,6 +4,7 @@ project(*Server) : taoexe, portableserver {
   idlflags    += -I../Sync
   includes += ../Sync
   libs += SyncServer
+  after += Sync_ServerLib
 
   IDL_Files {
     SyncExt.idl
