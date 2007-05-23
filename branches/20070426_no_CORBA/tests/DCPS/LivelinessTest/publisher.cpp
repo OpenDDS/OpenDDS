@@ -238,7 +238,7 @@ int main (int argc, char *argv[])
 
 
       ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-//      PortableServer::ServantBase_var safe_servant = fts_servant;
+      TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
       ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
