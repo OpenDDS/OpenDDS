@@ -1,3 +1,21 @@
+Wed May 23 16:20:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added the "user impacts" to the DDS_release_notes.txt.
+
+        * dds/DCPS/LocalObject.h:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Replaced lines like:
+            PortableServer::ServantBase_var safe_servant = fts_servant
+          with:
+            TAO::DCPS::LocalObject_var safe_servant = sts_servant;
+
 Tue May 22 20:26:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/LocalObject.h:

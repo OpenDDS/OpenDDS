@@ -327,7 +327,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooNoKeyTypeSupportImpl* nokey_fts_servant
             = new ::Xyz::FooNoKeyTypeSupportImpl();
-          //x PortableServer::ServantBase_var safe_servant = nokey_fts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = nokey_fts_servant;
 
           if (::DDS::RETCODE_OK != nokey_fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -354,7 +354,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooTypeSupportImpl* fts_servant
             = new ::Xyz::FooTypeSupportImpl();
-          //x :PortableServer::ServantBase_var safe_servant = fts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {

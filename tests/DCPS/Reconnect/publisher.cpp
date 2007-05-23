@@ -100,7 +100,7 @@ int main (int argc, char *argv[]) {
     }
 
     Messenger::MessageTypeSupportImpl* servant = new Messenger::MessageTypeSupportImpl();
-    //x PortableServer::ServantBase_var safe_servant = servant;
+    TAO::DCPS::LocalObject_var safe_servant = servant;
 
     if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
       cerr << "register_type failed." << endl;
