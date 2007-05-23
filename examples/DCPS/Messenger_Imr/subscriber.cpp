@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
       }
 
       MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = mts_servant;
+      TAO::DCPS::LocalObject_var safe_servant = mts_servant;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (), "")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;

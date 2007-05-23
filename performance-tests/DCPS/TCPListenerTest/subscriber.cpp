@@ -156,7 +156,7 @@ int main (int argc, char *argv[])
       case 128:
         {
           ::Xyz::Pt128TypeSupportImpl* pt128ts_servant = new ::Xyz::Pt128TypeSupportImpl();
-          //PortableServer::ServantBase_var safe_servant = pt128ts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = pt128ts_servant;
 
           ::Xyz::Pt128TypeSupport_var pt128ts =
             TAO::DCPS::servant_to_reference (pt128ts_servant);
@@ -172,7 +172,7 @@ int main (int argc, char *argv[])
       case 512:
         {
           ::Xyz::Pt512TypeSupportImpl* pt512ts_servant = new ::Xyz::Pt512TypeSupportImpl();
-          //PortableServer::ServantBase_var safe_servant = pt512ts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = pt512ts_servant;
 
           ::Xyz::Pt512TypeSupport_var pt512ts =
             TAO::DCPS::servant_to_reference (pt512ts_servant);
@@ -188,7 +188,7 @@ int main (int argc, char *argv[])
       case 2048:
         {
           ::Xyz::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Xyz::Pt2048TypeSupportImpl();
-          //PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = pt2048ts_servant;
 
           ::Xyz::Pt2048TypeSupport_var pt2048ts =
             TAO::DCPS::servant_to_reference (pt2048ts_servant);
@@ -204,7 +204,7 @@ int main (int argc, char *argv[])
       case 8192:
         {
           ::Xyz::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Xyz::Pt8192TypeSupportImpl();
-          //PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
+          TAO::DCPS::LocalObject_var safe_servant = pt8192ts_servant;
 
           ::Xyz::Pt8192TypeSupport_var pt8192ts =
             TAO::DCPS::servant_to_reference (pt8192ts_servant);
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
                                    RECVS_BTWN_READS,
                                    use_zero_copy_reads);
 
-      //PortableServer::ServantBase_var safe_servant = dr_listener_impl;
+      TAO::DCPS::LocalObject_var safe_servant = dr_listener_impl;
 
       ::DDS::DataReaderListener_var dr_listener =
         TAO::DCPS::servant_to_reference (dr_listener_impl);
