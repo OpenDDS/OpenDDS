@@ -290,11 +290,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-      Test::SimpleTypeSupportImpl* sts_servant = new Test::SimpleTypeSupportImpl();
-      TAO::DCPS::LocalObject_var safe_servant = sts_servant;
-
-      Test::SimpleTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (sts_servant);
+      Test::SimpleTypeSupport_var fts = new Test::SimpleTypeSupportImpl();
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,

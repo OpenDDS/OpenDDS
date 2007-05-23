@@ -23,13 +23,22 @@ extern long subscriber_delay_msec; // from common.h
 template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 {
-  // TWF: There is an optimization to the test by
-  // using a pointer to the known servant and
-  // static_casting it to the servant
+  // Since our listener is on the DataReader we always know
+  // that the "reader" parameter will be the one associated
+  // with this listener so we could keep the R_var value
+  // instead of narrowing it for each call but the 
+  // performance gain would be very minimal.
   R_var var_dr
     = R::_narrow(reader);
 
-  Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
+  // Note: in v 0.12 and before the zero-copy read enabled interface
+  //       was only available via the servant but with the change
+  //       to local interfaces the local object reference can be used.
+  // Note: in v 0.12 and before interfaces were remote (although collocated) 
+  //       and using the servant directly rather than the DataReader reference
+  //       had performance benefits but with the change to local
+  //       interfaces this is no longer needed.
+  //Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
 
   if (subscriber_delay_msec)
     {
@@ -51,7 +60,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   DDS::ReturnCode_t status;
   // initialize to zero.
 
-  status = dr_servant->read (
+  status = var_dr->read (
     samples,
     infos,
     max_read_samples,
@@ -72,7 +81,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
         ACE_OS::printf (" read  data: Error: %d\n", status) ;
     }
 
-  status = dr_servant->return_loan(samples, infos);
+  status = var_dr->return_loan(samples, infos);
   if (status != ::DDS::RETCODE_OK)
   {
       // TBD - why is printf used for errors?
