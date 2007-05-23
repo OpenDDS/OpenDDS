@@ -10,7 +10,7 @@ namespace TAO
 {
   namespace DCPS
   {
-    // support "TAO::DCPS" style _prt and _var
+    // support "TAO::DCPS" style _ptr and _var
     typedef CORBA::LocalObject_ptr LocalObject_ptr;
     typedef CORBA::LocalObject_var LocalObject_var;
 
@@ -22,10 +22,7 @@ namespace TAO
     template <class Stub>
     class LocalObject
       : public virtual Stub
-      , public virtual CORBA::LocalObject
-      // Note: used CORBA::LocalObject instead of TAO_Local_RefCounted_Object
-      // to avoid reference counting problems (as in the_type->_add_ref();
-      // in Data_Types_Register::register_type)
+      , public virtual TAO_Local_RefCounted_Object
     {
     public:
       typedef typename Stub::_ptr_type _ptr_type;
