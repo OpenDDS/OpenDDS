@@ -1,3 +1,9 @@
+Wed May 23 15:42:48 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+          This project is dependent upon the ../Sync libraries. Add
+          dependency to serialize build.
+
 Tue May 22 21:52:14 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/Sync:
