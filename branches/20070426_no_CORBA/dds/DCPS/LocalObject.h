@@ -10,6 +10,11 @@ namespace TAO
 {
   namespace DCPS
   {
+    // support "TAO::DCPS" style _prt and _var
+    typedef CORBA::LocalObject_ptr LocalObject_ptr;
+    typedef CORBA::LocalObject_var LocalObject_var;
+
+
     /// TAO::DCPS::LocalObject resolves ambigously-inherited members like
     /// _narrow and _ptr_type.  It is used from client code like so:
     /// class MyReaderListener

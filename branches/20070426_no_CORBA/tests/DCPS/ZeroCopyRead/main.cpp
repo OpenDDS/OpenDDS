@@ -291,7 +291,7 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
       Test::SimpleTypeSupportImpl* sts_servant = new Test::SimpleTypeSupportImpl();
-      //REMOVE fix this PortableServer::ServantBase_var safe_servant = sts_servant;
+      TAO::DCPS::LocalObject_var safe_servant = sts_servant;
 
       Test::SimpleTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (sts_servant);

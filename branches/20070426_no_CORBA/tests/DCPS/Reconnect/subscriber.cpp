@@ -106,7 +106,7 @@ int main (int argc, char *argv[])
     }
 
     Messenger::MessageTypeSupportImpl* mts_servant = new Messenger::MessageTypeSupportImpl();
-    //x PortableServer::ServantBase_var safe_servant = mts_servant;
+    TAO::DCPS::LocalObject_var safe_servant = mts_servant;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {
