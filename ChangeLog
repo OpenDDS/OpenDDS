@@ -1,3 +1,10 @@
+Wed May 23 22:25:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+
+          Reverted the change directly below this one.  The release notes and
+          tests still need to be fixed for this.
+
 Wed May 23 21:00:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/LocalObject.h:
@@ -39,14 +46,14 @@ Wed May 23 17:19:02 UTC 2007  Scott Harris  <harris_s@ociweb.com>
         * tests/DCPS/SimpleFooTest/main.cpp:
         * tests/DCPS/unit/Main.cpp:
 
-          Changed all 
-			PortableServer::ServantBase_var safe_servant = fts_servant;
-		  to 
-		    TAO::DCPS::LocalObject_var safe_servant
-		  where appropriate.  
-		  
-		  No others should be changed because they are POA servants
-		  and not local objects.
+          Changed all
+                        PortableServer::ServantBase_var safe_servant = fts_servant;
+                  to
+                    TAO::DCPS::LocalObject_var safe_servant
+                  where appropriate.
+
+                  No others should be changed because they are POA servants
+                  and not local objects.
 
 Wed May 23 17:01:27 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
