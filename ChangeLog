@@ -1,9 +1,20 @@
+Thu May 24 00:30:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Changed TAO::DCPS::servant_to_reference() to increment the reference
+          count as it did before we switched to local interfaces.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+          Removed #if code used to allow build 
+          with old style <type>SZSeq type.
+
 Wed May 23 22:25:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/LocalObject.h:
 
-          Reverted the change directly below this one.  The release notes and
-          tests still need to be fixed for this.
+          Reverted the change directly below this one.
 
 Wed May 23 21:00:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 

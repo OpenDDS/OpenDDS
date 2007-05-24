@@ -14,12 +14,6 @@
 
 extern long subscriber_delay_msec; // from common.h
 
-// defined this to build with code only supporting the zero-copy type
-// but strongly supporting it.
-// Comment out this line to build with code that supports the default use of zero-copy
-// but also supports the original sequence type.
-#define WITH_ZERO_COPY_ONLY
-
 template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 {
@@ -48,13 +42,8 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
     }
 
   const ::CORBA::Long max_read_samples = 100;
-#ifdef WITH_ZERO_COPY_ONLY
   Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
   Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
-#else
-  Tseq samples(0); //max_read_samples);
-  Iseq infos(0); //max_read_samples);
-#endif
 
   int samples_recvd = 0;
   DDS::ReturnCode_t status;
