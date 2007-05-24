@@ -2,6 +2,7 @@
 #define _SYNC_CLIENT_I_
 
 #include "SyncS.h"
+#include "Sync_export.h"
 
 #include "ace/Task.h"
 
@@ -14,7 +15,7 @@
  * ORB_Ptr) will be created by the SyncClient itself
  ***/
 
-class SyncClient_i : public POA_Sync::Client, public ACE_Task_Base
+class Sync_Export SyncClient_i : public POA_Sync::Client, public ACE_Task_Base
 {
  public:
   typedef std::string InitError;

@@ -8,6 +8,7 @@ project(*Server) : taoexe, portableserver {
 
   IDL_Files {
     SyncExt.idl
+    ../Sync/Sync.idl
   }
 
   Source_Files {
@@ -31,6 +32,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
     Messenger.idl
     MessageTypeSupport.idl
     SyncExt.idl
+    ../Sync/Sync.idl
   }
 
   Source_Files {
@@ -56,6 +58,7 @@ project(DDS*Subscriber) : taoexe, portableserver, dcps {
     Messenger.idl
     MessageTypeSupport.idl
     SyncExt.idl
+    ../Sync/Sync.idl
   }
 
   Source_Files {

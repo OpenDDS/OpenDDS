@@ -1,3 +1,16 @@
+Thu May 24 16:16:54 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/Sync/Sync.mpc:
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/Sync_export.h:
+          Fix for visibility related issue. The generated proxy classes
+          don't have the export macros and therefore aren't visibile
+          outside the Sync library. Fixed by adding dependency directly
+          upon the idl file which pulls in the object files directly
+          getting around the visibility restriction.
+
 Wed May 23 15:42:48 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

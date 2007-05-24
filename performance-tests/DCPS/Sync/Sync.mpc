@@ -15,6 +15,7 @@ project(*Server) : taoexe, portableserver, iortable {
 project(*ServerLib) : taolib, portableserver, iortable {
    sharedname = SyncServer
    after += *Server
+   dynamicflags = SYNC_BUILD_DLL
 
   Source_Files {
     SyncServer_i.cpp
@@ -24,8 +25,9 @@ project(*ServerLib) : taolib, portableserver, iortable {
 }
 
 project(*Client) : taolib {
-  sharedname = SyncClient
-  after += *Server
+   sharedname = SyncClient
+   after += *Server
+   dynamicflags = SYNC_BUILD_DLL
 
   Source_Files {
     SyncC.cpp

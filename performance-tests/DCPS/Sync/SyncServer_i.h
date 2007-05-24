@@ -2,6 +2,7 @@
 #define _SYNC_SERVER_I_
 
 #include "SyncS.h"
+#include "Sync_export.h"
 
 #include "tao/IORTable/IORTable.h"
 #include "ace/Task.h"
@@ -9,7 +10,7 @@
 #include <map>
 #include <string>
 
-class SyncServer_i : public virtual POA_Sync::Server, public ACE_Task_Base
+class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Task_Base
 {
  public:
   typedef std::string InitError;
