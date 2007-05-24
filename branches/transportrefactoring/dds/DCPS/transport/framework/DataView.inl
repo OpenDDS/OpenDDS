@@ -16,18 +16,6 @@ void
 TAO::DCPS::DataView::get(View& packets)
 {
   ACE_Message_Block* mbptr = &mb_;
-  while (mbptr != 0)
-  {
-    follow_next_chain(*mbptr, packets);
-    mbptr = mbptr->cont();
-  }
-}
-
-ACE_INLINE
-void
-TAO::DCPS::DataView::follow_next_chain(ACE_Message_Block& mb, View& packets)
-{
-  ACE_Message_Block* mbptr = &mb;
   if (mbptr == 0)
   {
     return;
@@ -44,7 +32,7 @@ TAO::DCPS::DataView::follow_next_chain(ACE_Message_Block& mb, View& packets)
     mbptr->rd_ptr(size);
     if (mbptr->rd_ptr() == end)
     {
-      mbptr = mbptr->next();
+      mbptr = mbptr->cont();
     }
   }
 }

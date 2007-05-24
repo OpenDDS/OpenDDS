@@ -235,7 +235,49 @@ namespace
     transport.log_.clear();
 
     linkImpl.close(0);
-  }}
+  }
+
+  void testSendFailure()
+  {
+    DummyTransport transport;
+    LinkGuard linkGuard(transport, transport.createLink());
+    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+
+    linkImpl.open(0);
+
+    assertTrue(transport.log_.empty());
+
+    TransportAPI::BLOB* blob = 0;
+    TransportAPI::Status status = linkImpl.connect(blob);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(transport.log_.size() == 1);
+    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].second == 1);
+    transport.log_.clear();
+
+    // Make the link report 5 consecutive failures
+
+    dynamic_cast<DummyTransport::Link&>(linkGuard.get()).setFailTimes(5);
+
+    ACE_Message_Block testMessage(1024);
+    testMessage.wr_ptr(1024);
+    TransportAPI::Id id(0);
+
+    status = linkImpl.send(testMessage, id);
+
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(id == 2);
+
+    // The data was enqueued and is now delivered
+
+    ACE_OS::sleep(1);
+
+    assertTrue(transport.log_.size() == 1);
+    assertTrue(transport.log_[0].first == "send");
+    assertTrue(transport.log_[0].second == id);
+    transport.log_.clear();
+  }
+}
 
 int
 main(
@@ -250,6 +292,8 @@ main(
   testFragmentationSend();
   testBackpressureSend();
   testDisconnectedSend();
+
+  testSendFailure();
 
   return 0;
 }

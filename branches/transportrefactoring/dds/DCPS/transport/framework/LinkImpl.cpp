@@ -391,6 +391,21 @@ namespace
   }
 }
 
+namespace
+{
+  void receivedData(const TAO::DCPS::LinkImpl::IOItem& item)
+  {
+    // issue callback
+  }
+
+  template <template <typename> class Container>
+  void receivedData(Container<TAO::DCPS::LinkImpl::IOItem>& container)
+  {
+    // Compose a new ACE_Message_Block that aggregates all contained items
+    // issue callback
+  }
+}
+
 void
 TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 {
@@ -433,7 +448,7 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
   {
     if (ending)
     {
-      // TBD Deliver
+      receivedData(bufferedData_);
       bufferedData_.clear();
     }
     else
@@ -449,7 +464,7 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     {
       if (ending)
       {
-        // TBD Deliver
+        receivedData(item);
       }
       else
       {

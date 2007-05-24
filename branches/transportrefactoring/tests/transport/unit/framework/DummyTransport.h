@@ -59,9 +59,12 @@ public:
 
     virtual ~Link() {}
 
+    void setFailTimes(unsigned int times) { shouldFailTimes_ = times; }
+
   private:
     TransportAPI::LinkCallback* callback_;
     Log& log_;
+    unsigned int shouldFailTimes_;
   };
 
   virtual ~DummyTransport() {}
