@@ -1,3 +1,9 @@
+Thu May 24 16:31:08 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+          This library shouldn't be built as part of a minimum_corba
+          build. Using the MPC 'avoids' clause to add restriction.
+
 Thu May 24 16:16:54 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

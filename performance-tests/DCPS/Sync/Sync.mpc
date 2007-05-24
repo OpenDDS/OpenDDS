@@ -1,6 +1,7 @@
 
 project(*Server) : taoexe, portableserver, iortable {
   exename = syncServer
+  avoids += minimum_corba
 
   IDL_Files {
     Sync.idl
