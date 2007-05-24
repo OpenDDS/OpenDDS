@@ -507,19 +507,23 @@ TAO::DCPS::LinkImpl::deliver(
   DataView::View::iterator first = packets.begin();
   DataView::View::iterator last = packets.end();
   --last;
-  for (DataView::View::iterator iter = packets.begin(); iter != packets.end(); ++iter)
+  for (
+    DataView::View::iterator iter = packets.begin();
+    iter != packets.end();
+    ++iter, ++sequenceNumber
+    )
   {
     IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == first, iter == last);
-    if (enqueued || backpressure_)
-    {
-      queue_.push_back(item);
-    }
-    else if (!trySending(item, true))
+    if (
+      enqueued ||
+      backpressure_ ||
+      !connected_ ||
+      !trySending(item, true)
+      )
     {
       queue_.push_back(item);
       enqueued = true;
     }
-    ++sequenceNumber;
   }
   if (enqueued)
   {
