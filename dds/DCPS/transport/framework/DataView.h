@@ -23,8 +23,6 @@ namespace TAO
       void get(View& packets);
 
     private:
-      void follow_next_chain(ACE_Message_Block& mb, View& packets);
-
       ACE_Message_Block& mb_;
       size_t max_size_;
     };

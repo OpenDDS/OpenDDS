@@ -48,6 +48,7 @@ DummyTransport::destroyLink(TransportAPI::Transport::Link* link)
 DummyTransport::Link::Link(Log& log)
   : callback_(0)
   , log_(log)
+  , shouldFailTimes_(0)
 {
 }
 
@@ -75,6 +76,11 @@ DummyTransport::Link::shutdown(const TransportAPI::Id& requestId)
 TransportAPI::Status
 DummyTransport::Link::send(const iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId)
 {
+  if (shouldFailTimes_ > 0)
+  {
+    --shouldFailTimes_;
+    return TransportAPI::make_failure();
+  }
   log_.push_back(logEntry("send", requestId));
   return TransportAPI::make_success();
 }
