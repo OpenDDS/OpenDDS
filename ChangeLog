@@ -1,3 +1,14 @@
+Fri May 25 16:46:08 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+          Rename project to better reflect role.
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+          Fix visibility issues.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Remove unused parameter.
+
 Fri May 25 14:45:55 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

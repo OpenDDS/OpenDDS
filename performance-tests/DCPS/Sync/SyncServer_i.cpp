@@ -204,7 +204,7 @@ SyncServer_i::svc (void)
       orb_->run ();
       shutdown_ = true;
     }
-  catch ( CORBA::Exception& ex) {
+  catch ( CORBA::Exception& ) {
     return -1;
   }
   return 0;

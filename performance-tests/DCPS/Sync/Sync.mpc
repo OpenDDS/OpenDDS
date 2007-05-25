@@ -1,21 +1,15 @@
-
-project(*Server) : taoexe, portableserver, iortable {
-  exename = syncServer
-  avoids += minimum_corba
+project(*idl) : taoidldefaults {
 
   IDL_Files {
     Sync.idl
   }
 
-  Source_Files {
-    SyncServer_i.cpp
-    SyncServer.cpp
-  }
+  custom_only = 1
 }
 
 project(*ServerLib) : taolib, portableserver, iortable {
-   sharedname = SyncServer
-   after += *Server
+   sharedname   = SyncServer
+   after       += *idl
    dynamicflags = SYNC_BUILD_DLL
 
   Source_Files {
@@ -25,14 +19,29 @@ project(*ServerLib) : taolib, portableserver, iortable {
   }
 }
 
-project(*Client) : taolib {
-   sharedname = SyncClient
-   after += *Server
+project(*ClientLib) : taolib, portableserver {
+   sharedname   = SyncClient
+   after       += *idl
    dynamicflags = SYNC_BUILD_DLL
 
   Source_Files {
     SyncC.cpp
     SyncS.cpp
     SyncClient_i.cpp
+  }
+}
+
+project(*Server) : taoexe, portableserver, iortable {
+  exename = syncServer
+  avoids += minimum_corba
+  libs   += SyncServer
+  after  += *ServerLib
+
+  IDL_Files {
+    Sync.idl
+  }
+
+  Source_Files {
+    SyncServer.cpp
   }
 }

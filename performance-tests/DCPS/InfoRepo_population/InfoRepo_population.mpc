@@ -1,5 +1,5 @@
 
-project(*Server) : taoexe, portableserver {
+project(*SyncServer) : taoexe, portableserver {
   exename = syncServer
   idlflags    += -I../Sync
   includes += ../Sync
@@ -17,7 +17,7 @@ project(*Server) : taoexe, portableserver {
   }
 }
 
-project(DDS*Publisher) : taoexe, portableserver, dcps {
+project(*Publisher) : taoexe, portableserver, dcps {
 
   exename   = publisher
   libs     += SyncClient
@@ -43,7 +43,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
   }
 }
 
-project(DDS*Subscriber) : taoexe, portableserver, dcps {
+project(*Subscriber) : taoexe, portableserver, dcps {
 
   exename   = subscriber
   libs     += SyncClient
