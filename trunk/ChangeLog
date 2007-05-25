@@ -1,3 +1,12 @@
+Fri May 25 17:10:53 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+          Fixed incorrect project dependencies.
+
+Fri May 25 17:10:53 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+          Fixed incorrect project dependencies.
 Fri May 25 16:46:08 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

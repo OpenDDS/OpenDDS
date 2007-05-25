@@ -1,5 +1,5 @@
 
-project(*SyncServer) : taoexe, portableserver {
+project(*SyncServer) : taoexe, portableserver, iortable {
   exename = syncServer
   idlflags    += -I../Sync
   includes += ../Sync
@@ -22,7 +22,7 @@ project(*Publisher) : taoexe, portableserver, dcps {
   exename   = publisher
   libs     += SyncClient
   includes += ../Sync
-  after += *Server Sync_Client
+  after += *SyncServer Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -48,7 +48,7 @@ project(*Subscriber) : taoexe, portableserver, dcps {
   exename   = subscriber
   libs     += SyncClient
   includes += ../Sync
-  after += *Server Sync_Client
+  after += *SyncServer Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
