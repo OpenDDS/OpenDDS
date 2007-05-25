@@ -389,20 +389,44 @@ namespace
     }
     return totalSize;
   }
-}
 
-namespace
-{
-  void receivedData(const TAO::DCPS::LinkImpl::IOItem& item)
+  void
+  receivedData(const TAO::DCPS::LinkImpl::IOItem& item)
   {
     // issue callback
   }
 
-  template <template <typename> class Container>
-  void receivedData(Container<TAO::DCPS::LinkImpl::IOItem>& container)
+  void
+  receivedData(const ACE_Message_Block& mb)
   {
-    // Compose a new ACE_Message_Block that aggregates all contained items
     // issue callback
+  }
+
+  void
+  clear(TAO::DCPS::LinkImpl::IOItem& cache)
+  {
+    cache = TAO::DCPS::LinkImpl::IOItem();
+  }
+
+  void
+  append(
+    TAO::DCPS::LinkImpl::IOItem& cache,
+    TAO::DCPS::LinkImpl::IOItem& item
+    )
+  {
+    if (cache.mb_.get() == 0)
+    {
+      cache = item;
+    }
+    else
+    {
+      ACE_Message_Block* current = cache.mb_.get();
+      while (current->cont() != 0)
+      {
+        current = current->cont();
+      }
+      current->cont(item.mb_->duplicate());
+    }
   }
 }
 
@@ -449,26 +473,26 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     if (ending)
     {
       receivedData(bufferedData_);
-      bufferedData_.clear();
+      clear(bufferedData_);
     }
     else
     {
-      bufferedData_.push_back(item);
+      append(bufferedData_, item);
     }
     lastReceived_ = std::make_pair(requestId, sequenceNumber);
   }
-  else
+  else // If in range
   {
-    bufferedData_.clear();
+    clear(bufferedData_);
     if (beginning)
     {
       if (ending)
       {
-        receivedData(item);
+        receivedData(mb);
       }
       else
       {
-        bufferedData_.push_back(item);
+        append(bufferedData_, item);
       }
       lastReceived_ = std::make_pair(requestId, sequenceNumber);
     }
@@ -498,7 +522,12 @@ TAO::DCPS::LinkImpl::getNextRequestId(
   const Guard&
   )
 {
-  return ++currentRequestId_;
+  ++currentRequestId_;
+  if (currentRequestId_ == 0) // reserved
+  {
+    ++currentRequestId_;
+  }
+  return currentRequestId_;
 }
 
 bool

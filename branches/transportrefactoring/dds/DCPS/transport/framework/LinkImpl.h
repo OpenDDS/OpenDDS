@@ -116,7 +116,7 @@ namespace TAO
       TransportAPI::Status deferredConnectionStatus_;
       TransportAPI::Status deferredStatus_;
       std::deque<IOItem> queue_;
-      std::vector<IOItem> bufferedData_;
+      IOItem bufferedData_;
       std::pair<TransportAPI::Id, size_t> lastReceived_;
     };
 
