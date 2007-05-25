@@ -1,3 +1,9 @@
+Fri May 25 14:45:55 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+          The publisher & subscribers need the SyncClient library. Using
+          the 'after' MPC option to order the builds.
+
 Thu May 24 16:31:08 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/Sync/Sync.mpc:

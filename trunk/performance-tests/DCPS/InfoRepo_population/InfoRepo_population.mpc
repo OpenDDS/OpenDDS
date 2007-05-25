@@ -22,7 +22,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
   exename   = publisher
   libs     += SyncClient
   includes += ../Sync
-  after += *Server
+  after += *Server Sync_Client
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -48,7 +48,7 @@ project(DDS*Subscriber) : taoexe, portableserver, dcps {
   exename   = subscriber
   libs     += SyncClient
   includes += ../Sync
-  after += *Server
+  after += *Server Sync_Client
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
