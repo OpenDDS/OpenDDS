@@ -46,7 +46,7 @@ Reader::start ()
     }
 
     Xyz::FooDataReaderImpl* dr_servant =
-      TAO::DCPS::reference_to_servant<::Xyz::FooDataReaderImpl> (foo_dr.in ());
+      TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     char action[5] ;
     if (use_take_)

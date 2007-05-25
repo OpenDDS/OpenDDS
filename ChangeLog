@@ -1,3 +1,13 @@
+Fri May 25 15:58:15 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+
+          Added a space to resolve errors like:
+             error: `<::' cannot begin a template-argument list
+
 Thu May 24 00:30:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
