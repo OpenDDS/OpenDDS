@@ -82,7 +82,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   fast_dw_ =
-    TAO::DCPS::reference_to_servant<::Xyz::FooDataWriterImpl> (foo_dw.in ());
+    TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
 
 }
 

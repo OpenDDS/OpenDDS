@@ -435,7 +435,7 @@ int read (int expect_success)
     }
 
     ::Xyz::FooDataReaderImpl* dr_servant =
-      reference_to_servant<::Xyz::FooDataReaderImpl> (foo_dr.in ());
+      reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     int num_reads = 0;
     int num_received = 0;
