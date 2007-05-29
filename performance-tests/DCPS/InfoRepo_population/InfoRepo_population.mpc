@@ -1,14 +1,22 @@
-
-project(*SyncServer) : taoexe, portableserver, iortable {
-  exename = syncServer
+project(*idl) : taoidldefaults {
   idlflags    += -I../Sync
-  includes += ../Sync
-  libs += SyncServer
-  after += Sync_ServerLib
 
   IDL_Files {
     SyncExt.idl
-    ../Sync/Sync.idl
+  }
+
+  custom_only = 1
+}
+
+
+project(*SyncServer) : taoexe, portableserver, iortable {
+  exename = syncServer
+  includes += ../Sync
+  libs += SyncServer
+  after += *idl Sync_ServerLib
+
+  IDL_Files {
+    SyncExt.idl
   }
 
   Source_Files {
@@ -22,7 +30,7 @@ project(*Publisher) : taoexe, portableserver, dcps {
   exename   = publisher
   libs     += SyncClient
   includes += ../Sync
-  after += *SyncServer Sync_ClientLib
+  after += *idl Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -32,7 +40,6 @@ project(*Publisher) : taoexe, portableserver, dcps {
     Messenger.idl
     MessageTypeSupport.idl
     SyncExt.idl
-    ../Sync/Sync.idl
   }
 
   Source_Files {
@@ -48,7 +55,7 @@ project(*Subscriber) : taoexe, portableserver, dcps {
   exename   = subscriber
   libs     += SyncClient
   includes += ../Sync
-  after += *SyncServer Sync_ClientLib
+  after += *idl Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
@@ -58,7 +65,6 @@ project(*Subscriber) : taoexe, portableserver, dcps {
     Messenger.idl
     MessageTypeSupport.idl
     SyncExt.idl
-    ../Sync/Sync.idl
   }
 
   Source_Files {
