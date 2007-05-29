@@ -313,7 +313,6 @@ namespace
     TAO::DCPS::LinkImpl& linkImpl,
     const TransportAPI::Id& requestId,
     size_t sequenceNumber,
-    bool beginning,
     bool ending
     )
   {
@@ -362,24 +361,33 @@ namespace
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
-    synthesizeMessage(linkImpl, 1, 0, true, false);
-    synthesizeMessage(linkImpl, 1, 1, false, false);
-    synthesizeMessage(linkImpl, 1, 2, false, true);
+    synthesizeMessage(linkImpl, 1, 0, false);
+    synthesizeMessage(linkImpl, 1, 1, false);
+    synthesizeMessage(linkImpl, 1, 2, true);
 
     assertTrue(cb.numCallbacks == 1);
     assertTrue(cb.sizeReceived == (1024-10)*3);
     cb.reset();
 
-    synthesizeMessage(linkImpl, 1, 2, false, true);
+    synthesizeMessage(linkImpl, 1, 2, true);
 
-    synthesizeMessage(linkImpl, 2, 0, true, true);
+    synthesizeMessage(linkImpl, 2, 0, true);
 
-    synthesizeMessage(linkImpl, 1, 0, true, false);
-    synthesizeMessage(linkImpl, 1, 1, false, false);
-    synthesizeMessage(linkImpl, 1, 2, false, true);
+    synthesizeMessage(linkImpl, 1, 0, false);
+    synthesizeMessage(linkImpl, 1, 1, false);
+    synthesizeMessage(linkImpl, 1, 2, true);
 
     assertTrue(cb.numCallbacks == 1);
     assertTrue(cb.sizeReceived == (1024-10));
+    cb.reset();
+
+    synthesizeMessage(linkImpl, 0xffffffff, 0, true);
+    synthesizeMessage(linkImpl, 0xfffffffe, 0, true);
+    synthesizeMessage(linkImpl, 0, 0, true);
+
+    assertTrue(cb.numCallbacks == 2);
+    assertTrue(cb.sizeReceived == (1024-10)*2);
+    cb.reset();
 
     linkImpl.setCallback(0);
     linkImpl.close();
