@@ -103,7 +103,7 @@ SyncClient_i::svc (void)
     {
       orb_->run ();
     }
-  catch ( CORBA::Exception& ex) {
+  catch ( CORBA::Exception& ) {
     return -1;
   }
   return 0;

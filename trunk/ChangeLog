@@ -1,3 +1,14 @@
+Tue May 29 15:49:08 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Removed unused variable to get rid of scoreboard warnings.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+          Added #include of ace/String_Base.h.  Some versions of ACE+TAO need
+          this include for the ACE_String_Base class.
+
 Fri May 25 17:10:53 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
@@ -7,6 +18,7 @@ Fri May 25 17:10:53 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
           Fixed incorrect project dependencies.
+
 Fri May 25 16:46:08 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
@@ -62,7 +74,7 @@ Tue May 22 21:52:14 UTC 2007  Ciju John  <johnc at ociweb dot com>
         * performance-tests/DCPS/Sync/SyncServer.cpp:
         * performance-tests/DCPS/Sync/SyncServer_i.h:
         * performance-tests/DCPS/Sync/SyncServer_i.cpp:
-	  Framework for pub-sub synchronization.
+          Framework for pub-sub synchronization.
 
         * performance-tests/DCPS/InfoRepo_population:
         * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
