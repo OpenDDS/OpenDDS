@@ -1,3 +1,9 @@
+Tue May 29 20:40:20 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/Sync/Sync.mpc:
+          Additional visibility related fixes.
+
 Tue May 29 20:10:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.cpp:
