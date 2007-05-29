@@ -299,6 +299,12 @@ namespace
       sizeReceived += mb.total_length();
     }
 
+    void reset()
+    {
+      numCallbacks = 0;
+      sizeReceived = 0;
+    }
+
     size_t numCallbacks;
     size_t sizeReceived;
   };
@@ -324,8 +330,8 @@ namespace
     buffer[5] = (sequenceNumber >> 16) & 0xff;
     buffer[6] = (sequenceNumber >> 8) & 0xff;
     buffer[7] = sequenceNumber & 255;
-    buffer[8] = (beginning ? 1 : 0);
-    buffer[9] = (ending ? 1 : 0);
+    buffer[8] = (ending ? 1 : 0);
+    buffer[9] = 0; // buffer[9] is reseved
 
     mb.wr_ptr(1024);
     iovec iov[2];
@@ -362,10 +368,18 @@ namespace
 
     assertTrue(cb.numCallbacks == 1);
     assertTrue(cb.sizeReceived == (1024-10)*3);
+    cb.reset();
 
     synthesizeMessage(linkImpl, 1, 2, false, true);
 
     synthesizeMessage(linkImpl, 2, 0, true, true);
+
+    synthesizeMessage(linkImpl, 1, 0, true, false);
+    synthesizeMessage(linkImpl, 1, 1, false, false);
+    synthesizeMessage(linkImpl, 1, 2, false, true);
+
+    assertTrue(cb.numCallbacks == 1);
+    assertTrue(cb.sizeReceived == (1024-10));
 
     linkImpl.setCallback(0);
     linkImpl.close();
