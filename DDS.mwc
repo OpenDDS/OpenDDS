@@ -2,5 +2,8 @@
 
 workspace {
   cmdline = -include $PWD/MPC/config
+  exclude {
+    JNI
+  }
 }
 

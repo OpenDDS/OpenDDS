@@ -1,6 +1,7 @@
 #include "SyncServer_i.h"
 
 #include "tao/IORTable/IORTable.h"
+#include "ace/String_Base.h"
 #include "ace/OS_NS_unistd.h"
 
 #include <iostream>

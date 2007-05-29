@@ -36,6 +36,8 @@ $pub_addr = "localhost:29803";
 
 $arg_idx = 0;
 
+$svc_conf = "-ORBSvcConf ../../tcp.conf";
+
 if ($ARGV[0] eq 'udp') {
   $use_udp = 1;
   $arg_idx = 1;
