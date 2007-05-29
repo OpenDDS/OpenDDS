@@ -467,6 +467,10 @@ namespace
     {
       return true;
     }
+    else if (currentRequestId < 0x1fffffff && lastRequestId > 0xf0000000)
+    {
+      return true;
+    }
     return false;
   }
 }
