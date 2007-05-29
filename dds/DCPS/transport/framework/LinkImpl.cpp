@@ -12,6 +12,15 @@
 #include "DataView.h"
 #include "ace/Guard_T.h"
 
+void
+TAO::DCPS::LinkImpl::setCallback(
+  LinkImplCallback* cb
+  )
+{
+  Guard guard(lock_);
+  callback_ = cb;
+}
+
 namespace
 {
   template <typename ConditionVariable>
@@ -391,15 +400,27 @@ namespace
   }
 
   void
-  receivedData(const TAO::DCPS::LinkImpl::IOItem& item)
+  receivedData(
+    const ACE_Message_Block& mb,
+    TAO::DCPS::LinkImplCallback* callback
+    )
   {
-    // issue callback
+    if (callback != 0)
+    {
+      callback->receivedData(mb);
+    }
   }
 
   void
-  receivedData(const ACE_Message_Block& mb)
+  receivedData(
+    const TAO::DCPS::LinkImpl::IOItem& item,
+    TAO::DCPS::LinkImplCallback* callback
+    )
   {
-    // issue callback
+    if (item.mb_.get() != 0)
+    {
+      receivedData(*(item.mb_.get()), callback);
+    }
   }
 
   void
@@ -470,14 +491,11 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     (sequenceNumber == lastReceived_.second + 1)
     )
   {
+    append(bufferedData_, item);
     if (ending)
     {
-      receivedData(bufferedData_);
+      receivedData(bufferedData_, callback_);
       clear(bufferedData_);
-    }
-    else
-    {
-      append(bufferedData_, item);
     }
     lastReceived_ = std::make_pair(requestId, sequenceNumber);
   }
@@ -488,7 +506,7 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     {
       if (ending)
       {
-        receivedData(mb);
+        receivedData(mb, callback_);
       }
       else
       {
@@ -499,11 +517,10 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
   }
   // Read header
   // If block is last block + 1
+  //   Buffer block
   //   If block is end of block
-  //     Deliver all buffered blocks and the latest
+  //     Deliver all buffered blocks
   //     Clear cache
-  //   Else
-  //     Buffer block
   //   End If
   // Else
   //   Clear cache
