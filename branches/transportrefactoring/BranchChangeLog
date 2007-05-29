@@ -1,3 +1,12 @@
+Tue May 29 15:03:06 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+        * tests/transport/unit/framework/main.cpp:
+
+          Fixed some bugs and developed new tests.
+
 Fri May 25 15:49:37 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.h:

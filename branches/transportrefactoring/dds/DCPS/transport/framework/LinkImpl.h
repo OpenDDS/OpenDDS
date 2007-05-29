@@ -5,6 +5,7 @@
 #define TAO_DCPS_LINKIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "LinkImplCallback.h"
 #include "LinkCallback.h"
 #include "Transport.h"
 #include <ace/Message_Block.h>
@@ -28,6 +29,11 @@ namespace TAO
     public:
       LinkImpl(TransportAPI::Transport::Link& link, size_t max_transport_buffer_size);
       virtual ~LinkImpl();
+
+      // Set the callback. LinkImpl does not participate in the ownership of
+      // the callback object, and therefore setCallback(0) should be called
+      // before the callback's destruction.
+      void setCallback(LinkImplCallback* cb);
 
       /**
        * ACE_Task_Base methods
@@ -100,6 +106,7 @@ namespace TAO
       bool trySending(IOItem& item, bool locked = true);
       TransportAPI::Id getNextRequestId(const Guard&);
 
+      LinkImplCallback* callback_;
       TransportAPI::Transport::Link& link_;
       size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;

@@ -1,5 +1,6 @@
 #include "DummyTransport.h"
 #include "dds/DCPS/transport/framework/LinkImpl.h"
+#include "dds/DCPS/transport/framework/LinkImplCallback.h"
 #include <stdexcept>
 
 namespace
@@ -277,6 +278,98 @@ namespace
     assertTrue(transport.log_[0].second == id);
     transport.log_.clear();
   }
+
+  void testDeferredSend()
+  {
+    // TBD
+  }
+
+  struct DummyCallback
+    : public TAO::DCPS::LinkImplCallback
+  {
+    DummyCallback()
+      : numCallbacks(0)
+      , sizeReceived(0)
+    {
+    }
+
+    virtual void receivedData(const ACE_Message_Block& mb)
+    {
+      ++numCallbacks;
+      sizeReceived += mb.total_length();
+    }
+
+    size_t numCallbacks;
+    size_t sizeReceived;
+  };
+
+  void synthesizeMessage(
+    TAO::DCPS::LinkImpl& linkImpl,
+    const TransportAPI::Id& requestId,
+    size_t sequenceNumber,
+    bool beginning,
+    bool ending
+    )
+  {
+    const size_t max_size = 1024;
+    ACE_Message_Block mb(max_size);
+    typedef unsigned char uchar;
+    uchar* buffer = reinterpret_cast<uchar*>(mb.rd_ptr());
+
+    buffer[0] = uchar(requestId >> 24);
+    buffer[1] = uchar(requestId >> 16);
+    buffer[2] = uchar(requestId >> 8);
+    buffer[3] = uchar(requestId & 255);
+    buffer[4] = (sequenceNumber >> 24) & 0xff;
+    buffer[5] = (sequenceNumber >> 16) & 0xff;
+    buffer[6] = (sequenceNumber >> 8) & 0xff;
+    buffer[7] = sequenceNumber & 255;
+    buffer[8] = (beginning ? 1 : 0);
+    buffer[9] = (ending ? 1 : 0);
+
+    mb.wr_ptr(1024);
+    iovec iov[2];
+    iov[0].iov_base = buffer;
+    iov[0].iov_len = 10;
+    iov[1].iov_base = buffer + 10;
+    iov[1].iov_len = max_size - 10;
+    linkImpl.received(iov, 2);
+  }
+
+  void testInOrderReceipt()
+  {
+    DummyTransport transport;
+    LinkGuard linkGuard(transport, transport.createLink());
+    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    DummyCallback cb;
+
+    linkImpl.open(0);
+    linkImpl.setCallback(&cb);
+
+    assertTrue(transport.log_.empty());
+
+    TransportAPI::BLOB* blob = 0;
+    TransportAPI::Status status = linkImpl.connect(blob);
+    assertTrue(status.first == TransportAPI::SUCCESS);
+    assertTrue(transport.log_.size() == 1);
+    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].second == 1);
+    transport.log_.clear();
+
+    synthesizeMessage(linkImpl, 1, 0, true, false);
+    synthesizeMessage(linkImpl, 1, 1, false, false);
+    synthesizeMessage(linkImpl, 1, 2, false, true);
+
+    assertTrue(cb.numCallbacks == 1);
+    assertTrue(cb.sizeReceived == (1024-10)*3);
+
+    synthesizeMessage(linkImpl, 1, 2, false, true);
+
+    synthesizeMessage(linkImpl, 2, 0, true, true);
+
+    linkImpl.setCallback(0);
+    linkImpl.close();
+  }
 }
 
 int
@@ -292,8 +385,9 @@ main(
   testFragmentationSend();
   testBackpressureSend();
   testDisconnectedSend();
-
   testSendFailure();
+  testDeferredSend();
+  testInOrderReceipt();
 
   return 0;
 }

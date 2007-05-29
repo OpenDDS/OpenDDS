@@ -22,7 +22,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   bool beginning,
   bool ending
   )
-  : mb_(new ACE_Message_Block(mb, 1))
+  : mb_(mb.duplicate())
   , data_begin_(data)
   , data_size_(size)
   , requestId_(requestIdIn)
@@ -30,18 +30,20 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , beginning_(beginning)
   , ending_(ending)
 {
-  // TBD!
 }
 
 TAO::DCPS::LinkImpl::IOItem::IOItem(
   const TAO::DCPS::LinkImpl::IOItem& rhs
   )
-  : mb_(new ACE_Message_Block(*rhs.mb_, 1))
-  , data_begin_(rhs.data_begin_)
+  : data_begin_(rhs.data_begin_)
   , data_size_(rhs.data_size_)
   , requestId_(rhs.requestId_)
   , sequenceNumber_(rhs.sequenceNumber_)
 {
+  if (rhs.mb_.get() != 0)
+  {
+    mb_.reset(rhs.mb_->duplicate());
+  }
 }
 
 TAO::DCPS::LinkImpl::IOItem::~IOItem(
@@ -56,7 +58,14 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
 {
   if (this != &rhs)
   {
-    mb_.reset(new ACE_Message_Block(*rhs.mb_, 1));
+    if (rhs.mb_.get() != 0)
+    {
+      mb_.reset(rhs.mb_->duplicate());
+    }
+    else
+    {
+      mb_.reset();
+    }
     data_begin_ = rhs.data_begin_;
     data_size_ = rhs.data_size_;
     requestId_ = rhs.requestId_;
@@ -69,7 +78,8 @@ TAO::DCPS::LinkImpl::LinkImpl(
   TransportAPI::Transport::Link& link,
   size_t max_transport_buffer_size
   )
-  : link_(link)
+  : callback_(0)
+  , link_(link)
   , max_transport_buffer_size_(max_transport_buffer_size)
   , connectedCondition_(lock_)
   , condition_(lock_)
