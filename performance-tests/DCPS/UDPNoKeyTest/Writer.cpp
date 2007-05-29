@@ -148,10 +148,10 @@ Writer::svc ()
     case 128:
       {
         write < ::Xyz::Pt128,
-               ::Mine::Pt128DataWriter,
-               ::Mine::Pt128DataWriter_var,
-               ::Mine::Pt128DataWriter_ptr,
-               ::Mine::Pt128DataWriterImpl>
+               ::Xyz::Pt128DataWriter,
+               ::Xyz::Pt128DataWriter_var,
+               ::Xyz::Pt128DataWriter_ptr,
+               ::Xyz::Pt128DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -163,10 +163,10 @@ Writer::svc ()
     case 512:
       {
         write < ::Xyz::Pt512,
-               ::Mine::Pt512DataWriter,
-               ::Mine::Pt512DataWriter_var,
-               ::Mine::Pt512DataWriter_ptr,
-               ::Mine::Pt512DataWriterImpl>
+               ::Xyz::Pt512DataWriter,
+               ::Xyz::Pt512DataWriter_var,
+               ::Xyz::Pt512DataWriter_ptr,
+               ::Xyz::Pt512DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -178,10 +178,10 @@ Writer::svc ()
     case 2048:
       {
         write < ::Xyz::Pt2048,
-               ::Mine::Pt2048DataWriter,
-               ::Mine::Pt2048DataWriter_var,
-               ::Mine::Pt2048DataWriter_ptr,
-               ::Mine::Pt2048DataWriterImpl>
+               ::Xyz::Pt2048DataWriter,
+               ::Xyz::Pt2048DataWriter_var,
+               ::Xyz::Pt2048DataWriter_ptr,
+               ::Xyz::Pt2048DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -193,10 +193,10 @@ Writer::svc ()
     case 8192:
       {
         write < ::Xyz::Pt8192,
-               ::Mine::Pt8192DataWriter,
-               ::Mine::Pt8192DataWriter_var,
-               ::Mine::Pt8192DataWriter_ptr,
-               ::Mine::Pt8192DataWriterImpl>
+               ::Xyz::Pt8192DataWriter,
+               ::Xyz::Pt8192DataWriter_var,
+               ::Xyz::Pt8192DataWriter_ptr,
+               ::Xyz::Pt8192DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,

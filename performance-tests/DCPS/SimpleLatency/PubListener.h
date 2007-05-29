@@ -12,14 +12,15 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-class AckMessageDataReaderImpl;
-class PubMessageDataWriterImpl;
-
+namespace DDSPerfTest
+{
+  class AckMessageDataReaderImpl;
+  class PubMessageDataWriterImpl;
+}
 
 //Class AckDataReaderListenerImpl
 class AckDataReaderListenerImpl
-  : public virtual POA_DDS::DataReaderListener,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor
@@ -75,8 +76,8 @@ private:
 
   DDS::DataWriter_var writer_;
   DDS::DataReader_var reader_;
-  AckMessageDataReaderImpl* dr_servant_;
-  PubMessageDataWriterImpl* dw_servant_;
+  DDSPerfTest::AckMessageDataReaderImpl* dr_servant_;
+  DDSPerfTest::PubMessageDataWriterImpl* dw_servant_;
   DDS::InstanceHandle_t handle_;
   CORBA::Long size_;
   CORBA::Long sample_num_;

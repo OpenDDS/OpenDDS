@@ -226,11 +226,11 @@ Reader::svc ()
 
     case 128:
       {
-        status = read < ::Mine::Pt128Seq,
-                       ::Mine::Pt128DataReader,
-                       ::Mine::Pt128DataReader_var,
-                       ::Mine::Pt128DataReader_ptr,
-                       ::Mine::Pt128DataReaderImpl>
+        status = read < ::Xyz::Pt128Seq,
+                       ::Xyz::Pt128DataReader,
+                       ::Xyz::Pt128DataReader_var,
+                       ::Xyz::Pt128DataReader_ptr,
+                       ::Xyz::Pt128DataReaderImpl>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -242,11 +242,11 @@ Reader::svc ()
 
     case 512:
       {
-        status = read < ::Mine::Pt512Seq,
-                       ::Mine::Pt512DataReader,
-                       ::Mine::Pt512DataReader_var,
-                       ::Mine::Pt512DataReader_ptr,
-                       ::Mine::Pt512DataReaderImpl>
+        status = read < ::Xyz::Pt512Seq,
+                       ::Xyz::Pt512DataReader,
+                       ::Xyz::Pt512DataReader_var,
+                       ::Xyz::Pt512DataReader_ptr,
+                       ::Xyz::Pt512DataReaderImpl>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -258,11 +258,11 @@ Reader::svc ()
 
     case 2048:
       {
-        status = read < ::Mine::Pt2048Seq,
-                       ::Mine::Pt2048DataReader,
-                       ::Mine::Pt2048DataReader_var,
-                       ::Mine::Pt2048DataReader_ptr,
-                       ::Mine::Pt2048DataReaderImpl>
+        status = read < ::Xyz::Pt2048Seq,
+                       ::Xyz::Pt2048DataReader,
+                       ::Xyz::Pt2048DataReader_var,
+                       ::Xyz::Pt2048DataReader_ptr,
+                       ::Xyz::Pt2048DataReaderImpl>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -274,11 +274,11 @@ Reader::svc ()
 
     case 8192:
       {
-        status = read < ::Mine::Pt8192Seq,
-                       ::Mine::Pt8192DataReader,
-                       ::Mine::Pt8192DataReader_var,
-                       ::Mine::Pt8192DataReader_ptr,
-                       ::Mine::Pt8192DataReaderImpl>
+        status = read < ::Xyz::Pt8192Seq,
+                       ::Xyz::Pt8192DataReader,
+                       ::Xyz::Pt8192DataReader_var,
+                       ::Xyz::Pt8192DataReader_ptr,
+                       ::Xyz::Pt8192DataReaderImpl>
                          (
                           &stats_,
                           subscriber_.in (),

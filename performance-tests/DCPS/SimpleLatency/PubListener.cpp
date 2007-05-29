@@ -10,14 +10,10 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-
 #include <time.h>
 #include <math.h>
-//#include <sys/time.h>
 
-//#include "tester.h"
-
-
+using namespace DDSPerfTest;
 
 typedef struct
 {

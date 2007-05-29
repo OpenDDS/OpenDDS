@@ -20,6 +20,8 @@
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
 
+using namespace Messenger;
+
 TAO::DCPS::TransportIdType transport_impl_id = 1;
 
 int
