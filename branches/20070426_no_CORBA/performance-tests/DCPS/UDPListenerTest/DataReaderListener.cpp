@@ -265,10 +265,10 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 
   case 128:
     {
-      num_read = read < ::Mine::Pt128Seq,
-                      ::Mine::Pt128DataReader,
-                      ::Mine::Pt128DataReader_ptr,
-                      ::Mine::Pt128DataReaderImpl>
+      num_read = read < ::Xyz::Pt128Seq,
+                      ::Xyz::Pt128DataReader,
+                      ::Xyz::Pt128DataReader_ptr,
+                      ::Xyz::Pt128DataReaderImpl>
                         (
                         reader,
                         pub_finished_);
@@ -277,10 +277,10 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 
   case 512:
     {
-      num_read = read < ::Mine::Pt512Seq,
-                      ::Mine::Pt512DataReader,
-                      ::Mine::Pt512DataReader_ptr,
-                      ::Mine::Pt512DataReaderImpl>
+      num_read = read < ::Xyz::Pt512Seq,
+                      ::Xyz::Pt512DataReader,
+                      ::Xyz::Pt512DataReader_ptr,
+                      ::Xyz::Pt512DataReaderImpl>
                         (
                         reader,
                         pub_finished_);
@@ -289,10 +289,10 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 
   case 2048:
     {
-      num_read = read < ::Mine::Pt2048Seq,
-                      ::Mine::Pt2048DataReader,
-                      ::Mine::Pt2048DataReader_ptr,
-                      ::Mine::Pt2048DataReaderImpl>
+      num_read = read < ::Xyz::Pt2048Seq,
+                      ::Xyz::Pt2048DataReader,
+                      ::Xyz::Pt2048DataReader_ptr,
+                      ::Xyz::Pt2048DataReaderImpl>
                         (
                         reader,
                         pub_finished_);
@@ -301,10 +301,10 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 
   case 8192:
     {
-      num_read = read < ::Mine::Pt8192Seq,
-                      ::Mine::Pt8192DataReader,
-                      ::Mine::Pt8192DataReader_ptr,
-                      ::Mine::Pt8192DataReaderImpl>
+      num_read = read < ::Xyz::Pt8192Seq,
+                      ::Xyz::Pt8192DataReader,
+                      ::Xyz::Pt8192DataReader_ptr,
+                      ::Xyz::Pt8192DataReaderImpl>
                         (
                         reader,
                         pub_finished_);

@@ -9,10 +9,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-
-//#include <time.h>
-//#include <sys/time.h>
-
+using namespace DDSPerfTest;
 
 // Implementation skeleton constructor
 PubDataReaderListenerImpl::PubDataReaderListenerImpl()

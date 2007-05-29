@@ -24,6 +24,8 @@
 #include <string>
 #include <fstream>
 
+using namespace Messenger;
+
 TAO::DCPS::TransportIdType transport_impl_id = 1;
 std::string publisher_trigger ("publisher_trigger");
 std::string driver_trigger ("driver_trigger");

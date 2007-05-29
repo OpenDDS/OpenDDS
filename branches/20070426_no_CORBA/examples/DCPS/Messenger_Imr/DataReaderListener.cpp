@@ -7,6 +7,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()

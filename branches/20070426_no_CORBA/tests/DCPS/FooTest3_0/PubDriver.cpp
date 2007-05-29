@@ -764,7 +764,7 @@ PubDriver::listener_test ()
   incomp_status.policies[1].count = 10;
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // Domainparticipant's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter and
@@ -792,7 +792,7 @@ PubDriver::listener_test ()
                             ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // Publisher's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter
@@ -804,7 +804,7 @@ PubDriver::listener_test ()
   foo_datawriter_->set_listener (dwl.in (),
                                  ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // DataWriter's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change.
@@ -853,7 +853,7 @@ PubDriver::listener_test ()
   reader_ids[0] = this->sub_id_;
 
   CORBA::Boolean dont_notify_lost = 0;
-  foo_datawriter_->remove_associations (reader_ids, dont_notify_lost);
+  datawriter_servant_->remove_associations (reader_ids, dont_notify_lost);
 
   ret = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
@@ -1128,7 +1128,7 @@ void PubDriver::add_subscription (
   associations[0].readerQos = TheServiceParticipant->initial_DataReaderQos ();
 
   TAO::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
-  foo_datawriter_->add_associations (pub_id, associations);
+  datawriter_servant_->add_associations (pub_id, associations);
 }
 
 
