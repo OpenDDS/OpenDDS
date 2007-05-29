@@ -30,7 +30,7 @@ SyncClientExt_i::publish (SyncExt::Role role, int instances
 
       collector->publish (role, instances, msecs);
     }
-  catch (CORBA::Exception& e)
+  catch (CORBA::Exception&)
     {
       std::cerr << "SyncClientExt_i::push> Caught a CORBA exception."
                 << std::endl;
