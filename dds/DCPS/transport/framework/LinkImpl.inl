@@ -19,7 +19,6 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   size_t size,
   const TransportAPI::Id& requestIdIn,
   size_t sequenceNumber,
-  bool beginning,
   bool ending
   )
   : mb_(mb.duplicate())
@@ -27,7 +26,6 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , data_size_(size)
   , requestId_(requestIdIn)
   , sequenceNumber_(sequenceNumber)
-  , beginning_(beginning)
   , ending_(ending)
 {
 }
@@ -39,6 +37,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , data_size_(rhs.data_size_)
   , requestId_(rhs.requestId_)
   , sequenceNumber_(rhs.sequenceNumber_)
+  , ending_(rhs.ending_)
 {
   if (rhs.mb_.get() != 0)
   {
@@ -70,6 +69,7 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
     data_size_ = rhs.data_size_;
     requestId_ = rhs.requestId_;
     sequenceNumber_ = rhs.sequenceNumber_;
+    ending_ = rhs.ending_;
   }
   return *this;
 }

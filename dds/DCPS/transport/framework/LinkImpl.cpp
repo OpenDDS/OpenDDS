@@ -23,6 +23,8 @@ TAO::DCPS::LinkImpl::setCallback(
 
 namespace
 {
+  unsigned int RESERVED_ID = 0;
+
   template <typename ConditionVariable>
   TransportAPI::Status
   handleDeferredResolution(
@@ -245,7 +247,7 @@ namespace
     {
       if (item.requestId_ == id_)
       {
-        if (item.beginning_)
+        if (item.sequenceNumber_ == 0)
         {
           foundBeginning_ = true;
         }
@@ -449,6 +451,24 @@ namespace
       current->cont(item.mb_->duplicate());
     }
   }
+
+  bool inRange(
+    const TransportAPI::Id& currentRequestId,
+    size_t currentSequenceNumber,
+    const TransportAPI::Id& lastRequestId,
+    size_t lastSequenceNumber
+    )
+  {
+    if (lastRequestId == RESERVED_ID)
+    {
+      return true;
+    }
+    if (currentRequestId > lastRequestId)
+    {
+      return true;
+    }
+    return false;
+  }
 }
 
 void
@@ -471,8 +491,8 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     (buffer[6] << 8) +
     buffer[7];
 
-  bool beginning = (buffer[8] != 0);
-  bool ending = (buffer[9] != 0);
+  bool beginning = (sequenceNumber == 0);
+  bool ending = (buffer[8] != 0);
 
   mb.rd_ptr(10);
 
@@ -482,7 +502,6 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     mb.length(),
     requestId,
     sequenceNumber,
-    beginning,
     ending
     );
 
@@ -499,7 +518,7 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
     }
     lastReceived_ = std::make_pair(requestId, sequenceNumber);
   }
-  else // If in range
+  else if (inRange(requestId, sequenceNumber, lastReceived_.first, lastReceived_.second))
   {
     clear(bufferedData_);
     if (beginning)
@@ -540,7 +559,7 @@ TAO::DCPS::LinkImpl::getNextRequestId(
   )
 {
   ++currentRequestId_;
-  if (currentRequestId_ == 0) // reserved
+  if (currentRequestId_ == RESERVED_ID)
   {
     ++currentRequestId_;
   }
@@ -574,7 +593,7 @@ TAO::DCPS::LinkImpl::deliver(
     ++iter, ++sequenceNumber
     )
   {
-    IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == first, iter == last);
+    IOItem item(mb, iter->first, iter->second, requestId, sequenceNumber, iter == last);
     if (
       enqueued ||
       backpressure_ ||
@@ -612,8 +631,8 @@ TAO::DCPS::LinkImpl::trySending(
   buffer[5] = (item.sequenceNumber_ >> 16) & 0xff;
   buffer[6] = (item.sequenceNumber_ >> 8) & 0xff;
   buffer[7] = item.sequenceNumber_ & 255;
-  buffer[8] = (item.beginning_ ? 1 : 0);
-  buffer[9] = (item.ending_ ? 1 : 0);
+  buffer[8] = (item.ending_ ? 1 : 0);
+  buffer[9] = 0; // reserved
 
   iovs[0].iov_base = reinterpret_cast<char*>(buffer); // TBD: Marshal a simple header into a buffer
   iovs[0].iov_len = sizeof(buffer);

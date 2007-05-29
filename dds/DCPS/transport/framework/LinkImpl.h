@@ -54,7 +54,6 @@ namespace TAO
           size_t size,
           const TransportAPI::Id& requestIdIn,
           size_t sequenceNumber,
-          bool beginning,
           bool ending
           );
         IOItem(const IOItem& rhs);
@@ -67,7 +66,6 @@ namespace TAO
         size_t data_size_;
         TransportAPI::Id requestId_;
         size_t sequenceNumber_;
-        bool beginning_;
         bool ending_;
       };
 
