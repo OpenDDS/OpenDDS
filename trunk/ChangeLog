@@ -1,3 +1,9 @@
+Tue May 29 20:10:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.cpp:
+
+          Removed unused variable to get rid of scoreboard warnings.
+
 Tue May 29 15:49:08 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/SyncClient_i.cpp:
