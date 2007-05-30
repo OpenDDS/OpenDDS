@@ -1,0 +1,30 @@
+// -*- IDL -*-
+//
+// $Id$
+
+// ================================================================
+/**
+ * This file was used to generate the code in UShortSeq*.*
+ * The command used to generate code is:
+ *
+ *     tao_idl
+ *        -o orig -GA -SS -Sci
+ *          -Wb,export_macro=TAO_Export
+ *          -Wb,export_include=tao/TAO_Export.h
+ *          -Wb,pre_include="ace/pre.h"
+ *          -Wb,post_include="ace/post.h"
+ *          UShortSeq.pidl
+ */
+// ================================================================
+
+#ifndef TAO_CORBA_USHORT_SEQ_IDL
+#define TAO_CORBA_USHORT_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<unsigned short> UShortSeq;
+};
+
+#endif  /* TAO_CORBA_U_SHORT_SEQ_IDL */

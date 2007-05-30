@@ -28,6 +28,7 @@
 // The below include is needed to bypass a vc71/vc8/intel c++ bug
 // dealing with base template exports
 #include "tao/StringSeq.pidl"
+#include "tao/LongSeq.pidl"
 
 module DDS {
 
