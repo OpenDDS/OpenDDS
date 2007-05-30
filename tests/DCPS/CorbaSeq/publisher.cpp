@@ -18,6 +18,8 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
+
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 int main (int argc, char *argv[]) {
@@ -33,8 +35,7 @@ int main (int argc, char *argv[]) {
       return 1;
     }
 
-    MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-    PortableServer::ServantBase_var safe_servant = servant;
+    MessageTypeSupportImpl* servant = new MessageTypeSupportImpl;
 
     if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
       cerr << "register_type failed." << endl;

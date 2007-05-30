@@ -19,6 +19,8 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
+
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 int main (int argc, char *argv[])
@@ -37,8 +39,7 @@ int main (int argc, char *argv[])
       return 1 ;
     }
 
-    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-    PortableServer::ServantBase_var safe_servant = mts_servant;
+    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {
@@ -107,10 +108,8 @@ int main (int argc, char *argv[])
 
     // activate the listener
     DataReaderListenerImpl        listener_servant;
-    PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-    CORBA::Object_var obj = poa->servant_to_reference(&listener_servant);
     DDS::DataReaderListener_var listener =
-      DDS::DataReaderListener::_narrow (obj.in ());
+      DDS::DataReaderListener::_narrow (&listener_servant);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
