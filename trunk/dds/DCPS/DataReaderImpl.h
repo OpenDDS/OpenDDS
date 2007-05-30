@@ -29,6 +29,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class DDS_TEST; //fwd-decl for friend declaration below
+
 namespace TAO
 {
   namespace DCPS
@@ -418,6 +420,8 @@ namespace TAO
                                          ::DDS::InstanceHandleSeq & hdls);
 
       friend class WriterInfo;
+
+      friend class DDS_TEST; //allows tests to get at dr_remote_objref_
 
       TopicImpl*                      topic_servant_;
       ::DDS::TopicDescription_var     topic_desc_ ;

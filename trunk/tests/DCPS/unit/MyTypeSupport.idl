@@ -6,7 +6,7 @@
 #include "dds/DdsDcpsTypeSupportTao.idl"
 
 
-interface MyTypeSupport : TAO::DCPS::TypeSupport {
+local interface MyTypeSupport : TAO::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
 		in DDS::DomainParticipant participant,
 		in string type_name);

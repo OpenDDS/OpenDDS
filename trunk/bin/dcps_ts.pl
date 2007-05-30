@@ -33,7 +33,6 @@ my $typestyle = "struct" ;
 my $subdir ;
 my $exportmacro ;
 my $pchfile ;
-my $modulepath ;
 my $file ;
 my $cpp_only = 0;
 
@@ -131,14 +130,12 @@ my $moduleend      = "" ;
 my $namespacestart = "" ;
 my $namespaceend   = "" ;
 my $module         = "" ;
+
 # default to the same modulepath as the scope path (new for v0.12 5/9/07)
-if ($modulepath) {
-  &console( "The Module scope was specified. -- SHOULD NEVER HAPPEN the option was removed.") ;
-} else {
-  &console( "Defaulting Module scope to the path scope $scopepath minus ::.") ;
-  $modulepath = $scopepath;
-  $modulepath =~ s/\:\:$//;
-}
+&console( "Defaulting Module scope to the path scope $scopepath minus ::.") ;
+my $modulepath = $scopepath;
+$modulepath =~ s/\:\:$//;
+
 if( $modulepath) {
   $module         = "$modulepath\:\:" ;
   &console( "Module set to: $module") ;

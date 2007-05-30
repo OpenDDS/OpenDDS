@@ -20,10 +20,6 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
   exename   = publisher
   after    += DDS*idl
 
-  TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
-  }
-
   IDL_Files {
     Messenger.idl
     MessageTypeSupport.idl
@@ -40,10 +36,6 @@ project(DDS*Subscriber) : taoexe, portableserver, dcps {
   
   exename   = subscriber
   after    += DDS*idl
-
-  TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
-  }
 
   IDL_Files {
     Messenger.idl
