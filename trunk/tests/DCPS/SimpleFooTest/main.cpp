@@ -63,7 +63,7 @@ int main (int argc, char *argv[])
 
 
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
       FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
@@ -122,10 +122,9 @@ int main (int argc, char *argv[])
         dp->lookup_topicdescription(MY_TOPIC);
       TEST_CHECK (! CORBA::is_nil (description.in ()));
 
-      ::TAO::DCPS::TopicDescriptionImpl* ti
-        = ::TAO::DCPS::reference_to_servant<TAO::DCPS::TopicDescriptionImpl,
-                                            ::DDS::TopicDescription_ptr>
-          (description.in ());
+      TAO::DCPS::TopicDescriptionImpl* ti =
+        TAO::DCPS::reference_to_servant<TAO::DCPS::TopicDescriptionImpl>
+        (description.in ());
       TEST_CHECK (ti != 0);
 
       ::DDS::DataReader_var dr =

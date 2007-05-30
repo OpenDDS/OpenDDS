@@ -220,10 +220,9 @@ PubDriver::initialize(int& argc, char *argv[])
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-  ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-   PortableServer::ServantBase_var safe_servant = fts_servant;
+  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
-  ::Mine::FooTypeSupport_var fts =
+  ::Xyz::FooTypeSupport_var fts =
     ::TAO::DCPS::servant_to_reference (fts_servant);
 
   participant_ =
@@ -263,8 +262,8 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in ());
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+    (publisher_.in ());
 
   attach_to_transport ();
 
@@ -332,11 +331,9 @@ PubDriver::initialize(int& argc, char *argv[])
   // the topics should point to the same servant
   // but not the same Object Reference.
   TopicImpl* topic_got_servant
-    = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_got.in ());
+    = reference_to_servant<TopicImpl> (topic_got.in ());
   TopicImpl* topic_servant
-    = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-        (topic_.in ());
+    = reference_to_servant<TopicImpl> (topic_.in ());
 
   TEST_CHECK (topic_got_servant == topic_servant);
 
@@ -384,17 +381,16 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataWriterImpl, ::DDS::DataWriter_ptr>
-    (datawriter_.in ());
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl> (datawriter_.in ());
 
   foo_datawriter_
-    = ::Mine::FooDataWriter::_narrow(datawriter_.in ());
+    = ::Xyz::FooDataWriter::_narrow(datawriter_.in ());
 
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
-    = ::TAO::DCPS::reference_to_servant < ::Mine::FooDataWriterImpl, ::Mine::FooDataWriter_ptr>
-      (foo_datawriter_.in ());
+    = TAO::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
+    (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);
 }
@@ -768,7 +764,7 @@ PubDriver::listener_test ()
   incomp_status.policies[1].count = 10;
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // Domainparticipant's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter and
@@ -796,7 +792,7 @@ PubDriver::listener_test ()
                             ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   // Call listener and update the status cached in datawriter.
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // Publisher's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change when the datawriter
@@ -808,7 +804,7 @@ PubDriver::listener_test ()
   foo_datawriter_->set_listener (dwl.in (),
                                  ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
-  foo_datawriter_->update_incompatible_qos (incomp_status);
+  datawriter_servant_->update_incompatible_qos (incomp_status);
 
   // DataWriter's listener is called to notify the
   // OFFERED_INCOMPATIBLE_QOS_STATUS change.
@@ -857,7 +853,7 @@ PubDriver::listener_test ()
   reader_ids[0] = this->sub_id_;
 
   CORBA::Boolean dont_notify_lost = 0;
-  foo_datawriter_->remove_associations (reader_ids, dont_notify_lost);
+  datawriter_servant_->remove_associations (reader_ids, dont_notify_lost);
 
   ret = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
@@ -1132,7 +1128,7 @@ void PubDriver::add_subscription (
   associations[0].readerQos = TheServiceParticipant->initial_DataReaderQos ();
 
   TAO::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
-  foo_datawriter_->add_associations (pub_id, associations);
+  datawriter_servant_->add_associations (pub_id, associations);
 }
 
 

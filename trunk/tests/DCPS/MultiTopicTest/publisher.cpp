@@ -213,33 +213,30 @@ int main (int argc, char *argv[])
         return 1 ;
       }
 
-      ::Mine::Foo1TypeSupport_var fts1 ;
-      ::Mine::Foo2TypeSupport_var fts2 ;
-      ::Mine::Foo3TypeSupport_var fts3 ;
+      ::T1::Foo1TypeSupport_var fts1 ;
+      ::T2::Foo2TypeSupport_var fts2 ;
+      ::T3::Foo3TypeSupport_var fts3 ;
 
       if (topics & TOPIC_T1)
         {
-          ::Mine::Foo1TypeSupportImpl *fts_servant =
-              new ::Mine::Foo1TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = fts_servant;
+          ::T1::Foo1TypeSupportImpl *fts_servant =
+              new ::T1::Foo1TypeSupportImpl();
 
           fts1 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T2)
         {
-          ::Mine::Foo2TypeSupportImpl *fts_servant =
-              new ::Mine::Foo2TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = fts_servant;
+          ::T2::Foo2TypeSupportImpl *fts_servant =
+              new ::T2::Foo2TypeSupportImpl();
 
           fts2 = TAO::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T3)
         {
-          ::Mine::Foo3TypeSupportImpl *fts_servant =
-              new ::Mine::Foo3TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = fts_servant;
+          ::T3::Foo3TypeSupportImpl *fts_servant =
+              new ::T3::Foo3TypeSupportImpl();
 
           fts3 = TAO::DCPS::servant_to_reference (fts_servant);
         }
@@ -356,10 +353,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {

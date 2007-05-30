@@ -8,7 +8,7 @@ ACE_INLINE
 TAO::DCPS::DataReaderImpl::get_dr_obj_ref() {
 #if 1
   //TBD this may be faster than servant_to_reference - ?significantly?
-  return ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref_.in ()) ;
+  return ::DDS::DataReader::_duplicate (dr_local_objref_.in ()) ;
 #else
 #if 0
   // we don't really need the RemoteDataReader OR a DataReder OR will do.

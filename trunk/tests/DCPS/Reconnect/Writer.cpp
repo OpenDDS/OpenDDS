@@ -47,8 +47,8 @@ Writer::svc ()
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try {
-    MessageDataWriter_var message_dw
-      = MessageDataWriter::_narrow(writer_.in());
+    Messenger::MessageDataWriter_var message_dw
+      = Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
       cerr << "Data Writer could not be narrowed"<< endl;
       exit(1);

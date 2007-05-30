@@ -318,7 +318,7 @@ int parse_args (int argc, char *argv[])
 }
 
 void check_read_status(DDS::ReturnCode_t status,
-                       const SimpleZCSeq& data,
+                       const Test::SimpleSeq& data,
                        CORBA::ULong expected,
                        const char* where)
 {
@@ -363,10 +363,10 @@ void check_read_status(DDS::ReturnCode_t status,
 
 
 void check_return_loan_status(DDS::ReturnCode_t status,
-                       const SimpleZCSeq& data,
-                       CORBA::ULong expected_len,
-                       CORBA::ULong expected_max,
-                       const char* where)
+                              const Test::SimpleSeq& data,
+                              CORBA::ULong expected_len,
+                              CORBA::ULong expected_max,
+                              const char* where)
 {
 
       if (status == ::DDS::RETCODE_OK)
@@ -437,16 +437,14 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-      SimpleTypeSupportImpl* sts_servant = new SimpleTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = sts_servant;
+      Test::SimpleTypeSupport_var fts = new Test::SimpleTypeSupportImpl();
 
-      SimpleTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (sts_servant);
-
+      { //xxx dp scope
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
                                 ::DDS::DomainParticipantListener::_nil());
+      //xxx obj rc = 3
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
@@ -523,10 +521,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                             ::DDS::Subscriber_ptr>
-                              (sub.in ());
+      TAO::DCPS::SubscriberImpl* sub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -539,10 +535,8 @@ int main (int argc, char *argv[])
 
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -594,33 +588,31 @@ int main (int argc, char *argv[])
             1);
         }
 
-      SimpleDataWriter_var foo_dw
-           = SimpleDataWriter::_narrow(dw.in ());
+        Test::SimpleDataWriter_var foo_dw
+           = Test::SimpleDataWriter::_narrow(dw.in ());
       if (CORBA::is_nil (foo_dw.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) SimpleDataWriter::_narrow failed.\n")));
+          ACE_TEXT("(%P|%t) Test::SimpleDataWriter::_narrow failed.\n")));
         return 1; // failure
       }
 
-      SimpleDataWriterImpl* fast_dw =
-        ::TAO::DCPS::reference_to_servant< SimpleDataWriterImpl,
-                                           SimpleDataWriter_ptr>
-                (foo_dw.in ());
+      Test::SimpleDataWriterImpl* fast_dw =
+        TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
+        (foo_dw.in ());
 
-      SimpleDataReader_var foo_dr
-        = SimpleDataReader::_narrow(dr.in ());
+      Test::SimpleDataReader_var foo_dr
+        = Test::SimpleDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) SimpleDataReader::_narrow failed.\n")));
+          ACE_TEXT("(%P|%t) Test::SimpleDataReader::_narrow failed.\n")));
         return 1; // failure
       }
 
-      SimpleDataReaderImpl* fast_dr =
-        ::TAO::DCPS::reference_to_servant< SimpleDataReaderImpl,
-                                           SimpleDataReader_ptr>
-                (foo_dr.in ());
+      Test::SimpleDataReaderImpl* fast_dr =
+        TAO::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
+        (foo_dr.in ());
 
 
       // wait for association establishement before writing.
@@ -697,8 +689,8 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_INFO,"==== TEST 1 : show that zero-copy is zero-copy\n"));
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq      data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
 
 
         DDS::ReturnCode_t status  ;
@@ -715,8 +707,8 @@ int main (int argc, char *argv[])
         // this should change the value returned by the next read
         data1[0].count = 999;
 
-        SimpleZCSeq                  data2 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        Test::SimpleSeq      data2 (0, max_samples);
+        ::DDS::SampleInfoSeq info2 (0,max_samples);
         status = fast_dr->read(  data2
                                 , info2
                                 , max_samples
@@ -736,10 +728,29 @@ int main (int argc, char *argv[])
         }
 
         item = data2.getPtr(0);
+
+        // test the assignment operator.
+        Test::SimpleSeq      copy;
+        ::DDS::SampleInfoSeq copyInfo;
+        copy     = data2;
+        copyInfo = info2;
+        if (   copy.length() != data2.length() 
+            || copy[0].count != data2[0].count
+            || item->ref_count_ != 4)
+          {
+            ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) t1 ERROR: assignment operator failed\n") ));
+            test_failed = 1;
+          }
+            
+        status = fast_dr->return_loan(copy, copyInfo );
+
+        check_return_loan_status(status, copy, 0, 0, "t1 return_loan copy");
+
         if (item->ref_count_ != 3)
         {
             ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
+                ACE_TEXT("(%P|%t) t1 ERROR: bad ref count %d expecting 3\n"), item->ref_count_ ));
             test_failed = 1;
         }
 
@@ -775,8 +786,8 @@ int main (int argc, char *argv[])
 
         const CORBA::Long max_samples = 2;
         // types supporting zero-copy read
-        SimpleZCSeq                  data1 (max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (max_samples);
+        Test::SimpleSeq      data1 (max_samples);
+        ::DDS::SampleInfoSeq info1 (max_samples);
 
         DDS::ReturnCode_t status  ;
         status = fast_dr->read(  data1
@@ -793,8 +804,8 @@ int main (int argc, char *argv[])
         data1[0].count = 888;
         data1[0].text = CORBA::string_dup("t2");
 
-        SimpleZCSeq                  data2 (max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (max_samples);
+        Test::SimpleSeq      data2 (max_samples);
+        ::DDS::SampleInfoSeq info2 (max_samples);
         status = fast_dr->read(  data2
                                 , info2
                                 , max_samples
@@ -823,7 +834,24 @@ int main (int argc, char *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2
+        // test the assignment operator.
+        Test::SimpleSeq      copy (max_samples+1);
+        ::DDS::SampleInfoSeq copyInfo (max_samples+1);
+        copy     = data2;
+        copyInfo = info2;
+        if (   copy.length() != data2.length() 
+            || copy[0].count != data2[0].count )
+          {
+            ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) t2 ERROR: assignment operator failed\n") ));
+            test_failed = 1;
+          }
+            
+        status = fast_dr->return_loan(copy, copyInfo );
+
+        check_return_loan_status(status, copy, 1, max_samples, "t2 return_loan copy");
+
+        status = fast_dr->return_loan(  data2 
                                       , info2 );
 
         check_return_loan_status(status, data2, 1, max_samples, "t2 return_loan2");
@@ -854,8 +882,8 @@ int main (int argc, char *argv[])
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq      data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
 
 
         foo.key  = 1;
@@ -907,8 +935,8 @@ int main (int argc, char *argv[])
                             ACE_TEXT("(%P|%t) t3 ERROR: timeout waiting for data.\n")),
                             1);
 
-        SimpleZCSeq                  data2 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        Test::SimpleSeq      data2 (0, max_samples);
+        ::DDS::SampleInfoSeq info2 (0,max_samples);
 
         status = fast_dr->read(  data2
                                 , info2
@@ -964,8 +992,8 @@ int main (int argc, char *argv[])
         //=====================================================
         ACE_DEBUG((LM_INFO,"==== TEST 4 : show that the default is zero-copy read\n"));
         const CORBA::Long max_samples = 2;
-        SimpleZCSeq                  data1;
-        ::TAO::DCPS::SampleInfoZCSeq info1;
+        Test::SimpleSeq      data1;
+        ::DDS::SampleInfoSeq info1;
 
 
         DDS::ReturnCode_t status  ;
@@ -983,8 +1011,8 @@ int main (int argc, char *argv[])
         data1[0].count = 999;
 
         {
-            SimpleZCSeq                  data2;
-            ::TAO::DCPS::SampleInfoZCSeq info2;
+            Test::SimpleSeq      data2;
+            ::DDS::SampleInfoSeq info2;
             status = fast_dr->read(  data2
                                     , info2
                                     , max_samples
@@ -1035,8 +1063,8 @@ int main (int argc, char *argv[])
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq      data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
 
         foo.key  = 1;
         foo.count = 1;
@@ -1122,8 +1150,8 @@ int main (int argc, char *argv[])
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq     data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
          
         foo.key  = 1;
         foo.count = 1;
@@ -1160,8 +1188,8 @@ int main (int argc, char *argv[])
         }
 
         // 0 means zero-copy
-        SimpleZCSeq                  data2 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        Test::SimpleSeq     data2 (0, max_samples);
+        ::DDS::SampleInfoSeq info2 (0,max_samples);
         status = fast_dr->take(  data2 
                                 , info2
                                 , max_samples
@@ -1200,8 +1228,8 @@ int main (int argc, char *argv[])
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq     data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
          
         // It is important that the last test case took all of the samples!
 
@@ -1247,8 +1275,8 @@ int main (int argc, char *argv[])
         }
 
         // 0 means zero-copy
-        SimpleZCSeq                  data2 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        Test::SimpleSeq     data2 (0, max_samples);
+        ::DDS::SampleInfoSeq info2 (0,max_samples);
         status = fast_dr->take(  data2 
                                 , info2
                                 , max_samples
@@ -1301,8 +1329,8 @@ int main (int argc, char *argv[])
         // it will allocate from a pool on the stack and thus avoid
         // a heap allocation.
         // Note: because of the read/take preconditions the sequence does not need to resize.
-        SimpleZCSeq                  data1 (0, max_samples, &the_allocator);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq     data1 (0, max_samples, &the_allocator);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
          
         foo.key  = 1; 
         foo.count = 8;
@@ -1346,8 +1374,8 @@ int main (int argc, char *argv[])
         }
 
         // 0 means zero-copy
-        SimpleZCSeq                  data2 (0, max_samples, &the_allocator);
-        ::TAO::DCPS::SampleInfoZCSeq info2 (0,max_samples);
+        Test::SimpleSeq     data2 (0, max_samples, &the_allocator);
+        ::DDS::SampleInfoSeq info2 (0,max_samples);
         status = fast_dr->take(  data2 
                                 , info2
                                 , max_samples
@@ -1406,8 +1434,8 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
-        SimpleZCSeq                  data1 (0, max_samples);
-        ::TAO::DCPS::SampleInfoZCSeq info1 (0,max_samples);
+        Test::SimpleSeq     data1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (0,max_samples);
          
         foo.key  = 1; 
         foo.count = 9;
@@ -1489,11 +1517,14 @@ int main (int argc, char *argv[])
       // clean up common objects
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
+//xx dp::Entity::Object::muxtex_refcount_ = 3
+
+      }
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-    }
+    } //xxx dp::Entity::Object::muxtex_refcount_ = 1
   catch (const TestException&)
     {
       ACE_ERROR ((LM_ERROR,

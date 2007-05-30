@@ -193,10 +193,9 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
 
-      ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
-      ::Mine::FooTypeSupport_var fts =
+      ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
@@ -267,10 +266,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                             ::DDS::Subscriber_ptr>
-                              (sub.in ());
+      TAO::DCPS::SubscriberImpl* sub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
       {

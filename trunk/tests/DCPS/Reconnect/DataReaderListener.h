@@ -13,10 +13,11 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual POA_TAO::DCPS::DataReaderListener,
-    public virtual PortableServer::RefCountServantBase
+  // note: TAO specific extensions
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
 {
 public:
+
   //Constructor
   DataReaderListenerImpl ();
 

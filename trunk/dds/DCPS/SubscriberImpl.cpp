@@ -5,12 +5,13 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "SubscriberImpl.h"
+#include "DataReaderRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "TopicImpl.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
-#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "dds/DdsDcpsTypeSupportTaoC.h"
 #include "TopicDescriptionImpl.h"
 #include "Marked_Default_Qos.h"
 #include "DataSampleList.h"
@@ -58,9 +59,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
   if (! CORBA::is_nil (a_listener))
     {
       fast_listener_ =
-	reference_to_servant<POA_DDS::SubscriberListener,
-	DDS::SubscriberListener_ptr>
-	(listener_.in ());
+        reference_to_servant<DDS::SubscriberListener> (listener_.in ());
     }
 }
 
@@ -107,10 +106,7 @@ SubscriberImpl::create_datareader (
 
   ::DDS::DataReaderQos dr_qos;
 
-  TopicImpl* topic_servant =
-    reference_to_servant<TopicImpl,
-    DDS::TopicDescription_ptr>(
-			       a_topic_desc);
+  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic_desc);
 
   if (qos == DATAREADER_QOS_DEFAULT)
     {
@@ -149,7 +145,7 @@ SubscriberImpl::create_datareader (
       return ::DDS::DataReader::_nil();
     }
 
-  POA_TAO::DCPS::TypeSupport_ptr typesupport =
+  TAO::DCPS::TypeSupport_ptr typesupport =
     topic_servant->get_type_support();
 
   if (0 == typesupport)
@@ -163,19 +159,21 @@ SubscriberImpl::create_datareader (
       return ::DDS::DataReader::_nil ();
     }
 
-  DataReaderRemote_var dr_obj = typesupport->create_datareader();
+    ::DDS::DataReader_var dr_obj = typesupport->create_datareader();
 
   DataReaderImpl* dr_servant =
-    reference_to_servant<DataReaderImpl, ::DDS::DataReader_ptr>
-    (dr_obj.in ());
+    reference_to_servant<DataReaderImpl> (dr_obj.in ());
 
-  // Give ownership to poa.
-  dr_servant->_remove_ref ();
+  DataReaderRemoteImpl* reader_remote_impl = 0;
+  ACE_NEW_RETURN(reader_remote_impl,
+                    DataReaderRemoteImpl(dr_servant),
+                    ::DDS::DataReader::_nil());
+
+  ::TAO::DCPS::DataReaderRemote_var dr_remote_obj = 
+      servant_to_remote_reference(reader_remote_impl);
 
   DomainParticipantImpl* participant =
-    reference_to_servant<DomainParticipantImpl,
-    ::DDS::DomainParticipant_ptr>(
-				  participant_objref_.in ());
+    reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
 
   dr_servant->init (topic_servant,
 		    dr_qos,
@@ -183,7 +181,8 @@ SubscriberImpl::create_datareader (
 		    participant,
 		    this,
 		    subscriber_objref_.in (),
-		    dr_obj.in ());
+		    dr_obj.in (),
+            dr_remote_obj.in ());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -244,8 +243,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   DataReaderImpl* dr_servant
-    = reference_to_servant <DataReaderImpl, ::DDS::DataReader_ptr>
-    (a_datareader);
+    = reference_to_servant<DataReaderImpl> (a_datareader);
 
   if (dr_servant->get_subscriber_servant () != this)
     {
@@ -272,7 +270,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       it != datareader_map_.end ();
       it ++)
     {
-      if (it->second->local_reader_ == dr_servant)
+      if (it->second->local_reader_impl_ == dr_servant)
       {
         break;
       }
@@ -379,7 +377,7 @@ SubscriberImpl::delete_contained_entities (
   set_deleted (true);
 
 
-  ACE_Vector<DataReaderRemote_ptr> drs ;
+  ACE_Vector< ::DDS::DataReader_ptr> drs ;
 
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -391,7 +389,7 @@ SubscriberImpl::delete_contained_entities (
     DataReaderMap::iterator itEnd = datareader_map_.end ();
     for (it = datareader_map_.begin (); it != datareader_map_.end (); ++it)
     {
-       drs.push_back (it->second->remote_reader_);
+       drs.push_back (it->second->local_reader_objref_);
     }
   }   
     
@@ -456,7 +454,7 @@ SubscriberImpl::lookup_datareader (
     }
   else
     {
-      return ::DDS::DataReader::_duplicate (it->second->remote_reader_);
+      return ::DDS::DataReader::_duplicate (it->second->local_reader_objref_);
     }
 }
 
@@ -512,12 +510,12 @@ SubscriberImpl::notify_datareaders (
        it ++)
     {
       ::DDS::DataReaderListener_var listener =
-	  it->second->local_reader_->get_listener() ;
+	  it->second->local_reader_impl_->get_listener() ;
 
-      if (it->second->local_reader_->have_sample_states(
+      if (it->second->local_reader_impl_->have_sample_states(
 							::DDS::NOT_READ_SAMPLE_STATE))
 	{
-	  listener->on_data_available(it->second->remote_reader_) ;
+	  listener->on_data_available(it->second->local_reader_objref_) ;
 	}
     }
 }
@@ -585,9 +583,7 @@ SubscriberImpl::set_listener (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::POA_DDS::SubscriberListener,
-    ::DDS::SubscriberListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::SubscriberListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
@@ -834,7 +830,9 @@ SubscriberImpl::remove_associations(
 
 void
 SubscriberImpl::reader_enabled(
-			       DataReaderRemote_ptr     reader,
+                   DataReaderRemote_ptr     remote_reader,
+                   ::DDS::DataReader_ptr    local_reader,
+			       DataReaderImpl*          local_reader_impl,
 			       const char*              topic_name,
 			       RepoId                   topic_id
 			       )
@@ -843,17 +841,16 @@ SubscriberImpl::reader_enabled(
 		   ))
 {
   SubscriberDataReaderInfo* info = new SubscriberDataReaderInfo ;
-  info->remote_reader_ = reader ;
-  info->local_reader_
-    = reference_to_servant<DataReaderImpl, DataReaderRemote_ptr>
-    (reader);
+  info->remote_reader_objref_  = remote_reader ;
+  info->local_reader_objref_   = local_reader;
+  info->local_reader_impl_     = local_reader_impl ;
 
   info->topic_id_ = topic_id ;
 
   try
     {
       ::DDS::DataReaderQos qos;
-      info->remote_reader_->get_qos(qos);
+      info->local_reader_objref_->get_qos(qos);
 
       TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
       info->subscription_id_
@@ -861,11 +858,11 @@ SubscriberImpl::reader_enabled(
 					      participant_->get_domain_id (),
 					      participant_->get_id (),
 					      info->topic_id_,
-					      info->remote_reader_,
+					      info->remote_reader_objref_,
 					      qos,
 					      trans_conf_info,
 					      qos_) ;
-      info->local_reader_->set_subscription_id (info->subscription_id_);
+      info->local_reader_impl_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)
     {
@@ -904,10 +901,10 @@ SubscriberImpl::reader_enabled(
 
   // Increase the ref count when the servant is referenced
   // by the datareader map.
-  info->local_reader_->_add_ref ();
+  info->local_reader_impl_->_add_ref ();
 }
 
-::POA_DDS::SubscriberListener*
+::DDS::SubscriberListener*
 SubscriberImpl::listener_for (::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status

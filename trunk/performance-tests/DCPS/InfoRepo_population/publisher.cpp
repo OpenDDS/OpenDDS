@@ -50,7 +50,6 @@ private:
   std::string sync_server_;
 
   DDS::DomainParticipantFactory_var dpf_;
-  PortableServer::ServantBase_var safe_servant_;
   std::vector<DDS::DomainParticipant_var> participant_;
   std::vector<DDS::Topic_var> topic_;
   std::vector<DDS::Publisher_var> pub_;
@@ -174,18 +173,17 @@ Publisher::run (void)
         }
       participant_timer.stop();
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-      safe_servant_ = servant;
+      Messenger::MessageTypeSupport_var mts = new Messenger::MessageTypeSupportImpl();
 
       for (size_t count = 0; count < participant_count_; count++)
         {
-          if (DDS::RETCODE_OK != servant->register_type(participant_[count].in (), "")) {
+          if (DDS::RETCODE_OK != mts->register_type(participant_[count].in (), "")) {
             cerr << "register_type failed." << endl;
             return false;
           }
         }
 
-      CORBA::String_var type_name = servant->get_type_name ();
+      CORBA::String_var type_name = mts->get_type_name ();
 
       DDS::TopicQos topic_qos;
       participant_[0]->get_default_topic_qos(topic_qos);

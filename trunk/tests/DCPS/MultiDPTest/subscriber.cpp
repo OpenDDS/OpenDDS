@@ -111,13 +111,11 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  ::Mine::FooTypeSupportImpl* fts_servant
-    = new ::Mine::FooTypeSupportImpl();
-  PortableServer::ServantBase_var safe_servant = fts_servant;
+  ::Xyz::FooTypeSupportImpl* fts_servant
+    = new ::Xyz::FooTypeSupportImpl();
 
-  ::Mine::FooTypeSupportImpl* another_fts_servant
-    = new ::Mine::FooTypeSupportImpl();
-  PortableServer::ServantBase_var another_safe_servant = another_fts_servant;
+  ::Xyz::FooTypeSupportImpl* another_fts_servant
+    = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant[i].in (), type_name))
   {
@@ -186,10 +184,9 @@ void init_dcps_objects (int i)
     }
 
   // Attach the subscriber to the transport.
-  ::TAO::DCPS::SubscriberImpl* sub_impl
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                         ::DDS::Subscriber_ptr>
-                          (subscriber[i].in ());
+  TAO::DCPS::SubscriberImpl* sub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>
+    (subscriber[i].in ());
 
   if (0 == sub_impl)
     {
@@ -256,7 +253,6 @@ void init_listener()
   for (int i = 0; i < 2; ++i)
   {
     DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
-    PortableServer::ServantBase_var safe_servant = listener_servant;
 
     listener[i] = ::TAO::DCPS::servant_to_reference(listener_servant);
 

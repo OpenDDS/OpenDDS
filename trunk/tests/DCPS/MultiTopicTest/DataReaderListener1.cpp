@@ -16,8 +16,8 @@
     ACE_UNUSED_ARG(history_depth);
     ACE_UNUSED_ARG(using_udp);
 
-    ::Mine::Foo1DataReader_var foo_dr =
-        ::Mine::Foo1DataReader::_narrow(reader);
+    ::T1::Foo1DataReader_var foo_dr =
+        ::T1::Foo1DataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
       {
@@ -25,12 +25,10 @@
                ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
       }
 
-    ::Mine::Foo1DataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Mine::Foo1DataReaderImpl,
-                                           ::Mine::Foo1DataReader_ptr>
-            (foo_dr.in ());
+    ::T1::Foo1DataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<T1::Foo1DataReaderImpl> (foo_dr.in ());
 
-    ::Mine::Foo1Seq foo(num_ops_per_thread) ;
+    ::T1::Foo1Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
 
     DDS::ReturnCode_t status  ;

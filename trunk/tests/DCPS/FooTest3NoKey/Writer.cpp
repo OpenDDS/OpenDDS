@@ -32,7 +32,7 @@ Writer::start ()
 
   // Register the instance without key then use this handle
   // to verify other registrations always return same handle.
-  foo_dw_ = ::Mine::FooDataWriter::_narrow(writer_.in ());
+  foo_dw_ = ::Xyz::FooDataWriter::_narrow(writer_.in ());
   TEST_CHECK (! CORBA::is_nil (foo_dw_.in ()));
 
   handle_ = foo_dw_->_cxx_register (registered_foo_);

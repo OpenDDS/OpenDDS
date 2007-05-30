@@ -332,10 +332,9 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-      ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
-      ::Mine::FooTypeSupport_var fts =
+      ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
@@ -417,10 +416,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                             ::DDS::Subscriber_ptr>
-                              (sub.in ());
+      TAO::DCPS::SubscriberImpl* sub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -433,10 +430,8 @@ int main (int argc, char *argv[])
 
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -486,33 +481,29 @@ int main (int argc, char *argv[])
             1);
         }
 
-      ::Mine::FooDataWriter_var foo_dw
-           = ::Mine::FooDataWriter::_narrow(dw.in ());
+      ::Xyz::FooDataWriter_var foo_dw
+           = ::Xyz::FooDataWriter::_narrow(dw.in ());
       if (CORBA::is_nil (foo_dw.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ::Mine::FooDataWriter::_narrow failed.\n")));
+          ACE_TEXT("(%P|%t) ::Xyz::FooDataWriter::_narrow failed.\n")));
         return 1; // failure
       }
 
-      ::Mine::FooDataWriterImpl* fast_dw =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
-                                           ::Mine::FooDataWriter_ptr>
-                (foo_dw.in ());
+      ::Xyz::FooDataWriterImpl* fast_dw
+        = TAO::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>(foo_dw.in());
 
-      ::Mine::FooDataReader_var foo_dr
-        = ::Mine::FooDataReader::_narrow(dr.in ());
+      ::Xyz::FooDataReader_var foo_dr
+        = ::Xyz::FooDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+          ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
         return 1; // failure
       }
 
-      ::Mine::FooDataReaderImpl* fast_dr =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                           ::Mine::FooDataReader_ptr>
-                (foo_dr.in ());
+      ::Xyz::FooDataReaderImpl* fast_dr
+        = TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl>(foo_dr.in());
 
 
       // wait for association establishement before writing.

@@ -9,6 +9,7 @@
  */
 // ============================================================================
 
+#include "dds/DCPS/ReceivedDataElementList.h"
 
 namespace TAO
 {

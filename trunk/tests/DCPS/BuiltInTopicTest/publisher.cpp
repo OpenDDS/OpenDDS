@@ -38,15 +38,14 @@ int main (int argc, char *argv[]) {
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = servant;
+      ::Messenger::MessageTypeSupport_var ts = new ::Messenger::MessageTypeSupportImpl();
 
-      if (DDS::RETCODE_OK != servant->register_type(participant.in (), "Messenger")) {
+      if (DDS::RETCODE_OK != ts->register_type(participant.in (), "Messenger")) {
         cerr << "register_type failed." << endl;
         exit(1);
       }
 
-      CORBA::String_var type_name = servant->get_type_name ();
+      CORBA::String_var type_name = ts->get_type_name ();
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);

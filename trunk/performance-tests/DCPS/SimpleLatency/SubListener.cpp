@@ -9,10 +9,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-
-//#include <time.h>
-//#include <sys/time.h>
-
+using namespace DDSPerfTest;
 
 // Implementation skeleton constructor
 PubDataReaderListenerImpl::PubDataReaderListenerImpl()
@@ -38,16 +35,14 @@ void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   AckMessageDataWriter_var ackmessage_dw =
     AckMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ = 
-    ::TAO::DCPS::reference_to_servant< AckMessageDataWriterImpl, 
-                                       AckMessageDataWriter_ptr>(ackmessage_dw.in());
+    TAO::DCPS::reference_to_servant<AckMessageDataWriterImpl>(ackmessage_dw.in());
   DDSPerfTest::AckMessage msg;
   this->handle_ = this->dw_servant_->_cxx_register (msg);
 
   PubMessageDataReader_var pubmessage_dr = 
     PubMessageDataReader::_unchecked_narrow(this->reader_.in());
   this->dr_servant_ =
-    ::TAO::DCPS::reference_to_servant< PubMessageDataReaderImpl,
-                                       PubMessageDataReader_ptr>(pubmessage_dr.in());
+    TAO::DCPS::reference_to_servant<PubMessageDataReaderImpl>(pubmessage_dr.in());
 }
 
 // Implementation skeleton destructor
@@ -63,11 +58,11 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     if (use_zero_copy_)
     {
       ::CORBA::Long max_read_samples = 1;
-      PubMessageZCSeq message(0, max_read_samples);
-      ::TAO::DCPS::SampleInfoZCSeq si(0, max_read_samples);
+      DDSPerfTest::PubMessageSeq message(0, max_read_samples);
+      DDS::SampleInfoSeq              si(0, max_read_samples);
       // Use the reader data member (instead of the argument) for efficiency 
       // reasons
-      this->dr_servant_->read(message, si, max_read_samples,
+      this->dr_servant_->take(message, si, max_read_samples,
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,
                               ::DDS::ANY_INSTANCE_STATE);

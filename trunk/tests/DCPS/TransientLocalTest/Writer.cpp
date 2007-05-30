@@ -6,6 +6,8 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
+
 const int num_instances_per_writer = 1;
 const int num_messages = 5;
 

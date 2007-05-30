@@ -41,10 +41,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the publisher to the transport.
-  ::TAO::DCPS::PublisherImpl* pub_impl
-      = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                              ::DDS::Publisher_ptr>
-                              (pub_.in ());
+  TAO::DCPS::PublisherImpl* pub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -74,18 +72,17 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  ::Mine::FooDataWriter_var foo_dw = ::Mine::FooDataWriter::_narrow(
+  ::Xyz::FooDataWriter_var foo_dw = ::Xyz::FooDataWriter::_narrow(
       dw_.in ());
   if (CORBA::is_nil (foo_dw.in ()))
   {
     ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ::Mine::FooDataWriter::_narrow failed.\n")));
+               ACE_TEXT("(%P|%t) ::Xyz::FooDataWriter::_narrow failed.\n")));
     throw TestException() ;
   }
 
-  fast_dw_ = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl,
-                                                ::Mine::FooDataWriter_ptr>
-                (foo_dw.in ());
+  fast_dw_ =
+    TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
 
 }
 

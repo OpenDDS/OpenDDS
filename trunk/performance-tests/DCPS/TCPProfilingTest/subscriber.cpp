@@ -148,11 +148,7 @@ int main (int argc, char *argv[])
       }
 
       // Register the type supports
-      testMsgTypeSupportImpl* ts_servant = new testMsgTypeSupportImpl();
-      PortableServer::ServantBase_var ts_safe_servant = ts_servant;
-
-      testMsgTypeSupport_var ts =
-        TAO::DCPS::servant_to_reference (ts_servant);
+      ::profilingTest::testMsgTypeSupport_var ts = new ::profilingTest::testMsgTypeSupportImpl();
 
       if (::DDS::RETCODE_OK != ts->register_type(dp.in (), TEST_TYPE))
         {
@@ -268,17 +264,15 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.sec = 2 ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl* dr_listener_impl =
+      DataReaderListenerImpl* dr_listener_impl = 
         new DataReaderListenerImpl(num_datawriters,
                                    NUM_SAMPLES,
                                    DATA_SIZE,
                                    RECVS_BTWN_READS,
                                    USE_ZERO_COPY_READ);
 
-      PortableServer::ServantBase_var safe_servant = dr_listener_impl;
+      DDS::DataReaderListener_var dr_listener = dr_listener_impl;
 
-      ::DDS::DataReaderListener_var dr_listener =
-        TAO::DCPS::servant_to_reference (dr_listener_impl);
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,

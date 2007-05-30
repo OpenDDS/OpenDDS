@@ -33,7 +33,7 @@ public:
 
 private:
 
-  ::Mine::FooDataWriter_var foo_dw_; 
+  ::Xyz::FooDataWriter_var foo_dw_; 
   InstanceDataMap       data_map_;
   ::DDS::DataWriter_var writer_;
   int num_thread_to_write_;
