@@ -6,6 +6,8 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
+
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
 
@@ -56,8 +58,8 @@ Writer::svc ()
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
 
-    MessageDataWriter_var message_dw
-      = MessageDataWriter::_narrow(writer_.in());
+    ::Messenger::MessageDataWriter_var message_dw
+      = ::Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
       cerr << "Data Writer could not be narrowed"<< endl;
       exit(1);

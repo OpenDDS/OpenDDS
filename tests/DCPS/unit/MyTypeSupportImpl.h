@@ -29,7 +29,7 @@
  * @brief An implementation of a TypeSupport
  *
  */
-class MyTypeSupportImpl : public virtual POA_MyTypeSupport
+class MyTypeSupportImpl : public virtual TAO::DCPS::LocalObject<MyTypeSupport>
 {
 
 public:

@@ -15,8 +15,8 @@ namespace TAO
     namespace DCPS
     {
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq(
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq(
     const size_t max_len,
     const size_t init_size,
     ACE_Allocator* alloc) 
@@ -26,46 +26,46 @@ ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq(
 
 //======== CORBA sequence like methods ======
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-::DDS::SampleInfo const & 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) const 
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+InfoType const & 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) const 
 {
     return this->info_[i];
 };
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-::DDS::SampleInfo & 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) 
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+InfoType & 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) 
 {
     return this->info_[i];
 };
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 CORBA::ULong 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::length() const 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::length() const 
 {
     return this->length_;
 };
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 void 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::length(CORBA::ULong length) 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::length(CORBA::ULong length) 
 {
     // TBD - support resizing.
     this->length_ = length;
 };
 
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 CORBA::ULong 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::maximum() const 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::maximum() const 
 {
     return this->max_len();
 };
 
-template <size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 CORBA::ULong 
-ZeroCopyInfoSeq<ZCS_DEFAULT_SIZE>::max_slots() const 
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::max_slots() const 
 {
     return this->info_.max_size();
 };

@@ -1,3 +1,793 @@
+Wed May 30 19:19:38 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/LocalObject.h:
+
+          Added by merge of
+          https://svn.dre.vanderbilt.edu/DOC/DDS/branches/20070426_no_CORBA
+
+          !!!See the DDS_release_notes.txt for impacts on user code!!!!
+          
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/dcps_ts.pl:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/dcps_bits.mpb:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/DdsDcpsTypeSupportTao.idl:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * DDS_release_notes.txt:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger/Writer.cpp:
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/subscriber.cpp:
+        * DevGuideExamples/DDS/Messenger_ZeroCopy/Writer.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.cpp:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.h:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/Writer.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType3/DcpsFooType3.mpc:
+        * tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+        * tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+        * tests/DCPS/FooType4/DcpsFooType4.mpc:
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/FooType/FooType.idl:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Changed by merge of
+          https://svn.dre.vanderbilt.edu/DOC/DDS/branches/20070426_no_CORBA
+          and resolved conflicts and compliation errors.
+          
+          The following, indented comments are from the 20070426_no_CORBA
+          branch.
+          
+	Tue May 29 22:24:35 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/ZeroCopyAllocator_T.h:
+
+			Build with TAO 1.4a.
+
+	Tue May 29 21:23:54 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* DevGuideExamples/DDS/Messenger/DataReaderListener.h:
+			* DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+			* DevGuideExamples/DDS/Messenger/Writer.cpp:
+			* DevGuideExamples/DDS/Messenger/publisher.cpp:
+			* DevGuideExamples/DDS/Messenger/subscriber.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+			* examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+			* examples/DCPS/Messenger_Imr/DataReaderListener.h:
+			* examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+			* examples/DCPS/Messenger_Imr/Writer.cpp:
+			* examples/DCPS/Messenger_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_Imr/subscriber.cpp:
+			* performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+			* performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/McastListenerTest/Writer.cpp:
+			* performance-tests/DCPS/McastListenerTest/publisher.cpp:
+			* performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+			* performance-tests/DCPS/SimpleLatency/PubListener.h:
+			* performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+			* performance-tests/DCPS/SimpleLatency/SubListener.h:
+			* performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+			* performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+			* performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+			* performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+			* performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+			* performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+			* performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+			* tests/DCPS/FooTest3_0/PubDriver.cpp:
+			* tests/DCPS/unit/MyTypeSupportImpl.h:
+
+			Updated tests, examples, and performance tests to the new changes in
+			DDS, including using local interfaces for listeners and dealing with
+			generated code being in the same namespace as the DCPS struct type.
+			The only tests that won't compile after these changes are those tests
+			that use handcrafted "type support" code instead of the generated
+			code or use internal library classes directly.  Those tests are
+			(by MPC project name): dcps_integration_infrastructure,
+			dcps_integration_topic, DcpsFooType, dcpsinfo_test_publisher,
+			dcpsinfo_test_subscriber, DcpsSimpleFooTest, and DdsDcps_UnitTest.
+
+	Fri May 25 15:58:15 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* tests/DCPS/BuiltInTopic/common.cpp:
+			* tests/DCPS/FooTest4_0/Writer.cpp:
+			* tests/DCPS/FooTest4/Reader.cpp:
+			* tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+
+			Added a space to resolve errors like:
+				error: `<::' cannot begin a template-argument list
+
+	Thu May 24 00:30:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/Service_Participant.h:
+
+			Changed TAO::DCPS::servant_to_reference() to increment the reference
+			count as it did before we switched to local interfaces.
+
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+			Removed #if code used to allow build
+			with old style <type>SZSeq type.
+
+	Wed May 23 22:25:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* dds/DCPS/LocalObject.h:
+
+			Reverted the change directly below this one.
+
+	Wed May 23 21:00:59 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/LocalObject.h:
+
+			Resolved a problem with reference counting.
+
+			* DDS_release_notes.txt:
+
+			Added more notes about servants vs object references.
+
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+
+			Changed the tests to not use servants for the write and read calls.
+			There is no longer a performance benefit (thanks to local interfaces).
+			Added comments to that effect.
+
+	Wed May 23 17:19:02 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* DevGuideExamples/DDS/Messenger/publisher.cpp:
+			* DevGuideExamples/DDS/Messenger/subscriber.cpp:
+			* examples/DCPS/Messenger_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_Imr/subscriber.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+			* performance-tests/DCPS/McastListenerTest/publisher.cpp:
+			* performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+			* performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+			* performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+			* performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+			* tests/DCPS/FooTest2/main.cpp:
+			* tests/DCPS/LivelinessTest/publisher.cpp:
+			* tests/DCPS/SimpleFooTest/main.cpp:
+			* tests/DCPS/unit/Main.cpp:
+
+			Changed all
+							PortableServer::ServantBase_var safe_servant = fts_servant;
+					to
+						TAO::DCPS::LocalObject_var safe_servant
+					where appropriate.
+
+					No others should be changed because they are POA servants
+					and not local objects.
+
+	Wed May 23 17:01:27 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* bin/dcps_ts.pl:
+			* dds/dcps_bits.mpb:
+			* DDS_release_notes.txt:
+
+			Removed support for --Module option from dcps_ts.pl.
+
+			* tests/DCPS/BuiltInTopic/main.cpp:
+
+			Adjusted the type specific interfaces from --Module Mine to
+			the type scope of Xyz to get this test to build.
+
+	Wed May 23 16:36:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* dds/DCPS/DataReaderImpl.cpp:
+			* dds/DCPS/DataWriterImpl.cpp:
+			* dds/DCPS/DomainParticipantFactoryImpl.cpp:
+			* dds/DCPS/DomainParticipantImpl.cpp:
+			* dds/DCPS/PublisherImpl.cpp:
+			* dds/DCPS/SubscriberImpl.cpp:
+			* dds/DCPS/TopicImpl.cpp:
+			* dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+			Cleaned up use of the reference_to_servant<SERVANT>() function
+			template.  The second template argument should never be used at the
+			call site.
+
+			* DevGuideExamples/DDS/Messenger/DataReaderListener.cpp:
+			* DevGuideExamples/DDS/Messenger/publisher.cpp:
+			* DevGuideExamples/DDS/Messenger/subscriber.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+			* examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+			* examples/DCPS/Messenger_Imr/publisher.cpp:
+			* examples/DCPS/Messenger_Imr/subscriber.cpp:
+			* performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/McastListenerTest/Writer.cpp:
+			* performance-tests/DCPS/McastListenerTest/publisher.cpp:
+			* performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+			* performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+			* performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+			* performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+			* performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+			* performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+			* performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+			* performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+			* performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+			* performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+			* performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+			* tests/DCPS/BuiltInTopic/common.cpp:
+			* tests/DCPS/BuiltInTopic/main.cpp:
+			* tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+			* tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+			* tests/DCPS/DcpsIntegration/TopicListener.h:
+			* tests/DCPS/DcpsIntegration/infrastructure.cpp:
+			* tests/DCPS/DcpsIntegration/topic.cpp:
+			* tests/DCPS/FooTest3/Writer.cpp:
+			* tests/DCPS/FooTest3/main.cpp:
+			* tests/DCPS/FooTest3NoKey/Writer.h:
+			* tests/DCPS/FooTest3NoKey/Writer.cpp:
+			* tests/DCPS/FooTest3NoKey/main.cpp:
+			* tests/DCPS/FooTest3_0/DataWriterListener.h:
+			* tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+			* tests/DCPS/FooTest3_0/PubDriver.h:
+			* tests/DCPS/FooTest3_0/PubDriver.cpp:
+			* tests/DCPS/FooTest3_0/PublisherListener.h:
+			* tests/DCPS/FooTest3_1/PubDriver.cpp:
+			* tests/DCPS/FooTest3_1/Writer.cpp:
+			* tests/DCPS/FooTest3_2/PubDriver.cpp:
+			* tests/DCPS/FooTest3_2/Writer.cpp:
+			* tests/DCPS/FooTest4/Reader.cpp:
+			* tests/DCPS/FooTest4/Writer.cpp:
+			* tests/DCPS/FooTest4/main.cpp:
+			* tests/DCPS/FooTest4_0/Reader.cpp:
+			* tests/DCPS/FooTest4_0/Writer.cpp:
+			* tests/DCPS/FooTest5/DataReaderListener.cpp:
+			* tests/DCPS/FooTest5/publisher.cpp:
+			* tests/DCPS/FooTest5/subscriber.cpp:
+			* tests/DCPS/FooTest5_0/main.cpp:
+			* tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+			* tests/DCPS/LivelinessTest/publisher.cpp:
+			* tests/DCPS/LivelinessTest/subscriber.cpp:
+			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+			* tests/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+			* tests/DCPS/Messenger_ZeroCopy/Writer.cpp:
+			* tests/DCPS/Messenger_ZeroCopy/publisher.cpp:
+			* tests/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+			* tests/DCPS/MultiDPTest/DataReaderListener.h:
+			* tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+			* tests/DCPS/MultiDPTest/Writer.cpp:
+			* tests/DCPS/MultiDPTest/publisher.cpp:
+			* tests/DCPS/MultiDPTest/subscriber.cpp:
+			* tests/DCPS/MultiTopicTest/DataReaderListener.h:
+			* tests/DCPS/MultiTopicTest/DataReaderListener1.cpp:
+			* tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+			* tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+			* tests/DCPS/MultiTopicTest/Writer.cpp:
+			* tests/DCPS/MultiTopicTest/publisher.cpp:
+			* tests/DCPS/MultiTopicTest/subscriber.cpp:
+			* tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+			* tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+			* tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+			* tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+			* tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+			* tests/DCPS/Reconnect/DataReaderListener.cpp:
+			* tests/DCPS/Reconnect/publisher.cpp:
+			* tests/DCPS/Reconnect/subscriber.cpp:
+			* tests/DCPS/SimpleFooTest/main.cpp:
+			* tests/DCPS/TransientLocalTest/DataReaderListener.h:
+			* tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+			* tests/DCPS/TransientLocalTest/Writer.cpp:
+			* tests/DCPS/TransientLocalTest/publisher.cpp:
+			* tests/DCPS/TransientLocalTest/subscriber.cpp:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+			* tests/DCPS/sub_init_loop/Writer.cpp:
+			* tests/DCPS/sub_init_loop/publisher.cpp:
+			* tests/DCPS/sub_init_loop/subscriber.cpp:
+			* tests/DCPS/unit/Main.cpp:
+
+			Same reference_to_servant change noted above, and began the process
+			of changing all tests and examples to work with the new local
+			interfaces and change in module for type-support, etc.
+
+	Wed May 23 16:20:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* DDS_release_notes.txt:
+
+			Added the "user impacts" to the DDS_release_notes.txt.
+
+			* dds/DCPS/LocalObject.h:
+			* tests/DCPS/FooTest5/publisher.cpp:
+			* tests/DCPS/FooTest5/subscriber.cpp:
+			* tests/DCPS/Reconnect/publisher.cpp:
+			* tests/DCPS/Reconnect/subscriber.cpp:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+
+			Replaced lines like:
+				PortableServer::ServantBase_var safe_servant = fts_servant
+			with:
+				TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+
+	Tue May 22 20:26:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* dds/DCPS/LocalObject.h:
+
+			Eliminated build warnings.
+
+			* dds/DCPS/Service_Participant.h:
+
+			Whitespace formatting and removed ACE_dynamic_cast since it's
+			deprecated.
+
+	Tue May 22 19:04:06 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* DDS_no_CORBA.mwc:
+
+			Added more tests that now compile on this branch.
+
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+			* tests/DCPS/Reconnect/DataWriterListener.h:
+			* tests/DCPS/FooTest4_0/DataReaderListener.h:
+			* tests/DCPS/FooTest5/DataReaderListener.h:
+
+			Changed to use new LocalObject class template.
+
+			* tests/DCPS/FooType4/DcpsFooType4.mpc:
+			* tests/DCPS/BuiltInTopic/common.cpp:
+			* tests/DCPS/FooTest4/main.cpp:
+			* tests/DCPS/FooTest4/Reader.cpp:
+			* tests/DCPS/FooTest4_0/main.cpp:
+			* tests/DCPS/FooTest4_0/Writer.cpp:
+			* tests/DCPS/FooTest4_0/Writer.h:
+			* tests/DCPS/FooTest4_0/Reader.cpp:
+			* tests/DCPS/FooTest5_0/main.cpp:
+
+			Removed the --module switch from dcps_ts.pl, changed all uses of the
+			"Mine" namespace to "Xyz".
+
+			* tests/DCPS/FooType/FooType.idl:
+
+			Change to use local IDL interfaces.
+
+			* tests/DCPS/FooType3/DcpsFooType3.mpc:
+			* tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+			* tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+			* tests/DCPS/FooType5/DcpsFooType5.mpc:
+			* tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+
+			Removed the --module switch from dcps_ts.pl.  Test code that uses the
+			"Mine" namespace still needs to be updated.
+
+			* tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+			* tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+			* tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+
+			Removed these files.  They should never have been in SVN.
+
+	Tue May 22 16:12:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+			* DDS_no_CORBA.mwc:
+
+			Added some tests that now compile with local interfaces.
+
+			* tests/DCPS/FooType4/DcpsFooType4.mpc:
+
+			Removed the --module from the dcps_ts.pl command line.  Not sure if
+			this change should be part of the merge back to trunk or if we should
+			change the code or if more changes need to be made to the --module
+			support.
+
+			* dds/DCPS/LocalObject.h:
+
+			Made TAO::DCPS::LocalObject into a class template so it can
+			disambiguate the multiply-inherited _ptr_type and _narrow members.
+
+			* bin/DCPS/HTemplate.pm:
+			* dds/DCPS/DomainParticipantFactoryImpl.h:
+			* dds/DCPS/DomainParticipantImpl.h:
+			* dds/DCPS/EntityImpl.h:
+			* dds/DCPS/PublisherImpl.h:
+			* dds/DCPS/Service_Participant.h:
+			* dds/DCPS/SubscriberImpl.h:
+			* dds/DCPS/TopicDescriptionImpl.h:
+			* dds/DCPS/TopicImpl.h:
+
+			Made use of the new TAO::DCPS::LocalObject class template.
+
+			* dds/DCPS/DomainParticipantFactoryImpl.cpp:
+			* dds/DCPS/DomainParticipantImpl.cpp:
+			* dds/DCPS/PublisherImpl.cpp:
+			* dds/DCPS/SubscriberImpl.cpp:
+
+			Fixed reference counting bugs in cases where the code assumed there
+			was a POA involved (what used to be non-local interfaces).
+
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+			* tests/DCPS/FooTest5/DataReaderListener.h:
+			* tests/DCPS/LivelinessTest/DataReaderListener.h:
+			* tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+			* tests/DCPS/LivelinessTest/Writer.cpp:
+			* tests/DCPS/LivelinessTest/publisher.cpp:
+			* tests/DCPS/LivelinessTest/subscriber.cpp:
+			* tests/DCPS/Reconnect/DataReaderListener.h:
+			* tests/DCPS/Reconnect/DataWriterListener.h:
+			* tests/DCPS/TransientLocalTest/MessageTypeSupport.idl:
+			* tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.h:
+			* tests/DCPS/TransientLocalTest/MessageTypeSupportImpl.cpp:
+
+			Updated the tests referenced by DDS_no_CORBA.mwc to compile with
+			these latest changes.
+
+	Mon May 21 23:51:16 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* bin/DCPS/HTemplate.pm:
+			* dds/DCPS/DomainParticipantFactoryImpl.h:
+			* dds/DCPS/EntityImpl.h:
+			* dds/DCPS/LocalObject.h:
+			* dds/DCPS/ZeroCopyInfoSeq_T.h:
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+			* tests/DCPS/FooTest5/DataReaderListener.h:
+			* tests/DCPS/Reconnect/DataReaderListener.h:
+			* tests/DCPS/Reconnect/DataWriterListener.h:
+
+			Change fron using TAO_Local_RefCounted_Object to a typedef
+			of it named TAO::DCPS::LocalObject in case we wish to
+			extend its functionallity in the future.
+
+	Mon May 21 22:12:46 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* bin/DCPS/IDLTemplate.pm:
+			* dds/DCPS/Service_Participant.h:
+
+			Updates per Adam's code review posted Fri May 18 17:07:25 2007 CDT.
+
+			* dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+			* dds/DCPS/ZeroCopyInfoSeq_T.h:
+			* dds/DCPS/ZeroCopySeq_T.cpp:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+
+			Created the InfoSeq assignment operator and tested
+			the zero-copy Seq assignment operator.
+
+			* DDS_no_CORBA.mwc:
+			* tests/DCPS/Reconnect/DataReaderListener.cpp:
+			* tests/DCPS/Reconnect/DataReaderListener.h:
+			* tests/DCPS/Reconnect/DataWriterListener.h:
+			* tests/DCPS/Reconnect/publisher.cpp:
+			* tests/DCPS/Reconnect/subscriber.cpp:
+			* tests/DCPS/Reconnect/Writer.cpp:
+
+			Updated the reconnection test to verify that the TAO DDS specific
+			reconnection listener callbacks are made.
+
+	Sat May 19 00:02:15 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/ZeroCopySeq_T.cpp:
+			* dds/DCPS/BuiltInTopicUtils.h:
+			* dds/DCPS/DataReaderImpl.cpp:
+
+			Resolve build errors and warnings from gcc.
+
+	Fri May 18 20:32:11 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* bin/DCPS/CPPTemplate.pm:
+			* bin/DCPS/IDLTemplate.pm:
+			* dds/DCPS/BuiltInTopicUtils.h:
+			* dds/DCPS/DataReaderImpl.cpp:
+			* dds/DCPS/DataReaderImpl.h:
+			* dds/DdsDcps.mpc:
+			* dds/DdsDcpsInfrastructure.idl:
+
+			Support moving ZeroCopyDataSeq instantiation from FooC.h
+			to FooTypeSupportC.h (where it was when it was sequence<Foo>)
+			by adding #PRAGMA DCPS*ZERO_COPY* and resolving circular includes.
+
+			* dds/DCPS/ZeroCopySeq_T.cpp:
+			* dds/DCPS/ZeroCopySeq_T.h:
+			* dds/DCPS/ZeroCopySeq_T.inl:
+
+			Support the assignment operator -- needed for BIT.
+
+	Thu May 17 20:07:21 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+			* performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+			* performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+			* performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+			* performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+
+			Removed --Module Mine and its impacts.
+			Made other remote to local interface changes.
+
+	Mon May 14 20:23:33 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/ZeroCopySeq_T.h:
+
+			Fix test build issue.
+
+	Mon May 14 19:14:12 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* tests/DCPS/FooType5/DcpsFooType5.mpc:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+			* tests/DCPS/FooTest5/DataReaderListener.cpp:
+			* tests/DCPS/FooTest5/subscriber.cpp:
+			* tests/DCPS/FooTest5/DataReaderListener.h:
+			* tests/DCPS/FooTest5/Writer.cpp:
+			* tests/DCPS/FooTest5/publisher.cpp:
+
+			Removed --Module and changes related to that.
+			Changed the listener to be a local interface.
+
+			* bin/DCPS/IDLTemplate.pm:
+			* dds/DdsDcpsInfrastructure.idl:
+
+			Added #pragma DCPS_ZUPPORT_ZERO_COPY_READ to IDLTemplate.pm.
+
+			* bin/DCPS/CPPTemplate.pm:
+			* dds/DCPS/SubscriberImpl.cpp:
+
+			Avoid warnings from gcc.
+
+			* dds/DCPS/ZeroCopyInfoSeq_T.h:
+			* dds/DCPS/ZeroCopyInfoSeq_T.inl:
+			* dds/DCPS/DataReaderImpl.h:
+
+			Moved DDS::SampleInfoSeq from DataReaderImpl.h to
+			DdsDcpsInfrastructureC.h (also TAO_IDL changes).
+
+	Fri May 11 23:36:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* dds/DCPS/DataReaderRemoteImpl.cpp:
+			* dds/DCPS/DataReaderRemoteImpl.h:
+			* dds/DCPS/DataWriterRemoteImpl.cpp:
+			* dds/DCPS/DataWriterRemoteImpl.h:
+
+			Oops - forgot to add these.
+
+	Thu May 10 18:06:58 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+			* DDS_no_CORBA.mwc:
+
+			Temporary addition.
+
+			* bin/DCPS/CPPTemplate.pm:
+			* bin/DCPS/HTemplate.pm:
+			* bin/DCPS/IDLTemplate.pm:
+			* bin/dcps_ts.pl:
+			* dds/DCPS/DataReaderImpl.cpp:
+			* dds/DCPS/DataReaderImpl.h:
+			* dds/DCPS/DataReaderImpl.inl:
+			* dds/DCPS/DataWriterImpl.cpp:
+			* dds/DCPS/DataWriterImpl.h:
+			* dds/DCPS/DomainParticipantFactoryImpl.h:
+			* dds/DCPS/DomainParticipantImpl.cpp:
+			* dds/DCPS/DomainParticipantImpl.h:
+			* dds/DCPS/EntityImpl.h:
+			* dds/DCPS/PublisherImpl.cpp:
+			* dds/DCPS/PublisherImpl.h:
+			* dds/DCPS/Registered_Data_Types.cpp:
+			* dds/DCPS/Registered_Data_Types.h:
+			* dds/DCPS/Service_Participant.cpp:
+			* dds/DCPS/Service_Participant.h:
+			* dds/DCPS/SubscriberImpl.cpp:
+			* dds/DCPS/SubscriberImpl.h:
+			* dds/DCPS/TopicDescriptionImpl.cpp:
+			* dds/DCPS/TopicDescriptionImpl.h:
+			* dds/DCPS/TopicImpl.cpp:
+			* dds/DCPS/TopicImpl.h:
+			* dds/DdsDcps.mpc:
+			* dds/DdsDcpsDataReaderRemote.idl:
+			* dds/DdsDcpsDataWriterRemote.idl:
+			* dds/DdsDcpsDomain.idl:
+			* dds/DdsDcpsInfrastructure.idl:
+			* dds/DdsDcpsPublication.idl:
+			* dds/DdsDcpsSubscription.idl:
+			* dds/DdsDcpsTopic.idl:
+			* dds/DdsDcpsTypeSupportTao.idl:
+			* dds/InfoRepo/DomainParticipantListener_i.h:
+			* tests/DCPS/ZeroCopyRead/main.cpp:
+
+			First round of making the entity interfaces local
+			and merging the sample sequence types.
+
 Wed May 30 15:14:21 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

@@ -107,9 +107,6 @@ namespace TAO
       ::DDS::Publisher_ptr pub_obj
         = servant_to_reference (pub);
 
-      // Give ownership to poa.
-      pub->_remove_ref ();
-
       pub->set_object_reference (pub_obj);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -155,9 +152,7 @@ namespace TAO
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      PublisherImpl* the_servant
-        = reference_to_servant<PublisherImpl, ::DDS::Publisher_ptr>
-            (p);
+      PublisherImpl* the_servant = reference_to_servant<PublisherImpl> (p);
 
       if (the_servant->is_clean () == 0)
         {
@@ -250,9 +245,6 @@ namespace TAO
       ::DDS::Subscriber_ptr sub_obj
         = servant_to_reference (sub);
 
-      // Give ownership to poa.
-      sub->_remove_ref ();
-
       sub->set_object_reference (sub_obj);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -298,9 +290,7 @@ namespace TAO
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      SubscriberImpl* the_servant
-        = reference_to_servant<SubscriberImpl, ::DDS::Subscriber_ptr>
-            (s);
+      SubscriberImpl* the_servant = reference_to_servant<SubscriberImpl> (s);
 
       if (the_servant->is_clean () == 0)
         {
@@ -547,17 +537,14 @@ namespace TAO
         // The servant's ref count should be greater than 2 at this point,
         // one referenced by poa, one referenced by the topic map and
         // others referenced by the datareader/datawriter.
-        TopicImpl* the_topic_servant
-          = reference_to_servant<TopicImpl, ::DDS::Topic_ptr>
-              (a_topic);
+        TopicImpl* the_topic_servant = reference_to_servant<TopicImpl> (a_topic);
 
         CORBA::String_var topic_name = the_topic_servant->get_name();
 
         ::DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
 
-        DomainParticipantImpl* the_dp_servant
-          = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-              (dp.in());
+        DomainParticipantImpl* the_dp_servant =
+          reference_to_servant<DomainParticipantImpl> (dp.in ());
 
         if (the_dp_servant != this)
           {
@@ -969,9 +956,7 @@ namespace TAO
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::DomainParticipantListener::_duplicate(a_listener);
       fast_listener_
-        = reference_to_servant< ::POA_DDS::DomainParticipantListener,
-                                ::DDS::DomainParticipantListener_ptr >
-            (listener_.in ());
+        = reference_to_servant<DDS::DomainParticipantListener> (listener_.in ());
       return ::DDS::RETCODE_OK;
     }
 
@@ -1434,7 +1419,7 @@ namespace TAO
           return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
         }
 
-      POA_TAO::DCPS::TypeSupport_ptr type_support =
+      TAO::DCPS::TypeSupport_ptr type_support =
         TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (),type_name);
 
       if (0 == type_support)
@@ -1460,10 +1445,6 @@ namespace TAO
         }
 
       ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
-
-
-      // Give ownership to poa.
-      topic_servant->_remove_ref ();
 
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
@@ -1521,7 +1502,7 @@ namespace TAO
         participant_objref_ = ::DDS::DomainParticipant::_duplicate (dp);
     }
 
-    ::POA_DDS::DomainParticipantListener*
+    ::DDS::DomainParticipantListener*
     DomainParticipantImpl::listener_for (::DDS::StatusKind kind)
     {
       if ((listener_mask_ & kind) == 0)
@@ -1567,7 +1548,7 @@ namespace TAO
         ::DDS::TopicQos topic_qos;
         this->get_default_topic_qos(topic_qos);
 
-        POA_TAO::DCPS::TypeSupport_ptr type_support =
+        TAO::DCPS::TypeSupport_ptr type_support =
           TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
         if (0 == type_support)
@@ -1826,8 +1807,7 @@ namespace TAO
       {
         // Attach the Subscriber with the TransportImpl.
         ::TAO::DCPS::SubscriberImpl* sub_servant
-          = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::SubscriberImpl, ::DDS::Subscriber_ptr>
-          (bit_subscriber_.in ());
+          = reference_to_servant<TAO::DCPS::SubscriberImpl> (bit_subscriber_.in ());
 
         TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ();
 

@@ -10,6 +10,7 @@
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Unbounded_Set.h"
+#include "dds/DCPS/LocalObject.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -35,8 +36,7 @@ namespace TAO
     *
     */
     class TAO_DdsDcps_Export DomainParticipantFactoryImpl
-      : public virtual POA_DDS::DomainParticipantFactory,
-        public virtual PortableServer::RefCountServantBase
+      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantFactory>
     {
     public:
 

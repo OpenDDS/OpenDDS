@@ -213,10 +213,8 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                             ::DDS::Subscriber_ptr>
-                              (sub.in ());
+      TAO::DCPS::SubscriberImpl* sub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
         {
@@ -325,9 +323,9 @@ int main (int argc, char *argv[])
 
       if (no_key)
         {
-          ::Mine::FooNoKeyTypeSupportImpl* nokey_fts_servant
-            = new ::Mine::FooNoKeyTypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = nokey_fts_servant;
+          ::Xyz::FooNoKeyTypeSupportImpl* nokey_fts_servant
+            = new ::Xyz::FooNoKeyTypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = nokey_fts_servant;
 
           if (::DDS::RETCODE_OK != nokey_fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -338,9 +336,9 @@ int main (int argc, char *argv[])
         }
       else
         {
-          ::Mine::FooTypeSupportImpl* fts_servant
-            = new ::Mine::FooTypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = fts_servant;
+          ::Xyz::FooTypeSupportImpl* fts_servant
+            = new ::Xyz::FooTypeSupportImpl();
+          //x ortableServer::ServantBase_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -352,9 +350,9 @@ int main (int argc, char *argv[])
 
       if (mixed_trans)
         {
-          ::Mine::FooTypeSupportImpl* fts_servant
-            = new ::Mine::FooTypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = fts_servant;
+          ::Xyz::FooTypeSupportImpl* fts_servant
+            = new ::Xyz::FooTypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {

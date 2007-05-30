@@ -42,15 +42,14 @@ int main (int argc, char *argv[])
         return 1 ;
       }
 
-      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = mts_servant;
+      ::Messenger::MessageTypeSupport_var mts = new ::Messenger::MessageTypeSupportImpl();
 
-      if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (), "Messenger")) {
+      if (DDS::RETCODE_OK != mts->register_type(participant.in (), "Messenger")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;
           exit(1);
         }
 
-      CORBA::String_var type_name = mts_servant->get_type_name ();
+      CORBA::String_var type_name = mts->get_type_name ();
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);

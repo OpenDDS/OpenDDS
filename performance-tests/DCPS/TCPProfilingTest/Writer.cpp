@@ -28,12 +28,12 @@ void write (long id,
     data.contents[i] = (char) i % 256;
   }
 
-  testMsgDataWriter_var pt_dw
-    = testMsgDataWriter::_narrow(writer);
+  ::profilingTest::testMsgDataWriter_var pt_dw
+    = ::profilingTest::testMsgDataWriter::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  testMsgDataWriterImpl* pt_servant =
-    ::TAO::DCPS::reference_to_servant< testMsgDataWriterImpl, testMsgDataWriter_ptr>
+  ::profilingTest::testMsgDataWriterImpl* pt_servant =
+    ::TAO::DCPS::reference_to_servant< ::profilingTest::testMsgDataWriterImpl, ::profilingTest::testMsgDataWriter_ptr>
             (pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,

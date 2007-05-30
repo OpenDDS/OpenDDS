@@ -39,12 +39,12 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant =
-    ::TAO::DCPS::reference_to_servant< Wimpl, W_ptr>
-            (pt_dw.in ());
+  // Note: in v 0.12 and before interfaces were remote (although collocated) 
+  //       and using the servant directly rather than the DataReader reference
+  //       had performance benefits but with the change to local
+  //       interfaces this is no longer needed.
+  // Wimpl* pt_servant = TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
 
-  //SHH remove this kludge when the transport is fixed.
-  //ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
 
@@ -55,8 +55,8 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
-    pt_servant->write(data,
-                      handle);
+    pt_dw->write(data,
+                 handle);
   }
   }
 }
@@ -126,10 +126,10 @@ Writer::svc ()
     case 128:
       {
         write < ::Xyz::Pt128,
-               ::Mine::Pt128DataWriter,
-               ::Mine::Pt128DataWriter_var,
-               ::Mine::Pt128DataWriter_ptr,
-               ::Mine::Pt128DataWriterImpl>
+               ::Xyz::Pt128DataWriter,
+               ::Xyz::Pt128DataWriter_var,
+               ::Xyz::Pt128DataWriter_ptr,
+               ::Xyz::Pt128DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -140,10 +140,10 @@ Writer::svc ()
     case 512:
       {
         write < ::Xyz::Pt512,
-               ::Mine::Pt512DataWriter,
-               ::Mine::Pt512DataWriter_var,
-               ::Mine::Pt512DataWriter_ptr,
-               ::Mine::Pt512DataWriterImpl>
+               ::Xyz::Pt512DataWriter,
+               ::Xyz::Pt512DataWriter_var,
+               ::Xyz::Pt512DataWriter_ptr,
+               ::Xyz::Pt512DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -154,10 +154,10 @@ Writer::svc ()
     case 2048:
       {
         write < ::Xyz::Pt2048,
-               ::Mine::Pt2048DataWriter,
-               ::Mine::Pt2048DataWriter_var,
-               ::Mine::Pt2048DataWriter_ptr,
-               ::Mine::Pt2048DataWriterImpl>
+               ::Xyz::Pt2048DataWriter,
+               ::Xyz::Pt2048DataWriter_var,
+               ::Xyz::Pt2048DataWriter_ptr,
+               ::Xyz::Pt2048DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -168,10 +168,10 @@ Writer::svc ()
     case 8192:
       {
         write < ::Xyz::Pt8192,
-               ::Mine::Pt8192DataWriter,
-               ::Mine::Pt8192DataWriter_var,
-               ::Mine::Pt8192DataWriter_ptr,
-               ::Mine::Pt8192DataWriterImpl>
+               ::Xyz::Pt8192DataWriter,
+               ::Xyz::Pt8192DataWriter_var,
+               ::Xyz::Pt8192DataWriter_ptr,
+               ::Xyz::Pt8192DataWriterImpl>
                  (writer_id_,
                   data_size_,
                   num_messages_,

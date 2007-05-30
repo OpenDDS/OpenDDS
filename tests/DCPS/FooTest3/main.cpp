@@ -106,10 +106,9 @@ int main (int argc, char *argv[])
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
-      ::Mine::FooTypeSupport_var fts =
+      ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
@@ -242,8 +241,8 @@ int main (int argc, char *argv[])
                                ::DDS::DataReaderListener::_nil());
       TEST_CHECK (! CORBA::is_nil (dr.in ()));
 
-      ::Mine::FooDataReader_var foo_dr
-        = ::Mine::FooDataReader::_narrow(dr.in ());
+      ::Xyz::FooDataReader_var foo_dr
+        = ::Xyz::FooDataReader::_narrow(dr.in ());
       TEST_CHECK (! CORBA::is_nil (foo_dr.in ()));
 
       int num_samples

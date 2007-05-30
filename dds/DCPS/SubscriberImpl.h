@@ -33,8 +33,9 @@ namespace TAO
     // Subscriber
     struct  SubscriberDataReaderInfo
     {
-      DataReaderRemote_ptr        remote_reader_ ;
-      DataReaderImpl*             local_reader_;
+      ::TAO::DCPS::DataReaderRemote_ptr remote_reader_objref_ ;
+      ::DDS::DataReader_ptr       local_reader_objref_;
+      DataReaderImpl*             local_reader_impl_;
       RepoId                      topic_id_ ;
       RepoId                      subscription_id_ ;
     } ;
@@ -50,7 +51,7 @@ namespace TAO
 
     //Class SubscriberImpl
     class TAO_DdsDcps_Export SubscriberImpl
-      : public virtual POA_DDS::Subscriber,
+      : public virtual TAO::DCPS::LocalObject<DDS::Subscriber>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
@@ -214,7 +215,9 @@ namespace TAO
     // called by DataReaderImpl::data_received
     void data_received(DataReaderImpl *reader);
 
-    void reader_enabled(DataReaderRemote_ptr reader,
+    void reader_enabled(DataReaderRemote_ptr     remote_reader,
+                        ::DDS::DataReader_ptr    local_reader,
+			DataReaderImpl*          local_reader_impl,
                         const char *topic_name,
                         RepoId topic_id
       )
@@ -224,7 +227,7 @@ namespace TAO
 
     //void cleanup();
 
-    ::POA_DDS::SubscriberListener* listener_for (::DDS::StatusKind kind);
+    ::DDS::SubscriberListener* listener_for (::DDS::StatusKind kind);
 
     private:
 
@@ -233,7 +236,7 @@ namespace TAO
 
       DDS::StatusKindMask           listener_mask_;
       ::DDS::SubscriberListener_var  listener_;
-      ::POA_DDS::SubscriberListener* fast_listener_;
+      ::DDS::SubscriberListener* fast_listener_;
 
       DataReaderMap                 datareader_map_ ;
       DataReaderSet                 datareader_set_ ;

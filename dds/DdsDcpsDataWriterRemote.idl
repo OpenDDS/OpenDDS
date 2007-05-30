@@ -24,7 +24,7 @@ module TAO {
     // This interface contains TAO specific interfaces
     // related to a DDS::DataWriter servant.
     // It is split out so the DDS::DataWriter interface can be local.
-    interface DataWriterRemote : ::DDS::DataWriter {
+    interface DataWriterRemote { //x : ::DDS::DataWriter {
 
       // will tell transport and call on_publication_match() 
       oneway void add_associations(

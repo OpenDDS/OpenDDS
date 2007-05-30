@@ -96,7 +96,7 @@ namespace TAO
 
 
       // Give ownership to poa.
-      dp->_remove_ref ();
+      //x dp->_remove_ref (); //xxx 2-> 1
 
       if (CORBA::is_nil (dp_obj))
         {
@@ -110,7 +110,7 @@ namespace TAO
 
       // Set the participant object reference before enable since it's
       // needed for the built in topics during enable.
-      dp->set_object_reference (dp_obj);
+      dp->set_object_reference (dp_obj); //xxx no change
 
       // There is no qos policy in the DomainParticipantFactory, the DomainParticipant
       // defaults to enabled.
@@ -160,13 +160,13 @@ namespace TAO
               return ::DDS::DomainParticipant::_nil ();
             }
         }
-
+//xxx still ref_count = 1
       // Increase ref count when the servant is referenced by the
       // map.
-      dp->_add_ref ();
+      dp->_add_ref (); //xxx 1->2
 
-      return ::DDS::DomainParticipant::_duplicate(dp_obj);
-    }
+      return ::DDS::DomainParticipant::_duplicate(dp_obj); //xxx still 2  (obj 3->4)
+    } //xxx obj 4->3
 
 
     ::DDS::ReturnCode_t
@@ -177,7 +177,7 @@ namespace TAO
         CORBA::SystemException
       ))
     {
-
+//xxx rc = 4
       if (CORBA::is_nil(a_participant))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -190,9 +190,9 @@ namespace TAO
       // The servant's ref count should be 2 at this point, one referenced
       // by the poa and the other referenced by the map.
       DomainParticipantImpl* the_servant
-        = reference_to_servant<DomainParticipantImpl, ::DDS::DomainParticipant_ptr>
-            (a_participant);
+        = reference_to_servant<DomainParticipantImpl> (a_participant);
 
+      //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_ 
       if (the_servant->is_clean () == 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -240,7 +240,7 @@ namespace TAO
               ::DDS::ReturnCode_t result
                 = the_servant->delete_contained_entities ();
 
-
+//xxx still rc=4
               if (result != ::DDS::RETCODE_OK)
                 {
                   return result;
@@ -257,7 +257,7 @@ namespace TAO
                                     ACE_TEXT("remove")),
                                     ::DDS::RETCODE_ERROR);
                 }
-
+//xxx now obj rc=5 and servant rc=4
               if (entry->int_id_.is_empty ())
                 {
                   if (participants_.unbind (entry->ext_id_) == -1)
@@ -270,8 +270,8 @@ namespace TAO
                                         ::DDS::RETCODE_ERROR);
                     }
                 }
-            }
-        }
+            } //xxx now obj rc = 4
+        }//xxx now obj rc = 3
 
       DCPSInfo_var repo = TheServiceParticipant->get_repository();
 
@@ -297,9 +297,9 @@ namespace TAO
 
       // Decrease ref count when the servant is removed from map.
       the_servant->_remove_ref ();
-
+//xxx ^^^ obj rc = 3 servant rc 4->3
       deactivate_object < ::DDS::DomainParticipant_ptr > (a_participant);
-
+//xxx ^^^ obj rc = 3 servant rc 3->2
       return ::DDS::RETCODE_OK;
     }
 

@@ -8,6 +8,7 @@
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "TestStats.h"
 
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -15,10 +16,10 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-: public virtual POA_DDS::DataReaderListener,
-  public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
+
   //Constructor
   DataReaderListenerImpl (int num_publishers,
                           int num_samples,

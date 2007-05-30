@@ -12,11 +12,12 @@
 
 
 //Class DataWriterListenerImpl
-class DataWriterListenerImpl
-  : public virtual POA_TAO::DCPS::DataWriterListener,
-    public virtual PortableServer::RefCountServantBase
+class DataWriterListenerImpl 
+  // note: TAO specific extensions
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataWriterListener>
 {
 public:
+
   //Constructor
   DataWriterListenerImpl ();
 

@@ -36,19 +36,17 @@ Reader::start ()
   try
   {
 
-    ::Mine::FooDataReader_var foo_dr
-      = ::Mine::FooDataReader::_narrow(reader_.in ());
+    ::Xyz::FooDataReader_var foo_dr
+      = ::Xyz::FooDataReader::_narrow(reader_.in ());
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+                 ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       throw TestException() ;
     }
 
-    ::Mine::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                           ::Mine::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     char action[5] ;
     if (use_take_)
@@ -98,7 +96,7 @@ Reader::start ()
     {
       //  Verify the samples were actually taken
       //
-      ::Mine::FooSeq foo(1) ;
+      ::Xyz::FooSeq foo(1) ;
       ::DDS::SampleInfoSeq si(1) ;
 
       ACE_OS::printf ("release: %d\n", foo.release()) ;
@@ -139,19 +137,17 @@ Reader::start1 ()
   try
   {
 
-    ::Mine::FooDataReader_var foo_dr
-      = ::Mine::FooDataReader::_narrow(reader_.in ());
+    ::Xyz::FooDataReader_var foo_dr
+      = ::Xyz::FooDataReader::_narrow(reader_.in ());
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+                 ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       throw TestException() ;
     }
 
-    ::Mine::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                           ::Mine::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     char action[14] ;
     if (use_take_)
@@ -163,7 +159,7 @@ Reader::start1 ()
       ACE_OS::strcpy(action, "read_instance") ;
     }
 
-    ::Mine::FooSeq foo(num_reads_per_thread_) ;
+    ::Xyz::FooSeq foo(num_reads_per_thread_) ;
     ::DDS::SampleInfoSeq si(num_reads_per_thread_) ;
     ::Xyz::Foo key_holder ;
 
@@ -342,7 +338,7 @@ Reader::start1 ()
     {
       //  Verify the damples were actually taken
       //
-      ::Mine::FooSeq foo(1) ;
+      ::Xyz::FooSeq foo(1) ;
       ::DDS::SampleInfoSeq si(1) ;
 
       DDS::ReturnCode_t status ;
@@ -381,21 +377,19 @@ Reader::start2 ()
   try
   {
 
-    ::Mine::FooDataReader_var foo_dr
-      = ::Mine::FooDataReader::_narrow(reader_.in ());
+    ::Xyz::FooDataReader_var foo_dr
+      = ::Xyz::FooDataReader::_narrow(reader_.in ());
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+                 ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       throw TestException() ;
     }
 
-    ::Mine::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                           ::Mine::FooDataReader_ptr>
-                (foo_dr.in ());
+    Xyz::FooDataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
-    ::Mine::FooSeq foo;
+    ::Xyz::FooSeq foo;
     ::DDS::SampleInfoSeq si ;
     DDS::ReturnCode_t status  ;
 

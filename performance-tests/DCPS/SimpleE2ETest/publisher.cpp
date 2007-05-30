@@ -143,10 +143,10 @@ int main (int argc, char *argv[])
       {
       case 128:
         {
-          ::Mine::Pt128TypeSupportImpl* pt128ts_servant = new ::Mine::Pt128TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = pt128ts_servant;
+          ::Xyz::Pt128TypeSupportImpl* pt128ts_servant = new ::Xyz::Pt128TypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = pt128ts_servant;
 
-          ::Mine::Pt128TypeSupport_var pt128ts =
+          ::Xyz::Pt128TypeSupport_var pt128ts =
             TAO::DCPS::servant_to_reference (pt128ts_servant);
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
@@ -159,10 +159,10 @@ int main (int argc, char *argv[])
         break;
       case 512:
         {
-          ::Mine::Pt512TypeSupportImpl* pt512ts_servant = new ::Mine::Pt512TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = pt512ts_servant;
+          ::Xyz::Pt512TypeSupportImpl* pt512ts_servant = new ::Xyz::Pt512TypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = pt512ts_servant;
 
-          ::Mine::Pt512TypeSupport_var pt512ts =
+          ::Xyz::Pt512TypeSupport_var pt512ts =
             TAO::DCPS::servant_to_reference (pt512ts_servant);
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
@@ -175,10 +175,10 @@ int main (int argc, char *argv[])
         break;
       case 2048:
         {
-          ::Mine::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Mine::Pt2048TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = pt2048ts_servant;
+          ::Xyz::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Xyz::Pt2048TypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = pt2048ts_servant;
 
-          ::Mine::Pt2048TypeSupport_var pt2048ts =
+          ::Xyz::Pt2048TypeSupport_var pt2048ts =
             TAO::DCPS::servant_to_reference (pt2048ts_servant);
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
@@ -191,10 +191,10 @@ int main (int argc, char *argv[])
         break;
       case 8192:
         {
-          ::Mine::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Mine::Pt8192TypeSupportImpl();
-          PortableServer::ServantBase_var safe_servant = pt8192ts_servant;
+          ::Xyz::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Xyz::Pt8192TypeSupportImpl();
+          TAO::DCPS::LocalObject_var safe_servant = pt8192ts_servant;
 
-          ::Mine::Pt8192TypeSupport_var pt8192ts =
+          ::Xyz::Pt8192TypeSupport_var pt8192ts =
             TAO::DCPS::servant_to_reference(pt8192ts_servant);
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
@@ -252,10 +252,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {

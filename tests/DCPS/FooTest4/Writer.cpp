@@ -33,10 +33,8 @@ Writer::start ()
 
   try
   {
-    ::TAO::DCPS::DataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataReaderImpl,
-                                           ::DDS::DataReader_ptr>
-                           (reader_);
+    TAO::DCPS::DataReaderImpl* dr_servant =
+      TAO::DCPS::reference_to_servant<TAO::DCPS::DataReaderImpl> (reader_);
 
     ::Xyz::Foo foo;
     foo.x = 0.0 ;

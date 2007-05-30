@@ -14,12 +14,12 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
   // TWF: There is an optimization to the test by
   // using a pointer to the known servant and
   // static_casting it to the servant
-  testMsgDataReader_var var_dr
-    = testMsgDataReader::_narrow(reader);
+  ::profilingTest::testMsgDataReader_var var_dr
+    = ::profilingTest::testMsgDataReader::_narrow(reader);
 
-  testMsgDataReader_ptr pt_dr = var_dr.ptr();
-  testMsgDataReaderImpl* dr_servant =
-      ::TAO::DCPS::reference_to_servant< testMsgDataReaderImpl, testMsgDataReader_ptr>
+  ::profilingTest::testMsgDataReader_ptr pt_dr = var_dr.ptr();
+  ::profilingTest::testMsgDataReaderImpl* dr_servant =
+      ::TAO::DCPS::reference_to_servant< ::profilingTest::testMsgDataReaderImpl, ::profilingTest::testMsgDataReader_ptr>
               (pt_dr);
 
   if (subscriber_delay_msec)
@@ -34,64 +34,28 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
   DDS::ReturnCode_t status;
   // initialize to zero.
 
-  if (useZeroCopy)
+  ::profilingTest::testMsgSeq samples(useZeroCopy ? 0 : max_read_samples, max_read_samples);
+  ::DDS::SampleInfoSeq        infos  (useZeroCopy ? 0 : max_read_samples, max_read_samples);
+
+  status = dr_servant->read (
+    samples,
+    infos,
+    max_read_samples,
+    ::DDS::NOT_READ_SAMPLE_STATE,
+    ::DDS::ANY_VIEW_STATE,
+    ::DDS::ANY_INSTANCE_STATE);
+
+  if (status == ::DDS::RETCODE_OK)
     {
-      testMsgZCSeq samplesZC(0,max_read_samples);
-      ::TAO::DCPS::SampleInfoZCSeq infosZC(0,max_read_samples);
-
-      status = dr_servant->read (
-        samplesZC,
-        infosZC,
-        max_read_samples,
-        ::DDS::NOT_READ_SAMPLE_STATE,
-        ::DDS::ANY_VIEW_STATE,
-        ::DDS::ANY_INSTANCE_STATE);
-
-      if (status == ::DDS::RETCODE_OK)
-        {
-          samples_recvd = samplesZC.length ();
-        }
-      else if (status == ::DDS::RETCODE_NO_DATA)
-        {
-          ACE_ERROR((LM_ERROR, " Empty read [ZC]!\n"));
-        }
-      else
-        {
-            ACE_OS::printf (" read  data [ZC]: Error: %d\n", status) ;
-        }
-
-      status = dr_servant->return_loan (samplesZC, infosZC);
-
-      if (status != ::DDS::RETCODE_OK)
-        {
-            ACE_OS::printf (" read  data [ZC return loan]: Error: %d\n", status) ;
-        }
+      samples_recvd = samples.length ();
+    }
+  else if (status == ::DDS::RETCODE_NO_DATA)
+    {
+      ACE_ERROR((LM_ERROR, " Empty read!\n"));
     }
   else
     {
-      testMsgSeq samples(max_read_samples);
-      ::DDS::SampleInfoSeq infos(max_read_samples);
-
-      status = dr_servant->read (
-        samples,
-        infos,
-        max_read_samples,
-        ::DDS::NOT_READ_SAMPLE_STATE,
-        ::DDS::ANY_VIEW_STATE,
-        ::DDS::ANY_INSTANCE_STATE);
-
-      if (status == ::DDS::RETCODE_OK)
-        {
-          samples_recvd = samples.length ();
-        }
-      else if (status == ::DDS::RETCODE_NO_DATA)
-        {
-          ACE_ERROR((LM_ERROR, " Empty read!\n"));
-        }
-      else
-        {
-            ACE_OS::printf (" read  data: Error: %d\n", status) ;
-        }
+        ACE_OS::printf (" read  data: Error: %d\n", status) ;
     }
 
   return samples_recvd;

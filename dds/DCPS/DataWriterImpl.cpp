@@ -126,6 +126,7 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            TAO::DCPS::DomainParticipantImpl*      participant_servant,
            ::DDS::Publisher_ptr                   publisher,
            TAO::DCPS::PublisherImpl*              publisher_servant,
+           ::DDS::DataWriter_ptr                  dw_local,
            TAO::DCPS::DataWriterRemote_ptr        dw_remote
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -151,9 +152,8 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
 
   if (! CORBA::is_nil (listener_.in()))
     {
-      fast_listener_ = reference_to_servant<POA_DDS::DataWriterListener,
-  DDS::DataWriterListener_ptr>
-  (listener_.in());
+      fast_listener_ =
+        reference_to_servant<DDS::DataWriterListener> (listener_.in());
     }
   participant_servant_ = participant_servant;
   participant_servant_->_add_ref ();
@@ -162,7 +162,8 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   publisher_objref_  = ::DDS::Publisher::_duplicate (publisher);
   publisher_servant_ = publisher_servant;
   publisher_servant_->_add_ref ();
-  dw_remote_objref_  = ::TAO::DCPS::DataWriterRemote::_duplicate (dw_remote);
+  dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
+  dw_remote_objref_  = TAO::DCPS::DataWriterRemote::_duplicate (dw_remote);
 
   initialized_ = true;
 }
@@ -264,12 +265,12 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
 
       set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
 
-      ::POA_DDS::DataWriterListener* listener
+      ::DDS::DataWriterListener* listener
         = listener_for (::DDS::PUBLICATION_MATCH_STATUS);
 
       if (listener != 0)
       {
-        listener->on_publication_match (dw_remote_objref_.in (),
+        listener->on_publication_match (dw_local_objref_.in (),
           publication_match_status_);
 
         // TBD - why does the spec say to change this but not
@@ -433,7 +434,7 @@ DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  ::POA_DDS::DataWriterListener* listener
+  ::DDS::DataWriterListener* listener
       = listener_for (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -448,7 +449,7 @@ DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus
 
   if (listener != 0)
     {
-      listener->on_offered_incompatible_qos (dw_remote_objref_.in (),
+      listener->on_offered_incompatible_qos (dw_local_objref_.in (),
                offered_incompatible_qos_status_);
 
       // TBD - why does the spec say to change this but not
@@ -514,9 +515,7 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::POA_DDS::DataWriterListener,
-    ::DDS::DataWriterListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::DataWriterListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
@@ -785,7 +784,9 @@ DataWriterImpl::enable ( )
 
   this->set_enabled ();
 
-  return publisher_servant_->writer_enabled (dw_remote_objref_.in (),
+  return publisher_servant_->writer_enabled (
+               dw_remote_objref_.in(),
+               dw_local_objref_.in (),
                topic_name_.in (),
                topic_id_);
 }
@@ -1247,7 +1248,7 @@ DataWriterImpl::unregistered(::DDS::InstanceHandle_t instance_handle)
   ACE_UNUSED_ARG (instance_handle);
 }
 
-::POA_DDS::DataWriterListener*
+::DDS::DataWriterListener*
 DataWriterImpl::listener_for (::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
@@ -1371,7 +1372,7 @@ DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
       // Since this callback may come after remove_association which removes
       // the reader from id_to_handle map, we can ignore this error.
       this->cache_lookup_instance_handles (subids, status.subscription_handles);
-      the_listener->on_publication_disconnected (this->dw_remote_objref_.in (),
+      the_listener->on_publication_disconnected (this->dw_local_objref_.in (),
         status);
     }
   }
@@ -1402,7 +1403,7 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
           "cache_lookup_instance_handles failed\n"));
       }
 
-      the_listener->on_publication_reconnected (this->dw_remote_objref_.in (),
+      the_listener->on_publication_reconnected (this->dw_local_objref_.in (),
       status);
     }
   }
@@ -1426,7 +1427,7 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
       // Since this callback may come after remove_association which removes
       // the reader from id_to_handle map, we can ignore this error.
       this->cache_lookup_instance_handles (subids, status.subscription_handles);
-      the_listener->on_publication_lost (this->dw_remote_objref_.in (),
+      the_listener->on_publication_lost (this->dw_local_objref_.in (),
       status);
     }
   }
@@ -1443,7 +1444,7 @@ DataWriterImpl::notify_connection_deleted ()
   DataWriterListener_var the_listener = DataWriterListener::_narrow (this->listener_.in ());
 
   if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_connection_deleted (this->dw_remote_objref_.in ());
+    the_listener->on_connection_deleted (this->dw_local_objref_.in ());
 }
 
 bool
