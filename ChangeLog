@@ -1,3 +1,12 @@
+Wed May 30 23:50:53 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+
+          Fix gcc build errors.
+
 Wed May 30 22:41:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/CorbaSeq/DataReaderListener.h:
