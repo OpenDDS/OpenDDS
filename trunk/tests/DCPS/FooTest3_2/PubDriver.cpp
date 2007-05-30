@@ -390,7 +390,7 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = TAO::DCPS::reference_to_servant<::Xyz::FooDataWriterImpl>
+      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
@@ -430,7 +430,7 @@ PubDriver::run()
       = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i].in ());
 
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = TAO::DCPS::reference_to_servant<::Xyz::FooDataWriterImpl>
+      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 

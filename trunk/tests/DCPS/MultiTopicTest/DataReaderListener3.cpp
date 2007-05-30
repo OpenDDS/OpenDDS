@@ -26,7 +26,7 @@
       }
 
     ::T3::Foo3DataReaderImpl* dr_servant =
-      TAO::DCPS::reference_to_servant<::T3::Foo3DataReaderImpl>(foo_dr.in());
+      TAO::DCPS::reference_to_servant< ::T3::Foo3DataReaderImpl>(foo_dr.in());
 
     ::T3::Foo3Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
