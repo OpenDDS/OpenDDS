@@ -240,17 +240,10 @@ UDPTransport::Link::send(const iovec buffers[],
                "Sending would the iovec would "
                "take longer than the specified timeout" :
                ACE_OS::strerror(err));
-      callback_->sendFailed(reason);
-      if (err == EWOULDBLOCK || err == ETIME) {
-        return TransportAPI::make_deferred(reason);
-      }
-      else {
-        return TransportAPI::make_failure(reason);
-      }
+      return TransportAPI::make_failure(reason);
     }
   }
 
-  callback_->sendSucceeded(requestId);
   return TransportAPI::make_success();
 }
 

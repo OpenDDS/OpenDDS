@@ -195,11 +195,9 @@ TCPTransport::Link::send(const iovec buffers[],
   // Send with built-in ACE retry
   if (stream_.sendv_n(buffers, iovecSize) != total) {
     TransportAPI::failure_reason reason("Unable to send iovec ");
-    callback_->sendFailed(reason);
     return TransportAPI::make_failure(reason);
   }
 
-  callback_->sendSucceeded(requestId);
   return TransportAPI::make_success();
 }
 
