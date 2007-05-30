@@ -40,6 +40,18 @@ parse_args (int argc, char *argv[])
   return 0;
 }
 
+//This class is granted friendship to DataReaderImpl so we can get the remote
+//object reference.
+class DDS_TEST
+{
+public:
+  static TAO::DCPS::DataReaderRemote_ptr
+  getRemoteInterface(const TAO::DCPS::DataReaderImpl &impl)
+  {
+    return TAO::DCPS::DataReaderRemote::_duplicate (impl.dr_remote_objref_);
+  }
+};
+
 int
 main (int argc, char *argv[])
 {
@@ -106,9 +118,8 @@ main (int argc, char *argv[])
 
       // Add subscription
       TAO_DDS_DCPSDataReader_i dri;
-      PortableServer::ObjectId_var oid = poa->activate_object( &dri );
-      obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataReaderRemote_var dr = TAO::DCPS::DataReaderRemote::_narrow(obj.in());
+      TAO::DCPS::DataReaderRemote_var dr = DDS_TEST::getRemoteInterface(dri);
+
       if (CORBA::is_nil (dr.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,

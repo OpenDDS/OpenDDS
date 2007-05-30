@@ -55,13 +55,13 @@ public:
       CORBA::SystemException
     ));
 
-  virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
+  virtual ::DDS::DataWriter_ptr create_datawriter (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
-  virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
+  virtual ::DDS::DataReader_ptr create_datareader (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
