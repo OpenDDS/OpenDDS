@@ -5,7 +5,7 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   sharedname   = TAO_DdsDcps
   dynamicflags = TAO_DDSDCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT)
+  includes    += $(DDS_ROOT) 
 
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
@@ -53,6 +53,27 @@ project : orbsvcslib, core, portableserver, dcps_bits {
     DdsDcpsDataWriterRemote.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportTao.idl
+  }
+
+
+  IDL_Files {
+    idlflags += -Gdcpsonly
+    gendir = .
+    CorbaSeq/BooleanSeq.idl
+    CorbaSeq/CharSeq.idl
+    CorbaSeq/DoubleSeq.idl
+    CorbaSeq/FloatSeq.idl
+    CorbaSeq/LongDoubleSeq.idl
+    CorbaSeq/LongLongSeq.idl
+    CorbaSeq/LongSeq.idl
+    CorbaSeq/OctetSeq.idl
+    CorbaSeq/ShortSeq.idl
+    CorbaSeq/StringSeq.idl
+    CorbaSeq/ULongLongSeq.idl
+    CorbaSeq/ULongSeq.idl
+    CorbaSeq/UShortSeq.idl
+    CorbaSeq/WCharSeq.idl
+    CorbaSeq/WStringSeq.idl
   }
 
 }

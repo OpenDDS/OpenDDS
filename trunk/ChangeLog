@@ -1,3 +1,64 @@
+Wed May 30 21:04:26 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/CorbaSeq/BooleanSeq.idl:
+        * dds/CorbaSeq/CharSeq.idl:
+        * dds/CorbaSeq/DoubleSeq.idl:
+        * dds/CorbaSeq/FloatSeq.idl:
+        * dds/CorbaSeq/LongDoubleSeq.idl:
+        * dds/CorbaSeq/LongLongSeq.idl:
+        * dds/CorbaSeq/LongSeq.idl:
+        * dds/CorbaSeq/OctetSeq.idl:
+        * dds/CorbaSeq/ShortSeq.idl:
+        * dds/CorbaSeq/StringSeq.idl:
+        * dds/CorbaSeq/ULongLongSeq.idl:
+        * dds/CorbaSeq/ULongSeq.idl:
+        * dds/CorbaSeq/UShortSeq.idl:
+        * dds/CorbaSeq/WCharSeq.idl:
+        * dds/CorbaSeq/WStringSeq.idl:
+
+          Copied tao/*Seq.pidl files and renamed to idl files.
+          These idl files will be compiled with -Gdcpsonly and 
+          the generated code just build with dds specific code.
+          The generated code will be compiled to TAO_DdsDcps lib.
+          
+        * dds/DdsDcps.mpc:
+
+          Updated mpc to compile the built in sequence idls.
+          
+        * dds/DdsDcpsInfrastructure.idl:
+        
+          Added "tao/LongSeq.pidl" include to bypass a vc71/vc8/intel 
+          c++ bug dealing with base template exports.
+
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/Messenger.idl:
+        * tests/DCPS/CorbaSeq/Messenger2.idl:
+        * tests/DCPS/CorbaSeq/README:
+        * tests/DCPS/CorbaSeq/Writer.h:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/domain_ids:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+
+         Added simple test for built in sequence support in DDS.
+         It also covered other test cases:
+           - Multiple DCPS types with built in sequences.
+             This is to verify no link problem with built in 
+             sequences support.  
+           - DCPS struct contains sequence types defined 
+             in other module.
+
+        * DDS_release_notes.txt:
+
+          Updated release notes for built in sequences support.
+
+        * bin/dcps_tests.lst:
+        
+          Added CorbaSeq test.
+
 Wed May 30 19:19:38 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/DataReaderRemoteImpl.cpp:

@@ -2,6 +2,32 @@ Version 0.13 of TAO DDS.
 
 New to this version are the following changes:
 
+- Supported built in sequences.
+
+  Implementation details:
+  
+    DDS keeps copies of the $TAO_ROOT/tao/*Seq*.pidl in 
+    $DDS_ROOT/dds/CorbaSeq directory and renamed to *.idl files. 
+    These idl files are compiled with a new IDL option -Gdcpsonly to 
+    just generate the DDS specific code for built in sequences. The 
+    DDS CORBA::*Seq generated code will include the TAO CORBA::*Seq 
+    generated code so both TAO and DDS functions will be available.
+
+    When a DDS application contains an idl file that includes 
+    $TAO_ROOT/tao/*Seq*.pidl, the generated code will include the DDS
+    specific built in sequences code(under $DDS_ROOT/dds/ directory) 
+    instead of TAO specific built in sequences code(under 
+    $TAO_ROOT/tao/ directory).   
+  
+  Notes:
+  
+    - The idl files in $DDS_ROOT/dds/CorbaSeq directory are internally
+      used by DDS and CAN NOT be included in your idl files.
+    
+    - Currently the CORBA::AnySeq is not supported since DDS does not 
+      support serialization of Any type data.
+     
+
 - The DDS entities (e.g. DomainParticipant, FooDataReader) have changed from
   *remote* IDL types to *local* IDL types and the data sequence and info sequence
    types have changed from normal IDL sequences to types with
