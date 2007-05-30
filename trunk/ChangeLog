@@ -1,3 +1,13 @@
+Wed May 30 22:41:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+
+          Adapted for the new local interfaces changes.
+
 Wed May 30 22:34:15 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
