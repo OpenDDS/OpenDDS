@@ -1,6 +1,7 @@
 #include "SyncClient_i.h"
 
 #include "ace/OS_NS_unistd.h"
+#include "ace/String_Base.h"
 
 #include <string>
 

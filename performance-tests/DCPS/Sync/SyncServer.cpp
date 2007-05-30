@@ -1,6 +1,7 @@
 #include "SyncServer_i.h"
 
 #include "ace/Get_Opt.h"
+#include "ace/String_Base.h"
 
 #include <memory>
 #include <string>

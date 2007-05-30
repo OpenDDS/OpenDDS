@@ -14,6 +14,7 @@ project(*SyncServer) : taoexe, portableserver, iortable {
   includes += ../Sync
   libs += SyncServer
   after += *idl Sync_ServerLib
+  avoids += minimum_corba
 
   IDL_Files {
     SyncExt.idl
