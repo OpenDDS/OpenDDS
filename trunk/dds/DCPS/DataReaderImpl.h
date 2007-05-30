@@ -339,8 +339,6 @@ namespace TAO
 
       bool is_bit () const;
 
-      //NOTE: this cannot be pure virtual because of unit test projects like
-      //      DcpsFooType, DdsDcps_UnitTest, and dcpsinfo_test_subscriber.
       /** This method provides virtual access to type specific code
        * that is used when loans are automatically returned.
        * The destructor of the sequence supporing zero-copy read calls this
@@ -352,7 +350,7 @@ namespace TAO
        *
        * @thows NONE.
        */
-      virtual DDS::ReturnCode_t auto_return_loan(void* ); // = 0;
+      virtual DDS::ReturnCode_t auto_return_loan(void*) = 0;
 
       /** This method is used for a precondition check of delete_datareader.
        *

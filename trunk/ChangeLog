@@ -1,3 +1,15 @@
+Wed May 30 22:34:15 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Made auto_return_loan() pure-virtual.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Implemented a stub auto_return_loan() method.
+
 Wed May 30 21:47:18 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/Messenger.mpc:
@@ -77,17 +89,17 @@ Wed May 30 21:04:26 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds/CorbaSeq/WStringSeq.idl:
 
           Copied tao/*Seq.pidl files and renamed to idl files.
-          These idl files will be compiled with -Gdcpsonly and 
+          These idl files will be compiled with -Gdcpsonly and
           the generated code just build with dds specific code.
           The generated code will be compiled to TAO_DdsDcps lib.
-          
+
         * dds/DdsDcps.mpc:
 
           Updated mpc to compile the built in sequence idls.
-          
+
         * dds/DdsDcpsInfrastructure.idl:
-        
-          Added "tao/LongSeq.pidl" include to bypass a vc71/vc8/intel 
+
+          Added "tao/LongSeq.pidl" include to bypass a vc71/vc8/intel
           c++ bug dealing with base template exports.
 
         * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
@@ -106,9 +118,9 @@ Wed May 30 21:04:26 UTC 2007  Yan Dai  <dai_y@ociweb.com>
          Added simple test for built in sequence support in DDS.
          It also covered other test cases:
            - Multiple DCPS types with built in sequences.
-             This is to verify no link problem with built in 
-             sequences support.  
-           - DCPS struct contains sequence types defined 
+             This is to verify no link problem with built in
+             sequences support.
+           - DCPS struct contains sequence types defined
              in other module.
 
         * DDS_release_notes.txt:
@@ -116,7 +128,7 @@ Wed May 30 21:04:26 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           Updated release notes for built in sequences support.
 
         * bin/dcps_tests.lst:
-        
+
           Added CorbaSeq test.
 
 Wed May 30 19:19:38 UTC 2007  Scott Harris  <harris_s@ociweb.com>

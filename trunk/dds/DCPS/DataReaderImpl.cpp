@@ -1696,14 +1696,6 @@ bool DataReaderImpl::is_bit () const
   return this->is_bit_;
 }
 
-//REMOVE this when we can change this method back to a pure virtual method.
-DDS::ReturnCode_t 
-DataReaderImpl::auto_return_loan(void* ) // = 0;
-{
-  ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
-  return ::DDS::RETCODE_ERROR;
-}
-
 int 
 DataReaderImpl::num_zero_copies()
 {
