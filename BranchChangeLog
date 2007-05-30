@@ -1,3 +1,11 @@
+Wed May 30 15:52:53 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+
+          Removed callbacks that related to deferred processing as
+          these transports do not internally defer request processing.
+
 Tue May 29 22:32:13 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/LinkImpl.cpp:
