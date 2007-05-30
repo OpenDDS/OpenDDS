@@ -77,6 +77,11 @@ public:
         CORBA::SystemException
         )) { return ::DDS::RETCODE_OK;};
 
+  virtual ::DDS::ReturnCode_t auto_return_loan (void *)
+  {
+    return ::DDS::RETCODE_ERROR;
+  }
+
 };
 
 class MyDataWriterImpl :  public virtual TAO::DCPS::DataWriterImpl

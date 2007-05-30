@@ -72,6 +72,12 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  virtual ::DDS::ReturnCode_t auto_return_loan (void *)
+  {
+    return ::DDS::RETCODE_ERROR;
+  }
+
 };
 
 
