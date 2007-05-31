@@ -4,6 +4,7 @@ project(*publisher): dcpsexe, portableserver {
   Source_Files {
     publisher.cpp
     DCPSDataWriterI.cpp
+    test_helper.cpp
   }
 }
 
@@ -13,5 +14,6 @@ project(*subscriber): dcpsexe, portableserver {
   Source_Files {
     subscriber.cpp
     DCPSDataReaderI.cpp
+    test_helper.cpp
   }
 }

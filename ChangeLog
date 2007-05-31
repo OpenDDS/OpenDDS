@@ -1,3 +1,16 @@
+Thu May 31 15:53:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/test_helper.h:
+        * tests/DCPS/DCPSInfoRepo/test_helper.cpp:
+
+          Re-worked the way the tests get access (via friendship) to the
+          private "remote" objects in the Data{Reader,Writer}Impls.  These
+          tests should now compile on all platforms but will need more work to
+          run successfully.
+
 Thu May 31 14:49:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/Sync.mpc:
