@@ -1,3 +1,5 @@
+#include "test_helper.h" //must be the 1st include
+
 #include  "dds/DdsDcpsInfoC.h"
 #include  "DCPSDataReaderI.h"
 #include  "dds/DCPS/Service_Participant.h"
@@ -39,18 +41,6 @@ parse_args (int argc, char *argv[])
   // Indicates sucessful parsing of the command line
   return 0;
 }
-
-//This class is granted friendship to DataReaderImpl so we can get the remote
-//object reference.
-class DDS_TEST
-{
-public:
-  static TAO::DCPS::DataReaderRemote_ptr
-  getRemoteInterface(const TAO::DCPS::DataReaderImpl &impl)
-  {
-    return TAO::DCPS::DataReaderRemote::_duplicate (impl.dr_remote_objref_);
-  }
-};
 
 int
 main (int argc, char *argv[])
