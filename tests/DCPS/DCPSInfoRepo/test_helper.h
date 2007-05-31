@@ -1,3 +1,6 @@
+#ifndef DDS_DCPS_TEST_INFOREPO_HELPER
+#define DDS_DCPS_TEST_INFOREPO_HELPER
+
 namespace TAO
 {
   namespace DCPS
@@ -23,3 +26,5 @@ public:
   static TAO::DCPS::DataReaderRemote_ptr
   getRemoteInterface(const TAO::DCPS::DataReaderImpl &impl);
 };
+
+#endif
