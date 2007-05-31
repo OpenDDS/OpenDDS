@@ -24,7 +24,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-class DDS_TEST; //fwd-decl for friend declaration below
+class DDS_TEST;
 
 namespace TAO
 {
@@ -468,7 +468,7 @@ namespace TAO
       bool cache_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
-      friend class DDS_TEST; //allows tests to get at dw_remote_objref_
+      friend class ::DDS_TEST; //allows tests to get at dw_remote_objref_
 
       /// The name of associated topic.
       CORBA::String_var               topic_name_;

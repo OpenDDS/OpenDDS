@@ -29,7 +29,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-class DDS_TEST; //fwd-decl for friend declaration below
+class DDS_TEST;
 
 namespace TAO
 {
@@ -419,7 +419,7 @@ namespace TAO
 
       friend class WriterInfo;
 
-      friend class DDS_TEST; //allows tests to get at dr_remote_objref_
+      friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
 
       TopicImpl*                      topic_servant_;
       ::DDS::TopicDescription_var     topic_desc_ ;
