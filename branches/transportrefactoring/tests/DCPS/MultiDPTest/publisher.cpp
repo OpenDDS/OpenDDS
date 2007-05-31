@@ -98,9 +98,8 @@ void init ()
       throw TestException ();
     }
 
-  ::Mine::FooTypeSupportImpl* fts_servant
-    = new ::Mine::FooTypeSupportImpl();
-  PortableServer::ServantBase_var safe_servant = fts_servant;
+  ::Xyz::FooTypeSupportImpl* fts_servant
+    = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), type_name))
     {
@@ -172,10 +171,9 @@ void init ()
     }
 
   // Attach the publisher to the transport.
-  ::TAO::DCPS::PublisherImpl* pub_impl
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                         ::DDS::Publisher_ptr>
-                          (publisher.in ());
+  TAO::DCPS::PublisherImpl* pub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+    (publisher.in ());
 
   if (0 == pub_impl)
     {

@@ -1,0 +1,31 @@
+// -*- IDL -*-
+//
+// $Id$
+
+// ================================================================
+/**
+ * This file was used to generate the code in LongDoubleSeq*.*
+ * The command used to generate code is:
+ *
+ *     tao_idl
+ *        -o orig -GA -SS -Sci
+ *          -Wb,export_macro=TAO_Export
+ *          -Wb,export_include="tao/TAO_Export.h"
+ *          -Wb,pre_include="ace/pre.h"
+ *          -Wb,post_include="ace/post.h"
+ *          LongDoubleSeq.pidl
+ *
+ */
+// ================================================================
+
+#ifndef TAO_CORBA_LONG_DOUBLE_SEQ_IDL
+#define TAO_CORBA_LONG_DOUBLE_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<long double> LongDoubleSeq;
+};
+
+#endif  /* TAO_CORBA_LONG_DOUBLE_SEQ_IDL */

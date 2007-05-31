@@ -6,7 +6,7 @@ project(*) : dcps, portableserver {
   dynamicflags = FOOLIB_BUILD_DLL
   pch_header   =
   pch_source   =
-  dcps_ts_flags += --export=FooLib_Export --module=Mine
+  dcps_ts_flags += --export=FooLib_Export
 
   TypeSupport_Files {
     FooDef.idl >> FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp

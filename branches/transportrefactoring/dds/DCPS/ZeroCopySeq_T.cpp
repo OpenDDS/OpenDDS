@@ -34,10 +34,42 @@ namespace TAO
 template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
 ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::~ZeroCopyDataSeq()
 {
-    if (loaner_) {
-        loaner_->auto_return_loan(this);
-        loaner_ = 0;
+  if (loaner_) 
+    {
+      loaner_->auto_return_loan(this);
+      loaner_ = 0;
     }
+}
+
+template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
+ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &
+ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator= (const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &frm)
+{
+  if (this != &frm)
+    {
+      if (loaner_) 
+        {
+          loaner_->auto_return_loan(this);
+        }
+      this->ZeroCopySeqBase::operator=(frm);
+      this->is_zero_copy_ = frm.is_zero_copy_;
+      this->loaner_       = frm.loaner_;
+      if (this->is_zero_copy_)
+        {
+          this->ptrs_    = frm.ptrs_;
+          // increment reference counts.
+          for (size_t /* Ptr_Seq_Type::size_type */ ii = 0; ii < this->length_; ii++)
+            {
+              ptrs_[ii]->inc_ref();
+              ptrs_[ii]->zero_copy_cnt_++;
+            }
+        }
+      else
+        {
+          this->samples_ = frm.samples_;
+        }
+    }
+  return *this;
 }
 
     } // namespace  ::DDS

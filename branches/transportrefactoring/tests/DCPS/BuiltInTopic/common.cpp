@@ -391,8 +391,8 @@ int write ()
     foo.y = -1;
     foo.key = default_key;
 
-    ::Mine::FooDataWriter_var foo_dw
-      = ::Mine::FooDataWriter::_narrow(datawriter.in ());
+    ::Xyz::FooDataWriter_var foo_dw
+      = ::Xyz::FooDataWriter::_narrow(datawriter.in ());
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ::DDS::InstanceHandle_t handle
@@ -425,19 +425,17 @@ int read (int expect_success)
 
   try
   {
-    ::Mine::FooDataReader_var foo_dr
-      = ::Mine::FooDataReader::_narrow(datareader.in ());
+    ::Xyz::FooDataReader_var foo_dr
+      = ::Xyz::FooDataReader::_narrow(datareader.in ());
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")),
+                 ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")),
                  -1);
     }
 
-    ::Mine::FooDataReaderImpl* dr_servant =
-        reference_to_servant< ::Mine::FooDataReaderImpl,
-                             ::Mine::FooDataReader_ptr>
-                (foo_dr.in ());
+    ::Xyz::FooDataReaderImpl* dr_servant =
+      reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
 
     int num_reads = 0;
     int num_received = 0;

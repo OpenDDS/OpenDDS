@@ -39,8 +39,8 @@ int main (int argc, char *argv[])
         return 1 ;
       }
 
-      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = mts_servant;
+      Messenger::MessageTypeSupportImpl* mts_servant =
+        new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (), "")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;
@@ -77,8 +77,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       TAO::DCPS::SubscriberImpl* sub_impl =
-        ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
-                                           DDS::Subscriber_ptr> (sub.in ());
+        TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
       if (0 == sub_impl) {
         cerr << "Failed to obtain subscriber servant\n" << endl;
         exit(1);

@@ -72,8 +72,8 @@ Writer::svc ()
       foo.a_long_value = default_key;
     }
 
-    ::Mine::FooDataWriter_var foo_dw
-      = ::Mine::FooDataWriter::_narrow(writer_.in ());
+    ::Xyz::FooDataWriter_var foo_dw
+      = ::Xyz::FooDataWriter::_narrow(writer_.in ());
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     for (int i = 0; i< num_writes_per_thread_; i ++)

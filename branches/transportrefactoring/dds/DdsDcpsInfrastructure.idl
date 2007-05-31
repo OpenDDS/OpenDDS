@@ -28,8 +28,12 @@
 // The below include is needed to bypass a vc71/vc8/intel c++ bug
 // dealing with base template exports
 #include "tao/StringSeq.pidl"
+#include "tao/LongSeq.pidl"
 
 module DDS {
+
+// make the IDL compiler produce include of zero-copy read info sequence template
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
 
     typedef DOMAINID_TYPE_NATIVE DomainId_t;
     typedef HANDLE_TYPE_NATIVE InstanceHandle_t;
@@ -182,8 +186,8 @@ module DDS {
     // Listeners
     // ----------------------------------------------------------------------
 
-    interface Listener;
-    interface Entity;
+    local interface Listener;
+    local interface Entity;
     //interface TopicDescription;
     //interface Topic;
     //interface ContentFilteredTopic;
@@ -196,7 +200,7 @@ module DDS {
     //typedef sequence<Topic> TopicSeq;
     //typedef sequence<DataReader> DataReaderSeq;
 
-    interface Listener {};
+    local interface Listener {};
 
     // Sample states to support reads
     typedef unsigned long SampleStateKind;
@@ -561,7 +565,7 @@ module DDS {
 #endif /* !defined (DDS_HAS_MINIMUM_BIT) */
 
     // ----------------------------------------------------------------------
-    interface Entity {
+    local interface Entity {
                 // ReturnCode_t set_qos(in EntityQos qos);
                 // void get_qos(inout EntityQos qos);
                 // ReturnCode_t set_listener(in Listener l,
@@ -587,7 +591,8 @@ module DDS {
     long absolute_generation_rank;
     };
 
-    typedef sequence<SampleInfo> SampleInfoSeq;
+    native SampleInfoSeq; // support zero-copy read
+    //typedef sequence<SampleInfo> SampleInfoSeq;
 
 };
 

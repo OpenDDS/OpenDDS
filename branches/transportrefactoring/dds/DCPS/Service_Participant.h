@@ -316,9 +316,7 @@ namespace TAO
     ///         PortableServer::POA::WrongAdapter
     ///         PortableServer::POA::WongPolicy
     template <class T_impl, class T_ptr>
-    T_impl* reference_to_servant (
-      T_ptr p
-    )
+    T_impl* remote_reference_to_servant (T_ptr p)
     {
       if (CORBA::is_nil (p))
         {
@@ -327,9 +325,8 @@ namespace TAO
 
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
 
-      T_impl* the_servant = ACE_dynamic_cast (T_impl*,
-           poa->reference_to_servant (
-              p) );
+      T_impl* the_servant =
+        dynamic_cast<T_impl*>(poa->reference_to_servant(p));
 
       // Use the ServantBase_var so that the servant's reference
       // count will not be changed by this operation.
@@ -338,10 +335,18 @@ namespace TAO
       return the_servant;
     }
 
+    /// Get a servant pointer given a local object reference.
+    template <class T_impl, class T_ptr>
+    T_impl* reference_to_servant (T_ptr p)
+    {
+      return dynamic_cast<T_impl*> (p);
+    }
+
+    /// Given a servant, return the emote object reference from the local POA.
     /// @throws PortableServer::POA::ServantNotActive,
     ///         PortableServer::POA::WrongPolicy
     template <class T>
-    typename T::_stub_ptr_type servant_to_reference (
+    typename T::_stub_ptr_type servant_to_remote_reference (
       T *servant
     )
     {
@@ -355,15 +360,29 @@ namespace TAO
       return the_obj;
     }
 
+    // For local interfaces, servant_to_reference is a no-op.
+    // We are guaranteed that the "servant" type is convertible
+    // to the interface's stub type.
     template <class T>
-    void deactivate_object (
-      T obj
-    )
+    T *servant_to_reference (T *servant)
+    {
+      servant->_add_ref();
+      return servant;
+    }
+
+    template <class T>
+    void deactivate_remote_object (T obj)
     {
       PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
       PortableServer::ObjectId_var oid =
         poa->reference_to_id (obj);
       poa->deactivate_object (oid.in ());
+    }
+
+    template <class T>
+    void deactivate_object (T)
+    {
+        // no-op
     }
 
   } // namespace DCPS

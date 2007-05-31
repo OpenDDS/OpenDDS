@@ -147,11 +147,7 @@ int main (int argc, char *argv[])
       }
 
       // Register the type supports
-      testMsgTypeSupportImpl* ts_servant = new testMsgTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = ts_servant;
-
-      testMsgTypeSupport_var ts =
-        TAO::DCPS::servant_to_reference (ts_servant);
+      ::profilingTest::testMsgTypeSupport_var ts = new ::profilingTest::testMsgTypeSupportImpl();
 
       if (::DDS::RETCODE_OK != ts->register_type(dp.in() , TEST_TYPE))
         {

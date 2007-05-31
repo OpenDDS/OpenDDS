@@ -33,8 +33,7 @@
 
 //Class TAO_DCPS_DomainParticipantListener_i
 class TAO_DCPS_DomainParticipantListener_i
-: public virtual POA_DDS::DomainParticipantListener,
-  public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantListener>
 {
 public:
   //Constructor

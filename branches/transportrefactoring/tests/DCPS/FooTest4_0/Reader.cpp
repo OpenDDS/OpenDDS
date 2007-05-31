@@ -11,6 +11,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/SubscriberImpl.h"
 #include "tests/DCPS/FooType4/FooTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
@@ -40,10 +41,8 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the subscriber to the transport.
-  ::TAO::DCPS::SubscriberImpl* sub_impl
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
-                                         ::DDS::Subscriber_ptr>
-                    (sub_.in ());
+  TAO::DCPS::SubscriberImpl* sub_impl
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub_.in ());
 
   if (0 == sub_impl)
   {
@@ -136,25 +135,23 @@ Reader::read (const SampleInfoMap& si_map,
                   readers->length ()));
     }
 
-    ::Mine::FooSeq foo(max_samples_per_instance_) ;
+    ::Xyz::FooSeq foo(max_samples_per_instance_) ;
     ::DDS::SampleInfoSeq si(max_samples_per_instance_) ;
 
     for (CORBA::ULong i = 0 ; i < readers->length() ; i++)
     {
-      ::Mine::FooDataReader_var foo_dr
-          = ::Mine::FooDataReader::_narrow(readers[i]);
+      ::Xyz::FooDataReader_var foo_dr
+          = ::Xyz::FooDataReader::_narrow(readers[i]);
 
       if (CORBA::is_nil (foo_dr.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+               ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
         throw TestException() ;
       }
 
-      ::Mine::FooDataReaderImpl* dr_servant =
-          ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                             ::Mine::FooDataReader_ptr>
-              (foo_dr.in ());
+      ::Xyz::FooDataReaderImpl* dr_servant =
+        TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,
@@ -238,11 +235,6 @@ int Reader::init_transport ()
 
 Reader::~Reader()
 {
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-  PortableServer::ObjectId_var id =
-    poa->servant_to_id (&drl_servant_);
-  poa->deactivate_object (id.in ());
-
   sub_->delete_contained_entities() ;
   dp_->delete_subscriber(sub_.in ());
 

@@ -78,8 +78,8 @@ Writer::svc ()
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
 
-        ::Mine::Foo1DataWriter_var foo_dw
-            = ::Mine::Foo1DataWriter::_narrow(writer_.in ());
+        ::T1::Foo1DataWriter_var foo_dw
+            = ::T1::Foo1DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -107,8 +107,8 @@ Writer::svc ()
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
 
-        ::Mine::Foo2DataWriter_var foo_dw
-            = ::Mine::Foo2DataWriter::_narrow(writer_.in ());
+        ::T2::Foo2DataWriter_var foo_dw
+            = ::T2::Foo2DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;
@@ -138,8 +138,8 @@ Writer::svc ()
 
         foo.key = (CORBA::Long) (ACE_OS::thr_self ());
 
-        ::Mine::Foo3DataWriter_var foo_dw
-            = ::Mine::Foo3DataWriter::_narrow(writer_.in ());
+        ::T3::Foo3DataWriter_var foo_dw
+            = ::T3::Foo3DataWriter::_narrow(writer_.in ());
         TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
         rsleep1() ;

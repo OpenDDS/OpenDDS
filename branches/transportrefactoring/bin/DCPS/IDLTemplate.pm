@@ -23,22 +23,25 @@ sub contents { return <<'!EOT'
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsDataWriterRemote.idl"
-#include "dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
 #include "dds/DdsDcpsTypeSupportTao.idl"
 
 #include "<%SUBDIR%><%IDLFILE%>"
 
 <%MODULESTART%>
 
-typedef sequence<<%SCOPE%><%TYPE%>> <%TYPE%>Seq;
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
+#pragma DCPS_GEN_ZERO_COPY_READ
+//typedef sequence<<%SCOPE%><%TYPE%>> <%TYPE%>Seq;
+native <%TYPE%>Seq;
 
 /** Support topic registartion for <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface <%TYPE%>TypeSupport : TAO::DCPS::TypeSupport {
+local interface <%TYPE%>TypeSupport : TAO::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
                 in DDS::DomainParticipant participant,
                 in string type_name);
@@ -49,7 +52,7 @@ interface <%TYPE%>TypeSupport : TAO::DCPS::TypeSupport {
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface <%TYPE%>DataWriter : TAO::DCPS::DataWriterRemote {
+local interface <%TYPE%>DataWriter : DDS::DataWriter {
     DDS::InstanceHandle_t register(
                 in <%SCOPE%><%TYPE%> instance_data);
 
@@ -101,7 +104,7 @@ interface <%TYPE%>DataWriter : TAO::DCPS::DataWriterRemote {
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-interface <%TYPE%>DataReader : TAO::DCPS::DataReaderRemote {
+local interface <%TYPE%>DataReader : DDS::DataReader {
     DDS::ReturnCode_t read(
                 inout <%TYPE%>Seq received_data,
                 inout DDS::SampleInfoSeq info_seq,

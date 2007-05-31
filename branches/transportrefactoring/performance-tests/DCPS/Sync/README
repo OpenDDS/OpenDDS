@@ -1,0 +1,30 @@
+Framework for providing primitive pub-sub synchronization.
+
+This framework provides a basic SyncServer (a CORBA process).
+ All synchronized processes are classified as clients.
+
+SyncServer: The server startup parameters are the expected
+ pub & subs. The interface has register/unregister methods.
+ The clients invoke way_point_reached() at pre-determined
+ waypoints. The server issues proceed() to all clients
+ when all have reached the same waypoint. This scheme could
+ potentially lead to a deadlock if one client fails for any
+ reason. That however is a problem outside this frameworks
+ scope. Server shuts down upon all clients unregistration.
+
+SyncClient_i: The client implementation. This class accepts a
+ stringified reference to the SyncServer. If an ORB isn't
+ provided, the class creates its own ORB. For user convenience
+ server registeration/unregisteration are handled under the
+ covers. Clients create an instance of this class and invoke
+ way_point_reached(). Timed wait & asynchronous wait mechanisms
+ aren't currently available. Clients wait for server update
+ via get_notification().
+
+SyncServer_i: Server side implementation. Similar to SyncClient_i
+ it can manage its own ORB. It exists when all its clients
+ have unregisted.
+
+Both the servant implementations can be expanded (inherited from)
+ to expand upon their functionality e.g in addition to client
+ synchronization they can be a centralized data collector etc.

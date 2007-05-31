@@ -27,8 +27,8 @@ unsigned int num_parts = 4;
 unsigned int num_topics = 2;
 unsigned int num_subs = 1;
 unsigned int num_pubs = 1;
-char* topic_name = "Movie Discussion List";
-char* topic_type_name = "Messenger";
+const char* topic_name = "Movie Discussion List";
+const char* topic_type_name = "Messenger";
 
 int
 parse_args (int argc, char *argv[])

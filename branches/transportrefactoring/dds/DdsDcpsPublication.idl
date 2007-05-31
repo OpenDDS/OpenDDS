@@ -6,12 +6,12 @@
 #include "dds/DdsDcpsInfrastructure.idl"
 
 module DDS {
-   interface Topic;
-   interface DomainParticipant;
-   interface DataWriter;
-   interface Publisher;
+   local interface Topic;
+   local interface DomainParticipant;
+   local interface DataWriter;
+   local interface Publisher;
 
-   interface DataWriterListener : Listener {
+   local interface DataWriterListener : Listener {
     void on_offered_deadline_missed(
       in DataWriter writer,
       in OfferedDeadlineMissedStatus status);
@@ -29,11 +29,11 @@ module DDS {
       in PublicationMatchStatus status);
     };
 
-    interface PublisherListener : DataWriterListener {
+    local interface PublisherListener : DataWriterListener {
   };
 
 
-   interface DataWriter : Entity {
+   local interface DataWriter : Entity {
     // InstanceHandle_t register(
     //		in Data instance_data);
     // InstanceHandle_t register_w_timestamp(
@@ -106,7 +106,7 @@ module DDS {
     };
 
     // ----------------------------------------------------------------------
-    interface Publisher : Entity {
+    local interface Publisher : Entity {
     DataWriter create_datawriter(
       in Topic a_topic,
       in DataWriterQos qos,
@@ -166,7 +166,7 @@ module TAO {
     typedef PublicationLostStatus PublicationReconnectedStatus;
     typedef PublicationLostStatus DisassociationStatus;
 
-    interface DataWriterListener : ::DDS::DataWriterListener {
+    local interface DataWriterListener : ::DDS::DataWriterListener {
 
       // Called when a connection failure has been detected
       // and there are still associations using the connection

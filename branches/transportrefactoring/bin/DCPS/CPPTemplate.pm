@@ -31,6 +31,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublicationInstance.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "<%TYPE%>TypeSupportImpl.h"
@@ -85,7 +86,7 @@ char *
 }
 
 
-::TAO::DCPS::DataWriterRemote_ptr
+::DDS::DataWriter_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter (
   )
   ACE_THROW_SPEC ((
@@ -95,16 +96,16 @@ char *
     <%TYPE%>DataWriterImpl* writer_impl;
     ACE_NEW_RETURN(writer_impl,
                    <%TYPE%>DataWriterImpl(),
-                   ::TAO::DCPS::DataWriterRemote::_nil());
+                   ::DDS::DataWriter::_nil());
 
 
-    ::TAO::DCPS::DataWriterRemote_ptr writer_obj
+    ::DDS::DataWriter_ptr writer_obj
         = ::TAO::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
 }
 
-::TAO::DCPS::DataReaderRemote_ptr
+::DDS::DataReader_ptr
 <%TYPE%>TypeSupportImpl::create_datareader (
   )
   ACE_THROW_SPEC ((
@@ -114,11 +115,11 @@ char *
     <%TYPE%>DataReaderImpl* reader_impl = 0;
     ACE_NEW_RETURN(reader_impl,
                     <%TYPE%>DataReaderImpl(),
-                    ::TAO::DCPS::DataReaderRemote::_nil());
+                    ::DDS::DataReader::_nil());
 
 
-    ::TAO::DCPS::DataReaderRemote_ptr reader_obj
-        = ::TAO::DCPS::servant_to_reference (reader_impl);
+    ::DDS::DataReader_ptr reader_obj
+            = ::TAO::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;
 }
@@ -402,7 +403,8 @@ void
       TAO::DCPS::DomainParticipantImpl*      participant_servant,
       ::DDS::Publisher_ptr                   publisher,
       TAO::DCPS::PublisherImpl*              publisher_servant,
-      TAO::DCPS::DataWriterRemote_ptr        dw_remote
+      ::DDS::DataWriter_ptr                  dw_objref,
+        ::TAO::DCPS::DataWriterRemote_ptr    dw_remote_objref
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -415,7 +417,8 @@ void
                                        participant_servant,
                                        publisher,
                                        publisher_servant,
-                                       dw_remote);
+                                       dw_objref,
+                                       dw_remote_objref);
 
   ::<%SCOPE%><%TYPE%> data;
   if (_tao_is_bounded_size (data))
@@ -624,7 +627,8 @@ void
         ::DDS::DataReaderListener_ptr a_listener,
         TAO::DCPS::DomainParticipantImpl* participant,
         TAO::DCPS::SubscriberImpl*        subscriber,
-        ::DDS::Subscriber_ptr         subscriber_objref,
+        ::DDS::Subscriber_ptr             subscriber_objref,
+        ::DDS::DataReader_ptr		      dr_objerf,
         TAO::DCPS::DataReaderRemote_ptr   dr_remote_objref
       )
         ACE_THROW_SPEC ((
@@ -637,6 +641,7 @@ void
                                       participant,
                                       subscriber,
                                       subscriber_objref,
+                                      dr_objerf,
                                       dr_remote_objref) ;
 
 }
@@ -720,121 +725,6 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  if ((received_data.maximum() != info_seq.maximum()) ||
-      (received_data.length() != info_seq.length()) ||
-      (received_data.release() != info_seq.release()))
-    {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
-
-  if ((received_data.maximum() > 0) && !received_data.release())
-    {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
-
-  if (received_data.maximum() == 0)
-    {
-      ::<%SCOPE%><%TYPE%> *buf;
-      ::DDS::SampleInfo *info;
-      buf = new ::<%SCOPE%><%TYPE%>[max_samples];
-      info = new ::DDS::SampleInfo[max_samples];
-
-      received_data.replace(max_samples, max_samples, buf, 0);
-      info_seq.replace(max_samples, max_samples, info, 0);
-    }
-  else if ((::CORBA::Long)received_data.maximum() < max_samples)
-  {
-    max_samples = (::CORBA::Long)received_data.maximum();
-  }
-
-  ::CORBA::Long count(0);
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->sample_lock_,
-                    ::DDS::RETCODE_ERROR);
-
-  InstanceMap::iterator it;
-  for (it = instance_map_.begin ();
-       it != instance_map_.end ();
-       it ++)
-  {
-    ::CORBA::Long start_samples_in_instance(count) ;
-    ::CORBA::Long samples_in_instance_count(0) ;
-    ::DDS::InstanceHandle_t handle = it->second;
-    TAO::DCPS::SubscriptionInstance *ptr =
-      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
-
-    if ((ptr->instance_state_.view_state() & view_states) &&
-        (ptr->instance_state_.instance_state() & instance_states))
-    {
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
-           item != 0 ; item = item->next_data_sample_)
-      {
-        if (item->sample_state_ & sample_states)
-        {
-          // Increase sequence length before adding new element to sequence.
-          received_data.length (count + 1);
-          // copy the sample
-          received_data[count] =
-              *((::<%SCOPE%><%TYPE%> *)item->registered_data_ );
-          info_seq.length (count + 1);
-          ptr->instance_state_.sample_info(info_seq[count], item) ;
-
-          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
-
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (samples_in_instance_count) block.
-          ptr->instance_state_.accessed() ;
-          count++ ;
-          samples_in_instance_count++ ;
-        }
-        if (count == max_samples)
-        {
-          break ;
-        }
-      }
-    }
-
-    if (samples_in_instance_count)
-    {
-      //
-      // Get the sample_ranks, generation_ranks, and
-      // absolute_generation_ranks for this info_seq
-      //
-      sample_info(info_seq, start_samples_in_instance,
-                  samples_in_instance_count,
-                  ptr->rcvd_sample_.tail_) ;
-    }
-
-    if (count == max_samples)
-    {
-      break ;
-    }
-  }
-  if (count)
-  {
-    return ::DDS::RETCODE_OK;
-  }
-  else
-  {
-    return ::DDS::RETCODE_NO_DATA ;
-  }
-}
-
-DDS::ReturnCode_t
-<%TYPE%>DataReaderImpl::read (
-    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-    ::TAO::DCPS::SampleInfoZCSeq & info_seq,
-    ::CORBA::Long max_samples,
-    ::DDS::SampleStateMask sample_states,
-    ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
-{
   //---- start of preconditions common to read and take -----
   //SPEC ref v1.2 7.1.2.5.3.8 #1
   if ((received_data.max_slots() != info_seq.max_slots()) ||
@@ -888,7 +778,7 @@ DDS::ReturnCode_t
       max_samples = (::CORBA::Long)received_data.max_slots();
     }
   //---- end of preconditions common to read and take -----
-  
+
   ::CORBA::Long count(0);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -919,10 +809,10 @@ DDS::ReturnCode_t
           received_data.set_length (count + 1);
           if (received_data.max_len() != 0)
           {
-            received_data.assign_sample(count,
+            received_data.assign_sample(count, 
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
-          else
+          else 
           {
             received_data.assign_ptr(count, item, this) ;
           }
@@ -967,11 +857,11 @@ DDS::ReturnCode_t
   {
 	if (received_data.max_len() == 0)
 	{
-	    received_data.owns(false); // per 7.1.2.5.3.8 rule #3
-	  	received_data.max_len(received_data.max_slots());
-		// preconditions ensure data and info sequences are the same.
-		info_seq.max_len(received_data.max_slots());
-		info_seq.owns(false);
+		received_data.max_len(received_data.max_slots());
+	}
+	if (info_seq.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
 	}
 
     return ::DDS::RETCODE_OK;
@@ -986,170 +876,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take (
     ::<%MODULE%><%TYPE%>Seq & received_data,
     ::DDS::SampleInfoSeq & info_seq,
-    ::CORBA::Long max_samples,
-    ::DDS::SampleStateMask sample_states,
-    ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
-{
-// TBD !!!! update take like read for zero-copy
-  if ((received_data.maximum() != info_seq.maximum()) ||
-      (received_data.length() != info_seq.length()) ||
-      (received_data.release() != info_seq.release()))
-    {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET ;
-    }
-
-  if ((received_data.maximum() > 0) && !received_data.release())
-    {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
-
-  if (received_data.maximum() == 0)
-    {
-      ::<%SCOPE%><%TYPE%> *buf;
-      ::DDS::SampleInfo *info;
-      buf = new ::<%SCOPE%><%TYPE%>[max_samples];
-      info = new ::DDS::SampleInfo[max_samples];
-
-      received_data.replace(max_samples, max_samples, buf, 0);
-    }
-  else if ((::CORBA::Long)received_data.maximum() < max_samples)
-    {
-      max_samples = (::CORBA::Long)received_data.maximum() ;
-    }
-
-  ::CORBA::Long count(0) ;
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->sample_lock_,
-                    ::DDS::RETCODE_ERROR);
-
-  InstanceMap::iterator it;
-  for (it = instance_map_.begin ();
-       it != instance_map_.end ();
-       it ++)
-    {
-      ::CORBA::Long start_samples_in_instance(count) ;
-      ::CORBA::Long samples_in_instance_count(0) ;
-      ::DDS::InstanceHandle_t handle = it->second;
-      TAO::DCPS::SubscriptionInstance *ptr =
-        this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
-
-      TAO::DCPS::ReceivedDataElement *tail = 0 ;
-      if ((ptr->instance_state_.view_state() & view_states) &&
-          (ptr->instance_state_.instance_state() & instance_states))
-      {
-        TAO::DCPS::ReceivedDataElement *next ;
-        tail = 0 ;
-        TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
-        while (item)
-        {
-          if (item->sample_state_ & sample_states)
-            {
-              // Increase sequence length before adding new element to sequence.
-              received_data.length (count + 1);
-              received_data[count] =
-                  *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-              info_seq.length (count + 1);
-              ptr->instance_state_.sample_info(info_seq[count], item) ;
-
-              item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
-
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (samples_in_instance_count) block.
-              ptr->instance_state_.accessed() ;
-
-              if (item == ptr->rcvd_sample_.tail_)
-                {
-                  tail = ptr->rcvd_sample_.tail_ ;
-                  item = item->next_data_sample_ ;
-                }
-              else
-                {
-                  next = item->next_data_sample_ ;
-
-                  ptr->rcvd_sample_.remove(item) ;
-
-                  if (0 == item->dec_ref())
-                  {
-                 ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
-                  ACE_DES_FREE (delete_ptr,
-                                data_allocator_->free,
-                                <%TYPE%> );
-                  ACE_DES_FREE (item,
-                                rd_allocator_->free,
-                                ReceivedDataElement);
-                                }
-                  item = next ;
-                }
-
-              samples_in_instance_count++ ;
-              count++ ;
-            }
-          if (count == max_samples)
-            {
-              break ;
-            }
-        }
-      }
-
-    if (samples_in_instance_count)
-      {
-        //
-        // Get the sample_ranks, generation_ranks, and
-        // absolute_generation_ranks for this info_seq
-        //
-        if (tail)
-          {
-            sample_info(info_seq, start_samples_in_instance,
-                        samples_in_instance_count,
-                        tail) ;
-
-            ptr->rcvd_sample_.remove(tail) ;
-
-                  if (0 == tail->dec_ref())
-                  {
-            ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
-            ACE_DES_FREE (delete_ptr,
-                          data_allocator_->free,
-                          <%TYPE%> );
-            ACE_DES_FREE (tail,
-                          rd_allocator_->free,
-                          ReceivedDataElement);
-                          }
-          }
-        else
-          {
-            sample_info(info_seq, start_samples_in_instance,
-                        samples_in_instance_count,
-                        ptr->rcvd_sample_.tail_) ;
-          }
-        }
-      if (count == max_samples)
-        {
-          break ;
-        }
-    }
-
-  if (count)
-    {
-      return ::DDS::RETCODE_OK;
-    }
-    else
-    {
-      return ::DDS::RETCODE_NO_DATA ;
-    }
-}
-
-DDS::ReturnCode_t
-<%TYPE%>DataReaderImpl::take (
-    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-    ::TAO::DCPS::SampleInfoZCSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
@@ -1481,7 +1207,7 @@ DDS::ReturnCode_t
                   next = item->next_data_sample_ ;
 
                   ptr->rcvd_sample_.remove(item) ;
-
+                  
                   if (0 == item->dec_ref())
                   {
 
@@ -1563,32 +1289,59 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  if ((received_data.maximum() != info_seq.maximum()) ||
+  //---- start of preconditions common to read and take -----
+  //SPEC ref v1.2 7.1.2.5.3.8 #1
+  if ((received_data.max_slots() != info_seq.max_slots()) ||
+      (received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
       (received_data.release() != info_seq.release()))
     {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET ;
-    }
-
-  if ((received_data.maximum() > 0) && !received_data.release())
-    {
+      ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET sample and info input sequences do not match.\n" ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-  if (received_data.maximum() == 0)
-    {
-      ::<%SCOPE%><%TYPE%> *buf;
-      ::DDS::SampleInfo *info;
-      buf = new ::<%SCOPE%><%TYPE%>[max_samples];
-      info = new ::DDS::SampleInfo[max_samples];
+  //SPEC ref v1.2 7.1.2.5.3.8 #4
+  if ((received_data.max_len() > 0) && (received_data.owns() == false))
+	{
+		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET mismatch of max_len %d  and owns %d\n",
+		 received_data.max_len(), received_data.owns() ));
+		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+	}
 
-      received_data.replace(max_samples, max_samples, buf, 0);
-      info_seq.replace(max_samples, max_samples, info, 0);
+  if (received_data.max_len() == 0)
+    {
+      // not in SPEC but needed.
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          max_samples = (::CORBA::Long)received_data.max_slots();
+        }
     }
-  else if ((::CORBA::Long)received_data.maximum() < max_samples)
-  {
-    max_samples = (::CORBA::Long)received_data.maximum() ;
-  }
+    else
+    {
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5a
+          max_samples = received_data.max_len();
+        }
+      else if (max_samples > (::CORBA::Long)received_data.max_len())
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5c
+          ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET max_samples %d > max_len %d\n",
+            max_samples, received_data.max_len() ));
+          return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+
+        }
+      //else
+      //SPEC ref v1.2 7.1.2.5.3.8 #5b - is true by impl below.
+    }
+
+  // The spec does not say what to do in this case but it appears to be a good thing.
+  // Note: max_slots is the greater of the sequence's max_len and init_size.
+  if ((::CORBA::Long)received_data.max_slots() < max_samples)
+    {
+      max_samples = (::CORBA::Long)received_data.max_slots();
+    }
+  //---- end of preconditions common to read and take -----
 
   ::CORBA::Long count(0) ;
 
@@ -1608,19 +1361,25 @@ DDS::ReturnCode_t
     {
       if (item->sample_state_ & sample_states)
       {
-        // Increase sequence length before adding new element to sequence.
-        received_data.length (count + 1);
-        received_data[count] =
-            *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-        info_seq.length (count + 1);
-        ptr->instance_state_.sample_info(info_seq[count], item) ;
+          // Increase sequence length before adding new element to sequence.
+          received_data.set_length (count + 1);
+          if (received_data.max_len() != 0)
+          {
+            received_data.assign_sample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
+          else 
+          {
+            received_data.assign_ptr(count, item, this) ;
+          }
+          // Increase sequence length before adding new element to sequence.
+          info_seq.length (count + 1);
+          ptr->instance_state_.sample_info(info_seq[count], item) ;
 
-        item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (count) block.
-        ptr->instance_state_.accessed() ;
-        count++ ;
+          ptr->instance_state_.accessed() ;
+          count++ ;
       }
 
       if (count == max_samples)
@@ -1638,6 +1397,14 @@ DDS::ReturnCode_t
     //
     sample_info(info_seq, 0, count, ptr->rcvd_sample_.tail_) ;
 
+	if (received_data.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
+	if (info_seq.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
     return ::DDS::RETCODE_OK;
   }
   else
@@ -1660,32 +1427,59 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  if ((received_data.maximum() != info_seq.maximum()) ||
+  //---- start of preconditions common to read and take -----
+  //SPEC ref v1.2 7.1.2.5.3.8 #1
+  if ((received_data.max_slots() != info_seq.max_slots()) ||
+      (received_data.maximum() != info_seq.maximum()) ||
       (received_data.length() != info_seq.length()) ||
       (received_data.release() != info_seq.release()))
     {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET ;
-    }
-
-  if ((received_data.maximum() > 0) && !received_data.release())
-    {
+      ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET sample and info input sequences do not match.\n" ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-  if (received_data.maximum() == 0)
-    {
-      ::<%SCOPE%><%TYPE%> *buf;
-      ::DDS::SampleInfo *info;
-      buf = new ::<%SCOPE%><%TYPE%>[max_samples];
-      info = new ::DDS::SampleInfo[max_samples];
+  //SPEC ref v1.2 7.1.2.5.3.8 #4
+  if ((received_data.max_len() > 0) && (received_data.owns() == false))
+	{
+		ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET mismatch of max_len %d  and owns %d\n",
+		 received_data.max_len(), received_data.owns() ));
+		return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+	}
 
-      received_data.replace(max_samples, max_samples, buf, 0);
-      info_seq.replace(max_samples, max_samples, info, 0);
-    }
-  else if ((::CORBA::Long)received_data.maximum() < max_samples)
+  if (received_data.max_len() == 0)
     {
-      max_samples = (::CORBA::Long)received_data.maximum() ;
+      // not in SPEC but needed.
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          max_samples = (::CORBA::Long)received_data.max_slots();
+        }
     }
+    else
+    {
+      if (max_samples == ::DDS::LENGTH_UNLIMITED)
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5a
+          max_samples = received_data.max_len();
+        }
+      else if (max_samples > (::CORBA::Long)received_data.max_len())
+        {
+          //SPEC ref v1.2 7.1.2.5.3.8 #5c
+          ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::read PRECONDITION_NOT_MET max_samples %d > max_len %d\n",
+            max_samples, received_data.max_len() ));
+          return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+
+        }
+      //else
+      //SPEC ref v1.2 7.1.2.5.3.8 #5b - is true by impl below.
+    }
+
+  // The spec does not say what to do in this case but it appears to be a good thing.
+  // Note: max_slots is the greater of the sequence's max_len and init_size.
+  if ((::CORBA::Long)received_data.max_slots() < max_samples)
+    {
+      max_samples = (::CORBA::Long)received_data.max_slots();
+    }
+  //---- end of preconditions common to read and take -----
 
   ::CORBA::Long count(0) ;
 
@@ -1697,93 +1491,63 @@ DDS::ReturnCode_t
   TAO::DCPS::SubscriptionInstance * ptr =
     this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
-  TAO::DCPS::ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-    TAO::DCPS::ReceivedDataElement *next ;
-    TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
-    while (item)
-    {
-      if (item->sample_state_ & sample_states)
+      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+           item != 0 ; item = item->next_data_sample_)
       {
-        received_data.length (count + 1);
-        received_data[count] =
-            *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-        info_seq.length (count + 1);
-        ptr->instance_state_.sample_info(info_seq[count], item) ;
-
-        item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
-
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (count) block.
-        ptr->instance_state_.accessed() ;
-
-        if (item == ptr->rcvd_sample_.tail_)
+        if (item->sample_state_ & sample_states)
         {
-          tail = ptr->rcvd_sample_.tail_ ;
-          item = item->next_data_sample_ ;
+          // Increase sequence length before adding new element to sequence.
+          received_data.set_length (count + 1);
+          if (received_data.max_len() != 0)
+          {
+            received_data.assign_sample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
+          }
+          else 
+          {
+            received_data.assign_ptr(count, item, this) ;
+          }
+              
+          // Increase sequence length before adding new element to sequence.
+          info_seq.length (count + 1);
+          ptr->instance_state_.sample_info(info_seq[count], item) ;
+
+          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+
+          ptr->instance_state_.accessed() ;
+          count++ ;
         }
-        else
+        if (count == max_samples)
         {
-          next = item->next_data_sample_ ;
-
-          ptr->rcvd_sample_.remove(item) ;
-
-                  if (0 == item->dec_ref())
-                  {
-          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
-          ACE_DES_FREE (delete_ptr,
-                        data_allocator_->free,
-                        <%TYPE%> );
-          ACE_DES_FREE (item,
-                        rd_allocator_->free,
-                        ReceivedDataElement);
-}
-          item = next ;
+          break ;
         }
-        count++ ;
-      }
+      } // for sample
+    } // if view/instance state
 
-      if (count == max_samples)
-      {
-        break ;
-      }
-    }
-  }
-
-  if (count)
-  {
-    //
-    // Get the sample_ranks, generation_ranks, and
-    // absolute_generation_ranks for this info_seq
-    //
-    if (tail)
+    if (count)
     {
-      sample_info(info_seq, 0,
-                  count,
-                  tail) ;
-
-      ptr->rcvd_sample_.remove(tail) ;
-
-                  if (0 == tail->dec_ref())
-                  {
-
-      ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
-      ACE_DES_FREE (delete_ptr,
-                    data_allocator_->free,
-                    <%TYPE%> );
-      ACE_DES_FREE (tail,
-                    rd_allocator_->free,
-                    ReceivedDataElement);
-      }
-    }
-    else
-    {
-      sample_info(info_seq, 0,
+      //
+      // Get the sample_ranks, generation_ranks, and
+      // absolute_generation_ranks for this info_seq
+      //
+      sample_info(info_seq, count,
                   count,
                   ptr->rcvd_sample_.tail_) ;
     }
+
+  if (count)
+  {
+	if (received_data.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
+	if (info_seq.max_len() == 0)
+	{
+		received_data.max_len(received_data.max_slots());
+	}
 
     return ::DDS::RETCODE_OK;
   }
@@ -1906,44 +1670,10 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_NO_DATA ;
 }
 
-DDS::ReturnCode_t
-<%TYPE%>DataReaderImpl::return_loan (
-    ::<%MODULE%><%TYPE%>Seq & received_data,
-    ::DDS::SampleInfoSeq & info_seq
-  )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
-{
-  if (received_data.release() != info_seq.release())
-    {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
-
-  if (!received_data.release())
-  {
-    // true means the buffer is orphaned - not owned by the sequence
-    ::<%SCOPE%><%TYPE%> *buf = received_data.get_buffer(true);
-    ::DDS::SampleInfo *info = info_seq.get_buffer(true);
-
-
-    // TBD - pool these buffers instead of deleting them
-
-    delete[] buf;
-    delete[] info;
-
-    // per DDS spec: set max_len = 0;
-    // also buffer is null and "owns" is false (CORBA seq "release" == DDS seq "owns")
-    received_data.replace(0,0,0,false);
-    info_seq.replace(0,0,0,false);
-  }
-
-  return ::DDS::RETCODE_OK;
-}
 
 void
 <%TYPE%>DataReaderImpl::release_loan (
-           ::<%MODULE%><%TYPE%>ZCSeq & received_data
+           ::<%MODULE%><%TYPE%>Seq & received_data
            )
 {
       // decrement the data references.
@@ -1964,14 +1694,14 @@ void
                        rd_allocator_->free,
                        ReceivedDataElement);
           }
-
+          
       }
 }
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
-    ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-    ::TAO::DCPS::SampleInfoZCSeq & info_seq
+    ::<%MODULE%><%TYPE%>Seq & received_data,
+    ::DDS::SampleInfoSeq & info_seq
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1991,9 +1721,9 @@ DDS::ReturnCode_t
   if (received_data.owns())
     {
       // nothing to do because this is not zero-copy data
-      return ::DDS::RETCODE_OK;
+      return ::DDS::RETCODE_OK; 
     }
-  else
+  else 
     {
       // reset but allow the info buffer to be used again
       info_seq.max_len(0);
@@ -2002,7 +1732,7 @@ DDS::ReturnCode_t
       //??TBD? - put the info buffer in a pool
 
       this->release_loan(received_data);
-
+      
       // reset the max_len  per DDS spec
       // this also makes access to the recieved_data an error (a spec req)
       received_data.max_len(0);
@@ -2125,7 +1855,7 @@ void
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
         //       just looking at the head will not be enough.
-        ::POA_DDS::DataReaderListener* listener
+        ::DDS::DataReaderListener* listener
             = listener_for (::DDS::SAMPLE_REJECTED_STATUS);
 
         sample_rejected_status_.last_reason =
@@ -2199,7 +1929,7 @@ void
 
       if (head_ptr->sample_state_ == ::DDS::NOT_READ_SAMPLE_STATE)
       {
-        ::POA_DDS::DataReaderListener* listener
+        ::DDS::DataReaderListener* listener
             = listener_for (::DDS::SAMPLE_LOST_STATUS);
 
         sample_lost_status_.total_count++ ;
@@ -2225,7 +1955,7 @@ void
     }
 
     TAO::DCPS::SubscriberImpl* sub = get_subscriber_servant () ;
-    ::POA_DDS::SubscriberListener* sub_listener =
+    ::DDS::SubscriberListener* sub_listener =
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS) ;
     if (sub_listener != 0)
     {
@@ -2233,7 +1963,7 @@ void
     }
     else
     {
-      ::POA_DDS::DataReaderListener* listener
+      ::DDS::DataReaderListener* listener
             = listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
       if (listener != 0)
@@ -2295,16 +2025,16 @@ void
                 <%TYPE%> );
 }
 
-DDS::ReturnCode_t
+DDS::ReturnCode_t 
 <%TYPE%>DataReaderImpl::auto_return_loan(void* seq)
 {
-  ::<%MODULE%><%TYPE%>ZCSeq& received_data = *(::<%MODULE%><%TYPE%>ZCSeq*)seq;
-
+  ::<%MODULE%><%TYPE%>Seq& received_data = *(::<%MODULE%><%TYPE%>Seq*)seq;
+  
   if (!received_data.owns())
     {
       this->release_loan(received_data);
     }
-  return ::DDS::RETCODE_OK;
+  return ::DDS::RETCODE_OK; 
 }
 
 //TAO::DCPS::DataReaderRemote_ptr
@@ -2326,3 +2056,4 @@ DDS::ReturnCode_t
 }
 
 1;
+

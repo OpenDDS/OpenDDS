@@ -21,6 +21,8 @@
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
 
+using namespace Messenger;
+
 TAO::DCPS::TransportIdType transport_impl_id = 1;
 
 int
@@ -88,7 +90,7 @@ int main (int argc, char *argv[])
       }
 
       MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = mts_servant;
+      TAO::DCPS::LocalObject_var safe_servant = mts_servant;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (), "")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;
@@ -125,8 +127,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       TAO::DCPS::SubscriberImpl* sub_impl =
-        ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
-                                           DDS::Subscriber_ptr> (sub.in ());
+        TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
       if (0 == sub_impl) {
         cerr << "Failed to obtain subscriber servant\n" << endl;
         exit(1);

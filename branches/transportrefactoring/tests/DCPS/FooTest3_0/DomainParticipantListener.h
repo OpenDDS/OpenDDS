@@ -11,7 +11,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class DomainParticipantListenerImpl
-class DomainParticipantListenerImpl : public virtual POA_DDS::DomainParticipantListener
+class DomainParticipantListenerImpl
+  : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantListener>
 {
 public:
   //Constructor

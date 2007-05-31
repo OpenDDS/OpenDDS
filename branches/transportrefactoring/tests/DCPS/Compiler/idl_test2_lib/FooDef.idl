@@ -13,3 +13,10 @@ module Xyz {
   };
 
 };
+
+//Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
+//of a module in IDL.
+#pragma DCPS_DATA_TYPE "Bar"
+struct Bar {
+  unsigned long data;
+};

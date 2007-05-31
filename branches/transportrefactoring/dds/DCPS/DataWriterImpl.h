@@ -24,6 +24,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class DDS_TEST;
+
 namespace TAO
 {
   namespace DCPS
@@ -53,7 +55,7 @@ namespace TAO
     *        up ownership to this WriteDataContainer.
     */
     class TAO_DdsDcps_Export DataWriterImpl
-      : public virtual POA_TAO::DCPS::DataWriterRemote,
+      : public virtual DDS::DataWriter,
         public virtual EntityImpl,
         public virtual TransportSendListener,
         public virtual ACE_Event_Handler
@@ -206,6 +208,7 @@ namespace TAO
         TAO::DCPS::DomainParticipantImpl*      participant_servant,
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
+        ::DDS::DataWriter_ptr                  dw_local,
         TAO::DCPS::DataWriterRemote_ptr        dw_remote
       )
         ACE_THROW_SPEC ((
@@ -379,7 +382,7 @@ namespace TAO
     * Otherwise, the query for the listener is propagated up to the
     * factory/publisher.
     */
-    ::POA_DDS::DataWriterListener* listener_for (::DDS::StatusKind kind);
+    ::DDS::DataWriterListener* listener_for (::DDS::StatusKind kind);
 
     /// Handle the assert liveliness timeout.
     virtual int handle_timeout (const ACE_Time_Value &tv,
@@ -465,6 +468,7 @@ namespace TAO
       bool cache_lookup_instance_handles (const ReaderIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
+      friend class ::DDS_TEST; //allows tests to get at dw_remote_objref_
 
       /// The name of associated topic.
       CORBA::String_var               topic_name_;
@@ -482,7 +486,7 @@ namespace TAO
       /// Used to notify the entity for relevant events.
       ::DDS::DataWriterListener_var   listener_;
       /// The datawriter listener servant.
-      ::POA_DDS::DataWriterListener*  fast_listener_;
+      ::DDS::DataWriterListener*  fast_listener_;
       /// The participant servant which creats the publisher that
       /// creates this datawriter.
       DomainParticipantImpl*          participant_servant_;
@@ -492,8 +496,10 @@ namespace TAO
       PublisherImpl*                  publisher_servant_;
       /// The object reference of the publisher.
       ::DDS::Publisher_var            publisher_objref_;
+      /// the object reference of the local datawriter
+      ::DDS::DataWriter_var           dw_local_objref_;
       /// The object reference of the remote datawriter.
-      DataWriterRemote_var            dw_remote_objref_;
+      ::TAO::DCPS::DataWriterRemote_var dw_remote_objref_;
       /// The repository id of this datawriter/publication.
       PublicationId                   publication_id_;
       /// The sequence number unique in DataWriter scope.

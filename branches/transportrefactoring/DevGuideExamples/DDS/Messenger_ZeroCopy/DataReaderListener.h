@@ -13,8 +13,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual POA_TAO::DCPS::DataReaderListener,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
 {
 public:
   //Constructor
@@ -61,6 +60,8 @@ public:
   )
   throw (CORBA::SystemException);
 
+  //--- TAO DDS specific callbacks ---
+
   virtual void on_subscription_disconnected (
     DDS::DataReader_ptr reader,
     const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
@@ -83,6 +84,7 @@ public:
   DDS::DataReader_ptr)
   throw (CORBA::SystemException);
 
+  //--- example specific methods ---
   long num_reads() const {
     return num_reads_;
   }
@@ -90,7 +92,7 @@ public:
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  long                num_reads_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

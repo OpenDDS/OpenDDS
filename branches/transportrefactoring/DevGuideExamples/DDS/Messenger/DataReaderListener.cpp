@@ -7,6 +7,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
+using namespace Messenger;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
@@ -25,7 +26,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   num_reads_ ++;
 
   try {
-    MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
+    ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
       cerr << "read: _narrow failed." << endl;
       exit(1);
@@ -36,8 +37,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
     // Alternate code to read directlty via the servant
     //MessageDataReaderImpl* dr_servant =
-    //  reference_to_servant< MessageDataReaderImpl,
-    //                        MessageDataReader_ptr>(message_dr.in());
+    //  reference_to_servant<MessageDataReaderImpl>(message_dr.in());
     //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {

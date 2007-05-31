@@ -29,7 +29,7 @@
  * @brief An implementation of a TypeSupport
  *
  */
-class MyTypeSupportImpl : public virtual POA_MyTypeSupport
+class MyTypeSupportImpl : public virtual TAO::DCPS::LocalObject<MyTypeSupport>
 {
 
 public:
@@ -55,13 +55,13 @@ public:
       CORBA::SystemException
     ));
 
-  virtual ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
+  virtual ::DDS::DataWriter_ptr create_datawriter (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
-  virtual ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
+  virtual ::DDS::DataReader_ptr create_datareader (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -76,6 +76,11 @@ public:
       ACE_THROW_SPEC ((
         CORBA::SystemException
         )) { return ::DDS::RETCODE_OK;};
+
+  virtual ::DDS::ReturnCode_t auto_return_loan (void *)
+  {
+    return ::DDS::RETCODE_ERROR;
+  }
 
 };
 

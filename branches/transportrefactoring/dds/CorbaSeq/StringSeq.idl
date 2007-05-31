@@ -1,0 +1,30 @@
+// -*- IDL -*-
+//
+// $Id$
+
+// ================================================================
+//
+//   This file was used to generate the code in StringSeqC.*
+//   The command used to generate code is:
+//
+//     tao_idl
+//       -o orig -GA -SS -Sci
+//          -Wb,export_macro=TAO_Export
+//          -Wb,pre_include="ace/pre.h"
+//          -Wb,post_include="ace/post.h"
+//          StringSeq.pidl
+//
+// ================================================================
+
+
+#ifndef TAO_CORBA_STRING_SEQ_IDL
+#define TAO_CORBA_STRING_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<string> StringSeq;
+};
+
+#endif  /* TAO_CORBA_STRING_SEQ_IDL */
