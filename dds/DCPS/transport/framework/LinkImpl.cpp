@@ -147,14 +147,19 @@ TAO::DCPS::LinkImpl::performWork(
       connected = extConnected;
       backpressure = extBackpressure;
     }
-    if (haveEntry && connected && !backpressure)
+    if (haveEntry && connected && !backpressure && !entry.deferred_)
     {
-      extract = trySending(entry, false);
+      extract = trySending(entry);
       if (extract)
       {
         Guard guard(extLock);
         extQueue.pop_front();
         queueEmpty = extQueue.empty();
+      }
+      else if (entry.deferred_)
+      {
+        Guard guard(extLock);
+        extQueue.front().deferred_ = true;
       }
     }
     else
@@ -226,10 +231,7 @@ TAO::DCPS::LinkImpl::send(
   Guard guard(lock_);
   requestId = getNextRequestId(guard);
   ACE_Message_Block copy(mb, 1);
-  if (!deliver(guard, copy, requestId))
-  {
-    return TransportAPI::make_failure();
-  }
+  deliver(guard, copy, requestId);
   return TransportAPI::make_success();
 }
 
@@ -333,9 +335,19 @@ TAO::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
   // TBD: check requestId w/front of queue
-  if (deferred_)
+  bool done = false;
+  for (
+    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    iter != queue_.end() && !done;
+    ++iter
+    )
   {
-    deferredStatus_ = TransportAPI::make_success();
+    // Remove the deferred item
+    if ((iter->requestId_ == requestId) && (iter->deferred_))
+    {
+      queue_.erase(iter);
+      done = true;
+    }
   }
   condition_.signal();
 }
@@ -343,11 +355,22 @@ TAO::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
 void
 TAO::DCPS::LinkImpl::sendFailed(const TransportAPI::failure_reason& reason)
 {
+ 
   Guard guard(lock_);
   // TBD: check requestId w/front of queue
-  if (deferred_)
+  bool done = false;
+  for (
+    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    iter != queue_.end() && !done;
+    ++iter
+    )
   {
-    deferredStatus_ = TransportAPI::make_failure();
+    // Remove the deferred item
+    if ((iter->requestId_ == reason.id()) && (iter->deferred_))
+    {
+      iter->deferred_ = false;
+      done = true;
+    }
   }
   condition_.signal();
 }
@@ -570,7 +593,7 @@ TAO::DCPS::LinkImpl::getNextRequestId(
   return currentRequestId_;
 }
 
-bool
+void
 TAO::DCPS::LinkImpl::deliver(
   const Guard&,
   ACE_Message_Block& mb,
@@ -584,7 +607,7 @@ TAO::DCPS::LinkImpl::deliver(
   size_t sequenceNumber = 0;
   if (packets.empty())
   {
-    return true;
+    return;
   }
 
   bool enqueued = !queue_.empty();
@@ -602,7 +625,7 @@ TAO::DCPS::LinkImpl::deliver(
       enqueued ||
       backpressure_ ||
       !connected_ ||
-      !trySending(item, true)
+      !trySending(item)
       )
     {
       queue_.push_back(item);
@@ -613,13 +636,11 @@ TAO::DCPS::LinkImpl::deliver(
   {
     condition_.signal();
   }
-  return true;
 }
 
 bool
 TAO::DCPS::LinkImpl::trySending(
-  IOItem& item,
-  bool locked
+  IOItem& item
   )
 {
   // Process the head of the queue
@@ -643,33 +664,8 @@ TAO::DCPS::LinkImpl::trySending(
   iovs[1].iov_base = item.data_begin_;
   iovs[1].iov_len = item.data_size_;
 
-  if (!locked)
-  {
-    Guard guard(lock_);
-    deferred_ = true;
-    deferredStatus_ = TransportAPI::make_failure();
-  }
-  else
-  {
-    deferred_ = true;
-    deferredStatus_ = TransportAPI::make_failure();
-  }
+  item.deferred_ = true;
   TransportAPI::Status status = link_.send(iovs, 2, item.requestId_);
-  while (status.first == TransportAPI::DEFERRED)
-  {
-    if (!locked)
-    {
-      Guard guard(lock_);
-      status = handleDeferredResolution(deferred_, condition_, deferredStatus_);
-    }
-    else
-    {
-      status = handleDeferredResolution(deferred_, condition_, deferredStatus_);
-    }
-  }
-  if (status.first == TransportAPI::SUCCESS)
-  {
-    return true;
-  }
-  return false;
+  item.deferred_ = (status.first == TransportAPI::DEFERRED);
+  return status.first == TransportAPI::SUCCESS;
 }

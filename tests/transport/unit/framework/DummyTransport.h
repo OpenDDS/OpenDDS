@@ -60,11 +60,13 @@ public:
     virtual ~Link() {}
 
     void setFailTimes(unsigned int times) { shouldFailTimes_ = times; }
+    void setDeferred(bool defer = true) { defer_ = defer; }
 
   private:
     TransportAPI::LinkCallback* callback_;
     Log& log_;
     unsigned int shouldFailTimes_;
+    bool defer_;
   };
 
   virtual ~DummyTransport() {}

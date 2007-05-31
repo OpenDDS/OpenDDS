@@ -67,6 +67,7 @@ namespace TAO
         TransportAPI::Id requestId_;
         size_t sequenceNumber_;
         bool ending_;
+        bool deferred_;
       };
 
       bool performWork(
@@ -96,12 +97,12 @@ namespace TAO
     private:
       typedef ACE_Guard<ACE_Thread_Mutex> Guard;
 
-      bool deliver(
+      void deliver(
         const Guard&,
         ACE_Message_Block& mb,
         const TransportAPI::Id& requestId
         );
-      bool trySending(IOItem& item, bool locked = true);
+      bool trySending(IOItem& item);
       TransportAPI::Id getNextRequestId(const Guard&);
 
       LinkImplCallback* callback_;
@@ -117,9 +118,7 @@ namespace TAO
       bool connected_;
       bool backpressure_;
       bool connectionDeferred_;
-      bool deferred_;
       TransportAPI::Status deferredConnectionStatus_;
-      TransportAPI::Status deferredStatus_;
       std::deque<IOItem> queue_;
       IOItem bufferedData_;
       std::pair<TransportAPI::Id, size_t> lastReceived_;
