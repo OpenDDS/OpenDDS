@@ -22,6 +22,8 @@
 #include <ace/Get_Opt.h>
 #include "ace/OS_NS_sys_stat.h"
 
+using namespace Messenger;
+
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
@@ -81,8 +83,7 @@ int main (int argc, char *argv[])
                           , -1);
       }
 
-      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = mts_servant;
+    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                         "")) {

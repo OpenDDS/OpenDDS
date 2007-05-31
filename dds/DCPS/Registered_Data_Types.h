@@ -25,7 +25,7 @@ namespace TAO
 {
   namespace DCPS
   {
-    typedef ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX> TypeSupportHash;
+    typedef ACE_Hash_Map_Manager<ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX> TypeSupportHash;
     typedef ACE_Hash_Map_Manager<void*, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
 
     /**
@@ -55,7 +55,7 @@ namespace TAO
        */
       ::DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr domain_participant,
                                          ACE_CString type_name,
-                                         POA_TAO::DCPS::TypeSupport_ptr the_type);
+                                         TAO::DCPS::TypeSupport_ptr the_type);
 
       /**
        * Find a data type by its type name.
@@ -64,7 +64,7 @@ namespace TAO
        *         type_name
        *         Otherwise returns TypeSupport::_nil()
        */
-      POA_TAO::DCPS::TypeSupport_ptr lookup(::DDS::DomainParticipant_ptr domain_participant,
+      TAO::DCPS::TypeSupport_ptr lookup(::DDS::DomainParticipant_ptr domain_participant,
                                       ACE_CString type_name);
     private:
       Data_Types_Register(void);

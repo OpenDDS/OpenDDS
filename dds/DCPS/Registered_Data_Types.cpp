@@ -23,7 +23,7 @@ namespace TAO
     Data_Types_Register::~Data_Types_Register(void)
     {
       TypeSupportHash*  supportHash;
-      ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr> typeSupports;
+      ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr> typeSupports;
 
       if (0 < domains_.current_size() )
         {
@@ -59,14 +59,14 @@ namespace TAO
 
           domains_.unbind_all();
 
-          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesIter =
+          ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>::ITERATOR typesIter =
             typeSupports.begin();
-          ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>::ITERATOR typesEnd =
+          ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>::ITERATOR typesEnd =
             typeSupports.end();
 
           while (typesEnd != typesIter)
             {
-              POA_TAO::DCPS::TypeSupport_ptr type = *typesIter;
+              TAO::DCPS::TypeSupport_ptr type = *typesIter;
               ++typesIter;
               // if there are no more references then it will be deleted
               type->_remove_ref();
@@ -92,7 +92,7 @@ namespace TAO
     ::DDS::ReturnCode_t Data_Types_Register::register_type (
       ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name,
-      POA_TAO::DCPS::TypeSupport_ptr the_type)
+      TAO::DCPS::TypeSupport_ptr the_type)
     {
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash = NULL;
@@ -108,7 +108,7 @@ namespace TAO
             }
           else if (1 == lookup)
             {
-              POA_TAO::DCPS::TypeSupport_ptr currentType = NULL;
+              TAO::DCPS::TypeSupport_ptr currentType = NULL;
               if ( 0 == supportHash->find(type_name, currentType) )
                 {
                   // Allow different TypeSupport instances of the same TypeSupport
@@ -147,11 +147,11 @@ namespace TAO
     }
 
 
-    POA_TAO::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
+    TAO::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
       ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name)
     {
-      POA_TAO::DCPS::TypeSupport_ptr typeSupport = 0;
+      TAO::DCPS::TypeSupport_ptr typeSupport = 0;
 
       TypeSupportHash*  supportHash = NULL;
 
@@ -178,32 +178,32 @@ namespace TAO
 
 template class TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>;
 
-template class ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
-template class ACE_Hash_Map_Iterator <ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
-template class ACE_Hash_Map_Entry<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr>;
+template class ACE_Hash_Map_Manager<ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
+template class ACE_Hash_Map_Iterator <ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
+template class ACE_Hash_Map_Entry<ACE_CString, TAO::DCPS::TypeSupport_ptr>;
 
 template class ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_NULL_SYNCH>;
 template class ACE_Hash_Map_Iterator <::DDS::DomainId_t, TypeSupportHash*, ACE_NULL_SYNCH>;
 template class ACE_Hash_Map_Entry<::DDS::DomainId_t, TypeSupportHash*>;
 
-template class ACE_Node<POA_TAO::DCPS::TypeSupport_ptr>;
-template class ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>;
-template class ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>;
+template class ACE_Node<TAO::DCPS::TypeSupport_ptr>;
+template class ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>;
+template class ACE_Unbounded_Set_Iterator<TAO::DCPS::TypeSupport_ptr>;
 
 #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
 
 #pragma instantiate TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>
 
-#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
-#pragma instantiate ACE_Hash_Map_Iterator <ACE_CString, POA_TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
-#pragma instantiate ACE_Hash_Map_Entry<ACE_CString, POA_TAO::DCPS::TypeSupport_ptr>;
+#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
+#pragma instantiate ACE_Hash_Map_Iterator <ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX>;
+#pragma instantiate ACE_Hash_Map_Entry<ACE_CString, TAO::DCPS::TypeSupport_ptr>;
 
 #pragma instantiate ACE_Hash_Map_Manager<::DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Iterator <::DDS::DomainId_t, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX>;
 #pragma instantiate ACE_Hash_Map_Entry<::DDS::DomainId_t, TypeSupportHash*>;
 
-#pragma instantiate ACE_Node<POA_TAO::DCPS::TypeSupport_ptr>
-#pragma instantiate ACE_Unbounded_Set<POA_TAO::DCPS::TypeSupport_ptr>
-#pragma instantiate ACE_Unbounded_Set_Iterator<POA_TAO::DCPS::TypeSupport_ptr>
+#pragma instantiate ACE_Node<TAO::DCPS::TypeSupport_ptr>
+#pragma instantiate ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>
+#pragma instantiate ACE_Unbounded_Set_Iterator<TAO::DCPS::TypeSupport_ptr>
 
 #endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

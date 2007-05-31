@@ -13,8 +13,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual POA_DDS::DataReaderListener,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor

@@ -51,10 +51,11 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export DomainParticipantImpl
-      : public virtual POA_DDS::DomainParticipant,
+      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipant>,
         public virtual TAO::DCPS::EntityImpl
     {
     public:
+
       typedef Objref_Servant_Pair <SubscriberImpl,
                                    ::DDS::Subscriber,
                                    ::DDS::Subscriber_ptr,
@@ -325,7 +326,7 @@ namespace TAO
       * kind is in the listener mask then the listener is returned.
       * Otherwise, return nil.
       */
-      ::POA_DDS::DomainParticipantListener* listener_for (::DDS::StatusKind kind);
+      ::DDS::DomainParticipantListener* listener_for (::DDS::StatusKind kind);
 
     private:
 
@@ -376,7 +377,7 @@ namespace TAO
       /// Used to notify the entity for relevant events.
       ::DDS::DomainParticipantListener_var  listener_;
       /// The DomainParticipant listener servant.
-      ::POA_DDS::DomainParticipantListener* fast_listener_;
+      ::DDS::DomainParticipantListener* fast_listener_;
       /// The StatusKind bit mask indicates which status condition change
       /// can be notified by the listener of this entity.
       ::DDS::StatusKindMask                 listener_mask_;

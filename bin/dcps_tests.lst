@@ -82,6 +82,8 @@ tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 #tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
+tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN !STATIC
+
 tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/mcast_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
@@ -92,6 +94,7 @@ tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !STATIC
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/reliable_multicast/unittest: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN !STATIC
+performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !STATIC
 # run with single-copy read (the default is zero-copy read)
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl 13 1 500: !DCPS_MIN !STATIC
 performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN !STATIC

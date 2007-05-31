@@ -1,3 +1,5 @@
+#include "test_helper.h" //must be the 1st include
+
 #include  "dds/DdsDcpsInfoC.h"
 #include  "DCPSDataWriterI.h"
 
@@ -52,7 +54,6 @@ parse_args (int argc, char *argv[])
   // Indicates sucessful parsing of the command line
   return 0;
 }
-
 
 int
 main (int argc, char *argv[])
@@ -117,9 +118,7 @@ main (int argc, char *argv[])
 
       // Add publication
       TAO_DDS_DCPSDataWriter_i dwi;
-      PortableServer::ObjectId_var oid = poa->activate_object( &dwi );
-      obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataWriterRemote_var dw = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
+      TAO::DCPS::DataWriterRemote_var dw = DDS_TEST::getRemoteInterface(dwi);
       if (CORBA::is_nil (dw.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
@@ -185,7 +184,6 @@ main (int argc, char *argv[])
       CORBA::Long dpIdAlmost = 0;
       CORBA::Long topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
-      PortableServer::ServantBase_var safe_servant = dwiAlmost;
       TAO::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
       CORBA::Long pubIdAlmost = 0;
@@ -215,9 +213,7 @@ main (int argc, char *argv[])
           }
 
         // Add publication
-        oid = poa->activate_object( dwiAlmost );
-        obj = poa->id_to_reference( oid.in() );
-        dwAlmost = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
+        dwAlmost = DDS_TEST::getRemoteInterface(*dwiAlmost);
         if (CORBA::is_nil (dwAlmost.in ()))
           {
             ACE_ERROR_RETURN ((LM_DEBUG,

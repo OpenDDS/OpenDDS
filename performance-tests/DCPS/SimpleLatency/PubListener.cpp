@@ -10,14 +10,10 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-
 #include <time.h>
 #include <math.h>
-//#include <sys/time.h>
 
-//#include "tester.h"
-
-
+using namespace DDSPerfTest;
 
 typedef struct
 {
@@ -126,14 +122,12 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   AckMessageDataReader_var ackmessage_dr =
     AckMessageDataReader::_narrow(this->reader_.in());
   this->dr_servant_ =
-    ::TAO::DCPS::reference_to_servant< AckMessageDataReaderImpl,
-                                       AckMessageDataReader_ptr>(ackmessage_dr.in());
+    TAO::DCPS::reference_to_servant<AckMessageDataReaderImpl>(ackmessage_dr.in());
 
   PubMessageDataWriter_var pubmessage_dw =
     PubMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ =
-    ::TAO::DCPS::reference_to_servant< PubMessageDataWriterImpl,
-                                       PubMessageDataWriter_ptr>(pubmessage_dw.in());
+    TAO::DCPS::reference_to_servant<PubMessageDataWriterImpl>(pubmessage_dw.in());
   DDSPerfTest::PubMessage msg;
   this->handle_ = this->dw_servant_->_cxx_register (msg);
 }
@@ -148,9 +142,9 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     if (use_zero_copy_)
     {
       ::CORBA::Long max_read_samples = 1;
-      AckMessageZCSeq messageZC(0, max_read_samples);
-      ::TAO::DCPS::SampleInfoZCSeq siZC(0, max_read_samples);
-      status = this->dr_servant_->read(messageZC,
+      AckMessageSeq messageZC(0, max_read_samples);
+      DDS::SampleInfoSeq siZC(0, max_read_samples);
+      status = this->dr_servant_->take(messageZC,
                                        siZC,
                                        max_read_samples,
                                        ::DDS::NOT_READ_SAMPLE_STATE,

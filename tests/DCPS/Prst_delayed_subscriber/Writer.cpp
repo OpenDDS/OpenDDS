@@ -8,6 +8,8 @@
 #include <ace/streams.h>
 #include "ace/High_Res_Timer.h"
 
+using namespace Messenger;
+
 const int num_instances_per_writer = 1;
 
 Writer::Writer(::DDS::DataWriter_ptr writer

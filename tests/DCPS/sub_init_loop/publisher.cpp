@@ -81,8 +81,8 @@ int main (int argc, char *argv[])
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = servant;
+    Messenger::MessageTypeSupportImpl* servant =
+      new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -115,37 +115,32 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-      // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl =
-        ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl,
-        DDS::Publisher_ptr>(pub.in ());
-      if (0 == pub_impl) {
-        cerr << "Failed to obtain publisher servant" << endl;
-        exit(1);
-      }
+    // Attach the publisher to the transport.
+    TAO::DCPS::PublisherImpl* pub_impl =
+      TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
+    if (0 == pub_impl) {
+      cerr << "Failed to obtain publisher servant" << endl;
+      exit(1);
+    }
 
-      TAO::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
-      if (status != TAO::DCPS::ATTACH_OK)
-        {
-          std::string status_str;
-          switch (status) {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = "ATTACH_BAD_TRANSPORT";
-            break;
-          case TAO::DCPS::ATTACH_ERROR:
-            status_str = "ATTACH_ERROR";
-            break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = "ATTACH_INCOMPATIBLE_QOS";
-            break;
-          default:
-            status_str = "Unknown Status";
-            break;
-          }
-          cerr << "Failed to attach to the transport. Status == "
-               << status_str.c_str() << endl;
-          exit(1);
-        }
+    TAO::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+    if (status != TAO::DCPS::ATTACH_OK) {
+      std::string status_str;
+      switch (status) {
+        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          status_str = "ATTACH_BAD_TRANSPORT";
+          break;
+        case TAO::DCPS::ATTACH_ERROR:
+          status_str = "ATTACH_ERROR";
+          break;
+        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          status_str = "ATTACH_INCOMPATIBLE_QOS";
+          break;
+        default:
+          status_str = "Unknown Status";
+          break;
+      }
+    }
 
       // Create the datawriter
       DDS::DataWriterQos dw_qos;

@@ -13,7 +13,7 @@
 #define ZEROCOPYALLOCATOR_H
 
 #include /**/ "ace/pre.h"
-
+#include "ace/Malloc_Base.h"          /* Need ACE_Allocator */
 // not needed export for templates #include "dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

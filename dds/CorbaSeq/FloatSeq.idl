@@ -1,0 +1,34 @@
+// -*- IDL -*-
+//
+// $Id$
+
+/**
+ *   This file was used to generate the code in FloatSeqC.*
+ *   The command used to generate code is:
+ *
+ *     tao_idl
+ *          -oA AnyTypeCode
+ *          -GA -SS -Sci
+ *          -Wb,pre_include=ace/pre.h
+ *          -Wb,post_include=ace/post.h
+ *          -Wb,export_macro=TAO_Export
+ *          -Wb,export_include=tao/TAO_Export.h
+ *          -Wb,anyop_export_macro=TAO_AnyTypeCode_Export
+ *          -Wb,anyop_export_include=tao/AnyTypeCode/TAO_AnyTypeCode_Export.h
+ *          -Wb,versioning_begin=TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+ *          -Wb,versioning_end=TAO_END_VERSIONED_NAMESPACE_DECL
+ *          FloatSeq.pidl
+ */
+
+
+#ifndef TAO_CORBA_FLOAT_SEQ_IDL
+#define TAO_CORBA_FLOAT_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<float> FloatSeq;
+};
+
+#endif  /* TAO_CORBA_FLOAT_SEQ_IDL */

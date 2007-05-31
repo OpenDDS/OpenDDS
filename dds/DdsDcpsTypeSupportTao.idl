@@ -2,14 +2,16 @@
 #define TAO_DCPS_TYPE_SUPPORT_IDL
 
 #include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsDataWriterRemote.idl"
-#include "dds/DdsDcpsDataReaderRemote.idl"
+//x #include "dds/DdsDcpsDataWriterRemote.idl"
+#include "dds/DdsDcpsPublication.idl"
+//x #include "dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsSubscription.idl"
 
 
 module TAO {
   module DCPS {
 
-    interface TypeSupport : ::DDS::TypeSupport {
+    local interface TypeSupport : ::DDS::TypeSupport {
 
     /**
     * create and activate a FooDataWriter.
@@ -18,7 +20,7 @@ module TAO {
     * other initialization so the implementation of this method
     * is as small and simple as possible.
     */
-    DataWriterRemote create_datawriter();
+    ::DDS::DataWriter create_datawriter();
 
     /**
     * create and activate a FooDataReader.
@@ -27,7 +29,7 @@ module TAO {
     * other initialization so the implementation of this method
     * is as small and simple as possible.
     */
-    DataReaderRemote create_datareader();
+    ::DDS::DataReader create_datareader();
 
     };
   };

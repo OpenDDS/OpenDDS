@@ -142,7 +142,7 @@ int run_domain_test ()
   TEST_CHECK (domain_id == MY_DOMAIN);
 
   MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
-  PortableServer::ServantBase_var safe_servant = fts_servant;
+  TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
 
   MyTypeSupport_var fts =
@@ -159,15 +159,13 @@ int run_domain_test ()
   ::DDS::DomainParticipant_var looked_dp
     = dpf->lookup_participant(MY_DOMAIN);
 
-  ::TAO::DCPS::DomainParticipantImpl* new_dp_servant
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl,
-                                ::DDS::DomainParticipant_ptr >
-            (new_dp.in ());
+  TAO::DCPS::DomainParticipantImpl* new_dp_servant
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+    (new_dp.in());
 
-  ::TAO::DCPS::DomainParticipantImpl* looked_dp_servant
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl,
-                                ::DDS::DomainParticipant_ptr >
-            (looked_dp.in ());
+  TAO::DCPS::DomainParticipantImpl* looked_dp_servant
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+    (looked_dp.in ());
 
   TEST_CHECK (looked_dp_servant == new_dp_servant);
 
@@ -178,10 +176,9 @@ int run_domain_test ()
                            TOPIC_QOS_DEFAULT,
                            ::DDS::TopicListener::_nil ());
 
-  ::TAO::DCPS::TopicImpl* new_topic_servant
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl,
-                                ::DDS::Topic_ptr >
-            (new_topic.in ());
+  TAO::DCPS::TopicImpl* new_topic_servant
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl>
+    (new_topic.in ());
 
   ::DDS::Duration_t timeout;
   timeout.sec = static_cast<long>(find_topic_timeout.sec ());
@@ -192,9 +189,8 @@ int run_domain_test ()
     = new_dp->find_topic(MY_TOPIC, timeout);
 
   ::TAO::DCPS::TopicImpl* found_topic_servant
-    = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::TopicImpl,
-                                ::DDS::Topic_ptr >
-            (found_topic.in ());
+    = ::TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl>
+    (found_topic.in ());
 
   TEST_CHECK (new_topic_servant == found_topic_servant);
 

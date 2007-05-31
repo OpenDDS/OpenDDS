@@ -26,29 +26,27 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   try
     {
-      MessageDataReaderImpl* dr_impl =
-        ::TAO::DCPS::reference_to_servant< MessageDataReaderImpl,
-        MessageDataReader_ptr> (MessageDataReader::_narrow (reader));
-      if (0 == dr_impl) {
+      Messenger::MessageDataReader_var dr = 
+        Messenger::MessageDataReader::_narrow (reader);
+      if (CORBA::is_nil (dr.in ())) {
         cerr << "Failed to obtain DataReader Implementation\n" << endl;
         exit(1);
       }
 
       CORBA::Long MAX_ELEMS_TO_RETURN = 3;
-      // using types supporting zero-copy read
       // Note: the 0 enables zero-copy reads/takes.
       //       A value > 0 will enable single-copy reads/takes
       //       The default contructor enables zero-copy reads/takes.
-      MessageZCSeq the_data (0, MAX_ELEMS_TO_RETURN);
-      ::TAO::DCPS::SampleInfoZCSeq the_info(0,MAX_ELEMS_TO_RETURN);
+      Messenger::MessageSeq the_data (0, MAX_ELEMS_TO_RETURN);
+      DDS::SampleInfoSeq    the_info (0, MAX_ELEMS_TO_RETURN);
 
-      // Use the zero-copy API to get data buffers directly.
-      DDS::ReturnCode_t status = dr_impl->read (the_data
-                                                , the_info
-                                                , MAX_ELEMS_TO_RETURN
-                                                , ::DDS::ANY_SAMPLE_STATE
-                                                , ::DDS::ANY_VIEW_STATE
-                                                , ::DDS::ANY_INSTANCE_STATE);
+      // get references to the samples  (zero-copy read of the samples)
+      DDS::ReturnCode_t status = dr->read (the_data
+                                           , the_info
+                                           , MAX_ELEMS_TO_RETURN
+                                           , ::DDS::ANY_SAMPLE_STATE
+                                           , ::DDS::ANY_VIEW_STATE
+                                           , ::DDS::ANY_INSTANCE_STATE);
 
       if (status == DDS::RETCODE_OK) {
         cout << "Message: subject    = " << the_data[0].subject.in() << endl
@@ -64,7 +62,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
 
       // the application is required to return the loaned samples
-      dr_impl->return_loan (the_data, the_info);
+      dr->return_loan (the_data, the_info);
     }
   catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;

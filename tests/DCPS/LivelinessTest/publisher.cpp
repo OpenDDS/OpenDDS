@@ -237,10 +237,10 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
 
-      ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = fts_servant;
+      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
+      TAO::DCPS::LocalObject_var safe_servant = fts_servant;
 
-      ::Mine::FooTypeSupport_var fts =
+      ::Xyz::FooTypeSupport_var fts =
         TAO::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
@@ -300,10 +300,8 @@ int main (int argc, char *argv[])
       }
 
       // Attach the publisher to the transport.
-      ::TAO::DCPS::PublisherImpl* pub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::PublisherImpl,
-                                             ::DDS::Publisher_ptr>
-                              (pub.in ());
+      TAO::DCPS::PublisherImpl* pub_impl
+        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {

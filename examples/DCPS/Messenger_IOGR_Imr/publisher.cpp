@@ -24,6 +24,8 @@
 #include <string>
 #include <fstream>
 
+using namespace Messenger;
+
 TAO::DCPS::TransportIdType transport_impl_id = 1;
 std::string publisher_trigger ("publisher_trigger");
 std::string driver_trigger ("driver_trigger");
@@ -133,7 +135,7 @@ int main (int argc, char *argv[]) {
       }
 
       MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-      PortableServer::ServantBase_var safe_servant = servant;
+      TAO::DCPS::LocalObject_var safe_servant = servant;
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -168,8 +170,7 @@ int main (int argc, char *argv[]) {
 
       // Attach the publisher to the transport.
       TAO::DCPS::PublisherImpl* pub_impl =
-        ::TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl,
-        DDS::Publisher_ptr>(pub.in ());
+        TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl>(pub.in ());
       if (0 == pub_impl) {
         cerr << "Failed to obtain publisher servant" << endl;
         exit(1);

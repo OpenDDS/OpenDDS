@@ -6,15 +6,15 @@
 #include "dds/DdsDcpsInfrastructure.idl"
 
 module DDS {
-    interface TopicDescription;
-    interface DomainParticipant;
-    interface DataReader;
-    interface Subscriber;
+    local interface TopicDescription;
+    local interface DomainParticipant;
+    local interface DataReader;
+    local interface Subscriber;
 
     typedef sequence<DataReader> DataReaderSeq;
 
 
-    interface DataReaderListener : Listener {
+    local interface DataReaderListener : Listener {
     void on_requested_deadline_missed(
       in DataReader reader,
       in RequestedDeadlineMissedStatus status);
@@ -43,12 +43,12 @@ module DDS {
       in SampleLostStatus status);
     };
 
-    interface SubscriberListener : DataReaderListener {
+    local interface SubscriberListener : DataReaderListener {
     void on_data_on_readers(
       in Subscriber subs);
     };
 
-    interface DataReader : Entity {
+    local interface DataReader : Entity {
     // ReturnCode_t read(
     // 		inout DataSeq received_data,
     // 		inout SampleInfoSeq info_seq,
@@ -180,7 +180,7 @@ module DDS {
     };
 
     // ----------------------------------------------------------------------
-    interface Subscriber : Entity {
+    local interface Subscriber : Entity {
     DataReader create_datareader(
       in TopicDescription a_topic,
       in DataReaderQos qos,
@@ -243,7 +243,7 @@ module TAO {
     typedef SubscriptionLostStatus SubscriptionDisconnectedStatus;
     typedef SubscriptionLostStatus SubscriptionReconnectedStatus;
 
-    interface DataReaderListener : ::DDS::DataReaderListener {
+    local interface DataReaderListener : ::DDS::DataReaderListener {
 
       // Called when a connection failure has been detected
       // and there are still associations using the connection

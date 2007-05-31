@@ -132,6 +132,7 @@ void DataReaderImpl::init (
          DomainParticipantImpl*        participant,
          SubscriberImpl*               subscriber,
          ::DDS::Subscriber_ptr         subscriber_objref,
+         ::DDS::DataReader_ptr         dr_objref,
          DataReaderRemote_ptr          dr_remote_objref
          )
   ACE_THROW_SPEC ((
@@ -157,9 +158,8 @@ void DataReaderImpl::init (
 
   if (! CORBA::is_nil (listener_.in()))
     {
-      fast_listener_ = reference_to_servant<POA_DDS::DataReaderListener,
-  DDS::DataReaderListener_ptr>
-  (listener_.in());
+      fast_listener_ =
+        reference_to_servant<DDS::DataReaderListener> (listener_.in ());
     }
   participant_servant_ = participant;
   participant_servant_->_add_ref ();
@@ -171,7 +171,8 @@ void DataReaderImpl::init (
   subscriber_servant_ = subscriber ;
   subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
   subscriber_servant_->_add_ref ();
-  dr_remote_objref_  = ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref);
+  dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
+  dr_remote_objref_ = ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
   initialized_ = true;
 }
@@ -290,7 +291,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
       if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
         return;
 
-      ::POA_DDS::DataReaderListener* listener
+      ::DDS::DataReaderListener* listener
         = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
 
       ::DDS::SubscriptionMatchStatus subscription_match_status;
@@ -321,7 +322,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 
       if (listener != 0)
       {
-        listener->on_subscription_match (dr_remote_objref_.in (),
+        listener->on_subscription_match (dr_local_objref_.in (),
           subscription_match_status);
 
         // TBD - why does the spec say to change this but not
@@ -508,7 +509,7 @@ void DataReaderImpl::update_incompatible_qos (
        CORBA::SystemException
        ))
 {
-  ::POA_DDS::DataReaderListener* listener
+  ::DDS::DataReaderListener* listener
       = listener_for (::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
@@ -527,7 +528,7 @@ void DataReaderImpl::update_incompatible_qos (
   if (listener != 0)
     {
 
-      listener->on_requested_incompatible_qos (dr_remote_objref_.in (),
+      listener->on_requested_incompatible_qos (dr_local_objref_.in (),
                  requested_incompatible_qos_status_);
 
 
@@ -610,9 +611,7 @@ void DataReaderImpl::get_qos (
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
   fast_listener_
-    = reference_to_servant< ::POA_DDS::DataReaderListener,
-    ::DDS::DataReaderListener_ptr >
-    (listener_.in ());
+    = reference_to_servant<DDS::DataReaderListener> (listener_.in ());
   return ::DDS::RETCODE_OK;
 }
 
@@ -877,7 +876,10 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
   CORBA::String_var name = topic_servant_->get_name ();
 
-  subscriber_servant_->reader_enabled(dr_remote_objref_.in (),
+  subscriber_servant_->reader_enabled(
+                      dr_remote_objref_.in (),
+                      dr_local_objref_.in (),
+                      this,
               name.in(),
               topic_servant_->get_id());
 
@@ -984,6 +986,12 @@ void DataReaderImpl::set_subscription_id(RepoId subscription_id)
   subscription_id_ = subscription_id ;
 }
 
+char *
+DataReaderImpl::get_topic_name() const 
+{ 
+  return topic_servant_->get_name() ; 
+}
+
 bool DataReaderImpl::have_sample_states(
           ::DDS::SampleStateMask sample_states) const
 {
@@ -1043,7 +1051,7 @@ bool DataReaderImpl::have_instance_states(
   return false ;
 }
 
-::POA_DDS::DataReaderListener*
+::DDS::DataReaderListener*
 DataReaderImpl::listener_for (::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
@@ -1060,7 +1068,7 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
 }
 
 // zero-copy version of this metod
-void DataReaderImpl::sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
+void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq, //x ::TAO::DCPS::SampleInfoZCSeq & info_seq,
          size_t start_idx, size_t count,
          ReceivedDataElement *ptr)
 {
@@ -1105,52 +1113,51 @@ void DataReaderImpl::sample_info(::TAO::DCPS::SampleInfoZCSeq & info_seq,
     }
 }
 
-void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
-         size_t start_idx, size_t count,
-         ReceivedDataElement *ptr)
-{
-  size_t end_idx = start_idx + count - 1 ;
-  for (size_t i = start_idx ; i <= end_idx ; i++)
-    {
-      info_seq[i].sample_rank = count - (i - start_idx + 1) ;
+//void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq,
+//				 size_t start_idx, size_t count,
+//				 ReceivedDataElement *ptr)
+//{
+//  size_t end_idx = start_idx + count - 1 ;
+//  for (size_t i = start_idx ; i <= end_idx ; i++)
+//    {
+//      info_seq[i].sample_rank = count - (i - start_idx + 1) ;
+//
+//      // generation_rank =
+//      //    (MRSIC.disposed_generation_count +
+//      //     MRSIC.no_writers_generation_count)
+//      //  - (S.disposed_generation_count +
+//      //     S.no_writers_generation_count)
+//      //
+//      //  info_seq[end_idx] == MRSIC
+//      //  info_seq[i].generation_rank ==
+//      //      (S.disposed_generation_count +
+//      //      (S.no_writers_generation_count) -- calculated in
+//      //            InstanceState::sample_info
+//
+//      info_seq[i].generation_rank =
+//	(info_seq[end_idx].disposed_generation_count +
+//	 info_seq[end_idx].no_writers_generation_count) -
+//	info_seq[i].generation_rank ;
+//
+//      // absolute_generation_rank =
+//      //     (MRS.disposed_generation_count +
+//      //      MRS.no_writers_generation_count)
+//      //   - (S.disposed_generation_count +
+//      //      S.no_writers_generation_count)
+//      //
+//      // ptr == MRS
+//      // info_seq[i].absolute_generation_rank ==
+//      //    (S.disposed_generation_count +
+//      //     S.no_writers_generation_count)-- calculated in
+//      //            InstanceState::sample_info
+//      //
+//      info_seq[i].absolute_generation_rank =
+//	(ptr->disposed_generation_count_ +
+//	 ptr->no_writers_generation_count_) -
+//	info_seq[i].absolute_generation_rank ;
+//    }
+//}
 
-      // generation_rank =
-      //    (MRSIC.disposed_generation_count +
-      //     MRSIC.no_writers_generation_count)
-      //  - (S.disposed_generation_count +
-      //     S.no_writers_generation_count)
-      //
-      //  info_seq[end_idx] == MRSIC
-      //  info_seq[i].generation_rank ==
-      //      (S.disposed_generation_count +
-      //      (S.no_writers_generation_count) -- calculated in
-      //            InstanceState::sample_info
-
-      info_seq[i].generation_rank =
-  (info_seq[end_idx].disposed_generation_count +
-   info_seq[end_idx].no_writers_generation_count) -
-  info_seq[i].generation_rank ;
-
-      // absolute_generation_rank =
-      //     (MRS.disposed_generation_count +
-      //      MRS.no_writers_generation_count)
-      //   - (S.disposed_generation_count +
-      //      S.no_writers_generation_count)
-      //
-      // ptr == MRS
-      // info_seq[i].absolute_generation_rank ==
-      //    (S.disposed_generation_count +
-      //     S.no_writers_generation_count)-- calculated in
-      //            InstanceState::sample_info
-      //
-      info_seq[i].absolute_generation_rank =
-  (ptr->disposed_generation_count_ +
-   ptr->no_writers_generation_count_) -
-  info_seq[i].absolute_generation_rank ;
-    }
-}
-
-//REMOVE TBD check that this still behaves correctly.
 void DataReaderImpl::sample_info(::DDS::SampleInfo & sample_info,
          ReceivedDataElement *ptr)
 {
@@ -1343,7 +1350,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
 
   // NOTE: each instance will change to ALIVE_STATE when they recieve a sample
 
-  ::POA_DDS::DataReaderListener* listener
+  ::DDS::DataReaderListener* listener
       = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
 
   set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS,
@@ -1385,7 +1392,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
 
   if (listener != 0)
     {
-      listener->on_liveliness_changed (dr_remote_objref_.in (),
+      listener->on_liveliness_changed (dr_local_objref_.in (),
                liveliness_changed_status_);
 
       liveliness_changed_status_.active_count_change = 0;
@@ -1449,12 +1456,12 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
 
     }
 
-  ::POA_DDS::DataReaderListener* listener
+  ::DDS::DataReaderListener* listener
       = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
 
   if (listener != 0)
     {
-      listener->on_liveliness_changed (dr_remote_objref_.in (),
+      listener->on_liveliness_changed (dr_local_objref_.in (),
                liveliness_changed_status_);
 
       liveliness_changed_status_.active_count_change = 0;
@@ -1542,7 +1549,7 @@ DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
         // Since this callback may come after remove_association which removes
         // the writer from id_to_handle map, we can ignore this error.
         this->cache_lookup_instance_handles (pubids, status.publication_handles);
-        the_listener->on_subscription_disconnected (this->dr_remote_objref_.in (),
+        the_listener->on_subscription_disconnected (this->dr_local_objref_.in (),
         status);
       }
     }
@@ -1571,7 +1578,7 @@ DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
         ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::notify_subscription_reconnected "
           "cache_lookup_instance_handles failed\n"));
       }
-      the_listener->on_subscription_reconnected (this->dr_remote_objref_.in (),
+      the_listener->on_subscription_reconnected (this->dr_local_objref_.in (),
         status);
     }
   }
@@ -1596,7 +1603,7 @@ DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
       // Since this callback may come after remove_association which removes
       // the writer from id_to_handle map, we can ignore this error.
       this->cache_lookup_instance_handles (pubids, status.publication_handles);
-      the_listener->on_subscription_lost (this->dr_remote_objref_.in (),
+      the_listener->on_subscription_lost (this->dr_local_objref_.in (),
         status);
     }
   }
@@ -1613,7 +1620,7 @@ DataReaderImpl::notify_connection_deleted ()
   DataReaderListener_var the_listener = DataReaderListener::_narrow (this->listener_.in ());
 
   if (! CORBA::is_nil (the_listener.in ()))
-    the_listener->on_connection_deleted (this->dr_remote_objref_.in ());
+    the_listener->on_connection_deleted (this->dr_local_objref_.in ());
 }
 
 bool
@@ -1687,14 +1694,6 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
 bool DataReaderImpl::is_bit () const
 {
   return this->is_bit_;
-}
-
-//REMOVE this when we can change this method back to a pure virtual method.
-DDS::ReturnCode_t
-DataReaderImpl::auto_return_loan(void* ) // = 0;
-{
-  ACE_ASSERT("DataReaderImpl::auto_return_loan not implemented"==0);
-  return ::DDS::RETCODE_ERROR;
 }
 
 int

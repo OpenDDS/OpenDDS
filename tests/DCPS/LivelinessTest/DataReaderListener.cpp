@@ -154,21 +154,19 @@ void DataReaderListenerImpl::on_subscription_match (
     CORBA::SystemException
   ))
   {
-    ::Mine::FooDataReader_var foo_dr =
-        ::Mine::FooDataReader::_narrow(reader);
+    ::Xyz::FooDataReader_var foo_dr =
+        ::Xyz::FooDataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+               ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       }
 
-    ::Mine::FooDataReaderImpl* dr_servant =
-        ::TAO::DCPS::reference_to_servant< ::Mine::FooDataReaderImpl,
-                                           ::Mine::FooDataReader_ptr>
-            (foo_dr.in ());
+    ::Xyz::FooDataReaderImpl* dr_servant
+      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl>(foo_dr.in());
 
-    ::Mine::FooSeq foo(num_ops_per_thread) ;
+    ::Xyz::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
 
     DDS::ReturnCode_t status  ;

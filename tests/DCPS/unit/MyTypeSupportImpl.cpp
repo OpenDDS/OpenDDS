@@ -52,7 +52,7 @@ MyTypeSupportImpl::get_type_name (
 }
 
 
-::TAO::DCPS::DataWriterRemote_ptr MyTypeSupportImpl::create_datawriter (
+::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter (
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -61,16 +61,16 @@ MyTypeSupportImpl::get_type_name (
     MyDataWriterImpl* writer_impl;
     ACE_NEW_RETURN(writer_impl,
                    MyDataWriterImpl(),
-                   ::TAO::DCPS::DataWriterRemote::_nil());
+                   ::DDS::DataWriter::_nil());
 
 
-    ::TAO::DCPS::DataWriterRemote_ptr writer_obj
+    ::DDS::DataWriter_ptr writer_obj
       = ::TAO::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
   }
 
-::TAO::DCPS::DataReaderRemote_ptr MyTypeSupportImpl::create_datareader (
+::DDS::DataReader_ptr MyTypeSupportImpl::create_datareader (
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -79,10 +79,10 @@ MyTypeSupportImpl::get_type_name (
     MyDataReaderImpl* reader_impl;
     ACE_NEW_RETURN(reader_impl,
                    MyDataReaderImpl(),
-                   ::TAO::DCPS::DataReaderRemote::_nil());
+                   ::DDS::DataReader::_nil());
 
 
-    ::TAO::DCPS::DataReaderRemote_ptr reader_obj
+    ::DDS::DataReader_ptr reader_obj
       = ::TAO::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;

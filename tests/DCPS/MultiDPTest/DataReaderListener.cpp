@@ -45,9 +45,7 @@ int read (::DDS::DataReader_ptr reader)
     }
 
     DR_impl* dr_servant =
-        TAO::DCPS::reference_to_servant< DR_impl,
-                                         DR_ptr>
-                (foo_dr.in ());
+      TAO::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
 
     DT foo;
     ::DDS::SampleInfo si ;
@@ -190,11 +188,11 @@ void DataReaderListenerImpl::on_subscription_match (
     num_reads ++;
 
     int ret = read <Xyz::Foo,
-        ::Mine::FooSeq,
-        ::Mine::FooDataReader,
-        ::Mine::FooDataReader_ptr,
-        ::Mine::FooDataReader_var,
-        ::Mine::FooDataReaderImpl> (reader);
+        ::Xyz::FooSeq,
+        ::Xyz::FooDataReader,
+        ::Xyz::FooDataReader_ptr,
+        ::Xyz::FooDataReader_var,
+        ::Xyz::FooDataReaderImpl> (reader);
 
     if (ret != 0)
     {

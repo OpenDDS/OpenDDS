@@ -28,16 +28,17 @@ namespace TAO
     * the interface this class is implementing.
     */
     class TAO_DdsDcps_Export TopicImpl
-      : public virtual POA_DDS::Topic,
+      : public virtual TAO::DCPS::LocalObject<DDS::Topic>,
         public virtual EntityImpl,
         public virtual TopicDescriptionImpl
     {
     public:
+
       //Constructor
       TopicImpl (const RepoId                   topic_id,
                  const char*                    topic_name,
                  const char*                    type_name,
-                 POA_TAO::DCPS::TypeSupport_ptr type_support,
+                 TAO::DCPS::TypeSupport_ptr type_support,
                  const ::DDS::TopicQos &        qos,
                  ::DDS::TopicListener_ptr       a_listener,
                  ::DDS::DomainParticipant_ptr   participant);
@@ -113,7 +114,7 @@ namespace TAO
       /// The topic listener
       ::DDS::TopicListener_var       listener_;
       /// The topic listener servant.
-      ::POA_DDS::TopicListener*      fast_listener_;
+      ::DDS::TopicListener*      fast_listener_;
 
       /// The id given by DCPSInfo/repository.
       RepoId                         id_;

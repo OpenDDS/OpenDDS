@@ -12,7 +12,8 @@
 
 
 //Class DataReaderListenerImpl
-class DataReaderListenerImpl : public virtual POA_TAO::DCPS::DataReaderListener
+class DataReaderListenerImpl
+  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
 {
 public:
   //Constructor

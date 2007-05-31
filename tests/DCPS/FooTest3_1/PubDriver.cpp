@@ -260,10 +260,9 @@ PubDriver::init(int& argc, char *argv[])
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
 
-  ::Mine::FooTypeSupportImpl* fts_servant = new ::Mine::FooTypeSupportImpl();
-   PortableServer::ServantBase_var safe_servant = fts_servant;
+  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
-  ::Mine::FooTypeSupport_var fts =
+  ::Xyz::FooTypeSupport_var fts =
     ::TAO::DCPS::servant_to_reference (fts_servant);
 
 
@@ -391,8 +390,8 @@ PubDriver::run()
 
   for (int i = 0; i < num_datawriters_; i ++)
   {
-    ::Mine::FooDataWriterImpl* datawriter_servant
-      = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
+    ::Xyz::FooDataWriterImpl* datawriter_servant
+      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
@@ -431,8 +430,8 @@ PubDriver::run()
     ::TAO::DCPS::DataWriterRemote_var dw_remote
       = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i].in ());
 
-    ::Mine::FooDataWriterImpl* datawriter_servant
-      = ::TAO::DCPS::reference_to_servant< ::Mine::FooDataWriterImpl, ::DDS::DataWriter_ptr>
+    ::Xyz::FooDataWriterImpl* datawriter_servant
+      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
@@ -576,9 +575,8 @@ void PubDriver::attach_to_transport ()
     }
 
   // Attach the Publisher with the TransportImpl.
-  ::TAO::DCPS::PublisherImpl* pub_servant
-    = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in ());
+  TAO::DCPS::PublisherImpl* pub_servant
+    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (publisher_.in ());
 
   TEST_CHECK (pub_servant != 0);
 

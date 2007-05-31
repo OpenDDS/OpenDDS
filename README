@@ -11,7 +11,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix. It is released under the same generous license
 terms as ACE, TAO and MPC.
 
-This directory structure contains TAO DDS 0.12.
+This directory structure contains TAO DDS 0.13.
 
 Note that this release is considered beta quality software and
 therefore some small interface changes may occur before version 1.0 is
@@ -405,13 +405,3 @@ all of the base types in the complex type are specified.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
-
-The following tests currently fail on a significant percentage of builds:
-tests/DCPS/Reconnect/run_test.pl restart_pub
-tests/DCPS/Reconnect/run_test.pl bp_timeout
-tests/DCPS/sub_init_loop/run_test.pl
-
-All three of these were disabled for the prior (0.11) release.  These tests are
-for unusual (but not unexpected) situations where applications crash and then
-subsequently restart.
-

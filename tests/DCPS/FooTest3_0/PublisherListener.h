@@ -12,7 +12,8 @@
 
 
 //Class PublisherListenerImpl
-class PublisherListenerImpl : public virtual POA_DDS::PublisherListener
+class PublisherListenerImpl
+  : public virtual TAO::DCPS::LocalObject<DDS::PublisherListener>
 {
 public:
   //Constructor

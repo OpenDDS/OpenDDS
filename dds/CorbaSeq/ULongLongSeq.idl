@@ -1,0 +1,19 @@
+// -*- IDL -*-
+//
+// $Id$
+
+/**
+ *   This file is used to generate the code in ULongLongSeqC.*
+ */
+
+#ifndef TAO_CORBA_ULONGLONG_SEQ_IDL
+#define TAO_CORBA_ULONGLONG_SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<unsigned long long> ULongLongSeq;
+};
+
+#endif  /* TAO_CORBA_ULONGLONG_SEQ_IDL */

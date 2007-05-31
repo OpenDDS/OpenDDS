@@ -14,25 +14,25 @@
 
 extern long subscriber_delay_msec; // from common.h
 
-// defined this to build with code only supporting the zero-copy type
-// but strongly supporting it.
-// Comment out this line to build with code that supports the default use of zero-copy
-// but also supports the original sequence type.
-#define WITH_ZERO_COPY_ONLY
-
 template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
 int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 {
-  // TWF: There is an optimization to the test by
-  // using a pointer to the known servant and
-  // static_casting it to the servant
+  // Since our listener is on the DataReader we always know
+  // that the "reader" parameter will be the one associated
+  // with this listener so we could keep the R_var value
+  // instead of narrowing it for each call but the 
+  // performance gain would be very minimal.
   R_var var_dr
     = R::_narrow(reader);
 
-  R_ptr pt_dr = var_dr.ptr();
-  Rimpl* dr_servant =
-      ::TAO::DCPS::reference_to_servant< Rimpl, R_ptr>
-              (pt_dr);
+  // Note: in v 0.12 and before the zero-copy read enabled interface
+  //       was only available via the servant but with the change
+  //       to local interfaces the local object reference can be used.
+  // Note: in v 0.12 and before interfaces were remote (although collocated) 
+  //       and using the servant directly rather than the DataReader reference
+  //       had performance benefits but with the change to local
+  //       interfaces this is no longer needed.
+  //Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
 
   if (subscriber_delay_msec)
     {
@@ -42,19 +42,14 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
     }
 
   const ::CORBA::Long max_read_samples = 100;
-#ifdef WITH_ZERO_COPY_ONLY
   Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
   Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
-#else
-  Tseq samples(0); //max_read_samples);
-  Iseq infos(0); //max_read_samples);
-#endif
 
   int samples_recvd = 0;
   DDS::ReturnCode_t status;
   // initialize to zero.
 
-  status = dr_servant->read (
+  status = var_dr->read (
     samples,
     infos,
     max_read_samples,
@@ -75,7 +70,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
         ACE_OS::printf (" read  data: Error: %d\n", status) ;
     }
 
-  status = dr_servant->return_loan(samples, infos);
+  status = var_dr->return_loan(samples, infos);
   if (status != ::DDS::RETCODE_OK)
   {
       // TBD - why is printf used for errors?
@@ -263,130 +258,63 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
 {
   int num_read = 0;
 
-#ifndef WITH_ZERO_COPY_ONLY
-  if (use_zero_copy_reads_) {
-#endif
-    switch ( num_floats_per_sample_ )
-    {
+  switch ( num_floats_per_sample_ )
+  {
 
-    case 128:
-        {
-        num_read = read < ::Mine::Pt128ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt128DataReader,
-                        ::Mine::Pt128DataReader_ptr,
-                        ::Mine::Pt128DataReader_var,
-                        ::Mine::Pt128DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
+  case 128:
+      {
+      num_read = read < ::Xyz::Pt128Seq,
+                        ::DDS::SampleInfoSeq,
+                      ::Xyz::Pt128DataReader,
+                      ::Xyz::Pt128DataReader_ptr,
+                      ::Xyz::Pt128DataReader_var,
+                      ::Xyz::Pt128DataReaderImpl>
+                          (reader, use_zero_copy_reads_);
+      }
+      break;
 
-    case 512:
-        {
-        num_read = read < ::Mine::Pt512ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt512DataReader,
-                        ::Mine::Pt512DataReader_ptr,
-                        ::Mine::Pt512DataReader_var,
-                        ::Mine::Pt512DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
+  case 512:
+      {
+      num_read = read < ::Xyz::Pt512Seq,
+                        ::DDS::SampleInfoSeq,
+                      ::Xyz::Pt512DataReader,
+                      ::Xyz::Pt512DataReader_ptr,
+                      ::Xyz::Pt512DataReader_var,
+                      ::Xyz::Pt512DataReaderImpl>
+                          (reader, use_zero_copy_reads_);
+      }
+      break;
 
-    case 2048:
-        {
-        num_read = read < ::Mine::Pt2048ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt2048DataReader,
-                        ::Mine::Pt2048DataReader_ptr,
-                        ::Mine::Pt2048DataReader_var,
-                        ::Mine::Pt2048DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
+  case 2048:
+      {
+      num_read = read < ::Xyz::Pt2048Seq,
+                        ::DDS::SampleInfoSeq,
+                      ::Xyz::Pt2048DataReader,
+                      ::Xyz::Pt2048DataReader_ptr,
+                      ::Xyz::Pt2048DataReader_var,
+                      ::Xyz::Pt2048DataReaderImpl>
+                          (reader, use_zero_copy_reads_);
+      }
+      break;
 
-    case 8192:
-        {
-        num_read = read < ::Mine::Pt8192ZCSeq,
-                          ::TAO::DCPS::SampleInfoZCSeq,
-                        ::Mine::Pt8192DataReader,
-                        ::Mine::Pt8192DataReader_ptr,
-                        ::Mine::Pt8192DataReader_var,
-                        ::Mine::Pt8192DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
+  case 8192:
+      {
+      num_read = read < ::Xyz::Pt8192Seq,
+                        ::DDS::SampleInfoSeq,
+                      ::Xyz::Pt8192DataReader,
+                      ::Xyz::Pt8192DataReader_ptr,
+                      ::Xyz::Pt8192DataReader_var,
+                      ::Xyz::Pt8192DataReaderImpl>
+                          (reader, use_zero_copy_reads_);
+      }
+      break;
 
-    default:
-        ACE_ERROR((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
-        return 0;
-        break;
-    };
-
-#ifndef WITH_ZERO_COPY_ONLY
-  }
-  else {
-
-
-    switch ( num_floats_per_sample_ )
-    {
-
-    case 128:
-        {
-        num_read = read < ::Mine::Pt128Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt128DataReader,
-                        ::Mine::Pt128DataReader_ptr,
-                        ::Mine::Pt128DataReader_var,
-                        ::Mine::Pt128DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 512:
-        {
-        num_read = read < ::Mine::Pt512Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt512DataReader,
-                        ::Mine::Pt512DataReader_ptr,
-                        ::Mine::Pt512DataReader_var,
-                        ::Mine::Pt512DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 2048:
-        {
-        num_read = read < ::Mine::Pt2048Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt2048DataReader,
-                        ::Mine::Pt2048DataReader_ptr,
-                        ::Mine::Pt2048DataReader_var,
-                        ::Mine::Pt2048DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    case 8192:
-        {
-        num_read = read < ::Mine::Pt8192Seq,
-                          ::DDS::SampleInfoSeq,
-                        ::Mine::Pt8192DataReader,
-                        ::Mine::Pt8192DataReader_ptr,
-                        ::Mine::Pt8192DataReader_var,
-                        ::Mine::Pt8192DataReaderImpl>
-                            (reader, use_zero_copy_reads_);
-        }
-        break;
-
-    default:
-        ACE_ERROR((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
-        return 0;
-        break;
+  default:
+      ACE_ERROR((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
+      return 0;
+      break;
   };
 
-  }
-#endif
 
   stats_.samples_received(num_read);
 

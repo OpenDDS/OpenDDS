@@ -32,16 +32,10 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/DataBlockLockPool.h"
-#include "dds/DCPS/ZeroCopySeq_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-<%NAMESPACESTART%>
-  // for support of zero-copy read
-  typedef ::TAO::DCPS::ZeroCopyDataSeq<<%SCOPE%><%TYPE%>, DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> <%TYPE%>ZCSeq;
-<%NAMESPACEEND%>
 
 <%NAMESPACESTART%>
 /** Servant for TypeSuport interface of <%TYPE%> data type.
@@ -51,10 +45,10 @@ sub contents { return <<'!EOT'
  *
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
-  : public virtual <%POA%><%TYPE%>TypeSupport,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>TypeSupport>
 {
 public:
+
   //Constructor
   <%TYPE%>TypeSupportImpl (void);
 
@@ -78,14 +72,14 @@ public:
     ));
 
   virtual
-  ::TAO::DCPS::DataWriterRemote_ptr create_datawriter (
+  ::DDS::DataWriter_ptr create_datawriter (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual
-  ::TAO::DCPS::DataReaderRemote_ptr create_datareader (
+  ::DDS::DataReader_ptr create_datareader (
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -104,11 +98,11 @@ public:
  * this interface.
  */
 class <%EXPORT%> <%TYPE%>DataWriterImpl
-  : public virtual <%POA%><%TYPE%>DataWriter,
-    public virtual TAO::DCPS::DataWriterImpl,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataWriter>,
+    public virtual TAO::DCPS::DataWriterImpl
 {
 public:
+
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
@@ -222,7 +216,8 @@ public:
         TAO::DCPS::DomainParticipantImpl*      participant_servant,
         ::DDS::Publisher_ptr                   publisher,
         TAO::DCPS::PublisherImpl*              publisher_servant,
-        TAO::DCPS::DataWriterRemote_ptr        dw_remote
+        ::DDS::DataWriter_ptr                  dw_objref,
+        ::TAO::DCPS::DataWriterRemote_ptr      dw_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -303,11 +298,11 @@ private:
  *
  */
 class <%EXPORT%> <%TYPE%>DataReaderImpl
-  : public virtual <%POA%><%TYPE%>DataReader,
-    public virtual TAO::DCPS::DataReaderImpl,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataReader>,
+    public virtual TAO::DCPS::DataReaderImpl
 {
 public:
+
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
   typedef ::TAO::DCPS::Cached_Allocator_With_Overflow<<%SCOPE%><%TYPE%>, ACE_Null_Mutex>  DataAllocator;
@@ -337,6 +332,7 @@ public:
         TAO::DCPS::DomainParticipantImpl*        participant,
         TAO::DCPS::SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr                    subscriber_objref,
+        ::DDS::DataReader_ptr					 dr_objerf,
         TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
       )
         ACE_THROW_SPEC ((
@@ -366,37 +362,10 @@ public:
       CORBA::SystemException
     ));
 
-  // zero-copy overloaded version
-  virtual
-  DDS::ReturnCode_t read (
-      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
-      ::CORBA::Long max_samples,
-      ::DDS::SampleStateMask sample_states,
-      ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
   virtual
   DDS::ReturnCode_t take (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
-      ::CORBA::Long max_samples,
-      ::DDS::SampleStateMask sample_states,
-      ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
-  virtual
-  DDS::ReturnCode_t take (
-      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
@@ -490,15 +459,6 @@ public:
     ));
 
   virtual
-  DDS::ReturnCode_t return_loan (
-      ::<%MODULE%><%TYPE%>ZCSeq & received_data,
-      ::TAO::DCPS::SampleInfoZCSeq & info_seq
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
-
-  virtual
   DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
       ::DDS::InstanceHandle_t handle
@@ -510,7 +470,7 @@ public:
   virtual 
   DDS::ReturnCode_t auto_return_loan(void* seq);
 
-  void release_loan (::<%MODULE%><%TYPE%>ZCSeq & received_data);
+  void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
 
  protected:
 

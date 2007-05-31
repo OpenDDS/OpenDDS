@@ -145,15 +145,15 @@ Writer::svc ()
   if (no_key)
   {
     write<Xyz::FooNoKey,
-          ::Mine::FooNoKeyDataWriter,
-          ::Mine::FooNoKeyDataWriter_var>
+          ::Xyz::FooNoKeyDataWriter,
+          ::Xyz::FooNoKeyDataWriter_var>
           (writer_id_, timeout_writes_, writer_.in ());
   }
   else
   {
     write<Xyz::Foo,
-          ::Mine::FooDataWriter,
-          ::Mine::FooDataWriter_var>
+          ::Xyz::FooDataWriter,
+          ::Xyz::FooDataWriter_var>
           (writer_id_, timeout_writes_, writer_.in ());
   }
 

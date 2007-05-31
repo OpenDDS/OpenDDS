@@ -5,7 +5,7 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   sharedname   = TAO_DdsDcps
   dynamicflags = TAO_DDSDCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT)
+  includes    += $(DDS_ROOT) 
 
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
@@ -37,16 +37,43 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   }
 
   IDL_Files {
+    // DDS specification defined
+    //
+    // Do not put DdsDcpsInfrastructure.idl here or it will 
+    //           override was is in dcps_bits.mpb 
+    // ^^^ DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsTopic.idl
     DdsDcps.idl
+    // TAO specific below
     DdsDcpsInfo.idl
     DdsDcpsDataReaderRemote.idl
     DdsDcpsDataWriterRemote.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportTao.idl
+  }
+
+
+  IDL_Files {
+    idlflags += -Gdcpsonly
+    gendir = .
+    CorbaSeq/BooleanSeq.idl
+    CorbaSeq/CharSeq.idl
+    CorbaSeq/DoubleSeq.idl
+    CorbaSeq/FloatSeq.idl
+    CorbaSeq/LongDoubleSeq.idl
+    CorbaSeq/LongLongSeq.idl
+    CorbaSeq/LongSeq.idl
+    CorbaSeq/OctetSeq.idl
+    CorbaSeq/ShortSeq.idl
+    CorbaSeq/StringSeq.idl
+    CorbaSeq/ULongLongSeq.idl
+    CorbaSeq/ULongSeq.idl
+    CorbaSeq/UShortSeq.idl
+    CorbaSeq/WCharSeq.idl
+    CorbaSeq/WStringSeq.idl
   }
 
 }
