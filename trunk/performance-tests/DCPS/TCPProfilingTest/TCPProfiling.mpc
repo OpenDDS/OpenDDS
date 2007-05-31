@@ -1,4 +1,4 @@
-project(DCPS_Perf*Pub): dcpsexe, portableserver {
+project(DCPS_Perf*Pub): dcpsexe {
   exename   = publisher
 
   TypeSupport_Files {
@@ -22,7 +22,7 @@ project(DCPS_Perf*Pub): dcpsexe, portableserver {
 }
 
 
-project(DCPS_Perf*Sub): dcpsexe, portableserver {
+project(DCPS_Perf*Sub): dcpsexe {
   exename   = subscriber
   after    += DCPS_Perf_TCPProfiling_Pub
 

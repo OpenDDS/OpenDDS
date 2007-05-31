@@ -1,4 +1,4 @@
-project(*publisher): dcpsexe, portableserver {
+project(*publisher): dcpsexe {
   exename  = publisher
 
   Source_Files {
@@ -8,7 +8,7 @@ project(*publisher): dcpsexe, portableserver {
   }
 }
 
-project(*subscriber): dcpsexe, portableserver {
+project(*subscriber): dcpsexe {
   exename = subscriber
 
   Source_Files {

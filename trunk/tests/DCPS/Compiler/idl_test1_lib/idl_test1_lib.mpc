@@ -1,4 +1,4 @@
-project(*) : dcps, portableserver {
+project : dcps {
   sharedname = idl_test1_lib
   libout       = .
 

@@ -1,4 +1,4 @@
-project : orbsvcslib, core, portableserver, dcps_bits {
+project: taolib, portableserver, core, dcps_bits {
 
   requires    += exceptions
 
@@ -59,21 +59,7 @@ project : orbsvcslib, core, portableserver, dcps_bits {
   IDL_Files {
     idlflags += -Gdcpsonly
     gendir = .
-    CorbaSeq/BooleanSeq.idl
-    CorbaSeq/CharSeq.idl
-    CorbaSeq/DoubleSeq.idl
-    CorbaSeq/FloatSeq.idl
-    CorbaSeq/LongDoubleSeq.idl
-    CorbaSeq/LongLongSeq.idl
-    CorbaSeq/LongSeq.idl
-    CorbaSeq/OctetSeq.idl
-    CorbaSeq/ShortSeq.idl
-    CorbaSeq/StringSeq.idl
-    CorbaSeq/ULongLongSeq.idl
-    CorbaSeq/ULongSeq.idl
-    CorbaSeq/UShortSeq.idl
-    CorbaSeq/WCharSeq.idl
-    CorbaSeq/WStringSeq.idl
+    CorbaSeq/*.idl
   }
 
 }
