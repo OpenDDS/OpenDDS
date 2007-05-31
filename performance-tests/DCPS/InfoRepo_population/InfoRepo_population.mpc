@@ -26,7 +26,7 @@ project(*SyncServer) : taoexe, portableserver, iortable {
   }
 }
 
-project(*Publisher) : taoexe, portableserver, dcps {
+project(*Publisher) : dcpsexe {
 
   exename   = publisher
   libs     += SyncClient
@@ -51,7 +51,7 @@ project(*Publisher) : taoexe, portableserver, dcps {
   }
 }
 
-project(*Subscriber) : taoexe, portableserver, dcps {
+project(*Subscriber) : dcpsexe {
 
   exename   = subscriber
   libs     += SyncClient

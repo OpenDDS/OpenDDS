@@ -23,7 +23,7 @@ project(*idl): dcps {
   custom_only = 1
 }
 
-project(DDS*Pub): taoexe, portableserver, dcps {
+project(DDS*Pub): dcpsexe {
   after += *idl
   
   exename = tao_pub
@@ -43,7 +43,7 @@ project(DDS*Pub): taoexe, portableserver, dcps {
 }
 
 
-project(DDS*Sub): taoexe, portableserver, dcps {
+project(DDS*Sub): dcpsexe {
   after += *idl
   
   exename = tao_sub

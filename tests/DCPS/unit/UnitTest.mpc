@@ -1,4 +1,4 @@
-project(DdsDcps_UnitTest): dcpsexe, portableserver {
+project(DdsDcps_UnitTest): dcpsexe {
   exename = DdsDcps_UnitTest
 
   IDL_Files {

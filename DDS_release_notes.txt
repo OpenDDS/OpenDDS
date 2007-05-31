@@ -2,125 +2,109 @@ Version 0.13 of TAO DDS.
 
 New to this version are the following changes:
 
-- Supported built in sequences.
+- Simplified .mpc and .mpb files
+
+  Projects that use DDS no longer need to explicitly list "portableserver" as a
+  base project.  It will be included by the "dcps*" base projects such as
+  "dcpsexe" and "dcpsexe_with_tcp".
+
+
+- Supported built-in sequences (the CORBA::*Seq sequences).
 
   Implementation details:
-  
-    DDS keeps copies of the $TAO_ROOT/tao/*Seq*.pidl in 
-    $DDS_ROOT/dds/CorbaSeq directory and renamed to *.idl files. 
-    These idl files are compiled with a new IDL option -Gdcpsonly to 
-    just generate the DDS specific code for built in sequences. The 
-    DDS CORBA::*Seq generated code will include the TAO CORBA::*Seq 
+
+    DDS keeps copies of the $TAO_ROOT/tao/*Seq.pidl in
+    $DDS_ROOT/dds/CorbaSeq directory and renamed to *.idl files.
+    These idl files are compiled with a new IDL option -Gdcpsonly to
+    just generate the DDS specific code for built in sequences. The
+    DDS CORBA::*Seq generated code will include the TAO CORBA::*Seq
     generated code so both TAO and DDS functions will be available.
 
-    When a DDS application contains an idl file that includes 
+    When a DDS application contains an idl file that includes
     $TAO_ROOT/tao/*Seq*.pidl, the generated code will include the DDS
-    specific built in sequences code(under $DDS_ROOT/dds/ directory) 
-    instead of TAO specific built in sequences code(under 
-    $TAO_ROOT/tao/ directory).   
-  
+    specific built in sequences code(under $DDS_ROOT/dds/ directory)
+    instead of TAO specific built in sequences code(under
+    $TAO_ROOT/tao/ directory).
+
   Notes:
-  
+
     - The idl files in $DDS_ROOT/dds/CorbaSeq directory are internally
       used by DDS and CAN NOT be included in your idl files.
-    
+
     - Currently the CORBA::AnySeq is not supported since DDS does not 
       support serialization of Any type data.
-     
+
 
 - The DDS entities (e.g. DomainParticipant, FooDataReader) have changed from
-  *remote* IDL types to *local* IDL types and the data sequence and info sequence
-   types have changed from normal IDL sequences to types with
-   extra functionality required to support zero-copy reads.
+  *remote* IDL types to *local* IDL types and the data sequence and info
+  sequence types have changed from normal IDL sequences to types with extra
+  functionality required to support zero-copy reads.
 
    *** This change requires changes to DDS user code. ***
    
    --- impacts on user code ---
-	1) The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
-	The <Foo>Seq and DDS::SampleInfoSeq have been changed
-	to support both single-copy reads (as before) and zero-copy reads
-	(like <Foo>ZCSeq should have).
-	
-	Change ::TAO::DCPS::SampleInfoZCSeq to ::DDS::SampleInfoSeq.
-	Change <Foo>ZCSeq to [Modlue::]<Foo>Seq.
+   1) The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
+        The <Foo>Seq and DDS::SampleInfoSeq have been changed
+        to support both single-copy reads (as before) and zero-copy reads
+        (like <Foo>ZCSeq should have).
+        
+        Change ::TAO::DCPS::SampleInfoZCSeq to ::DDS::SampleInfoSeq.
+        Change <Foo>ZCSeq to [Modlue::]<Foo>Seq.
 
-	The default constructor for <Foo>Seq enables zero-copy reads.
-	Constructing a <Foo>Seq(num) with num > 0 enables single-copy reads.
+        The default constructor for <Foo>Seq enables zero-copy reads.
+        Constructing a <Foo>Seq(num) with num > 0 enables single-copy reads.
 
-	2) Listeners will now inherit from DDS::<enity>Listner
-	instead of POA_DDS::<entity> or POA_TAO::DCPS::DataReader/WriterListener
-	and should inherit as a local object (not a servant).  DDS provides a helper
-	template that adds reference counting.  Use of this template (as shown
-	below) is highly recommended.
+   2) Listeners will now inherit from DDS::<enity>Listner instead of
+        POA_DDS::<entity> or POA_TAO::DCPS::DataReader/WriterListener and
+        should inherit as a local object (not a servant).  DDS provides a
+        helper template that adds reference counting.  Use of this template
+        (as shown below) is highly recommended.
 
-	for example:
+        for example:
 
-		class DataReaderListenerImpl
-		: public virtual POA_DDS::DataReaderListener,
-			public virtual PortableServer::RefCountServantBase
-		{...};
+                class DataReaderListenerImpl
+                : public virtual POA_DDS::DataReaderListener,
+                        public virtual PortableServer::RefCountServantBase
+                {...};
 
-	will become:
+        will become:
 
-		class DataReaderListenerImpl
-		: public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
-		{...};
+                class DataReaderListenerImpl
+                : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
+                {...};
 
-	but the header and implementation should require no other changes.
+        but the header and implementation should require no other changes.
 
-	NOTE: if you are implementing the TAO specific reconnection callbacks,
-			on*disconnected, on_*_reconnected, on_*_lost, on_connection_deleted
-			then you should change inheritance from
-			    POA_TAO::DCPS::DataReaderListener
-			to
-				TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
-			and remove inheritance to
-				PortableServer::RefCountServantBase
+        NOTE: if you are implementing the TAO specific reconnection callbacks,
+        on*disconnected, on_*_reconnected, on_*_lost, on_connection_deleted
+        then you should change inheritance from
+                POA_TAO::DCPS::DataReaderListener
+                       to
+                TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
+        and remove inheritance from PortableServer::RefCountServantBase
     
-    3) Stub/implemenation reference counting cleanup object like:
-       should change from:
-       
-          FooTypeSupportImpl* fts_servant
-            = new FooTypeSupportImpl;
-          PortableServer::ServantBase_var safe_servant = fts_servant;
-       
-       to:
-       
-          FooTypeSupportImpl* fts_servant
-            = new FooTypeSupportImpl;
-          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
-       
-       But even better would be:
-       
-          FooTypeSupport_var fts_servant = new FooTypeSupportImpl;
-          
-       because it avoids the safe_servant line and 
-       the need for code like:
-       
-           SimpleTypeSupport_var fts =
-                TAO::DCPS::servant_to_reference (sts_servant);
-                
-       to get the reference.
+   3) Implemenation reference counting cleanup code is no longer used
        
        For example:
-		SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
-		PortableServer::ServantBase_var safe_servant = sts_servant;
+                SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
+                PortableServer::ServantBase_var safe_servant = sts_servant;
 
-		SimpleTypeSupport_var fts =
-			TAO::DCPS::servant_to_reference (sts_servant);
+                SimpleTypeSupport_var fts =
+                        TAO::DCPS::servant_to_reference (sts_servant);
 
-		if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
+                if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
        becomes:
 
-		SimpleTypeSupport_var fts = new SimpleTypeSupportImpl;
+                SimpleTypeSupport_var fts = new SimpleTypeSupportImpl;
 
-		if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
-		
-	   
-	   
-    4) Since the DCPS interfaces are not local, there is very little 
-       performance gain to convert from _var to a servant pointer.
+                if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
+                
+           
+           
+    4) Since the DCPS interfaces are now local, there is very little 
+       performance gain to convert from _var to a servant pointer (using
+       reference_to_servant).
        
        For example:
            ::DDS::DataWriter_var dw = 
@@ -128,57 +112,53 @@ New to this version are the following changes:
                                         dw_qos,
                                         ::DDS::DataWriterListener::_nil());
 
-			Test::SimpleDataWriter_var foo_dw
-				= Test::SimpleDataWriter::_narrow(dw.in ());
+                        Test::SimpleDataWriter_var foo_dw
+                                = Test::SimpleDataWriter::_narrow(dw.in ());
 
-			// This is unnesesary but will still work.
-			// Previously fast_dw was used to increase the 
-			// performance of writing samples.
-			Test::SimpleDataWriterImpl* fast_dw =
-			    TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
-			    (foo_dw.in ());
-		
-		Also, a pointer to the servant is no longer needed for making
-		calls on zero-copy read supporting overloaded methods.
+                        // This is unnesesary but will still work.
+                        // Previously fast_dw was used to increase the 
+                        // performance of writing samples.
+                        Test::SimpleDataWriterImpl* fast_dw =
+                            TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
+                            (foo_dw.in ());
+                
+                Also, a pointer to the servant is no longer needed for making
+                calls on zero-copy read supporting overloaded methods.
 
-	5) The need to user reference_to_servant() to increase performance
-	of an application has been reduced by making the entity interfaces local.
-	An application may still do so.
+   5) If the user defined DDS type is in a module then the generated types will
+      also be in that same module.
 
-	6) If the user defined DDS type is in a module then the generated types will
-	also be in that same module.
+                        Given a "Foo" DDS type defined in the module "Test":
+                                  old           new
+                                  --------      ------------
+                        type      Test::Foo     Test::Foo
+                        sequence  FooSeq        Test::FooSeq
+                        reader    FooDataReader Test::FooDataReader
+                        writer    FooDataWriter Test::FooDataWriter
 
-			Given a "Foo" DDS type defined in the module "Test":
-					old           new
-					--------      ------------
-			type      Test::Foo     Test::Foo
-			sequence  FooSeq        Test::FooSeq
-			reader    FooDataReader Test::FooDataReader
-			writer    FooDataWriter Test::FooDataWriter
+   6) The --module option to dcps_ts.pl is no longer supported. 
+           The module is set as described in point #5 above.
 
-	7) The --module option to dcps_ts.pl is no longer supported. 
-	   The module is set as described in point #6 above.
+   7) What did not change.
+        You may use the following:
+        <entity>_var, <entity>_ptr 
+        <entity>::_narrrow()    // might use this for a listener
+        <entity>::_duplicate()
+        TAO::DCPS::servant_to_reference()
+        TAO::DCPS::reference_to_servant()
+        TAO::DCPS::deactivate() // now a no-op
 
-	8) What did not change.
-	You may use the following:
-	<entity>_var, <entity>_ptr 
-	<entity>::_narrrow()    // might use this for a listener
-	<entity>::_duplicate()
-	TAO::DCPS::servant_to_reference()
-	TAO::DCPS::reference_to_servant()
-	TAO::DCPS::deactivate() // now a no-op
+        Note: if you used
+                                        TAO::DCPS::servant_to_reference(),
+                                        TAO::DCPS::reference_to_servant(), or
+                                        TAO::DCPS::deactivate_object
+                for non-DDS interfaces then you may change to:
+                                        remote_reference_to_servant
+                                        servant_to_remote_reference
+                                        deactivate_remote_object
 
-	Note: if you used
-					TAO::DCPS::servant_to_reference(),
-					TAO::DCPS::reference_to_servant(), or
-					TAO::DCPS::deactivate_object
-		for non-DDS interfaces then you may change to:
-					remote_reference_to_servant
-					servant_to_remote_reference
-					deactivate_remote_object
+        --- end of local interface impact to users ---
 
-	--- end of local interface impact to users ---
-	  
 =========================================================================
 Version 0.12 of TAO DDS.
 
@@ -209,7 +189,7 @@ New to this version are the following changes:
 - The reliable multicast transport was added.  See the DDS developers guide
   for details.
   NOTE: The reliable multicast (unlike the unreliable multicast) transport
-  	currently doesn't provide a default configuration.  The use of the
+        currently doesn't provide a default configuration.  The use of the
         transport IDs TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID and
         TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID is unsupported.
 

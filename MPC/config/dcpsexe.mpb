@@ -1,5 +1,5 @@
 // -*- MPC -*-
 // $Id$
 
-project : orbsvcsexe, dcps {
+project : taoexe, dcps {
 }
