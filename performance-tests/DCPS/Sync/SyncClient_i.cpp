@@ -27,7 +27,7 @@ SyncClient_i::SyncClient_i (const std::string& sync_server
       }
 
       CORBA::Object_var poaObj = orb_->resolve_initial_references ("RootPOA");
-      PortableServer::POA_var root_poa_ = PortableServer::POA::_narrow (poaObj.in ());
+      root_poa_ = PortableServer::POA::_narrow (poaObj.in ());
 
       poa_manager_ = root_poa_->the_POAManager ();
       poa_manager_->activate ();

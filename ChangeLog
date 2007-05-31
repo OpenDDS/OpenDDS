@@ -1,3 +1,14 @@
+Thu May 31 14:49:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+
+          Older versions of TAO need an explicit base project with IDL support
+          so that the IDL_Files {...} section is recognized.
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Use the root_poa_ member variable instead of local.
+
 Wed May 30 23:50:53 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
