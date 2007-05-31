@@ -49,6 +49,7 @@ DummyTransport::Link::Link(Log& log)
   : callback_(0)
   , log_(log)
   , shouldFailTimes_(0)
+  , defer_(false)
 {
 }
 
@@ -63,6 +64,10 @@ TransportAPI::Status
 DummyTransport::Link::establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId)
 {
   log_.push_back(logEntry("establish", requestId));
+  if (defer_)
+  {
+    return TransportAPI::make_deferred();
+  }
   return TransportAPI::make_success();
 }
 
@@ -70,6 +75,10 @@ TransportAPI::Status
 DummyTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
   log_.push_back(logEntry("shutdown", requestId));
+  if (defer_)
+  {
+    return TransportAPI::make_deferred();
+  }
   return TransportAPI::make_success();
 }
 
@@ -82,5 +91,9 @@ DummyTransport::Link::send(const iovec buffers[], size_t iovecSize, const Transp
     return TransportAPI::make_failure();
   }
   log_.push_back(logEntry("send", requestId));
+  if (defer_)
+  {
+    return TransportAPI::make_deferred();
+  }
   return TransportAPI::make_success();
 }

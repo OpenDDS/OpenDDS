@@ -27,6 +27,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , requestId_(requestIdIn)
   , sequenceNumber_(sequenceNumber)
   , ending_(ending)
+  , deferred_(false)
 {
 }
 
@@ -38,6 +39,7 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   , requestId_(rhs.requestId_)
   , sequenceNumber_(rhs.sequenceNumber_)
   , ending_(rhs.ending_)
+  , deferred_(rhs.deferred_)
 {
   if (rhs.mb_.get() != 0)
   {
@@ -70,6 +72,7 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
     requestId_ = rhs.requestId_;
     sequenceNumber_ = rhs.sequenceNumber_;
     ending_ = rhs.ending_;
+    deferred_ = rhs.deferred_;
   }
   return *this;
 }
@@ -90,9 +93,7 @@ TAO::DCPS::LinkImpl::LinkImpl(
   , connected_(false)
   , backpressure_(false)
   , connectionDeferred_(false)
-  , deferred_(false)
   , deferredConnectionStatus_(TransportAPI::make_failure())
-  , deferredStatus_(TransportAPI::make_failure())
   , lastReceived_(std::make_pair(0, 0))
 {
   link_.setCallback(this);
