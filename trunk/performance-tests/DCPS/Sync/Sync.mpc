@@ -8,7 +8,7 @@ project(*idl) : taoidldefaults {
   custom_only = 1
 }
 
-project(*ServerLib) : taolib, portableserver, iortable {
+project(*ServerLib) : taolib_with_idl, portableserver, iortable {
   sharedname   = SyncServer
   after       += *idl
   avoids      += minimum_corba
@@ -24,7 +24,7 @@ project(*ServerLib) : taolib, portableserver, iortable {
   }
 }
 
-project(*ClientLib) : taolib, portableserver {
+project(*ClientLib) : taolib_with_idl, portableserver {
   sharedname   = SyncClient
   after       += *idl
   dynamicflags = SYNC_BUILD_DLL
@@ -39,7 +39,7 @@ project(*ClientLib) : taolib, portableserver {
   }
 }
 
-project(*Server) : taoexe, portableserver, iortable {
+project(*Server) : taoexe, taoidldefaults, portableserver, iortable {
   exename = syncServer
   libs   += SyncServer
   after  += *ServerLib
