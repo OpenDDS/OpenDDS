@@ -1,3 +1,14 @@
+Thu May 31 16:21:04 UTC 2007  Scott Harris  <harris_s@ociweb.com>
+
+        * docs/design/configuration_design.txt:
+        * docs/design/fully_established_connection.txt:
+        * docs/design/IDL_compiler.txt:
+        * docs/design/README:
+        * docs/design/transport_hooks.txt:
+        * docs/design/transport_reconnect.txt:
+        
+          Added these existing design notes.
+
 Thu May 31 15:53:55 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
