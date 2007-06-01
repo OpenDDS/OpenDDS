@@ -19,6 +19,7 @@ project(*Publisher): dcpsexe {
     Writer.cpp
     TestS.cpp
     TestC.cpp
+    test_helper.cpp
   }
 }
 
