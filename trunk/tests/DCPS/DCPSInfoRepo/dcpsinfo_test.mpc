@@ -4,7 +4,6 @@ project(*publisher): dcpsexe {
   Source_Files {
     publisher.cpp
     DCPSDataWriterI.cpp
-    test_helper.cpp
   }
 }
 
@@ -14,6 +13,5 @@ project(*subscriber): dcpsexe {
   Source_Files {
     subscriber.cpp
     DCPSDataReaderI.cpp
-    test_helper.cpp
   }
 }

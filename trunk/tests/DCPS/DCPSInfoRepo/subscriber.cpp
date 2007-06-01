@@ -1,5 +1,3 @@
-#include "test_helper.h" //must be the 1st include
-
 #include  "dds/DdsDcpsInfoC.h"
 #include  "DCPSDataReaderI.h"
 #include  "dds/DCPS/Service_Participant.h"
@@ -108,8 +106,9 @@ main (int argc, char *argv[])
 
       // Add subscription
       TAO_DDS_DCPSDataReader_i dri;
-      TAO::DCPS::DataReaderRemote_var dr = DDS_TEST::getRemoteInterface(dri);
-
+      PortableServer::ObjectId_var oid = poa->activate_object( &dri );
+      obj = poa->id_to_reference( oid.in() );
+      TAO::DCPS::DataReaderRemote_var dr = TAO::DCPS::DataReaderRemote::_narrow(obj.in());
       if (CORBA::is_nil (dr.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,

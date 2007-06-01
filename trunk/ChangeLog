@@ -1,3 +1,20 @@
+Fri Jun  1 17:54:02 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Reverted back to the old version since the previous friendship
+          hack makes test fail on nil DataWriterRemote and DataReaderRemote
+          object reference.
+
+        * tests/DCPS/DCPSInfoRepo/test_helper.h:
+        * tests/DCPS/DCPSInfoRepo/test_helper.cpp:
+
+          Removed these files since they are not needed.
+
 Fri Jun  1 17:25:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
@@ -25,7 +42,7 @@ Thu May 31 22:45:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * MPC/config/dcps.mpb:
 
           Older versions of TAO need an explicit base project - taoidldefaults
-          for IDL support so that the idlflags {...} section is recognized.
+          for IDL support so that the idlflags addition is recognized.
 
 Thu May 31 21:13:27 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

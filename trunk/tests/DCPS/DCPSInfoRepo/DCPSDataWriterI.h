@@ -25,14 +25,15 @@
 #ifndef DCPSDATAWRITERI_H_
 #define DCPSDATAWRITERI_H_
 
-#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DdsDcpsDataWriterRemoteS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DDS_DCPSDataWriter_i
-class TAO_DDS_DCPSDataWriter_i : public virtual TAO::DCPS::DataWriterImpl
+class TAO_DDS_DCPSDataWriter_i 
+  : public virtual POA_TAO::DCPS::DataWriterRemote
 {
 public:
   //Constructor
