@@ -1491,63 +1491,110 @@ DDS::ReturnCode_t
   TAO::DCPS::SubscriptionInstance * ptr =
     this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
+  TAO::DCPS::ReceivedDataElement *tail = 0 ;
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
-           item != 0 ; item = item->next_data_sample_)
+    TAO::DCPS::ReceivedDataElement *next ;
+    TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+    while (item)
+    {
+      if (item->sample_state_ & sample_states)
       {
-        if (item->sample_state_ & sample_states)
-        {
-          // Increase sequence length before adding new element to sequence.
-          received_data.set_length (count + 1);
-          if (received_data.max_len() != 0)
+        // Increase sequence length before adding new element to sequence.
+        received_data.set_length (count + 1);
+        if (received_data.max_len() != 0)
           {
             received_data.assign_sample(count, 
                 *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
-          else 
+        else 
           {
             received_data.assign_ptr(count, item, this) ;
           }
-              
-          // Increase sequence length before adding new element to sequence.
-          info_seq.length (count + 1);
-          ptr->instance_state_.sample_info(info_seq[count], item) ;
+        // Increase sequence length before adding new element to sequence.
+        info_seq.length (count + 1);
+        ptr->instance_state_.sample_info(info_seq[count], item) ;
 
-          item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
+        item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          ptr->instance_state_.accessed() ;
-          count++ ;
-        }
-        if (count == max_samples)
+        // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
+        //       move into if (count) block.
+        ptr->instance_state_.accessed() ;
+
+        if (item == ptr->rcvd_sample_.tail_)
         {
-          break ;
+          tail = ptr->rcvd_sample_.tail_ ;
+          item = item->next_data_sample_ ;
         }
-      } // for sample
-    } // if view/instance state
+        else
+        {
+          next = item->next_data_sample_ ;
 
-    if (count)
-    {
-      //
-      // Get the sample_ranks, generation_ranks, and
-      // absolute_generation_ranks for this info_seq
-      //
-      sample_info(info_seq, count,
-                  count,
-                  ptr->rcvd_sample_.tail_) ;
-    }
+          ptr->rcvd_sample_.remove(item) ;
+
+          if (0 == item->dec_ref())
+            {
+              ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+              ACE_DES_FREE (delete_ptr,
+                            data_allocator_->free,
+                            <%TYPE%> );
+              ACE_DES_FREE (item,
+                            rd_allocator_->free,
+                            ReceivedDataElement);
+            }
+
+          item = next ;
+        }
+        count++ ;
+      }
+
+      if (count == max_samples)
+      {
+        break ;
+      }
+    } // for sample
+  } // if view/instance state
 
   if (count)
   {
-	if (received_data.max_len() == 0)
-	{
-		received_data.max_len(received_data.max_slots());
-	}
-	if (info_seq.max_len() == 0)
-	{
-		received_data.max_len(received_data.max_slots());
-	}
+	  if (received_data.max_len() == 0)
+	    {
+		    received_data.max_len(received_data.max_slots());
+	    }
+	  if (info_seq.max_len() == 0)
+	    {
+		    received_data.max_len(received_data.max_slots());
+	    }
+    //
+    // Get the sample_ranks, generation_ranks, and
+    // absolute_generation_ranks for this info_seq
+    //
+    if (tail)
+    {
+      sample_info(info_seq, 0,
+                  count,
+                  tail) ;
+
+      ptr->rcvd_sample_.remove(tail) ;
+
+      if (0 == tail->dec_ref())
+        {
+          ::<%SCOPE%><%TYPE%>* delete_ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(tail->registered_data_);
+          ACE_DES_FREE (delete_ptr,
+                        data_allocator_->free,
+                        <%TYPE%> );
+          ACE_DES_FREE (tail,
+                        rd_allocator_->free,
+                        ReceivedDataElement);
+        }
+    }
+    else
+    {
+      sample_info(info_seq, 0,
+                  count,
+                  ptr->rcvd_sample_.tail_) ;
+    }
 
     return ::DDS::RETCODE_OK;
   }
@@ -2037,7 +2084,7 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_OK; 
 }
 
-void 
+void
 <%TYPE%>DataReaderImpl::release_instance_i (::DDS::InstanceHandle_t handle)
 {
   InstanceMap::iterator it;
