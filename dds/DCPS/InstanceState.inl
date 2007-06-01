@@ -149,19 +149,6 @@ TAO::DCPS::InstanceState::empty( bool value)
   // here.
   //
   this->empty_ = value ;
-
-  if( this->empty_
-      && (     (this->instance_state_ & DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-           || ((this->instance_state_ & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
-                && this->no_writers_
-              )
-         )
-    )
-    {
-      // Terminate state in figure 2-11
-      this->instance_state_ = 0 ;
-      this->disposed_generation_count_   = 0 ;
-      this->no_writers_generation_count_ = 0 ;
-    }
 }
+
 

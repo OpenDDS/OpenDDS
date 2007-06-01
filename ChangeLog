@@ -1,3 +1,38 @@
+Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Added new virtual method release_instance to DCPS type
+          DataReaderImpl that removes the instance with the provided
+          handle from the instance - handle map.
+          
+        * bin/dcps_tests.lst:
+ 
+          Added Liveliness tests.
+          
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+
+          Corrected the DataReader liveliness implementation as stated
+          in spec.
+          Made the datareader check if an instance has no samples when
+          it receives the dispose message or liveliness detection finds
+          the writer is dead. If it is then the instance/handle will be 
+          removed from internal maps in DataReader.
+
+        * tests/DCPS/LivelinessTest/run_test.pl:
+
+          Fixed test to run with current DDS.
+          
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added implementation for pure virtual function 
+          release_instance_i() to avoid compilation error.
+
 Fri Jun  1 17:54:02 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
