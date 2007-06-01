@@ -25,15 +25,15 @@
 #ifndef DCPSDATAREADERI_H_
 #define DCPSDATAREADERI_H_
 
-#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DdsDcpsDataReaderRemoteS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DDS_DCPSDataReader_i
-class TAO_DDS_DCPSDataReader_i : public virtual TAO::DCPS::DataReaderImpl
-
+class TAO_DDS_DCPSDataReader_i   
+  : public virtual POA_TAO::DCPS::DataReaderRemote
 {
 public:
   //Constructor
@@ -72,12 +72,6 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
-
-  virtual ::DDS::ReturnCode_t auto_return_loan (void *)
-  {
-    return ::DDS::RETCODE_ERROR;
-  }
-
 };
 
 
