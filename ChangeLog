@@ -1,3 +1,12 @@
+Fri Jun  1 17:25:24 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+
+          Same change as below but for FooTest3_2.
+
 Fri Jun  1 16:16:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
