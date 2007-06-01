@@ -29,6 +29,7 @@ private:
   unsigned short remotePort_;
   unsigned long timeout_;
 
+public:
   class BLOB: public TransportAPI::BLOB
   {
   public:
@@ -73,10 +74,10 @@ private:
     /// Tell the thread to end itself and wait for it.
     void finish();
 
-  private:
+  protected:
     bool done_;
     TransportAPI::LinkCallback* callback_;
-    ACE_SOCK_Dgram local_;
+    ACE_SOCK_Dgram* local_;
     ACE_SOCK_Dgram::PEER_ADDR remote_;
     ACE_Time_Value* timeout_;
   };
