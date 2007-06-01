@@ -256,7 +256,7 @@ private:
    * @param for_write If 1 use the fast allocator; otherwise use the heap.
    * @return returns the serialized data.
    */
-  ACE_Message_Block* marshal(
+  ACE_Message_Block* dds_marshal(
     const ::<%SCOPE%><%TYPE%>& instance_data,
     int  for_write = 1);
 
@@ -474,7 +474,7 @@ public:
 
  protected:
 
-    virtual void demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;
+    virtual void dds_demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;
 
     virtual void dispose(const TAO::DCPS::ReceivedDataSample& sample) ;
 

@@ -314,7 +314,7 @@ DDS::ReturnCode_t
     handle = registered_handle;
   }
 
-  marshalled = marshal (instance_data); // FOR_WRITE - using cached allocators
+  marshalled = dds_marshal (instance_data); // FOR_WRITE - using cached allocators
   return this->TAO_DCPS_DataWriterImpl::write(marshalled, handle, source_timestamp);
 }
 
@@ -478,7 +478,7 @@ void
 // Note: The <%TYPE%>DataWriter gives ownership of the marshalled data
 //       to the WriteDataContainer.
 ACE_Message_Block*
- <%TYPE%>DataWriterImpl::marshal(
+ <%TYPE%>DataWriterImpl::dds_marshal(
                 const ::<%SCOPE%><%TYPE%>& instance_data,
                 int  for_write)
 {
@@ -552,7 +552,7 @@ ACE_Message_Block*
   if (needs_registration)
   {
     // don't use fast allocator for registration.
-    ACE_Message_Block* marshalled = this->marshal(instance_data, 0); //NOT_FOR_WRITE
+    ACE_Message_Block* marshalled = this->dds_marshal(instance_data, 0); //NOT_FOR_WRITE
 
     // tell DataWriterLocal and Publisher about the instance.
     ::DDS::ReturnCode_t ret = register_instance(handle, marshalled, source_timestamp);
@@ -1771,7 +1771,7 @@ DDS::ReturnCode_t
 }
 
 void
-<%TYPE%>DataReaderImpl::demarshal(const TAO::DCPS::ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::dds_demarshal(const TAO::DCPS::ReceivedDataSample& sample)
 {
   ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
 
