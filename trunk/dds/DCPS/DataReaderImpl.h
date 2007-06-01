@@ -358,6 +358,9 @@ namespace TAO
        */
       virtual int num_zero_copies();
 
+      /// Release the instance with the handle.
+      void release_instance (::DDS::InstanceHandle_t handle);
+      
     protected:
 
       // type specific DataReader's part of enable.
@@ -391,6 +394,7 @@ namespace TAO
       */
       ::DDS::InstanceHandle_t get_next_handle ();
 
+      virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
       mutable SubscriptionInstanceMapType           instances_ ;
 

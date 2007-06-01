@@ -479,6 +479,9 @@ public:
     virtual void dispose(const TAO::DCPS::ReceivedDataSample& sample) ;
 
     //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
+    
+    virtual void release_instance_i (::DDS::InstanceHandle_t handle);
+
 
   private:
     ::DDS::ReturnCode_t  store_instance_data(

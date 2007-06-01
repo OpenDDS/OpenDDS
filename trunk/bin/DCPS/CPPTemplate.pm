@@ -2037,6 +2037,25 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_OK; 
 }
 
+void 
+<%TYPE%>DataReaderImpl::release_instance_i (::DDS::InstanceHandle_t handle)
+{
+  InstanceMap::iterator it;
+  for (it = instance_map_.begin ();
+    it != instance_map_.end ();
+    it ++)
+  {
+    if (it->second == handle)
+      break;
+  }
+
+  if (it != instance_map_.end ())
+  {
+    instance_map_.erase (it);
+  }
+}
+
+
 //TAO::DCPS::DataReaderRemote_ptr
 //<%TYPE%>DataReaderImpl::get_datareaderremote_obj_ref ()
 //{
