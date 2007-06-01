@@ -1,10 +1,23 @@
+Fri Jun  1 16:16:00 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+
+          The test was failing trying to narrow DataWriter to DataWriterRemote,
+          which is no longer possible.  Changed to use the "test_helper" to get
+          the DataWriterRemote from the DataWriter.
+
 Thu May 31 22:45:53 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * MPC/config/dcps.mpb:
 
           Older versions of TAO need an explicit base project - taoidldefaults
           for IDL support so that the idlflags {...} section is recognized.
-          
+
 Thu May 31 21:13:27 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/Messenger.mpc:

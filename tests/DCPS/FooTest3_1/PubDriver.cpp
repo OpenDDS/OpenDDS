@@ -1,3 +1,4 @@
+#include "test_helper.h" //must be the 1st include
 #include "PubDriver.h"
 #include "Writer.h"
 #include "TestException.h"
@@ -427,13 +428,13 @@ PubDriver::run()
   {
   for (int i = 0; i < num_datawriters_; i ++)
   {
-    ::TAO::DCPS::DataWriterRemote_var dw_remote
-      = ::TAO::DCPS::DataWriterRemote::_narrow (datawriters_[i].in ());
-
     ::Xyz::FooDataWriterImpl* datawriter_servant
       = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
     TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+
+    ::TAO::DCPS::DataWriterRemote_var dw_remote
+      = DDS_TEST::getRemoteInterface(*datawriter_servant);
 
     dw_remote->add_associations (pub_id, associations);
   }

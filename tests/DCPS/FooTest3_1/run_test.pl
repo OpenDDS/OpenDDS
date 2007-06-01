@@ -10,7 +10,7 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 # Set the library path for the client to be able to load
-# the FooTyoe* library.
+# the FooType* library.
 PerlACE::add_lib_path('../FooType3');
 
 $status=0;
