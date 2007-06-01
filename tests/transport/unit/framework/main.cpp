@@ -428,9 +428,9 @@ namespace
 
     mb.wr_ptr(1024);
     iovec iov[2];
-    iov[0].iov_base = buffer;
+    iov[0].iov_base = reinterpret_cast<char*>(buffer);
     iov[0].iov_len = 10;
-    iov[1].iov_base = buffer + 10;
+    iov[1].iov_base = reinterpret_cast<char*>(buffer + 10);
     iov[1].iov_len = max_size - 10;
     linkImpl.received(iov, 2);
   }
