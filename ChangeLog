@@ -1,3 +1,22 @@
+Fri Jun  1 21:45:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Renamed FooDataWriter::marshal() to dds_marshal() since marshal()
+          conflicts with a method inherited from the stub (due to the local-
+          interface implementation).
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          To maintain symmetry with dds_marhsal(), renamed demarshal() to
+          dds_demarshal() and made it pure-virtual.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added dds_demarshal() since it's now pure-virtual in the base.
+
 Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -6,11 +25,11 @@ Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           Added new virtual method release_instance to DCPS type
           DataReaderImpl that removes the instance with the provided
           handle from the instance - handle map.
-          
+
         * bin/dcps_tests.lst:
- 
+
           Added Liveliness tests.
-          
+
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/InstanceState.h:
@@ -21,16 +40,16 @@ Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           in spec.
           Made the datareader check if an instance has no samples when
           it receives the dispose message or liveliness detection finds
-          the writer is dead. If it is then the instance/handle will be 
+          the writer is dead. If it is then the instance/handle will be
           removed from internal maps in DataReader.
 
         * tests/DCPS/LivelinessTest/run_test.pl:
 
           Fixed test to run with current DDS.
-          
+
         * tests/DCPS/unit/MyTypeSupportImpl.h:
 
-          Added implementation for pure virtual function 
+          Added implementation for pure virtual function
           release_instance_i() to avoid compilation error.
 
 Fri Jun  1 17:54:02 UTC 2007  Yan Dai  <dai_y@ociweb.com>

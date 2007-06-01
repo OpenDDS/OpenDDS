@@ -933,7 +933,7 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
       {
 	this->writer_activity(sample.header_.publication_id_);
 	// This also adds to the sample container
-	this->demarshal(sample) ;
+	this->dds_demarshal(sample) ;
 
 	this->subscriber_servant_->data_received(this) ;
       }
@@ -1527,11 +1527,6 @@ DataReaderImpl::set_sample_rejected_status(
   sample_rejected_status_ = status ;
 }
 
-
-void DataReaderImpl::demarshal(const ReceivedDataSample& sample)
-{
-  ACE_UNUSED_ARG(sample) ;
-}
 
 void DataReaderImpl::dispose(const ReceivedDataSample& sample)
 {
