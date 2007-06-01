@@ -149,6 +149,7 @@ UDPTransport::BLOB::getTimeout() const
 UDPTransport::Link::Link()
  : done_(false),
    callback_(0),
+   local_(0),
    timeout_(0)
 {
 }
@@ -156,6 +157,7 @@ UDPTransport::Link::Link()
 UDPTransport::Link::~Link()
 {
   finish();
+  delete local_;
   delete timeout_;
 }
 
@@ -180,7 +182,8 @@ UDPTransport::Link::establish(TransportAPI::BLOB* endpoint,
   // Open a socket on  hostname_:port_
   ACE_SOCK_Dgram::PEER_ADDR addr(blob->getPort(),
                                  blob->getHostname().c_str());
-  if (local_.open(addr) == -1) {
+  local_ = new ACE_SOCK_Dgram();
+  if (local_->open(addr) == -1) {
     return TransportAPI::make_failure(TransportAPI::failure_reason(
                                         "Unable to connect to " +
                                         blob->getHostname()));
@@ -195,7 +198,7 @@ UDPTransport::Link::establish(TransportAPI::BLOB* endpoint,
     }
 
     // Enable asynchronous I/O
-    if (local_.enable(ACE_NONBLOCK) == -1) {
+    if (local_->enable(ACE_NONBLOCK) == -1) {
       return TransportAPI::make_failure(TransportAPI::failure_reason(
                                           ACE_OS::strerror(errno)));
     }
@@ -215,7 +218,7 @@ TransportAPI::Status
 UDPTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
   done_ = true;
-  if (local_.close() == 0) {
+  if (local_ == 0 || local_->close() == 0) {
     return TransportAPI::make_success();
   }
 
@@ -228,12 +231,18 @@ UDPTransport::Link::send(const iovec buffers[],
                          size_t iovecSize,
                          const TransportAPI::Id& requestId)
 {
+  if (local_ == 0) {
+    TransportAPI::failure_reason reason("Link has not yet been established");
+    callback_->sendFailed(reason);
+    return TransportAPI::make_failure(reason);
+  }
+
   for(size_t i = 0; i < iovecSize; i++) {
-    if (local_.send(buffers[i].iov_base,
-                    buffers[i].iov_len,
-                    remote_,
-                    0,
-                    timeout_) != static_cast<ssize_t> (buffers[i].iov_len)) {
+    if (local_->send(buffers[i].iov_base,
+                     buffers[i].iov_len,
+                     remote_,
+                     0,
+                     timeout_) != static_cast<ssize_t> (buffers[i].iov_len)) {
       int err = errno;
       TransportAPI::failure_reason
         reason(err == EWOULDBLOCK || err == ETIME ?
@@ -250,11 +259,16 @@ UDPTransport::Link::send(const iovec buffers[],
 int
 UDPTransport::Link::svc()
 {
+  if (local_ == 0) {
+    // TDB: Log this error
+    return 1;
+  }
+
   char buffer[bufferSize];
   const ACE_Time_Value timeout(1, 0);
   while(!done_) {
-    ssize_t amount = local_.recv(buffer, bufferSize, remote_,
-                                 0, &timeout);
+    ssize_t amount = local_->recv(buffer, bufferSize, remote_,
+                                  0, &timeout);
 
     if (amount == 0) {
       done_ = true;
@@ -288,6 +302,8 @@ void
 UDPTransport::Link::finish()
 {
   done_ = true;
-  local_.close();
+  if (local_ != 0) {
+    local_->close();
+  }
   wait();
 }

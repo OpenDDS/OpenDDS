@@ -1,3 +1,18 @@
+Fri Jun  1 15:10:50 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/MCast/MCastTransport.h:
+        * dds/DCPS/transport/MCast/MCastTransport.cpp:
+        * dds/DCPS/transport/MCast/MCastTransport.mpc:
+        * dds/DCPS/transport/MCast/mcast_export.h:
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+        * tests/transport/unit/mcast/MCast_Unit.mpc:
+        * tests/transport/unit/mcast/publisher.cpp:
+        * tests/transport/unit/mcast/run_test.pl:
+        * tests/transport/unit/mcast/subscriber.cpp:
+
+          Checking in my non-functional multicast transport changes.
+
 Fri Jun  1 13:56:47 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * tests/transport/unit/framework/main.cpp:
