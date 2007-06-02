@@ -5,8 +5,11 @@
 #include <ace/OS_NS_string.h>
 #include <ace/SOCK_Connector.h>
 
-static const size_t bufferSize = 8192;
-static const std::string BLOBIdentifier = "TCP";
+namespace
+{
+  const size_t bufferSize = 8192;
+  const std::string BLOBIdentifier = "TCP";
+}
 
 TCPTransport::TCPTransport()
  : active_(false),
@@ -19,9 +22,9 @@ TCPTransport::~TCPTransport()
 }
 
 void
-TCPTransport::getBLOB(TransportAPI::BLOB*& endpoint) const
+TCPTransport::getBLOB(const TransportAPI::BLOB*& endpoint) const
 {
-  endpoint = new BLOB(hostname_, port_, active_);
+  endpoint = &endpointConfiguration_;
 }
 
 size_t
@@ -31,7 +34,7 @@ TCPTransport::getMaximumBufferSize() const
 }
 
 TransportAPI::Status
-TCPTransport::isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const
+TCPTransport::isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const
 {
   if (endpoint != 0 && endpoint->getIdentifier() == BLOBIdentifier) {
     return TransportAPI::make_success();
@@ -57,6 +60,7 @@ TCPTransport::configure(const TransportAPI::NVPList& configuration)
     }
   }
   if (hostname_.length() != 0 && port_ != 0) {
+    endpointConfiguration_ = BLOB(hostname_, port_, active_);
     return TransportAPI::make_success();
   }
   return TransportAPI::make_failure(TransportAPI::failure_reason(
@@ -81,6 +85,12 @@ TCPTransport::destroyLink(TransportAPI::Transport::Link* link)
 //  else {
 //    throw something;
 //  }
+}
+
+TCPTransport::BLOB::BLOB()
+  : active_(false),
+    port_(0)
+{
 }
 
 TCPTransport::BLOB::BLOB(const std::string& hostname,
@@ -130,11 +140,11 @@ TCPTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 }
 
 TransportAPI::Status
-TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
+TCPTransport::Link::establish(const TransportAPI::BLOB* endpoint,
                               const TransportAPI::Id& requestId)
 {
   // Get down to our BLOB type
-  TCPTransport::BLOB* blob = dynamic_cast<TCPTransport::BLOB*>(endpoint);
+  const TCPTransport::BLOB* blob = dynamic_cast<const TCPTransport::BLOB*>(endpoint);
   if (blob == 0) {
     return TransportAPI::make_failure(TransportAPI::failure_reason(
                                         "Endpoint is not a TCP/IP endpoint"));
@@ -165,7 +175,6 @@ TCPTransport::Link::establish(TransportAPI::BLOB* endpoint,
     }
   }
 
-  callback_->connected(requestId);
   return TransportAPI::make_success();
 }
 

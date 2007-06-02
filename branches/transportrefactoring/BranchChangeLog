@@ -1,3 +1,22 @@
+Sat Jun  2 12:49:11 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/TCP/TCPTransport.h:
+        * dds/DCPS/transport/TCP/TCPTransport.cpp:
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+        * dds/DCPS/transport/framework/Transport.h:
+        * tests/transport/unit/framework/DummyTransport.h:
+        * tests/transport/unit/framework/DummyTransport.cpp:
+        * tests/transport/unit/tcp/publisher.cpp:
+        * tests/transport/unit/tcp/subscriber.cpp:
+        * tests/transport/unit/udp/publisher.cpp:
+        * tests/transport/unit/udp/subscriber.cpp:
+
+          Made some changes to the Transport API involving lifetime
+          of the BLOB returned - this is owned by the Transport.
+          Also fixed some issues with TCP and UDP that violated the
+          Transport API contract and could lead to deadlock.
+
 Fri Jun  1 15:10:50 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/MCast/MCastTransport.h:

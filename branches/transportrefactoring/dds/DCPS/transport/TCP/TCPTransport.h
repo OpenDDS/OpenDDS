@@ -14,22 +14,19 @@ public:
   TCPTransport();
   virtual ~TCPTransport();
 
-  virtual void getBLOB(TransportAPI::BLOB*& endpoint) const;
+  virtual void getBLOB(const TransportAPI::BLOB*& endpoint) const;
   virtual size_t getMaximumBufferSize() const;
-  virtual TransportAPI::Status isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const;
+  virtual TransportAPI::Status isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const;
   virtual TransportAPI::Status configure(const TransportAPI::NVPList& configuration);
 
   virtual TransportAPI::Transport::Link* createLink();
   virtual void destroyLink(TransportAPI::Transport::Link* link);
 
 private:
-  bool active_;
-  std::string hostname_;
-  unsigned short port_;
-
   class BLOB: public TransportAPI::BLOB
   {
   public:
+    BLOB();
     BLOB(const std::string& hostname,
          unsigned short port,
          bool active);
@@ -43,6 +40,11 @@ private:
     unsigned short port_;
   };
 
+  bool active_;
+  std::string hostname_;
+  unsigned short port_;
+  TCPTransport::BLOB endpointConfiguration_;
+
   class Link: public TransportAPI::Transport::Link,
               public ACE_Task_Base
   {
@@ -52,7 +54,7 @@ private:
 
     virtual TransportAPI::Status setCallback(TransportAPI::LinkCallback* callback);
 
-    virtual TransportAPI::Status establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
     virtual TransportAPI::Status shutdown(const TransportAPI::Id& requestId);
 
     virtual TransportAPI::Status send(const iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId);

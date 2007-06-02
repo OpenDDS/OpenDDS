@@ -26,7 +26,7 @@ parse_args(int argc, char** argv)
                           "usage:  %s "
                           "-h <host> "
                           "-p <port> "
-                          "\n", 
+                          "\n",
                           argv [0]),
                          -1);
     }
@@ -51,16 +51,12 @@ public:
   virtual void received(const iovec buffers[], size_t iovecSize);
 
 private:
-  bool connected_;
   bool disconnected_;
-  bool sent_;
   bool received_;
 };
 
 DataSink::DataSink()
- : connected_(false),
-   disconnected_(false),
-   sent_(false),
+ : disconnected_(false),
    received_(false)
 {
 }
@@ -68,7 +64,7 @@ DataSink::DataSink()
 int
 DataSink::checkStatus() const
 {
-  if (connected_ && sent_ && !received_) {
+  if (!received_) {
     return 0;
   }
   return 1;
@@ -77,7 +73,6 @@ DataSink::checkStatus() const
 void
 DataSink::connected(const TransportAPI::Id&)
 {
-  connected_ = true;
 }
 
 void
@@ -89,13 +84,11 @@ DataSink::disconnected(const TransportAPI::failure_reason&)
 void
 DataSink::sendSucceeded(const TransportAPI::Id&)
 {
-  sent_ = true;
 }
 
 void
 DataSink::sendFailed(const TransportAPI::failure_reason&)
 {
-  sent_ = false;
 }
 
 void
@@ -126,7 +119,7 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Configuration of the transport failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   DataSink sink;
@@ -140,10 +133,10 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Setting the link callback failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
-  TransportAPI::BLOB* endpoint = 0;
+  const TransportAPI::BLOB* endpoint = 0;
   transport.getBLOB(endpoint);
   if (endpoint == 0) {
    ACE_ERROR_RETURN((LM_ERROR,
@@ -152,11 +145,10 @@ int main(int argc, char** argv)
 
   TransportAPI::Id id = 0;
   status = link->establish(endpoint, id++);
-  delete endpoint;
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to establish the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   char buffer[1024];
@@ -165,23 +157,28 @@ int main(int argc, char** argv)
     ACE_ERROR_RETURN((LM_ERROR, "Unable to open %s\n", __FILE__), 1);
   }
 
-  while(!feof(fp)) {
+  while(!feof(fp) && (status.first == TransportAPI::SUCCESS)) {
     size_t ramount = (ACE_OS::rand() % 1023) + 1;
     size_t amount = ACE_OS::fread(buffer, 1, ramount, fp);
     if (amount > 0) {
       iovec buf[1];
       buf[0].iov_base = buffer;
       buf[0].iov_len = amount;
-      link->send(buf, 1, id++);
+      status = link->send(buf, 1, id++);
     }
   }
   ACE_OS::fclose(fp);
+  if (status.first != TransportAPI::SUCCESS) {
+   ACE_ERROR_RETURN((LM_ERROR,
+                     "ERROR: Unable to send data\n"
+                     "       %s\n", status.second.what()), 1);
+  }
 
   status = link->shutdown(id++);
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to shutdown the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
   transport.destroyLink(link);
   return sink.checkStatus();

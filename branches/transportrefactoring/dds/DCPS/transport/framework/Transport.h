@@ -19,9 +19,9 @@ namespace TransportAPI
      *  @name Configuration methods (synchronous)
      */
     //@{
-    virtual void getBLOB(BLOB*& endpoint) const = 0;
+    virtual void getBLOB(const BLOB*& endpoint) const = 0;
     virtual size_t getMaximumBufferSize() const = 0;
-    virtual Status isCompatibleEndpoint(BLOB* endpoint) const = 0;
+    virtual Status isCompatibleEndpoint(const BLOB* endpoint) const = 0;
     virtual Status configure(const NVPList& configuration) = 0;
     //@}
 
@@ -47,7 +47,7 @@ namespace TransportAPI
        *  @name Connection methods (asynchronous)
        */
       //@{
-      virtual Status establish(BLOB* endpoint, const Id& requestId) = 0;
+      virtual Status establish(const BLOB* endpoint, const Id& requestId) = 0;
       virtual Status shutdown(const Id& requestId) = 0;
       //@}
 
