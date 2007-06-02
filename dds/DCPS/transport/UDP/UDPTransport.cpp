@@ -4,8 +4,11 @@
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_string.h>
 
-static const size_t bufferSize = 8192;
-static const std::string BLOBIdentifier = "UDP";
+namespace
+{
+  const size_t bufferSize = 8192;
+  const std::string BLOBIdentifier = "UDP";
+}
 
 UDPTransport::UDPTransport()
  : active_(false),
@@ -19,10 +22,9 @@ UDPTransport::~UDPTransport()
 }
 
 void
-UDPTransport::getBLOB(TransportAPI::BLOB*& endpoint) const
+UDPTransport::getBLOB(const TransportAPI::BLOB*& endpoint) const
 {
-  endpoint = new BLOB(hostname_, port_, remoteHostname_, remotePort_,
-                      active_, timeout_);
+  endpoint = &endpointConfiguration_;
 }
 
 size_t
@@ -32,7 +34,7 @@ UDPTransport::getMaximumBufferSize() const
 }
 
 TransportAPI::Status
-UDPTransport::isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const
+UDPTransport::isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const
 {
   if (endpoint != 0 && endpoint->getIdentifier() == BLOBIdentifier) {
     return TransportAPI::make_success();
@@ -68,6 +70,9 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
   }
   if (hostname_.length() != 0 && port_ != 0 &&
       remoteHostname_.length() != 0 && remotePort_ != 0) {
+    endpointConfiguration_ =
+      BLOB(hostname_, port_, remoteHostname_, remotePort_,
+                      active_, timeout_);
     return TransportAPI::make_success();
   }
   return TransportAPI::make_failure(TransportAPI::failure_reason(
@@ -92,6 +97,15 @@ UDPTransport::destroyLink(TransportAPI::Transport::Link* link)
 //  else {
 //    throw something;
 //  }
+}
+
+UDPTransport::BLOB::BLOB()
+  : active_(false),
+    port_(0),
+    remotePort_(0),
+    timeout_(0)
+{
+  setIdentifier(BLOBIdentifier);
 }
 
 UDPTransport::BLOB::BLOB(const std::string& hostname,
@@ -169,11 +183,11 @@ UDPTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 }
 
 TransportAPI::Status
-UDPTransport::Link::establish(TransportAPI::BLOB* endpoint,
+UDPTransport::Link::establish(const TransportAPI::BLOB* endpoint,
                               const TransportAPI::Id& requestId)
 {
   // Get down to our BLOB type
-  UDPTransport::BLOB* blob = dynamic_cast<UDPTransport::BLOB*>(endpoint);
+  const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
   if (blob == 0) {
     return TransportAPI::make_failure(TransportAPI::failure_reason(
                                         "Endpoint is not a UDP/IP endpoint"));
@@ -210,7 +224,6 @@ UDPTransport::Link::establish(TransportAPI::BLOB* endpoint,
     }
   }
 
-  callback_->connected(requestId);
   return TransportAPI::make_success();
 }
 
@@ -219,6 +232,8 @@ UDPTransport::Link::shutdown(const TransportAPI::Id& requestId)
 {
   done_ = true;
   if (local_ == 0 || local_->close() == 0) {
+    delete local_;
+    local_ = 0;
     return TransportAPI::make_success();
   }
 
@@ -233,24 +248,26 @@ UDPTransport::Link::send(const iovec buffers[],
 {
   if (local_ == 0) {
     TransportAPI::failure_reason reason("Link has not yet been established");
-    callback_->sendFailed(reason);
     return TransportAPI::make_failure(reason);
   }
 
-  for(size_t i = 0; i < iovecSize; i++) {
-    if (local_->send(buffers[i].iov_base,
-                     buffers[i].iov_len,
-                     remote_,
-                     0,
-                     timeout_) != static_cast<ssize_t> (buffers[i].iov_len)) {
-      int err = errno;
-      TransportAPI::failure_reason
-        reason(err == EWOULDBLOCK || err == ETIME ?
-               "Sending would the iovec would "
-               "take longer than the specified timeout" :
-               ACE_OS::strerror(err));
-      return TransportAPI::make_failure(reason);
-    }
+  size_t totalSize = 0;
+  for (size_t i = 0; i < iovecSize; ++i)
+  {
+    totalSize += buffers[i].iov_len;
+  }
+
+  if (local_->send(buffers,
+                   static_cast<int>(iovecSize),
+                   remote_,
+                   0) != static_cast<ssize_t>(totalSize)) {
+    int err = errno;
+    TransportAPI::failure_reason
+      reason(err == EWOULDBLOCK || err == ETIME ?
+             "Sending would the iovec would "
+             "take longer than the specified timeout" :
+             ACE_OS::strerror(err));
+    return TransportAPI::make_failure(reason);
   }
 
   return TransportAPI::make_success();
@@ -260,13 +277,13 @@ int
 UDPTransport::Link::svc()
 {
   if (local_ == 0) {
-    // TDB: Log this error
+    // TBD: Log this error
     return 1;
   }
 
   char buffer[bufferSize];
-  const ACE_Time_Value timeout(1, 0);
-  while(!done_) {
+  const ACE_Time_Value timeout(0, 500000);
+  while(done_ == false) {
     ssize_t amount = local_->recv(buffer, bufferSize, remote_,
                                   0, &timeout);
 
@@ -288,7 +305,7 @@ UDPTransport::Link::svc()
       }
     }
     else {
-      if (errno != EINTR) {
+      if (errno == EINTR) {
         done_ = true;
         // TBD: Log this error
       }

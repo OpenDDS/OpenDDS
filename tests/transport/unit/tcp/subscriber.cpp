@@ -32,7 +32,7 @@ parse_args(int argc, char** argv)
                           "-d <output> "
                           "-h <host> "
                           "-p <port> "
-                          "\n", 
+                          "\n",
                           argv [0]),
                          -1);
     }
@@ -61,11 +61,8 @@ public:
   void wait();
 
 private:
-  bool connected_;
   bool disconnected_;
-  bool sent_;
   bool received_;
-  bool written_;
 
   typedef std::vector<std::pair<size_t, char*> > Buffers;
   Buffers buffers_;
@@ -75,11 +72,8 @@ private:
 };
 
 DataSink::DataSink()
- : connected_(false),
-   disconnected_(false),
-   sent_(false),
+ : disconnected_(false),
    received_(false),
-   written_(false),
    c_(m_)
 {
 }
@@ -95,7 +89,7 @@ DataSink::~DataSink()
 int
 DataSink::checkStatus() const
 {
-  if (connected_ && disconnected_ && !sent_ && received_ && written_) {
+  if (disconnected_ && received_) {
     return 0;
   }
   return 1;
@@ -106,7 +100,6 @@ DataSink::writeData(const char* file)
 {
   FILE* fp = ACE_OS::fopen(file, "w");
   if (fp != 0) {
-    written_ = true;
     size_t maxBuf = buffers_.size();
     for(size_t i = 0; i < maxBuf; i++) {
       ACE_OS::fwrite(buffers_[i].second, buffers_[i].first, 1, fp);
@@ -125,7 +118,6 @@ DataSink::wait()
 void
 DataSink::connected(const TransportAPI::Id&)
 {
-  connected_ = true;
 }
 
 void
@@ -139,7 +131,6 @@ DataSink::disconnected(const TransportAPI::failure_reason&)
 void
 DataSink::sendSucceeded(const TransportAPI::Id&)
 {
-  sent_ = true;
 }
 
 void
@@ -179,7 +170,7 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Configuration of the transport failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   DataSink sink;
@@ -193,10 +184,10 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Setting the link callback failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
-  TransportAPI::BLOB* endpoint = 0;
+  const TransportAPI::BLOB* endpoint = 0;
   transport.getBLOB(endpoint);
   if (endpoint == 0) {
    ACE_ERROR_RETURN((LM_ERROR,
@@ -205,11 +196,10 @@ int main(int argc, char** argv)
 
   TransportAPI::Id id = 0;
   status = link->establish(endpoint, id++);
-  delete endpoint;
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to establish the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   // Create this file so the test script knows to
@@ -224,7 +214,7 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to shutdown the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   transport.destroyLink(link);

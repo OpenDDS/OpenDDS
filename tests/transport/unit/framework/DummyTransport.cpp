@@ -10,7 +10,7 @@ namespace
 }
 
 void
-DummyTransport::getBLOB(TransportAPI::BLOB*& endpoint) const
+DummyTransport::getBLOB(const TransportAPI::BLOB*& endpoint) const
 {
 }
 
@@ -21,7 +21,7 @@ DummyTransport::getMaximumBufferSize() const
 }
 
 TransportAPI::Status
-DummyTransport::isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const
+DummyTransport::isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const
 {
   return TransportAPI::make_success();
 }
@@ -61,7 +61,7 @@ DummyTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 }
 
 TransportAPI::Status
-DummyTransport::Link::establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId)
+DummyTransport::Link::establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId)
 {
   log_.push_back(logEntry("establish", requestId));
   if (defer_)

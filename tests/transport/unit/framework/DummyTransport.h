@@ -15,9 +15,9 @@ public:
    *  @name Configuration methods (synchronous)
    */
   //@{
-  virtual void getBLOB(TransportAPI::BLOB*& endpoint) const;
+  virtual void getBLOB(const TransportAPI::BLOB*& endpoint) const;
   virtual size_t getMaximumBufferSize() const;
-  virtual TransportAPI::Status isCompatibleEndpoint(TransportAPI::BLOB* endpoint) const;
+  virtual TransportAPI::Status isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const;
   virtual TransportAPI::Status configure(const TransportAPI::NVPList& configuration);
   //@}
 
@@ -46,7 +46,7 @@ public:
      *  @name Connection methods (asynchronous)
      */
     //@{
-    virtual TransportAPI::Status establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
     virtual TransportAPI::Status shutdown(const TransportAPI::Id& requestId);
     //@}
 
