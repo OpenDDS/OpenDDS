@@ -21,7 +21,7 @@ public:
   virtual TransportAPI::Transport::Link* createLink();
   virtual void destroyLink(TransportAPI::Transport::Link* link);
 
-private:
+public:
   class BLOB: public TransportAPI::BLOB
   {
   public:
@@ -48,6 +48,7 @@ private:
     unsigned long timeout_;
   };
 
+private:
   bool active_;
   std::string hostname_;
   unsigned short port_;

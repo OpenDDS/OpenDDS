@@ -1,3 +1,9 @@
+Mon Jun  4 15:03:35 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+
+          Fixing for Win32.
+
 Sat Jun  2 12:49:11 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/TCP/TCPTransport.h:
