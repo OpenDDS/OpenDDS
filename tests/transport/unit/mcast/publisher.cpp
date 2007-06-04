@@ -36,7 +36,7 @@ parse_args(int argc, char** argv)
                           "-p <port> "
                           "-r <host> "
                           "-s <port> "
-                          "\n", 
+                          "\n",
                           argv [0]),
                          -1);
     }
@@ -61,24 +61,18 @@ public:
   virtual void received(const iovec buffers[], size_t iovecSize);
 
 private:
-  bool connected_;
-  bool disconnected_;
-  bool sent_;
   bool received_;
 };
 
 DataSink::DataSink()
- : connected_(false),
-   disconnected_(false),
-   sent_(false),
-   received_(false)
+ : received_(false)
 {
 }
 
 int
 DataSink::checkStatus() const
 {
-  if (connected_ && sent_ && !received_) {
+  if (!received_) {
     return 0;
   }
   return 1;
@@ -87,25 +81,21 @@ DataSink::checkStatus() const
 void
 DataSink::connected(const TransportAPI::Id&)
 {
-  connected_ = true;
 }
 
 void
 DataSink::disconnected(const TransportAPI::failure_reason&)
 {
-  disconnected_ = true;
 }
 
 void
 DataSink::sendSucceeded(const TransportAPI::Id&)
 {
-  sent_ = true;
 }
 
 void
 DataSink::sendFailed(const TransportAPI::failure_reason&)
 {
-  sent_ = false;
 }
 
 void
@@ -138,7 +128,7 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Configuration of the transport failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   DataSink sink;
@@ -152,10 +142,10 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Setting the link callback failed\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
-  TransportAPI::BLOB* endpoint = 0;
+  const TransportAPI::BLOB* endpoint = 0;
   transport.getBLOB(endpoint);
   if (endpoint == 0) {
    ACE_ERROR_RETURN((LM_ERROR,
@@ -164,11 +154,10 @@ int main(int argc, char** argv)
 
   TransportAPI::Id id = 0;
   status = link->establish(endpoint, id++);
-  delete endpoint;
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to establish the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
 
   char buffer[1024];
@@ -193,7 +182,7 @@ int main(int argc, char** argv)
   if (status.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to shutdown the link\n"
-                     "       %s\n", status.second.what()), 1); 
+                     "       %s\n", status.second.what()), 1);
   }
   transport.destroyLink(link);
   return sink.checkStatus();

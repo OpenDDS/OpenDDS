@@ -11,12 +11,12 @@ class MCast_Export MCastTransport: public UDPTransport
 {
 public:
   virtual TransportAPI::Transport::Link* createLink();
-  
+ 
 protected:
   class Link: public UDPTransport::Link
   {
   public:
-    virtual TransportAPI::Status establish(TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
   };
 };
 

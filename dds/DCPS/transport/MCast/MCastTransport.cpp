@@ -3,17 +3,17 @@
 #include <ace/SOCK_Dgram_Mcast.h>
 
 TransportAPI::Transport::Link*
-MCastTransport::createLink()    
+MCastTransport::createLink()
 {
   return new Link();
 }
 
 TransportAPI::Status
-MCastTransport::Link::establish(TransportAPI::BLOB* endpoint,
+MCastTransport::Link::establish(const TransportAPI::BLOB* endpoint,
                                 const TransportAPI::Id& requestId)
 {
   // Get down to our BLOB type
-  UDPTransport::BLOB* blob = dynamic_cast<UDPTransport::BLOB*>(endpoint);
+  const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
   if (blob == 0) {
     return TransportAPI::make_failure(TransportAPI::failure_reason(
                                         "Endpoint is not a MCast/IP endpoint"));
@@ -29,7 +29,7 @@ MCastTransport::Link::establish(TransportAPI::BLOB* endpoint,
     ACE_SOCK_Dgram* sock = new ACE_SOCK_Dgram();
     if (sock == 0) {
       return TransportAPI::make_failure(TransportAPI::failure_reason(
-                                          ACE_OS::strerror(errno))); 
+                                          ACE_OS::strerror(errno)));
     }
     local_ = sock;
     if (sock->open(ACE_Addr::sap_any) == -1) {
@@ -57,7 +57,7 @@ MCastTransport::Link::establish(TransportAPI::BLOB* endpoint,
     ACE_SOCK_Dgram_Mcast* sock = new ACE_SOCK_Dgram_Mcast();
     if (sock == 0) {
       return TransportAPI::make_failure(TransportAPI::failure_reason(
-                                          ACE_OS::strerror(errno))); 
+                                          ACE_OS::strerror(errno)));
     }
     local_ = sock;
     if (sock->join(addr) == -1) {
@@ -71,7 +71,6 @@ MCastTransport::Link::establish(TransportAPI::BLOB* endpoint,
     }
   }
 
-  callback_->connected(requestId);
   return TransportAPI::make_success();
 }
 

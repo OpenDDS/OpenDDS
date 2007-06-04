@@ -1,3 +1,12 @@
+Mon Jun  4 20:49:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/MCast/MCastTransport.h:
+        * dds/DCPS/transport/MCast/MCastTransport.cpp:
+        * tests/transport/unit/mcast/publisher.cpp:
+        * tests/transport/unit/mcast/subscriber.cpp:
+
+          Fixed multicast transport and tests.
+
 Mon Jun  4 15:03:35 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/UDP/UDPTransport.h:
