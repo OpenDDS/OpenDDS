@@ -1434,8 +1434,10 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
-        Test::SimpleSeq     data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
+        // operation.
+        Test::SimpleSeq     data0 (0, max_samples);
+        ::DDS::SampleInfoSeq info0 (0,max_samples);
          
         foo.key  = 1; 
         foo.count = 9;
@@ -1451,14 +1453,17 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1 
-                                , info1
+        status = fast_dr->read(  data0 
+                                , info0
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
-          
+        // Copy read sample sequence and use it to check read status.
+        Test::SimpleSeq     data1 (data0);
+        ::DDS::SampleInfoSeq info1 (info0);
+  
         check_read_status(status, data1, 1, "t9 read2");
 
         if (data1[0].count != 9)
@@ -1477,6 +1482,13 @@ int main (int argc, char *argv[])
             test_failed = 1;
         }
 
+        // Return the "loan" of read samples to datareader.
+        status = fast_dr->return_loan(  data0 
+                                      , info0 );
+
+        check_return_loan_status(status, data0, 0, 0, "t9 return_loan");
+
+        // Return the "loan" of copied samples to the datareader.
         status = fast_dr->return_loan(  data1 
                                       , info1 );
 

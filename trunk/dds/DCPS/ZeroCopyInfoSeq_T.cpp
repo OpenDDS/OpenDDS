@@ -26,6 +26,16 @@ namespace TAO
 {
     namespace DCPS
     {
+
+
+template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
+ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq (
+    const ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> & frm)
+{
+  this->operator= (frm);
+}
+
+
 template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> &
 ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::operator= (const ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> &frm)

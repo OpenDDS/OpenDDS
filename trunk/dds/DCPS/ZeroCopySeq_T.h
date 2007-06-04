@@ -83,6 +83,7 @@ namespace TAO
                 const size_t init_size = ZCS_DEFAULT_SIZE,
                 ACE_Allocator* alloc = 0);
 
+            ZeroCopyDataSeq(const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> & seq);
 
             ~ZeroCopyDataSeq();
 
