@@ -489,6 +489,14 @@ public:
          const TAO::DCPS::DataSampleHeader& header
          ) ;
 
+    /// common input read* & take* input processing and precondition checks
+    ::DDS::ReturnCode_t check_inputs (
+        const char* method_name,
+        ::<%MODULE%><%TYPE%>Seq & received_data,
+        ::DDS::SampleInfoSeq & info_seq,
+        ::CORBA::Long& max_samples
+        ) ;
+
    InstanceMap  instance_map_;
    DataAllocator* data_allocator_;
 };

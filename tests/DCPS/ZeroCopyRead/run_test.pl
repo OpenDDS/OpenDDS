@@ -15,7 +15,6 @@ $status = 0;
 $multiple_instance=0;
 $num_samples_per_reader=3;
 $num_readers=1;
-$use_take=0;
 
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
@@ -26,22 +25,17 @@ unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -NOBITS
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             " -NOBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             " -o $dcpsrepo_ior"
+                             . " -d $domains_file -NOBITS");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 # -b
-$parameters = "-DcpsBit 0 $svc_config -r $num_readers -t $use_take"
-              . " -m $multiple_instance -i $num_samples_per_reader " ;
+$parameters = "-DcpsBit 0 $svc_config ";
+# or could have
+# $parameters = "-b -DcpsBit 1 $svc_config ";
 
-if ($ARGV[0] eq 'udp') {
-  $parameters .= " -ORBSvcConf udp.conf -us -s localhost:16701 -up -p localhost:29803";
-}
-if ($ARGV[0] eq 'give_addrs') {
-  $parameters .= "$svc_config -s localhost:16701 -p localhost:29803";
-}
-elsif ($ARGV[0] eq 'diff_trans') {
-  $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";
+if ($ARGV[0] eq 'by_instance') {
+  $parameters .= " -i";
 }
 
 $FooTest5 = new PerlACE::Process ("main", $parameters);
