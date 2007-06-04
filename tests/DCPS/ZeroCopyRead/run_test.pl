@@ -26,8 +26,8 @@ unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -NOBITS
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             " -NOTBITS -o $dcpsrepo_ior"
-                             . " -d $domains_file -NOBITS");
+                             " -NOBITS -o $dcpsrepo_ior"
+                             . " -d $domains_file");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 # -b

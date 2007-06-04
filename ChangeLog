@@ -1,19 +1,39 @@
+Mon Jun  4 18:29:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        
+          Added copy constructor to ZeroCopyInfoSeq template.
+          
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Added copy constructor to ZeroCopySeq template.
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        
+          Added zero-copy sequence copy constructor test to test case 9.
+          
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+          
+          Removed a duplicate option from InfoRepo command line.
+          
 Fri Jun  1 23:31:01 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
           Fixed the problem that take_instance() implementation did not remove
           the sample from instance after read.
-          Basically I rolled back the *DataReaderImpl::take_instance() 
-          implementation to the version before 
+          Basically I rolled back the *DataReaderImpl::take_instance()
+          implementation to the version before
           "Wed May 30 19:19:38 UTC 2007  Scott Harris  <harris_s@ociweb.com>"
           and merged the changes needed for zero copy.
-          
+
         * tests/DCPS/FooTest4/run_test.pl:
 
           Turned off ORBDebugLevel for InfoRepo and removed duplicated command
           line options.
-          
+
 Fri Jun  1 21:45:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
