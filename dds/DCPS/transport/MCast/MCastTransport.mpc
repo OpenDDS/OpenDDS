@@ -2,4 +2,5 @@ project : dcps {
   sharedname   = MCast
   dynamicflags = MCAST_BUILD_DLL
   libs        += Udp
+  after       += UdpTransport
 }

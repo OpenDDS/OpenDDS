@@ -22,7 +22,7 @@ public:
   virtual void destroyLink(TransportAPI::Transport::Link* link);
 
 public:
-  class BLOB: public TransportAPI::BLOB
+  class Udp_Export BLOB: public TransportAPI::BLOB
   {
   public:
     BLOB();
@@ -58,8 +58,8 @@ private:
   UDPTransport::BLOB endpointConfiguration_;
 
 public:
-  class Link: public TransportAPI::Transport::Link,
-              public ACE_Task_Base
+  class Udp_Export Link: public TransportAPI::Transport::Link,
+                         public ACE_Task_Base
   {
   public:
     Link();
