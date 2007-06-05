@@ -1,3 +1,10 @@
+Tue Jun  5 15:28:30 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/MCast/MCastTransport.mpc:
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+
+          Added MPC "after" directive and exported more classes.
+
 Tue Jun  5 14:31:47 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
 
         * dds/DCPS/transport/MCast/MCastTransport.mpc:
