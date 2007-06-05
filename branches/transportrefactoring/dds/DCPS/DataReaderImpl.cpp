@@ -931,9 +931,9 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
     case SAMPLE_DATA:
     case INSTANCE_REGISTRATION:
       {
-  this->writer_activity(sample.header_.publication_id_);
-  // This also adds to the sample container
-  this->demarshal(sample) ;
+	this->writer_activity(sample.header_.publication_id_);
+	// This also adds to the sample container
+	this->dds_demarshal(sample) ;
 
   this->subscriber_servant_->data_received(this) ;
       }
@@ -1296,6 +1296,34 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   return 0;
 }
 
+
+void
+DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
+{
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+  SubscriptionInstance* instance = this->get_handle_instance (handle);
+
+  if (instance == 0)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::release_instance "
+      "could not find the instance by handle %d\n", handle));
+    return;
+  }
+
+  if (instance->rcvd_sample_.size_ == 0)
+  {
+    this->instances_.unbind (handle); 
+    this->release_instance_i (handle);
+  }
+  else
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::release_instance "
+      "Can not release the instance (handle=%d) since it still has samples.\n", 
+      handle));
+  }
+}
+
+
 TAO::DCPS::WriterInfo::WriterInfo ()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     is_alive_(1),
@@ -1444,16 +1472,18 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
     }
 
 
-  //loop through all instances telling them this writer is dead
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+    SubscriptionInstanceMapType::ITERATOR pos = instances_.begin();
+    SubscriptionInstanceMapType::ITERATOR next = pos;
+
+    while (pos != instances_.end())
     {
+      next ++;
       SubscriptionInstance *ptr = (*pos).int_id_;
 
       ptr->instance_state_.writer_became_dead (
-                 writer_id, liveliness_changed_status_.active_count, when);
+        writer_id, liveliness_changed_status_.active_count, when);
 
+      pos = next;
     }
 
   ::DDS::DataReaderListener* listener
@@ -1497,11 +1527,6 @@ DataReaderImpl::set_sample_rejected_status(
   sample_rejected_status_ = status ;
 }
 
-
-void DataReaderImpl::demarshal(const ReceivedDataSample& sample)
-{
-  ACE_UNUSED_ARG(sample) ;
-}
 
 void DataReaderImpl::dispose(const ReceivedDataSample& sample)
 {

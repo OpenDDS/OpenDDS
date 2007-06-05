@@ -312,17 +312,14 @@ namespace TAO
       void set_subscription_id(RepoId subscription_id) ;
 
       ::DDS::DataReader_ptr get_dr_obj_ref();
-      //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref () = 0;
 
       char *get_topic_name() const;
 
       bool have_sample_states(::DDS::SampleStateMask sample_states) const ;
       bool have_view_states(::DDS::ViewStateMask view_states) const ;
       bool have_instance_states(::DDS::InstanceStateMask instance_states) const;
-/*
-      virtual void demarshal(const ReceivedDataSample& sample) = 0 ;
-*/
-      virtual void demarshal(const ReceivedDataSample& sample) ;
+
+      virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
       virtual void dispose(const ReceivedDataSample& sample) ;
 
       CORBA::Long get_depth() const { return depth_ ; }
@@ -358,6 +355,9 @@ namespace TAO
        */
       virtual int num_zero_copies();
 
+      /// Release the instance with the handle.
+      void release_instance (::DDS::InstanceHandle_t handle);
+      
     protected:
 
       // type specific DataReader's part of enable.
@@ -391,6 +391,7 @@ namespace TAO
       */
       ::DDS::InstanceHandle_t get_next_handle ();
 
+      virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
       mutable SubscriptionInstanceMapType           instances_ ;
 

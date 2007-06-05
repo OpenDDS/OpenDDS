@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe, portableserver {
+project(*Publisher): dcpsexe {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -12,7 +12,7 @@ project(*Publisher): dcpsexe, portableserver {
 }
 
 
-project(*Subscriber): dcpsexe, portableserver {
+project(*Subscriber): dcpsexe {
   exename   = subscriber
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

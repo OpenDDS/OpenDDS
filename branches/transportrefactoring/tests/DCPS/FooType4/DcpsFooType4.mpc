@@ -1,4 +1,4 @@
-project(*) : dcps, portableserver {
+project : dcps {
   after       += DcpsFooType4
   libout       = .
 

@@ -11,6 +11,7 @@
 
 tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/ZeroCopyRead/run_test.pl: !DCPS_MIN !STATIC
+tests/DCPS/ZeroCopyRead/run_test.pl by_instance: !DCPS_MIN !STATIC
 tests/DCPS/DCPSInfoRepo/run_test.pl
 tests/DCPS/unit/run_test.pl: !STATIC
 tests/DCPS/FooTest3_0/run_test.pl: !STATIC
@@ -32,6 +33,9 @@ tests/DCPS/FooTest3_2/run_test.pl mi: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_2/run_test.pl mw: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_2/run_test.pl bp_remove: !DCPS_MIN !STATIC
 tests/DCPS/FooTest3_2/run_test.pl b: !DCPS_MIN !STATIC
+tests/DCPS/LivelinessTest/run_test.pl: !DCPS_MIN !STATIC
+tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !STATIC
+tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !STATIC
 
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN !STATIC
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN

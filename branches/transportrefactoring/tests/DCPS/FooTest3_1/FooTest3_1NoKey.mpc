@@ -2,7 +2,7 @@
 //
 // $Id$
 
-project(*Publisher): dcpsexe, portableserver {
+project(*Publisher): dcpsexe {
   exename = FooTest3NoKey_publisher
   after    += DcpsFooType3NoKey
   libs     +=  DcpsFooType3NoKey
@@ -19,10 +19,11 @@ project(*Publisher): dcpsexe, portableserver {
     Writer.cpp
     TestS.cpp
     TestC.cpp
+    test_helper.cpp
   }
 }
 
-project(*Subscriber): dcpsexe, portableserver {
+project(*Subscriber): dcpsexe {
   exename = FooTest3NoKey_subscriber
   after    += DcpsFooType3NoKey
   libs     += DcpsFooType3NoKey

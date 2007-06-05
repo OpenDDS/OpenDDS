@@ -1,4 +1,4 @@
-project: dcpsexe_with_tcp, portableserver {
+project: dcpsexe_with_tcp {
   exename   = bit
   libpaths += ../FooType4
   libs     +=  DcpsFooType4

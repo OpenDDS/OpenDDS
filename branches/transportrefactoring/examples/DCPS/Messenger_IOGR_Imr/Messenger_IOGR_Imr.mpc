@@ -26,7 +26,7 @@ project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb {
   }
 }
 
-project(DDS*Publisher) : taoexe, portableserver, dcps {
+project(DDS*Publisher) : dcpsexe {
 
   exename   = publisher
   after    += DDS*idl
@@ -47,7 +47,7 @@ project(DDS*Publisher) : taoexe, portableserver, dcps {
   }
 }
 
-project(DDS*Subscriber) : taoexe, portableserver, dcps {
+project(DDS*Subscriber) : dcpsexe {
 
   exename   = subscriber
   after    += DDS*idl
