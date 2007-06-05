@@ -1,4 +1,4 @@
-project(DCPS_Perf*) : dcps, portableserver {
+project(DCPS_Perf*) : dcps {
   libout       = .
   idlflags    += -Wb,export_macro=PTTypeLib_Export -Wb,export_include=PTTypeLib_Export.h
   dynamicflags = PTTYPELIB_BUILD_DLL

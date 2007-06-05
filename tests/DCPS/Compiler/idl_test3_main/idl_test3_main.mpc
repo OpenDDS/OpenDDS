@@ -1,4 +1,4 @@
-project(*): dcpsexe, portableserver {
+project: dcpsexe {
   exename   = idl_test3
   libs     +=  idl_test3_lib
   libpaths +=  ../idl_test3_lib

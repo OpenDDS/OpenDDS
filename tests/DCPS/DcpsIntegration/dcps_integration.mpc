@@ -1,4 +1,4 @@
-project(*topic): dcpsexe, portableserver {
+project(*topic): dcpsexe {
   exename   = topic_test
   libs     += DcpsFooType
   libpaths += ../FooType
@@ -11,7 +11,7 @@ project(*topic): dcpsexe, portableserver {
   }
 }
 
-project(*infrastructure): dcpsexe, portableserver {
+project(*infrastructure): dcpsexe {
   exename   = infrastructure_test
   libs     += DcpsFooType
   libpaths += ../FooType

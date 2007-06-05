@@ -43,7 +43,7 @@ TAO::DCPS::InstanceState::dispose_was_received()
       this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ;
       //spec says: if "no samples in the DataReader && no "live" writers"
       //      then destroy the instance.
-      // TAO::DCPS::InstanceState::empty(true) will be called if "no samples"
+      this->release_if_empty ();
     }
 }
 
@@ -67,6 +67,16 @@ TAO::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
-     // TAO::DCPS::InstanceState::empty(true) will be called if "no samples"
+      this->release_if_empty ();
     }
+}
+
+
+void
+TAO::DCPS::InstanceState::release_if_empty()
+{
+  if( this->empty_ && this->no_writers_)
+  {
+    this->reader_->release_instance (this->handle_);
+  }
 }

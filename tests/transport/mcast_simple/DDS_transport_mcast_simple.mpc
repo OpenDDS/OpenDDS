@@ -2,7 +2,7 @@
 //
 // $Id$
 
-project(*Publisher): dcpsexe, portableserver {
+project(*Publisher): dcpsexe {
   exename = simple_publisher
 
   Source_Files {
@@ -13,7 +13,7 @@ project(*Publisher): dcpsexe, portableserver {
   }
 }
 
-project(*Subscriber): dcpsexe, portableserver {
+project(*Subscriber): dcpsexe {
   exename = simple_subscriber
 
   Source_Files {

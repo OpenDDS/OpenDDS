@@ -81,6 +81,9 @@ public:
   {
     return ::DDS::RETCODE_ERROR;
   }
+  
+  virtual void release_instance_i(DDS::InstanceHandle_t) {}
+  virtual void dds_demarshal(const TAO::DCPS::ReceivedDataSample&) {}
 
 };
 

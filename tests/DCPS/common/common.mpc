@@ -1,4 +1,4 @@
-project(*) : dcps, portableserver {
+project : dcps {
   libout       = .
   dynamicflags = COMMON_BUILD_DLL
   pch_header   =

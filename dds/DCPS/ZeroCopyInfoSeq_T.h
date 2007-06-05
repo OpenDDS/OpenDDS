@@ -62,6 +62,8 @@ namespace TAO
                 const size_t init_size = ZCS_DEFAULT_SIZE,
                 ACE_Allocator* alloc = 0);
 
+            ZeroCopyInfoSeq (const ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> & frm);
+
             ZeroCopyInfoSeq& operator= (const ZeroCopyInfoSeq & frm);
 
             //======== CORBA sequence like methods ======

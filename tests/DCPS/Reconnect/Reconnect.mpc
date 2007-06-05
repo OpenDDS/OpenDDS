@@ -1,5 +1,5 @@
 
-project(*Publisher) : taoexe, portableserver, dcps {
+project(*Publisher) : dcpsexe {
   
   exename   = publisher
 
@@ -20,7 +20,7 @@ project(*Publisher) : taoexe, portableserver, dcps {
   }
 }
 
-project(*Subscriber) : taoexe, portableserver, dcps {
+project(*Subscriber) : dcpsexe {
   
   exename   = subscriber
 

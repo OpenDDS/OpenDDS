@@ -33,6 +33,7 @@ $use_take = 0;
 $use_udp = 0;
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:29803";
+$svc_conf = " -ORBSvcConf ../../tcp.conf ";
 
 $arg_idx = 0;
 
@@ -40,6 +41,7 @@ if ($ARGV[0] eq 'udp') {
   $use_udp = 1;
   $arg_idx = 1;
   $svc_conf = " -ORBSvcConf udp.conf ";
+  $app_bit_conf = " -DCPSBit 0 "
 }
 
 if ($ARGV[$arg_idx] eq 'take') { 
@@ -67,7 +69,7 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 
 print $DCPSREPO->CommandLine(), "\n";
-$common_parameters = "-u $use_udp"
+$common_parameters = "-u $use_udp $app_bit_conf"
               . " -w $num_readers -m $multiple_instance"
               . " -l $num_unlively_periods -i $num_samples_per_reader " ;
               

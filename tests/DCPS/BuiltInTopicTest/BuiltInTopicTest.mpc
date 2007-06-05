@@ -14,7 +14,7 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_tcp, portableserver {
+project(DDS*Publisher) : dcpsexe_with_tcp {
 
   exename   = publisher
   after    += DDS*idl
@@ -35,7 +35,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp, portableserver {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp, portableserver {
+project(DDS*Subscriber) : dcpsexe_with_tcp {
 
   exename   = subscriber
   after    += DDS*idl
@@ -57,7 +57,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp, portableserver {
 }
 
 
-project(DDS*Monitor) : dcpsexe_with_tcp, portableserver {
+project(DDS*Monitor) : dcpsexe_with_tcp {
 
   exename   = monitor
   requires += built_in_topics

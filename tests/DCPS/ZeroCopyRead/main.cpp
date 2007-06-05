@@ -42,11 +42,10 @@ const char* MY_TYPE     = "foo";
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
-int use_take = 0;
-int multiple_instances = 0;
 int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 int history_depth = 1 ;
 bool support_client_side_BIT = false;
+bool do_by_instance = false;
 
 int test_failed = 0;
 
@@ -306,6 +305,11 @@ int parse_args (int argc, char *argv[])
     else if (arg_shifter.cur_arg_strncasecmp("-b") == 0)
     {
       support_client_side_BIT = true;
+      arg_shifter.consume_arg();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp("-i") == 0)
+    {
+      do_by_instance = true;
       arg_shifter.consume_arg();
     }
     else
@@ -646,7 +650,8 @@ int main (int argc, char *argv[])
       ::DDS::SubscriptionMatchStatus matched =
         foo_dr->get_subscription_match_status ();
 
-      ::DDS::InstanceHandle_t handle;
+      ::DDS::InstanceHandle_t writer_instance_handle;
+      ::DDS::InstanceHandle_t reader_instance_handle;
 
           if (matched.total_count != 1)
             ACE_ERROR_RETURN((LM_ERROR,
@@ -667,11 +672,11 @@ int main (int argc, char *argv[])
       foo.ls = ls;
 
 
-      handle
+      writer_instance_handle
           = fast_dw->_cxx_register (foo);
 
       fast_dw->write(foo,
-                     handle);
+                     writer_instance_handle);
 
 
       // wait for new data for upto 5 seconds
@@ -694,13 +699,26 @@ int main (int argc, char *argv[])
 
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read ( data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+            // remember this for later.
+            reader_instance_handle = info1[0].instance_handle;
+          }
+        else
+          {
+            status = fast_dr->read ( data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t1 read2");
 
@@ -709,12 +727,25 @@ int main (int argc, char *argv[])
 
         Test::SimpleSeq      data2 (0, max_samples);
         ::DDS::SampleInfoSeq info2 (0,max_samples);
-        status = fast_dr->read(  data2
-                                , info2
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data2
+                                    , info2
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data2
+                                    , info2
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
 
         check_read_status(status, data2, 1, "t1 read2");
@@ -790,13 +821,25 @@ int main (int argc, char *argv[])
         ::DDS::SampleInfoSeq info1 (max_samples);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data1
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t1 read2");
 
@@ -806,13 +849,25 @@ int main (int argc, char *argv[])
 
         Test::SimpleSeq      data2 (max_samples);
         ::DDS::SampleInfoSeq info2 (max_samples);
-        status = fast_dr->read(  data2
-                                , info2
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance ( data2
+                                    , info2
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data2
+                                    , info2
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data2, 1, "t2 read2");
 
@@ -892,7 +947,7 @@ int main (int argc, char *argv[])
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
         fast_dw->write(foo,
-                        handle);
+                        writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -901,13 +956,25 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data1
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t3 read2");
 
@@ -927,7 +994,7 @@ int main (int argc, char *argv[])
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
         fast_dw->write(foo,
-                        handle);
+                        writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -938,13 +1005,25 @@ int main (int argc, char *argv[])
         Test::SimpleSeq      data2 (0, max_samples);
         ::DDS::SampleInfoSeq info2 (0,max_samples);
 
-        status = fast_dr->read(  data2
-                                , info2
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data2
+                                    , info2
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data2
+                                    , info2
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data2, 1, "t3 read2");
 
@@ -997,13 +1076,25 @@ int main (int argc, char *argv[])
 
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data1
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t4 read2");
 
@@ -1013,13 +1104,25 @@ int main (int argc, char *argv[])
         {
             Test::SimpleSeq      data2;
             ::DDS::SampleInfoSeq info2;
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data2
+                                    , info2
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
             status = fast_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
                                     , ::DDS::ANY_VIEW_STATE
                                     , ::DDS::ANY_INSTANCE_STATE );
-
+          }
 
             check_read_status(status, data2, 1, "t4 read2");
 
@@ -1071,7 +1174,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1080,13 +1183,25 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data1
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t5 read2");
 
@@ -1105,7 +1220,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1118,13 +1233,25 @@ int main (int argc, char *argv[])
 
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
 
-        status = fast_dr->read(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->read_instance(  data1
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->read(  data1
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
         check_read_status(status, data1, 1, "t5 read2");
 
@@ -1158,7 +1285,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1167,13 +1294,25 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->take(  data1
-                                , info1
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
-
+        if (do_by_instance)
+          {
+            status = fast_dr->take_instance(  data1 
+                                    , info1
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->take(  data1 
+                                    , info1
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
  
         check_read_status(status, data1, 1, "t6 read2");
 
@@ -1190,12 +1329,25 @@ int main (int argc, char *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
         ::DDS::SampleInfoSeq info2 (0,max_samples);
-        status = fast_dr->take(  data2
-                                , info2
-                                , max_samples
-                                , ::DDS::ANY_SAMPLE_STATE
-                                , ::DDS::ANY_VIEW_STATE
-                                , ::DDS::ANY_INSTANCE_STATE );
+        if (do_by_instance)
+          {
+            status = fast_dr->take_instance ( data2 
+                                    , info2
+                                    , max_samples
+                                    , reader_instance_handle
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
+        else
+          {
+            status = fast_dr->take(  data2 
+                                    , info2
+                                    , max_samples
+                                    , ::DDS::ANY_SAMPLE_STATE
+                                    , ::DDS::ANY_VIEW_STATE
+                                    , ::DDS::ANY_INSTANCE_STATE );
+          }
 
  
         if (status != ::DDS::RETCODE_NO_DATA)
@@ -1238,7 +1390,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo,  ::TAO::DCPS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1337,7 +1489,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1434,15 +1586,17 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
-        Test::SimpleSeq     data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
+        // operation.
+        Test::SimpleSeq     data0 (0, max_samples);
+        ::DDS::SampleInfoSeq info0 (0,max_samples);
  
         foo.key  = 1;
         foo.count = 9;
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, handle);
+        fast_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1451,14 +1605,17 @@ int main (int argc, char *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
-                                , info1
+        status = fast_dr->read(  data0 
+                                , info0
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
                                 , ::DDS::ANY_VIEW_STATE
                                 , ::DDS::ANY_INSTANCE_STATE );
 
- 
+        // Copy read sample sequence and use it to check read status.
+        Test::SimpleSeq     data1 (data0);
+        ::DDS::SampleInfoSeq info1 (info0);
+  
         check_read_status(status, data1, 1, "t9 read2");
 
         if (data1[0].count != 9)
@@ -1477,7 +1634,14 @@ int main (int argc, char *argv[])
             test_failed = 1;
         }
 
-        status = fast_dr->return_loan(  data1
+        // Return the "loan" of read samples to datareader.
+        status = fast_dr->return_loan(  data0 
+                                      , info0 );
+
+        check_return_loan_status(status, data0, 0, 0, "t9 return_loan");
+
+        // Return the "loan" of copied samples to the datareader.
+        status = fast_dr->return_loan(  data1 
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t9 return_loan");

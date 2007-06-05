@@ -1,4 +1,4 @@
-project(MultiTopicTestPublisher): dcpsexe, portableserver {
+project(MultiTopicTestPublisher): dcpsexe {
   exename   = publisher
   libpaths += ../MultiTopicTypes
   libpaths += ../common
@@ -16,7 +16,7 @@ project(MultiTopicTestPublisher): dcpsexe, portableserver {
 }
 
 
-project(MultiTopicTestSubscriber): dcpsexe, portableserver {
+project(MultiTopicTestSubscriber): dcpsexe {
   exename   = subscriber
   libpaths += ../MultiTopicTypes
   libpaths += ../common

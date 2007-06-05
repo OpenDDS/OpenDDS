@@ -69,7 +69,11 @@ namespace TAO
       void accessed() ;
 
       /// DataReader has become empty.
-      void empty( bool value) ;
+      void empty( bool value) ; 
+      
+      /// Remove the instance if it's instance has no samples
+      /// and no writers.
+      void release_if_empty();
 
     /// tell this instance when a DataWriter transitions to NOT_ALIVE
     void writer_became_dead (PublicationId         writer_id,
