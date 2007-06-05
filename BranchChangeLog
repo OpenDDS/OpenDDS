@@ -1,3 +1,9 @@
+Tue Jun  5 14:31:47 UTC 2007  Chad Elliott  <elliott_c@ociweb.com>
+
+        * dds/DCPS/transport/MCast/MCastTransport.mpc:
+
+          Added the Udp library to the set of linked in libraries.
+
 Mon Jun  4 20:49:21 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/MCast/MCastTransport.h:
