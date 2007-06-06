@@ -1,3 +1,11 @@
+Wed Jun  6 17:47:15 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Fixed a warning that should explicitly initialize the base
+          template in the sequence copy constructor.
+
 Wed Jun  6 15:16:42 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
