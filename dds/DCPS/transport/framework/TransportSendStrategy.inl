@@ -112,15 +112,16 @@ TAO::DCPS::TransportSendStrategy::resume_send ()
       this->mode_before_suspend_ = MODE_NOT_SET;
       this->num_delayed_notifications_ = 0;
     }
-  else if (this->mode_before_suspend_ == MODE_NOT_SET)
-    {
-      ACE_ERROR((LM_ERROR, "(%P|%t)TransportSendStrategy::resume_send  The suspend_send()"
-        " is not called previously.\n"));
-    }
+  else if (this->mode_ == MODE_SUSPEND)
+  {
+    this->mode_ = this->mode_before_suspend_;
+    this->mode_before_suspend_ = MODE_NOT_SET;
+  }
   else
-    {
-      this->mode_ = this->mode_before_suspend_;
-    }
+  {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy::resume_send  The suspend or terminate"
+      " is not called previously.\n"));
+  }
 }
 
 

@@ -11,6 +11,7 @@
 #include "RepoIdSetMap.h"
 #include "TransportImpl_rch.h"
 //borland #include "TransportSendStrategy.h"
+#include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 //borland #include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
@@ -60,6 +61,11 @@ namespace TAO
         /// created this DataLink.
         DataLink(TransportImpl* impl);
         virtual ~DataLink();
+
+        // The resume_send is used in the case of reconnection
+        // on the subscriber's side, e.g.,to send
+        // out the FULLY_ASSOCIATED message to publisher.
+        void resume_send ();
 
       // ciju: Called by TransportImpl
         /// This is for a remote subscriber_id and local publisher_id

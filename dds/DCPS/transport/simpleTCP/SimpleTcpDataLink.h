@@ -57,7 +57,7 @@ namespace TAO
 
 
       private:
-      
+
         void send_graceful_disconnect_message ();
 
         ACE_INET_Addr           remote_address_;

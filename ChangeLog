@@ -1,3 +1,26 @@
+Wed Jun  6 20:21:36 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+        * tests/DCPS/Reconnect/Writer.cpp:
+
+          Various changes to fix the reconnect problem when publisher is
+          getting restarted. Three are three problems identified and fixed.
+          1. The test itself needs to call get_matched_subscriptions() to
+             make sure the writer has correct handle before sending data.
+          2. SendStrategy needs a reset function which resets the connection.
+          3. The orb thread needs to check the connection before sending
+             the FULLY_ASSOCIATED message to the publisher.
+
+
 Wed Jun  6 17:47:15 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
