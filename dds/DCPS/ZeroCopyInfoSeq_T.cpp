@@ -31,6 +31,7 @@ namespace TAO
 template <class InfoType, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE>::ZeroCopyInfoSeq (
     const ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> & frm)
+: ZeroCopySeqBase(0)
 {
   this->operator= (frm);
 }

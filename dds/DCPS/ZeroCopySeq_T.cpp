@@ -33,6 +33,7 @@ namespace TAO
 template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::ZeroCopyDataSeq(
    const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> & frm)
+: ZeroCopySeqBase(0)
 {
   this->ZeroCopySeqBase::operator=(frm);
   this->is_zero_copy_ = frm.is_zero_copy_;
