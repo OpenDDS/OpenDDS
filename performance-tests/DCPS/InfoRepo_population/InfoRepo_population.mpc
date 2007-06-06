@@ -1,5 +1,6 @@
 project(*idl) : taoidldefaults {
   idlflags    += -I../Sync
+  after       += Sync_Idl
 
   IDL_Files {
     SyncExt.idl
