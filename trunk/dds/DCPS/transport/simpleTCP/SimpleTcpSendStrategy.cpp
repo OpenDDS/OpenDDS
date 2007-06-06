@@ -9,12 +9,14 @@
 #include "SimpleTcpConfiguration.h"
 #include "SimpleTcpSynchResource.h"
 #include "SimpleTcpDataLink.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 
 TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                      (SimpleTcpDataLink*      link,
                                       SimpleTcpConfiguration* config,
                                       SimpleTcpConnection*    connection,
-                                      SimpleTcpSynchResource* synch_resource)
+                                      SimpleTcpSynchResource* synch_resource,
+                                      TransportReactorTask* task)
   : TransportSendStrategy(config, synch_resource)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",5);
@@ -29,12 +31,81 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
   // Keep a "copy" of the SimpleTcpDataLink reference for ourselves
   link->_add_ref();
   this->link_ = link;
+
+  // Keep a "copy" of the reference to the TransportReactorTask for ourselves.
+  task->_add_ref();
+  this->reactor_task_ = task;
+
 }
 
 
 TAO::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",5);
+}
+
+int
+TAO::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
+{
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",5);
+
+  // Sanity check - this connection is passed in from the constructor and
+  // it should not be nil.
+  if (this->connection_.is_nil())
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: SimpleTcpSendStrategy::reset  previous connection "
+                        "should not be nil.\n"),
+                       -1);
+    }
+
+  if (this->connection_.in () == connection)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: SimpleTcpSendStrategy::reset should not be called"
+                        " to replace the same connection.\n"),
+                       -1);
+    }
+
+  // Unregister the old handle
+  this->reactor_task_->get_reactor()->remove_handler
+                                             (this->connection_.in(),
+                                              ACE_Event_Handler::READ_MASK |
+                                              ACE_Event_Handler::DONT_CALL);
+
+  // This will cause the connection_ object to drop its reference to this
+  // TransportSendStrategy object.
+  this->connection_->remove_send_strategy();
+
+  // Take back the "copy" we made (see start_i() implementation).
+  this->connection_->_remove_ref();
+
+  // Replace with a new connection.
+  connection->_add_ref ();
+  this->connection_ = connection;
+
+  // Tell the SimpleTcpConnection that we are the object that it should
+  // call when it receives a handle_input() "event", and we will carry
+  // it out.  The SimpleTcpConnection object will make a "copy" of the
+  // reference (to this object) that we pass-in here.
+  this->connection_->set_send_strategy(this);
+
+  // Give the reactor its own "copy" of the reference to the connection object.
+  this->connection_->_add_ref();
+
+  if (this->reactor_task_->get_reactor()->register_handler
+                                      (this->connection_.in(),
+                                       ACE_Event_Handler::READ_MASK) == -1)
+    {
+      // Take back the "copy" we made.
+      this->connection_->_remove_ref();
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: SimpleTcpConnection can't register with "
+                        "reactor\n"),
+                       -1);
+    }
+
+  return 0;
 }
 
 

@@ -46,7 +46,17 @@ Writer::svc ()
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
+  ::DDS::InstanceHandleSeq handles;
   try {
+    while (1)
+    {
+      writer_->get_matched_subscriptions(handles);
+      if (handles.length() > 0)
+        break;
+      else
+        ACE_OS::sleep(ACE_Time_Value(0,200000));
+    }
+
     Messenger::MessageDataWriter_var message_dw
       = Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {

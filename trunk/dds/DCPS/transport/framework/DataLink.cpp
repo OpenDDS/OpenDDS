@@ -52,6 +52,11 @@ TAO::DCPS::DataLink::~DataLink()
     }
 }
 
+void
+TAO::DCPS::DataLink::resume_send ()
+{
+   this->send_strategy_->resume_send();
+}
 
 //MJM: Include the return value meanings to the header documentation as
 //MJM: well.

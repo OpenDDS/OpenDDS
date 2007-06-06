@@ -87,12 +87,18 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 				  0);
 	      }
 	  }
-	// This means we found a suitable (and already connected) DataLink.
-	// We can return it now since we are done.
+	// This means we may or may not find a suitable (and already connected) DataLink.
+  // Thus we need more checks.
+  else
+  {
+    if(!con->is_connector () && !con->is_connected ())
+    {
+      // The passive connecting side will wait for the connection establishment.
+    }
 
+  }
 	VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
 		   " No need for passive connection establishment.\n"), 5);
-
 	return link._retn();
       }
   }
@@ -555,7 +561,8 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
 			      this->tcp_config_.in(),
 			      connection,
 			      new SimpleTcpSynchResource(connection,
-							 this->tcp_config_->max_output_pause_period_));
+							 this->tcp_config_->max_output_pause_period_),
+            this->reactor_task_.in());
 
   TransportReceiveStrategy_rch receive_strategy =
     new SimpleTcpReceiveStrategy(link,
@@ -590,7 +597,9 @@ TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_addres
       SimpleTcpConnection_rch old_con = link->get_connection ();
       if (old_con.in () != connection.in ())
         // Replace the "old" connection object with the "new" connection object.
+      {
         return link->reconnect (connection.in ());
+      }
     }
 
   return 0;

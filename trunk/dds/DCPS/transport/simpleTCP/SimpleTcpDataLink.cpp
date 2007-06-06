@@ -166,7 +166,27 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
     }
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  return rs->reset (this->connection_.in ());
+  int rs_result = rs->reset (this->connection_.in ());
+
+  SimpleTcpSendStrategy* ss
+    = dynamic_cast <SimpleTcpSendStrategy*> (this->send_strategy_.in ());
+
+  if (ss == 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect dynamic_cast failed\n"),
+        -1);
+    }
+  // Associate the new connection object with the sending strategy and disassociate
+  // the old connection object with the sending strategy.
+  int ss_result = ss->reset (this->connection_.in ());
+
+  if (rs_result == 0 && ss_result == 0)
+  {
+    return 0;
+  }
+
+  return -1;
 }
 
 
@@ -254,6 +274,12 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","fully_associated",5);
 
+  while ( ! this->connection_->is_connected ())
+  {
+    ACE_Time_Value tv (0, 100000);
+    ACE_OS::sleep (tv);
+  }
+  this->resume_send ();
   bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
