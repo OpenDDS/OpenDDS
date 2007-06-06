@@ -1,8 +1,13 @@
+Wed Jun  6 15:16:42 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+          Add note regards participants BIT support default setting.
+
 Mon Jun 04 23:06:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
         * bin/DCPS/HTemplate.pm:
-        
+
           Moved the read* & take* precondition checks to a common function.
           Made sure to set owns(false) when zero-copy read/take is done.
           I also fixed that take_instance did not delete the sample when it
@@ -11,7 +16,7 @@ Mon Jun 04 23:06:56 UTC 2007  Scott Harris  <harris_s@ociweb.com>
         * bin/dcps_tests.lst:
         * tests/DCPS/ZeroCopyRead/main.cpp:
         * tests/DCPS/ZeroCopyRead/run_test.pl:
-        
+
           Added the -i option to run with read_instance and take_instance
           methods. Cleaned up the test a bit.
 
@@ -19,22 +24,22 @@ Mon Jun  4 18:29:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/ZeroCopyInfoSeq_T.h:
         * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
-        
+
           Added copy constructor to ZeroCopyInfoSeq template.
-          
+
         * dds/DCPS/ZeroCopySeq_T.h:
         * dds/DCPS/ZeroCopySeq_T.cpp:
 
           Added copy constructor to ZeroCopySeq template.
 
         * tests/DCPS/ZeroCopyRead/main.cpp:
-        
+
           Added zero-copy sequence copy constructor test to test case 9.
-          
+
         * tests/DCPS/ZeroCopyRead/run_test.pl:
-          
+
           Removed a duplicate option from InfoRepo command line.
-          
+
 Fri Jun  1 23:31:01 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
