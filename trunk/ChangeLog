@@ -1,3 +1,12 @@
+Wed Jun  6 22:36:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Added an "after" to relate this file's *Idl project to the Sync_Idl
+          project in ../Sync/Sync.mpc.  This is needed so that the SyncExtC.cpp
+          and SyncC.h files have the correct relative timestamps in incremental
+          builds.
+
 Wed Jun  6 20:21:36 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
@@ -19,7 +28,6 @@ Wed Jun  6 20:21:36 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
           2. SendStrategy needs a reset function which resets the connection.
           3. The orb thread needs to check the connection before sending
              the FULLY_ASSOCIATED message to the publisher.
-
 
 Wed Jun  6 17:47:15 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
