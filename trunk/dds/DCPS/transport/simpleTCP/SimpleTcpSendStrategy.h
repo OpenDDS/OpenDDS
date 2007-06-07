@@ -32,10 +32,10 @@ namespace TAO
                               TransportReactorTask* task);
         virtual ~SimpleTcpSendStrategy();
 
-        // This is called by the datalink object to associate with the "new" connection object.
-        // The "old" connection object is unregistered with the reactor and the "new" connection
-        // object is registered for sending. The implementation of this method is borrowed from
-        // the ReceiveStrategy.
+        /// This is called by the datalink object to associate with the "new" connection object.
+        /// The "old" connection object is unregistered with the reactor and the "new" connection
+        /// object is registered for sending. The implementation of this method is borrowed from
+        /// the ReceiveStrategy.
         int reset(SimpleTcpConnection* connection);
 
       protected:
@@ -44,8 +44,8 @@ namespace TAO
         virtual ACE_HANDLE get_handle ();
         virtual ssize_t send_bytes_i (const iovec iov[], int n);
 
-        // Delegate to the connection object to re-establish
-        // the connection.
+        /// Delegate to the connection object to re-establish
+        /// the connection.
         virtual void relink (bool do_suspend = true);
 
         virtual void stop_i();

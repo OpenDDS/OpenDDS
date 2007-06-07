@@ -1,3 +1,10 @@
+Thu Jun  7 19:53:50 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+
+          Method comments improvements for Doxygen.
+
 Thu Jun  7 19:58:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/dcps_tests.lst:

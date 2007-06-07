@@ -62,9 +62,9 @@ namespace TAO
         DataLink(TransportImpl* impl);
         virtual ~DataLink();
 
-        // The resume_send is used in the case of reconnection
-        // on the subscriber's side, e.g.,to send
-        // out the FULLY_ASSOCIATED message to publisher.
+        /// The resume_send is used in the case of reconnection
+        /// on the subscriber's side, e.g.,to send
+        /// out the FULLY_ASSOCIATED message to publisher.
         void resume_send ();
 
       // ciju: Called by TransportImpl
