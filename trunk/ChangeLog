@@ -1,3 +1,12 @@
+Thu Jun  7 19:58:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/dcps_tests.lst:
+	  Don't run InfoRepo_Populate test in minimum_corba builds.
+
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+          Wait for SychServer to fully initialize before starting test.
+
 Wed Jun  6 22:36:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:

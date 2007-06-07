@@ -17,9 +17,11 @@ $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$sync_status_file = PerlACE::LocalFile ("sync_status");
 $repo_bit_opt = "-ORBSvcConf tcp.conf -NOBITS";
 
 unlink $dcpsrepo_ior;
+unlink $sync_status_file;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
@@ -27,7 +29,7 @@ $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
 $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
 $Publisher2 = new PerlACE::Process ("publisher", " $pub_opts"." -i2");
 $SyncServer = new PerlACE::Process ("syncServer"
-				    , "-p2 -s1");
+				    , "-p2 -s1 -o$sync_status_file");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
@@ -39,6 +41,12 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 print $SyncServer->CommandLine() . "\n";
 $SyncServer->Spawn ();
+if (PerlACE::waitforfile_timed ($sync_status_file, 10) == -1) {
+    print STDERR "ERROR: waiting for SyncServer status file\n";
+    $DCPSREPO->Kill ();
+    $SyncServer->Kill ();
+    exit 1;
+}
 
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
@@ -78,6 +86,7 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
+unlink $sync_status_file;
 
 if ($status == 0) {
   print "test PASSED.\n";
