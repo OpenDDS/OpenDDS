@@ -1,3 +1,13 @@
+Tue Jun 12 19:06:13 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Check the mode status before calling resume_send.
+          This avoids some unnecessary calls when the send mode is
+          "direct".
+
 Thu Jun  7 19:53:50 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
@@ -8,7 +18,7 @@ Thu Jun  7 19:53:50 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 Thu Jun  7 19:58:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/dcps_tests.lst:
-	  Don't run InfoRepo_Populate test in minimum_corba builds.
+          Don't run InfoRepo_Populate test in minimum_corba builds.
 
         * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
