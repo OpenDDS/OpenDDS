@@ -142,6 +142,7 @@ namespace TAO
     const TransportIdType DEFAULT_SIMPLE_MCAST_SUB_ID = 0xFFFFFF03;
     const TransportIdType DEFAULT_RELIABLE_MULTICAST_PUB_ID = 0xFFFFFF04;
     const TransportIdType DEFAULT_RELIABLE_MULTICAST_SUB_ID = 0xFFFFFF05;
+    const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF06;
 
     /// Return code type for send_control() operations.
     enum SendControlStatus

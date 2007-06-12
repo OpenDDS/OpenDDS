@@ -1,3 +1,53 @@
+Tue Jun 12 20:30:05 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * dds/DCPS/transport/dummyTCP:
+        * dds/DCPS/transport/dummyTCP/DummyTcp.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcp.mpc:
+        * dds/DCPS/transport/dummyTCP/DummyTcp.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpAcceptor.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpAcceptor.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConfiguration.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConfiguration.inl:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConfiguration.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConfiguration_rch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnection.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnection.inl:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnection.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnectionReplaceTask.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpConnection_rch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpDataLink.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpDataLink.inl:
+        * dds/DCPS/transport/dummyTCP/DummyTcpDataLink.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpDataLink_rch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpFactory.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpFactory.inl:
+        * dds/DCPS/transport/dummyTCP/DummyTcpFactory.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpGenerator.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpGenerator.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpLoader.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpLoader.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpReceiveStrategy.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpReconnectTask.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpReconnectTask.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpSendStrategy.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpSendStrategy.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpSendStrategy_rch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpSynchResource.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpSynchResource.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpTransport.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcpTransport.cpp:
+        * dds/DCPS/transport/dummyTCP/DummyTcpTransport_rch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcp_export.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcp_pch.h:
+        * dds/DCPS/transport/dummyTCP/DummyTcp_pch.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Added the DummyTcp transport skeleton for testing
+          the performance of current transport implementation.
+
 Tue Jun 12 19:06:13 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
