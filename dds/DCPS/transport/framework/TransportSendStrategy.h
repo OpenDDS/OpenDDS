@@ -119,6 +119,8 @@ namespace TAO
 
         void link_released (bool flag);
 
+        bool isDirectMode();
+
       protected:
 
         TransportSendStrategy(TransportConfiguration* config,

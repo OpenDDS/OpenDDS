@@ -119,8 +119,8 @@ TAO::DCPS::TransportSendStrategy::resume_send ()
   }
   else
   {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy::resume_send  The suspend or terminate"
-      " is not called previously.\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: (%P|%t)TransportSendStrategy::resume_send  The suspend or terminate"
+                         " is not called previously.\n"));
   }
 }
 
@@ -136,4 +136,10 @@ TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
                                        "UNKNOWN" };
 
   return SendModeStr [mode];
+}
+
+ACE_INLINE bool
+TAO::DCPS::TransportSendStrategy::isDirectMode ()
+{
+  return this->mode_ == MODE_DIRECT;
 }
