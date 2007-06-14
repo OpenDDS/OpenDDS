@@ -11,24 +11,17 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-# single reader with single instances test
-$multiple_instance=0;
-$num_samples_per_reader=3;
-$num_readers=1;
-
-
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 unlink $dcpsrepo_ior;
-unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -NOBITS
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             " -o $dcpsrepo_ior"
-                             . " -d $domains_file -NOBITS");
+                                  " -o $dcpsrepo_ior"
+                                  . " -d $domains_file -NOBITS");
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = " -ORBSvcConf ../../tcp.conf ";
 # -b
 $parameters = "-DcpsBit 0 $svc_config ";
 # or could have
@@ -38,11 +31,13 @@ if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-$FooTest5 = new PerlACE::Process ("main", $parameters);
-
+$ZCTest = new PerlACE::Process ("main", $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
-$DCPSREPO->Spawn ();
+if ($DCPSREPO->Spawn () != 0) {
+    print STDERR "ERROR: Couldn't spawn InfoRepo\ntest FAILED.\n";
+    return 1;
+}
 
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -50,16 +45,18 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-print $FooTest5->CommandLine(), "\n";
-$FooTest5->Spawn ();
+print $ZCTest->CommandLine(), "\n";
+if ($ZCTest->Spawn () != 0) {
+    print STDERR "ERROR: Couldn't spawn main\ntest FAILED.\n";
+    return 1;
+}
 
-$result = $FooTest5->WaitKill (60);
+$result = $ZCTest->WaitKill (60);
 
 if ($result != 0) {
     print STDERR "ERROR: main returned $result \n";
     $status = 1;
 }
-
 
 $ir = $DCPSREPO->TerminateWaitKill(5);
 

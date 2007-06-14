@@ -355,6 +355,8 @@ namespace TAO
        */
       virtual int num_zero_copies();
 
+      virtual void dec_ref_data_element(ReceivedDataElement* r) = 0;
+
       /// Release the instance with the handle.
       void release_instance (::DDS::InstanceHandle_t handle);
       

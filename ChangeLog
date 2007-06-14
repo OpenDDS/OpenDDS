@@ -1,3 +1,42 @@
+Thu Jun 14 19:55:48 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.inl:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopyInfoSeq_T.cpp:
+        * dds/DCPS/ZeroCopySeqBase.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Adapted the ZeroCopy sequence implementation be compatible with the
+          requirements of the CORBA/C++ mapping for unbounded value sequences.
+
+        * tests/DCPS/ZeroCopyRead/Simple.idl:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+          Extended this test to cover new functionality in ZeroCopy sequences.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          This test doesn't use the generated FooDataReaderImpl so it needed to
+          be augmented to have the additional virtual function.
+
+        * dds/DCPS/ZeroCopySeqBase.inl:
+        * dds/DCPS/ZeroCopySeqBase.cpp:
+
+          Removed these files.  They are no longer needed.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+          Logic error fixed, unrelated to Zero-Copy but found during testing.
+
 Wed Jun 13 14:52:59 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP:
@@ -9893,3 +9932,9 @@ Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
           developement history.
 
          LocalWords:  UTC txt
+
+LocalVariables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))End:
+indent-tabs-mode: nil
+End:

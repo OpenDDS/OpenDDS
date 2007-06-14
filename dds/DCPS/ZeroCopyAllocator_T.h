@@ -57,13 +57,11 @@ namespace TAO
 #endif /* ACE_HAS_MALLOC_STATS */
             virtual void dump (void) const;
 
-        private:
-            // do not allow copies.
-            FirstTimeFastAllocator(const FirstTimeFastAllocator&);
-            FirstTimeFastAllocator& operator=(const FirstTimeFastAllocator&);
+            T* pool() { return pool_; }
 
+        private:
             /// is this the first time this is allocated?
-            int firstTime_;
+            bool firstTime_;
 
             /// the pool of allocated memory.
             T pool_[N];

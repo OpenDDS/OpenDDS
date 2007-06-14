@@ -11,8 +11,4 @@ project: dcpsexe {
     SimpleTypeSupport.idl
   }
 
-  Source_Files {
-    main.cpp
-    SimpleTypeSupportImpl.cpp
-  }
 }

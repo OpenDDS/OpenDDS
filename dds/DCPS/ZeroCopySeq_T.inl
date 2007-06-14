@@ -1,15 +1,12 @@
 // -*- C++ -*-
-// ============================================================================
-/**
- *  @file   ZeroCopySeq_T.inl
- *
- *  $Id$
- *
- *
- */
-// ============================================================================
+// $Id$
 
 #include "dds/DCPS/ReceivedDataElementList.h"
+#include "dds/DCPS/DataReaderImpl.h"
+
+#include <utility>
+#include <algorithm>
+
 
 namespace TAO
 {
@@ -17,162 +14,290 @@ namespace TAO
     {
 
 
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::ZeroCopyDataSeq(
-    const size_t max_len,
-    const size_t init_size,
-    ACE_Allocator* alloc) 
-    : ZeroCopySeqBase(max_len)
-    , is_zero_copy_(max_len == 0)
-    , loaner_(0)
-    , ptrs_(max_len > init_size ? max_len : init_size, alloc ? alloc : &defaultAllocator_)
-    , samples_(max_len > 0 ? this->ptrs_.max_size() : 0)
+//DDS_Vector implementation
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::DDS_Vector(
+  const size_t init_size,
+  ACE_Allocator* alloc)
+  : ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX> (init_size, alloc)
 {
 }
 
 
-//======== DDS specification inspired methods =====
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-CORBA::ULong 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::length() const {
-    return this->length_;
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::swap(DDS_Vector& rhs)
+{
+  ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX>::swap(rhs);
+  std::swap (this->length_, rhs.length_);
+  std::swap (this->curr_max_size_, rhs.curr_max_size_);
 }
 
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-void 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::length(CORBA::ULong length) {
-    // Support spec saying:
-    // To avoid potential memory leaks, the implementation of the Data and SampleInfo 
-    // collections should disallow changing the length of a collection for which owns==FALSE.
-    ACE_ASSERT(this->owns() == true);
-    ACE_ASSERT(length <= this->max_slots());
 
-    this->set_length(length);
+//ZeroCopyDataSeq implementation
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
+  CORBA::ULong maximum /* = 0 */,
+  CORBA::ULong init_size /* = DEF_MAX */,
+  ACE_Allocator* alloc /* = 0 */) 
+  : loaner_(0)
+  , ptrs_((maximum == 0) ? init_size : 0
+          , alloc ? alloc : &default_allocator_)
+  , sc_maximum_(maximum)
+  , sc_length_(0)
+  , sc_buffer_(sc_maximum_ ? allocbuf(sc_maximum_) : 0)
+  , sc_release_(sc_maximum_)
+{
 }
 
-//======== CORBA sequence like methods ======
 
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-Sample_T const & 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) const {
-    // TBD? should we make it a violation to reference when max_len=0?
-    if (is_zero_copy_) 
-        return *((Sample_T*)this->ptrs_[i]->registered_data_);
-    else
-        return this->samples_[i];
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
+  CORBA::ULong maximum,
+  CORBA::ULong length,
+  Sample_T* buffer, 
+  CORBA::Boolean release /* = false */)
+  : loaner_(0)
+  , ptrs_(0)
+  , sc_maximum_(maximum)
+  , sc_length_(length)
+  , sc_buffer_(buffer)
+  , sc_release_(release)
+{
 }
 
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-Sample_T & 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator[](CORBA::ULong i) {
-    // TBD? should we make it a violation to reference when max_len=0?
-    if (is_zero_copy_) 
-        return *((Sample_T*)this->ptrs_[i]->registered_data_);
-    else
-        return this->samples_[i];
-}
 
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-CORBA::ULong 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::maximum() const {
-    return this->max_len();
-}
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-CORBA::ULong 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::max_slots() const {
-    if (this->is_zero_copy_ == true)
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+ZeroCopyDataSeq<Sample_T, DEF_MAX>&
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator=(
+  const ZeroCopyDataSeq& frm)
+{
+  if (this != &frm)
     {
-        return this->ptrs_.max_size();
+      ZeroCopyDataSeq<Sample_T, DEF_MAX> temp(frm);
+      swap(temp);
     }
-    else
+  return *this;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::swap(ZeroCopyDataSeq& frm)
+{
+  bool thisUsedDefAlloc = ptrs_.allocator_ == &default_allocator_;
+  bool thisUsedLocalBuffer = ptrs_.array_ == default_allocator_.pool();
+  bool frmUsedDefAlloc = frm.ptrs_.allocator_ == &frm.default_allocator_;
+  bool frmUsedLocalBuffer = frm.ptrs_.array_ == frm.default_allocator_.pool();
+
+  std::swap(loaner_, frm.loaner_);
+  std::swap(default_allocator_, frm.default_allocator_);
+  ptrs_.swap(frm.ptrs_);
+  std::swap(sc_maximum_, frm.sc_maximum_);
+  std::swap(sc_length_, frm.sc_length_);
+  std::swap(sc_buffer_, frm.sc_buffer_);
+  std::swap(sc_release_, frm.sc_release_);
+
+  if (thisUsedDefAlloc) frm.ptrs_.allocator_ = &frm.default_allocator_;
+  if (thisUsedLocalBuffer) frm.ptrs_.array_ = frm.default_allocator_.pool();
+  if (frmUsedDefAlloc) ptrs_.allocator_ = &default_allocator_;
+  if (frmUsedLocalBuffer) ptrs_.array_ = default_allocator_.pool();
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::~ZeroCopyDataSeq()
+{
+  if (loaner_) loaner_->auto_return_loan(this);
+  if (sc_release_ && sc_buffer_) freebuf(sc_buffer_);
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+bool
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::is_zero_copy() const
+{
+  return sc_maximum_ == 0;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+CORBA::ULong
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::maximum() const
+{
+  return sc_maximum_;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+CORBA::ULong 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::max_slots() const
+{
+  return is_zero_copy() ? ptrs_.max_size() : sc_maximum_;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+CORBA::ULong
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::length() const
+{
+  return is_zero_copy() ? ptrs_.size() : sc_length_;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+const Sample_T& 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i) const
+{
+  if (is_zero_copy()) 
+    return *static_cast<const Sample_T*>(ptrs_[i]->registered_data_);
+  else
+    return sc_buffer_[i];
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+Sample_T&
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i)
+{
+  if (is_zero_copy()) 
+    return *static_cast<Sample_T*>(ptrs_[i]->registered_data_);
+  else
+    return sc_buffer_[i];
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+CORBA::Boolean
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::release() const
+{
+  return sc_release_; //will always be false in zero-copy mode
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::replace(
+  CORBA::ULong maximum,
+  CORBA::ULong length,
+  Sample_T* buffer, 
+  CORBA::Boolean release /* = false */)
+{
+  ZeroCopyDataSeq<Sample_T, DEF_MAX> newOne(maximum, length, buffer, release);
+  swap(newOne);
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::make_single_copy(CORBA::ULong maximum)
+{
+  ZeroCopyDataSeq<Sample_T, DEF_MAX> sc(std::max(maximum, ptrs_.size()));
+  sc.length(ptrs_.size());
+  for (CORBA::ULong i(0); i < ptrs_.size(); ++i)
     {
-        return this->samples_.max_size();
-    } 
+      sc[i] = (*this)[i];
+    }
+  swap(sc);
 }
 
 
-// ==== OpenDDS unique methods =====
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-void 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::assign_ptr(::CORBA::ULong ii, 
-                                                                     ::TAO::DCPS::ReceivedDataElement* item,
-                                                                     ::TAO::DCPS::DataReaderImpl* loaner) 
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+const Sample_T*
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer() const
 {
-    ACE_ASSERT(this->is_zero_copy_ == true);
-    item->inc_ref();
-    item->zero_copy_cnt_++;
-    loaner_ = loaner; // remember which DataReadr contains this data
-    ptrs_[ii] = item;
-}
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-TAO::DCPS::ReceivedDataElement* 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::getPtr(::CORBA::ULong ii) const 
-{
-    ACE_ASSERT(this->is_zero_copy_ == true);
-    return ptrs_[ii];
-}
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-void 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::assign_sample(::CORBA::ULong ii, const Sample_T& sample) 
-{
-    ACE_ASSERT(this->is_zero_copy_ == false);
-    samples_[ii] = sample;
-}
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-void 
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::set_length(CORBA::ULong length) 
-{
-    ACE_ASSERT(length <= this->max_slots());
-
-    /* this is too complicated since we are not supporting resizing
-
-    // NOTE: +20 helps avoid copying every time the Seq length is incremented
-    // and we know that they are pointers so 20 more is no big deal
-    CORBA::ULong nextLen = length+20;
-    if (this->max_len_)
+  //If we're currently zero-copy we must become single copy in order to return
+  //a contigous buffer.  The only way to do this and meet the CORBA/C++ spec
+  //interface is to cast-away the constness.
+  if (is_zero_copy())
+    const_cast<ZeroCopyDataSeq*>(this)->make_single_copy(max_slots());
+  if (!sc_buffer_) 
     {
-    if (nextLen > this->max_len_) {
-    nextLen = length;
+      sc_buffer_ = allocbuf(sc_maximum_);
+      sc_release_ = true;
     }
-    if (nextLen > this->max_len_) {
-    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max_len %d -- no allowed.\n", 
-    length, this->max_len_));
-    // TBD - it would be nice to tell the calling code that this did not work.
-    return;  
-    }
-    }
-    if (this->length_ > ptrs_.max_size()) {
+  return sc_buffer_;
+}
 
-    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-    length, ptrs_.max_size()));
-    ACE_ASSERT(this->length_ <= ptrs_.max_size()); // make it easier to debug
-    return;
-    // TBD allow resizing? - must copy the pointers
-    //     I do not think it is required per the spec.
-    // Note - resize does not copy the existing values.
-    //this->ptrs_.resize(nextLen, (TAO::DCPS::ReceivedDataElement*)0); 
-    }
-    // only need to resize the samples if we are using them.
-    if (this->max_len_ && this->length_ > samples_.max_size()) {
 
-    // the above check should handle this but better safe than sorry.
-    ACE_ERROR((LM_ERROR,"ZeroCopySeq::length(%d) setting length > max/initial length %d -- no allowed.\n", 
-    length, ptrs_.max_size()));
-    ACE_ASSERT(this->length_ <= samples_.max_size()); // make it easier to debug
-    return;
-    // TBD allow resizing? - must copy the pointers
-    //     I do not think it is required per the spec.
-    // Note - resize does not copy the existing values.
-    this->samples_.resize(nextLen, Sample_T()); 
+/*static*/
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+Sample_T*
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::allocbuf(CORBA::ULong nelems)
+{
+  return new Sample_T[nelems];
+}
+
+
+/*static*/
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::freebuf(Sample_T* buffer)
+{
+  delete[] buffer;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
+{
+  if (!is_zero_copy() || len < ptrs_.size())
+    {
+      length(len);
     }
-    */
-    this->length_ = length;
-};
+  else if (len > ptrs_.size())
+    {
+      //We need the vector to grow efficiently (not reallocate on each call)...
+      ptrs_.resize(std::max(len, ptrs_.size() * 2), 0);
+      //...but maintain the invariant that the size of ptrs_ is our length
+      ptrs_.resize(len, 0);
+    }
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::set_loaner(
+  TAO::DCPS::DataReaderImpl* loaner)
+{
+  loaner_ = loaner;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
+  CORBA::ULong ii,
+  TAO::DCPS::ReceivedDataElement* item) 
+{
+  ACE_ASSERT(is_zero_copy());
+  item->inc_ref();
+  ++item->zero_copy_cnt_;
+  ptrs_[ii] = item;
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+TAO::DCPS::ReceivedDataElement*
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const 
+{
+  ACE_ASSERT(is_zero_copy());
+  return ptrs_[ii];
+}
+
+
+template <class Sample_T, size_t DEF_MAX> ACE_INLINE
+void 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_sample(
+  CORBA::ULong ii, const Sample_T& sample) 
+{
+  ACE_ASSERT(!is_zero_copy());
+  sc_buffer_[ii] = sample;
+}
+
 
     } // namespace  ::DDS
 } // namespace TAO

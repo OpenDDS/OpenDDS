@@ -17,11 +17,11 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/ZeroCopySeq_T.h"
-#include "dds/DCPS/DataReaderImpl.h" // needed for gcc
 
 #if !defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopySeq_T.inl"
 #endif /* __//ACE_INLINE__ */
+
 
 namespace TAO
 {
@@ -29,73 +29,127 @@ namespace TAO
     {
 
 
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE> ACE_INLINE
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::ZeroCopyDataSeq(
-   const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> & frm)
-: ZeroCopySeqBase(0)
+template <class Sample_T, size_t DEF_MAX>
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
+  const ZeroCopyDataSeq& frm)
+  : loaner_(frm.loaner_)
+  , ptrs_(frm.ptrs_.size(),
+          (frm.ptrs_.allocator_ == &frm.default_allocator_)
+          ? &default_allocator_ : frm.ptrs_.allocator_)
+  , sc_maximum_(frm.sc_maximum_)
+  , sc_length_(0) //initialized below
+  , sc_buffer_(frm.sc_maximum_ ? allocbuf(frm.sc_maximum_) : 0)
+  , sc_release_(frm.sc_maximum_)
 {
-  this->ZeroCopySeqBase::operator=(frm);
-  this->is_zero_copy_ = frm.is_zero_copy_;
-  this->loaner_       = frm.loaner_;
-  if (this->is_zero_copy_)
+  if (frm.is_zero_copy())
     {
-      this->ptrs_    = frm.ptrs_;
-      // increment reference counts.
-      for (size_t /* Ptr_Seq_Type::size_type */ ii = 0; ii < this->length_; ii++)
+      ptrs_ = frm.ptrs_;
+      //ptrs_ doesn't manage the ref count for its elements
+      for (size_t ii = 0; ii < frm.ptrs_.size(); ++ii)
         {
           ptrs_[ii]->inc_ref();
-          ptrs_[ii]->zero_copy_cnt_++;
+          ++ptrs_[ii]->zero_copy_cnt_;
         }
     }
   else
     {
-      this->samples_ = frm.samples_;
-    }
-}
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::~ZeroCopyDataSeq()
-{
-  if (loaner_) 
-    {
-      loaner_->auto_return_loan(this);
-      loaner_ = 0;
-    }
-}
-
-template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &
-ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE>::operator= (const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> &frm)
-{
-  if (this != &frm)
-    {
-      if (loaner_) 
+      for (CORBA::ULong i = 0; i < frm.sc_length_; ++i)
         {
-          loaner_->auto_return_loan(this);
+          sc_buffer_[i] = frm.sc_buffer_[i];
+          ++sc_length_;
         }
-      this->ZeroCopySeqBase::operator=(frm);
-      this->is_zero_copy_ = frm.is_zero_copy_;
-      this->loaner_       = frm.loaner_;
-      if (this->is_zero_copy_)
+    }
+}
+
+
+template <class Sample_T, size_t DEF_MAX>
+void 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
+{
+  using std::fill;
+  using std::max;
+  using std::copy;
+
+  if (length == this->length())
+  {
+    return;
+  }
+
+  if (is_zero_copy())
+    {
+      if (length < ptrs_.size())
         {
-          this->ptrs_    = frm.ptrs_;
-          // increment reference counts.
-          for (size_t /* Ptr_Seq_Type::size_type */ ii = 0; ii < this->length_; ii++)
+          if (!loaner_)
             {
-              ptrs_[ii]->inc_ref();
-              ptrs_[ii]->zero_copy_cnt_++;
+              make_single_copy(length);
+              this->length(length);
+              return;
             }
+          for (size_t i(length); i < ptrs_.size(); ++i)
+            {
+              --ptrs_[i]->zero_copy_cnt_;
+              loaner_->dec_ref_data_element(ptrs_[i]);
+            }
+          ptrs_.resize(length, 0);
         }
       else
         {
-          this->samples_ = frm.samples_;
+          make_single_copy(length);
         }
     }
-  return *this;
+  else
+    {
+      if (length < sc_length_) //shrink
+        {
+          sc_length_ = length;
+        }
+      else if (length <= sc_maximum_) //grow within buffer
+        {
+          fill(&sc_buffer_[sc_length_], &sc_buffer_[length], Sample_T());
+          sc_length_ = length;
+        }
+      else //grow to larger buffer
+        {
+          ZeroCopyDataSeq<Sample_T, DEF_MAX> grow(max(length, sc_maximum_*2));
+          copy(sc_buffer_, &sc_buffer_[sc_length_], grow.sc_buffer_);
+          fill(&grow.sc_buffer_[sc_length_], &grow.sc_buffer_[length],
+            Sample_T());
+          swap(grow);
+        }
+    }
 }
 
-    } // namespace  ::DDS
+
+template <class Sample_T, size_t DEF_MAX>
+Sample_T*
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer (
+  CORBA::Boolean orphan /* = false */)
+{
+  //Case 1: I can't give away what's not mine
+  //  (includes zero-copy since sc_release_ is always false for zero-copy
+  if (orphan && !sc_release_) return 0;
+
+  // (preparation for cases 2-3)
+  if (is_zero_copy()) make_single_copy(max_slots());
+  if (!sc_buffer_)
+    {
+      allocbuf(sc_maximum_);
+      if (!orphan) sc_release_ = true;
+    }
+
+  //Case 2: Keeping the buffer but letting client use it too
+  if (!orphan) return sc_buffer_;
+
+  //Case 3: Orphaning the buffer to the client, leaves "this" in the
+  //  default-constructed state (which in our case is ZC-enabled)
+  ZeroCopyDataSeq<Sample_T, DEF_MAX> yours;
+  swap(yours);
+  yours.sc_release_ = false; //don't freebuf in dtor
+  return yours.sc_buffer_;
+}
+
+
+    } // namespace DCPS
 } // namespace TAO
 
 

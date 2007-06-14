@@ -139,10 +139,11 @@ SyncServer_i::way_point_reached (::Sync::Id id,
   ClientInfos::iterator iter = subs_.find (id);
   if (iter == subs_.end()) {
     iter = pubs_.find (id);
+    if (iter == pubs_.end()) {
+      return;
+    }
   }
-  if (iter == pubs_.end()) {
-    return;
-  }
+
 
   iter->second.way_point = way_point;
 
