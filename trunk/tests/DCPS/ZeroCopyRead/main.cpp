@@ -383,11 +383,11 @@ void check_return_loan_status(DDS::ReturnCode_t status,
               test_failed = 1;
               throw TestException();
           }
-          if (data.max_len() != expected_max)
+          if (data.maximum() != expected_max)
           {
               ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %s ERROR: expected %d max_len but got %d\n"),
-                  where, expected_max, data.max_len() ));
+                  ACE_TEXT("(%P|%t) %s ERROR: expected %d maximum but got %d\n"),
+                  where, expected_max, data.maximum() ));
               test_failed = 1;
               throw TestException();
           }
@@ -650,8 +650,8 @@ int main (int argc, char *argv[])
       ::DDS::SubscriptionMatchStatus matched =
         foo_dr->get_subscription_match_status ();
 
-      ::DDS::InstanceHandle_t writer_instance_handle;
-      ::DDS::InstanceHandle_t reader_instance_handle;
+      ::DDS::InstanceHandle_t writer_instance_handle = ::DDS::HANDLE_NIL;
+      ::DDS::InstanceHandle_t reader_instance_handle = ::DDS::HANDLE_NIL;
 
           if (matched.total_count != 1)
             ACE_ERROR_RETURN((LM_ERROR,
@@ -662,7 +662,7 @@ int main (int argc, char *argv[])
 
     try { // the real testing.
       ::Test::Simple foo;
-      ::Test::MyLongSeq ls;
+      ::CORBA::LongSeq ls;
       //::Test::Simple::_ls_seq ls;
       ls.length(1);
       ls[0] = 5;
@@ -695,7 +695,7 @@ int main (int argc, char *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq      data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1 (0, max_samples);
 
 
         DDS::ReturnCode_t status  ;
@@ -726,7 +726,7 @@ int main (int argc, char *argv[])
         data1[0].count = 999;
 
         Test::SimpleSeq      data2 (0, max_samples);
-        ::DDS::SampleInfoSeq info2 (0,max_samples);
+        ::DDS::SampleInfoSeq info2;
         if (do_by_instance)
           {
             status = fast_dr->read_instance(  data2
@@ -758,7 +758,8 @@ int main (int argc, char *argv[])
 
         }
 
-        item = data2.getPtr(0);
+        Test::SimpleSeq::PrivateMemberAccess data2_p(data2);
+        item = data2_p.get_ptr(0);
 
         // test the assignment operator.
         Test::SimpleSeq      copy;
@@ -811,9 +812,9 @@ int main (int argc, char *argv[])
 
       {
         //=====================================================
-        // 2) show that single-copy is makes copies
+        // 2) show that single-copy makes copies
         //=====================================================
-        ACE_DEBUG((LM_INFO,"==== TEST 2 : show that single-copy is makes copies\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 2 : show that single-copy makes copies\n"));
 
         const CORBA::Long max_samples = 2;
         // types supporting zero-copy read
@@ -938,7 +939,7 @@ int main (int argc, char *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq      data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1;
 
 
         foo.key  = 1;
@@ -1003,7 +1004,7 @@ int main (int argc, char *argv[])
                             1);
 
         Test::SimpleSeq      data2 (0, max_samples);
-        ::DDS::SampleInfoSeq info2 (0,max_samples);
+        ::DDS::SampleInfoSeq info2;
 
         if (do_by_instance)
           {
@@ -1134,7 +1135,8 @@ int main (int argc, char *argv[])
 
             }
 
-            item = data2.getPtr(0);
+            Test::SimpleSeq::PrivateMemberAccess data2_p(data2);
+            item = data2_p.get_ptr(0);
             if (item->ref_count_ != 3)
             {
                 ACE_ERROR ((LM_ERROR,
@@ -1167,7 +1169,7 @@ int main (int argc, char *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq      data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1;
 
         foo.key  = 1;
         foo.count = 1;
@@ -1278,7 +1280,7 @@ int main (int argc, char *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq     data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1;
          
         foo.key  = 1;
         foo.count = 1;
@@ -1328,7 +1330,7 @@ int main (int argc, char *argv[])
 
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
-        ::DDS::SampleInfoSeq info2 (0,max_samples);
+        ::DDS::SampleInfoSeq info2(0, max_samples); //testing alternate ctor
         if (do_by_instance)
           {
             status = fast_dr->take_instance ( data2 
@@ -1381,7 +1383,7 @@ int main (int argc, char *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq     data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1;
          
         // It is important that the last test case took all of the samples!
 
@@ -1428,7 +1430,7 @@ int main (int argc, char *argv[])
 
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
-        ::DDS::SampleInfoSeq info2 (0,max_samples);
+        ::DDS::SampleInfoSeq info2;
         status = fast_dr->take(  data2 
                                 , info2
                                 , max_samples
@@ -1482,7 +1484,7 @@ int main (int argc, char *argv[])
         // a heap allocation.
         // Note: because of the read/take preconditions the sequence does not need to resize.
         Test::SimpleSeq     data1 (0, max_samples, &the_allocator);
-        ::DDS::SampleInfoSeq info1 (0,max_samples);
+        ::DDS::SampleInfoSeq info1;
          
         foo.key  = 1; 
         foo.count = 8;
@@ -1527,7 +1529,7 @@ int main (int argc, char *argv[])
 
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples, &the_allocator);
-        ::DDS::SampleInfoSeq info2 (0,max_samples);
+        ::DDS::SampleInfoSeq info2;
         status = fast_dr->take(  data2 
                                 , info2
                                 , max_samples
@@ -1579,17 +1581,79 @@ int main (int argc, char *argv[])
       }
 
       {
+        //==================================================================
+        // 9) Show that the ZC sequence impl meets CORBA C++ mapping reqmts
+        //==================================================================
+        ACE_DEBUG((LM_INFO, ACE_TEXT("==== TEST 9 : Show that the ZC sequence")
+                   ACE_TEXT(" impl meets CORBA C++ mapping reqmts.\n")));
+        using Test::SimpleSeq;
+        using Test::Simple;
+        SimpleSeq default_ctor;
+        SimpleSeq copy_ctor(default_ctor);
+        CORBA::ULong max(10);
+        SimpleSeq max_ctor(max);
+        copy_ctor = max_ctor; //test operator=
+        if (copy_ctor.maximum() < max)
+        {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: maximum() should return at least 10\n")));
+          test_failed = 1;
+        }
+        Simple* buffer = SimpleSeq::allocbuf(max);
+        SimpleSeq buf_ctor(max, 0, buffer);
+        if (buf_ctor.release())
+        {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: release() should be false\n")));
+          test_failed = 1;
+        }
+
+        copy_ctor.replace(max, 0, buffer);
+        Simple* buffer2 = copy_ctor.get_buffer();
+        const SimpleSeq& const_cc = copy_ctor;
+        const Simple* buffer3 = const_cc.get_buffer();
+        SimpleSeq::freebuf(buffer2);
+        {
+          SimpleSeq orphanTest(const_cc);
+          buffer2 = orphanTest.get_buffer(true);
+          SimpleSeq::freebuf(buffer2);
+        }
+
+        max_ctor.length(max);
+        for (CORBA::ULong i = 0; i < max; ++i)
+        {
+          max_ctor[i].key = 42 + i;
+        }
+        for (CORBA::ULong i = 0; i < max; ++i)
+        {
+          if (max_ctor[i].key != 42 + i)
+          {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: Didn't get expected data out of the sequence.\n")));
+            test_failed = 1;
+          }
+        }
+        const SimpleSeq& const_seq = max_ctor;
+        for (CORBA::ULong i = 0; i < max; ++i)
+        {
+          if (const_seq[i].key != 42 + i)
+          {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: Didn't get expected data out of the sequence (const).\n")));
+            test_failed = 1;
+          }
+        }
+
+      }
+
+      {
         //=====================================================
-        // 9) Show that loans are checked by delete_datareader.
+        // 10) Show that loans are checked by delete_datareader.
         //=====================================================
       // !!!! note - this test should be the last because it deletes the datareader
-        ACE_DEBUG((LM_INFO,"==== TEST 9 : Show that loans are checked by delete_datareader.\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 10: Show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
         // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
         // operation.
         Test::SimpleSeq     data0 (0, max_samples);
-        ::DDS::SampleInfoSeq info0 (0,max_samples);
+        ::DDS::SampleInfoSeq info0;
          
         foo.key  = 1; 
         foo.count = 9;
@@ -1601,7 +1665,7 @@ int main (int argc, char *argv[])
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) t9 ERROR: timeout waiting for data.\n")),
+                            ACE_TEXT("(%P|%t) t10 ERROR: timeout waiting for data.\n")),
                             1);
 
         DDS::ReturnCode_t status  ;
@@ -1616,12 +1680,12 @@ int main (int argc, char *argv[])
         Test::SimpleSeq     data1 (data0);
         ::DDS::SampleInfoSeq info1 (info0);
   
-        check_read_status(status, data1, 1, "t9 read2");
+        check_read_status(status, data1, 1, "t10 read2");
 
         if (data1[0].count != 9)
         {
             ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t9 ERROR: unexpected value for data1-pre.\n") ));
+                    ACE_TEXT("(%P|%t) t10 ERROR: unexpected value for data1-pre.\n") ));
             test_failed = 1;
         }
 
@@ -1630,7 +1694,7 @@ int main (int argc, char *argv[])
         if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET)
         {
             ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite should have returned PRECONDITION_NOT_MET but returned retcode %d.\n"), status ));
+                    ACE_TEXT("(%P|%t) t10 ERROR: delete_datawrite should have returned PRECONDITION_NOT_MET but returned retcode %d.\n"), status ));
             test_failed = 1;
         }
 
@@ -1638,20 +1702,20 @@ int main (int argc, char *argv[])
         status = fast_dr->return_loan(  data0 
                                       , info0 );
 
-        check_return_loan_status(status, data0, 0, 0, "t9 return_loan");
+        check_return_loan_status(status, data0, 0, 0, "t10 return_loan");
 
         // Return the "loan" of copied samples to the datareader.
         status = fast_dr->return_loan(  data1 
                                       , info1 );
 
-        check_return_loan_status(status, data1, 0, 0, "t9 return_loan");
+        check_return_loan_status(status, data1, 0, 0, "t10 return_loan");
 
         status =   sub->delete_datareader(dr.in ());
 
         if (status != ::DDS::RETCODE_OK)
         {
             ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t9 ERROR: delete_datawrite failed with retcode %d.\n"), status ));
+                    ACE_TEXT("(%P|%t) t10 ERROR: delete_datawrite failed with retcode %d.\n"), status ));
             test_failed = 1;
         }
 
@@ -1703,7 +1767,7 @@ int main (int argc, char *argv[])
 
   // Note: The TransportImpl reference SHOULD be deleted before exit from
   //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
+  //       Otherwise cleanup after main() will encounter an access violation.
   reader_transport_impl = 0;
   writer_transport_impl = 0;
   return test_failed;

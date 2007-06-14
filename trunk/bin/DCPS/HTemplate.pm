@@ -1,4 +1,4 @@
-#
+# -*- C++ -*-
 # HTemplate.pm - template for generating header implementation file for
 #                DDS TypeSupport.  The following macros are
 #                substituted when generating the output file:
@@ -288,7 +288,7 @@ private:
 <%NAMESPACEEND%>
 
 <%NAMESPACESTART%>
-/** Servant for DateReader interface of <%TYPE%> data type.
+/** Servant for DataReader interface of <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
@@ -471,6 +471,8 @@ public:
   DDS::ReturnCode_t auto_return_loan(void* seq);
 
   void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
+
+  void dec_ref_data_element(::TAO::DCPS::ReceivedDataElement* r);
 
  protected:
 

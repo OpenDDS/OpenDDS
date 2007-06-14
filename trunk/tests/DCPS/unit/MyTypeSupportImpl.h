@@ -84,6 +84,7 @@ public:
   
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual void dds_demarshal(const TAO::DCPS::ReceivedDataSample&) {}
+  virtual void dec_ref_data_element(TAO::DCPS::ReceivedDataElement *) {}
 
 };
 
