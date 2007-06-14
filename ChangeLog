@@ -1,3 +1,10 @@
+Thu Jun 14 21:00:22 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/reliable_multicast/reliable_multicast.mpc:
+
+          Removed dependencies on TAO and the core DDS library, now it just
+          links against the ReliableMulticast transport lib and ACE.
+
 Thu Jun 14 19:55:48 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
