@@ -137,8 +137,9 @@ namespace TAO
 
         void swap(DDS_Vector&);
 
-        using ACE_Vector::allocator_;
-        using ACE_Vector::array_;
+        typedef ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX> BASE;
+        using BASE::allocator_;
+        using BASE::array_;
       };
 
 

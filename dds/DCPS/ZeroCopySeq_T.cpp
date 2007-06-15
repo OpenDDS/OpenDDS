@@ -63,7 +63,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
 
 
 template <class Sample_T, size_t DEF_MAX>
-void 
+void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
 {
   using std::fill;

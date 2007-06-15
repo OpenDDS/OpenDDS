@@ -37,7 +37,7 @@ ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
 template <class InfoType, size_t DEF_MAX> ACE_INLINE
 ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
   CORBA::ULong maximum,
-  CORBA::ULong length, 
+  CORBA::ULong length,
   InfoType* buffer,
   CORBA::Boolean release)
   : TAO_BASE_SEQUENCE <InfoType> (maximum, length, buffer, release)
