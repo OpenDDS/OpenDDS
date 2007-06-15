@@ -1,3 +1,24 @@
+Fri Jun 15 21:39:34 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.h:
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * examples/DCPS/DistributedContent/domain_ids:
+        * examples/DCPS/DistributedContent/FileInfo.idl:
+        * examples/DCPS/DistributedContent/FileInfoListener.cpp:
+        * examples/DCPS/DistributedContent/FileInfoListener.h:
+        * examples/DCPS/DistributedContent/main.cpp:
+        * examples/DCPS/DistributedContent/README:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/DistributedContent/simple_tcp.conf:
+
+          Added an example that mimics a simple distributed content system.
+          The code demonstrates using a class to abstract DDS logic
+          from application logic and using a publisher and subscriber
+          to reference to the same topic but not associate with each other.
+
 Fri Jun 15 21:23:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
