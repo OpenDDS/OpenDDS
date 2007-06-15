@@ -10,6 +10,7 @@
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
 
 TAO::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                      (DummyTcpDataLink*      link,
@@ -127,6 +128,7 @@ TAO::DCPS::DummyTcpSendStrategy::get_handle ()
 ssize_t 
 TAO::DCPS::DummyTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 {
+  PerformanceTest::stop_test ("TAO::DCPS::DummyTcpSendStrategy::send_bytes_i");
   return this->connection_->peer().sendv(iov, n);
 }
 

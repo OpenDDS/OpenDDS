@@ -1,3 +1,42 @@
+Fri Jun 15 14:39:31 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * performance-tests/DCPS/TransportLatency:
+
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:
+        * performance-tests/DCPS/TransportLatency/Messenger.idl:
+        * performance-tests/DCPS/TransportLatency/Messenger.mpc:
+        * performance-tests/DCPS/TransportLatency/README:
+        * performance-tests/DCPS/TransportLatency/Writer.h:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/domain_ids:
+        * performance-tests/DCPS/TransportLatency/mcast.conf:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/reliable_mcast.conf:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/tcp.conf:
+        * performance-tests/DCPS/TransportLatency/udp.conf:
+
+          Added a new test for the current Transport Framework.
+          This test currently only test the latency on the publisher side.
+          I will add the corresponding test on the subscriber side later.
+
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+
+          Inserted the test stopping point at send_bytes_i. 
+
 Fri Jun 15 13:48:39 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ZeroCopyAllocator_T.h:

@@ -1,0 +1,12 @@
+#include <dds/DdsDcpsInfrastructure.idl>
+
+module Messenger {
+
+#pragma DCPS_DATA_TYPE "Messenger::Message"
+#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
+
+  struct Message {
+    long subject_id;
+    DDS::Time_t timestamp;
+  };
+};
