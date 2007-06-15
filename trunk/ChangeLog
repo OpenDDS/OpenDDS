@@ -1,3 +1,19 @@
+Fri Jun 15 16:39:05 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+
+          Renamed file.
+
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Added the missing files.
+
+        * performance-tests/DCPS/TransportLatency/Messenger.mpc:
+
+          Removed this file. Renamed.
+
+
 Fri Jun 15 16:19:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ZeroCopyRead/main.cpp:
@@ -41,7 +57,7 @@ Fri Jun 15 14:39:31 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
 
-          Inserted the test stopping point at send_bytes_i. 
+          Inserted the test stopping point at send_bytes_i.
 
 Fri Jun 15 13:48:39 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
