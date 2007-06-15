@@ -1,3 +1,9 @@
+Fri Jun 15 21:23:07 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Added the required pre-compiler header include.
+
 Fri Jun 15 19:17:20 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
