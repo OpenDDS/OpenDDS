@@ -1,3 +1,9 @@
+Fri Jun 15 19:17:20 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+
+          Added the missing export macro to fix compile errors.
+
 Fri Jun 15 16:39:05 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:

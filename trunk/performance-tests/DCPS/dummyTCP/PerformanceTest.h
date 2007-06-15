@@ -1,10 +1,12 @@
 #include <ace/OS_NS_time.h>
 #include <ace/High_Res_Timer.h>
 
+#include "DummyTcp_export.h"
+
 #include <string>
 using namespace std;
 
-class PerformanceTest
+class DummyTcp_Export PerformanceTest
 {
 
   typedef struct
