@@ -1,3 +1,9 @@
+Fri Jun 15 16:19:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Fixed scoreboard warnings.
+
 Fri Jun 15 14:39:31 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/TransportLatency:
