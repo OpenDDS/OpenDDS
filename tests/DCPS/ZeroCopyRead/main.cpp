@@ -1610,6 +1610,12 @@ int main (int argc, char *argv[])
         Simple* buffer2 = copy_ctor.get_buffer();
         const SimpleSeq& const_cc = copy_ctor;
         const Simple* buffer3 = const_cc.get_buffer();
+        if (buffer3 == 0)
+        {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) t9 ERROR: get_buffer() returned 0\n")));
+          test_failed = 1;
+        }
         SimpleSeq::freebuf(buffer2);
         {
           SimpleSeq orphanTest(const_cc);
@@ -1624,7 +1630,7 @@ int main (int argc, char *argv[])
         }
         for (CORBA::ULong i = 0; i < max; ++i)
         {
-          if (max_ctor[i].key != 42 + i)
+          if (max_ctor[i].key != CORBA::Long(42 + i))
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: Didn't get expected data out of the sequence.\n")));
             test_failed = 1;
@@ -1633,7 +1639,7 @@ int main (int argc, char *argv[])
         const SimpleSeq& const_seq = max_ctor;
         for (CORBA::ULong i = 0; i < max; ++i)
         {
-          if (const_seq[i].key != 42 + i)
+          if (const_seq[i].key != CORBA::Long(42 + i))
           {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(P%|%t) t9 ERROR: Didn't get expected data out of the sequence (const).\n")));
             test_failed = 1;
