@@ -41,7 +41,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
   CORBA::ULong maximum /* = 0 */,
   CORBA::ULong init_size /* = DEF_MAX */,
-  ACE_Allocator* alloc /* = 0 */) 
+  ACE_Allocator* alloc /* = 0 */)
   : loaner_(0)
   , ptrs_((maximum == 0) ? init_size : 0
           , alloc ? alloc : &default_allocator_)
@@ -57,7 +57,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
   CORBA::ULong maximum,
   CORBA::ULong length,
-  Sample_T* buffer, 
+  Sample_T* buffer,
   CORBA::Boolean release /* = false */)
   : loaner_(0)
   , ptrs_(0)
@@ -84,7 +84,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator=(
 
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-void 
+void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::swap(ZeroCopyDataSeq& frm)
 {
   bool thisUsedDefAlloc = ptrs_.allocator_ == &default_allocator_;
@@ -132,7 +132,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::maximum() const
 
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-CORBA::ULong 
+CORBA::ULong
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::max_slots() const
 {
   return is_zero_copy() ? ptrs_.max_size() : sc_maximum_;
@@ -148,10 +148,10 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length() const
 
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-const Sample_T& 
+const Sample_T&
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i) const
 {
-  if (is_zero_copy()) 
+  if (is_zero_copy())
     return *static_cast<const Sample_T*>(ptrs_[i]->registered_data_);
   else
     return sc_buffer_[i];
@@ -162,7 +162,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 Sample_T&
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i)
 {
-  if (is_zero_copy()) 
+  if (is_zero_copy())
     return *static_cast<Sample_T*>(ptrs_[i]->registered_data_);
   else
     return sc_buffer_[i];
@@ -182,7 +182,7 @@ void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::replace(
   CORBA::ULong maximum,
   CORBA::ULong length,
-  Sample_T* buffer, 
+  Sample_T* buffer,
   CORBA::Boolean release /* = false */)
 {
   ZeroCopyDataSeq<Sample_T, DEF_MAX> newOne(maximum, length, buffer, release);
@@ -194,7 +194,8 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::make_single_copy(CORBA::ULong maximum)
 {
-  ZeroCopyDataSeq<Sample_T, DEF_MAX> sc(std::max(maximum, ptrs_.size()));
+  CORBA::ULong currentSize(ptrs_.size());
+  ZeroCopyDataSeq<Sample_T, DEF_MAX> sc(std::max(maximum, currentSize));
   sc.length(ptrs_.size());
   for (CORBA::ULong i(0); i < ptrs_.size(); ++i)
     {
@@ -213,7 +214,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer() const
   //interface is to cast-away the constness.
   if (is_zero_copy())
     const_cast<ZeroCopyDataSeq*>(this)->make_single_copy(max_slots());
-  if (!sc_buffer_) 
+  if (!sc_buffer_)
     {
       sc_buffer_ = allocbuf(sc_maximum_);
       sc_release_ = true;
@@ -251,7 +252,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
   else if (len > ptrs_.size())
     {
       //We need the vector to grow efficiently (not reallocate on each call)...
-      ptrs_.resize(std::max(len, ptrs_.size() * 2), 0);
+      ptrs_.resize(std::max(len, CORBA::ULong(ptrs_.size()) * 2), 0);
       //...but maintain the invariant that the size of ptrs_ is our length
       ptrs_.resize(len, 0);
     }
@@ -271,7 +272,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
   CORBA::ULong ii,
-  TAO::DCPS::ReceivedDataElement* item) 
+  TAO::DCPS::ReceivedDataElement* item)
 {
   ACE_ASSERT(is_zero_copy());
   item->inc_ref();
@@ -282,7 +283,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 TAO::DCPS::ReceivedDataElement*
-ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const 
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const
 {
   ACE_ASSERT(is_zero_copy());
   return ptrs_[ii];
@@ -290,9 +291,9 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const
 
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-void 
+void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_sample(
-  CORBA::ULong ii, const Sample_T& sample) 
+  CORBA::ULong ii, const Sample_T& sample)
 {
   ACE_ASSERT(!is_zero_copy());
   sc_buffer_[ii] = sample;

@@ -16,14 +16,14 @@ namespace TAO
     {
 
 template<class T, std::size_t N> ACE_INLINE
-FirstTimeFastAllocator<T, N>::FirstTimeFastAllocator() 
-: firstTime_(true) 
+FirstTimeFastAllocator<T, N>::FirstTimeFastAllocator()
+: firstTime_(true)
 {
 }
 
 template<class T, std::size_t N> ACE_INLINE
 void *
-FirstTimeFastAllocator<T, N>::malloc (size_t nbytes) { 
+FirstTimeFastAllocator<T, N>::malloc (size_t nbytes) {
     if (firstTime_ && nbytes <= N * sizeof(T)) {
         firstTime_ = false;
         return (void*) pool_;

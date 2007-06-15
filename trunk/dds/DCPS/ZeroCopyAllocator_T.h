@@ -25,8 +25,8 @@ namespace TAO
     namespace DCPS
     {
 
-        /// This allocator is "Fast" because it's pool can be on the stack 
-        ///   (If the object is on the stack and hence it does not require the 
+        /// This allocator is "Fast" because it's pool can be on the stack
+        ///   (If the object is on the stack and hence it does not require the
         ///    cost of allocating and deallocating on the heap.  It object is on the
         ///    heap then it requires just one allocation; not two.)
         /// @WARNING The object using this allocator must not have a scope smaller than this object !!!
@@ -39,7 +39,7 @@ namespace TAO
             virtual void free (void *ptr);
 
             /// These methods are no-ops.
-            virtual void *calloc (size_t nbytes, char initial_value = '\0'); 
+            virtual void *calloc (size_t nbytes, char initial_value = '\0');
             virtual void *calloc (size_t n_elem, size_t elem_size, char initial_value = '\0');
             virtual int remove (void);
             virtual int bind (const char *name, void *pointer, int duplicates = 0);

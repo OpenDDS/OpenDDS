@@ -52,7 +52,7 @@ namespace TAO
       explicit ZeroCopyInfoSeq(CORBA::ULong maximum,
         CORBA::ULong init_size = DEF_MAX, ACE_Allocator* = 0);
 
-      ZeroCopyInfoSeq(CORBA::ULong maximum, CORBA::ULong length, 
+      ZeroCopyInfoSeq(CORBA::ULong maximum, CORBA::ULong length,
         InfoType* buffer, CORBA::Boolean release = false);
 
     };
