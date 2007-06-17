@@ -1,3 +1,9 @@
+Sat Jun 16 17:36:10 MST 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * examples/DCPS/DistributedContent/main.cpp:
+
+          Fixed warning about no end of line.
+
 Fri Jun 15 21:39:34 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
