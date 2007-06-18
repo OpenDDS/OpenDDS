@@ -14,6 +14,8 @@ std::string PerformanceTest::name_;
 std::string PerformanceTest::start_location_;
 std::string PerformanceTest::stop_location_;
 
+using namespace std;
+
 void
 PerformanceTest::start_test (const string& name, const string& start_loc)
 {

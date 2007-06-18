@@ -1,3 +1,12 @@
+Mon Jun 18 21:40:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Moved "using namespace std" to the cpp file.  This can't go in the h
+          file because it has unwanted side-effects in other compilation units
+          that include the header.
+
 Mon Jun 18 19:12:58 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * DDS_TAO.mwc:
@@ -5,7 +14,6 @@ Mon Jun 18 19:12:58 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
           Added the MPC/config to the include path.
           Use ace.mpc since it is the only library
           we want to use from ace directory.
-
 
 Mon Jun 18 17:37:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 

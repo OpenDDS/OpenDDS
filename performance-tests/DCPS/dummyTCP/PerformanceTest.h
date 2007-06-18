@@ -4,7 +4,6 @@
 #include "DummyTcp_export.h"
 
 #include <string>
-using namespace std;
 
 class DummyTcp_Export PerformanceTest
 {
@@ -21,8 +20,9 @@ class DummyTcp_Export PerformanceTest
 
 
 public:
-  static void start_test (const string& name, const string& start_loc);
-  static void stop_test (const string& stop_loc);
+  static void start_test (const std::string& name,
+                          const std::string& start_loc);
+  static void stop_test (const std::string& stop_loc);
   static ACE_hrtime_t transport_time ();
   static void report_stats ();
   static bool debug;
