@@ -6,6 +6,6 @@ project : aceexe {
   exename = unittest
   libs  += ReliableMulticast
   after += ReliableMulticast
-  includes = $(DDS_ROOT)
+  includes += $(DDS_ROOT)
   libpaths += $(DDS_ROOT)/lib
 }
