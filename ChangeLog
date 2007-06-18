@@ -1,3 +1,9 @@
+Mon Jun 18 15:25:36 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+
+          Added an 'after' for the DummyTcp library.
+
 Mon Jun 18 15:10:50 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/TransportLatency/Messenger.idl:
