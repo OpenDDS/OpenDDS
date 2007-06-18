@@ -1,3 +1,13 @@
+Mon Jun 18 14:11:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+
+          Simplified the mpc file and added 'requires += built_in_topics'.
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+
+          Removed a stray '-' on a line by itself.
+
 Sat Jun 16 17:36:10 MST 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * examples/DCPS/DistributedContent/main.cpp:

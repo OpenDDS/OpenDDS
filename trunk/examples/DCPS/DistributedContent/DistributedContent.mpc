@@ -1,39 +1,10 @@
-
-project(DDS*idl): dcps {
-  // This project ensures the common components get built first.
-
-  TypeSupport_Files {
-    FileInfo.idl >> FileInfoTypeSupport.idl FileInfoTypeSupportImpl.h FileInfoTypeSupportImpl.cpp
-  }
-
-  IDL_Files {
-    FileInfo.idl
-    FileDiffTypeSupport.idl
-  }
-
-  custom_only = 1
-}
-
-
 project(DDS*Node) : dcpsexe {
   
   exename   = node
-  after    += DDS*idl
+  requires += built_in_topics
 
   TypeSupport_Files {
-    FileInfo.idl >> FileInfoTypeSupport.idl FileInfoTypeSupportImpl.h FileInfoTypeSupportImpl.cpp
+    FileInfo.idl >> FileDiffTypeSupport.idl FileDiffTypeSupportImpl.h FileDiffTypeSupportImpl.cpp
   }
 
-  IDL_Files {
-    FileInfo.idl
-    FileDiffTypeSupport.idl
-  }
-
-  Source_Files {
-    main.cpp
-    FileInfoListener.cpp
-    AbstractionLayer.cpp
-    ApplicationLevel.cpp
-    FileDiffTypeSupportImpl.cpp
-  }
 }
