@@ -17,7 +17,7 @@ project(DDS*idl): dcps {
 project(DDS*Publisher) : dcpsexe {
   
   exename   = publisher
-  after    += DDS*idl
+  after    += DDS*idl DummyTcp
 
   libs += DummyTcp
   IDL_Files {
@@ -36,7 +36,7 @@ project(DDS*Subscriber) : dcpsexe {
   
   libs += DummyTcp
   exename   = subscriber
-  after    += DDS*idl
+  after    += DDS*idl DummyTcp
 
   IDL_Files {
     Messenger.idl
