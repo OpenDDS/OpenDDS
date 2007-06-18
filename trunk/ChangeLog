@@ -1,3 +1,12 @@
+Mon Jun 18 15:10:50 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * performance-tests/DCPS/TransportLatency/Messenger.idl:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+
+          Defined the time_t struct in the idl instead of using
+          DDS::Time_t to resolve the compile errors in the 
+          built_in_topics=0 build. 
+
 Mon Jun 18 14:56:51 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/DistributedContent.mpc:

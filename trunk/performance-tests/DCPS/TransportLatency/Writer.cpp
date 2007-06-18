@@ -78,7 +78,9 @@ Writer::svc ()
 
     // message only contain a timestamp to reduce the overhead from complex types
     // so that we can focus on the performance of transport framework.
-    message.timestamp = TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+      DDS::Time_t ddstime = TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+      message.timestamp.sec = ddstime.sec;
+      message.timestamp.nanosec = ddstime.nanosec;
 
 
       // begin the  performance test
