@@ -1,3 +1,12 @@
+Mon Jun 18 19:12:58 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Added the MPC/config to the include path.
+          Use ace.mpc since it is the only library
+          we want to use from ace directory.
+
+
 Mon Jun 18 17:37:01 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/reliable_multicast/reliable_multicast.mpc:
