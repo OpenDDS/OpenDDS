@@ -15,10 +15,9 @@
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 #include "ace/Vector_T.h"
-
+#include <map>
 
 namespace TAO
 {
@@ -286,26 +285,11 @@ private:
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                DataWriterImpl*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              PublicationObjectMap;
+        typedef std::map<RepoId, DataWriterImpl*>            PublicationObjectMap;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                DataReaderImpl*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              SubscriptionObjectMap;
+        typedef std::map<RepoId, DataReaderImpl*>            SubscriptionObjectMap;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                AssociationInfoList*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              PendingAssociationsMap;
+        typedef std::map<RepoId, AssociationInfoList*>       PendingAssociationsMap;
 
         /// The collection of the DataWriterImpl objects that are created by
         /// the PublisherImpl currently "attached" to this TransportImpl.
