@@ -2,12 +2,6 @@ Version 0.13 of TAO DDS.
 
 New to this version are the following changes:
 
-- Since version 0.12 the default participant setting for BITs is "on".
-
-   BIT settings need to be synchronized across all participants (including
-   the InfoRepo) in a domain. A mixed setting environment may not operate
-   correctly.
-
 - Simplified .mpc and .mpb files
 
   Projects that use DDS no longer need to explicitly list "portableserver" as a
@@ -169,6 +163,12 @@ New to this version are the following changes:
 Version 0.12 of TAO DDS.
 
 New to this version are the following changes:
+
+- The default participant setting for BITs is now "on".
+
+   BIT settings need to be synchronized across all participants (including
+   the InfoRepo) in a domain. A mixed setting environment may not operate
+   correctly.
 
 - DCPSInfoRepo service now has a file based persistence mechanism. This
   can be configured to actively persist the InfoRepo's current state
