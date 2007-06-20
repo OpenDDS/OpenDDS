@@ -21,6 +21,10 @@
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
+
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 const char* pub_ready_filename    = "publisher_ready.txt";

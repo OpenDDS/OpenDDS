@@ -18,6 +18,10 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #include <ace/streams.h>
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
+
 using namespace Messenger;
 
 const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;

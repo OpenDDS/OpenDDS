@@ -1,4 +1,4 @@
-project(*topic): dcpsexe {
+project(*topic): dcpsexe_with_tcp {
   exename   = topic_test
   libs     += DcpsFooType
   libpaths += ../FooType
@@ -11,7 +11,7 @@ project(*topic): dcpsexe {
   }
 }
 
-project(*infrastructure): dcpsexe {
+project(*infrastructure): dcpsexe_with_tcp {
   exename   = infrastructure_test
   libs     += DcpsFooType
   libpaths += ../FooType

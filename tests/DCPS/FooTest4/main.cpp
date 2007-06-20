@@ -22,6 +22,10 @@
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "ace/Arg_Shifter.h"
 #include "ace/SString.h"
 

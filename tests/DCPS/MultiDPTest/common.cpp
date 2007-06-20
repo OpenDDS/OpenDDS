@@ -4,6 +4,10 @@
 
 #include "common.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 const char* type_name = "Foo";
 int num_datawriters = 2;
 int num_instances_per_writer = 1;

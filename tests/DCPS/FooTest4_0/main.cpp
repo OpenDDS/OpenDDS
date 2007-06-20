@@ -20,6 +20,10 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "ace/Arg_Shifter.h"
 
 TAO::DCPS::TransportImpl_rch reader_transport_impl;

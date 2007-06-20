@@ -1,3 +1,74 @@
+Wed Jun 20 18:42:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed !STATIC from the majority of tests.  The changes below allow
+          the tests to use SimpleTCP in a static build.  Later I'll go back and
+          enable the other transports where needed.
+          Also uncommented the tests/DCPS/BuiltInTopic/run_test.pl ignore_*
+          tests since BuiltInTopics are now supported.  There is a bug with
+          ignore_part but Yan will fix that shortly so for now we will see it
+          as red on the scoreboard.
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/TCPListener.mpc:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/dcps_integration.mpc:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_0/pub_main.cpp:
+        * tests/DCPS/FooTest3_0/sub_main.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest4/FooTest4.mpc:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/FooTest4_0.mpc:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/MultiDPTest.mpc:
+        * tests/DCPS/MultiDPTest/common.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/UnitTest.mpc:
+        * tests/transport/simple_bp/DDS_transport_simple_bp.mpc:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/DDS_transport_simple_bp_rm.mpc:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/DDS_transport_simple_n.mpc:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/sub_main.cpp:
+
+          Enabled SimpleTCP in static builds on most tests that are run for the
+          scoreboard.  tests/DCPS/FooTest5_0 is left as runtime-loading so that
+          this functionality is tested too.
+
 Mon Jun 18 21:40:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/dummyTCP/PerformanceTest.h:

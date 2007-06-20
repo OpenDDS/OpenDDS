@@ -5,6 +5,9 @@
 #include  "dds/DCPS/Qos_Helper.h"
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
 
 #include "ace/Arg_Shifter.h"
 
