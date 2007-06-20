@@ -1,10 +1,22 @@
+Wed Jun 20 21:16:46 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_reliable_multicast.mpb:
+        * MPC/config/dcps_tcp.mpb:
+        * MPC/config/dcps_unreliable_dgram.mpb:
+        * MPC/config/dcpsexe_with_reliable_multicast.mpb:
+        * MPC/config/dcpsexe_with_tcp.mpb:
+        * MPC/config/dcpsexe_with_unreliable_dgram.mpb:
+
+          Added base projects for the three transport libraries, refactored the
+          dcpsexe_with_* base projects to use these new base projects.
+
 Wed Jun 20 21:11:25 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
           Moved my note from
           Wed Jun  6 15:16:42 UTC 2007  Ciju John  <johnc at ociweb dot
           com>
-          to its correct cronological position (under V 0.12 notes).
+          to its correct chronological position (under V 0.12 notes).
 
 Wed Jun 20 20:32:01 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 

@@ -1,7 +1,4 @@
-// -*- MPC -*-
-// $Id$
-
-project : dcpsexe, dcps_reliable_multicast {
+project {
   libs        += ReliableMulticast
   after       += ReliableMulticast
 }

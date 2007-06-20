@@ -1,7 +1,5 @@
 // -*- MPC -*-
 // $Id$
 
-project : dcpsexe {
-  libs        += SimpleUnreliableDgram
-  after       += SimpleUnreliableDgram
+project : dcpsexe, dcps_unreliable_dgram {
 }
