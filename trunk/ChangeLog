@@ -1,3 +1,10 @@
+Wed Jun 20 19:28:34 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/dds.doxygen:
+
+          Doxygen appears to be confused by ACE_THROW_SPEC((...)), attempting
+          to fix this.
+
 Wed Jun 20 18:42:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
