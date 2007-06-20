@@ -1,3 +1,11 @@
+Wed Jun 20 21:28:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Augmented the existing MPC note for the MPC change directly below
+          this one, and clarified the default BIT setting note in the current
+          version.
+
 Wed Jun 20 21:16:46 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_reliable_multicast.mpb:

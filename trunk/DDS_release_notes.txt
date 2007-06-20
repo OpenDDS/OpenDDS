@@ -2,11 +2,20 @@ Version 0.13 of TAO DDS.
 
 New to this version are the following changes:
 
+- The default participant setting for BITs is now "on"
+
+  This change was actually part of 0.12 but the release notes were not updated
+  to include it.  Please see the entry with the same title under the "Version
+  0.12" section below for more details.
+
+
 - Simplified .mpc and .mpb files
 
   Projects that use DDS no longer need to explicitly list "portableserver" as a
   base project.  It will be included by the "dcps*" base projects such as
-  "dcpsexe" and "dcpsexe_with_tcp".
+  "dcpsexe" and "dcpsexe_with_tcp".  Also, an .mpb file is provided for each of
+  the transport libraries (dcps_tcp.mpb, dcps_unreliable_dgram.mpb,
+  dcps_reliable_multicast.mpb).
 
 
 - Supported built-in sequences (the CORBA::*Seq sequences).
