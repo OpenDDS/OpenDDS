@@ -1,3 +1,11 @@
+Wed Jun 20 21:11:25 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+          Moved my note from
+          Wed Jun  6 15:16:42 UTC 2007  Ciju John  <johnc at ociweb dot
+          com>
+          to its correct cronological position (under V 0.12 notes).
+
 Wed Jun 20 20:32:01 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:
