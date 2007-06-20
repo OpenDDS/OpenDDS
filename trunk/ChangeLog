@@ -1,3 +1,10 @@
+Wed Jun 20 20:32:01 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Converted ACE_Hash_Map_Manager_Ex to std::map.
+
 Wed Jun 20 19:28:34 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
