@@ -13,6 +13,7 @@
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
 #include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
 
 
 const char* MY_TOPIC    = "foo";

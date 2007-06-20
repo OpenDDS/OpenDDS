@@ -1,4 +1,4 @@
-project(DcpsFooTest5Publisher): dcpsexe_with_unreliable_dgram, dcpsexe_with_reliable_multicast {
+project(DcpsFooTest5Publisher): dcpsexe_with_unreliable_dgram, dcpsexe_with_reliable_multicast, dcpsexe_with_tcp {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -13,7 +13,7 @@ project(DcpsFooTest5Publisher): dcpsexe_with_unreliable_dgram, dcpsexe_with_reli
 }
 
 
-project(DcpsFooTest5Subscriber): dcpsexe_with_unreliable_dgram, dcpsexe_with_reliable_multicast {
+project(DcpsFooTest5Subscriber): dcpsexe_with_unreliable_dgram, dcpsexe_with_reliable_multicast, dcpsexe_with_tcp {
   exename   = subscriber
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

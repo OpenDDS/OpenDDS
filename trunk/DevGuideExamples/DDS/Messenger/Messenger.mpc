@@ -15,8 +15,8 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe {
-  
+project(DDS*Publisher) : dcpsexe_with_tcp {
+
   exename   = publisher
   after    += DDS*idl
 
@@ -32,8 +32,8 @@ project(DDS*Publisher) : dcpsexe {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe {
-  
+project(DDS*Subscriber) : dcpsexe_with_tcp {
+
   exename   = subscriber
   after    += DDS*idl
 

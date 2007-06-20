@@ -12,6 +12,10 @@
 #include "tests/DCPS/common/TestSupport.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"

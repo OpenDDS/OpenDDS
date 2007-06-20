@@ -1,4 +1,4 @@
-project(LivelinessTestPublisher): dcpsexe {
+project(LivelinessTestPublisher): dcpsexe_with_tcp {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
@@ -13,7 +13,7 @@ project(LivelinessTestPublisher): dcpsexe {
 }
 
 
-project(LivelinessTestSubscriber): dcpsexe {
+project(LivelinessTestSubscriber): dcpsexe_with_tcp {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common
