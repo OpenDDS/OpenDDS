@@ -1857,29 +1857,3 @@ namespace TAO
 
    } // namespace DCPS
 } // namespace TAO
-
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Unbounded_Set <::DDS::Subscriber_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::Subscriber_ptr>;
-template class ACE_Unbounded_Set <::DDS::Publisher_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::Publisher_ptr>;
-template class ACE_Hash_Map_Manager<ACE_CString, ::DDS::Topic_ptr, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Iterator <ACE_CString, ::DDS::Topic_ptr, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Entry<ACE_CString, ::DDS::Topic_ptr>;
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Unbounded_Set <::DDS::Subscriber_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::Subscriber_ptr>;
-#pragma instantiate ACE_Unbounded_Set <::DDS::Publisher_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::Publisher_ptr>;
-#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, ::DDS::RefCounted_Topic, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Iterator <ACE_CString, ::DDS::RefCounted_Topic, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Entry<ACE_CString, ::DDS::RefCounted_Topic>;
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-
-
-

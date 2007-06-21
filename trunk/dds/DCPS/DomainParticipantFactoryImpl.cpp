@@ -413,23 +413,3 @@ namespace TAO
 
  } // namespace DCPS
 } // namespace TAO
-
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Unbounded_Set <::DDS::DomainParticipant_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::DomainParticipant_ptr>;
-template class ACE_Hash_Map_Manager<::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Iterator <::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Entry<::DDS::DomainId_t, DPSet>;
-
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Unbounded_Set <::DDS::DomainParticipant_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::DomainParticipant_ptr>;
-#pragma instantiate ACE_Hash_Map_Manager<::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Iterator <::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Entry<::DDS::DomainId_t, DPSet>;
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

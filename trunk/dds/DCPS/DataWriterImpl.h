@@ -20,6 +20,8 @@
 
 #include "ace/Event_Handler.h"
 
+#include <map>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -513,11 +515,7 @@ namespace TAO
       /// The list of active subscriptions.
       ::DDS::InstanceHandleSeq        subscription_handles_;
 
-      typedef ACE_Hash_Map_Manager_Ex<RepoId,
-        DDS::InstanceHandle_t,
-        ACE_Hash<RepoId>,
-        ACE_Equal_To<RepoId>,
-        ACE_Null_Mutex>        RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
 

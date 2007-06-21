@@ -6,6 +6,7 @@
 #include "TransportImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Util.h"
 #include "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
@@ -24,24 +25,6 @@ namespace
       itr->second->_remove_ref ();
     }
     c.clear();
-  }
-
-  // bind reproduces the ACE_Hash_Map_Manager_Ex's bind behavior
-  template <typename Container>
-  int bind(
-    Container& c,
-    const typename Container::value_type& v
-    )
-  {
-    if (c.find(v.first) == c.end())
-    {
-      if (c.insert(v).second)
-      {
-        return 0;
-      }
-      return -1;
-    }
-    return 1;
   }
 }
 
