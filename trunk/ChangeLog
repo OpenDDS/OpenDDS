@@ -1,3 +1,32 @@
+Thu Jun 21 20:47:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataSampleList.inl:
+
+          Fixed a bug that copy constructor incorrectly copied num_subs_.
+
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Made the sub/pub repo id (participant id and topic id) generator
+          in DCPSInfoRepo to generate unique id per DCPSInfoRepo instance 
+          instead of per domain. This would allow multiple domains in the 
+          same process(connect to the same DCPSInfoRepo instance) share the
+          same transport.
+          
+        * DDS_release_notes.txt:
+
+          Added notes for repo id generation scheme change.
+          
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Removed some old TBD comments.
+          
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Reverted back the built-in topic checking participant data.
+          
 Thu Jun 21 16:22:05 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
