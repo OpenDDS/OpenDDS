@@ -17,6 +17,9 @@
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>

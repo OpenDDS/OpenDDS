@@ -84,7 +84,7 @@ TAO_DCPS_SimpleUnreliableDgramLoader::init (int argc,
 
 ACE_FACTORY_DEFINE (SimpleUnreliableDgram, TAO_DCPS_SimpleUnreliableDgramLoader)
 ACE_STATIC_SVC_DEFINE (TAO_DCPS_SimpleUnreliableDgramLoader,
-                       ACE_TEXT ("DCPS_SimpleUnreliableDgramLoader"),
+                       ACE_TEXT ("TAO_DCPS_SimpleUnreliableDgramLoader"),
                        ACE_SVC_OBJ_T,
                        &ACE_SVC_NAME (TAO_DCPS_SimpleUnreliableDgramLoader),
                        ACE_Service_Type::DELETE_THIS

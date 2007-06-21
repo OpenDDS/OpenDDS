@@ -15,7 +15,7 @@ project(DDS*idl): dcps {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_tcp {
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
 
   exename   = publisher
   after    += DDS*idl
@@ -32,7 +32,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp {
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
 
   exename   = subscriber
   after    += DDS*idl

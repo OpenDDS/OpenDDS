@@ -1,3 +1,32 @@
+Thu Jun 21 21:05:06 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastLoader.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramLoader.cpp:
+
+          Allow these transport libraries to be used in a static build.
+
+        * DevGuideExamples/DDS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/transport/mcast_simple/DDS_transport_mcast_simple.mpc:
+        * tests/transport/mcast_simple/pub_main.cpp:
+        * tests/transport/mcast_simple/sub_main.cpp:
+
+          Continued enabling tests for static builds.  These are the tests that
+          use transports other than TCP, plus some that use TCP that I forgot
+          to fix yesterday.
+
 Thu Jun 21 20:47:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataSampleList.inl:

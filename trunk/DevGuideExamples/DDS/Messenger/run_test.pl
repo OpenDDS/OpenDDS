@@ -26,8 +26,8 @@ elsif ($ARGV[0] eq 'mcast') {
     $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
 }
 elsif ($ARGV[0] eq 'reliable_mcast') {
-    $opts =  "-ORBSvcConf reliable_mcast.conf -t reliable_mcast";
-#	. " -ORBSvcConf tcp.conf";
+    $opts =  "-ORBSvcConf reliable_mcast.conf -t reliable_mcast"
+        . " -ORBSvcConf tcp.conf"; # TCP is still used for BITs
     $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini";
 }

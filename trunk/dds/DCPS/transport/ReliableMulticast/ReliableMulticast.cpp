@@ -14,4 +14,8 @@
 TAO_DCPS_ReliableMulticast_Initializer::TAO_DCPS_ReliableMulticast_Initializer()
 {
   ACE_Service_Config::process_directive (ace_svc_desc_TAO_DCPS_ReliableMulticastLoader);
+#if RELIABLEMULTICAST_HAS_DLL == 0
+  ACE_Service_Config::process_directive (
+    ACE_TEXT("static TAO_DCPS_ReliableMulticastLoader \"\""));
+#endif
 }
