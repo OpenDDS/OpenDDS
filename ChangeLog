@@ -1,3 +1,18 @@
+Thu Jun 21 16:22:05 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Converted ACE_Hash_Map_Manager_Ex to std::map.
+
 Thu Jun 21 14:05:56 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
 
         * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:

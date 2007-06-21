@@ -102,11 +102,9 @@ namespace TAO
     {
     public:
 
-      typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
-                                      SubscriptionInstance*,
-                                      ACE_Hash< ::DDS::InstanceHandle_t>,
-                                      ACE_Equal_To< ::DDS::InstanceHandle_t>,
-                                      ACE_Null_Mutex>        SubscriptionInstanceMapType;
+      typedef std::map<
+        ::DDS::InstanceHandle_t,
+        SubscriptionInstance*> SubscriptionInstanceMapType;
 
       //Constructor
       DataReaderImpl (void);
@@ -442,11 +440,7 @@ namespace TAO
 
       ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
 
-      typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                      DDS::InstanceHandle_t,
-                                      ACE_Hash<RepoId>,
-                                      ACE_Equal_To<RepoId>,
-                                      ACE_Null_Mutex>        RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
       ::DDS::InstanceHandleSeq        publication_handles_;
@@ -483,11 +477,7 @@ namespace TAO
       /// Flag indicates that the init() is called.
       bool                       initialized_;
 
-      typedef ACE_Hash_Map_Manager_Ex<PublicationId,
-                                      WriterInfo,
-                                      ACE_Hash<PublicationId>,
-                                      ACE_Equal_To<PublicationId>,
-                                      ACE_Null_Mutex>        WriterMapType;
+      typedef std::map<PublicationId, WriterInfo> WriterMapType;
 
 
       /// publications writing to this reader.

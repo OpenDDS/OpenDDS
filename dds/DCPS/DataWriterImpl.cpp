@@ -19,6 +19,7 @@
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
+#include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
@@ -253,7 +254,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
         publication_match_status_.total_count ++;
         publication_match_status_.total_count_change ++;
         subscription_handles_[sub_len + i] = handles[i];
-        if (id_to_handle_map_.bind (rd_ids[i], handles[i]) != 0)
+        if (bind(id_to_handle_map_, std::make_pair(rd_ids[i], handles[i])) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataWriterImpl::fully_associated "
             "insert %d - %X to id_to_handle_map_ failed \n", rd_ids[i], handles[i]));
@@ -387,7 +388,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
     for (CORBA::ULong i = 0; i < num_removed_readers; i++)
     {
-      id_to_handle_map_.unbind (readers[i]);
+      id_to_handle_map_.erase(readers[i]);
     }
   }
 
@@ -1498,8 +1499,8 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
   for (CORBA::ULong i = 0; i < num_ids; ++i)
   {
     hdls.length (i + 1);
-    RepoIdToHandleMap::ENTRY* ientry;
-    if (id_to_handle_map_.find (ids[i], ientry) != 0)
+    RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
+    if (iter == id_to_handle_map_.end())
     {
       ACE_DEBUG ((LM_WARNING, "(%P|%t)DataWriterImpl::cache_lookup_instance_handles "
         "could not find instance handle for writer %d\n", ids[i]));
@@ -1508,7 +1509,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
     }
     else
     {
-      hdls[i] = ientry->int_id_;
+      hdls[i] = iter->second;
     }
   }
 

@@ -34,6 +34,7 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
+#include "dds/DCPS/Util.h"
 #include "<%TYPE%>TypeSupportImpl.h"
 
 
@@ -62,7 +63,6 @@ namespace
     DataReaderImpl* dataReader_;
     bool set_;
   };
-
 }
 
 
@@ -1599,7 +1599,7 @@ void
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
-    int ret = instances_.bind(handle, instance);
+    int ret = bind(instances_, std::make_pair(handle, instance));
 
     if (ret != 0)
     {
