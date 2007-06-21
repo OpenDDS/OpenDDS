@@ -1452,8 +1452,6 @@ bool
 DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
-  // TBD: Remove the condition check after we change to default support
-  //      builtin topics.
   if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
   {
 #if !defined (DDS_HAS_MINIMUM_BIT)

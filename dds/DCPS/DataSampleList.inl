@@ -30,7 +30,7 @@ namespace TAO
     {
       sample_ = elem.sample_->duplicate ();
       publication_id_ = elem.publication_id_;
-      num_subs_ = elem.publication_id_; 
+      num_subs_ = elem.num_subs_; 
       for (CORBA::ULong i = 0; i < num_subs_; ++i)
         subscription_ids_[i] = elem.subscription_ids_[i];
       group_id_ = elem.group_id_;

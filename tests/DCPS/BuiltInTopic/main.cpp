@@ -224,7 +224,7 @@ void test_bit_participant ()
                                                 ANY_SAMPLE_STATE,
                                                 ANY_VIEW_STATE,
                                                 ANY_INSTANCE_STATE) ;
-#if 0
+
       TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
       CORBA::ULong data_len = part_data.length ();
@@ -239,12 +239,6 @@ void test_bit_participant ()
       TEST_CHECK (part_data[0].key[0] == TEST_DOMAIN);
       TEST_CHECK (part_data[0].key[1] == participant_servant->get_id ());
       TEST_CHECK (part_data[0].key[2] == 0);
-#else
-      // The paricipant will not know itself from repo since the
-      // bit participant topic datareader is created after 
-      // DCPS gets add_domain_participant request.
-      TEST_CHECK (ret == ::DDS::RETCODE_NO_DATA);
-#endif
     }
   catch (...)
     {

@@ -1024,49 +1024,49 @@ void DCPS_IR_Domain::remove_dead_participants ()
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_participant_id ()
 {
-  return participantIdGenerator_.get_next_id ();
+  return participantIdGenerator_.get_next_part_id ();
 }
 
 bool
 DCPS_IR_Domain::set_base_participant_id (TAO::DCPS::RepoId id)
 {
-  return participantIdGenerator_.set_base_id (id);
+  return participantIdGenerator_.set_base_part_id (id);
 }
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
 {
-  return topicIdGenerator_.get_next_id ();
+  return topicIdGenerator_.get_next_topic_id ();
 }
 
 bool
 DCPS_IR_Domain::set_base_topic_id (TAO::DCPS::RepoId id)
 {
-  return topicIdGenerator_.set_base_id (id);
+  return topicIdGenerator_.set_base_topic_id (id);
 }
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
 {
-  return pubsubIdGenerator_.get_next_id ();
+  return pubsubIdGenerator_.get_next_sub_pub_id ();
 }
 
 bool
 DCPS_IR_Domain::set_base_publication_id (TAO::DCPS::RepoId id)
 {
-  return pubsubIdGenerator_.set_base_id (id);
+  return pubsubIdGenerator_.set_base_sub_pub_id (id);
 }
 
 
 TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
 {
-  return pubsubIdGenerator_.get_next_id ();
+  return pubsubIdGenerator_.get_next_sub_pub_id ();
 }
 
 bool
 DCPS_IR_Domain::set_base_subscription_id (TAO::DCPS::RepoId id)
 {
-  return pubsubIdGenerator_.set_base_id (id);
+  return pubsubIdGenerator_.set_base_sub_pub_id (id);
 }
 
 
