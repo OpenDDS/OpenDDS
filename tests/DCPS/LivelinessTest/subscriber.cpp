@@ -23,6 +23,7 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.cpp"
 #endif
 
 #include "ace/Arg_Shifter.h"
