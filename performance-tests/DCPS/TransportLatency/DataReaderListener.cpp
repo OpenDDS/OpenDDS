@@ -8,6 +8,8 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <ace/streams.h>
 
+#include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
+
 using namespace Messenger;
 
 // Implementation skeleton constructor
@@ -24,6 +26,10 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
+
+  PerformanceTest::stop_test("Subscriber Side Transport Performance Test",
+                                   "DataReaderListenerImpl::on_data_available\n");
+
   num_reads_ ++;
 
   try {

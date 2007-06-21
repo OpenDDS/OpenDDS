@@ -7,6 +7,7 @@
 #include "DummyTcpSendStrategy.h"
 #include "DummyTcpTransport.h"
 #include "DummyTcpDataLink.h"
+#include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -50,6 +51,10 @@ TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes
 
   // We don't do anything to the remote_address for the DummyTcp case.
   ACE_UNUSED_ARG(remote_address);
+
+  // begin the  performance test on the subscriber side
+  PerformanceTest::start_test ("Subscriber Side Transport Performance Test",
+                               "TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes");
 
   if (this->connection_.is_nil())
     {

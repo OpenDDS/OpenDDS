@@ -4,17 +4,20 @@
 #include <iostream>
 #include <cmath>
 
-ACE_High_Res_Timer PerformanceTest::timer_;
-PerformanceTest::stats_type PerformanceTest::result_;
-ACE_hrtime_t PerformanceTest::transport_time_ = 0;
-bool PerformanceTest::started_ = false;
 bool PerformanceTest::debug =false;
-
-std::string PerformanceTest::name_;
-std::string PerformanceTest::start_location_;
-std::string PerformanceTest::stop_location_;
+PerformanceTest::PTestMap PerformanceTest::pmap_;
 
 using namespace std;
+
+PerformanceTest::PerformanceTest (const string& test_name,
+                                  const string& start_loc)
+  : transport_time_(0),
+    started_(false),
+    test_name_(test_name),
+    start_location_(start_loc)
+{
+    init_stats();
+}
 
 void
 PerformanceTest::start_test (const string& name, const string& start_loc)
@@ -22,48 +25,97 @@ PerformanceTest::start_test (const string& name, const string& start_loc)
   if(debug)
     ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::start_test\n"));
 
-  if (result_.count == 0)
-  {
-    if(debug)
-      ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::start_test, count is 0, init_stats_\n"));
-
-    init_stats();
-  }
-
-  name_ = name;
-  start_location_ = start_loc;
-  timer_.reset ();
-  timer_.start ();
-  started_ = true;
+  // finding or creating a performance test object
+ PerformanceTest* pt = find_or_create_testobj (name, start_loc);
+  pt->begin_ptest();
 }
 
 void
-PerformanceTest::stop_test (const string& stop_loc)
+PerformanceTest::stop_test (const string& name,
+                            const string& stop_loc)
 {
-  if(started_)
+  PTestMap::iterator iter = pmap_.find(name);
+  PerformanceTest* pt = 0;
+  if (iter != pmap_.end())
+    pt = iter->second;
+
+  if(pt !=0)
   {
-    timer_.stop ();
-    started_ = false;
-
-    stop_location_ = stop_loc;
-    transport_time ();
-    if(debug)
+    if(pt->started())
     {
-      ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::stop_test\n"));
-      ACE_DEBUG((LM_DEBUG,"%T (%P|%t)Time spent in transport framework is %Q microseconds\n", transport_time_/(ACE_hrtime_t)1000));
-    }
+      pt->end_ptest(stop_loc);
 
-    add_stats(transport_time_);
+      if(debug)
+        ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::stop_test\n"));
+    }
+  }
+  else
+  {
+    if(debug)
+      ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::stop_test, cannot find the test object!\n"));
   }
 }
 
-ACE_hrtime_t
-PerformanceTest::transport_time ()
+PerformanceTest*
+PerformanceTest::find_or_create_testobj(const string& test_name,
+                                        const string& start_loc)
+{
+
+  PTestMap::iterator iter = pmap_.find(test_name);
+  PerformanceTest* pt = 0;
+  if (iter != pmap_.end())
+    pt = iter->second;
+  else
+  {
+    if(debug)
+      ACE_DEBUG((LM_DEBUG,"(%P|%t), %s, Creating a new PerformanceTest object\n", test_name.c_str()));
+    pt = new PerformanceTest(test_name,start_loc);
+    pmap_.insert(make_pair(test_name,pt));
+  }
+
+  return pt;
+}
+
+void
+PerformanceTest::cleanup (const string& test_name)
+{
+  PTestMap::iterator iter = pmap_.find(test_name);
+  PerformanceTest* pt = 0;
+  if (iter != pmap_.end())
+    pt = iter->second;
+
+  delete pt;
+
+  pmap_.erase(iter);
+}
+
+void
+PerformanceTest::calculate_transport_time ()
+{
+  timer_.elapsed_time (transport_time_);
+  if(debug)
+    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::transport_time = %Q\n", transport_time_));
+}
+
+void
+PerformanceTest::begin_ptest()
 {
   if(debug)
-    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::transport_time\n"));
-  timer_.elapsed_time (transport_time_);
-  return transport_time_;
+    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest, start timer, count=%d\n", result_.count));
+  timer_.start();
+  started_ = true;
+
+}
+void
+PerformanceTest::end_ptest(const string& stop_loc)
+{
+  if(debug)
+    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest, stop timer\n"));
+  timer_.stop();
+  started_ = false;
+  stop_location_ = stop_loc;
+  calculate_transport_time();
+  add_stats(transport_time_);
 }
 
 void
@@ -102,12 +154,34 @@ PerformanceTest::std_dev (const stats_type& result)
 }
 
 void
-PerformanceTest::report_stats ()
+PerformanceTest::report_stats (const string& test_name)
+{
+  PTestMap::iterator iter = pmap_.find(test_name);
+  PerformanceTest* pt = 0;
+  if (iter != pmap_.end())
+    pt = iter->second;
+
+  pt->show_stats();
+}
+
+PerformanceTest::stats_type
+PerformanceTest::stats ()
+{
+  return result_;
+}
+
+bool
+PerformanceTest::started ()
+{
+  return started_;
+}
+
+void PerformanceTest::show_stats()
 {
   time_t clock = time (NULL);
   std::cout << "\n# Transport performance measurements (in us) \n";
-  std::cout << "Test Name: " << name_  << std::endl;
-  std::cout << "Test Start Location: " << start_location_  << std::endl;
+  std::cout << "Test Name: " << test_name_  << std::endl;
+  std::cout << "Test Start Location: " << start_location_ << std::endl;
   std::cout << "Test Stop  Location: " << stop_location_  << std::endl;
   std::cout << "# Executed at:" <<  ctime(&clock);
   std::cout << "# Transport framework traversal time [us]\n";

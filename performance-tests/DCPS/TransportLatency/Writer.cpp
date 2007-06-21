@@ -100,7 +100,7 @@ Writer::svc ()
     }
 
     // the loop is done, now report stats.
-    PerformanceTest::report_stats();
+    PerformanceTest::report_stats("Publisher Side Transport Performance Test");
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
 	 << e << endl;

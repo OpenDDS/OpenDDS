@@ -4,6 +4,7 @@
 #include "DummyTcp_export.h"
 
 #include <string>
+#include <map>
 
 class DummyTcp_Export PerformanceTest
 {
@@ -22,22 +23,38 @@ class DummyTcp_Export PerformanceTest
 public:
   static void start_test (const std::string& name,
                           const std::string& start_loc);
-  static void stop_test (const std::string& stop_loc);
-  static ACE_hrtime_t transport_time ();
-  static void report_stats ();
+  static void stop_test (const std::string& name,
+                         const std::string& stop_loc);
+  static void report_stats (const std::string& test_name);
+  static double std_dev (const stats_type& result);
   static bool debug;
+  static void cleanup (const std::string& test_name);
 private:
-  static ACE_High_Res_Timer timer_;
-  static ACE_hrtime_t transport_time_;
-  static bool started_;
-  static stats_type result_;
-  static std::string name_;
-  static std::string start_location_;
-  static std::string stop_location_;
+  ACE_High_Res_Timer timer_;
+  ACE_hrtime_t transport_time_;
+  bool started_;
+  stats_type result_;
+  std::string test_name_;
+  std::string start_location_;
+  std::string stop_location_;
+
+  // CTOR
+  PerformanceTest(const std::string& test_name,
+                  const std::string& start_loc);
 
   // helper functions
-  static void add_stats (ACE_hrtime_t data);
-  static void init_stats ();
-  static double std_dev (const stats_type& result);
+  void add_stats (ACE_hrtime_t data);
+  void init_stats ();
+  void calculate_transport_time ();
+  void begin_ptest ();
+  void end_ptest (const std::string& stop_loc);
+  stats_type stats ();
+  bool started ();
+  void show_stats();
+
+  typedef std::map<std::string,PerformanceTest*> PTestMap;
+  static PTestMap pmap_;
+  static PerformanceTest* find_or_create_testobj (const std::string& test_name,
+                                          const std::string& start_loc);
 
 };
