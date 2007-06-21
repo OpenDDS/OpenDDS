@@ -17,6 +17,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h>
+#include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -183,8 +184,12 @@ int main (int argc, char *argv[])
 
       int expected = 10;
       while ( listener_servant.num_reads() < expected) {
+
         ACE_OS::sleep (1);
       }
+
+   // the loop is done, now report stats.
+    PerformanceTest::report_stats("Subscriber Side Transport Performance Test");
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

@@ -1,3 +1,17 @@
+Thu Jun 21 14:05:56 UTC 2007  Wallace Zhang  <zhang_w@ociweb.com>
+
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Changes to finish transport framework performance test on
+          the subscriber side.
+
 Wed Jun 20 21:28:50 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:

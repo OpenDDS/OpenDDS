@@ -118,17 +118,18 @@ TAO::DCPS::DummyTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
   return this->non_blocking_send (iov, n, bp);
 }
 
-ACE_HANDLE 
+ACE_HANDLE
 TAO::DCPS::DummyTcpSendStrategy::get_handle ()
 {
   return this->connection_->peer().get_handle();
 }
 
 
-ssize_t 
+ssize_t
 TAO::DCPS::DummyTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 {
-  PerformanceTest::stop_test ("TAO::DCPS::DummyTcpSendStrategy::send_bytes_i");
+  PerformanceTest::stop_test ("Publisher Side Transport Performance Test",
+                              "TAO::DCPS::DummyTcpSendStrategy::send_bytes_i");
   return this->connection_->peer().sendv(iov, n);
 }
 
