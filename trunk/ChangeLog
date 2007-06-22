@@ -42,7 +42,7 @@ Fri Jun 22 19:40:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
           Continued making tests compatible with static builds, especially with
           the old (1.4a) ACE svc config behavior where processing "dynamic"
-          directives will yield an error when they dynamic library is not found
+          directives will yield an error when the dynamic library is not found,
           even if the service object is already in the ACE service repository.
 
 Fri Jun 22 18:58:47 USMST 2007  Yan Dai  <dai_y@ociweb.com>
