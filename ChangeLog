@@ -1,3 +1,9 @@
+Fri Jun 22 00:04:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
+
+          Updated comments.
+
 Thu Jun 21 21:05:06 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.cpp:
