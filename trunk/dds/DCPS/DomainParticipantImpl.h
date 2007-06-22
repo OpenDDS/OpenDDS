@@ -95,8 +95,6 @@ namespace TAO
       };
 
       typedef std::map<std::string, RefCounted_Topic> TopicMap;
-      typedef TopicMap::iterator TopicMap_Iterator;
-      typedef TopicMap::mapped_type TopicMap_Entry;
 
       ///Constructor
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
