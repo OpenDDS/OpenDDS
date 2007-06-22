@@ -73,7 +73,6 @@ Thu Jun 21 20:47:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
           Reverted back the built-in topic checking participant data.
           
->>>>>>> .r854
 Thu Jun 21 16:22:05 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
