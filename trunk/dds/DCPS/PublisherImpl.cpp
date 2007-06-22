@@ -280,46 +280,51 @@ PublisherImpl::~PublisherImpl (void)
     DataWriterMap::iterator the_writ = datawriter_map_.end ();
 
     for (writ = datawriter_map_.begin ();
-   writ != datawriter_map_.end ();
-   writ ++)
-      {
-  if (writ->second == it->second)
+      writ != datawriter_map_.end ();
+      writ ++)
     {
-      the_writ = writ;
-      break;
-    }
+      if (writ->second == it->second)
+      {
+        the_writ = writ;
+        break;
       }
+    }
 
     if (the_writ != datawriter_map_.end ())
-      {
-  datawriter_map_.erase (the_writ);
-      }
+    {
+      datawriter_map_.erase (the_writ);
+    }
 
     publication_map_.erase (publication_id);
 
+    // Call remove association before unregistering the datawriter with the transport,
+    // otherwise some callbacks resulted from remove_association may lost. 
+
+    dw_servant->remove_all_associations();
+    
+    
     TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
     if (impl.is_nil ())
-      {
-  ACE_ERROR ((LM_ERROR,
+    {
+      ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter, ")
         ACE_TEXT("the publisher has not been attached to the TransportImpl.\n")));
-  return ::DDS::RETCODE_ERROR;
-      }
+      return ::DDS::RETCODE_ERROR;
+    }
     // Unregister the DataWriterImpl object with the TransportImpl.
     else if (impl->unregister_publication (publication_id) == -1)
-      {
-  ACE_ERROR ((LM_ERROR,
+    {
+      ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::delete_datawriter, ")
         ACE_TEXT("failed to unregister datawriter %d with TransportImpl.\n"),
         publication_id));
-  return ::DDS::RETCODE_ERROR;
-      }
+      return ::DDS::RETCODE_ERROR;
+    }
 
     delete dw_info;
 
-    dw_servant->remove_all_associations();
     dw_servant->cleanup ();
   }
 

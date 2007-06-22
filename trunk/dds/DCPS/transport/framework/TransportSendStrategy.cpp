@@ -797,15 +797,31 @@ TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",5);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-	"Now graceful_disconnecting=%d and flip to MODE_TERMINATED "
-	, graceful_disconnecting));
-
-  this->clear (MODE_TERMINATED);
+  bool reset_flag = true;
 
   {
     GuardType guard(this->lock_);
 
+    // If the terminate_send call due to a non-graceful disconnection before
+    // a datalink shutdown then we will not try to send the graceful disconnect 
+    // message.
+    if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
+      && ! this->graceful_disconnecting_)
+    {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+        "It was already terminated non gracefully, will not set to graceful disconnecting \n "));
+      reset_flag = false;
+    }
+  }
+
+  VDBG((LM_DEBUG, "(%P|%t) DBG:  Now flip to MODE_TERMINATED \n"));
+
+  this->clear (MODE_TERMINATED);
+
+
+  if (reset_flag)
+  {
+    GuardType guard(this->lock_);
     this->graceful_disconnecting_ = graceful_disconnecting;
   }
 }
@@ -1777,7 +1793,7 @@ TAO::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int n, i
           // by looking at the iovec
           for (int ii = 0; ii < n; ii++)
             {
-              ACE_ERROR((LM_ERROR, "send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
+              ACE_ERROR((LM_ERROR, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
                 ii, iov[ii].iov_len, iov[ii].iov_base ));
             }
         }

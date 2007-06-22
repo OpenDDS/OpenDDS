@@ -39,11 +39,12 @@ int read_delay_ms = 0;
 int expected_lost_sub_notification = 0;
 int actual_lost_sub_notification = 0;
 int end_with_publisher = 0;
+int verify_lost_sub_notification = 1;
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:");
+  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:c:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -66,6 +67,9 @@ int parse_args (int argc, char *argv[])
         break;
       case 'l':
         expected_lost_sub_notification = ACE_OS::atoi (get_opts.opt_arg ());
+        break;
+      case 'c':
+        verify_lost_sub_notification = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case 'e':
         end_with_publisher = ACE_OS::atoi (get_opts.opt_arg ());
@@ -280,7 +284,8 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  if (actual_lost_sub_notification != expected_lost_sub_notification)
+  if (verify_lost_sub_notification 
+    && actual_lost_sub_notification != expected_lost_sub_notification)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_subscription_lost called %d times "
       "and expected %d times\n", actual_lost_sub_notification,
