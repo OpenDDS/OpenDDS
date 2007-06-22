@@ -1,3 +1,10 @@
+Fri Jun 22 20:21:59 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Clarified discussion of the InstanceHandles when BIT is disabled,
+          based on email from Scott Harris.
+
 Fri Jun 22 19:40:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:

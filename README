@@ -352,11 +352,9 @@ all of the base types in the complex type are specified.
      But using the USER_DATA QoS is not yet supported anyway.
 
 -------------------------------------------------------------------------------
-) When Built-in Topic support is not disabled the InstanceHanlde_t values in
-  statuses are actually RepoIDs.
-  One way to know what it is is to know if your application has enabled BIT.
-  Another is that if the InstanceHandle_t value is < 9999 then it
-  is not a valid instance handle value but is a RepoId value.
+) When Built-in Topic support is disabled the InstanceHandle_t values in
+  statuses are actually RepoIDs (the internal ID assigned by the DCPSInfoRepo).
+  Applications should not depend on this behavior.
 
 -------------------------------------------------------------------------------
 ) Calling set_qos() on an entity does not propagate the QoS changes.
