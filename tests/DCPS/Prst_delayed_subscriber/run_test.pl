@@ -11,34 +11,34 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-$opts =  "-ORBSvcConf tcp.conf";
+$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
+
+$opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
-    $opts =  "-ORBSvcConf udp.conf -t udp";
+    $opts = ($use_svc_conf ? "-ORBSvcConf udp.conf" : '') . " -t udp";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
-    #$svc_conf = " -ORBSvcConf udp.conf -t udp";
 }
 elsif ($ARGV[0] eq 'mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -t mcast";
+    $opts = ($use_svc_conf ? "-ORBSvcConf mcast.conf" : '') . " -t mcast";
     $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
-    #$svc_conf = " -ORBSvcConf mcast.conf -t mcast";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $opts =  "-ORBSvcConf tcp.conf";
+    $opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
     $pub_opts = "$opts -t default_tcp";
     $sub_opts = "$opts -t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts =  "-ORBSvcConf udp.conf";
+    $opts = $use_svc_conf ? "-ORBSvcConf udp.conf" : '';
     $pub_opts = "$opts -t default_udp";
     $sub_opts = "$opts -t default_udp";
 }
 elsif ($ARGV[0] eq 'default_mcast') {
-    $opts =  "-ORBSvcConf mcast.conf";
+    $opts = $use_svc_conf ? "-ORBSvcConf mcast.conf" : '';
     $pub_opts = "$opts -t default_mcast_pub";
     $sub_opts = "$opts -t default_mcast_sub";
 }

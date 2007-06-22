@@ -24,16 +24,16 @@ else {
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf");
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                             "$svc_config -o $dcpsrepo_ior"
+                             . " -d $domains_file -ORBDebugLevel 1");
 
 # test multiple cases
 $parameters = "$svc_config -z " ;

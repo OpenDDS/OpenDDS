@@ -23,9 +23,10 @@ $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
+$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 if ($ARGV[0] eq 'bit') {
-  $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
+  $repo_bit_conf = $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '' ;
   $app_bit_conf = "";
 }
 elsif ($ARGV[0] eq '') {
@@ -53,7 +54,7 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"

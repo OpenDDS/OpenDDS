@@ -97,11 +97,13 @@ unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
+
 $DCPSREPO=new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+                             . " -d $domains_file $svc_config");
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
 $publisher=new PerlACE::Process ("FooTest3_publisher"
 				 , "$svc_config"
                                  . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "

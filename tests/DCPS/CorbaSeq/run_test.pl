@@ -11,11 +11,15 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-if ($ARGV[0] eq 'udp') {
-  $svc_conf = " -ORBSvcConf udp.conf ";
-}
-else {
-  $svc_conf = " -ORBSvcConf ../../tcp.conf";
+$svc_conf = '';
+
+if (!new PerlACE::ConfigList->check_config ('STATIC')) {
+    if ($ARGV[0] eq 'udp') {
+        $svc_conf = " -ORBSvcConf udp.conf ";
+    }
+    else {
+        $svc_conf = " -ORBSvcConf ../../tcp.conf";
+    }
 }
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
