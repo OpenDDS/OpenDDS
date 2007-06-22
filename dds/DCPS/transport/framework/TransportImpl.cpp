@@ -18,13 +18,14 @@ namespace
   template <typename Container>
   void clear(Container& c)
   {
-    for (typename Container::iterator itr = c.begin();
-      itr != c.end();
+    Container copy;
+    copy.swap(c);
+    for (typename Container::iterator itr = copy.begin();
+      itr != copy.end();
       ++itr)
     {
       itr->second->_remove_ref ();
     }
-    c.clear();
   }
 }
 
@@ -224,12 +225,10 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
   int ret =
     bind(dw_map_, std::make_pair(pub_id, dw));
 
-  if (ret != 0)
+  if (ret != -1)
     {
-      return ret;
+      dw->_add_ref ();
     }
-
-  dw->_add_ref ();
 
   // It's possiable this function is called after the
   // add_association is handled and also the FULLY_ASSOCIATED
@@ -268,7 +267,6 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_
 {
   DBG_ENTRY_LVL("TransportImpl","find_publication",5);
   GuardType guard(this->lock_);
-
   PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
   if (iter == dw_map_.end())
     {
@@ -277,9 +275,11 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_publication   pub(%d) "
             "not found\n", pub_id));
         }
+      return 0;
     }
-  else if (safe_cpy && iter->second != 0)
+  else if (safe_cpy && iter->second != 0) {
     iter->second->_add_ref ();
+  }
 
   return iter->second;
 }
@@ -295,10 +295,10 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
   int ret =
     bind(dr_map_, std::make_pair(sub_id, dr));
 
-  if (ret == 0)
-    {
-      dr->_add_ref ();
-    }
+  if (ret != -1)
+  {
+    dr->_add_ref ();
+  }
 
   return ret;
 }
@@ -311,15 +311,14 @@ TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
   GuardType guard(this->lock_);
 
   SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
-  int ret = -1;
   if (iter != dr_map_.end())
   {
-    ret = 0;
     if (iter->second != 0)
       iter->second->_remove_ref ();
     dr_map_.erase(iter);
+    return 0;
   }
-  return ret;
+  return -1;
 }
 
 
@@ -328,7 +327,6 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe
 {
   DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
   GuardType guard(this->lock_);
-
   SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
   if (iter == dr_map_.end())
     {
@@ -339,8 +337,9 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe
         }
       return 0;
     }
-  else if (safe_cpy && iter->second != 0)
+  else if (safe_cpy && iter->second != 0) {
     iter->second->_add_ref ();
+  }
 
   return iter->second;
 }

@@ -1,3 +1,14 @@
+Fri Jun 22 14:55:35 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Converted more hash maps to std::map.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug that resulted in test failures on Windows.
+
 Fri Jun 22 00:04:37 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
@@ -62,6 +73,7 @@ Thu Jun 21 20:47:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
           Reverted back the built-in topic checking participant data.
           
+>>>>>>> .r854
 Thu Jun 21 16:22:05 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
