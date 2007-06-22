@@ -435,24 +435,29 @@ TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 
       ACE_Time_Value timeout (this->tcp_config_->passive_reconnect_duration_/1000,
                               this->tcp_config_->passive_reconnect_duration_%1000 * 1000);
-      SimpleTcpReceiveStrategy* rs
-        = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
-
       this->reconnect_state_ = PASSIVE_WAITING_STATE;
       this->link_->notify (DataLink::DISCONNECTED);
 
-      // Give a copy to reactor.
-      this->_add_ref ();
-      this->passive_reconnect_timer_id_ = rs->get_reactor()->schedule_timer(this, 0, timeout);
+      // It is possible that the passive reconnect is called after the new connection
+      // is accepted and the receive_strategy of this old connection is reset to nil. 
+      if (! this->receive_strategy_.is_nil ())
+      {
+        SimpleTcpReceiveStrategy* rs
+          = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
 
-      if (this->passive_reconnect_timer_id_ == -1)
+        // Give a copy to reactor.
+        this->_add_ref ();
+        this->passive_reconnect_timer_id_ = rs->get_reactor()->schedule_timer(this, 0, timeout);
+
+        if (this->passive_reconnect_timer_id_ == -1)
         {
           this->_remove_ref ();
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i, ")
-                            ACE_TEXT(" %p. \n"), "schedule_timer" ),
-                            -1);
+            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i, ")
+            ACE_TEXT(" %p. \n"), "schedule_timer" ),
+            -1);
         }
+      }
     }
 
   return 0;
@@ -585,7 +590,11 @@ TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
       // We stay in PASSIVE_TIMEOUT_CALLED_STATE indicates there is no new connection.
       // Now we need declare the connection is lost.
       this->link_->notify (DataLink::LOST);
-      this->send_strategy_->terminate_send ();
+
+      // The handle_timeout may be called after the connection is re-established 
+      // and the send strategy of this old connection is reset to nil.
+      if (! this->send_strategy_.is_nil ())
+        this->send_strategy_->terminate_send ();
       this->reconnect_state_ = LOST_STATE;
     }
     break;
@@ -649,6 +658,9 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
           ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
           ACE_TEXT(" %p. \n"), "cancel_timer" ));
       }
+      else
+        passive_reconnect_timer_id_ = -1;
+
       this->_remove_ref ();
       notify_reconnect = true;
     }

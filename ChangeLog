@@ -1,3 +1,35 @@
+Fri Jun 22 18:58:47 USMST 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Made the DataWriter/DataReader remove_all_association() calls
+          before the un-registering from transport, otherwise some
+          callbacks resulted from the un-registration will be lost.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Made send strategy not try to send the graceful disconnect message
+          when the terminate_send() is called due to a non-graceful disconnect
+          before a graceful link shutdown.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Added send strategy and receive strategy nil value checking to avoid
+          access violation since the reconnect and handle_timeout may be
+          called after connection is re-established and the send/recv strategies
+          are reset to nil.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          Added a new option to indicate if the on_subscription_lost callback 
+          needs be verified. Whether the listener receives the callback depends
+          on the timing of remove_association and the handle_timeout call 
+          on the passive connection. The bp_timeout test will not verify 
+          on_subscription_lost callback since the listener receives the 
+          callback randomly.
+          
 Fri Jun 22 14:55:35 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
@@ -55,24 +87,24 @@ Thu Jun 21 20:47:18 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
           Made the sub/pub repo id (participant id and topic id) generator
-          in DCPSInfoRepo to generate unique id per DCPSInfoRepo instance 
-          instead of per domain. This would allow multiple domains in the 
+          in DCPSInfoRepo to generate unique id per DCPSInfoRepo instance
+          instead of per domain. This would allow multiple domains in the
           same process(connect to the same DCPSInfoRepo instance) share the
           same transport.
-          
+
         * DDS_release_notes.txt:
 
           Added notes for repo id generation scheme change.
-          
+
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Removed some old TBD comments.
-          
+
         * tests/DCPS/BuiltInTopic/main.cpp:
 
           Reverted back the built-in topic checking participant data.
-          
+
 Thu Jun 21 16:22:05 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

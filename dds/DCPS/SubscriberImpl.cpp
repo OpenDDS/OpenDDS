@@ -319,6 +319,10 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       return ::DDS::RETCODE_ERROR;
     }
 
+  // Call remove association before unregistering the datareader from the transport,
+  // otherwise some callbacks resulted from remove_association may lost. 
+
+  dr_servant->remove_all_associations();
 
   TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
   if (impl.is_nil ())
@@ -341,7 +345,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   // Clean up any remaining associations
-  dr_servant->remove_all_associations();
+  //dr_servant->remove_all_associations();
 
   delete dr_info;
 

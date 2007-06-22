@@ -23,6 +23,7 @@ $lost_subscription_callback = 0;
 $end_with_publisher = 0;
 $kill_subscriber = 0;
 $expected_deleted_connections = 1;
+$verify_lost_sub_notification = 1;
 
 if ($ARGV[0] eq 'restart_sub') {
   # Increase the number of messages so that the publisher will last
@@ -56,7 +57,7 @@ elsif ($ARGV[0] eq 'bp_timeout') {
   $num_writes = 10000;
   $num_expected_reads = $num_writes;
   $lost_publication_callback = 1;
-  $lost_subscription_callback = 1;
+  $verify_lost_sub_notification = 0;
 
   $end_with_publisher = 1;
 }
@@ -70,7 +71,6 @@ else {
   print STDERR "ERROR: invalid parameter $ARGV[0]\n";
   exit 1;
 }
-
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
@@ -100,7 +100,7 @@ $Subscriber = new PerlACE::Process
     ("subscriber"
      , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
      . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
-     . " -e $end_with_publisher");
+     . " -c $verify_lost_sub_notification -e $end_with_publisher");
 $Publisher = new PerlACE::Process
     ("publisher"
      , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
