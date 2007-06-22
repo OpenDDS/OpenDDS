@@ -26,6 +26,9 @@
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Unbounded_Set.h"
 
+#include <map>
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -91,9 +94,9 @@ namespace TAO
         CORBA::Long    client_refs_;
       };
 
-      typedef ACE_Hash_Map_Manager<ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap;
-      typedef ACE_Hash_Map_Iterator < ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap_Iterator;
-      typedef ACE_Hash_Map_Entry < ACE_CString, RefCounted_Topic> TopicMap_Entry;
+      typedef std::map<std::string, RefCounted_Topic> TopicMap;
+      typedef TopicMap::iterator TopicMap_Iterator;
+      typedef TopicMap::mapped_type TopicMap_Entry;
 
       ///Constructor
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,

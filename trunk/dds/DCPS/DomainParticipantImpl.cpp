@@ -10,6 +10,7 @@
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
+#include "Util.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -20,6 +21,26 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "tao/debug.h"
+
+namespace Util
+{
+  template <typename Key>
+  int find(
+    TAO::DCPS::DomainParticipantImpl::TopicMap& c,
+    const Key& key,
+    TAO::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value
+    )
+  {
+    TAO::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
+      c.find(key);
+    if (iter == c.end())
+    {
+      return -1;
+    }
+    value = &iter->second;
+    return 0;
+  }
+}
 
 namespace TAO
 {
@@ -398,7 +419,7 @@ namespace TAO
           return ::DDS::Topic::_nil();
         }
 
-      TopicMap_Entry* entry = 0;
+      TopicMap::mapped_type* entry = 0;
       bool found = false;
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -406,7 +427,7 @@ namespace TAO
                           this->topics_protector_,
                           ::DDS::Topic::_nil());
 
-        if (topics_.find (topic_name, entry) == 0)
+        if (Util::find(topics_, topic_name, entry) == 0)
           {
             found = true;
           }
@@ -415,12 +436,12 @@ namespace TAO
       if ( found )
       {
       	CORBA::String_var found_type
-      	  = entry->int_id_.pair_.svt_->get_type_name();
+      	  = entry->pair_.svt_->get_type_name();
 
         if (ACE_OS::strcmp(type_name, found_type) == 0)
           {
             ::DDS::TopicQos found_qos;
-            entry->int_id_.pair_.svt_->get_qos(found_qos);
+            entry->pair_.svt_->get_qos(found_qos);
             if (topic_qos == found_qos)  // match type name, qos
               {
                 {
@@ -428,9 +449,9 @@ namespace TAO
                                     tao_mon,
                                     this->topics_protector_,
                                     ::DDS::Topic::_nil());
-                  entry->int_id_.client_refs_ ++;
+                  entry->client_refs_ ++;
                 }
-                return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+                return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
               }
             else
               {
@@ -558,8 +579,8 @@ namespace TAO
                             this->topics_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          TopicMap_Entry* entry = 0;
-          if (topics_.find (topic_name.in (), entry) == -1)
+          TopicMap::mapped_type* entry = 0;
+          if (Util::find(topics_, topic_name.in (), entry) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
@@ -568,10 +589,10 @@ namespace TAO
                                 ::DDS::RETCODE_ERROR);
             }
 
-          entry->int_id_.client_refs_ --;
+          entry->client_refs_ --;
 
           if (remove_objref == true ||
-              0 == entry->int_id_.client_refs_)
+              0 == entry->client_refs_)
             {
               //TBD - mark the TopicImpl as deleted and make it
               //      reject calls to the TopicImpl.
@@ -597,7 +618,7 @@ namespace TAO
 
               // note: this will destroy the TopicImpl if there are no
               // client object reference to it.
-              if (topics_.unbind(topic_name.in ()) == -1)
+              if (topics_.erase(topic_name.in ()) == 0)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
@@ -662,17 +683,17 @@ namespace TAO
                   first_time = 0;
                 }
 
-              TopicMap_Entry* entry = 0;
+              TopicMap::mapped_type* entry = 0;
               {
                 ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                                   tao_mon,
                                   this->topics_protector_,
                                   ::DDS::Topic::_nil());
 
-                if (topics_.find (topic_name, entry) == 0)
+                if (Util::find(topics_, topic_name, entry) == 0)
                   {
-                    entry->int_id_.client_refs_ ++;
-                    return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+                    entry->client_refs_ ++;
+                    return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
                   }
               }
 
@@ -762,14 +783,14 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry = 0;
-      if (topics_.find (name, entry) == -1)
+      TopicMap::mapped_type* entry = 0;
+      if (Util::find(topics_, name, entry) == -1)
         {
           return ::DDS::TopicDescription::_nil();
         }
       else
         {
-          return ::DDS::TopicDescription::_duplicate(entry->int_id_.pair_.obj_.in ());
+          return ::DDS::TopicDescription::_duplicate(entry->pair_.obj_.in ());
         }
     }
 
@@ -870,16 +891,14 @@ namespace TAO
 
         while (1)
           {
-            TopicMap_Iterator topicIter(topics_);
-            TopicMap_Entry* entry = 0;
-            if (topicIter.next (entry) == 0)
+            if (topics_.begin() == topics_.end())
               {
                 break;
               }
 
             // Delete the topic the reference count.
             ::DDS::ReturnCode_t result = this->delete_topic_i(
-                                    entry->int_id_.pair_.obj_.in (), true);
+                                    topics_.begin()->second.pair_.obj_.in (), true);
             if (result != ::DDS::RETCODE_OK)
               {
                 ret = result;
@@ -1412,11 +1431,11 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry = 0;
-      if (topics_.find (topic_name, entry) == 0)
+      TopicMap::mapped_type* entry = 0;
+      if (Util::find(topics_, topic_name, entry) == 0)
         {
-          entry->int_id_.client_refs_ ++;
-          return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+          entry->client_refs_ ++;
+          return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
         }
 
       TAO::DCPS::TypeSupport_ptr type_support =
@@ -1448,7 +1467,7 @@ namespace TAO
 
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
-      if (topics_.bind (topic_name, refCounted_topic)  == -1)
+      if (bind(topics_, std::make_pair(topic_name, refCounted_topic)) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
@@ -1471,7 +1490,7 @@ namespace TAO
     DomainParticipantImpl::is_clean () const
     {
       int sub_is_clean = subscribers_.is_empty () == 1;
-      int topics_is_clean = topics_.current_size () == 0;
+      int topics_is_clean = topics_.size () == 0;
 
       if (! TheTransientKludge->is_enabled ())
         {
@@ -1479,7 +1498,7 @@ namespace TAO
           // left.
 
           sub_is_clean = sub_is_clean == 0 ? subscribers_.size () == 1 : 1;
-          topics_is_clean = topics_is_clean == 0 ? topics_.current_size () == 4 : 1;
+          topics_is_clean = topics_is_clean == 0 ? topics_.size () == 4 : 1;
         }
 
       return (publishers_.is_empty () == 1
