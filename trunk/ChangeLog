@@ -1,3 +1,50 @@
+Fri Jun 22 19:40:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DDS/Messenger/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/pub_main.cpp:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest3_2/sub_main.cpp:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/mcast_simple/mcast.conf:
+        * tests/transport/mcast_simple_n/mcast.conf:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/udp.conf:
+        * tests/transport/udp_simple_n/pub_main.cpp:
+        * tests/transport/udp_simple_n/sub_main.cpp:
+        * tests/transport/udp_simple_n/udp.conf:
+
+          Continued making tests compatible with static builds, especially with
+          the old (1.4a) ACE svc config behavior where processing "dynamic"
+          directives will yield an error when they dynamic library is not found
+          even if the service object is already in the ACE service repository.
+
 Fri Jun 22 18:58:47 USMST 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
@@ -12,24 +59,24 @@ Fri Jun 22 18:58:47 USMST 2007  Yan Dai  <dai_y@ociweb.com>
           Made send strategy not try to send the graceful disconnect message
           when the terminate_send() is called due to a non-graceful disconnect
           before a graceful link shutdown.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
           Added send strategy and receive strategy nil value checking to avoid
           access violation since the reconnect and handle_timeout may be
           called after connection is re-established and the send/recv strategies
           are reset to nil.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
         * tests/DCPS/Reconnect/subscriber.cpp:
 
-          Added a new option to indicate if the on_subscription_lost callback 
+          Added a new option to indicate if the on_subscription_lost callback
           needs be verified. Whether the listener receives the callback depends
-          on the timing of remove_association and the handle_timeout call 
-          on the passive connection. The bp_timeout test will not verify 
-          on_subscription_lost callback since the listener receives the 
+          on the timing of remove_association and the handle_timeout call
+          on the passive connection. The bp_timeout test will not verify
+          on_subscription_lost callback since the listener receives the
           callback randomly.
-          
+
 Fri Jun 22 14:55:35 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:

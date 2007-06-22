@@ -10,40 +10,42 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 $status = 0;
+$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts =  "-ORBSvcConf tcp.conf";
+$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
+$repo_bit_opt = $opts;
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
-    $opts =  "-ORBSvcConf udp.conf -t udp -ORBSvcConf tcp.conf";
+    $opts .= ($use_svc_config ? "-ORBSvcConf udp.conf " : '') . "-t udp";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -t mcast -ORBSvcConf tcp.conf";
+    $opts .= ($use_svc_config ? "-ORBSvcConf mcast.conf " : '') . "-t mcast";
     $pub_opts = "$opts -DCPSConfigFile pub_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_mcast.ini";
 }
 elsif ($ARGV[0] eq 'reliable_mcast') {
-    $opts =  "-ORBSvcConf reliable_mcast.conf -t reliable_mcast"
-        . " -ORBSvcConf tcp.conf"; # TCP is still used for BITs
+    $opts .= ($use_svc_config ? "-ORBSvcConf reliable_mcast.conf " : '')
+        . "-t reliable_mcast";
     $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $opts =  "-ORBSvcConf tcp.conf -t default_tcp";
+    $opts .= "-t default_tcp";
     $pub_opts = "$opts";
     $sub_opts = "$opts";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts =  "-ORBSvcConf udp.conf -ORBSvcConf tcp.conf"
+    $opts .= ($use_svc_config ? "-ORBSvcConf udp.conf " : '')
 	. " -t default_udp";
     $pub_opts = "$opts";
     $sub_opts = "$opts";
 }
 elsif ($ARGV[0] eq 'default_mcast') {
-    $opts =  "-ORBSvcConf mcast.conf -ORBSvcConf tcp.conf";
+    $opts .= ($use_svc_config ? "-ORBSvcConf mcast.conf " : '');
     $pub_opts = "$opts -t default_mcast_pub";
     $sub_opts = "$opts -t default_mcast_sub";
 }
@@ -54,7 +56,6 @@ elsif ($ARGV[0] ne '') {
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$repo_bit_opt = "-ORBSvcConf tcp.conf";
 
 unlink $dcpsrepo_ior;
 

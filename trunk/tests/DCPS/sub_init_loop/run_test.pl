@@ -31,11 +31,12 @@ if ($#ARGV >= 0)
 	$common_opts = $common_opts." -v";
     }
 }
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = new PerlACE::Process
     ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-     , " -ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior"
+     , " $svc_config -o $dcpsrepo_ior"
      . " -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process
     ("subscriber"

@@ -1,4 +1,4 @@
-project: dcpsexe {
+project: dcpsexe_with_tcp {
 
   exename   = main
 

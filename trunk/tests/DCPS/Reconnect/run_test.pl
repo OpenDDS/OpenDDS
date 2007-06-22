@@ -91,11 +91,12 @@ unlink $testoutputfilename;
 open(SAVEERR, ">&STDERR");
 open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = new PerlACE::Process
     ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-     , "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
+     , "$svc_config -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process
     ("subscriber"
      , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"

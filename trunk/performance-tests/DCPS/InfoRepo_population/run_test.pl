@@ -11,14 +11,16 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-$opts =  "-ORBSvcConf tcp.conf";
+$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+
+$opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0 -t5 -n5 -p5 -s5";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 $sync_status_file = PerlACE::LocalFile ("sync_status");
-$repo_bit_opt = "-ORBSvcConf tcp.conf -NOBITS";
+$repo_bit_opt = "-NOBITS";
 
 unlink $dcpsrepo_ior;
 unlink $sync_status_file;

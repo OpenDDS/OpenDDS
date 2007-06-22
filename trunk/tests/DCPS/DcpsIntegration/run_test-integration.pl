@@ -14,7 +14,8 @@ $status = 0;
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
-$bit_conf = "-ORBSvcConf ../../tcp.conf";
+$bit_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
@@ -22,7 +23,7 @@ PerlACE::add_lib_path('../FooType');
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                             "$bit_conf -o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf");
+                            . " -d $domains_file -ORBDebugLevel 1");
 
 
 $Test = new PerlACE::Process ("infrastructure_test",

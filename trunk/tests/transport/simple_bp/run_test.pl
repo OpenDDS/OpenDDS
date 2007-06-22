@@ -16,7 +16,8 @@ use Getopt::Long qw( :config bundling) ;
 #
 my $testTime   = 60 ;
 my $iterations = 400 ;
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
 #
 # Publisher parameters.
