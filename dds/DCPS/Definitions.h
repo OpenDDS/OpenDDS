@@ -103,6 +103,11 @@ namespace TAO
         return pair.svt_ == this->svt_;
       };
 
+      bool operator< (const Objref_Servant_Pair & pair) const
+      {
+        return this->svt_ < pair.svt_;
+      };
+
       T_impl* svt_;
       T_var   obj_;
     };

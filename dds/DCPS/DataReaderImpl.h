@@ -23,7 +23,8 @@
 
 #include "ace/String_Base.h"
 //#include "ace/Unbounded_Set.h"
-#include "ace/Hash_Map_Manager.h"
+
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -48,7 +49,7 @@ namespace TAO
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class TAO_DdsDcps_Export WriterInfo {
       public:
-        WriterInfo (); // needed for Hash_Map_Manager
+        WriterInfo (); // needed for maps
 
         WriterInfo (DataReaderImpl* reader,
                     PublicationId   writer_id);
