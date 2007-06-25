@@ -11,7 +11,7 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0 -t5 -n5 -p5 -s5";
