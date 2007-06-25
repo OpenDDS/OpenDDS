@@ -6,12 +6,13 @@
 
 #include "Definitions.h"
 #include "dds/DdsDcpsDomainS.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Unbounded_Set.h"
 #include "dds/DCPS/LocalObject.h"
 
+#include <map>
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -44,11 +45,8 @@ namespace TAO
                                    ::DDS::DomainParticipant,
                                    ::DDS::DomainParticipant_ptr,
                                    ::DDS::DomainParticipant_var > Participant_Pair;
-      typedef ACE_Unbounded_Set < Participant_Pair > DPSet;
-      typedef ACE_Unbounded_Set_Iterator < Participant_Pair > DPSet_Iterator;
-      typedef ACE_Hash_Map_Manager <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap;
-      typedef ACE_Hash_Map_Iterator <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap_Iterator;
-      typedef ACE_Hash_Map_Entry <DDS::DomainId_t, DPSet> DPMap_Entry;
+      typedef std::set<Participant_Pair> DPSet;
+      typedef std::map<DDS::DomainId_t, DPSet> DPMap;
 
       /** Constructor **/
       DomainParticipantFactoryImpl (void);
