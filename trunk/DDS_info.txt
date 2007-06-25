@@ -363,10 +363,10 @@ If I have time, I will verify the above.
 > DDS::DataWriter_var dw = pub->create_datawriter(topic.in
 > (),dw_qos,DDS::DataWriterListener::_nil());
 >
-> • This data writer has the following behaviors:
-> – Can queue up to 100 samples that are pending delivery to one or more
+> This data writer has the following behaviors:
+> Can queue up to 100 samples that are pending delivery to one or more
 > subscribers
-> – If 100 samples are pending, then the write call blocks for up to 10
+> If 100 samples are pending, then the write call blocks for up to 10
 > seconds waiting for an
 > opening in the queue
 > » An opening occurs when a previously written sample is delivered to all

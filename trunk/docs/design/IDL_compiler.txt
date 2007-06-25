@@ -608,7 +608,7 @@ between each Data and SampleInfo is represented by the use of the same index
  to access
 the corresponding elements on each of the collections. It is anticipated
  that additional
-data-accessing API’s may be provided on each target language to make this
+data-accessing APIs may be provided on each target language to make this
  operation as
 natural and efficient is it can be. The reason is that accessing data is the
  main purpose of
