@@ -21,7 +21,6 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Unbounded_Set.h"

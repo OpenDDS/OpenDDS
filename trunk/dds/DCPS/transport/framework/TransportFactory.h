@@ -12,10 +12,11 @@
 //borland #include "TransportGenerator.h"
 #include "TransportGenerator_rch.h"
 #include "TransportConfiguration_rch.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
 
+#include <map>
+#include <string>
 
 namespace TAO
 {
@@ -161,21 +162,13 @@ namespace TAO
         ///
         ///  Key  == "Transport type"
         ///  Value == TransportGenerator object
-        typedef ACE_Hash_Map_Manager_Ex<ACE_CString,
-                                        TransportGenerator_rch,
-                                        ACE_Hash<ACE_CString>,
-                                        ACE_Equal_To<ACE_CString>,
-                                        ACE_Null_Mutex>        GeneratorMap;
+        typedef std::map<std::string, TransportGenerator_rch> GeneratorMap;
 
         /// The "TransportConfiguration Map"
         ///
         ///  Key  == "transport id"
         ///  Value == TransportConfiguration object
-        typedef ACE_Hash_Map_Manager_Ex<TransportIdType,
-                                        TransportConfiguration_rch,
-                                        ACE_Hash<TransportIdType>,
-                                        ACE_Equal_To<TransportIdType>,
-                                        ACE_Null_Mutex>        ConfigurationMap;
+        typedef std::map<TransportIdType, TransportConfiguration_rch> ConfigurationMap;
 
        /// The "TranportImplFactory instance Map".
        /// Since each transport type has just one TransportImplFactory then we can
@@ -183,21 +176,13 @@ namespace TAO
         ///
         ///   Key   == "Transport type"
         ///   Value == TransportImplFactory object
-        typedef ACE_Hash_Map_Manager_Ex<FactoryIdType,
-                                        TransportImplFactory_rch,
-                                        ACE_Hash<FactoryIdType>,
-                                        ACE_Equal_To<FactoryIdType>,
-                                        ACE_Null_Mutex>        ImplTypeMap;
+        typedef std::map<FactoryIdType, TransportImplFactory_rch> ImplTypeMap;
 
         /// The "Impl Map"
         ///
         ///   Key   == "TransportImpl instance id"
         ///   Value == TransportImpl object
-        typedef ACE_Hash_Map_Manager_Ex<TransportIdType,
-                                        TransportImpl_rch,
-                                        ACE_Hash<TransportIdType>,
-                                        ACE_Equal_To<TransportIdType>,
-                                        ACE_Null_Mutex>        ImplMap;
+        typedef std::map<TransportIdType, TransportImpl_rch> ImplMap;
 
         /// Thread Lock type
         typedef ACE_SYNCH_MUTEX     LockType;

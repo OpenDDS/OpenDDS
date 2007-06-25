@@ -12,23 +12,6 @@
 
 namespace Util
 {
-  template <typename Container, typename Key>
-  int find(
-    Container& c,
-    const Key& key,
-    typename Container::mapped_type*& value
-    )
-  {
-    typename Container::iterator iter =
-      c.find(key);
-    if (iter == c.end())
-    {
-      return -1;
-    }
-    value = &iter->second;
-    return 0;
-  }
-
   template <typename Container, typename ValueType>
   int insert(
     Container& c,
@@ -179,7 +162,7 @@ namespace TAO
       Participant_Pair pair (dp, dp_obj, NO_DUP);
 
       DPSet* entry;
-      if (Util::find(participants_, domainId, entry) == -1)
+      if (find(participants_, domainId, entry) == -1)
         {
           DPSet set;
 
@@ -262,7 +245,7 @@ namespace TAO
       RepoId dp_id = the_servant->get_id ();
 
       DPSet* entry;
-      if (Util::find(participants_, domain_id, entry) == -1)
+      if (find(participants_, domain_id, entry) == -1)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
@@ -279,7 +262,7 @@ namespace TAO
                             ::DDS::RETCODE_ERROR);
 
           DPSet* entry;
-          if (Util::find(participants_, domain_id, entry) == -1)
+          if (find(participants_, domain_id, entry) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: ")
@@ -373,7 +356,7 @@ namespace TAO
                         ::DDS::DomainParticipant::_nil ());
 
       DPSet* entry;
-      if (Util::find(participants_, domainId, entry) == -1)
+      if (find(participants_, domainId, entry) == -1)
         {
           if (DCPS_debug_level >= 1)
             {
