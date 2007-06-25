@@ -1,3 +1,10 @@
+Mon Jun 25 22:00:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_info.txt:
+        * docs/design/IDL_compiler.txt:
+
+          Removed characters that were outside of the standard ASCII range.
+
 Mon Jun 25 20:20:39 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
