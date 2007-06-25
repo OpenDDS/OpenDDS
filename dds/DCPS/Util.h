@@ -51,8 +51,42 @@ namespace TAO
       const typename Container::key_type& k
       )
     {
-      Container::mapped_type v;
+      typename Container::mapped_type v;
       return unbind(c, k, v);
+    }
+
+    template <typename Container, typename Key>
+      int find(
+      Container& c,
+      const Key& key,
+      typename Container::mapped_type*& value
+      )
+    {
+      typename Container::iterator iter =
+        c.find(key);
+      if (iter == c.end())
+      {
+        return -1;
+      }
+      value = &iter->second;
+      return 0;
+    }
+
+    template <typename Container, typename Key>
+      int find(
+      Container& c,
+      const Key& key,
+      typename Container::mapped_type& value
+      )
+    {
+      typename Container::iterator iter =
+        c.find(key);
+      if (iter == c.end())
+      {
+        return -1;
+      }
+      value = iter->second;
+      return 0;
     }
   }
 }

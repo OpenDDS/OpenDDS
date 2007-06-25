@@ -6,6 +6,7 @@
 #include "TransportDebug.h"
 #include "TransportFactory.h"
 #include "TransportConfiguration.h"
+#include "dds/DCPS/Util.h"
 
 #include "tao/TAO_Singleton.h"
 
@@ -111,7 +112,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
       throw Transport::UnableToCreate();
     }
 
-  int result = this->impl_map_.bind(impl_id, impl);
+  int result = bind(impl_map_, std::make_pair(impl_id, impl));
 
   if (result == 0)
     {
@@ -259,7 +260,7 @@ TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
   int result = 0;
     {
       GuardType guard(this->lock_);
-      result = configuration_map_.find (transport_id, config);
+      result = TAO::DCPS::find(configuration_map_, transport_id, config);
     }
 
   if (result != 0)
@@ -282,7 +283,7 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
   TransportGenerator_rch generator;
     {
       GuardType guard(this->lock_);
-      result = generator_map_.find (transport_type, generator);
+      result = find(generator_map_, transport_type.c_str(), generator);
     }
 
   if (result != 0)
@@ -315,7 +316,7 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
   int result = 0;
     {
       GuardType guard(this->lock_);
-      result = configuration_map_.find (transport_id, config);
+      result = find(configuration_map_, transport_id, config);
     }
 
   if (result == 0)
@@ -349,7 +350,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
   int result = 0;
     {
       GuardType guard(this->lock_);
-      result = impl_type_map_.find (factory_id, factory);
+      result = find(impl_type_map_, factory_id, factory);
     }
   if (result == 0)
     return factory;
@@ -359,7 +360,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
     GuardType guard(this->lock_);
     // The factory_id uses the transport type name, we use the factory_id
     // to find the generator for the transport type.
-    result = this->generator_map_.find (factory_id, generator);
+    result = find(generator_map_, factory_id.c_str(), generator);
   }
 
   if (result == 0)
@@ -393,7 +394,7 @@ TAO::DCPS::TransportFactory::register_generator (const char* type,
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = this->generator_map_.bind(type, generator_rch);
+    result = bind(generator_map_, std::make_pair(type, generator_rch));
   }
 
   // Check to see if it worked.
@@ -450,7 +451,7 @@ TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_i
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = this->impl_type_map_.bind(factory_id, factory);
+    result = bind(impl_type_map_, std::make_pair(factory_id, factory));
   }
 
   // Check to see if it worked.
@@ -486,7 +487,7 @@ TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transp
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = this->configuration_map_.bind(transport_id, config);
+    result = bind(configuration_map_, std::make_pair(transport_id, config));
   }
 
   // Check to see if it worked.
@@ -524,7 +525,7 @@ TAO::DCPS::TransportFactory::obtain(TransportIdType impl_id)
     GuardType guard(this->lock_);
 
     // Attempt to locate the TransportImpl object
-    int result = this->impl_map_.find(impl_id, impl);
+    int result = find(impl_map_, impl_id, impl);
 
     // 0 means we found it, and -1 means we didn't.
     if (result != 0)
@@ -547,20 +548,18 @@ TAO::DCPS::TransportFactory::release()
 
   // Iterate over all of the entries in the impl_map_, and
   // each TransportImpl object to shutdown().
-  ImplMap::ENTRY* entry;
-
-  for (ImplMap::ITERATOR itr(this->impl_map_);
-       itr.next(entry);
-       itr.advance())
+  for (ImplMap::iterator iter = impl_map_.begin();
+    iter != impl_map_.end();
+    ++iter)
     {
-      entry->int_id_->shutdown();
+      iter->second->shutdown();
     }
 
   // Clear the maps.
-  this->impl_type_map_.unbind_all();
-  this->impl_map_.unbind_all();
-  this->generator_map_.unbind_all();
-  this->configuration_map_.unbind_all();
+  impl_type_map_.clear();
+  impl_map_.clear();
+  generator_map_.clear();
+  configuration_map_.clear();
 }
 
 
@@ -579,7 +578,7 @@ TAO::DCPS::TransportFactory::release(TransportIdType impl_id)
   // Use separate scope for guard
   {
     GuardType guard(this->lock_);
-    result = this->impl_map_.unbind(impl_id, impl);
+    result = unbind(impl_map_, impl_id, impl);
     // 0 means the unbind was successful, -1 means it failed.
     if (result == -1)
       {
@@ -589,7 +588,7 @@ TAO::DCPS::TransportFactory::release(TransportIdType impl_id)
         return;
       }
 
-    result = this->configuration_map_.unbind(impl_id);
+    result = unbind(configuration_map_, impl_id);
     if (result == -1)
       {
         ACE_ERROR((LM_ERROR,
