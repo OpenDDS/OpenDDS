@@ -62,8 +62,6 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_links",5);
 
-  ssize_t map_size = 0;
-
   GuardType guard(this->lock_);
 
   // Attempt to unbind each of the DataLinks in the released_set's
