@@ -11,7 +11,9 @@
 
 #include "tao/TAO_Singleton.h"
 
-#include "ace/Hash_Map_Manager_T.h"
+#include "ace/Hash_Map_Manager.h"
+#include <map>
+#include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -25,8 +27,8 @@ namespace TAO
 {
   namespace DCPS
   {
-    typedef ACE_Hash_Map_Manager<ACE_CString, TAO::DCPS::TypeSupport_ptr, ACE_SYNCH_RECURSIVE_MUTEX> TypeSupportHash;
-    typedef ACE_Hash_Map_Manager<void*, TypeSupportHash*, ACE_SYNCH_RECURSIVE_MUTEX> DomainHash;
+    typedef std::map<std::string, TAO::DCPS::TypeSupport_ptr> TypeSupportHash;
+    typedef std::map<void*, TypeSupportHash*> DomainHash;
 
     /**
     * A singleton class that keeps track of the registered DDS data types
@@ -70,6 +72,7 @@ namespace TAO
       Data_Types_Register(void);
       ~Data_Types_Register(void);
 
+      ACE_SYNCH_RECURSIVE_MUTEX lock_;
       DomainHash domains_;
     };
 

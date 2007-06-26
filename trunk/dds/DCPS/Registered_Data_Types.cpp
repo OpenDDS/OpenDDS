@@ -5,10 +5,14 @@
 
 #include "Registered_Data_Types.h"
 
+#include "dds/DCPS/Util.h"
+
 #include "tao/TAO_Singleton.h"
 
 #include "ace/Unbounded_Set.h"
 #include "ace/SString.h"
+
+#include <set>
 
 namespace TAO
 {
@@ -23,45 +27,44 @@ namespace TAO
     Data_Types_Register::~Data_Types_Register(void)
     {
       TypeSupportHash*  supportHash;
-      ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr> typeSupports;
 
-      if (0 < domains_.current_size() )
+      if (!domains_.empty() )
         {
-          DomainHash::ITERATOR domainIter = domains_.begin();
-          DomainHash::ITERATOR domainEnd = domains_.end();
+          std::set<TAO::DCPS::TypeSupport_ptr> typeSupports;
+          DomainHash::iterator domainIter = domains_.begin();
+          DomainHash::iterator domainEnd = domains_.end();
 
           while (domainIter != domainEnd)
             {
-              supportHash = (*domainIter).int_id_;
+              supportHash = domainIter->second;
               ++domainIter;
 
-              if (0 < supportHash->current_size() )
+              if (!supportHash->empty() )
                 {
-                  TypeSupportHash::ITERATOR supportIter = supportHash->begin();
-                  TypeSupportHash::ITERATOR supportEnd = supportHash->end();
+                  TypeSupportHash::iterator supportIter = supportHash->begin();
+                  TypeSupportHash::iterator supportEnd = supportHash->end();
 
                   while (supportIter != supportEnd)
                     {
                       // ignore the error of adding a duplicate pointer.
                       // this done to handle a pointer having been registered
                       // to multiple names.
-                      typeSupports.insert( (*supportIter).int_id_);
+                      typeSupports.insert( supportIter->second );
                       ++supportIter;
 
                     } /* while (supportIter != supportEnd) */
 
                 } /* if (0 < supportHash->current_size() ) */
 
-              supportHash->unbind_all();
               delete supportHash;
 
             } /* while (domainIter != domainEnd) */
 
-          domains_.unbind_all();
+          domains_.clear();
 
-          ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>::ITERATOR typesIter =
+          std::set<TAO::DCPS::TypeSupport_ptr>::iterator typesIter =
             typeSupports.begin();
-          ACE_Unbounded_Set<TAO::DCPS::TypeSupport_ptr>::ITERATOR typesEnd =
+          std::set<TAO::DCPS::TypeSupport_ptr>::iterator typesEnd =
             typeSupports.end();
 
           while (typesEnd != typesIter)
@@ -72,7 +75,6 @@ namespace TAO
               type->_remove_ref();
             }
 
-          typeSupports.reset();
         } /* if (0 < domains_.current_size() ) */
 
     }
@@ -96,10 +98,11 @@ namespace TAO
     {
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash = NULL;
+      ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
 
-      if (0 == domains_.find(reinterpret_cast <void*> (domain_participant), supportHash))
+      if (0 == find(domains_, reinterpret_cast <void*> (domain_participant), supportHash))
         {
-          int lookup = supportHash->bind(type_name, the_type);
+          int lookup = bind(*supportHash, std::make_pair(type_name.c_str(), the_type));
 
           if (0 == lookup)
             {
@@ -109,7 +112,7 @@ namespace TAO
           else if (1 == lookup)
             {
               TAO::DCPS::TypeSupport_ptr currentType = NULL;
-              if ( 0 == supportHash->find(type_name, currentType) )
+              if ( 0 == find(*supportHash, type_name.c_str(), currentType) )
                 {
                   // Allow different TypeSupport instances of the same TypeSupport
                   // type register with the same type name in the same
@@ -129,9 +132,9 @@ namespace TAO
           // new domain id!
           supportHash = new TypeSupportHash;
 
-          if (0 == domains_.bind(reinterpret_cast<void*> (domain_participant), supportHash))
+          if (0 == bind(domains_, std::make_pair(reinterpret_cast<void*> (domain_participant), supportHash)))
             {
-              if (0 == supportHash->bind(type_name, the_type))
+              if (0 == bind(*supportHash, std::make_pair(type_name.c_str(), the_type)))
                 {
                   the_type->_add_ref();
                   retCode = ::DDS::RETCODE_OK;
@@ -152,12 +155,13 @@ namespace TAO
       ACE_CString type_name)
     {
       TAO::DCPS::TypeSupport_ptr typeSupport = 0;
+      ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, typeSupport);
 
       TypeSupportHash*  supportHash = NULL;
 
-      if (0 == domains_.find(reinterpret_cast<void*> (domain_participant), supportHash))
+      if (0 == find(domains_, reinterpret_cast<void*> (domain_participant), supportHash))
         {
-          if (0 != supportHash->find(type_name, typeSupport))
+          if (0 != find(*supportHash, type_name.c_str(), typeSupport))
             {
               // reassign to nil to make sure that there was no partial
               // assignment in the find.
