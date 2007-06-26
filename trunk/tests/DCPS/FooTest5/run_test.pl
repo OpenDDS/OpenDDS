@@ -137,12 +137,12 @@ elsif ($mixed_trans == 1) {
       . $bit_off_conf;
 }
 elsif ($use_mcast == 1) {
-  $svc_config = ($use_svc_config ? " -ORBSvcConf mcast.conf " :'')
+  $svc_config = ($use_svc_config ? " -ORBSvcConf mcast.conf " : '')
       . $bit_off_conf;
 }
 elsif ($use_reliable_multicast == 1) {
-  $svc_config = ($use_svc_config ? " -ORBSvcConf reliable_multicast.conf" : '')
-      . $bit_off_conf;
+  $svc_config = ($use_svc_config ? " -ORBSvcConf reliable_multicast.conf "
+                 : '') . $bit_off_conf;
 }
 
 # test multiple cases
