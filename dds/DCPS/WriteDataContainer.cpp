@@ -7,6 +7,7 @@
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
 #include "PublicationInstance.h"
+#include "Util.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "tao/debug.h"
@@ -132,7 +133,7 @@ WriteDataContainer::register_instance(
 
     instance_handle = get_next_handle();
 
-    int insert_attempt = instances_.bind(instance_handle, instance);
+    int insert_attempt = bind(instances_, std::make_pair(instance_handle, instance));
 
     if (0 != insert_attempt)
     {
@@ -148,7 +149,7 @@ WriteDataContainer::register_instance(
   }
   else
   {
-    int find_attempt = instances_.find(instance_handle, instance);
+    int find_attempt = find(instances_, instance_handle, instance);
 
     if (0 != find_attempt)
     {
@@ -182,7 +183,7 @@ WriteDataContainer::unregister(
 {
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(instance_handle, instance);
+  int find_attempt = find(instances_, instance_handle, instance);
 
   if (0 != find_attempt)
   {
@@ -221,7 +222,7 @@ WriteDataContainer::dispose(
 
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(instance_handle, instance);
+  int find_attempt = find(instances_, instance_handle, instance);
 
   if (0 != find_attempt)
   {
@@ -277,7 +278,7 @@ WriteDataContainer::num_samples (
     ::DDS::RETCODE_ERROR);
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(handle, instance);
+  int find_attempt = find(instances_, handle, instance);
 
   if (0 != find_attempt)
   {
@@ -816,36 +817,36 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   while (it != instances_.end ())
   {
     // Release the instance data.
-    ret = dispose ((*it).ext_id_, registered_sample, false);
+    ret = dispose (it->first, registered_sample, false);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("WriteDataContainer::unregister_all, ")
         ACE_TEXT("dispose instance %X failed\n"),
-        (*it).ext_id_));
+        it->first));
     }
 
     // Mark the instance unregistered.
-    ret = unregister ((*it).ext_id_, registered_sample, writer, false);
+    ret = unregister (it->first, registered_sample, writer, false);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("WriteDataContainer::unregister_all, ")
         ACE_TEXT("unregister instance %X failed\n"),
-        (*it).ext_id_));
+        it->first));
     }
 
-    PublicationInstance* instance = (*it).int_id_;
+    PublicationInstance* instance = it->second;
 
     delete instance;
 
     // Get the next iterator before erase the instance handle.
     PublicationInstanceMapType::iterator it_next = it;
-    it_next ++;
+    ++it_next;
     // Remove the instance from the instance list.
-    instances_.unbind ((*it).ext_id_);
+    unbind(instances_, it->first);
     it = it_next;
   }
 
@@ -857,7 +858,7 @@ PublicationInstance*
 WriteDataContainer::get_handle_instance (::DDS::InstanceHandle_t handle)
 {
   PublicationInstance* instance = 0;
-  if (0 != instances_.find(handle, instance))
+  if (0 != find(instances_, handle, instance))
   {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")

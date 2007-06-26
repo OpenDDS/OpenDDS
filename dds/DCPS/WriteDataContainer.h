@@ -9,8 +9,8 @@
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "DataSampleList.h"
 #include "ace/Synch_T.h"
-#include "ace/Hash_Map_Manager.h"
 
+#include <map>
 #include <set>
 
 
@@ -25,12 +25,7 @@ namespace TAO
   {
     class DataWriterImpl;
 
-    typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
-                                    PublicationInstance*,
-                                    ACE_Hash< ::DDS::InstanceHandle_t>,
-                                    ACE_Equal_To< ::DDS::InstanceHandle_t>,
-                                    ACE_Null_Mutex>        PublicationInstanceMapType;
-
+    typedef std::map<::DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
     /**
     * @class WriteDataContainer

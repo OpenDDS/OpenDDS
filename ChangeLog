@@ -1,3 +1,12 @@
+Tue Jun 26 15:35:26 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          More std::map and std::set replacements for ACE equivalents.
+
 Mon Jun 25 22:00:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_info.txt:
