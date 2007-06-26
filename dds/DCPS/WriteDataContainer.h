@@ -25,7 +25,7 @@ namespace TAO
   {
     class DataWriterImpl;
 
-    typedef std::map<::DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
+    typedef std::map< ::DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
     /**
     * @class WriteDataContainer
