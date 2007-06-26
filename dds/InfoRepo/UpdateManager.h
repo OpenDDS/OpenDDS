@@ -3,7 +3,7 @@
 /**
  * @file      UpdateManager.h
  *
- * @library   UpdateManager
+ * library   UpdateManager
  *
  * $Id$
  *

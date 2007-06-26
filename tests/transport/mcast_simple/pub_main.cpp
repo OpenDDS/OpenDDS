@@ -4,7 +4,7 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.cpp"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
 #endif
 
 

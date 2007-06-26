@@ -21,7 +21,7 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.cpp"
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
 #endif
 
 #include "ace/Arg_Shifter.h"

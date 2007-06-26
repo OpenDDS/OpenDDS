@@ -55,7 +55,7 @@ namespace TAO
                     PublicationId   writer_id);
 
         /// check to see if this writer is alive (called by handle_timeout).
-        /// @param next_timeout next time this DataWriter will become not active (not alive)
+        /// @param now next time this DataWriter will become not active (not alive)
         ///      if no sample or liveliness message is received.
         /// @returns absolute time when the Writer will become not active (if no activity)
         ///          of ACE_Time_Value::zero if the writer is already or became not alive
@@ -344,9 +344,9 @@ namespace TAO
        *
        * @returns Always RETCODE_OK.
        *
-       * @thows NONE.
+       * thows NONE.
        */
-      virtual DDS::ReturnCode_t auto_return_loan(void*) = 0;
+      virtual DDS::ReturnCode_t auto_return_loan(void* seq) = 0;
 
       /** This method is used for a precondition check of delete_datareader.
        *

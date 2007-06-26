@@ -582,7 +582,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                 //
                 // Check the DataSampleHeader.
                 //
-                /// @TODO
+                /// TODO
 
                 //
                 // Set the amount to parse into the message buffer.  We
@@ -796,7 +796,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
             // Release the entire chain.  This manages the data block
             // refcount and buffer space as well.
             //
-            // @TODO: Manage this differently if we pass ownership.
+            // TODO: Manage this differently if we pass ownership.
             //
             this->receive_sample_.sample_->release() ;
             this->receive_sample_.sample_ = 0 ;

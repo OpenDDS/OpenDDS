@@ -1,3 +1,25 @@
+Tue Jun 26 19:47:51 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/InfoRepo/UpdateManager.h:
+
+          Fixed comments that were causing Doxygen to emit errors/warnings.
+
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/transport/mcast_simple/pub_main.cpp:
+        * tests/transport/mcast_simple/sub_main.cpp:
+
+          Fixed typo which was including a .cpp instead of a header.
+
+        * tests/transport/mcast_simple/mcast.conf:
+        * tests/transport/mcast_simple/run_test.pl:
+
+          Changed this test to dynamically load the transport library, unless
+          it's a static build.
+
 Tue Jun 26 19:10:03 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.h:
@@ -10,7 +32,7 @@ Tue Jun 26 19:10:03 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 Tue Jun 26 17:37:02 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.h:
-        
+
           Added a space to resolve errors like:
           error: `<::' cannot begin a template-argument list
 
