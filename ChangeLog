@@ -1,3 +1,11 @@
+Tue Jun 26 18:28:14 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.cpp:
+
+          Made the counter in file scope instead of in the function scope so
+          the set_base_*_id will set the same counter as get_*_id. This would  
+          fix the Prst_delayed_subscriber test failure.
+          
 Tue Jun 26 15:56:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5/common.cpp:
