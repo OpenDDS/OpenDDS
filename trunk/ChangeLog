@@ -1,3 +1,10 @@
+Tue Jun 26 23:21:57 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+          More std::map replacements for ACE equivalents.
+
 Tue Jun 26 21:57:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
