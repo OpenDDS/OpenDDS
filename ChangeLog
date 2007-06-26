@@ -1,3 +1,9 @@
+Tue Jun 26 21:34:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Removed and unused local variable.
+
 Tue Jun 26 20:00:19 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
@@ -5,7 +11,7 @@ Tue Jun 26 20:00:19 UTC 2007  Adam Mitz  <mitza@ociweb.com>
           No portable way to reference TAO (i.e. $TAO_ROOT) inside the doxygen
           file, so we can't reference it.  In the future we should support
           linking to ACE+TAO documentation via the use of doxytag and
-	  installdox.
+          installdox.
 
 Tue Jun 26 19:47:51 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
