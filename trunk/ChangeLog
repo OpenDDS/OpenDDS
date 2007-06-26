@@ -1,3 +1,9 @@
+Tue Jun 26 21:57:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/dds.doxygen:
+
+          One more attempt at getting Doxygen to understand ACE_THROW_SPEC().
+
 Tue Jun 26 21:34:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.cpp:

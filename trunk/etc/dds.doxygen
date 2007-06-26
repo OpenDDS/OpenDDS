@@ -1037,7 +1037,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = 
+PREDEFINED             = "ACE_THROW_SPEC(LIST)=throw LIST"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
@@ -1046,8 +1046,7 @@ PREDEFINED             =
 
 EXPAND_AS_DEFINED      = ACE_RCSID \
                          ACE_UNIMPLEMENTED_FUNC \
-                         ACE_CACHE_MAP_MANAGER \
-                         ACE_THROW_SPEC
+                         ACE_CACHE_MAP_MANAGER
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then 
 # doxygen's preprocessor will remove all function-like macros that are alone 
