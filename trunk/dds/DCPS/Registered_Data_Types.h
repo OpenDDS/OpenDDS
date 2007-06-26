@@ -11,7 +11,6 @@
 
 #include "tao/TAO_Singleton.h"
 
-#include "ace/Hash_Map_Manager.h"
 #include <map>
 #include <string>
 

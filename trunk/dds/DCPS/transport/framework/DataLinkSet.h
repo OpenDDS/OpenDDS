@@ -10,8 +10,9 @@
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
-#include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Synch.h"
+
+#include <map>
 
 namespace TAO
 {
@@ -97,16 +98,10 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
-                                            DataLink_rch>            MapType;
-        typedef Cached_Allocator_With_Overflow<MapType::ENTRY,
-                                               ACE_Null_Mutex>       MapEntryAllocator ;
-
-        /// Allocator for MapType::ENTRY.
-        MapEntryAllocator map_entry_allocator_;
+        typedef std::map<DataLinkIdType, DataLink_rch> MapType;
 
         /// Hash map for DataLinks.
-        MapType*  map_;
+        MapType map_;
 
         /// Allocator for TransportSendControlElement.
         TransportSendControlElementAllocator send_control_element_allocator_;

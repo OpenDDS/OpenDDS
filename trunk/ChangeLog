@@ -1,3 +1,12 @@
+Tue Jun 26 19:10:03 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          More std::map and std::set replacements for ACE equivalents.
+
 Tue Jun 26 17:37:02 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.h:
