@@ -1,3 +1,11 @@
+Tue Jun 26 15:56:16 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Fixed the logic for loading transports in the subscriber process and
+          some typos in the Perl script.
+
 Tue Jun 26 15:35:26 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.h:
