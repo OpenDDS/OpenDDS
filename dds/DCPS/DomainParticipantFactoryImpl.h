@@ -8,7 +8,6 @@
 #include "dds/DdsDcpsDomainS.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Unbounded_Set.h"
 #include "dds/DCPS/LocalObject.h"
 
 #include <map>

@@ -8,8 +8,9 @@
 #include "ReceiveListenerSet.h"
 #include "ReceiveListenerSet_rch.h"
 #include "dds/DCPS/Definitions.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+
+#include <map>
 
 namespace TAO
 {
@@ -26,11 +27,7 @@ namespace TAO
     {
       public:
        
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        ReceiveListenerSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
+        typedef std::map<RepoId, ReceiveListenerSet_rch> MapType;
 
         ReceiveListenerSetMap();
         virtual ~ReceiveListenerSetMap();

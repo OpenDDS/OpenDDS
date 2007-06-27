@@ -3,6 +3,7 @@
 // $Id$
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReceiveListenerSetMap.h"
+#include "dds/DCPS/Util.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ReceiveListenerSetMap.inl"
@@ -87,7 +88,7 @@ TAO::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
   DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",5);
   ReceiveListenerSet_rch listener_set;
 
-  if (this->map_.find(publisher_id, listener_set) != 0)
+  if (TAO::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
       return 0;
     }
@@ -99,7 +100,7 @@ TAO::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
 
   if (listener_set->size() == 0)
     {
-      if (this->map_.unbind(publisher_id) != 0)
+      if (unbind(map_, publisher_id) != 0)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             "(%P|%t) ERROR: Failed to remove an empty "
@@ -134,7 +135,7 @@ TAO::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
   DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",5);
   ReceiveListenerSet_rch listener_set;
 
-  if (this->map_.find(publisher_id, listener_set) != 0)
+  if (TAO::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: publisher id (%d) not found in map_.\n",
@@ -151,7 +152,7 @@ TAO::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
 
   if (listener_set->size() == 0)
     {
-      if (this->map_.unbind(publisher_id) != 0)
+      if (unbind(map_, publisher_id) != 0)
         {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: Failed to remove an empty "

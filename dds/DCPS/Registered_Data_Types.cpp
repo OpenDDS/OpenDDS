@@ -9,7 +9,6 @@
 
 #include "tao/TAO_Singleton.h"
 
-#include "ace/Unbounded_Set.h"
 #include "ace/SString.h"
 
 #include <set>

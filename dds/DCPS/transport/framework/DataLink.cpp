@@ -566,20 +566,19 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
     // Notify the datawriters registered with TransportImpl
     // the lost publications due to a connection problem.
-    ReceiveListenerSetMap::MapType::ENTRY* entry;
-    for (ReceiveListenerSetMap::MapType::ITERATOR itr(map);
-         itr.next(entry);
-         itr.advance())
+    for (ReceiveListenerSetMap::MapType::iterator itr = map.begin();
+         itr != map.end();
+         ++itr)
       {
-        DataWriterImpl* dw = this->impl_->find_publication(entry->ext_id_);
+        DataWriterImpl* dw = this->impl_->find_publication(itr->first);
         if (dw != 0)
           {
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify pub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
-            ReceiveListenerSet_rch subset = entry->int_id_;
+            ReceiveListenerSet_rch subset = itr->second;
             ReceiveListenerSet::MapType & imap = subset->map ();
 
             ReaderIdSeq subids;
@@ -613,7 +612,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify  not notify pub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
           }
 
