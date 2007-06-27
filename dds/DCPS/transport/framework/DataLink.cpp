@@ -422,13 +422,14 @@ TAO::DCPS::DataLink::release_remote_subscriber
  DataLinkSetMap& released_publishers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_subscriber",5);
-  RepoIdSet::MapType::ENTRY* entry;
 
-  for (RepoIdSet::MapType::ITERATOR itr(pubid_set->map());
-       itr.next(entry);
-       itr.advance())
+  RepoIdSet::MapType& pubid_map = pubid_set->map();
+
+  for (RepoIdSet::MapType::iterator itr = pubid_map.begin();
+       itr != pubid_map.end();
+       ++itr)
     {
-      if (publisher_id == entry->ext_id_)
+      if (publisher_id == itr->first)
       {
         // Remove the publisher_id => subscriber_id association.
         if (this->pub_map_.release_subscriber(publisher_id,
@@ -646,12 +647,12 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             WriterIdSeq pubids;
             pubids.length (pubset->size ());
             CORBA::ULong i = 0;
-            RepoIdSet::MapType::ENTRY* ientry;
-            for (RepoIdSet::MapType::ITERATOR iitr(map);
-                 iitr.next(ientry);
-                 iitr.advance())
+
+            for (RepoIdSet::MapType::iterator iitr = map.begin();
+                 iitr != map.end();
+                 ++iitr)
               {
-                pubids[i++] = ientry->ext_id_;
+                pubids[i++] = iitr->first;
               }
 
             switch (notice)
@@ -690,18 +691,18 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
   GuardType guard(this->released_local_lock_);
 
   RepoIdSet::MapType& pmap = released_local_pubs_.map ();
-  RepoIdSet::MapType::ENTRY* pentry;
-  for (RepoIdSet::MapType::ITERATOR itr(pmap);
-       itr.next(pentry);
-       itr.advance())
+
+  for (RepoIdSet::MapType::iterator itr = pmap.begin();
+       itr != pmap.end();
+       ++itr)
     {
-      DataWriterImpl* dw = this->impl_->find_publication(pentry->ext_id_);
+      DataWriterImpl* dw = this->impl_->find_publication(itr->first);
       if (dw != 0)
         {
           if (TAO_debug_level > 0)
             {
               ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify pub %d "
-                         "connection deleted \n", pentry->ext_id_));
+                         "connection deleted \n", itr->first));
             }
 
           dw->notify_connection_deleted ();
@@ -709,18 +710,18 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
     }
 
   RepoIdSet::MapType& smap = released_local_subs_.map ();
-  RepoIdSet::MapType::ENTRY* sentry;
-  for (RepoIdSet::MapType::ITERATOR itr2(smap);
-       itr2.next(sentry);
-       itr2.advance())
+
+  for (RepoIdSet::MapType::iterator itr2 = smap.begin();
+       itr2 != smap.end();
+       ++itr2)
     {
-      DataReaderImpl* dr = this->impl_->find_subscription(sentry->ext_id_);
+      DataReaderImpl* dr = this->impl_->find_subscription(itr2->first);
       if (dr != 0)
         {
           if (TAO_debug_level > 0)
             {
               ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify sub %d "
-                         "connection deleted \n", sentry->ext_id_));
+                         "connection deleted \n", itr2->first));
             }
 
           dr->notify_connection_deleted ();
