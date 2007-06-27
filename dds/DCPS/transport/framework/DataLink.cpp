@@ -465,13 +465,13 @@ TAO::DCPS::DataLink::release_remote_publisher
  DataLinkSetMap&     released_subscribers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_publisher",5);
-  ReceiveListenerSet::MapType::ENTRY* entry;
+  ReceiveListenerSet::MapType& listener_map = listener_set->map();
 
-  for (ReceiveListenerSet::MapType::ITERATOR itr(listener_set->map());
-       itr.next(entry);
-       itr.advance())
+  for (ReceiveListenerSet::MapType::iterator itr = listener_map.begin();
+       itr != listener_map.end();
+       ++itr)
     {
-      if (subscriber_id == entry->ext_id_)
+      if (subscriber_id == itr->first)
       {
         // Remove the publisher_id => subscriber_id association.
         if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
@@ -584,12 +584,11 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             ReaderIdSeq subids;
             subids.length (subset->size ());
             CORBA::ULong i = 0;
-            ReceiveListenerSet::MapType::ENTRY* ientry;
-            for (ReceiveListenerSet::MapType::ITERATOR iitr(imap);
-                 iitr.next(ientry);
-                 iitr.advance())
+            for (ReceiveListenerSet::MapType::iterator iitr = imap.begin();
+                 iitr != imap.end();
+                 ++iitr)
               {
-                subids[i++] = ientry->ext_id_;
+                subids[i++] = iitr->first;
               }
 
             switch (notice)

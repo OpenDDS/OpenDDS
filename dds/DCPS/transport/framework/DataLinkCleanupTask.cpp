@@ -64,10 +64,10 @@ TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 
     int count = 0;
     // create a sequence of associated sub-id's
-    ReceiveListenerSet::MapType::ENTRY* sub_entry;
-    for (ReceiveListenerSet::MapType::ITERATOR sub_ids_iter (sub_id_set->map());
-         sub_ids_iter.next(sub_entry); sub_ids_iter.advance()) {
-      sub_ids [count++] = sub_entry->ext_id_;
+    ReceiveListenerSet::MapType& sub_map = sub_id_set->map();
+    for (ReceiveListenerSet::MapType::iterator sub_entry = sub_map.begin();
+      sub_entry != sub_map.end(); ++sub_entry) {
+      sub_ids [count++] = sub_entry->first;
     }
 
     // after creating remote id sequence, remove from DataWriter
