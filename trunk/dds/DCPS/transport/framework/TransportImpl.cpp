@@ -406,17 +406,17 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
 
   this->acked_sub_map_.get_keys (acked_pubs);
 
-  RepoIdSet::MapType::ENTRY* entry;
+  RepoIdSet::MapType& acked_pubs_map = acked_pubs.map();
 
-  for (RepoIdSet::MapType::ITERATOR itr(acked_pubs.map ());
-    itr.next(entry);
-    itr.advance())
+  for (RepoIdSet::MapType::iterator itr = acked_pubs_map.begin();
+    itr != acked_pubs_map.end();
+    ++itr)
   {
     TAO::DCPS::RepoIdSet_rch pending_subs
-      = this->pending_sub_map_.find (entry->ext_id_);
+      = this->pending_sub_map_.find (itr->first);
 
-    if (! pending_subs.is_nil () && this->acked (entry->ext_id_))
-      this->fully_associated (entry->ext_id_);
+    if (! pending_subs.is_nil () && this->acked (itr->first))
+      this->fully_associated (itr->first);
   }
   return 0;
 }

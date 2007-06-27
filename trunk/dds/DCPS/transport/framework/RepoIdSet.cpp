@@ -21,13 +21,12 @@ TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
   DBG_ENTRY_LVL("RepoIdSet","serialize",5);
   CORBA::ULong sz = this->size ();
   serializer << sz;
-  MapType::ENTRY* entry;
 
-  for (MapType::ITERATOR itr(this->map_);
-    itr.next(entry);
-    itr.advance())
+  for (MapType::iterator itr = map_.begin();
+    itr != map_.end();
+    ++itr)
   {
-    serializer << entry->ext_id_;
+    serializer << itr->first;
   }
 }
 
@@ -39,14 +38,12 @@ TAO::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
 
   if (this->size () <= map.size () && this->size () > 0)
   {
-    MapType::ENTRY* entry;
-
-    for (MapType::ITERATOR itr(this->map_);
-      itr.next(entry);
-      itr.advance())
+    for (MapType::iterator itr = map_.begin();
+      itr != map_.end();
+      ++itr)
     {
-      MapType::ENTRY* ientry;
-      if (map.map_.find (entry->ext_id_, ientry) != 0)
+      MapType::mapped_type* ientry;
+      if (find(map.map_, itr->first, ientry) != 0)
         return false;
     }
 
@@ -65,7 +62,7 @@ TAO::DCPS::RepoIdSet::exist (const RepoId& local_id,
   last = true;
 
   RepoId remote;
-  if (this->map_.find(local_id, remote) == -1)
+  if (find(map_, local_id, remote) == -1)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)RepoIdSet::exist could not find local %d "
       "in map.\n", local_id));
@@ -73,6 +70,6 @@ TAO::DCPS::RepoIdSet::exist (const RepoId& local_id,
     return false;
   }
 
-  last = this->map_.current_size () == 1;
+  last = map_.size() == 1;
   return true;
 }

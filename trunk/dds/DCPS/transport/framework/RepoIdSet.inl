@@ -4,6 +4,7 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/Util.h"
 
 ACE_INLINE
 TAO::DCPS::RepoIdSet::RepoIdSet()
@@ -17,7 +18,7 @@ ACE_INLINE int
 TAO::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
   DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
-  return this->map_.bind(key, value);
+  return bind(map_, std::make_pair(key, value));
 }
 
 
@@ -25,7 +26,7 @@ ACE_INLINE int
 TAO::DCPS::RepoIdSet::remove_id(RepoId id)
 {
   DBG_ENTRY_LVL("RepoIdSet","remove_id",5);
-  int result = this->map_.unbind(id);
+  int result = unbind(map_, id);
 
   if (result != 0)
     {
@@ -40,7 +41,7 @@ ACE_INLINE size_t
 TAO::DCPS::RepoIdSet::size() const
 {
   DBG_ENTRY_LVL("RepoIdSet","size",5);
-  return this->map_.current_size();
+  return map_.size();
 }
 
 

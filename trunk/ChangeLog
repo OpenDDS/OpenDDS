@@ -1,3 +1,14 @@
+Wed Jun 27 18:48:54 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          More std::map replacements for ACE equivalents.
+
 Wed Jun 27 16:20:33 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

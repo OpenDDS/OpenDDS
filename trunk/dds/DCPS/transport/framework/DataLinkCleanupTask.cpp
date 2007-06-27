@@ -108,10 +108,10 @@ TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 
         int count = 0;
         // create a sequence of associated pub-id's
-        for (RepoIdSet::MapType::iterator pub_ids_iter (pub_id_set->map());
-          pub_ids_iter != pub_id_set->map().end(); pub_ids_iter++)
+        for (RepoIdSet::MapType::iterator pub_ids_iter = pub_id_set->map().begin();
+          pub_ids_iter != pub_id_set->map().end(); ++pub_ids_iter)
             {
-              pub_ids [count++] = (*pub_ids_iter).ext_id_;
+              pub_ids [count++] = pub_ids_iter->first;
             }
 
           // after creating remote id sequence, remove from DataReader
