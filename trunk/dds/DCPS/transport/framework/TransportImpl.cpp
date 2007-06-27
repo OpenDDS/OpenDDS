@@ -65,17 +65,15 @@ TAO::DCPS::TransportImpl::shutdown()
         return;
       }
 
-    InterfaceMapType::ENTRY* entry;
-
-    for (InterfaceMapType::ITERATOR itr(this->interfaces_);
-         itr.next(entry);
-         itr.advance())
+    for (InterfaceMapType::iterator itr = interfaces_.begin();
+         itr != interfaces_.end();
+         ++itr)
       {
-        entry->int_id_->transport_detached();
+        itr->second->transport_detached();
       }
 
     // Clear our collection of TransportInterface pointers.
-    this->interfaces_.unbind_all();
+    interfaces_.clear();
 
     // Drop our references to the config_ and reactor_task_.
     this->config_ = 0;
@@ -201,7 +199,7 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
                        ATTACH_BAD_TRANSPORT);
     }
 
-  if (this->interfaces_.bind(interface,interface) != 0)
+    if (bind(interfaces_, std::make_pair(interface,interface)) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
