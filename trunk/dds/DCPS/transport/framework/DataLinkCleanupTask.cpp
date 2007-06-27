@@ -38,47 +38,47 @@ TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 
   // The pub_map_ has an entry for each pub_id
   // Create iterator to traverse Publisher map.
-  ReceiveListenerSetMap::MapType::ENTRY* pub_entry;
-  for (ReceiveListenerSetMap::MapType::ITERATOR pub_map_iter (dl->pub_map_.map ());
-       pub_map_iter.next(pub_entry); )
+  ReceiveListenerSetMap::MapType& pub_map = dl->pub_map_.map();
+  for (ReceiveListenerSetMap::MapType::iterator pub_map_iter = pub_map.begin();
+       pub_map_iter != pub_map.end(); )
     {
       // Extract the pub id
-      RepoId pub_id = pub_entry->ext_id_;
+      RepoId pub_id = pub_map_iter->first;
       // Each pub_id (may)has an associated DataWriter
       // Dependends upon whether we are an actual pub or sub.
       DataWriterImpl *dw = this->transportImpl_->find_publication (pub_id, true);
 
-      ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
+      ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
       // The iterator seems to get corrupted if the element currently
       // being pointed at gets unbound. Hence advance it.
-      pub_map_iter.advance();
+      ++pub_map_iter;
 
       // Check is DataWriter exists (could have been deleted before we got here.
       if (dw != NULL)
-  {
-    // Each pub-id is mapped to a bunch of sub-id's
-    //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
-    ssize_t sub_ids_count = sub_id_set->size();
-    ReaderIdSeq sub_ids (sub_ids_count);
-    sub_ids.length (sub_ids_count);
+        {
+          // Each pub-id is mapped to a bunch of sub-id's
+          //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
+          ssize_t sub_ids_count = sub_id_set->size();
+          ReaderIdSeq sub_ids (sub_ids_count);
+          sub_ids.length (sub_ids_count);
 
-    int count = 0;
-    // create a sequence of associated sub-id's
-    ReceiveListenerSet::MapType& sub_map = sub_id_set->map();
-    for (ReceiveListenerSet::MapType::iterator sub_entry = sub_map.begin();
-      sub_entry != sub_map.end(); ++sub_entry) {
-      sub_ids [count++] = sub_entry->first;
-    }
+          int count = 0;
+          // create a sequence of associated sub-id's
+          ReceiveListenerSet::MapType& sub_map = sub_id_set->map();
+          for (ReceiveListenerSet::MapType::iterator sub_entry = sub_map.begin();
+            sub_entry != sub_map.end(); ++sub_entry) {
+            sub_ids [count++] = sub_entry->first;
+          }
 
-    // after creating remote id sequence, remove from DataWriter
-    // I believe the 'notify_lost' should be set to false, since
-    // it doesn't look like we meet any of the conditions for setting
-    // it true. Check interface documentations.
-    dw->remove_associations (sub_ids, false);
+          // after creating remote id sequence, remove from DataWriter
+          // I believe the 'notify_lost' should be set to false, since
+          // it doesn't look like we meet any of the conditions for setting
+          // it true. Check interface documentations.
+          dw->remove_associations (sub_ids, false);
 
-    // Since we requested a safe copy, we now need to remove the local reference.
-    dw->_remove_ref ();
-  }
+          // Since we requested a safe copy, we now need to remove the local reference.
+          dw->_remove_ref ();
+        }
     }
 
   // sub -> pub
