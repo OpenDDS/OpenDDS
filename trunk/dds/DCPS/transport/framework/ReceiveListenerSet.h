@@ -6,9 +6,9 @@
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 
+#include <map>
 
 namespace TAO
 {
@@ -25,11 +25,7 @@ namespace TAO
     {
       public:
 
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        TransportReceiveListener*,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
+        typedef std::map<RepoId, TransportReceiveListener*> MapType;
 
         ReceiveListenerSet();
         virtual ~ReceiveListenerSet();

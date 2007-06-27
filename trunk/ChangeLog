@@ -1,3 +1,14 @@
+Wed Jun 27 14:18:41 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+
+          More std::map replacements for ACE equivalents.
+
 Tue Jun 26 23:21:57 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSetMap.h:

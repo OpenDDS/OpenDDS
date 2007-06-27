@@ -9,6 +9,7 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/Util.h"
 
 TAO::DCPS::DataLinkSetMap::DataLinkSetMap()
 {

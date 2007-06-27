@@ -23,7 +23,7 @@ TAO::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
   last = true;
 
   TransportReceiveListener* listener;
-  if (this->map_.find(local_id, listener) == -1)
+  if (find(map_, local_id, listener) == -1)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ReceiveListenerSet::exist could not find local %d \n",
       local_id));
@@ -39,7 +39,7 @@ TAO::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
      return false;
   }
 
-  last = this->map_.current_size() == 1;
+  last = map_.size() == 1;
   return true;
 }
 
