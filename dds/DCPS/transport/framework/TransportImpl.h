@@ -276,11 +276,7 @@ private:
         int swap_bytes() const;
 
 
-        typedef ACE_Hash_Map_Manager_Ex<void*,
-                                        TransportInterface*,
-                                        ACE_Hash<void*>,
-                                        ACE_Equal_To<void*>,
-                                        ACE_Null_Mutex>      InterfaceMapType;
+        typedef std::map<void*, TransportInterface*>         InterfaceMapType;
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;

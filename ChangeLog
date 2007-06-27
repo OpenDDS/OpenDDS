@@ -1,3 +1,11 @@
+Wed Jun 27 15:13:03 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          More std::map replacements for ACE equivalents.
+
 Wed Jun 27 14:18:41 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

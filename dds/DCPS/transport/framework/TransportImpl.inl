@@ -132,7 +132,7 @@ TAO::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
   // We really don't care if this unbind "works" or not.  As long as we
   // don't have the interface pointer in our interfaces_ collection, then
   // we are happy.
-  this->interfaces_.unbind(interface);
+  unbind(interfaces_, interface);
 }
 
 
