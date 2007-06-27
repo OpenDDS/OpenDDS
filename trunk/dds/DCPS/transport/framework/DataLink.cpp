@@ -626,22 +626,21 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
     // the lost subscriptions due to a connection problem.
     RepoIdSetMap::MapType & map = this->sub_map_.map ();
 
-    RepoIdSetMap::MapType::ENTRY* entry;
-    for (RepoIdSetMap::MapType::ITERATOR itr(map);
-         itr.next(entry);
-         itr.advance())
+    for (RepoIdSetMap::MapType::iterator itr = map.begin();
+         itr != map.end();
+         ++itr)
       {
         // subscription_handles
-        DataReaderImpl* dr = this->impl_->find_subscription (entry->ext_id_);
+        DataReaderImpl* dr = this->impl_->find_subscription (itr->first);
 
         if (dr != 0)
           {
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify sub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
-            RepoIdSet_rch pubset = entry->int_id_;
+            RepoIdSet_rch pubset = itr->second;
             RepoIdSet::MapType & map = pubset->map ();
 
             WriterIdSeq pubids;
@@ -676,7 +675,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify not notify sub %d subscription lost \n",
-                           entry->ext_id_));
+                           itr->first));
               }
 
           }

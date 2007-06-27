@@ -10,8 +10,8 @@
 #include "RepoIdSet_rch.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Serializer.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include <map>
 
 namespace TAO
 {
@@ -24,12 +24,7 @@ namespace TAO
     {
       public:
 
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        RepoIdSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
-
+        typedef std::map<RepoId, RepoIdSet_rch> MapType;
 
         RepoIdSetMap();
         virtual ~RepoIdSetMap();

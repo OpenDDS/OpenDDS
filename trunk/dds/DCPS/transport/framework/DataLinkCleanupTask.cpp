@@ -83,44 +83,45 @@ TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 
   // sub -> pub
   // Create iterator to traverse Subscriber map.
-  RepoIdSetMap::MapType::ENTRY* sub_entry;
-   for (RepoIdSetMap::MapType::iterator sub_map_iter (dl->sub_map_.map ());
-  sub_map_iter.next(sub_entry); )
+  RepoIdSetMap::MapType& sub_map = dl->sub_map_.map();
+   for (RepoIdSetMap::MapType::iterator sub_map_iter = sub_map.begin();
+   sub_map_iter != sub_map.end(); )
   {
     // Extract the sub id
-    RepoId sub_id = sub_entry->ext_id_;
+    RepoId sub_id = sub_map_iter->first;
     // Each sub_id (may)has an associated DataReader
     // Dependends upon whether we are an actual pub or sub.
     DataReaderImpl *dr = this->transportImpl_->find_subscription (sub_id, true);
 
-    RepoIdSet_rch pub_id_set = sub_entry->int_id_;
+    RepoIdSet_rch pub_id_set = sub_map_iter->second;
     // The iterator seems to get corrupted if the element currently
     // being pointed at gets unbound. Hence advance it.
-    sub_map_iter.advance();
+    ++sub_map_iter;
 
     // Check id DataReader exists (could have been deleted before we got here.)
     if (dr != NULL)
       {
-  // Each sub-id is mapped to a bunch of pub-id's
-  ssize_t pub_ids_count = pub_id_set->size();
-  WriterIdSeq pub_ids (pub_ids_count);
-  pub_ids.length (pub_ids_count);
+        // Each sub-id is mapped to a bunch of pub-id's
+        ssize_t pub_ids_count = pub_id_set->size();
+        WriterIdSeq pub_ids (pub_ids_count);
+        pub_ids.length (pub_ids_count);
 
-  int count = 0;
-  // create a sequence of associated pub-id's
-  for (RepoIdSet::MapType::iterator pub_ids_iter (pub_id_set->map());
-       pub_ids_iter != pub_id_set->map().end(); pub_ids_iter++) {
-    pub_ids [count++] = (*pub_ids_iter).ext_id_;
-  }
+        int count = 0;
+        // create a sequence of associated pub-id's
+        for (RepoIdSet::MapType::iterator pub_ids_iter (pub_id_set->map());
+          pub_ids_iter != pub_id_set->map().end(); pub_ids_iter++)
+            {
+              pub_ids [count++] = (*pub_ids_iter).ext_id_;
+            }
 
-  // after creating remote id sequence, remove from DataReader
-  // I believe the 'notify_lost' should be set to false, since
-  // it doesn't look like we meet any of the conditions for setting
-  // it true. Check interface documentations.
-  dr->remove_associations (pub_ids, false);
+          // after creating remote id sequence, remove from DataReader
+          // I believe the 'notify_lost' should be set to false, since
+          // it doesn't look like we meet any of the conditions for setting
+          // it true. Check interface documentations.
+          dr->remove_associations (pub_ids, false);
 
-  // Since we requested a safe copy, we now need to remove the local reference.
-  dr->_remove_ref ();
+          // Since we requested a safe copy, we now need to remove the local reference.
+          dr->_remove_ref ();
       }
   }
 }
