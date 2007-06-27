@@ -54,6 +54,11 @@ while ($line = <DATA>)
    }
 }
 
+#Sleep for 2 seconds after publisher send all samples to avoid the timing issue
+#that the subscriber may start and finish in 1 second while the publisher is waiting 
+#for it to start.
+sleep (2);
+
 $Subscriber->Spawn ();
 
 $PublisherResult = $Publisher->WaitKill (300);
