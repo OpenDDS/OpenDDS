@@ -137,7 +137,7 @@ namespace TAO
 
       Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
-      if (publishers_.insert (pair) == -1)
+      if (TAO::DCPS::insert(publishers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_publisher, ")
@@ -191,7 +191,7 @@ namespace TAO
 
       Publisher_Pair pair (the_servant, p, DUP);
 
-      if (publishers_.remove (pair) == -1)
+      if (TAO::DCPS::remove(publishers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
@@ -275,7 +275,7 @@ namespace TAO
 
       Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
-      if (subscribers_.insert (pair) == -1)
+      if (TAO::DCPS::insert(subscribers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_subscriber, ")
@@ -341,7 +341,7 @@ namespace TAO
 
       Subscriber_Pair pair (the_servant, s, DUP);
 
-      if (subscribers_.remove (pair) == -1)
+      if (TAO::DCPS::remove(subscribers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
@@ -820,15 +820,14 @@ namespace TAO
                           this->publishers_protector_,
                           ::DDS::RETCODE_ERROR);
 
-        PublisherSet_Iterator pubIter(publishers_);
-        pubIter.first();
+        PublisherSet::iterator pubIter = publishers_.begin();
         ::DDS::Publisher_ptr pubPtr;
         size_t pubsize = publishers_.size();
 
         while (pubsize > 0)
           {
             pubPtr = (*pubIter).obj_.in ();
-            pubIter.advance();
+            ++pubIter;
 
             ::DDS::ReturnCode_t result
               = pubPtr->delete_contained_entities ();
@@ -854,15 +853,14 @@ namespace TAO
                           this->subscribers_protector_,
                           ::DDS::RETCODE_ERROR);
 
-        SubscriberSet_Iterator subIter(subscribers_);
-        subIter.first();
+        SubscriberSet::iterator subIter = subscribers_.begin();
         ::DDS::Subscriber_ptr subPtr;
         size_t subsize = subscribers_.size();
 
         while (subsize > 0)
           {
             subPtr = (*subIter).obj_.in ();
-            subIter.advance();
+            ++subIter;
 
             ::DDS::ReturnCode_t result = subPtr->delete_contained_entities ();
             if (result != ::DDS::RETCODE_OK)
@@ -1489,7 +1487,7 @@ namespace TAO
     int
     DomainParticipantImpl::is_clean () const
     {
-      int sub_is_clean = subscribers_.is_empty () == 1;
+      int sub_is_clean = subscribers_.empty();
       int topics_is_clean = topics_.size () == 0;
 
       if (! TheTransientKludge->is_enabled ())
@@ -1501,7 +1499,7 @@ namespace TAO
           topics_is_clean = topics_is_clean == 0 ? topics_.size () == 4 : 1;
         }
 
-      return (publishers_.is_empty () == 1
+      return (publishers_.empty()
               && sub_is_clean == 1
               && topics_is_clean == 1);
     }

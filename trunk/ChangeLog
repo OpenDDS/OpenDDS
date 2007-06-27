@@ -1,3 +1,12 @@
+Wed Jun 27 20:25:51 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Util.h:
+
+          More std::map and std::set replacements for ACE equivalents.
+
 Wed Jun 27 19:41:00 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
