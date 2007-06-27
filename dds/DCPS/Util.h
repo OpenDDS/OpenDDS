@@ -88,6 +88,40 @@ namespace TAO
       value = iter->second;
       return 0;
     }
+
+    template <typename Container, typename ValueType>
+    int insert(
+      Container& c,
+      const ValueType& v
+      )
+    {
+      if (c.find(v) == c.end())
+      {
+        if (c.insert(v).second)
+        {
+          return 0;
+        }
+        return -1;
+      }
+      return 1;
+    }
+
+    template <typename Container, typename ValueType>
+    int remove(
+      Container& c,
+      const ValueType& v
+      )
+    {
+      if (c.find(v) != c.end())
+      {
+        if (c.erase(v) == 1)
+        {
+          return 0;
+        }
+        return -1;
+      }
+      return -1;
+    }
   }
 }
 

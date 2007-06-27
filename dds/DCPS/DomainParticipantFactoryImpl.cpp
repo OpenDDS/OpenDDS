@@ -10,43 +10,6 @@
 #include "Util.h"
 #include "tao/debug.h"
 
-namespace Util
-{
-  template <typename Container, typename ValueType>
-  int insert(
-    Container& c,
-    const ValueType& v
-    )
-  {
-    if (c.find(v) == c.end())
-    {
-      if (c.insert(v).second)
-      {
-        return 0;
-      }
-      return -1;
-    }
-    return 1;
-  }
-
-  template <typename Container, typename ValueType>
-  int remove(
-    Container& c,
-    const ValueType& v
-    )
-  {
-    if (c.find(v) != c.end())
-    {
-      if (c.erase(v) == 1)
-      {
-        return 0;
-      }
-      return -1;
-    }
-    return -1;
-  }
-}
-
 namespace TAO
 {
   namespace DCPS
@@ -166,7 +129,7 @@ namespace TAO
         {
           DPSet set;
 
-          if (Util::insert(set, pair) == -1)
+          if (TAO::DCPS::insert(set, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -188,7 +151,7 @@ namespace TAO
         }
       else
         {
-          if (Util::insert(*entry, pair) == -1)
+          if (TAO::DCPS::insert(*entry, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -286,7 +249,7 @@ namespace TAO
 
               Participant_Pair pair (the_servant, a_participant, DUP);
 
-              if (Util::remove(*entry, pair) == -1)
+              if (TAO::DCPS::remove(*entry, pair) == -1)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: ")

@@ -23,9 +23,9 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Unbounded_Set.h"
 
 #include <map>
+#include <set>
 #include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -71,10 +71,8 @@ namespace TAO
                                    ::DDS::Topic_ptr,
                                    ::DDS::Topic_var > Topic_Pair;
 
-      typedef ACE_Unbounded_Set < Subscriber_Pair > SubscriberSet;
-      typedef ACE_Unbounded_Set_Iterator < Subscriber_Pair > SubscriberSet_Iterator;
-      typedef ACE_Unbounded_Set < Publisher_Pair > PublisherSet;
-      typedef ACE_Unbounded_Set_Iterator < Publisher_Pair > PublisherSet_Iterator;
+      typedef std::set<Subscriber_Pair> SubscriberSet;
+      typedef std::set<Publisher_Pair> PublisherSet;
 
       struct RefCounted_Topic
       {
