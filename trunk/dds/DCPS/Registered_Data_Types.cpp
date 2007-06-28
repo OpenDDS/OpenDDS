@@ -101,7 +101,7 @@ namespace TAO
 
       if (0 == find(domains_, reinterpret_cast <void*> (domain_participant), supportHash))
         {
-          int lookup = bind(*supportHash, std::make_pair(type_name.c_str(), the_type));
+          int lookup = bind(*supportHash, type_name.c_str(), the_type);
 
           if (0 == lookup)
             {
@@ -131,9 +131,9 @@ namespace TAO
           // new domain id!
           supportHash = new TypeSupportHash;
 
-          if (0 == bind(domains_, std::make_pair(reinterpret_cast<void*> (domain_participant), supportHash)))
+          if (0 == bind(domains_, reinterpret_cast<void*> (domain_participant), supportHash))
             {
-              if (0 == bind(*supportHash, std::make_pair(type_name.c_str(), the_type)))
+              if (0 == bind(*supportHash, type_name.c_str(), the_type))
                 {
                   the_type->_add_ref();
                   retCode = ::DDS::RETCODE_OK;

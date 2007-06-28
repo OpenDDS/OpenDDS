@@ -18,7 +18,7 @@ TAO::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
                                       TransportReceiveListener* listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","insert",5);
-  return bind(map_, std::make_pair(subscriber_id, listener));
+  return bind(map_, subscriber_id, listener);
 }
 
 

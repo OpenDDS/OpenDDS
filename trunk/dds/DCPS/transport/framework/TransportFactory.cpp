@@ -112,7 +112,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
       throw Transport::UnableToCreate();
     }
 
-  int result = bind(impl_map_, std::make_pair(impl_id, impl));
+  int result = bind(impl_map_, impl_id, impl);
 
   if (result == 0)
     {
@@ -394,7 +394,7 @@ TAO::DCPS::TransportFactory::register_generator (const char* type,
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(generator_map_, std::make_pair(type, generator_rch));
+    result = bind(generator_map_, type, generator_rch);
   }
 
   // Check to see if it worked.
@@ -451,7 +451,7 @@ TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_i
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(impl_type_map_, std::make_pair(factory_id, factory));
+    result = bind(impl_type_map_, factory_id, factory);
   }
 
   // Check to see if it worked.
@@ -487,7 +487,7 @@ TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transp
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(configuration_map_, std::make_pair(transport_id, config));
+    result = bind(configuration_map_, transport_id, config);
   }
 
   // Check to see if it worked.

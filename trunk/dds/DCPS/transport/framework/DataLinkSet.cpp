@@ -51,7 +51,7 @@ TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
 
   GuardType guard(this->lock_);
 
-  return bind(map_, std::make_pair(mylink->id(), mylink));
+  return bind(map_, mylink->id(), mylink);
 }
 
 
@@ -130,7 +130,7 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
       if (itr->second->is_target (remoteIds[i]))
       {
         bind (selected_links->map_,
-          std::make_pair(itr->second->id(), itr->second));
+          itr->second->id(), itr->second);
         break;
       }
     }

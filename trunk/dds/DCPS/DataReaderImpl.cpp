@@ -210,7 +210,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
     {
       PublicationId writer_id = writers[i].writerId;
       WriterInfo info(this, writer_id);
-      if (bind(writers_, std::make_pair(writer_id, info)) != 0)
+      if (bind(writers_, writer_id, info) != 0)
       {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) DataReaderImpl::add_associations: "
@@ -307,7 +307,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
         subscription_match_status_.total_count_change ++;
         publication_handles_[pub_len + i] = handles[i];
 
-        if (bind(id_to_handle_map_, std::make_pair(wr_ids[i], handles[i])) != 0)
+        if (bind(id_to_handle_map_, wr_ids[i], handles[i]) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataReaderImpl::add_associations "
             "insert %d - %X to id_to_handle_map_ failed \n", wr_ids[i], handles[i]));

@@ -133,7 +133,7 @@ WriteDataContainer::register_instance(
 
     instance_handle = get_next_handle();
 
-    int insert_attempt = bind(instances_, std::make_pair(instance_handle, instance));
+    int insert_attempt = bind(instances_, instance_handle, instance);
 
     if (0 != insert_attempt)
     {

@@ -6,15 +6,16 @@ namespace TAO
   namespace DCPS
   {
     // bind reproduces the ACE_Hash_Map_Manager_Ex's bind behavior
-    template <typename Container>
+    template <typename Container, typename FirstType, typename SecondType>
     int bind(
       Container& c,
-      const typename Container::value_type& v
+      const FirstType& first,
+      const SecondType& second
       )
     {
-      if (c.find(v.first) == c.end())
+      if (c.find(first) == c.end())
       {
-        if (c.insert(v).second)
+        if (c.insert(typename Container::value_type(first, second)).second)
         {
           return 0;
         }
