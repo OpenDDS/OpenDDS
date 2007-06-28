@@ -18,7 +18,7 @@ ACE_INLINE int
 TAO::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
   DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
-  return bind(map_, std::make_pair(key, value));
+  return bind(map_, key, value);
 }
 
 

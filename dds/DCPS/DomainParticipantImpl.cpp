@@ -1465,7 +1465,7 @@ namespace TAO
 
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
-      if (bind(topics_, std::make_pair(topic_name, refCounted_topic)) == -1)
+      if (bind(topics_, topic_name, refCounted_topic) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")

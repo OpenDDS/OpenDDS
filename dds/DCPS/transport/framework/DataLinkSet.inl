@@ -140,7 +140,7 @@ TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
     ++itr)
     {
       // Attempt to add the current DataLink to this set.
-      int result = bind(map_, std::make_pair(itr->first, itr->second));
+      int result = bind(map_, itr->first, itr->second);
 
       if (result == 0)
         {

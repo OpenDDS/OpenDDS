@@ -40,7 +40,7 @@ TAO::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
       // It wasn't found.  Create one and insert it.
       listener_set = new ReceiveListenerSet();
 
-      if (bind(map_, std::make_pair(publisher_id, listener_set)) != 0)
+      if (bind(map_, publisher_id, listener_set) != 0)
         {
            ACE_ERROR((LM_ERROR,
                       "(%P|%t) ERROR: Unable to insert ReceiveListenerSet into the "

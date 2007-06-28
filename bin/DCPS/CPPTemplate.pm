@@ -1599,7 +1599,7 @@ void
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
-    int ret = bind(instances_, std::make_pair(handle, instance));
+    int ret = bind(instances_, handle, instance);
 
     if (ret != 0)
     {

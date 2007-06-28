@@ -254,7 +254,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
         publication_match_status_.total_count ++;
         publication_match_status_.total_count_change ++;
         subscription_handles_[sub_len + i] = handles[i];
-        if (bind(id_to_handle_map_, std::make_pair(rd_ids[i], handles[i])) != 0)
+        if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataWriterImpl::fully_associated "
             "insert %d - %X to id_to_handle_map_ failed \n", rd_ids[i], handles[i]));

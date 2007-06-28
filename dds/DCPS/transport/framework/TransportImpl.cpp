@@ -199,7 +199,7 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
                        ATTACH_BAD_TRANSPORT);
     }
 
-    if (bind(interfaces_, std::make_pair(interface,interface)) != 0)
+    if (bind(interfaces_, interface, interface) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
@@ -221,7 +221,7 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
   GuardType guard(this->lock_);
 
   int ret =
-    bind(dw_map_, std::make_pair(pub_id, dw));
+    bind(dw_map_, pub_id, dw);
 
   if (ret != -1)
     {
@@ -291,7 +291,7 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
   GuardType guard(this->lock_);
 
   int ret =
-    bind(dr_map_, std::make_pair(sub_id, dr));
+    bind(dr_map_, sub_id, dr);
 
   if (ret != -1)
   {
@@ -373,7 +373,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
   else {
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back (info);
-    if (bind(pending_association_sub_map_, std::make_pair(pub_id, infos)) == -1)
+    if (bind(pending_association_sub_map_, pub_id, infos) == -1)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
       "(%P|%t) ERROR: add_pending_association: Failed to add pending associations for pub %d\n",

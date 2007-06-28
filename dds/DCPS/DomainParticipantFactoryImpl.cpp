@@ -139,7 +139,7 @@ namespace TAO
               return ::DDS::DomainParticipant::_nil ();
             }
 
-            if (bind(participants_, std::make_pair(domainId, set))  == -1)
+            if (bind(participants_, domainId, set)  == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
