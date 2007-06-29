@@ -119,8 +119,8 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      TAO::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      TAO::DCPS::TransportImpl_rch transport_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::TAO::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-      TAO::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+      TAO::DCPS::AttachStatus status = sub_impl->attach_transport(transport_impl.in());
       if (status != TAO::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {
