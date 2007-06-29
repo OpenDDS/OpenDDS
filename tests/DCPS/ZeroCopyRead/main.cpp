@@ -1444,15 +1444,14 @@ int main (int argc, char *argv[])
 
           
         check_read_status(status, data2, 1, "t7 take");
-#if 0
-    //wait for #10955 "DDS view_state implementation is wrong" to be fixed.
-        if (info1[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
+
+        if (info2[0].view_state != ::DDS::NOT_NEW_VIEW_STATE)
         {
             ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) t7 ERROR: expected NOT NEW view state.\n") ));
             test_failed = 1;
         }
-#endif
+
         if (data1[0].count != data2[0].count)
         {
             ACE_ERROR ((LM_ERROR,

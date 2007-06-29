@@ -1,0 +1,14 @@
+project: dcpsexe_with_tcp {
+
+  exename   = main
+
+  TypeSupport_Files {
+    Simple.idl >> SimpleTypeSupport.idl SimpleTypeSupportImpl.h SimpleTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    Simple.idl
+    SimpleTypeSupport.idl
+  }
+
+}

@@ -27,6 +27,18 @@ TAO::DCPS::InstanceState::accessed()
 
 
 ACE_INLINE
+bool
+TAO::DCPS::InstanceState::most_recent_generation (ReceivedDataElement* item) const
+{
+  if (item->disposed_generation_count_ == this->disposed_generation_count_
+    && item->no_writers_generation_count_ == this->no_writers_generation_count_)
+    return true;
+  else
+    return false;
+}
+
+
+ACE_INLINE
 void TAO::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
                                 const ReceivedDataElement* de)
 {
