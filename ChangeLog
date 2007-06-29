@@ -1,22 +1,31 @@
+Fri Jun 29 21:51:45 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+          Removed unrequired methods.
+
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+          Change variable name to generic transport type.
+
 Fri Jun 29 21:14:07 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        These changes are made to fix the view state.(See RT 10955) 
-        
+        These changes are made to fix the view state.(See RT 10955)
+
         * bin/DCPS/CPPTemplate.pm:
 
           Updated the read/take operations to update the view state
           after finishing read one instance instead of reading first
-          sample and update the view state only when the most recent 
+          sample and update the view state only when the most recent
           generation samples in the instance are read. The samples
           of same instance returned from single read() should have
           same view state.
-          
+
         * dds/DCPS/InstanceState.h:
         * dds/DCPS/InstanceState.inl:
 
           Added method to check if a received sample belongs to current
           generation.
-          
+
         * tests/DCPS/ViewState/README:
         * tests/DCPS/ViewState/Simple.idl:
         * tests/DCPS/ViewState/ViewState.mpc:
@@ -25,15 +34,15 @@ Fri Jun 29 21:14:07 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/ViewState/run_test.pl:
 
           Added view state test.
-          
+
         * tests/DCPS/ZeroCopyRead/main.cpp:
 
           Uncommented the code to verify the view state.
-          
+
         * bin/dcps_tests.lst:
 
           Added view state test to list.
-          
+
 Fri Jun 29 18:41:25 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DevGuideExamples/DCPS:
