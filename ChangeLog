@@ -1,3 +1,10 @@
+Fri Jun 29 18:41:25 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DevGuideExamples/DCPS:
+        * DevGuideExamples/DDS:
+          The current DevGide examples are all for DCPS. Renaming
+          directory 'DDS' to 'DCPS'.
+
 Thu Jun 28 17:01:23 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -24,7 +31,7 @@ Wed Jun 27 21:22:25 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/run_test.pl:
 
-          Made subscriber start 2 seconds after publisher send all samples to avoid 
+          Made subscriber start 2 seconds after publisher send all samples to avoid
           the timing issue that the subscriber may start and finish in 1 second while
           the publisher is waiting for it to start until timeout. This should fix the
           TransientLocalTest test failure occassionally.
