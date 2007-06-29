@@ -68,6 +68,8 @@ namespace TAO
       /// A read or take operation has been performed on this instance.
       void accessed() ;
 
+      bool most_recent_generation (ReceivedDataElement* item) const;
+
       /// DataReader has become empty.
       void empty( bool value) ; 
       

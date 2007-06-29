@@ -769,12 +769,16 @@ DDS::ReturnCode_t
     ::CORBA::Long start_samples_in_instance(count) ;
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
+
     TAO::DCPS::SubscriptionInstance *ptr =
       this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
-
+      
+    bool mrg = false; //most_recent_generation   
+      
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states))
     {
+      
       for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
@@ -798,9 +802,9 @@ DDS::ReturnCode_t
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (samples_in_instance_count) block.
-          ptr->instance_state_.accessed() ;
+          if (! mrg)
+            mrg = ptr->instance_state_.most_recent_generation(item);
+
           count++ ;
           samples_in_instance_count++ ;
         }
@@ -811,8 +815,12 @@ DDS::ReturnCode_t
       } // end matches sample state
     }  // end matches view and instance state
 
+        
     if (samples_in_instance_count)
     {
+      if (mrg)
+        ptr->instance_state_.accessed() ;
+        
       //
       // Get the sample_ranks, generation_ranks, and
       // absolute_generation_ranks for this info_seq
@@ -878,11 +886,14 @@ DDS::ReturnCode_t
       ::DDS::InstanceHandle_t handle = it->second;
       TAO::DCPS::SubscriptionInstance *ptr =
         this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+        
+      bool mrg = false; //most_recent_generation
 
       TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
           (ptr->instance_state_.instance_state() & instance_states))
       {
+        
         TAO::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
         TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
@@ -908,10 +919,8 @@ DDS::ReturnCode_t
 
               item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (samples_in_instance_count) block.
-              ptr->instance_state_.accessed() ;
-
+              if (! mrg)
+                mrg = ptr->instance_state_.most_recent_generation(item);
               if (item == ptr->rcvd_sample_.tail_)
                 {
                   tail = ptr->rcvd_sample_.tail_ ;
@@ -939,6 +948,9 @@ DDS::ReturnCode_t
     
     if (samples_in_instance_count)
       {
+        if (mrg)
+        ptr->instance_state_.accessed() ;
+        
         //
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
@@ -1002,6 +1014,8 @@ DDS::ReturnCode_t
     TAO::DCPS::SubscriptionInstance *ptr =
       this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
+    bool mrg = false; //most_recent_generation
+
     if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
         (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
@@ -1016,9 +1030,10 @@ DDS::ReturnCode_t
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (found_data) block.
-          ptr->instance_state_.accessed() ;
+             
+          if (! mrg)
+            mrg = ptr->instance_state_.most_recent_generation(item);
+            
           found_data = true ;
         }
         if (found_data)
@@ -1030,6 +1045,9 @@ DDS::ReturnCode_t
 
     if (found_data)
     {
+      if (mrg)
+        ptr->instance_state_.accessed() ;
+
       //
       // Get the sample_ranks, generation_ranks, and
       // absolute_generation_ranks for this info_seq
@@ -1073,11 +1091,14 @@ DDS::ReturnCode_t
       ::DDS::InstanceHandle_t handle = it->second;
       TAO::DCPS::SubscriptionInstance *ptr =
         this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+      
+      bool mrg = false; //most_recent_generation
 
       TAO::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
           (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
       {
+        
         TAO::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
         TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
@@ -1091,8 +1112,9 @@ DDS::ReturnCode_t
 
               item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-              ptr->instance_state_.accessed() ;
-
+              if (! mrg)
+                mrg = ptr->instance_state_.most_recent_generation(item);
+            
               if (item == ptr->rcvd_sample_.tail_)
                 {
                   tail = ptr->rcvd_sample_.tail_ ;
@@ -1119,6 +1141,9 @@ DDS::ReturnCode_t
 
     if (found_data)
       {
+        if (mrg)
+          ptr->instance_state_.accessed() ;
+
         //
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
@@ -1184,7 +1209,9 @@ DDS::ReturnCode_t
 
   TAO::DCPS::SubscriptionInstance * ptr =
       this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
-
+      
+  bool mrg = false; //most_recent_generation
+  	
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
@@ -1211,7 +1238,9 @@ DDS::ReturnCode_t
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          ptr->instance_state_.accessed() ;
+          if (! mrg)
+            mrg = ptr->instance_state_.most_recent_generation(item);
+            
           count++ ;
       }
 
@@ -1224,6 +1253,9 @@ DDS::ReturnCode_t
 
   if (count)
   {
+    if (mrg)
+      ptr->instance_state_.accessed() ;
+
     //
     // Get the sample_ranks, generation_ranks, and
     // absolute_generation_ranks for this info_seq
@@ -1273,6 +1305,9 @@ DDS::ReturnCode_t
     this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
   TAO::DCPS::ReceivedDataElement *tail = 0 ;
+  
+  bool mrg = false; //most_recent_generation
+
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
@@ -1302,10 +1337,8 @@ DDS::ReturnCode_t
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
 
-          // TBD - set the view state after all samples in an instance are read/taken - see RT 10955
-          //       move into if (samples_in_instance_count) block.
-            ptr->instance_state_.accessed() ;
-
+          if (! mrg)
+            mrg = ptr->instance_state_.most_recent_generation(item);
             if (item == ptr->rcvd_sample_.tail_)
             {
                 tail = ptr->rcvd_sample_.tail_ ;
@@ -1332,6 +1365,9 @@ DDS::ReturnCode_t
 
     if (count)
     {
+      if (mrg)
+        ptr->instance_state_.accessed() ;
+
         //
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
