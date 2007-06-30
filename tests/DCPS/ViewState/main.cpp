@@ -137,8 +137,6 @@ int parse_args (int argc, char *argv[])
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
 
-    const char *currentArg = 0;
-
     if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
