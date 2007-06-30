@@ -1,3 +1,9 @@
+Sat Jun 30 16:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ViewState/main.cpp:
+
+          Removed unused local variable.
+
 Fri Jun 29 21:51:45 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
@@ -47,7 +53,7 @@ Fri Jun 29 18:41:25 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DevGuideExamples/DCPS:
         * DevGuideExamples/DDS:
-          The current DevGide examples are all for DCPS. Renaming
+          The current DevGuide examples are all for DCPS. Renaming
           directory 'DDS' to 'DCPS'.
 
 Thu Jun 28 17:01:23 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
