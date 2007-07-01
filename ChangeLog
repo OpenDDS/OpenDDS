@@ -1,3 +1,9 @@
+Sun Jul  1 20:46:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated to reflect new location of DevGuideExamples tests.
+
 Sat Jun 30 16:28:26 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ViewState/main.cpp:
