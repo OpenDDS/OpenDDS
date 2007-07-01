@@ -105,12 +105,12 @@ performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl: !DCPS_MIN
 performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 # Not running UDPListenerTest due to the machine dependent peformance of UDP.
 
-DevGuideExamples/DDS/Messenger/run_test.pl: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl default_tcp: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl udp: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl default_udp: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl mcast: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl default_mcast: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
-DevGuideExamples/DDS/Messenger/run_ns_test.pl: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN
