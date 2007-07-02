@@ -184,6 +184,12 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 {
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
 
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::add_associations "
+      "bit %d local %d remote %d\n", is_bit_, yourId, writers[0].writerId));
+  }
+
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -345,6 +351,12 @@ void DataReaderImpl::remove_associations (
 		   ))
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_associations",5);
+
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::remove_associations "
+      "bit %d local %d remote %d\n", is_bit_, subscription_id_, writers[0]));
+  }
 
   ::DDS::InstanceHandleSeq handles;
 
