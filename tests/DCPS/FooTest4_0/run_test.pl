@@ -33,7 +33,8 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$svc_config -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBDebugLevel 1");
+                             #. " -ORBDebugLevel 1 "
+                             . " -d $domains_file");
 
 # test multiple cases
 $parameters = "$svc_config -z " ;

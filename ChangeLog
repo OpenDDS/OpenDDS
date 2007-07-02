@@ -1,3 +1,14 @@
+Mon Jul  2 20::59:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+        
+          Corrected the view state to accommodate the view state changes
+          for RT 10955.
+          
+        * tests/DCPS/FooTest4_0/run_test.pl:
+
+          Made test DCPSInfoRepo default to not turn on ORBDebugLevel.
+          
 Sun Jul  1 20:46:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
