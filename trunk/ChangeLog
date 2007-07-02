@@ -1,21 +1,31 @@
+Mon Jul  2 22:36:05 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Added sleep for 2 seconds to wait for all built in 
+          datareaders to receive the add_associations from InfoRepo 
+          before delete the subscriber. Otherwise the add_associations 
+          will not add the remote_id to the transport mapping
+          and the remove_associations will fail to find the remote id.
+      
 Mon Jul  2 22:05:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
-        * dds\DCPS\DataWriterImpl.cpp:
-        * dds\DCPS\DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
 
           Added logging to help debugging association change.
 
 Mon Jul  2 20::59:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
-        
+
           Corrected the view state to accommodate the view state changes
           for RT 10955.
-          
+
         * tests/DCPS/FooTest4_0/run_test.pl:
 
           Made test DCPSInfoRepo default to not turn on ORBDebugLevel.
-          
+
 Sun Jul  1 20:46:40 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

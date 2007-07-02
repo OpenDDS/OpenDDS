@@ -357,6 +357,12 @@ main (int argc, char *argv[])
       }
 
 
+      // Sleep for 2 seconds to wait for all built in datareaders to receive the  
+      // add_associations from InfoRepo before delete the subscriber. Otherwise
+      // the add_associations will not add the remote_id to the transport mapping
+      // and the remove_associations will fail to find the remote id.
+      ACE_OS::sleep (2);
+
       ::DDS::ReturnCode_t deleteParticipantReturnCode =
         dpFactory->delete_participant(participant.in ());
       if (::DDS::RETCODE_OK != deleteParticipantReturnCode)
