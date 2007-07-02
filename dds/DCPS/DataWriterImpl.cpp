@@ -176,6 +176,13 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","add_associations", 5);
+  
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::add_associations  "
+      "bit %d local %d remote %d\n", is_bit_, yourId, readers[0].readerId));
+  }
+
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -206,11 +213,17 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
 
 
 void
-DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
+DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId myid,
            size_t                  num_remote_associations,
            const AssociationData*  remote_associations)
 {
   DBG_ENTRY_LVL ("DataWriterImpl","fully_associated", 5);
+
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
+      "bit %d local %d remote %d\n", is_bit_, myid, remote_associations[0].remote_id_));
+  }
 
   {
     // protect readers_
@@ -323,6 +336,12 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
               )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
+      "bit %d local %d remote %d\n", is_bit_, publication_id_, readers[0]));
+  }
+
   CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
