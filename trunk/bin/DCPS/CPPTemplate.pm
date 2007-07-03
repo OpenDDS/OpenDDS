@@ -1859,7 +1859,11 @@ DDS::ReturnCode_t
   //---- start of preconditions common to read and take -----
   //SPEC ref v1.2 7.1.2.5.3.8 #1
   //NOTE: we can't check maximum() or release() here since those are
-  //implementation details of the sequences.
+  //implementation details of the sequences.  In general, the info_seq will
+  //have release() == true and maximum() == 0.  If we're in zero-copy mode, the
+  //received_data will have release() == false and maximum() == 0.  If it's not
+  //zero-copy then received_data will have release == true() and maximum() ==
+  //anything.
   if (received_data.length() != info_seq.length())
     {
       ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::%s PRECONDITION_NOT_MET sample and info input sequences do not match.\n",

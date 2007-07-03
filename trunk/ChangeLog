@@ -1,3 +1,11 @@
+Tue Jul  3 19:55:32 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Added comments regarding the zero-copy sequence implementation.
+
 Tue Jul 03 00:50:18 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
        *  DDS_release_notes.txt:
@@ -14,9 +22,9 @@ Mon Jul  2 22:36:05 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/DcpsIntegration/topic.cpp:
 
-          Added sleep for 2 seconds to wait for all built in 
-          datareaders to receive the add_associations from InfoRepo 
-          before delete the subscriber. Otherwise the add_associations 
+          Added sleep for 2 seconds to wait for all built in
+          datareaders to receive the add_associations from InfoRepo
+          before delete the subscriber. Otherwise the add_associations
           will not add the remote_id to the transport mapping
           and the remove_associations will fail to find the remote id.
 

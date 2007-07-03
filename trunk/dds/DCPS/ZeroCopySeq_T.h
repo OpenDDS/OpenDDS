@@ -75,7 +75,7 @@ namespace TAO
       CORBA::ULong maximum() const;
 
       /** Performance note: increasing the length of a zero-copy sequence past
-       *  its current length will cause a copy (the sequence will no longer be
+       *  its current length may cause a copy (the sequence will no longer be
        *  zero-copy enabled).
        */
       void length(CORBA::ULong length);
