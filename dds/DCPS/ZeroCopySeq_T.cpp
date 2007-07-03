@@ -94,6 +94,11 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
         }
       else
         {
+          //There's no way we can expand the size (logical) of the zero-copy
+          //array and have the user do any meaningful operations on the new
+          //elements.  The fact that they're pointers to ReceivedDataElement
+          //is hidden from the user.  Thus we need to make the sequence
+          //single-copy at this point.
           make_single_copy(length);
         }
     }
