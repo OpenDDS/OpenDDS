@@ -109,6 +109,7 @@ New to this version are the following changes:
 
                 if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
+       although the old style is discurraged it will still work.
 
 
     4) Since the DCPS interfaces are now local, there is very little
