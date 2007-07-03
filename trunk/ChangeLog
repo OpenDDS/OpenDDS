@@ -1,12 +1,12 @@
 Tue Jul 03 00:50:18 UTC 2007  Scott Harris  <harris_s@ociweb.com>
 
        *  DDS_release_notes.txt:
-        
+
           Add a clarification.
 
         * DevGuideExamples/DCPS/Messenger/publisher.cpp:
         * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
-        
+
           Update the example per DDS_release_notes.txt recommondations
           for switch from remote to local interfaces.
 
@@ -19,7 +19,7 @@ Mon Jul  2 22:36:05 UTC 2007  Yan Dai  <dai_y@ociweb.com>
           before delete the subscriber. Otherwise the add_associations 
           will not add the remote_id to the transport mapping
           and the remove_associations will fail to find the remote id.
-      
+
 Mon Jul  2 22:05:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
@@ -27,7 +27,7 @@ Mon Jul  2 22:05:48 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
           Added logging to help debugging association change.
 
-Mon Jul  2 20::59:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+Mon Jul  2 20:59:30 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest4_0/main.cpp:
 
