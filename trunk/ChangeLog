@@ -1,3 +1,9 @@
+Thu Jul  5 20:30:45 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+
+          Added libout assignments so the libraries end up in $DDS_ROOT/lib.
+
 Thu Jul  5 20:12:54 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/dds.doxygen:
