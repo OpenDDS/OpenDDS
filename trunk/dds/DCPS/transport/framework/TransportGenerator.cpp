@@ -6,11 +6,11 @@
 #include "TransportGenerator.h"
 
 
-TAO::DCPS::TransportGenerator::TransportGenerator()
+OpenDDS::DCPS::TransportGenerator::TransportGenerator()
 {
 }
 
-TAO::DCPS::TransportGenerator::~TransportGenerator()
+OpenDDS::DCPS::TransportGenerator::~TransportGenerator()
 {
 }
 

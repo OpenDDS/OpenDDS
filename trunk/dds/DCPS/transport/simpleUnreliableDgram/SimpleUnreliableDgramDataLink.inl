@@ -7,7 +7,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramDataLink::SimpleUnreliableDgramDataLink
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::SimpleUnreliableDgramDataLink
                                         (const ACE_INET_Addr& remote_address,
                                          TransportImpl* transport_impl)
   : DataLink(transport_impl),
@@ -18,7 +18,7 @@ TAO::DCPS::SimpleUnreliableDgramDataLink::SimpleUnreliableDgramDataLink
 
 
 ACE_INLINE const ACE_INET_Addr&
-TAO::DCPS::SimpleUnreliableDgramDataLink::remote_address() const
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::remote_address() const
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","remote_address",5);
   return this->remote_address_;
@@ -26,7 +26,7 @@ TAO::DCPS::SimpleUnreliableDgramDataLink::remote_address() const
 
 
 ACE_INLINE int
-TAO::DCPS::SimpleUnreliableDgramDataLink::connect(TransportSendStrategy* send_strategy)
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::connect(TransportSendStrategy* send_strategy)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","connect",5);
   return this->start(send_strategy,0);

@@ -4,7 +4,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramConfiguration::SimpleUnreliableDgramConfiguration()
+OpenDDS::DCPS::SimpleUnreliableDgramConfiguration::SimpleUnreliableDgramConfiguration()
 : max_output_pause_period_ (-1)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","SimpleUnreliableDgramConfiguration",5);

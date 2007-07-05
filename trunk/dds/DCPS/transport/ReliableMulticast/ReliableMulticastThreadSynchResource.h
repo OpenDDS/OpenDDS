@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
-#define TAO_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -14,7 +14,7 @@
 #include "ReliableMulticast_Export.h"
 #include "dds/DCPS/transport/framework/ThreadSynchResource.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -33,7 +33,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastThreadSynchResource.inl"
@@ -41,4 +41,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTTHREADSYNCHRESOURCE_H */

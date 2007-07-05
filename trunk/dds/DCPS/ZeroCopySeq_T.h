@@ -14,15 +14,20 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.h"
 #include <ace/Vector_T.h>
 
+namespace OpenDDS
+{
+  namespace DCPS
+  {
+    class DataReaderImpl;
+    class ReceivedDataElement;
+  }
+}
 
+//This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO
 {
   namespace DCPS
   {
-
-
-    class DataReaderImpl;
-    class ReceivedDataElement;
 
     /**
     * Provides [] operators returning sample references
@@ -107,13 +112,13 @@ namespace TAO
         void internal_set_length(CORBA::ULong len)
         { seq_.internal_set_length(len); }
 
-        void set_loaner(TAO::DCPS::DataReaderImpl* loaner)
+        void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner)
         { seq_.set_loaner(loaner); }
 
-        void assign_ptr(CORBA::ULong ii, TAO::DCPS::ReceivedDataElement* item)
+        void assign_ptr(CORBA::ULong ii, OpenDDS::DCPS::ReceivedDataElement* item)
         { seq_.assign_ptr(ii, item); }
 
-        TAO::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const
+        OpenDDS::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const
         { return seq_.get_ptr(ii); }
 
         void assign_sample(CORBA::ULong ii, const Sample_T& sample)
@@ -126,18 +131,18 @@ namespace TAO
 
     private:
 
-      /** ACE_Vector doesn't have a working swap()
+      /** In some versions of ACE, ACE_Vector doesn't have a working swap()
         * function, so we have to provide our own.
         */
       class DDS_Vector
-        : public ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX>
+        : public ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
       {
       public:
         DDS_Vector(const size_t init_size = DEF_MAX, ACE_Allocator* alloc = 0);
 
         void swap(DDS_Vector&);
 
-        typedef ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX> BASE;
+        typedef ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> BASE;
         using BASE::allocator_;
         using BASE::array_;
       };
@@ -155,11 +160,11 @@ namespace TAO
 
       void internal_set_length(CORBA::ULong len);
 
-      void set_loaner(TAO::DCPS::DataReaderImpl* loaner);
+      void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner);
 
-      void assign_ptr(CORBA::ULong ii, TAO::DCPS::ReceivedDataElement* item);
+      void assign_ptr(CORBA::ULong ii, OpenDDS::DCPS::ReceivedDataElement* item);
 
-      TAO::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const;
+      OpenDDS::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const;
 
       void assign_sample(CORBA::ULong ii, const Sample_T& sample);
 
@@ -168,10 +173,10 @@ namespace TAO
       void make_single_copy(CORBA::ULong maximum);
 
       /// The datareader that loaned its samples.
-      TAO::DCPS::DataReaderImpl* loaner_;
+      OpenDDS::DCPS::DataReaderImpl* loaner_;
 
       /// the default allocator
-      FirstTimeFastAllocator<TAO::DCPS::ReceivedDataElement*, DEF_MAX>
+      OpenDDS::DCPS::FirstTimeFastAllocator<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
         default_allocator_;
 
       typedef DDS_Vector Ptr_Seq_Type;
@@ -188,7 +193,7 @@ namespace TAO
     }; // class ZeroCopyDataSeq
 
   } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopySeq_T.inl"

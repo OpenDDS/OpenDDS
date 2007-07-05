@@ -53,8 +53,8 @@ bool do_by_instance = false;
 
 int test_failed = 0;
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 enum TransportInstanceId
 {
@@ -218,9 +218,9 @@ int init_tranport ()
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
@@ -234,8 +234,8 @@ int init_tranport ()
       writer_transport_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch writer_config
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
@@ -529,13 +529,13 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>(sub.in());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
 
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
@@ -543,13 +543,13 @@ int main (int argc, char *argv[])
 
 
       // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
+      OpenDDS::DCPS::PublisherImpl* pub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::PublisherImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
                           1);
       }
 
@@ -606,7 +606,7 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataWriterImpl* fast_dw =
-        TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
+        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
         (foo_dw.in ());
 
       Test::SimpleDataReader_var foo_dr
@@ -619,7 +619,7 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataReaderImpl* fast_dr =
-        TAO::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
+        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
         (foo_dr.in ());
 
 
@@ -690,7 +690,7 @@ int main (int argc, char *argv[])
                            1);
 
 
-      TAO::DCPS::ReceivedDataElement *item;
+      OpenDDS::DCPS::ReceivedDataElement *item;
       {
         //=====================================================
         // 1) show that zero-copy is zero-copy
@@ -1396,7 +1396,7 @@ int main (int argc, char *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,  ::TAO::DCPS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
+        fast_dw->write(foo,  ::OpenDDS::DCPS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))

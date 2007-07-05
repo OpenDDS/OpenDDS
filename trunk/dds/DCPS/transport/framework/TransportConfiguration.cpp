@@ -12,14 +12,14 @@
 #endif /* ! __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportConfiguration::~TransportConfiguration()
+OpenDDS::DCPS::TransportConfiguration::~TransportConfiguration()
 {
   DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",5);
   delete this->send_thread_strategy_;
 }
 
 int
-TAO::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configuration_Heap& cf)
+OpenDDS::DCPS::TransportConfiguration::load (const TransportIdType& id, ACE_Configuration_Heap& cf)
 {
   char section [50];
   ACE_OS::sprintf (section, "%s%u", TRANSPORT_SECTION_NAME_PREFIX, id);

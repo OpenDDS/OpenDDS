@@ -1,15 +1,15 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_BASICQUEUELINKPOOL_T_H
-#define TAO_DCPS_BASICQUEUELINKPOOL_T_H
+#ifndef OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H
+#define OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H
 
 #include "BasicQueueLink_T.h"
 #include "BasicQueueLinkAllocator_T.h"
 #include "ace/Malloc_T.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -73,16 +73,16 @@ namespace TAO
 
 }
 
-#endif  /* TAO_DCPS_BASICQUEUELINKPOOL_T_H */
+#endif  /* OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H */
 
 // OLD VERSION BELOW FOR REFERENCE
 #if 0
-#ifndef TAO_DCPS_BASICQUEUELINKPOOL_T_H
-#define TAO_DCPS_BASICQUEUELINKPOOL_T_H
+#ifndef OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H
+#define OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H
 
 #include "BasicQueueLink_T.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -182,5 +182,5 @@ namespace TAO
 
 }
 
-#endif  /* TAO_DCPS_BASICQUEUELINKPOOL_T_H */
+#endif  /* OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H */
 #endif

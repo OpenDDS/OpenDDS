@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H
-#define TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_SIMPLETCPSYNCHRESOURCE_H
+#define OPENDDS_DCPS_SIMPLETCPSYNCHRESOURCE_H
 
 #include "SimpleTcpConnection_rch.h"
 #include "SimpleTcpConnection.h"
@@ -11,7 +11,7 @@
 #include "ace/Time_Value.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -33,6 +33,6 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
-#endif  /* TAO_DCPS_SIMPLETCPSYNCHRESOURCE_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPSYNCHRESOURCE_H */

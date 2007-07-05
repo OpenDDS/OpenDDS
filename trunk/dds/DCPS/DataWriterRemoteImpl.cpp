@@ -7,7 +7,7 @@
 #include "DataWriterRemoteImpl.h"
 #include "DataWriterImpl.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -35,7 +35,7 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl (void)
 
 
 void
-DataWriterRemoteImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
+DataWriterRemoteImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
            const ReaderAssociationSeq & readers
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -57,7 +57,7 @@ DataWriterRemoteImpl::remove_associations ( const ReaderIdSeq & readers,
 
 
 void
-DataWriterRemoteImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus & status
+DataWriterRemoteImpl::update_incompatible_qos ( const OpenDDS::DCPS::IncompatibleQosStatus & status
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -65,4 +65,4 @@ DataWriterRemoteImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQos
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

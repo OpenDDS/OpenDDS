@@ -38,11 +38,11 @@ class UpdateManager : public ACE_Service_Object
   typedef struct ActorStrt< ::DDS::PublisherQos &
                             , ::DDS::DataWriterQos &
                             , std::string
-                            , TAO::DCPS::TransportInterfaceInfo &> UWActor;
+                            , OpenDDS::DCPS::TransportInterfaceInfo &> UWActor;
   typedef struct ActorStrt< ::DDS::SubscriberQos &
                             , ::DDS::DataReaderQos &
                             , std::string
-                            , TAO::DCPS::TransportInterfaceInfo &> URActor;
+                            , OpenDDS::DCPS::TransportInterfaceInfo &> URActor;
   typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
 
   // ciju: The below aggregative structures should probably be using

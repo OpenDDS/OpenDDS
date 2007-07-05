@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ThreadSynchResource::~ThreadSynchResource()
+OpenDDS::DCPS::ThreadSynchResource::~ThreadSynchResource()
 {
   DBG_ENTRY_LVL("ThreadSynchResource","~ThreadSynchResource",5);
   delete this->timeout_;

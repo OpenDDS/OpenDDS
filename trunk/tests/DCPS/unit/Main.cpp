@@ -36,7 +36,7 @@ class ORB_Task;
 ORB_Task* orb_task = 0;
 
 using namespace ::DDS;
-using namespace ::TAO::DCPS;
+using namespace ::OpenDDS::DCPS;
 
 class ORB_Task : public ACE_Task_Base
 {
@@ -64,17 +64,17 @@ public:
           catch (const CORBA::SystemException& sysex)
             {
               sysex._tao_print_exception (
-                "TAO_DCPS_Service_Participant::svc");
+                "OPENDDS_DCPS_Service_Participant::svc");
             }
           catch (const CORBA::UserException& userex)
             {
               userex._tao_print_exception (
-                "TAO_DCPS_Service_Participant::svc");
+                "OPENDDS_DCPS_Service_Participant::svc");
             }
           catch (const CORBA::Exception& ex)
             {
               ex._tao_print_exception (
-                "TAO_DCPS_Service_Participant::svc");
+                "OPENDDS_DCPS_Service_Participant::svc");
             }
           if (orb_->orb_core()->has_shutdown ())
             {
@@ -146,11 +146,11 @@ int run_domain_test ()
   TEST_CHECK (domain_id == MY_DOMAIN);
 
   MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
-  TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+  OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
 
   MyTypeSupport_var fts =
-    TAO::DCPS::servant_to_reference (fts_servant);
+    OpenDDS::DCPS::servant_to_reference (fts_servant);
 
   if (::DDS::RETCODE_OK != fts->register_type(new_dp.in (), MY_TYPE))
     {
@@ -163,12 +163,12 @@ int run_domain_test ()
   ::DDS::DomainParticipant_var looked_dp
     = dpf->lookup_participant(MY_DOMAIN);
 
-  TAO::DCPS::DomainParticipantImpl* new_dp_servant
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+  OpenDDS::DCPS::DomainParticipantImpl* new_dp_servant
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
     (new_dp.in());
 
-  TAO::DCPS::DomainParticipantImpl* looked_dp_servant
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+  OpenDDS::DCPS::DomainParticipantImpl* looked_dp_servant
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
     (looked_dp.in ());
 
   TEST_CHECK (looked_dp_servant == new_dp_servant);
@@ -180,8 +180,8 @@ int run_domain_test ()
                            TOPIC_QOS_DEFAULT,
                            ::DDS::TopicListener::_nil ());
 
-  TAO::DCPS::TopicImpl* new_topic_servant
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl>
+  OpenDDS::DCPS::TopicImpl* new_topic_servant
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
     (new_topic.in ());
 
   ::DDS::Duration_t timeout;
@@ -192,8 +192,8 @@ int run_domain_test ()
   ::DDS::Topic_var found_topic
     = new_dp->find_topic(MY_TOPIC, timeout);
 
-  ::TAO::DCPS::TopicImpl* found_topic_servant
-    = ::TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl>
+  ::OpenDDS::DCPS::TopicImpl* found_topic_servant
+    = ::OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
     (found_topic.in ());
 
   TEST_CHECK (new_topic_servant == found_topic_servant);
@@ -275,7 +275,7 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
 
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
@@ -336,7 +336,7 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
 
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
@@ -404,7 +404,7 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleListElement* middle = 0;
 
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (TAO::DCPS::TransportSendElement));
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   for (ssize_t i = 0; i < size; i ++)
   {
@@ -485,7 +485,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (orb_task->activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT ("TAO_DCPS_Service_Participant::get_domain_participant_factory, ")
+                          ACE_TEXT ("OPENDDS_DCPS_Service_Participant::get_domain_participant_factory, ")
                           ACE_TEXT ("Failed to activate the orb task.")));
               return 1;
             }

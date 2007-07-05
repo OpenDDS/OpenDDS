@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 int
-TAO::DCPS::ReliableMulticastTransportConfiguration::load(
+OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
   const TransportIdType& id,
   ACE_Configuration_Heap& config
   )

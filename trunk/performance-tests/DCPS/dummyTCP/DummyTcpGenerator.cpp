@@ -7,16 +7,16 @@
 #include "DummyTcpFactory.h"
 
 
-TAO::DCPS::DummyTcpGenerator::DummyTcpGenerator()
+OpenDDS::DCPS::DummyTcpGenerator::DummyTcpGenerator()
 {
 }
 
-TAO::DCPS::DummyTcpGenerator::~DummyTcpGenerator()
+OpenDDS::DCPS::DummyTcpGenerator::~DummyTcpGenerator()
 {
 }
 
-TAO::DCPS::TransportImplFactory* 
-TAO::DCPS::DummyTcpGenerator::new_factory() 
+OpenDDS::DCPS::TransportImplFactory* 
+OpenDDS::DCPS::DummyTcpGenerator::new_factory() 
 {
   DummyTcpFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
@@ -25,8 +25,8 @@ TAO::DCPS::DummyTcpGenerator::new_factory()
   return factory;
 }
 
-TAO::DCPS::TransportConfiguration* 
-TAO::DCPS::DummyTcpGenerator::new_configuration(const TransportIdType id)
+OpenDDS::DCPS::TransportConfiguration* 
+OpenDDS::DCPS::DummyTcpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
@@ -38,8 +38,8 @@ TAO::DCPS::DummyTcpGenerator::new_configuration(const TransportIdType id)
 }
 
 void 
-TAO::DCPS::DummyTcpGenerator::default_transport_ids (TransportIdList & ids)
+OpenDDS::DCPS::DummyTcpGenerator::default_transport_ids (TransportIdList & ids)
 {
   ids.clear ();
-  ids.push_back (TAO::DCPS::DEFAULT_DUMMY_TCP_ID);
+  ids.push_back (OpenDDS::DCPS::DEFAULT_DUMMY_TCP_ID);
 }

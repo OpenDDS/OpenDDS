@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DUMMYTCPDATALINK_H
-#define TAO_DCPS_DUMMYTCPDATALINK_H
+#ifndef OPENDDS_DCPS_DUMMYTCPDATALINK_H
+#define OPENDDS_DCPS_DUMMYTCPDATALINK_H
 
 #include "DummyTcpConnection_rch.h"
 #include "DummyTcpTransport_rch.h"
@@ -10,7 +10,7 @@
 #include "ace/INET_Addr.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -68,11 +68,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "DummyTcpDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_DUMMYTCPDATALINK_H */
+#endif  /* OPENDDS_DCPS_DUMMYTCPDATALINK_H */

@@ -40,7 +40,7 @@ sub contents { return <<'!EOT'
 
 namespace
 {
-  using ::TAO::DCPS::DataReaderImpl;
+  using ::OpenDDS::DCPS::DataReaderImpl;
 
   typedef ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess SequenceType;
 
@@ -69,8 +69,8 @@ namespace
 <%NAMESPACESTART%>
 
 // VC6 can not understand the baseclass calling syntax
-typedef TAO::DCPS::DataWriterImpl TAO_DCPS_DataWriterImpl;
-typedef TAO::DCPS::DataReaderImpl TAO_DCPS_DataReaderImpl;
+typedef OpenDDS::DCPS::DataWriterImpl OPENDDS_DCPS_DataWriterImpl;
+typedef OpenDDS::DCPS::DataReaderImpl OPENDDS_DCPS_DataReaderImpl;
 
 // Implementation skeleton constructor
 <%TYPE%>TypeSupportImpl::<%TYPE%>TypeSupportImpl (void)
@@ -96,7 +96,7 @@ DDS::ReturnCode_t
   else
      this->type_name_ = CORBA::string_dup (type_name);
 
-  return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
+  return ::OpenDDS::DCPS::Registered_Data_Types->register_type(participant,
                                                            this->type_name_.in (),
                                                            this);
 }
@@ -130,7 +130,7 @@ char *
 
 
     ::DDS::DataWriter_ptr writer_obj
-        = ::TAO::DCPS::servant_to_reference (writer_impl);
+        = ::OpenDDS::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
 }
@@ -149,7 +149,7 @@ char *
 
 
     ::DDS::DataReader_ptr reader_obj
-            = ::TAO::DCPS::servant_to_reference (reader_impl);
+            = ::OpenDDS::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;
 }
@@ -186,9 +186,9 @@ DDS::InstanceHandle_t
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return register_w_timestamp (instance_data,
-                               ::TAO::DCPS::HANDLE_NIL,
+                               ::OpenDDS::DCPS::HANDLE_NIL,
                                source_timestamp);
 }
 
@@ -235,7 +235,7 @@ DDS::ReturnCode_t
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return unregister_w_timestamp (instance_data,
                                  handle,
                                  source_timestamp);
@@ -258,7 +258,7 @@ DDS::ReturnCode_t
   ::DDS::InstanceHandle_t registered_handle
       = this->get_instance_handle(instance_data);
 
-  if(registered_handle == ::TAO::DCPS::HANDLE_NIL)
+  if(registered_handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     // This case could be the instance is not registered yet or
     // already unregistered.
@@ -268,7 +268,7 @@ DDS::ReturnCode_t
                         ACE_TEXT("The instance is not registered.\n")),
                         ::DDS::RETCODE_ERROR);
   }
-  else if (handle != ::TAO::DCPS::HANDLE_NIL && handle != registered_handle)
+  else if (handle != ::OpenDDS::DCPS::HANDLE_NIL && handle != registered_handle)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
@@ -282,7 +282,7 @@ DDS::ReturnCode_t
   // DataWriterImpl::unregister will call back to inform the <%TYPE%>DataWriter
   // that the instance handle is removed from there and hence <%TYPE%>DataWriter
   // can remove the instance here.
-  return this->TAO_DCPS_DataWriterImpl::unregister(handle, source_timestamp);
+  return this->OPENDDS_DCPS_DataWriterImpl::unregister(handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -295,7 +295,7 @@ DDS::ReturnCode_t
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return write_w_timestamp (instance_data,
                             handle,
                             source_timestamp);
@@ -345,7 +345,7 @@ DDS::ReturnCode_t
   }
 
   marshalled = dds_marshal (instance_data); // FOR_WRITE - using cached allocators
-  return this->TAO_DCPS_DataWriterImpl::write(marshalled, handle, source_timestamp);
+  return this->OPENDDS_DCPS_DataWriterImpl::write(marshalled, handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -358,7 +358,7 @@ DDS::ReturnCode_t
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return dispose_w_timestamp (instance_data,
                               instance_handle,
                               source_timestamp);
@@ -379,10 +379,10 @@ DDS::ReturnCode_t
                     get_lock (),
                     ::DDS::RETCODE_ERROR);
 
-  if(instance_handle == ::TAO::DCPS::HANDLE_NIL)
+  if(instance_handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     instance_handle = this->get_instance_handle(instance_data);
-    if (instance_handle == ::TAO::DCPS::HANDLE_NIL)
+    if (instance_handle == ::OpenDDS::DCPS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -392,7 +392,7 @@ DDS::ReturnCode_t
     }
   }
 
-  return this->TAO_DCPS_DataWriterImpl::dispose(instance_handle, source_timestamp);
+  return this->OPENDDS_DCPS_DataWriterImpl::dispose(instance_handle, source_timestamp);
 }
 
 DDS::ReturnCode_t
@@ -427,20 +427,20 @@ DDS::ReturnCode_t
 void
 <%TYPE%>DataWriterImpl::init (
       ::DDS::Topic_ptr                       topic,
-      TAO::DCPS::TopicImpl                   *topic_servant,
+      OpenDDS::DCPS::TopicImpl                   *topic_servant,
       const ::DDS::DataWriterQos &           qos,
       ::DDS::DataWriterListener_ptr          a_listener,
-      TAO::DCPS::DomainParticipantImpl*      participant_servant,
+      OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
       ::DDS::Publisher_ptr                   publisher,
-      TAO::DCPS::PublisherImpl*              publisher_servant,
+      OpenDDS::DCPS::PublisherImpl*              publisher_servant,
       ::DDS::DataWriter_ptr                  dw_objref,
-        ::TAO::DCPS::DataWriterRemote_ptr    dw_remote_objref
+        ::OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote_objref
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ))
 {
-  this->TAO_DCPS_DataWriterImpl::init (topic,
+  this->OPENDDS_DCPS_DataWriterImpl::init (topic,
                                        topic_servant,
                                        qos,
                                        a_listener,
@@ -473,23 +473,23 @@ void
   if (_tao_is_bounded_size (data))
   {
     data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
-    if (::TAO::DCPS::DCPS_debug_level >= 2)
+    if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
       ACE_DEBUG((LM_DEBUG,"(%P|%t) <%TYPE%>DataWriterImpl::enable_specific-data"
           " Dynamic_Cached_Allocator_With_Overflow %x with %d chunks\n",
           data_allocator_, n_chunks_));
   }
   else
   {
-    if (::TAO::DCPS::DCPS_debug_level >= 2)
+    if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
       ACE_DEBUG((LM_DEBUG,"(%P|%t) <%TYPE%>DataWriterImpl::enable_specific"
           " is unbounded data - allocate from heap\n"));
   }
 
   mb_allocator_ =
-   new ::TAO::DCPS::MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_);
-  db_allocator_ = new ::TAO::DCPS::DataBlockAllocator (n_chunks_);
+   new ::OpenDDS::DCPS::MessageBlockAllocator (n_chunks_ * association_chunk_multiplier_);
+  db_allocator_ = new ::OpenDDS::DCPS::DataBlockAllocator (n_chunks_);
 
-  if (::TAO::DCPS::DCPS_debug_level >= 2)
+  if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
     {
       ACE_DEBUG((LM_DEBUG,"(%P|%t) <%TYPE%>DataWriterImpl::enable_specific-mb"
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
@@ -558,7 +558,7 @@ ACE_Message_Block*
                 const ::<%SCOPE%><%TYPE%>& instance_data,
                 const ::DDS::Time_t & source_timestamp)
 {
-  handle = ::TAO::DCPS::HANDLE_NIL;
+  handle = ::OpenDDS::DCPS::HANDLE_NIL;
   InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
   int needs_creation = 1;
@@ -569,8 +569,8 @@ ACE_Message_Block*
     needs_creation = 0;
 
     handle = it->second;
-    TAO::DCPS::PublicationInstance* instance =
-      this->TAO_DCPS_DataWriterImpl::get_handle_instance(handle);
+    OpenDDS::DCPS::PublicationInstance* instance =
+      this->OPENDDS_DCPS_DataWriterImpl::get_handle_instance(handle);
 
     if (instance->unregistered_ == false)
     {
@@ -621,7 +621,7 @@ ACE_Message_Block*
 
   if (it == instance_map_.end())
   {
-    return ::TAO::DCPS::HANDLE_NIL;
+    return ::OpenDDS::DCPS::HANDLE_NIL;
   }
   else
   {
@@ -652,20 +652,20 @@ void
 
 void
 <%TYPE%>DataReaderImpl::init (
-        TAO::DCPS::TopicImpl*         a_topic,
+        OpenDDS::DCPS::TopicImpl*         a_topic,
         const ::DDS::DataReaderQos &  qos,
         ::DDS::DataReaderListener_ptr a_listener,
-        TAO::DCPS::DomainParticipantImpl* participant,
-        TAO::DCPS::SubscriberImpl*        subscriber,
+        OpenDDS::DCPS::DomainParticipantImpl* participant,
+        OpenDDS::DCPS::SubscriberImpl*        subscriber,
         ::DDS::Subscriber_ptr             subscriber_objref,
         ::DDS::DataReader_ptr             dr_objerf,
-        TAO::DCPS::DataReaderRemote_ptr   dr_remote_objref
+        OpenDDS::DCPS::DataReaderRemote_ptr   dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
       ))
 {
-  this->TAO_DCPS_DataReaderImpl::init(a_topic,
+  this->OPENDDS_DCPS_DataReaderImpl::init(a_topic,
                                       qos,
                                       a_listener,
                                       participant,
@@ -684,7 +684,7 @@ void
   ))
 {
   data_allocator_ = new DataAllocator(get_n_chunks ()) ;
-    if (::TAO::DCPS::DCPS_debug_level >= 2)
+    if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
       ACE_DEBUG((LM_DEBUG,"<%TYPE%>DataReaderImpl::enable_specific-data"
           " Cached_Allocator_With_Overflow %x with %d chunks\n",
           data_allocator_, this->get_n_chunks () ));
@@ -701,12 +701,12 @@ void
        it ++)
     {
       ::DDS::InstanceHandle_t handle = it->second;
-      TAO::DCPS::SubscriptionInstance *ptr =
-          this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+      OpenDDS::DCPS::SubscriptionInstance *ptr =
+          this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
       while (ptr->rcvd_sample_.size_)
         {
-          TAO::DCPS::ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
+          OpenDDS::DCPS::ReceivedDataElement *head_ptr = ptr->rcvd_sample_.head_ ;
           ptr->rcvd_sample_.remove(head_ptr) ;
           dec_ref_data_element(head_ptr);
         }
@@ -770,8 +770,8 @@ DDS::ReturnCode_t
     ::CORBA::Long samples_in_instance_count(0) ;
     ::DDS::InstanceHandle_t handle = it->second;
 
-    TAO::DCPS::SubscriptionInstance *ptr =
-      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    OpenDDS::DCPS::SubscriptionInstance *ptr =
+      this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
       
     bool mrg = false; //most_recent_generation   
       
@@ -779,7 +779,7 @@ DDS::ReturnCode_t
         (ptr->instance_state_.instance_state() & instance_states))
     {
       
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & sample_states)
@@ -884,19 +884,19 @@ DDS::ReturnCode_t
       ::CORBA::Long start_samples_in_instance(count) ;
       ::CORBA::Long samples_in_instance_count(0) ;
       ::DDS::InstanceHandle_t handle = it->second;
-      TAO::DCPS::SubscriptionInstance *ptr =
-        this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+      OpenDDS::DCPS::SubscriptionInstance *ptr =
+        this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
         
       bool mrg = false; //most_recent_generation
 
-      TAO::DCPS::ReceivedDataElement *tail = 0 ;
+      OpenDDS::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & view_states) &&
           (ptr->instance_state_.instance_state() & instance_states))
       {
         
-        TAO::DCPS::ReceivedDataElement *next ;
+        OpenDDS::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
-        TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
         while (item)
         {
           if (item->sample_state_ & sample_states)
@@ -1011,15 +1011,15 @@ DDS::ReturnCode_t
        it ++)
   {
     ::DDS::InstanceHandle_t handle = it->second;
-    TAO::DCPS::SubscriptionInstance *ptr =
-      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    OpenDDS::DCPS::SubscriptionInstance *ptr =
+      this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     bool mrg = false; //most_recent_generation
 
     if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
         (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
     {
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
            item != 0 ; item = item->next_data_sample_)
       {
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1089,19 +1089,19 @@ DDS::ReturnCode_t
        it ++)
     {
       ::DDS::InstanceHandle_t handle = it->second;
-      TAO::DCPS::SubscriptionInstance *ptr =
-        this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+      OpenDDS::DCPS::SubscriptionInstance *ptr =
+        this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
       
       bool mrg = false; //most_recent_generation
 
-      TAO::DCPS::ReceivedDataElement *tail = 0 ;
+      OpenDDS::DCPS::ReceivedDataElement *tail = 0 ;
       if ((ptr->instance_state_.view_state() & ::DDS::ANY_VIEW_STATE) &&
           (ptr->instance_state_.instance_state() & ::DDS::ANY_INSTANCE_STATE))
       {
         
-        TAO::DCPS::ReceivedDataElement *next ;
+        OpenDDS::DCPS::ReceivedDataElement *next ;
         tail = 0 ;
-        TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+        OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
         while (item)
         {
           if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1207,15 +1207,15 @@ DDS::ReturnCode_t
 
   LoanerGuard loanerGuard(received_data_p, this);
 
-  TAO::DCPS::SubscriptionInstance * ptr =
-      this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
+  OpenDDS::DCPS::SubscriptionInstance * ptr =
+      this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
       
   bool mrg = false; //most_recent_generation
   	
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-    for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+    for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
          item != 0 ; item = item->next_data_sample_)
     {
       if (item->sample_state_ & sample_states)
@@ -1301,19 +1301,19 @@ DDS::ReturnCode_t
 
   LoanerGuard loanerGuard(received_data_p, this);
 
-  TAO::DCPS::SubscriptionInstance * ptr =
-    this->TAO_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
+  OpenDDS::DCPS::SubscriptionInstance * ptr =
+    this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle) ;
 
-  TAO::DCPS::ReceivedDataElement *tail = 0 ;
+  OpenDDS::DCPS::ReceivedDataElement *tail = 0 ;
   
   bool mrg = false; //most_recent_generation
 
   if ((ptr->instance_state_.view_state() & view_states) &&
       (ptr->instance_state_.instance_state() & instance_states))
   {
-      TAO::DCPS::ReceivedDataElement *next ;
+      OpenDDS::DCPS::ReceivedDataElement *next ;
       tail = 0 ;
-      TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
       while (item)
       {
         if (item->sample_state_ & sample_states)
@@ -1413,7 +1413,7 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
-  ::DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
+  ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1421,7 +1421,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   InstanceMap::iterator it;
-  if (a_handle == ::TAO::DCPS::HANDLE_NIL)
+  if (a_handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     it = instance_map_.begin () ;
   }
@@ -1469,7 +1469,7 @@ DDS::ReturnCode_t
     CORBA::SystemException
   ))
 {
- ::DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
+ ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1477,7 +1477,7 @@ DDS::ReturnCode_t
                     ::DDS::RETCODE_ERROR);
 
   InstanceMap::iterator it;
-  if (a_handle == ::TAO::DCPS::HANDLE_NIL)
+  if (a_handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     it = instance_map_.begin () ;
   }
@@ -1524,7 +1524,7 @@ void
 
 void
 <%TYPE%>DataReaderImpl::dec_ref_data_element(
-  ::TAO::DCPS::ReceivedDataElement* item
+  ::OpenDDS::DCPS::ReceivedDataElement* item
   )
 {
   if (0 == item->dec_ref())
@@ -1599,7 +1599,7 @@ DDS::ReturnCode_t
 }
 
 void
-<%TYPE%>DataReaderImpl::dds_demarshal(const TAO::DCPS::ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
 
@@ -1618,9 +1618,9 @@ void
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::store_instance_data(
     ::<%SCOPE%><%TYPE%> *instance_data,
-    const TAO::DCPS::DataSampleHeader& header )
+    const OpenDDS::DCPS::DataSampleHeader& header )
 {
-  DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
+  DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   //!!! caller should already have the sample_lock_
 
@@ -1628,10 +1628,10 @@ void
 
   if (it == instance_map_.end())
   {
-    TAO::DCPS::SubscriptionInstance* instance = 0;
-    handle = this->TAO_DCPS_DataReaderImpl::get_next_handle ();
+    OpenDDS::DCPS::SubscriptionInstance* instance = 0;
+    handle = this->OPENDDS_DCPS_DataReaderImpl::get_next_handle ();
     ACE_NEW_RETURN (instance,
-                    TAO::DCPS::SubscriptionInstance(this, handle),
+                    OpenDDS::DCPS::SubscriptionInstance(this, handle),
                     ::DDS::RETCODE_ERROR);
 
     instance->instance_handle_ = handle;
@@ -1664,10 +1664,10 @@ void
     handle = it->second;
   }
 
-  if (header.message_id_ != TAO::DCPS::INSTANCE_REGISTRATION)
+  if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
-    TAO::DCPS::SubscriptionInstance* instance_ptr =
-      this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
+      this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
 
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
@@ -1708,18 +1708,18 @@ void
        else
        {
          // Discard the oldest previously-read sample
-         TAO::DCPS::ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
+         OpenDDS::DCPS::ReceivedDataElement *item = instance_ptr->rcvd_sample_.head_;
          instance_ptr->rcvd_sample_.remove(item) ;
          dec_ref_data_element(item);
       }
     }
 
-    TAO::DCPS::ReceivedDataElement *ptr /* = new TAO::DCPS::ReceivedDataElement(data) */ ;
+    OpenDDS::DCPS::ReceivedDataElement *ptr /* = new OpenDDS::DCPS::ReceivedDataElement(data) */ ;
     ACE_NEW_MALLOC_RETURN (ptr,
-                           static_cast<TAO::DCPS::ReceivedDataElement *> (
+                           static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
                            rd_allocator_->malloc (
-                              sizeof (TAO::DCPS::ReceivedDataElement))),
-                           TAO::DCPS::ReceivedDataElement(instance_data),
+                              sizeof (OpenDDS::DCPS::ReceivedDataElement))),
+                           OpenDDS::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
     instance_ptr->instance_state_.data_was_received() ;
@@ -1739,7 +1739,7 @@ void
 
     if (instance_ptr->rcvd_sample_.size_ > get_depth())
     {
-      TAO::DCPS::ReceivedDataElement *head_ptr =
+      OpenDDS::DCPS::ReceivedDataElement *head_ptr =
         instance_ptr->rcvd_sample_.head_ ;
 
       instance_ptr->rcvd_sample_.remove(head_ptr) ;
@@ -1762,7 +1762,7 @@ void
       dec_ref_data_element(head_ptr);
     }
 
-    TAO::DCPS::SubscriberImpl* sub = get_subscriber_servant () ;
+    OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant () ;
     ::DDS::SubscriberListener* sub_listener =
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS) ;
     if (sub_listener != 0)
@@ -1783,8 +1783,8 @@ void
   }
   else
   {
-    TAO::DCPS::SubscriptionInstance *instance_ptr =
-         this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    OpenDDS::DCPS::SubscriptionInstance *instance_ptr =
+         this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.lively(header.publication_id_) ;
     ACE_DES_FREE (instance_data,
                   data_allocator_->free,
@@ -1795,7 +1795,7 @@ void
 }
 
 void
-<%TYPE%>DataReaderImpl::dispose(const TAO::DCPS::ReceivedDataSample& sample)
+<%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   //!!! caller should already have the sample_lock_
 
@@ -1809,15 +1809,15 @@ void
   TAO::DCPS::Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
   ser >> *data ;
 
-  DDS::InstanceHandle_t handle(::TAO::DCPS::HANDLE_NIL) ;
+  DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   InstanceMap::const_iterator it = instance_map_.find(*data);
 
   if (it != instance_map_.end())
   {
     handle = it->second;
-    TAO::DCPS::SubscriptionInstance* instance_ptr =
-          this->TAO_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
+          this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
     instance_ptr->instance_state_.dispose_was_received() ;
   }
   else if (! this->is_bit ())
@@ -1936,16 +1936,16 @@ void
 }
 
 
-//TAO::DCPS::DataReaderRemote_ptr
+//OpenDDS::DCPS::DataReaderRemote_ptr
 //<%TYPE%>DataReaderImpl::get_datareaderremote_obj_ref ()
 //{
-//  ::TAO::DCPS::DataReaderRemote_ptr reader_obj
-//      = ::TAO::DCPS::servant_to_reference
+//  ::OpenDDS::DCPS::DataReaderRemote_ptr reader_obj
+//      = ::OpenDDS::DCPS::servant_to_reference
 //            (this);
-//  ACE_CHECK_RETURN (::TAO::DCPS::DataReaderRemote::_nil());
+//  ACE_CHECK_RETURN (::OpenDDS::DCPS::DataReaderRemote::_nil());
 //
 //  // servant_to_reference does not duplicate when the object is already active
-//  return TAO::DCPS::DataReaderRemote::_duplicate(reader_obj);
+//  return OpenDDS::DCPS::DataReaderRemote::_duplicate(reader_obj);
 //}
 <%NAMESPACEEND%>
 

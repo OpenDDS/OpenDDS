@@ -13,14 +13,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::QueueRemoveVisitor::~QueueRemoveVisitor()
+OpenDDS::DCPS::QueueRemoveVisitor::~QueueRemoveVisitor()
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","~QueueRemoveVisitor",5);
 }
 
 
 int
-TAO::DCPS::QueueRemoveVisitor::visit_element(TransportQueueElement* element,
+OpenDDS::DCPS::QueueRemoveVisitor::visit_element(TransportQueueElement* element,
                                              int&                   remove)
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","visit_element",5);

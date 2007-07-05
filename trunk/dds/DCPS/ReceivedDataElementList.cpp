@@ -10,19 +10,19 @@
 #endif /* ! __ACE_INLINE__ */
 
 
-TAO::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
+OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
           : head_(0), tail_(0), size_(0), instance_state_(instance_state)
 {
 }
 
-TAO::DCPS::ReceivedDataElementList::~ReceivedDataElementList()
+OpenDDS::DCPS::ReceivedDataElementList::~ReceivedDataElementList()
 {
   // The memory pointed to by instance_state_ is owned by
   // another object.
 }
    
 bool
-TAO::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
+OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
 {
   if (!head_)
   {

@@ -5,7 +5,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramSocket::SimpleUnreliableDgramSocket()
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::SimpleUnreliableDgramSocket()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","SimpleUnreliableDgramSocket",5);
 }

@@ -45,7 +45,7 @@ int read (::DDS::DataReader_ptr reader)
     }
 
     DR_impl* dr_servant =
-      TAO::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
 
     char action[5] ;
     if (use_take)
@@ -282,7 +282,7 @@ void DataReaderListenerImpl::on_subscription_match (
 
   void DataReaderListenerImpl::on_subscription_disconnected (
     ::DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
+    const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -297,7 +297,7 @@ void DataReaderListenerImpl::on_subscription_match (
 
   void DataReaderListenerImpl::on_subscription_reconnected (
     ::DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionReconnectedStatus & status
+    const ::OpenDDS::DCPS::SubscriptionReconnectedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -313,7 +313,7 @@ void DataReaderListenerImpl::on_subscription_match (
 
     void DataReaderListenerImpl::on_subscription_lost (
     ::DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionLostStatus & status
+    const ::OpenDDS::DCPS::SubscriptionLostStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

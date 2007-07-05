@@ -20,8 +20,8 @@ class ApplicationLevel;
     DDS Domain. **/
 
 /// Ids of the transports DDS will use.
-const TAO::DCPS::TransportIdType TCP_IMPL_PUB_ID = 10;
-const TAO::DCPS::TransportIdType TCP_IMPL_SUB_ID = 11;
+const OpenDDS::DCPS::TransportIdType TCP_IMPL_PUB_ID = 10;
+const OpenDDS::DCPS::TransportIdType TCP_IMPL_SUB_ID = 11;
 /// Id of the DDS domain that all the transactions will take place in.
 /// This id needs to be in the domain_ids file that is given to the DCPSInfoRepo application
 const int DOMAINID = 411;
@@ -88,9 +88,9 @@ private:
   /** References to DDS System Code **/
 
   /// The publishers DDS transport
-  TAO::DCPS::TransportImpl_rch        pub_tcp_impl_;
+  OpenDDS::DCPS::TransportImpl_rch        pub_tcp_impl_;
   /// The subscribers DDS transport
-  TAO::DCPS::TransportImpl_rch        sub_tcp_impl_;
+  OpenDDS::DCPS::TransportImpl_rch        sub_tcp_impl_;
 
   /// Factory for creating Domain Participants
   ::DDS::DomainParticipantFactory_var dpf_;

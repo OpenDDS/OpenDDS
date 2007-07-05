@@ -25,18 +25,18 @@
 #include "TopicListener.h"
 
 // Implementation skeleton constructor
-TAO_DCPS_TopicListener_i::TAO_DCPS_TopicListener_i (void)
+OPENDDS_DCPS_TopicListener_i::OPENDDS_DCPS_TopicListener_i (void)
   {
     last_status_.total_count = 0;
     last_status_.total_count_change = 0;
   }
 
 // Implementation skeleton destructor
-TAO_DCPS_TopicListener_i::~TAO_DCPS_TopicListener_i (void)
+OPENDDS_DCPS_TopicListener_i::~OPENDDS_DCPS_TopicListener_i (void)
   {
   }
 
-void TAO_DCPS_TopicListener_i::on_inconsistent_topic (
+void OPENDDS_DCPS_TopicListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
     const ::DDS::InconsistentTopicStatus & status
   )

@@ -10,7 +10,7 @@ int operator== (::DDS::Duration_t op1,
 }
 
 
-void increment_incompatibility_count (TAO::DCPS::IncompatibleQosStatus* status,
+void increment_incompatibility_count (OpenDDS::DCPS::IncompatibleQosStatus* status,
                                       ::DDS::QosPolicyId_t incompatible_policy)
 {
   status->total_count++;

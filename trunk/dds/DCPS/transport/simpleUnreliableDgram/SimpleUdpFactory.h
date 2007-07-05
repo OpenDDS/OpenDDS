@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUDPFACTORY_H
-#define TAO_DCPS_SIMPLEUDPFACTORY_H
+#ifndef OPENDDS_DCPS_SIMPLEUDPFACTORY_H
+#define OPENDDS_DCPS_SIMPLEUDPFACTORY_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/TransportImplFactory.h"
@@ -10,7 +10,7 @@
 class SimpleUdpTransport;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -33,7 +33,7 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUdpFactory.inl"

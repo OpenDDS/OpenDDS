@@ -16,9 +16,9 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::DummyTcpDataLink::DummyTcpDataLink
+OpenDDS::DCPS::DummyTcpDataLink::DummyTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
-                                         TAO::DCPS::DummyTcpTransport*  transport_impl)
+                                         OpenDDS::DCPS::DummyTcpTransport*  transport_impl)
   : DataLink(transport_impl),
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
@@ -29,7 +29,7 @@ TAO::DCPS::DummyTcpDataLink::DummyTcpDataLink
 }
 
 
-TAO::DCPS::DummyTcpDataLink::~DummyTcpDataLink()
+OpenDDS::DCPS::DummyTcpDataLink::~DummyTcpDataLink()
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","~DummyTcpDataLink",5);
 }
@@ -42,7 +42,7 @@ TAO::DCPS::DummyTcpDataLink::~DummyTcpDataLink()
 /// it has just released the last remaining reservations from the DataLink,
 /// and the DataLink is in the process of "releasing" itself.
 void
-TAO::DCPS::DummyTcpDataLink::stop_i()
+OpenDDS::DCPS::DummyTcpDataLink::stop_i()
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","stop_i",5);
 
@@ -58,7 +58,7 @@ TAO::DCPS::DummyTcpDataLink::stop_i()
 
 
 void
-TAO::DCPS::DummyTcpDataLink::pre_stop_i()
+OpenDDS::DCPS::DummyTcpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","pre_stop_i",5);
 
@@ -92,7 +92,7 @@ TAO::DCPS::DummyTcpDataLink::pre_stop_i()
 /// connection object for us.  This call puts this DummyTcpDataLink into
 /// the "connected" state.
 int
-TAO::DCPS::DummyTcpDataLink::connect
+OpenDDS::DCPS::DummyTcpDataLink::connect
                                  (DummyTcpConnection*      connection,
                                   TransportSendStrategy*    send_strategy,
                                   TransportReceiveStrategy* receive_strategy)
@@ -137,7 +137,7 @@ TAO::DCPS::DummyTcpDataLink::connect
 /// connection object and the "old" connection object is replaced by
 /// the new connection object.
 int
-TAO::DCPS::DummyTcpDataLink::reconnect (DummyTcpConnection* connection)
+OpenDDS::DCPS::DummyTcpDataLink::reconnect (DummyTcpConnection* connection)
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","reconnect",5);
 
@@ -192,7 +192,7 @@ TAO::DCPS::DummyTcpDataLink::reconnect (DummyTcpConnection* connection)
 
 
 void
-TAO::DCPS::DummyTcpDataLink::send_graceful_disconnect_message ()
+OpenDDS::DCPS::DummyTcpDataLink::send_graceful_disconnect_message ()
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","send_graceful_disconnect_message",5);
 
@@ -212,7 +212,7 @@ TAO::DCPS::DummyTcpDataLink::send_graceful_disconnect_message ()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //::DDS::Time_t source_timestamp
-  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //  = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;
@@ -270,7 +270,7 @@ TAO::DCPS::DummyTcpDataLink::send_graceful_disconnect_message ()
 
 
 void
-TAO::DCPS::DummyTcpDataLink::fully_associated ()
+OpenDDS::DCPS::DummyTcpDataLink::fully_associated ()
 {
   DBG_ENTRY_LVL("DummyTcpDataLink","fully_associated",5);
 
@@ -293,7 +293,7 @@ TAO::DCPS::DummyTcpDataLink::fully_associated ()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //::DDS::Time_t source_timestamp
-  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //  = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;

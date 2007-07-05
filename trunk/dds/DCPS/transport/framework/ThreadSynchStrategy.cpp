@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ThreadSynchStrategy::~ThreadSynchStrategy()
+OpenDDS::DCPS::ThreadSynchStrategy::~ThreadSynchStrategy()
 {
   DBG_ENTRY_LVL("ThreadSynchStrategy","~ThreadSynchStrategy",5);
 }

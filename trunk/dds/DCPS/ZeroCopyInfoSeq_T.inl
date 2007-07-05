@@ -46,4 +46,4 @@ ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
 
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS

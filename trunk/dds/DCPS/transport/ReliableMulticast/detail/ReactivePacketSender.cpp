@@ -10,8 +10,8 @@
 #include "ReactivePacketSender.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::PacketHandler PacketHandler;
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler PacketHandler;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
 
 namespace
 {
@@ -23,7 +23,7 @@ namespace
   }
 }
 
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender(
   const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
   size_t sender_history_size
@@ -35,7 +35,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::ReactivePacketSender
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
   )
 {
   if (socket_.ACE_SOCK_Dgram::open(
@@ -66,18 +66,18 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::close()
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::close()
 {
   if (reactor()->cancel_timer(this) == -1)
   {
     logError("ReactivePacketSender: failure to cancel_timer\n");
   }
-  TAO::DCPS::ReliableMulticast::detail::EventHandler::close();
+  OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::close();
   reactor(0);
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
   const Packet& p
   )
 {
@@ -91,7 +91,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::send_packet(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_from(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_from(
   const Packet& packet,
   const ACE_INET_Addr& peer
   )
@@ -107,7 +107,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::receive_packet_from(
 }
 
 int
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender::handle_timeout(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::handle_timeout(
   const ACE_Time_Value& current_time,
   const void*
   )

@@ -159,10 +159,10 @@ int main (int argc, char *argv[])
       case 128:
         {
           ::Xyz::Pt128TypeSupportImpl* pt128ts_servant = new ::Xyz::Pt128TypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = pt128ts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = pt128ts_servant;
 
           ::Xyz::Pt128TypeSupport_var pt128ts =
-            TAO::DCPS::servant_to_reference (pt128ts_servant);
+            OpenDDS::DCPS::servant_to_reference (pt128ts_servant);
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -175,10 +175,10 @@ int main (int argc, char *argv[])
       case 512:
         {
           ::Xyz::Pt512TypeSupportImpl* pt512ts_servant = new ::Xyz::Pt512TypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = pt512ts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = pt512ts_servant;
 
           ::Xyz::Pt512TypeSupport_var pt512ts =
-            TAO::DCPS::servant_to_reference (pt512ts_servant);
+            OpenDDS::DCPS::servant_to_reference (pt512ts_servant);
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -191,10 +191,10 @@ int main (int argc, char *argv[])
       case 2048:
         {
           ::Xyz::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Xyz::Pt2048TypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = pt2048ts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = pt2048ts_servant;
 
           ::Xyz::Pt2048TypeSupport_var pt2048ts =
-            TAO::DCPS::servant_to_reference (pt2048ts_servant);
+            OpenDDS::DCPS::servant_to_reference (pt2048ts_servant);
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -207,10 +207,10 @@ int main (int argc, char *argv[])
       case 8192:
         {
           ::Xyz::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Xyz::Pt8192TypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = pt8192ts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = pt8192ts_servant;
 
           ::Xyz::Pt8192TypeSupport_var pt8192ts =
-            TAO::DCPS::servant_to_reference (pt8192ts_servant);
+            OpenDDS::DCPS::servant_to_reference (pt8192ts_servant);
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -276,33 +276,33 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>(sub.in());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
 
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
-      TAO::DCPS::AttachStatus attach_status =
+      OpenDDS::DCPS::AttachStatus attach_status =
         sub_impl->attach_transport(reader_transport_impl.in());
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           std::string status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -333,10 +333,10 @@ int main (int argc, char *argv[])
                                    RECVS_BTWN_READS,
                                    use_zero_copy_reads);
 
-      TAO::DCPS::LocalObject_var safe_servant = dr_listener_impl;
+      OpenDDS::DCPS::LocalObject_var safe_servant = dr_listener_impl;
 
       ::DDS::DataReaderListener_var dr_listener =
-        TAO::DCPS::servant_to_reference (dr_listener_impl);
+        OpenDDS::DCPS::servant_to_reference (dr_listener_impl);
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,

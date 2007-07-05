@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
+OpenDDS::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
   : enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),

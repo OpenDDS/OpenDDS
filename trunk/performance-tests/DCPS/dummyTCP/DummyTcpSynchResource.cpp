@@ -7,7 +7,7 @@
 #include "DummyTcpConnection.h"
 #include "DummyTcpSendStrategy.h"
 
-TAO::DCPS::DummyTcpSynchResource::DummyTcpSynchResource
+OpenDDS::DCPS::DummyTcpSynchResource::DummyTcpSynchResource
                                             (DummyTcpConnection*  connection,
                                              const int& max_output_pause_period_ms)
   : ThreadSynchResource (connection->peer().get_handle())
@@ -26,14 +26,14 @@ TAO::DCPS::DummyTcpSynchResource::DummyTcpSynchResource
 }
 
 
-TAO::DCPS::DummyTcpSynchResource::~DummyTcpSynchResource()
+OpenDDS::DCPS::DummyTcpSynchResource::~DummyTcpSynchResource()
 {
   DBG_ENTRY_LVL("DummyTcpSynchResource","~DummyTcpSynchResource",5);
 }
 
 
 void
-TAO::DCPS::DummyTcpSynchResource::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::DummyTcpSynchResource::notify_lost_on_backpressure_timeout ()
 {
   DBG_ENTRY_LVL("DummyTcpSynchResource","notify_lost_on_backpressure_timeout",5);
 

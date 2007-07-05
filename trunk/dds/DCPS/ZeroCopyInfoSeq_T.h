@@ -22,7 +22,7 @@
 
 // kludge to be sure LocalObject is defined in DdsDcpsInfrastructureC.h
 // because a listener might be defined without #including
-// any non-listener entitiy implementations.
+// any non-listener entity implementations.
 #include "dds/DCPS/LocalObject.h"
 
 #include <tao/Version.h>
@@ -34,7 +34,7 @@
 #  define TAO_BASE_SEQUENCE TAO::unbounded_value_sequence
 #endif
 
-
+//This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO
 {
   namespace DCPS
@@ -58,7 +58,7 @@ namespace TAO
     };
 
   } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyInfoSeq_T.inl"

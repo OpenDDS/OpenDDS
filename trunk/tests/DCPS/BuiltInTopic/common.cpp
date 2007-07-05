@@ -41,19 +41,19 @@ DataReaderImpl* datareader_servant = 0;
 
 int ignore_kind = DONT_IGNORE;
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 int init_transport ()
 {
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_tcp_config->local_address_ = reader_address;
@@ -67,13 +67,13 @@ int init_transport ()
   }
 
   writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
   writer_tcp_config->local_address_ = writer_address;
@@ -97,23 +97,23 @@ int cleanup_transport ()
 
 int attach_publisher_transport ()
 {
-  TAO::DCPS::AttachStatus attach_status
+  OpenDDS::DCPS::AttachStatus attach_status
     = publisher_servant->attach_transport(writer_transport_impl.in());
 
-  if (attach_status != TAO::DCPS::ATTACH_OK)
+  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       std::string status_str;
 
       switch (attach_status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             status_str = "ATTACH_BAD_TRANSPORT";
             break;
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             status_str = "ATTACH_ERROR";
             break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             status_str = "ATTACH_INCOMPATIBLE_QOS";
             break;
           default:
@@ -134,22 +134,22 @@ int attach_publisher_transport ()
 
 int attach_subscriber_transport ()
 {
-  TAO::DCPS::AttachStatus attach_status
+  OpenDDS::DCPS::AttachStatus attach_status
     = subscriber_servant->attach_transport(reader_transport_impl.in());
-  if (attach_status != TAO::DCPS::ATTACH_OK)
+  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       std::string status_str;
 
       switch (attach_status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             status_str = "ATTACH_BAD_TRANSPORT";
             break;
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             status_str = "ATTACH_ERROR";
             break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             status_str = "ATTACH_INCOMPATIBLE_QOS";
             break;
           default:
@@ -179,27 +179,27 @@ int ignore ()
       // the USER_DATA to find the Built-In Topic InstanceHandle_t
       // value for an entity (e.g. a DomainParticipant) but this
       // test knows everything and can use the DCPSInfo RepoID.
-      ::TAO::DCPS::RepoId part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
       //SHH one of these should be the subscriber participant and the other should be the publisher participant.
-      ::TAO::DCPS::RepoId ignore_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = participant_servant->get_id ();
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %d ignore participant %d .\n"),
                  part_id, ignore_id));
 
       ::DDS::InstanceHandleSeq handles;
-      ::TAO::DCPS::ReaderIdSeq ignore_ids;
+      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
       ignore_ids.length (1);
       ignore_ids[0] = ignore_id;
 
-      ::TAO::DCPS::BIT_Helper_2 < ::DDS::ParticipantBuiltinTopicDataDataReader,
+      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::ParticipantBuiltinTopicDataDataReader,
                     ::DDS::ParticipantBuiltinTopicDataDataReader_var,
                     ::DDS::ParticipantBuiltinTopicDataSeq,
-                    ::TAO::DCPS::ReaderIdSeq > hh;
+                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
       ::DDS::ReturnCode_t ret
         = hh.repo_ids_to_instance_handles(participant_servant,
-          ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+          ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
           ignore_ids,
           handles);
 
@@ -227,26 +227,26 @@ int ignore ()
 
   case IGNORE_TOPIC:
     {
-      ::TAO::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::TAO::DCPS::RepoId ignore_id = topic_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = topic_servant->get_id ();
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %d ignore topic %d .\n"),
                  part_id, ignore_id));
 
       ::DDS::InstanceHandleSeq handles;
-      ::TAO::DCPS::ReaderIdSeq ignore_ids;
+      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
       ignore_ids.length (1);
       ignore_ids[0] = ignore_id;
 
-      ::TAO::DCPS::BIT_Helper_2 < ::DDS::TopicBuiltinTopicDataDataReader,
+      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::TopicBuiltinTopicDataDataReader,
                     ::DDS::TopicBuiltinTopicDataDataReader_var,
                     ::DDS::TopicBuiltinTopicDataSeq,
-                    ::TAO::DCPS::ReaderIdSeq > hh;
+                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
       ::DDS::ReturnCode_t ret
         = hh.repo_ids_to_instance_handles(participant_servant,
-          ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC,
+          ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
           ignore_ids,
           handles);
 
@@ -273,27 +273,27 @@ int ignore ()
     break;
   case IGNORE_PUBLICATION:
     {
-      ::TAO::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::TAO::DCPS::RepoId ignore_id = datawriter_servant->get_publication_id ();
+      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_publication_id ();
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %d ignore publication %d .\n"),
                  part_id, ignore_id));
 
       ::DDS::InstanceHandleSeq handles;
-      ::TAO::DCPS::ReaderIdSeq ignore_ids;
+      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
       ignore_ids.length (1);
       ignore_ids[0] = ignore_id;
 
-      ::TAO::DCPS::BIT_Helper_2 <
+      ::OpenDDS::DCPS::BIT_Helper_2 <
                     ::DDS::PublicationBuiltinTopicDataDataReader,
                     ::DDS::PublicationBuiltinTopicDataDataReader_var,
                     ::DDS::PublicationBuiltinTopicDataSeq,
-                    ::TAO::DCPS::ReaderIdSeq > hh;
+                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
       ::DDS::ReturnCode_t ret
         = hh.repo_ids_to_instance_handles(participant_servant,
-          ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+          ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
           ignore_ids,
           handles);
 
@@ -320,26 +320,26 @@ int ignore ()
     break;
   case IGNORE_SUBSCRIPTION:
     {
-      ::TAO::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::TAO::DCPS::RepoId ignore_id = datareader_servant->get_subscription_id ();
+      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_subscription_id ();
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %d ignore subscription %d .\n"),
                  part_id, ignore_id));
 
       ::DDS::InstanceHandleSeq handles;
-      ::TAO::DCPS::ReaderIdSeq ignore_ids;
+      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
       ignore_ids.length (1);
       ignore_ids[0] = ignore_id;
 
-      ::TAO::DCPS::BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
+      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
                     ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                     ::DDS::SubscriptionBuiltinTopicDataSeq,
-                    ::TAO::DCPS::ReaderIdSeq > hh;
+                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
 
       ::DDS::ReturnCode_t ret
         = hh.repo_ids_to_instance_handles(participant_servant,
-          ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+          ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
           ignore_ids,
           handles);
 

@@ -122,12 +122,12 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   AckMessageDataReader_var ackmessage_dr = 
     AckMessageDataReader::_narrow(this->reader_.in());
   this->dr_servant_ =
-    TAO::DCPS::reference_to_servant<AckMessageDataReaderImpl>(ackmessage_dr.in());
+    OpenDDS::DCPS::reference_to_servant<AckMessageDataReaderImpl>(ackmessage_dr.in());
 
   PubMessageDataWriter_var pubmessage_dw =
     PubMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ =
-    TAO::DCPS::reference_to_servant<PubMessageDataWriterImpl>(pubmessage_dw.in());
+    OpenDDS::DCPS::reference_to_servant<PubMessageDataWriterImpl>(pubmessage_dw.in());
   DDSPerfTest::PubMessage msg;
   this->handle_ = this->dw_servant_->_cxx_register (msg);
 }

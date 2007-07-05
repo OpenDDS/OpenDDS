@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_RECEIVELISTENERSETMAP_H
-#define TAO_DCPS_RECEIVELISTENERSETMAP_H
+#ifndef OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
+#define OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ReceiveListenerSet.h"
@@ -12,7 +12,7 @@
 
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -23,7 +23,7 @@ namespace TAO
     class ReceivedDataSample;
 
 
-    class TAO_DdsDcps_Export ReceiveListenerSetMap
+    class OpenDDS_Dcps_Export ReceiveListenerSetMap
     {
       public:
        
@@ -70,10 +70,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReceiveListenerSetMap.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_RECEIVELISTENERSETMAP_H */
+#endif /* OPENDDS_DCPS_RECEIVELISTENERSETMAP_H */

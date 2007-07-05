@@ -33,7 +33,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -43,7 +43,7 @@ namespace TAO
     /**
     * @class DomainParticipantImpl
     *
-    * @brief Implements the ::TAO::DCPS::DomainParticipant interfaces.
+    * @brief Implements the ::OpenDDS::DCPS::DomainParticipant interfaces.
     *
     * This class acts as an entrypoint of the service and a factory
     * for publisher, subscriber and topic. It also acts as a container
@@ -52,9 +52,9 @@ namespace TAO
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export DomainParticipantImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipant>,
-        public virtual TAO::DCPS::EntityImpl
+    class OpenDDS_Dcps_Export DomainParticipantImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
+        public virtual OpenDDS::DCPS::EntityImpl
     {
     public:
 
@@ -429,6 +429,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */

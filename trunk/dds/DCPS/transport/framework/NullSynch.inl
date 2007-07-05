@@ -6,7 +6,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::NullSynch::NullSynch(ThreadSynchResource* resource)
+OpenDDS::DCPS::NullSynch::NullSynch(ThreadSynchResource* resource)
   : ThreadSynch(0)
 {
   DBG_ENTRY_LVL("NullSynch","NullSynch",5);

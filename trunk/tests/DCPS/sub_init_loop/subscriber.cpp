@@ -27,7 +27,7 @@
 
 using namespace Messenger;
 
-const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
+const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
 const char* sub_finished_filename = "subscriber_finished.txt";
@@ -111,8 +111,8 @@ int main (int argc, char *argv[])
       }
 
       // Initialize the transport
-      TAO::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::TAO::DCPS::AUTO_CONFIG);
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Indicate that the subscriber is about to become ready
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, "w");
@@ -149,28 +149,28 @@ int main (int argc, char *argv[])
           }
 
           // Attach the subscriber to the transport.
-          TAO::DCPS::SubscriberImpl* sub_impl =
-            ::TAO::DCPS::reference_to_servant
-            < TAO::DCPS::SubscriberImpl, DDS::Subscriber_ptr> (sub.in ());
+          OpenDDS::DCPS::SubscriberImpl* sub_impl =
+            ::OpenDDS::DCPS::reference_to_servant
+            < OpenDDS::DCPS::SubscriberImpl, DDS::Subscriber_ptr> (sub.in ());
           if (0 == sub_impl) {
             ACE_ERROR_RETURN ((LM_ERROR,
                                "(%P|%t) Failed to obtain subscriber servant.\n")
                               , -1);
           }
 
-          TAO::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
-          if (status != TAO::DCPS::ATTACH_OK)
+          OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+          if (status != OpenDDS::DCPS::ATTACH_OK)
             {
               std::string status_str;
               switch (status)
                 {
-                case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+                case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                   status_str = "ATTACH_BAD_TRANSPORT";
                   break;
-                case TAO::DCPS::ATTACH_ERROR:
+                case OpenDDS::DCPS::ATTACH_ERROR:
                   status_str = "ATTACH_ERROR";
                   break;
-                case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+                case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                   status_str = "ATTACH_INCOMPATIBLE_QOS";
                   break;
                 default:

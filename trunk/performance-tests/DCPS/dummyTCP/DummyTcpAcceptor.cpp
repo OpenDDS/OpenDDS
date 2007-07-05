@@ -11,7 +11,7 @@
 // This can not be inlined since it needs to have the internals of the
 // DummyTcpTransport available in order to call add_ref(), and that
 // gets a bit circular in the dependencies.  Oh well.
-TAO::DCPS::DummyTcpAcceptor::DummyTcpAcceptor
+OpenDDS::DCPS::DummyTcpAcceptor::DummyTcpAcceptor
                                          (DummyTcpTransport* transport_impl)
 {
   DBG_ENTRY_LVL("DummyTcpAcceptor","DummyTcpAcceptor",5);
@@ -20,20 +20,20 @@ TAO::DCPS::DummyTcpAcceptor::DummyTcpAcceptor
   this->transport_ = transport_impl;
 }
 
-TAO::DCPS::DummyTcpAcceptor::~DummyTcpAcceptor()
+OpenDDS::DCPS::DummyTcpAcceptor::~DummyTcpAcceptor()
 {
   DBG_ENTRY_LVL("DummyTcpAcceptor","~DummyTcpAcceptor",5);
 }
 
-TAO::DCPS::DummyTcpConfiguration*
-TAO::DCPS::DummyTcpAcceptor::get_configuration()
+OpenDDS::DCPS::DummyTcpConfiguration*
+OpenDDS::DCPS::DummyTcpAcceptor::get_configuration()
 {
   return this->transport_->get_configuration();
 }
 
 
-TAO::DCPS::DummyTcpTransport*
-TAO::DCPS::DummyTcpAcceptor::transport()
+OpenDDS::DCPS::DummyTcpTransport*
+OpenDDS::DCPS::DummyTcpAcceptor::transport()
 {
   DBG_ENTRY_LVL("DummyTcpAcceptor","transport",5);
   // Return a new reference to the caller (the caller is responsible for
@@ -44,7 +44,7 @@ TAO::DCPS::DummyTcpAcceptor::transport()
 
 
 void
-TAO::DCPS::DummyTcpAcceptor::transport_shutdown()
+OpenDDS::DCPS::DummyTcpAcceptor::transport_shutdown()
 {
   DBG_ENTRY_LVL("DummyTcpAcceptor","transport_shutdown",5);
 

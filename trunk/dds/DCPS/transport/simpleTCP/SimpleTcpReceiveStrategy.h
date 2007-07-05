@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPRECEIVESTRATEGY_H
-#define TAO_DCPS_SIMPLETCPRECEIVESTRATEGY_H
+#ifndef OPENDDS_DCPS_SIMPLETCPRECEIVESTRATEGY_H
+#define OPENDDS_DCPS_SIMPLETCPRECEIVESTRATEGY_H
 
 #include "SimpleTcpConnection_rch.h"
 #include "SimpleTcpConnection.h"
@@ -11,7 +11,7 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -57,10 +57,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleTcpReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_SIMPLETCPRECEIVESTRATEGY_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPRECEIVESTRATEGY_H */

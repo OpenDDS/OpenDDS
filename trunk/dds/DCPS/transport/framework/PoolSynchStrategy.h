@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_POOLSYNCHSTRATEGY_H
-#define TAO_DCPS_POOLSYNCHSTRATEGY_H
+#ifndef OPENDDS_DCPS_POOLSYNCHSTRATEGY_H
+#define OPENDDS_DCPS_POOLSYNCHSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynchStrategy.h"
@@ -11,12 +11,12 @@
 #include "ace/Condition_T.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export PoolSynchStrategy : public ACE_Task_Base,
+    class OpenDDS_Dcps_Export PoolSynchStrategy : public ACE_Task_Base,
                               public ThreadSynchStrategy
     {
       public:
@@ -44,10 +44,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "PoolSynchStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_POOLSYNCHSTRATEGY_H */
+#endif  /* OPENDDS_DCPS_POOLSYNCHSTRATEGY_H */

@@ -5,7 +5,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "dds/DCPS/BuiltInTopicUtils.h"
 
-namespace TAO {
+namespace OpenDDS {
   namespace DCPS {
 
     const char* BUILT_IN_PARTICIPANT_TOPIC = "DCPSParticipant";
@@ -22,4 +22,4 @@ namespace TAO {
 
 
   } // End of namespace DCPS
-}; // End of namespace TAO
+}; // End of namespace OpenDDS

@@ -5,7 +5,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::BuildChainVisitor::BuildChainVisitor()
+OpenDDS::DCPS::BuildChainVisitor::BuildChainVisitor()
   : head_(0),
     tail_(0)
 {
@@ -16,7 +16,7 @@ TAO::DCPS::BuildChainVisitor::BuildChainVisitor()
 
 ACE_INLINE
 ACE_Message_Block*
-TAO::DCPS::BuildChainVisitor::chain()
+OpenDDS::DCPS::BuildChainVisitor::chain()
 {
   DBG_ENTRY_LVL("BuildChainVisitor","chain",5);
 

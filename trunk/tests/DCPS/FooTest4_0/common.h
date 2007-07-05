@@ -30,8 +30,8 @@ static const int I1 = 1;
 static const int I2 = 2;
 static const int I3 = 3;
 
-extern TAO::DCPS::TransportImpl_rch reader_transport_impl;
-extern TAO::DCPS::TransportImpl_rch writer_transport_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 typedef std::map < char, ::DDS::SampleInfo > SampleInfoMap ;
 

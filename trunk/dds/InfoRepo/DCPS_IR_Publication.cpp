@@ -7,12 +7,12 @@
 #include /**/ "tao/debug.h"
 
 
-DCPS_IR_Publication::DCPS_IR_Publication (TAO::DCPS::RepoId id,
+DCPS_IR_Publication::DCPS_IR_Publication (OpenDDS::DCPS::RepoId id,
                                           DCPS_IR_Participant* participant,
                                           DCPS_IR_Topic* topic,
-                                          TAO::DCPS::DataWriterRemote_ptr writer,
+                                          OpenDDS::DCPS::DataWriterRemote_ptr writer,
                                           ::DDS::DataWriterQos qos,
-                                          TAO::DCPS::TransportInterfaceInfo info,
+                                          OpenDDS::DCPS::TransportInterfaceInfo info,
                                           ::DDS::PublisherQos publisherQos)
   : id_(id),
     participant_(participant),
@@ -23,7 +23,7 @@ DCPS_IR_Publication::DCPS_IR_Publication (TAO::DCPS::RepoId id,
     info_(info),
     publisherQos_(publisherQos)
 {
-  writer_ =  TAO::DCPS::DataWriterRemote::_duplicate( writer );
+  writer_ =  OpenDDS::DCPS::DataWriterRemote::_duplicate( writer );
 
   incompatibleQosStatus_.total_count = 0;
   incompatibleQosStatus_.count_since_last_send = 0;
@@ -49,7 +49,7 @@ int DCPS_IR_Publication::add_associated_subscription (DCPS_IR_Subscription* sub)
     case 0:
       {
         // inform the datawriter about the association
-        TAO::DCPS::ReaderAssociationSeq associationSeq(2);
+        OpenDDS::DCPS::ReaderAssociationSeq associationSeq(2);
         associationSeq.length(1);
         associationSeq[0].readerTransInfo = sub->get_transportInterfaceInfo ();
         associationSeq[0].readerId = sub->get_id();
@@ -110,7 +110,7 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
 
   if (sendNotify)
     {
-      TAO::DCPS::ReaderIdSeq idSeq(1);
+      OpenDDS::DCPS::ReaderIdSeq idSeq(1);
       idSeq.length(1);
       idSeq[0]= sub->get_id();
       if (participant_->is_alive())
@@ -185,7 +185,7 @@ int DCPS_IR_Publication::remove_associations (CORBA::Boolean notify_lost)
   return status;
 }
 
-void DCPS_IR_Publication::disassociate_participant (TAO::DCPS::RepoId id)
+void DCPS_IR_Publication::disassociate_participant (OpenDDS::DCPS::RepoId id)
 {
   DCPS_IR_Subscription* sub = 0;
   size_t numAssociations = associations_.size();
@@ -195,7 +195,7 @@ void DCPS_IR_Publication::disassociate_participant (TAO::DCPS::RepoId id)
 
   if (0 < numAssociations)
     {
-      TAO::DCPS::ReaderIdSeq idSeq(numAssociations);
+      OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
       idSeq.length(numAssociations);
 
       DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
@@ -250,7 +250,7 @@ void DCPS_IR_Publication::disassociate_participant (TAO::DCPS::RepoId id)
 }
 
 
-void DCPS_IR_Publication::disassociate_topic (TAO::DCPS::RepoId id)
+void DCPS_IR_Publication::disassociate_topic (OpenDDS::DCPS::RepoId id)
 {
   DCPS_IR_Subscription* sub = 0;
   size_t numAssociations = associations_.size();
@@ -260,7 +260,7 @@ void DCPS_IR_Publication::disassociate_topic (TAO::DCPS::RepoId id)
 
   if (0 < numAssociations)
     {
-      TAO::DCPS::ReaderIdSeq idSeq(numAssociations);
+      OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
       idSeq.length(numAssociations);
 
       DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
@@ -315,7 +315,7 @@ void DCPS_IR_Publication::disassociate_topic (TAO::DCPS::RepoId id)
 }
 
 
-void DCPS_IR_Publication::disassociate_subscription (TAO::DCPS::RepoId id)
+void DCPS_IR_Publication::disassociate_subscription (OpenDDS::DCPS::RepoId id)
 {
   DCPS_IR_Subscription* sub = 0;
   size_t numAssociations = associations_.size();
@@ -325,7 +325,7 @@ void DCPS_IR_Publication::disassociate_subscription (TAO::DCPS::RepoId id)
 
   if (0 < numAssociations)
     {
-      TAO::DCPS::ReaderIdSeq idSeq(numAssociations);
+      OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
       idSeq.length(numAssociations);
 
       DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
@@ -387,9 +387,9 @@ void DCPS_IR_Publication::update_incompatible_qos ()
 }
 
 
-CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (TAO::DCPS::RepoId partId,
-                                                             TAO::DCPS::RepoId topicId,
-                                                             TAO::DCPS::RepoId subId)
+CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (OpenDDS::DCPS::RepoId partId,
+                                                             OpenDDS::DCPS::RepoId topicId,
+                                                             OpenDDS::DCPS::RepoId subId)
 {
   CORBA::Boolean ignored;
   ignored = ( participant_->is_participant_ignored(partId) ||
@@ -412,35 +412,35 @@ CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (TAO::DCPS::RepoId p
 }
 
 
-TAO::DCPS::TransportInterfaceId DCPS_IR_Publication::get_transport_id () const
+OpenDDS::DCPS::TransportInterfaceId DCPS_IR_Publication::get_transport_id () const
 {
   return info_.transport_id;
 }
 
-TAO::DCPS::TransportInterfaceInfo DCPS_IR_Publication::get_transportInterfaceInfo () const
+OpenDDS::DCPS::TransportInterfaceInfo DCPS_IR_Publication::get_transportInterfaceInfo () const
 {
-  TAO::DCPS::TransportInterfaceInfo info = info_;
+  OpenDDS::DCPS::TransportInterfaceInfo info = info_;
   return info;
 }
 
-TAO::DCPS::IncompatibleQosStatus* DCPS_IR_Publication::get_incompatibleQosStatus ()
+OpenDDS::DCPS::IncompatibleQosStatus* DCPS_IR_Publication::get_incompatibleQosStatus ()
 {
   return &incompatibleQosStatus_;
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Publication::get_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_id ()
 {
   return id_;
 }
 
-TAO::DCPS::RepoId DCPS_IR_Publication::get_topic_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_topic_id ()
 {
   return topic_->get_id();
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Publication::get_participant_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Publication::get_participant_id ()
 {
   return participant_->get_id();
 }

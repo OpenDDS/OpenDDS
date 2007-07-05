@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_NETWORKADDRESS_H
-#define TAO_DCPS_NETWORKADDRESS_H
+#ifndef OPENDDS_DCPS_NETWORKADDRESS_H
+#define OPENDDS_DCPS_NETWORKADDRESS_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/INET_Addr.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -21,7 +21,7 @@ namespace TAO
      *
      * This is used to send/receive an ACE_INET_Addr through the transport.
      */
-    struct TAO_DdsDcps_Export NetworkAddress
+    struct OpenDDS_Dcps_Export NetworkAddress
     {
       /// Default Ctor
       NetworkAddress();
@@ -55,4 +55,4 @@ namespace TAO
 #include "NetworkAddress.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_NETWORKADDRESS_H */
+#endif /* OPENDDS_DCPS_NETWORKADDRESS_H */

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORT_GENERATOR_H
-#define TAO_DCPS_TRANSPORT_GENERATOR_H
+#ifndef OPENDDS_DCPS_TRANSPORT_GENERATOR_H
+#define OPENDDS_DCPS_TRANSPORT_GENERATOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -11,7 +11,7 @@
 
 #include "ace/Synch.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -31,7 +31,7 @@ namespace TAO
      * The TransportGenerator object is registered with the Transport6supplied to the 
      * TransportImpl::configure() method.
      */
-    class TAO_DdsDcps_Export TransportGenerator : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export TransportGenerator : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

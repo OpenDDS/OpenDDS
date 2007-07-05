@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ThreadSynch::~ThreadSynch()
+OpenDDS::DCPS::ThreadSynch::~ThreadSynch()
 {
   DBG_ENTRY_LVL("ThreadSynch","~ThreadSynch",5);
   delete this->resource_;
@@ -18,7 +18,7 @@ TAO::DCPS::ThreadSynch::~ThreadSynch()
 
 
 int
-TAO::DCPS::ThreadSynch::register_worker_i()
+OpenDDS::DCPS::ThreadSynch::register_worker_i()
 {
   DBG_ENTRY_LVL("ThreadSynch","register_worker_i",5);
   // Default implementation is to do nothing here.  Subclass may override.
@@ -27,7 +27,7 @@ TAO::DCPS::ThreadSynch::register_worker_i()
 
 
 void
-TAO::DCPS::ThreadSynch::unregister_worker_i()
+OpenDDS::DCPS::ThreadSynch::unregister_worker_i()
 {
   DBG_ENTRY_LVL("ThreadSynch","unregister_worker_i",5);
   // Default implementation is to do nothing here.  Subclass may override.

@@ -19,7 +19,7 @@
 //The TAO_IDL compiler-generated code expects to find this constant
 //in the in the global namespace.  It's not worth the overhead of a
 //TAO_IDL change to fix this right now but it eventually should be in
-//the TAO::DCPS namespace.
+//the OpenDDS::DCPS namespace.
 enum { DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE = 20 };
 
 #endif /* ZEROCOPYSEQBASE_H  */

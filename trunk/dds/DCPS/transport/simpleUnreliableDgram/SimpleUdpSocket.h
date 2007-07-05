@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUDPSOCKET_H
-#define TAO_DCPS_SIMPLEUDPSOCKET_H
+#ifndef OPENDDS_DCPS_SIMPLEUDPSOCKET_H
+#define OPENDDS_DCPS_SIMPLEUDPSOCKET_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramSocket.h"
@@ -10,7 +10,7 @@
 #include "ace/SOCK_Dgram.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -53,4 +53,4 @@ namespace TAO
 #include "SimpleUdpSocket.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_SIMPLEUDPSOCKET_H */
+#endif  /* OPENDDS_DCPS_SIMPLEUDPSOCKET_H */

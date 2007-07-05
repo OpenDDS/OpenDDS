@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTGDCONTROLELEMENT_H
-#define TAO_DCPS_TRANSPORTGDCONTROLELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H
+#define OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
@@ -10,13 +10,13 @@
 
 class ACE_Message_Block ;
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export TransportControlElement : public TransportQueueElement
+    class OpenDDS_Dcps_Export TransportControlElement : public TransportQueueElement
     {
       public:
 
@@ -48,4 +48,4 @@ namespace TAO
 }
 
 
-#endif  /* TAO_DCPS_TRANSPORTGDCONTROLELEMENT_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H */

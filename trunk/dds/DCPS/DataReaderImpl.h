@@ -31,7 +31,7 @@
 
 class DDS_TEST;
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -40,13 +40,13 @@ namespace TAO
     class SubscriptionInstance ;
     class TopicImpl;
 
-    typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
+    typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
     //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
-    class TAO_DdsDcps_Export WriterInfo {
+    class OpenDDS_Dcps_Export WriterInfo {
       public:
         WriterInfo (); // needed for maps
 
@@ -94,7 +94,7 @@ namespace TAO
     * is specific to the data-type associated with the topic.
     *
     */
-    class TAO_DdsDcps_Export DataReaderImpl
+    class OpenDDS_Dcps_Export DataReaderImpl
       : public virtual DDS::DataReader,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
@@ -114,15 +114,15 @@ namespace TAO
 
 
       virtual void add_associations (
-          ::TAO::DCPS::RepoId yourId,
-          const TAO::DCPS::WriterAssociationSeq & writers
+          ::OpenDDS::DCPS::RepoId yourId,
+          const OpenDDS::DCPS::WriterAssociationSeq & writers
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual void remove_associations (
-          const TAO::DCPS::WriterIdSeq & writers,
+          const OpenDDS::DCPS::WriterIdSeq & writers,
           ::CORBA::Boolean callback
         )
         ACE_THROW_SPEC ((
@@ -130,7 +130,7 @@ namespace TAO
         ));
 
       virtual void update_incompatible_qos (
-          const TAO::DCPS::IncompatibleQosStatus & status
+          const OpenDDS::DCPS::IncompatibleQosStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -174,7 +174,7 @@ namespace TAO
         SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
         ::DDS::DataReader_ptr         dr_objref,
-        ::TAO::DCPS::DataReaderRemote_ptr dr_remote_objref
+        ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -485,7 +485,7 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"

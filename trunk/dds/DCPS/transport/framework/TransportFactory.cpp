@@ -17,8 +17,8 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportFactory*
-TAO::DCPS::TransportFactory::instance (void)
+OpenDDS::DCPS::TransportFactory*
+OpenDDS::DCPS::TransportFactory::instance (void)
 {
   // Hide the template instantiation to prevent multiple instances
   // from being created.
@@ -47,8 +47,8 @@ TAO::DCPS::TransportFactory::instance (void)
 /// be raised.  This would include a failure to create/activate the
 /// TransportReactorTask object (if necessary).
 ///
-TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
 {
   DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",1);
 
@@ -152,7 +152,7 @@ TAO::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, F
 
 
 int
-TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Heap& cf)
+OpenDDS::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Heap& cf)
 {
   int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section ();
@@ -205,8 +205,8 @@ TAO::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration_Hea
 }
 
 
-TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
                                                     bool auto_configure)
 {
   TransportConfiguration_rch config = this->get_configuration (transport_id);
@@ -215,8 +215,8 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 }
 
 
-TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
                                                     ACE_CString transport_type,
                                                     bool auto_configure)
 {
@@ -253,14 +253,14 @@ TAO::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id
 }
 
 
-TAO::DCPS::TransportConfiguration_rch
-TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
+OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
 {
   TransportConfiguration_rch config;
   int result = 0;
     {
       GuardType guard(this->lock_);
-      result = TAO::DCPS::find(configuration_map_, transport_id, config);
+      result = OpenDDS::DCPS::find(configuration_map_, transport_id, config);
     }
 
   if (result != 0)
@@ -275,8 +275,8 @@ TAO::DCPS::TransportFactory::get_configuration (TransportIdType transport_id)
 }
 
 
-TAO::DCPS::TransportConfiguration_rch
-TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
+OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
                                                    ACE_CString transport_type)
 {
   int result = 0;
@@ -301,8 +301,8 @@ TAO::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
 }
 
 
-TAO::DCPS::TransportConfiguration_rch
-TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transport_id,
+OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transport_id,
                                                           ACE_CString transport_type)
 {
   if (transport_type == "")
@@ -335,8 +335,8 @@ TAO::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transp
 }
 
 
-TAO::DCPS::TransportImplFactory_rch
-TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
+OpenDDS::DCPS::TransportImplFactory_rch
+OpenDDS::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 {
   DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",1);
 
@@ -380,7 +380,7 @@ TAO::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 }
 
 void
-TAO::DCPS::TransportFactory::register_generator (const char* type,
+OpenDDS::DCPS::TransportFactory::register_generator (const char* type,
                                                  TransportGenerator* generator)
 {
   DBG_ENTRY_LVL("TransportFactory","register_generator",5);
@@ -440,7 +440,7 @@ TAO::DCPS::TransportFactory::register_generator (const char* type,
 /// to deal with holding/owning its own reference to the impl factory.
 /// It's this (non-standard) way because of the expected use pattern.
 void
-TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
+OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
                                               TransportImplFactory_rch factory)
 {
   DBG_ENTRY_LVL("TransportFactory","register_factory",1);
@@ -476,7 +476,7 @@ TAO::DCPS::TransportFactory::register_factory(FactoryIdType            factory_i
 
 
 void
-TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transport_id,
+OpenDDS::DCPS::TransportFactory::register_configuration(TransportIdType       transport_id,
                                                     TransportConfiguration_rch  config)
 {
   DBG_ENTRY_LVL("TransportFactory","register_configuration",5);
@@ -511,8 +511,8 @@ TAO::DCPS::TransportFactory::register_configuration(TransportIdType       transp
 }
 
 
-TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportFactory::obtain(TransportIdType impl_id)
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportFactory::obtain(TransportIdType impl_id)
 {
   DBG_ENTRY_LVL("TransportFactory","obtain",5);
   TransportImpl_rch impl;
@@ -541,7 +541,7 @@ TAO::DCPS::TransportFactory::obtain(TransportIdType impl_id)
 
 
 void
-TAO::DCPS::TransportFactory::release()
+OpenDDS::DCPS::TransportFactory::release()
 {
   DBG_SUB_ENTRY("TransportFactory","release",1);
   GuardType guard(this->lock_);
@@ -568,7 +568,7 @@ TAO::DCPS::TransportFactory::release()
 // one that required the reactor.  The other release() method above does
 // deal with the reactor.
 void
-TAO::DCPS::TransportFactory::release(TransportIdType impl_id)
+OpenDDS::DCPS::TransportFactory::release(TransportIdType impl_id)
 {
   DBG_SUB_ENTRY("TransportFactory","release",2);
   int result;

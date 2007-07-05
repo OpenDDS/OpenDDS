@@ -19,7 +19,7 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
 
   ::profilingTest::testMsgDataReader_ptr pt_dr = var_dr.ptr();
   ::profilingTest::testMsgDataReaderImpl* dr_servant =
-      ::TAO::DCPS::reference_to_servant< ::profilingTest::testMsgDataReaderImpl, ::profilingTest::testMsgDataReader_ptr>
+      ::OpenDDS::DCPS::reference_to_servant< ::profilingTest::testMsgDataReaderImpl, ::profilingTest::testMsgDataReader_ptr>
               (pt_dr);
 
   if (subscriber_delay_msec)

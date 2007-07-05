@@ -47,8 +47,8 @@ bool support_client_side_BIT = false;
 // default to using TCP
 int sub_using_udp = 0;
 int pub_using_udp = 0;
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 enum TransportTypeId
 {
@@ -73,13 +73,13 @@ int init_tranport ()
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleUdp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
 
-      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config
+        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -106,13 +106,13 @@ int init_tranport ()
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
         {
@@ -135,13 +135,13 @@ int init_tranport ()
       writer_transport_impl
          = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                        "SimpleUdp",
-                                                       TAO::DCPS::DONT_AUTO_CONFIG);
+                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
 
-      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config
+        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -167,12 +167,12 @@ int init_tranport ()
       writer_transport_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch writer_config
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
       if (writer_address_given)
         {
@@ -335,7 +335,7 @@ int main (int argc, char *argv[])
       ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
       ::Xyz::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -416,13 +416,13 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
@@ -430,13 +430,13 @@ int main (int argc, char *argv[])
 
 
       // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
+      OpenDDS::DCPS::PublisherImpl* pub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::PublisherImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
                           1);
       }
 
@@ -491,7 +491,7 @@ int main (int argc, char *argv[])
       }
 
       ::Xyz::FooDataWriterImpl* fast_dw
-        = TAO::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>(foo_dw.in());
+        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>(foo_dw.in());
 
       ::Xyz::FooDataReader_var foo_dr
         = ::Xyz::FooDataReader::_narrow(dr.in ());
@@ -503,7 +503,7 @@ int main (int argc, char *argv[])
       }
 
       ::Xyz::FooDataReaderImpl* fast_dr
-        = TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl>(foo_dr.in());
+        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl>(foo_dr.in());
 
 
       // wait for association establishement before writing.

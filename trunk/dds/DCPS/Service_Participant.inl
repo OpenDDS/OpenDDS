@@ -1,4 +1,4 @@
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -200,4 +200,4 @@ namespace TAO
     }
 
   } // namespace ::DDS
-} // namespace TAO
+} // namespace OpenDDS

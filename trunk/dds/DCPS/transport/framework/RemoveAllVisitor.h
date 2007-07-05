@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_REMOVEALLVISITOR_H
-#define TAO_DCPS_REMOVEALLVISITOR_H
+#ifndef OPENDDS_DCPS_REMOVEALLVISITOR_H
+#define OPENDDS_DCPS_REMOVEALLVISITOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "BasicQueueVisitor_T.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -16,7 +16,7 @@ namespace TAO
 
     class TransportQueueElement;
 
-    class TAO_DdsDcps_Export RemoveAllVisitor : public BasicQueueVisitor<TransportQueueElement>
+    class OpenDDS_Dcps_Export RemoveAllVisitor : public BasicQueueVisitor<TransportQueueElement>
     {
       public:
 
@@ -56,4 +56,4 @@ namespace TAO
 #include "RemoveAllVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_REMOVEALLVISITOR_H */
+#endif  /* OPENDDS_DCPS_REMOVEALLVISITOR_H */

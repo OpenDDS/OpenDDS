@@ -8,7 +8,7 @@
 #include "dds/DCPS/Util.h"
 
 ACE_INLINE void
-TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet","send",5);
   VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: DataLinkSet::send element %@.\n"
@@ -43,8 +43,8 @@ TAO::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 }
 
 
-ACE_INLINE TAO::DCPS::SendControlStatus
-TAO::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
+ACE_INLINE OpenDDS::DCPS::SendControlStatus
+OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
                                      TransportSendListener* listener,
                                      ACE_Message_Block*     msg)
 {
@@ -78,7 +78,7 @@ TAO::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
 
 
 ACE_INLINE int
-TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
+OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_sample",5);
@@ -104,7 +104,7 @@ TAO::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
 
 
 ACE_INLINE int
-TAO::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_all_control_msgs",5);
 
@@ -129,7 +129,7 @@ TAO::DCPS::DataLinkSet::remove_all_control_msgs(RepoId pub_id)
 /// since they heard about it when they were inserted into the
 /// send_links_ set.
 ACE_INLINE void
-TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
+OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_start",5);
 
@@ -165,7 +165,7 @@ TAO::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 /// This will inform each DataLink in the set about the send_stop()
 /// event.  It will then clear the send_links_ set.
 ACE_INLINE void
-TAO::DCPS::DataLinkSet::send_stop()
+OpenDDS::DCPS::DataLinkSet::send_stop()
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",5);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.

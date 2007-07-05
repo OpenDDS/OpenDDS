@@ -9,7 +9,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <meta name=Originator content="Microsoft Word 9">
 <link rel=File-List
 href="./TAO%20DDS%20Configuration%20Settings_files/filelist.xml">
-<title>TAO DDS Configuration Settings</title>
+<title>OpenDDS Configuration Settings</title>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>Scott8</o:Author>
@@ -109,10 +109,10 @@ div.Section1
 
 <div class=Section1>
 
-<h2><span lang=EN style='mso-ansi-language:EN'>TAO DDS Configuration Settings<o:p></o:p></span></h2>
+<h2><span lang=EN style='mso-ansi-language:EN'>OpenDDS Configuration Settings<o:p></o:p></span></h2>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
-EN'>TAO DDS 0.8 includes a new file-based configuration framework for
+EN'>OpenDDS 0.8 includes a new file-based configuration framework for
 configuring both global items such as debug level and </span><code><span
 lang=EN style='font-size:10.0pt;mso-ansi-language:EN'>DCPSInfoRepo</span></code><span
 lang=EN style='mso-ansi-language:EN'> location as well as transport
@@ -121,14 +121,14 @@ took advantage of this file-based configuration to switch between TCP and UDP
 transports without modifying any C++ code. <o:p></o:p></span></p>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
-EN'>This section summarizes the file-based configuration settings in TAO DDS.
+EN'>This section summarizes the file-based configuration settings in OpenDDS.
 We will first discuss &quot;common&quot;, or global, configuration settings.
 Then, we will discuss transport implementation configuration settings. <o:p></o:p></span></p>
 
 <h3><span lang=EN style='mso-ansi-language:EN'>Common Configuration Settings<o:p></o:p></span></h3>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
-EN'>The &quot;common&quot; section of the TAO DDS configuration file contains
+EN'>The &quot;common&quot; section of the OpenDDS configuration file contains
 settings for attributes such as debugging output, the object reference of the
 DCPSInfoRepo process, and memory pre-allocation settings. A sample
 &quot;common&quot; section is below. <o:p></o:p></span></p>
@@ -307,14 +307,14 @@ both the publisher and subscriber, we identified the transport id as follows: <o
 <pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// constants used by this publisher for transport; the <o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// TRANSPORT_IMPL_ID must match the value in the <o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// configuration file.<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>const TAO::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;<o:p></o:p></span></pre>
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>const OpenDDS::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;<o:p></o:p></span></pre>
 
 <p style='margin:0in;margin-bottom:.0001pt'><span lang=EN style='mso-ansi-language:
 EN'>and created the transport implementation object as follows: <o:p></o:p></span></p>
 
 <pre><span lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// Initialize the transport; the TRANSPORT_IMPL_ID<o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>// must match the value in the configuration file.<o:p></o:p></span></pre><pre><span
-lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>TAO::DCPS::TransportImpl_rch tcp_impl =<o:p></o:p></span></pre><pre><span
+lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">    </span>OpenDDS::DCPS::TransportImpl_rch tcp_impl =<o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">  </span><span style="mso-spacerun: yes">    </span>TheTransportFactory-&gt;create_transport_impl (<o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>TRANSPORT_IMPL_ID,<o:p></o:p></span></pre><pre><span
 lang=EN style='mso-ansi-language:EN'><span style="mso-spacerun: yes">        </span>AUTO_CONFIG);<o:p></o:p></span></pre>
@@ -355,7 +355,7 @@ are common to all transports: <o:p></o:p></span></p>
   </td>
   <td width=405 valign=top style='width:303.4pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoNormal>Type of the transport; the list of available transports
-  can be extended programmatically via the TAO DDS Pluggable Transport
+  can be extended programmatically via the OpenDDS Pluggable Transport
   Framework. <span style='font-family:"Arial Unicode MS"'><o:p></o:p></span></p>
   </td>
  </tr>

@@ -207,7 +207,7 @@ void DCPS_IR_Topic_Description::try_associate_publication (DCPS_IR_Publication* 
 {
   // for each subscription check for compatiblity
   DCPS_IR_Subscription* subscription = 0;
-  TAO::DCPS::IncompatibleQosStatus* qosStatus = 0;
+  OpenDDS::DCPS::IncompatibleQosStatus* qosStatus = 0;
 
   DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
@@ -253,7 +253,7 @@ void DCPS_IR_Topic_Description::try_associate_subscription (DCPS_IR_Subscription
     }
 
   // Check the subscriptions QOS status
-  TAO::DCPS::IncompatibleQosStatus* qosStatus =
+  OpenDDS::DCPS::IncompatibleQosStatus* qosStatus =
     subscription->get_incompatibleQosStatus();
   if (0 < qosStatus->total_count)
     {

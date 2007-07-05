@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-namespace TAO
+namespace OpenDDS
 {
     namespace DCPS
     {
@@ -43,5 +43,5 @@ FirstTimeFastAllocator<T, N>::free (void *ptr) {
 
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 

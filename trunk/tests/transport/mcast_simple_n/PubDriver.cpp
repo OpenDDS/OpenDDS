@@ -153,15 +153,15 @@ void
 PubDriver::init()
 {
 
-  TAO::DCPS::TransportImpl_rch transport_impl
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   "SimpleMcast",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
-  TAO::DCPS::TransportConfiguration_rch config
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleMcast");
 
-  TAO::DCPS::SimpleMcastConfiguration* mcast_config
-    = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleMcastConfiguration* mcast_config
+    = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (config.in ());
 
   //mcast_config->local_address_ = this->if_addr_;
   mcast_config->multicast_group_address_ = this->pub_addr_;
@@ -179,15 +179,15 @@ void
 PubDriver::run()
 {
   // Set up the subscriptions.
-  TAO::DCPS::AssociationData subscriptions[1];
+  OpenDDS::DCPS::AssociationData subscriptions[1];
   subscriptions[0].remote_id_                = this->sub_id_;
   subscriptions[0].remote_data_.transport_id = 3;  // TBD - not right
 
-  TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
 
-  subscriptions[0].remote_data_.data = TAO::DCPS::TransportInterfaceBLOB
-                       (sizeof(TAO::DCPS::NetworkAddress),
-                        sizeof(TAO::DCPS::NetworkAddress),
+  subscriptions[0].remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
+                       (sizeof(OpenDDS::DCPS::NetworkAddress),
+                        sizeof(OpenDDS::DCPS::NetworkAddress),
                         (CORBA::Octet*)(&network_order_address));
 
   this->publisher_.init(ALL_TRAFFIC,

@@ -21,7 +21,7 @@
 #include <list>
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -33,7 +33,7 @@ namespace TAO
     // Subscriber
     struct  SubscriberDataReaderInfo
     {
-      ::TAO::DCPS::DataReaderRemote_ptr remote_reader_objref_ ;
+      ::OpenDDS::DCPS::DataReaderRemote_ptr remote_reader_objref_ ;
       ::DDS::DataReader_ptr       local_reader_objref_;
       DataReaderImpl*             local_reader_impl_;
       RepoId                      topic_id_ ;
@@ -50,8 +50,8 @@ namespace TAO
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
     //Class SubscriberImpl
-    class TAO_DdsDcps_Export SubscriberImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::Subscriber>,
+    class OpenDDS_Dcps_Export SubscriberImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::Subscriber>,
         public virtual EntityImpl,
         public virtual TransportInterface
     {
@@ -254,6 +254,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_SUBSCRIBER_H  */

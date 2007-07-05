@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
         = participant->get_builtin_subscriber () ;
 
       ::DDS::DataReader_var reader
-        = bit_subscriber->lookup_datareader (TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC) ;
+        = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) ;
 
       ::DDS::ParticipantBuiltinTopicDataDataReader_var part_reader 
         = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (reader.in ());
@@ -114,7 +114,7 @@ int main (int argc, char *argv[])
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (TAO::DCPS::BUILT_IN_TOPIC_TOPIC) ;
+      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC) ;
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_reader 
         = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (reader.in ());
       if (CORBA::is_nil (topic_reader.in ()))
@@ -123,7 +123,7 @@ int main (int argc, char *argv[])
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
+      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
       ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_reader 
         = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow (reader.in ());
       if (CORBA::is_nil (sub_reader.in ()))
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
         return 1;
       }
 
-      reader = bit_subscriber->lookup_datareader (TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
+      reader = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader 
         = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (reader.in ());
       if (CORBA::is_nil (pub_reader.in ()))

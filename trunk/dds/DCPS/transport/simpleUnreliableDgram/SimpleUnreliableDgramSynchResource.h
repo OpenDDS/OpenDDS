@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
-#define TAO_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
+#define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramSocket_rch.h"
@@ -13,7 +13,7 @@
 #include "ace/Time_Value.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -38,6 +38,6 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
-#endif  /* TAO_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H */
+#endif  /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSYNCHRESOURCE_H */

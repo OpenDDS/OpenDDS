@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_PACKETRECEIVERCALLBACK_H
-#define TAO_DCPS_PACKETRECEIVERCALLBACK_H
+#ifndef OPENDDS_DCPS_PACKETRECEIVERCALLBACK_H
+#define OPENDDS_DCPS_PACKETRECEIVERCALLBACK_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -15,7 +15,7 @@
 #include "Packet.h"
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -46,8 +46,8 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_PACKETRECEIVERCALLBACK_H */
+#endif /* OPENDDS_DCPS_PACKETRECEIVERCALLBACK_H */

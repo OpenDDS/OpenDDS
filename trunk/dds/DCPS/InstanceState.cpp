@@ -14,7 +14,7 @@
 #endif /* ! __ACE_INLINE__ */
 
 
-TAO::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
+OpenDDS::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
                               ::DDS::InstanceHandle_t handle)
    : instance_state_( 0)
    , view_state_( 0)
@@ -33,7 +33,7 @@ TAO::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
 // cannot ACE_INLINE because of #include loop
 
 void
-TAO::DCPS::InstanceState::dispose_was_received()
+OpenDDS::DCPS::InstanceState::dispose_was_received()
 {
   //
   // Manage the instance state on disposal here.
@@ -48,7 +48,7 @@ TAO::DCPS::InstanceState::dispose_was_received()
 }
 
 void 
-TAO::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
+OpenDDS::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
                                    int                   num_alive_writers,
                                    const ACE_Time_Value& when)
 {
@@ -73,7 +73,7 @@ TAO::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
 
 
 void
-TAO::DCPS::InstanceState::release_if_empty()
+OpenDDS::DCPS::InstanceState::release_if_empty()
 {
   if( this->empty_ && this->no_writers_)
   {

@@ -30,11 +30,11 @@
 class DCPS_IR_Domain;
 class UpdateManager;
 
-typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
-typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
-typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Topic*,ACE_Null_Mutex> DCPS_IR_Topic_Map;
+typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
+typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
+typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Topic*,ACE_Null_Mutex> DCPS_IR_Topic_Map;
 
-typedef ACE_Unbounded_Set<TAO::DCPS::RepoId> TAO_DDS_RepoId_Set;
+typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 
 
 /**
@@ -47,7 +47,7 @@ typedef ACE_Unbounded_Set<TAO::DCPS::RepoId> TAO_DDS_RepoId_Set;
 class DCPS_IR_Participant
 {
 public:
-  DCPS_IR_Participant (TAO::DCPS::RepoId id,
+  DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
 		       UpdateManager* um);
@@ -101,29 +101,29 @@ public:
   ///  domain's list of dead participants for removal
   void mark_dead ();
 
-  TAO::DCPS::RepoId get_id ();
+  OpenDDS::DCPS::RepoId get_id ();
 
   CORBA::Boolean is_alive ();
   void set_alive (CORBA::Boolean alive);
 
   /// Ignore the participant with the id
-  void ignore_participant (TAO::DCPS::RepoId id);
+  void ignore_participant (OpenDDS::DCPS::RepoId id);
   /// Ignore the topic with the id
-  void ignore_topic (TAO::DCPS::RepoId id);
+  void ignore_topic (OpenDDS::DCPS::RepoId id);
   /// Ignore the publication with the id
-  void ignore_publication (TAO::DCPS::RepoId id);
+  void ignore_publication (OpenDDS::DCPS::RepoId id);
   /// Ignore the subscription with the id
-  void ignore_subscription (TAO::DCPS::RepoId id);
+  void ignore_subscription (OpenDDS::DCPS::RepoId id);
 
 
   /// Return pointer to the participant qos
   /// Participant retains ownership
   const ::DDS::DomainParticipantQos* get_qos ();
 
-  CORBA::Boolean is_participant_ignored (TAO::DCPS::RepoId id);
-  CORBA::Boolean is_topic_ignored (TAO::DCPS::RepoId id);
-  CORBA::Boolean is_publication_ignored (TAO::DCPS::RepoId id);
-  CORBA::Boolean is_subscription_ignored (TAO::DCPS::RepoId id);
+  CORBA::Boolean is_participant_ignored (OpenDDS::DCPS::RepoId id);
+  CORBA::Boolean is_topic_ignored (OpenDDS::DCPS::RepoId id);
+  CORBA::Boolean is_publication_ignored (OpenDDS::DCPS::RepoId id);
+  CORBA::Boolean is_subscription_ignored (OpenDDS::DCPS::RepoId id);
 
   ::DDS::InstanceHandle_t get_handle();
   void set_handle(::DDS::InstanceHandle_t handle);
@@ -132,7 +132,7 @@ public:
   void set_bit_status (CORBA::Boolean isBIT);
 
 private:
-  TAO::DCPS::RepoId id_;
+  OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Domain* domain_;
   ::DDS::DomainParticipantQos qos_;
   CORBA::Boolean aliveStatus_;

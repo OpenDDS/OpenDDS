@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTRECEIVELISTENER_H
-#define TAO_DCPS_TRANSPORTRECEIVELISTENER_H
+#ifndef OPENDDS_DCPS_TRANSPORTRECEIVELISTENER_H
+#define OPENDDS_DCPS_TRANSPORTRECEIVELISTENER_H
 
 #include "dds/DCPS/dcps_export.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -16,7 +16,7 @@ namespace TAO
     class ReceivedDataSample;
 
 
-    class TAO_DdsDcps_Export TransportReceiveListener
+    class OpenDDS_Dcps_Export TransportReceiveListener
     {
       public:
 
@@ -32,10 +32,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportReceiveListener.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_TRANSPORTRECEIVELISTENER_H */
+#endif /* OPENDDS_DCPS_TRANSPORTRECEIVELISTENER_H */

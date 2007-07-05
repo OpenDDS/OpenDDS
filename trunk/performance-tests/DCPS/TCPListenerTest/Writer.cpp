@@ -43,7 +43,7 @@ void write (long id,
   //       and using the servant directly rather than the DataReader reference
   //       had performance benefits but with the change to local
   //       interfaces this is no longer needed.
-  // Wimpl* pt_servant = TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
+  // Wimpl* pt_servant = OpenDDS::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));

@@ -10,13 +10,13 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::RepoIdSet::~RepoIdSet()
+OpenDDS::DCPS::RepoIdSet::~RepoIdSet()
 {
   DBG_ENTRY_LVL("RepoIdSet","~RepoIdSet",5);
 }
 
 void
-TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
+OpenDDS::DCPS::RepoIdSet::serialize(TAO::DCPS::Serializer & serializer)
 {
   DBG_ENTRY_LVL("RepoIdSet","serialize",5);
   CORBA::ULong sz = this->size ();
@@ -32,7 +32,7 @@ TAO::DCPS::RepoIdSet::serialize(Serializer & serializer)
 
 
 bool
-TAO::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
+OpenDDS::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
 {
   DBG_ENTRY_LVL("RepoIdSet","is_subset",5);
 
@@ -54,7 +54,7 @@ TAO::DCPS::RepoIdSet::is_subset (RepoIdSet& map)
 }
 
 bool
-TAO::DCPS::RepoIdSet::exist (const RepoId& local_id,
+OpenDDS::DCPS::RepoIdSet::exist (const RepoId& local_id,
                              bool& last)
 {
   DBG_ENTRY_LVL("RepoIdSet","exist",5);

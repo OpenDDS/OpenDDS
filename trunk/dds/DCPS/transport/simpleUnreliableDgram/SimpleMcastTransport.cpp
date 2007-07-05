@@ -12,7 +12,7 @@
 #include "SimpleMcastTransport.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::SimpleMcastTransport::~SimpleMcastTransport()
+OpenDDS::DCPS::SimpleMcastTransport::~SimpleMcastTransport()
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","~SimpleMcastTransport",5);
 }
@@ -20,7 +20,7 @@ TAO::DCPS::SimpleMcastTransport::~SimpleMcastTransport()
 
 
 int
-TAO::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* config)
+OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","configure_socket",5);
 
@@ -75,7 +75,7 @@ TAO::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* config
 
 
 int
-TAO::DCPS::SimpleMcastTransport::connection_info_i
+OpenDDS::DCPS::SimpleMcastTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","connection_info_i",5);
@@ -89,7 +89,7 @@ TAO::DCPS::SimpleMcastTransport::connection_info_i
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 3; // TBD Change magic number into a enum or constant value.
   // TBD SOON - Move the local_info.data "population" to the NetworkAddress.
-  local_info.data = TAO::DCPS::TransportInterfaceBLOB
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
                                     (sizeof(NetworkAddress),
                                      sizeof(NetworkAddress),
                                      (CORBA::Octet*)(&network_order_address));

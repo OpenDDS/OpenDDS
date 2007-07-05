@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_THREADPERCONREMOVEVISITOR_H
-#define TAO_DCPS_THREADPERCONREMOVEVISITOR_H
+#ifndef OPENDDS_DCPS_THREADPERCONREMOVEVISITOR_H
+#define OPENDDS_DCPS_THREADPERCONREMOVEVISITOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "BasicQueueVisitor_T.h"
@@ -11,13 +11,13 @@
 #include "ace/Message_Block.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export ThreadPerConRemoveVisitor : public BasicQueueVisitor<SendRequest>
+    class OpenDDS_Dcps_Export ThreadPerConRemoveVisitor : public BasicQueueVisitor<SendRequest>
     {
       public:
 
@@ -61,4 +61,4 @@ namespace TAO
 #include "ThreadPerConRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_THREADPERCONREMOVEVISITOR_H */
+#endif  /* OPENDDS_DCPS_THREADPERCONREMOVEVISITOR_H */

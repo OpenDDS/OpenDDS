@@ -60,7 +60,7 @@ class PubDriver
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
     int               block_on_write_;
     int               num_threads_to_write_;

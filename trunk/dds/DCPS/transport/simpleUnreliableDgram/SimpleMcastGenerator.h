@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEMCAST_GENERATOR_H
-#define TAO_DCPS_SIMPLEMCAST_GENERATOR_H
+#ifndef OPENDDS_DCPS_SIMPLEMCAST_GENERATOR_H
+#define OPENDDS_DCPS_SIMPLEMCAST_GENERATOR_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/TransportGenerator.h"
 #include "ace/Synch.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS

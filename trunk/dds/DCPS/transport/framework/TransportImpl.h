@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTIMPL_H
-#define TAO_DCPS_TRANSPORTIMPL_H
+#ifndef OPENDDS_DCPS_TRANSPORTIMPL_H
+#define OPENDDS_DCPS_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -19,7 +19,7 @@
 #include "ace/Vector_T.h"
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -59,7 +59,7 @@ namespace TAO
     *     but has a references via smart pointer then the reference should be freed;
     *     if this object has ownership of task objects then the tasks should be closed.
     */
-    class TAO_DdsDcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -334,10 +334,10 @@ private:
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTIMPL_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTIMPL_H */

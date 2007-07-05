@@ -1,14 +1,14 @@
 /// -*- C++ -*-
 ///
 /// $Id$
-#ifndef TAO_DCPS_DATASAMPLELIST_H
-#define TAO_DCPS_DATASAMPLELIST_H
+#ifndef OPENDDS_DCPS_DATASAMPLELIST_H
+#define OPENDDS_DCPS_DATASAMPLELIST_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -80,7 +80,7 @@ namespace TAO
     *       are all presumably from a cache (for the most part) anyway, so
     *       it should be fairly quick.
     */
-    struct TAO_DdsDcps_Export DataSampleListElement 
+    struct OpenDDS_Dcps_Export DataSampleListElement 
     {
       DataSampleListElement (PublicationId           publication_id,
                              TransportSendListener*  send_listner,
@@ -99,7 +99,7 @@ namespace TAO
       /// Publication Id used downstream.
       PublicationId          publication_id_ ;
       CORBA::ULong           num_subs_;
-      TAO::DCPS::RepoId      subscription_ids_[TAO::DCPS::MAX_READERS_PER_ELEM];
+      OpenDDS::DCPS::RepoId      subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)
@@ -144,7 +144,7 @@ namespace TAO
     * some lists where we remove from the middle, which are not handled by
     * this list structure.
     */
-    class TAO_DdsDcps_Export DataSampleList {
+    class OpenDDS_Dcps_Export DataSampleList {
 
     public:
       /// Default constructor clears the list.
@@ -219,10 +219,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined(__ACE_INLINE__)
 #include "DataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_DATASAMPLELIST_H */
+#endif  /* OPENDDS_DCPS_DATASAMPLELIST_H */

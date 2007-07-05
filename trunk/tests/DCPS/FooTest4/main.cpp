@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
       ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
       ::Xyz::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -168,20 +168,20 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>(sub.in ());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in ());
 
       if (0 == sub_impl)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                            ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                             1);
         }
 
-      TAO::DCPS::TransportImpl_rch transport_impl
-        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+      OpenDDS::DCPS::TransportImpl_rch transport_impl
+        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch config
+      OpenDDS::DCPS::TransportConfiguration_rch config
         = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
       if (transport_impl->configure(config.in ()) != 0)
@@ -191,23 +191,23 @@ int main (int argc, char *argv[])
           return 1 ;
         }
 
-      TAO::DCPS::AttachStatus status
+      OpenDDS::DCPS::AttachStatus status
         = sub_impl->attach_transport(transport_impl.in());
 
-      if (status != TAO::DCPS::ATTACH_OK)
+      if (status != OpenDDS::DCPS::ATTACH_OK)
       {
         // We failed to attach to the transport for some reason.
         ACE_CString status_str;
 
         switch (status)
           {
-            case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+            case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
               status_str = "ATTACH_BAD_TRANSPORT";
               break;
-            case TAO::DCPS::ATTACH_ERROR:
+            case OpenDDS::DCPS::ATTACH_ERROR:
               status_str = "ATTACH_ERROR";
               break;
-            case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+            case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
               status_str = "ATTACH_INCOMPATIBLE_QOS";
               break;
             default:

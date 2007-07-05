@@ -41,13 +41,13 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the publisher to the transport.
-  TAO::DCPS::PublisherImpl* pub_impl
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub_.in ());
+  OpenDDS::DCPS::PublisherImpl* pub_impl
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
 
   if (0 == pub_impl)
   {
     ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::PublisherImpl\n")));
+                      ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")));
     throw TestException() ;
   }
 
@@ -82,17 +82,17 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   }
 
   fast_dw_ =
-    TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
+    OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
 
 }
 
 void Writer::write (char message_id, const ::Xyz::Foo &foo)
 {
-  ::DDS::InstanceHandle_t handle (::TAO::DCPS::HANDLE_NIL) ;
+  ::DDS::InstanceHandle_t handle (::OpenDDS::DCPS::HANDLE_NIL) ;
 
   switch(message_id)
   {
-    case ::TAO::DCPS::SAMPLE_DATA:
+    case ::OpenDDS::DCPS::SAMPLE_DATA:
       ACE_OS::printf ("writing %c foo.x = %f foo.y = %f, foo.key = %d\n",
                       foo.c, foo.x, foo.y, foo.key);
 
@@ -100,12 +100,12 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
                       handle);
       break;
 
-    case ::TAO::DCPS::INSTANCE_REGISTRATION:
+    case ::OpenDDS::DCPS::INSTANCE_REGISTRATION:
       ACE_OS::printf ("registering foo.key = %d\n", foo.key) ;
       handle = fast_dw_->_cxx_register (foo);
       break;
 
-    case ::TAO::DCPS::DISPOSE_INSTANCE:
+    case ::OpenDDS::DCPS::DISPOSE_INSTANCE:
       ACE_OS::printf ("disposing foo.key = %d\n", foo.key) ;
 
       fast_dw_->dispose(foo,
@@ -134,19 +134,19 @@ Writer::test1 ()
     foo.key = I1 ;
 
     // register I1
-    write(::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
+    write(::OpenDDS::DCPS::INSTANCE_REGISTRATION, foo) ;
 
     foo.x = 1.0 ;
     foo.y = -1.0 ;
     foo.c = 'A';
 
     // write I1 value A
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     foo.key = I2 ;
 
     // register I2
-    write (::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
+    write (::OpenDDS::DCPS::INSTANCE_REGISTRATION, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -171,7 +171,7 @@ Writer::test2 ()
     foo.key = I2 ;
 
     // write I2 value X
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     foo.x = 2.0 ;
     foo.y = -2.0 ;
@@ -179,19 +179,19 @@ Writer::test2 ()
     foo.key = I1 ;
 
     // write I1 value B
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     foo.key = I3 ;
 
     // register I3
-    write (::TAO::DCPS::INSTANCE_REGISTRATION, foo) ;
+    write (::OpenDDS::DCPS::INSTANCE_REGISTRATION, foo) ;
 
     foo.x = 2.0 ;
     foo.y = -3.0 ;
     foo.c = 'Q';
 
     // write I3 value Q
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -215,24 +215,24 @@ Writer::test3 ()
     foo.key = I1 ;
 
     // Dispose I1
-    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
+    write (::OpenDDS::DCPS::DISPOSE_INSTANCE, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -1.0 ;
     foo.c = 'C' ;
 
     // write I1 value C
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     // Dispose I1
-    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
+    write (::OpenDDS::DCPS::DISPOSE_INSTANCE, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -2.0 ;
     foo.c = 'D' ;
 
     // write I1 value D
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     foo.x = 3.0 ;
     foo.y = -4.0 ;
@@ -240,10 +240,10 @@ Writer::test3 ()
     foo.key = I2 ;
 
     // write I2 value Y
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
 
     // Dispose I2
-    write (::TAO::DCPS::DISPOSE_INSTANCE, foo) ;
+    write (::OpenDDS::DCPS::DISPOSE_INSTANCE, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -267,7 +267,7 @@ Writer::test4 ()
     foo.key = I1 ;
 
     // write I1 value c
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -291,7 +291,7 @@ Writer::test5 ()
     foo.key = I1 ;
 
     // write I1 value d
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -316,7 +316,7 @@ Writer::test6 ()
     foo.key = I1 ;
 
     // write I1 value d
-    write (::TAO::DCPS::SAMPLE_DATA, foo) ;
+    write (::OpenDDS::DCPS::SAMPLE_DATA, foo) ;
   }
   catch (const CORBA::Exception& ex)
   {
@@ -332,13 +332,13 @@ int Writer::init_transport ()
   writer_transport_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
   writer_tcp_config->local_address_ = writer_address;

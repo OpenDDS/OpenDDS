@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
-#define TAO_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
+#ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
+#define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -16,7 +16,7 @@
 #include "ace/Event_Handler.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -80,4 +80,4 @@ namespace TAO
 #include "SimpleUnreliableDgramSocket.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H */
+#endif  /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMSOCKET_H */

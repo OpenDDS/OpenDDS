@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsDataWriterRemote.idl"
 #include "dds/DdsDcpsDataReaderRemote.idl"
 
-module TAO {
+module OpenDDS {
   module DCPS {
     interface DCPSInfo {
 
@@ -171,7 +171,7 @@ module TAO {
       // incompatible.
       //
       // Note: these methods are not required for the first implemenation
-      // of TAO DDS because the supported topics are not changeable
+      // of OpenDDS because the supported topics are not changeable
       // per the QoS table in the DDS spec.
 
 //      void update_domain_participant_qos (in ::DDS::DomainId_t domain,
@@ -212,6 +212,6 @@ module TAO {
     };
 
   }; // module DDS
-}; // module TAO
+}; // module OpenDDS
 
 #endif // TAO_DDS_DCPSINFO_IDL

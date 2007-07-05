@@ -11,7 +11,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleUnreliableDgramDataLink::~SimpleUnreliableDgramDataLink()
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::~SimpleUnreliableDgramDataLink()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","~SimpleUnreliableDgramDataLink",5);
 }
@@ -19,7 +19,7 @@ TAO::DCPS::SimpleUnreliableDgramDataLink::~SimpleUnreliableDgramDataLink()
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramDataLink::stop_i()
+OpenDDS::DCPS::SimpleUnreliableDgramDataLink::stop_i()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","stop_i",5);
 

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
-#define TAO_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -15,7 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "ace/Auto_Ptr.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -42,8 +42,8 @@ namespace TAO
     public:
       // We do not own synch_resource!
       ReliableMulticastTransportSendStrategy(
-        TAO::DCPS::ReliableMulticastTransportConfiguration& configuration,
-        TAO::DCPS::ReliableMulticastThreadSynchResource* synch_resource
+        OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
+        OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource
         );
       virtual ~ReliableMulticastTransportSendStrategy();
 
@@ -66,12 +66,12 @@ namespace TAO
       virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
     private:
-      ACE_Auto_Ptr<TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender> sender_;
+      ACE_Auto_Ptr<OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender> sender_;
     };
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportSendStrategy.inl"
@@ -79,4 +79,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTSENDSTRATEGY_H */

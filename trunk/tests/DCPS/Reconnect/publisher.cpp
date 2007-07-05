@@ -25,7 +25,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-const TAO::DCPS::TransportIdType TCP_IMPL_ID = 1;
+const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* pub_finished_filename = "publisher_finished.txt";
@@ -104,7 +104,7 @@ int main (int argc, char *argv[]) {
     }
 
     Messenger::MessageTypeSupportImpl* servant = new Messenger::MessageTypeSupportImpl();
-    TAO::DCPS::LocalObject_var safe_servant = servant;
+    OpenDDS::DCPS::LocalObject_var safe_servant = servant;
 
     if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
       cerr << "register_type failed." << endl;
@@ -125,9 +125,9 @@ int main (int argc, char *argv[]) {
       exit(1);
     }
 
-    TAO::DCPS::TransportImpl_rch tcp_impl =
+    OpenDDS::DCPS::TransportImpl_rch tcp_impl =
       TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  ::TAO::DCPS::AUTO_CONFIG);
+                                                  ::OpenDDS::DCPS::AUTO_CONFIG);
 
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -138,24 +138,24 @@ int main (int argc, char *argv[]) {
     }
 
     // Attach the publisher to the transport.
-    TAO::DCPS::PublisherImpl* pub_impl =
-      TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
+    OpenDDS::DCPS::PublisherImpl* pub_impl =
+      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
       exit(1);
     }
 
-    TAO::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
-    if (status != TAO::DCPS::ATTACH_OK) {
+    OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+    if (status != OpenDDS::DCPS::ATTACH_OK) {
       std::string status_str;
       switch (status) {
-        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
           status_str = "ATTACH_BAD_TRANSPORT";
           break;
-        case TAO::DCPS::ATTACH_ERROR:
+        case OpenDDS::DCPS::ATTACH_ERROR:
           status_str = "ATTACH_ERROR";
           break;
-        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
           status_str = "ATTACH_INCOMPATIBLE_QOS";
           break;
         default:
@@ -170,7 +170,7 @@ int main (int argc, char *argv[]) {
     // activate the listener
     DataWriterListenerImpl listener_servant;
     DDS::DataWriterListener_var listener =
-      ::TAO::DCPS::servant_to_reference (&listener_servant);
+      ::OpenDDS::DCPS::servant_to_reference (&listener_servant);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);

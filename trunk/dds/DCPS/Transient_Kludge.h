@@ -16,7 +16,7 @@
 # pragma warning( disable : 4231 )
 #endif
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -29,7 +29,7 @@ namespace TAO
     * enable flag.
     * Only the DCPSInfo repository should set/enable the kludge!!!
     */
-    class TAO_DdsDcps_Export Transient_Kludge
+    class OpenDDS_Dcps_Export Transient_Kludge
     {
     public:
 
@@ -54,10 +54,10 @@ namespace TAO
     };
 
 
-    #define TheTransientKludge ::TAO::DCPS::Transient_Kludge::instance()
+    #define TheTransientKludge ::OpenDDS::DCPS::Transient_Kludge::instance()
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
 #include "Transient_Kludge.inl"

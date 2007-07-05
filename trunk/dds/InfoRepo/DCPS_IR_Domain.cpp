@@ -48,7 +48,7 @@ DCPS_IR_Domain::~DCPS_IR_Domain()
 
 int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 {
-  TAO::DCPS::RepoId participantId = participant->get_id ();
+  OpenDDS::DCPS::RepoId participantId = participant->get_id ();
 
   int status = participants_.bind(participantId, participant);
 
@@ -81,7 +81,7 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 
 
 
-int DCPS_IR_Domain::remove_participant(TAO::DCPS::RepoId participantId,
+int DCPS_IR_Domain::remove_participant(OpenDDS::DCPS::RepoId participantId,
                                        CORBA::Boolean notify_lost)
 {
   DCPS_IR_Participant* participant;
@@ -129,7 +129,7 @@ int DCPS_IR_Domain::remove_participant(TAO::DCPS::RepoId participantId,
 
 
 
-int DCPS_IR_Domain::find_participant(TAO::DCPS::RepoId participantId,
+int DCPS_IR_Domain::find_participant(OpenDDS::DCPS::RepoId participantId,
                                      DCPS_IR_Participant*& participant)
 {
   int status = participants_.find(participantId, participant);
@@ -157,7 +157,7 @@ int DCPS_IR_Domain::find_participant(TAO::DCPS::RepoId participantId,
 
 
 
-TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic(TAO::DCPS::RepoId_out topicId,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out topicId,
                                                  const char * topicName,
                                                  const char * dataTypeName,
                                                  const ::DDS::TopicQos & qos,
@@ -165,34 +165,34 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic(TAO::DCPS::RepoId_out topicId,
 {
   topicId = 0;
 
-  TAO::DCPS::RepoId topic_id = get_next_topic_id();
-  TAO::DCPS::TopicStatus status = add_topic_i (topic_id, topicName
+  OpenDDS::DCPS::RepoId topic_id = get_next_topic_id();
+  OpenDDS::DCPS::TopicStatus status = add_topic_i (topic_id, topicName
                                                , dataTypeName
                                                , qos, participantPtr);
 
-  if (status == TAO::DCPS::CREATED) {
+  if (status == OpenDDS::DCPS::CREATED) {
     topicId = topic_id;
   }
 
   return status;
 }
 
-TAO::DCPS::TopicStatus
-DCPS_IR_Domain::force_add_topic(TAO::DCPS::RepoId topicId,
+OpenDDS::DCPS::TopicStatus
+DCPS_IR_Domain::force_add_topic(OpenDDS::DCPS::RepoId topicId,
                                 const char* topicName,
                                 const char* dataTypeName,
                                 const ::DDS::TopicQos & qos,
                                 DCPS_IR_Participant* participantPtr)
 {
   this->set_base_topic_id (topicId + 1);
-  TAO::DCPS::TopicStatus status = add_topic_i (topicId, topicName
+  OpenDDS::DCPS::TopicStatus status = add_topic_i (topicId, topicName
                                                , dataTypeName
                                                , qos, participantPtr);
 
   return status;
 }
 
-TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId topicId,
                                                     const char * topicName,
                                                     const char * dataTypeName,
                                                     const ::DDS::TopicQos & qos,
@@ -203,7 +203,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
   if (1 == descriptionLookup)
     {
       topicId = 0;
-      return TAO::DCPS::CONFLICTING_TYPENAME;
+      return OpenDDS::DCPS::CONFLICTING_TYPENAME;
     }
   else if (-1 == descriptionLookup)
     {
@@ -212,7 +212,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
                        this,
                        topicName,
                        dataTypeName),
-                       TAO::DCPS::NOT_FOUND);
+                       OpenDDS::DCPS::NOT_FOUND);
 
       int descriptionAddition = add_topic_description (description);
       if (0 != descriptionAddition)
@@ -223,11 +223,11 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
           topicId = 0;
           if (2 == descriptionAddition)
             {
-              return TAO::DCPS::CONFLICTING_TYPENAME;
+              return OpenDDS::DCPS::CONFLICTING_TYPENAME;
             }
           else
             {
-              return TAO::DCPS::NOT_FOUND;
+              return OpenDDS::DCPS::NOT_FOUND;
             }
         }
     }
@@ -240,9 +240,9 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
                    this,
                    participantPtr,
                    description),
-                 TAO::DCPS::NOT_FOUND);
+                 OpenDDS::DCPS::NOT_FOUND);
 
-  TAO::DCPS::TopicStatus topicStatus = TAO::DCPS::NOT_FOUND;
+  OpenDDS::DCPS::TopicStatus topicStatus = OpenDDS::DCPS::NOT_FOUND;
 
   int bindStatus = description->add_topic(topic);
 
@@ -258,7 +258,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
                 ACE_TEXT("Successfully added topic %X id: %d\n"),
                 topic, topicId));
             }
-          topicStatus = TAO::DCPS::CREATED;
+          topicStatus = OpenDDS::DCPS::CREATED;
 
           // Publish the BIT information
           publish_topic_bit(topic);
@@ -268,7 +268,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
           ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic ")
             ACE_TEXT("Unable to add topic %X id %d to Domain Participant\n"),
             topic, topicId));
-          topicStatus = TAO::DCPS::NOT_FOUND;
+          topicStatus = OpenDDS::DCPS::NOT_FOUND;
           topicId = 0;
           description->remove_topic(topic);
           delete topic;
@@ -279,7 +279,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic ")
         ACE_TEXT("Unable to add topic %X id %d to Topic Description\n"),
         topic, topicId));
-      topicStatus = TAO::DCPS::NOT_FOUND;
+      topicStatus = OpenDDS::DCPS::NOT_FOUND;
       topicId = 0;
       delete topic;
     }
@@ -289,24 +289,24 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (TAO::DCPS::RepoId topicId,
 
 
 
-TAO::DCPS::TopicStatus DCPS_IR_Domain::find_topic(const char * topicName,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::find_topic(const char * topicName,
                                                   DCPS_IR_Topic*& topic)
 
 {
-  TAO::DCPS::TopicStatus topicStatus = TAO::DCPS::NOT_FOUND;
+  OpenDDS::DCPS::TopicStatus topicStatus = OpenDDS::DCPS::NOT_FOUND;
   DCPS_IR_Topic_Description* temp = 0;
 
   DCPS_IR_Topic_Description_Set::ITERATOR iter = topicDescriptions_.begin ();
   DCPS_IR_Topic_Description_Set::ITERATOR end = topicDescriptions_.end();
 
-  while (iter != end && topicStatus == TAO::DCPS::NOT_FOUND)
+  while (iter != end && topicStatus == OpenDDS::DCPS::NOT_FOUND)
     {
       temp = *iter;
       if ( ACE_OS::strcmp(topicName, temp->get_name()) == 0 )
         {
           temp = *iter;
           topic = temp->get_first_topic();
-          topicStatus = TAO::DCPS::FOUND;
+          topicStatus = OpenDDS::DCPS::FOUND;
 
           if (TAO_debug_level > 0)
             {
@@ -324,7 +324,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::find_topic(const char * topicName,
 
 
 
-TAO::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
                                                     DCPS_IR_Topic*& topic)
 {
   DCPS_IR_Topic_Description* description = topic->get_topic_description();
@@ -334,7 +334,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
       // An unknown error means that the description may still
       // have the topic in its topic set.  We can't remove it.
       // The system is an inconsistent state!
-      throw TAO::DCPS::Invalid_Topic();
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
   if (description->get_number_topics() == 0)
@@ -375,7 +375,7 @@ TAO::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
   delete topic;
   topic = 0;
 
-  return TAO::DCPS::REMOVED;
+  return OpenDDS::DCPS::REMOVED;
 }
 
 
@@ -453,10 +453,10 @@ int DCPS_IR_Domain::init_built_in_topics()
     {
       bitParticipantFactory_ = TheParticipantFactory;
 
-      TAO_DCPS_DomainParticipantListener_i* listenerImpl =
-        new TAO_DCPS_DomainParticipantListener_i;
+      OPENDDS_DCPS_DomainParticipantListener_i* listenerImpl =
+        new OPENDDS_DCPS_DomainParticipantListener_i;
 
-      bitParticipantListener_ = ::TAO::DCPS::servant_to_reference (listenerImpl);
+      bitParticipantListener_ = ::OpenDDS::DCPS::servant_to_reference (listenerImpl);
 
       bitParticipant_ =
         bitParticipantFactory_->create_participant(id_,
@@ -519,11 +519,11 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant =
         new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
       ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport =
-        TAO::DCPS::servant_to_reference (participantTypeSupport_servant);
+        OpenDDS::DCPS::servant_to_reference (participantTypeSupport_servant);
 
       if (::DDS::RETCODE_OK !=
           participantTypeSupport->register_type(bitParticipant_.in (),
-                                                ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE))
+                                                ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport.")));
@@ -531,8 +531,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       bitParticipantTopic_ =
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                       ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
+        bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                       ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitParticipantTopic_.in ()))
@@ -541,7 +541,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
+                             ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
                             1);
         }
 
@@ -549,11 +549,11 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
         new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
       ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport =
-        TAO::DCPS::servant_to_reference (topicTypeSupport_servant);
+        OpenDDS::DCPS::servant_to_reference (topicTypeSupport_servant);
 
       if (::DDS::RETCODE_OK !=
           topicTypeSupport->register_type(bitParticipant_.in (),
-                                          ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE))
+                                          ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport.")));
@@ -561,8 +561,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       bitTopicTopic_ =
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_TOPIC_TOPIC,
-                                       ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
+        bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
+                                       ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitTopicTopic_.in ()))
@@ -571,7 +571,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC),
+                             ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC),
                             1);
         }
 
@@ -579,11 +579,11 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant =
         new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
       ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport =
-        TAO::DCPS::servant_to_reference (subscriptionTypeSupport_servant);
+        OpenDDS::DCPS::servant_to_reference (subscriptionTypeSupport_servant);
 
       if (::DDS::RETCODE_OK !=
           subscriptionTypeSupport->register_type(bitParticipant_.in (),
-                                                 ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
+                                                 ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport.")));
@@ -591,8 +591,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       bitSubscriptionTopic_ =
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-                                       ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
+        bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+                                       ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitSubscriptionTopic_.in ()))
@@ -601,7 +601,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
+                             ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
                             1);
         }
 
@@ -609,11 +609,11 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
       ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant =
         new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
       ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport =
-        TAO::DCPS::servant_to_reference (publicationTypeSupport_servant);
+        OpenDDS::DCPS::servant_to_reference (publicationTypeSupport_servant);
 
       if (::DDS::RETCODE_OK !=
           publicationTypeSupport->register_type(bitParticipant_.in (),
-                                                ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE))
+                                                ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT ("ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport.")));
@@ -621,8 +621,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       bitPublicationTopic_ =
-        bitParticipant_->create_topic (::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-                                       ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
+        bitParticipant_->create_topic (::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+                                       ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
                                        topic_qos,
                                        ::DDS::TopicListener::_nil());
       if (CORBA::is_nil (bitPublicationTopic_.in ()))
@@ -631,7 +631,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("Nil %s Topic from ")
                             ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n"),
-                             ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC),
+                             ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC),
                             1);
         }
 
@@ -755,7 +755,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
   try
     {
       transportImpl_ =
-        TheTransportFactory->obtain(TAO::DCPS::BIT_ALL_TRAFFIC);
+        TheTransportFactory->obtain(OpenDDS::DCPS::BIT_ALL_TRAFFIC);
 
       // Create the Publisher
       bitPublisher_ =
@@ -771,27 +771,27 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
         }
 
       // Attach the Publisher with the TransportImpl.
-      TAO::DCPS::PublisherImpl* pubServant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+      OpenDDS::DCPS::PublisherImpl* pubServant
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
         (bitPublisher_.in ());
 
-      TAO::DCPS::AttachStatus status
+      OpenDDS::DCPS::AttachStatus status
         = pubServant->attach_transport(transportImpl_.in());
 
-      if (status != TAO::DCPS::ATTACH_OK)
+      if (status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           const char* status_str;
 
           switch (status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -1022,49 +1022,49 @@ void DCPS_IR_Domain::remove_dead_participants ()
 
 
 
-TAO::DCPS::RepoId DCPS_IR_Domain::get_next_participant_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Domain::get_next_participant_id ()
 {
   return participantIdGenerator_.get_next_part_id ();
 }
 
 bool
-DCPS_IR_Domain::set_base_participant_id (TAO::DCPS::RepoId id)
+DCPS_IR_Domain::set_base_participant_id (OpenDDS::DCPS::RepoId id)
 {
   return participantIdGenerator_.set_base_part_id (id);
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Domain::get_next_topic_id ()
 {
   return topicIdGenerator_.get_next_topic_id ();
 }
 
 bool
-DCPS_IR_Domain::set_base_topic_id (TAO::DCPS::RepoId id)
+DCPS_IR_Domain::set_base_topic_id (OpenDDS::DCPS::RepoId id)
 {
   return topicIdGenerator_.set_base_topic_id (id);
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Domain::get_next_publication_id ()
 {
   return pubsubIdGenerator_.get_next_sub_pub_id ();
 }
 
 bool
-DCPS_IR_Domain::set_base_publication_id (TAO::DCPS::RepoId id)
+DCPS_IR_Domain::set_base_publication_id (OpenDDS::DCPS::RepoId id)
 {
   return pubsubIdGenerator_.set_base_sub_pub_id (id);
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id ()
 {
   return pubsubIdGenerator_.get_next_sub_pub_id ();
 }
 
 bool
-DCPS_IR_Domain::set_base_subscription_id (TAO::DCPS::RepoId id)
+DCPS_IR_Domain::set_base_subscription_id (OpenDDS::DCPS::RepoId id)
 {
   return pubsubIdGenerator_.set_base_sub_pub_id (id);
 }
@@ -1131,10 +1131,10 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
       const char* dataTypeName = desc->get_dataTypeName ();
 
       bool isNotBIT =
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
       if ( isNotBIT )
         {
@@ -1205,10 +1205,10 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
       const char* dataTypeName = desc->get_dataTypeName ();
 
       bool isNotBIT =
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
       if ( isNotBIT )
         {
@@ -1286,10 +1286,10 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
       const char* dataTypeName = desc->get_dataTypeName ();
 
       bool isNotBIT =
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-        ACE_OS::strcmp(dataTypeName, ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
+        ACE_OS::strcmp(dataTypeName, ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
       if ( isNotBIT )
         {
@@ -1597,11 +1597,11 @@ template class ACE_Node<DCPS_IR_Participant*>;
 template class ACE_Unbounded_Set<DCPS_IR_Participant*>;
 template class ACE_Unbounded_Set_Iterator<DCPS_IR_Participant*>;
 
-template class ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Participant*>;
-template class ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
+template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*>;
+template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
+template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
 
 #elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
 
@@ -1613,10 +1613,10 @@ template class ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,A
 #pragma instantiate ACE_Unbounded_Set<DCPS_IR_Participant*>
 #pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Participant*>
 
-#pragma instantiate ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Participant*>
-#pragma instantiate ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*>
+#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
 
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

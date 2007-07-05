@@ -1,5 +1,5 @@
-#ifndef TAO_DCPS_TYPE_SUPPORT_IDL
-#define TAO_DCPS_TYPE_SUPPORT_IDL
+#ifndef OPENDDS_DCPS_TYPE_SUPPORT_IDL
+#define OPENDDS_DCPS_TYPE_SUPPORT_IDL
 
 #include "dds/DdsDcpsTopic.idl"
 //x #include "dds/DdsDcpsDataWriterRemote.idl"
@@ -8,7 +8,7 @@
 #include "dds/DdsDcpsSubscription.idl"
 
 
-module TAO {
+module OpenDDS {
   module DCPS {
 
     local interface TypeSupport : ::DDS::TypeSupport {
@@ -36,4 +36,4 @@ module TAO {
 };
 
 
-#endif /* TAO_DCPS_TYPE_SUPPORT_IDL */
+#endif /* OPENDDS_DCPS_TYPE_SUPPORT_IDL */

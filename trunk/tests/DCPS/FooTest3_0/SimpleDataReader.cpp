@@ -21,20 +21,20 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(TAO::DCPS::RepoId sub_id)
+SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id)
 {
   this->sub_id_ = sub_id;
 }
 
 
 void
-SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received: %T\n"));
 
-  const ::TAO::DCPS::DataSampleHeader & header = sample.header_;
+  const ::OpenDDS::DCPS::DataSampleHeader & header = sample.header_;
 
-  if (header.message_id_ != ::TAO::DCPS::DATAWRITER_LIVELINESS)
+  if (header.message_id_ != ::OpenDDS::DCPS::DATAWRITER_LIVELINESS)
   {
     this->received_test_message_ ++;
 

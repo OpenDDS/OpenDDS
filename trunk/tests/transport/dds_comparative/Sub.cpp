@@ -33,7 +33,7 @@ Sub::set_data_size(char data_size)
 
 
 void
-Sub::set_local_subscriber(TAO::DCPS::RepoId sub_id)
+Sub::set_local_subscriber(OpenDDS::DCPS::RepoId sub_id)
 {
   this->sub_id_ = sub_id;
   this->reader_.set_id(sub_id);
@@ -41,7 +41,7 @@ Sub::set_local_subscriber(TAO::DCPS::RepoId sub_id)
 
 
 void
-Sub::add_remote_publisher(TAO::DCPS::RepoId    pub_id,
+Sub::add_remote_publisher(OpenDDS::DCPS::RepoId    pub_id,
                           const ACE_INET_Addr& pub_addr)
 {
   this->pubs_.push_back(PubInfo(pub_id,pub_addr));
@@ -82,7 +82,7 @@ void
 Sub::init_attach_transport(unsigned impl_id)
 {
   // Obtain the transport.
-  TAO::DCPS::TransportImpl_rch transport =
+  OpenDDS::DCPS::TransportImpl_rch transport =
                                       TheTransportFactory->obtain(impl_id);
 
   if (transport.is_nil())
@@ -96,22 +96,22 @@ Sub::init_attach_transport(unsigned impl_id)
     }
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  OpenDDS::DCPS::AttachStatus status = this->attach_transport(transport.in());
 
-  if (status != TAO::DCPS::ATTACH_OK)
+  if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       const char* emsg = "Failed attachment to transport. AttachStatus == ";
 
       switch (status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_BAD_TRANSPORT\n",emsg));
             throw TestException();
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_ERROR\n",emsg));
             throw TestException();
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_INCOMPATIBLE_QOS\n",emsg));
             throw TestException();
           default:
@@ -128,7 +128,7 @@ Sub::init_add_publications()
 {
   unsigned num_pubs = this->pubs_.size();
 
-  TAO::DCPS::AssociationData* pubs = new TAO::DCPS::AssociationData[num_pubs];
+  OpenDDS::DCPS::AssociationData* pubs = new OpenDDS::DCPS::AssociationData[num_pubs];
 
   for (unsigned i = 0; i < num_pubs; i++)
     {

@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::~ReactivePacketReceiver(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::~ReactivePacketReceiver(
   )
 {
 }

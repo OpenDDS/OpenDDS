@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_THREADPERCONNECTIONSENDER_H
-#define TAO_DCPS_THREADPERCONNECTIONSENDER_H
+#ifndef OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
+#define OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
 
 #include /**/ "ace/pre.h"
 
@@ -16,7 +16,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -48,7 +48,7 @@ namespace TAO
      *  This task implements the request execute method which handles each step
      *  of sending a sample or control message.
      */
-    class TAO_DdsDcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base
+    class OpenDDS_Dcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base
     {
     public:
 
@@ -116,4 +116,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_THREADPERCONNECTIONSENDER_H */
+#endif /* OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H */

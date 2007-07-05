@@ -5,7 +5,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::PoolSynch::PoolSynch(PoolSynchStrategy* strategy,
+OpenDDS::DCPS::PoolSynch::PoolSynch(PoolSynchStrategy* strategy,
                                 ThreadSynchResource* synch_resource)
   : ThreadSynch(synch_resource),
     strategy_(strategy)

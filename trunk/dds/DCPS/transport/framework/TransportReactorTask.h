@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTREACTORTASK_H
-#define TAO_DCPS_TRANSPORTREACTORTASK_H
+#ifndef OPENDDS_DCPS_TRANSPORTREACTORTASK_H
+#define OPENDDS_DCPS_TRANSPORTREACTORTASK_H
 
 
 #include "dds/DCPS/dcps_export.h"
@@ -13,13 +13,13 @@
 class ACE_Reactor;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export TransportReactorTask : public virtual ACE_Task_Base,
+    class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
                                  public virtual RcObject<ACE_SYNCH_MUTEX>
     {
       public:
@@ -59,4 +59,4 @@ namespace TAO
 #include "TransportReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTREACTORTASK_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTREACTORTASK_H */

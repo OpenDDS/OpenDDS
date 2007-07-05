@@ -23,17 +23,17 @@ namespace
     }
 
     char version_;
-    TAO::DCPS::NetworkAddress multicast_group_address_;
+    OpenDDS::DCPS::NetworkAddress multicast_group_address_;
   };
 }
 
-TAO::DCPS::DataLink*
-TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   const TransportInterfaceInfo& remote_info,
   int connect_as_publisher
   )
 {
-  TAO::DCPS::ReliableMulticastDataLink_rch data_link;
+  OpenDDS::DCPS::ReliableMulticastDataLink_rch data_link;
   const TransportInterfaceData& transport_interface_data =
     reinterpret_cast<const TransportInterfaceData&>(*(remote_info.data.get_buffer()));
   ACE_INET_Addr multicast_group_address;
@@ -49,7 +49,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
     return iter->second._retn();
   }
 
-  data_link = new TAO::DCPS::ReliableMulticastDataLink(
+  data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
     *configuration_,
     multicast_group_address,
@@ -69,7 +69,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 }
 
 int
-TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* config)
 {
   ReliableMulticastTransportConfiguration* my_config =
     dynamic_cast<ReliableMulticastTransportConfiguration*>(config);
@@ -98,7 +98,7 @@ TAO::DCPS::ReliableMulticastTransportImpl::configure_i(TransportConfiguration* c
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportImpl::shutdown_i()
+OpenDDS::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 {
   for (
     ReliableMulticastDataLinkMap::iterator iter = data_links_.begin();
@@ -113,12 +113,12 @@ TAO::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 }
 
 int
-TAO::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceInfo& local_info) const
+OpenDDS::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceInfo& local_info) const
 {
   TransportInterfaceData transport_interface_data(configuration_->multicast_group_address_);
 
   local_info.transport_id = 999;
-  local_info.data = TAO::DCPS::TransportInterfaceBLOB(
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB(
     sizeof(transport_interface_data),
     sizeof(transport_interface_data),
     reinterpret_cast<CORBA::Octet*>(&transport_interface_data)
@@ -127,10 +127,10 @@ TAO::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceI
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportImpl::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::ReliableMulticastTransportImpl::release_datalink_i(DataLink* link)
 {
-  TAO::DCPS::ReliableMulticastDataLink* data_link =
-    dynamic_cast<TAO::DCPS::ReliableMulticastDataLink*>(link);
+  OpenDDS::DCPS::ReliableMulticastDataLink* data_link =
+    dynamic_cast<OpenDDS::DCPS::ReliableMulticastDataLink*>(link);
 
   if (data_link == 0)
   {

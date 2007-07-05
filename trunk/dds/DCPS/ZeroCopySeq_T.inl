@@ -20,7 +20,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::DDS_Vector(
   const size_t init_size,
   ACE_Allocator* alloc)
-  : ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX> (init_size, alloc)
+  : ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> (init_size, alloc)
 {
 }
 
@@ -29,7 +29,9 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::DDS_Vector::swap(DDS_Vector& rhs)
 {
-  ACE_Vector<TAO::DCPS::ReceivedDataElement*, DEF_MAX>::swap(rhs);
+  //Later versions of ACE do have a working ACE_Vector<T,MAX>::swap so we must
+  //delegate up to ACE_Array<T> to get consistent swap behavior.
+  ACE_Array<OpenDDS::DCPS::ReceivedDataElement*>::swap(rhs);
   std::swap (this->length_, rhs.length_);
   std::swap (this->curr_max_size_, rhs.curr_max_size_);
 }
@@ -262,7 +264,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::set_loaner(
-  TAO::DCPS::DataReaderImpl* loaner)
+  OpenDDS::DCPS::DataReaderImpl* loaner)
 {
   loaner_ = loaner;
 }
@@ -272,7 +274,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
   CORBA::ULong ii,
-  TAO::DCPS::ReceivedDataElement* item)
+  OpenDDS::DCPS::ReceivedDataElement* item)
 {
   ACE_ASSERT(is_zero_copy());
   item->inc_ref();
@@ -282,7 +284,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
 
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
-TAO::DCPS::ReceivedDataElement*
+OpenDDS::DCPS::ReceivedDataElement*
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const
 {
   ACE_ASSERT(is_zero_copy());
@@ -301,5 +303,5 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_sample(
 
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 

@@ -11,20 +11,20 @@
 
 #include "dds/DCPS/Util.h"
 
-TAO::DCPS::DataLinkSetMap::DataLinkSetMap()
+OpenDDS::DCPS::DataLinkSetMap::DataLinkSetMap()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","DataLinkSetMap",5);
 }
 
 
-TAO::DCPS::DataLinkSetMap::~DataLinkSetMap()
+OpenDDS::DCPS::DataLinkSetMap::~DataLinkSetMap()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","~DataLinkSetMap",5);
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","find_or_create_set",5);
   DataLinkSet_rch link_set;
@@ -50,8 +50,8 @@ TAO::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_set(RepoId id)
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
   DataLinkSet_rch link_set;
@@ -66,8 +66,8 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id)
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_set(RepoId id, 
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id, 
                                     const RepoId* remoteIds, 
                                     const CORBA::ULong num_targets)
 {
@@ -88,7 +88,7 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id,
 
 /// REMEMBER: This really means find_or_create_set_then_insert_link()
 int
-TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
+OpenDDS::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","insert_link",5);
 
@@ -102,7 +102,7 @@ TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 
 
 void
-TAO::DCPS::DataLinkSetMap::release_reservations
+OpenDDS::DCPS::DataLinkSetMap::release_reservations
                                        (ssize_t         num_remote_ids,
                                         const RepoId*   remote_ids,
                                         const RepoId    local_id, 
@@ -160,7 +160,7 @@ TAO::DCPS::DataLinkSetMap::release_reservations
 
 
 void
-TAO::DCPS::DataLinkSetMap::release_all_reservations()
+OpenDDS::DCPS::DataLinkSetMap::release_all_reservations()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","release_all_reservations",5);
   // TBD SOON - IMPLEMENT DataLinkSetMap::release_all_reservations()
@@ -181,7 +181,7 @@ TAO::DCPS::DataLinkSetMap::release_all_reservations()
 // we will remove the DataLinkSet (and the corresponding local_id) from our
 // map_.
 void
-TAO::DCPS::DataLinkSetMap::remove_released
+OpenDDS::DCPS::DataLinkSetMap::remove_released
                                      (const DataLinkSetMap& released_locals)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","remove_released",5);
@@ -242,7 +242,7 @@ TAO::DCPS::DataLinkSetMap::remove_released
 
 
 void
-TAO::DCPS::DataLinkSetMap::clear()
+OpenDDS::DCPS::DataLinkSetMap::clear()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","clear",5);
   GuardType guard(this->map_lock_);

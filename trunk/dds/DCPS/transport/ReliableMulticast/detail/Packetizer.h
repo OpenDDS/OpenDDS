@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_PACKETIZER_H
-#define TAO_DCPS_PACKETIZER_H
+#ifndef OPENDDS_DCPS_PACKETIZER_H
+#define OPENDDS_DCPS_PACKETIZER_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -15,7 +15,7 @@
 #include "ace/SOCK_IO.h"
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -50,7 +50,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "Packetizer.inl"
@@ -58,4 +58,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_PACKETIZER_H */
+#endif /* OPENDDS_DCPS_PACKETIZER_H */

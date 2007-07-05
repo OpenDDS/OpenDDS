@@ -3,7 +3,7 @@
 #include "dds/DdsDcpsTopic.idl"
 #include "dds/DdsDcpsDataWriterRemote.idl"
 #include "dds/DdsDcpsDataReaderRemote.idl"
-#include "dds/DdsDcpsTypeSupportTao.idl"
+#include "dds/DdsDcpsTypeSupportExt.idl"
 
 
 // Implied IDL for type "Foo"

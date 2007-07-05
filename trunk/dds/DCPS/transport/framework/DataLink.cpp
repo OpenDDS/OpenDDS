@@ -22,7 +22,7 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
   : thr_per_con_send_task_ (0)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",5);
@@ -41,7 +41,7 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
     }
 }
 
-TAO::DCPS::DataLink::~DataLink()
+OpenDDS::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY_LVL("DataLink","~DataLink",5);
 
@@ -53,7 +53,7 @@ TAO::DCPS::DataLink::~DataLink()
 }
 
 void
-TAO::DCPS::DataLink::resume_send ()
+OpenDDS::DCPS::DataLink::resume_send ()
 {
    if (!this->send_strategy_->isDirectMode())
      this->send_strategy_->resume_send();
@@ -67,7 +67,7 @@ TAO::DCPS::DataLink::resume_send ()
 /// Return Codes: 0 means successful reservation made.
 ///              -1 means failure.
 int
-TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
+OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
                                       RepoId publisher_id)   /* local */
 {
   DBG_SUB_ENTRY("DataLink","make_reservation",5);
@@ -150,7 +150,7 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
 /// Only called by our TransportImpl object.
 int
-TAO::DCPS::DataLink::make_reservation
+OpenDDS::DCPS::DataLink::make_reservation
 (RepoId                    publisher_id,     /* remote */
  RepoId                    subscriber_id,    /* local */
  TransportReceiveListener* receive_listener)
@@ -245,7 +245,7 @@ TAO::DCPS::DataLink::make_reservation
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
+OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
                                           RepoId          local_id,
                                           DataLinkSetMap& released_locals)
 {
@@ -375,7 +375,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 /// within this DataLink that are interested in the (remote) publisher id
 /// that sent the sample.
 int
-TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
+OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("DataLink","data_received",5);
 
@@ -415,7 +415,7 @@ TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-TAO::DCPS::DataLink::release_remote_subscriber
+OpenDDS::DCPS::DataLink::release_remote_subscriber
 (RepoId          subscriber_id,
  RepoId          publisher_id,
  RepoIdSet_rch&      pubid_set,
@@ -459,7 +459,7 @@ TAO::DCPS::DataLink::release_remote_subscriber
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-TAO::DCPS::DataLink::release_remote_publisher
+OpenDDS::DCPS::DataLink::release_remote_publisher
 (RepoId              publisher_id,
  RepoId              subscriber_id,
  ReceiveListenerSet_rch& listener_set,
@@ -500,7 +500,7 @@ TAO::DCPS::DataLink::release_remote_publisher
 
 // static
 ACE_UINT64
-TAO::DCPS::DataLink::get_next_datalink_id ()
+OpenDDS::DCPS::DataLink::get_next_datalink_id ()
 {
   static ACE_UINT64 next_id = 0;
   static LockType lock;
@@ -523,7 +523,7 @@ TAO::DCPS::DataLink::get_next_datalink_id ()
 
 
 void
-TAO::DCPS::DataLink::transport_shutdown()
+OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",5);
 
@@ -552,7 +552,7 @@ TAO::DCPS::DataLink::transport_shutdown()
 
 
 void
-TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
 {
   DBG_ENTRY_LVL("DataLink","notify",5);
 
@@ -685,7 +685,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
 
 void
-TAO::DCPS::DataLink::notify_connection_deleted ()
+OpenDDS::DCPS::DataLink::notify_connection_deleted ()
 {
   GuardType guard(this->released_local_lock_);
 
@@ -730,7 +730,7 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
 
 
 void
-TAO::DCPS::DataLink::pre_stop_i()
+OpenDDS::DCPS::DataLink::pre_stop_i()
 {
   if (this->thr_per_con_send_task_ != 0)
     {
@@ -740,14 +740,14 @@ TAO::DCPS::DataLink::pre_stop_i()
 
 
 ACE_Message_Block*
-TAO::DCPS::DataLink::marshal_acks (bool byte_order)
+OpenDDS::DCPS::DataLink::marshal_acks (bool byte_order)
 {
   DBG_ENTRY_LVL("DataLink","marshal_acks",5);
   return this->sub_map_.marshal (byte_order);
 }
 
 bool
-TAO::DCPS::DataLink::release_resources ()
+OpenDDS::DCPS::DataLink::release_resources ()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources", 5);
 
@@ -757,7 +757,7 @@ TAO::DCPS::DataLink::release_resources ()
 
 
 bool 
-TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
+OpenDDS::DCPS::DataLink::is_target (const RepoId& sub_id)
 {
  GuardType guard(this->sub_map_lock_);
  RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
@@ -767,7 +767,7 @@ TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
 
 
 bool 
-TAO::DCPS::DataLink::exist (const RepoId& remote_id,
+OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
                             const RepoId& local_id,
                             const bool&   pub_side,
                             bool& last)

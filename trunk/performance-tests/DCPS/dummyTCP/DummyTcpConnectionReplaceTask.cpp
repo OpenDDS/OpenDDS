@@ -10,7 +10,7 @@
 
 
 
-TAO::DCPS::DummyTcpConnectionReplaceTask::DummyTcpConnectionReplaceTask(
+OpenDDS::DCPS::DummyTcpConnectionReplaceTask::DummyTcpConnectionReplaceTask(
   DummyTcpTransport* trans)
   : trans_ (trans)
 {
@@ -18,14 +18,14 @@ TAO::DCPS::DummyTcpConnectionReplaceTask::DummyTcpConnectionReplaceTask(
 }
 
 
-TAO::DCPS::DummyTcpConnectionReplaceTask::~DummyTcpConnectionReplaceTask()
+OpenDDS::DCPS::DummyTcpConnectionReplaceTask::~DummyTcpConnectionReplaceTask()
 {
   DBG_ENTRY_LVL("DummyTcpConnectionReplaceTask","~DummyTcpConnectionReplaceTask",5);
 }
 
 
 
-void TAO::DCPS::DummyTcpConnectionReplaceTask::execute (DummyTcpConnection_rch& con)
+void OpenDDS::DCPS::DummyTcpConnectionReplaceTask::execute (DummyTcpConnection_rch& con)
 {
   DBG_ENTRY_LVL("DummyTcpConnectionReplaceTask","execute",5);
 

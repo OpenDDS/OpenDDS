@@ -63,11 +63,11 @@ namespace
     verify(false, file, line);
   }
 
-  typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
-  typedef TAO::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
-  typedef TAO::DCPS::ReliableMulticast::detail::Packetizer Packetizer;
-  typedef TAO::DCPS::ReliableMulticast::detail::ReceiverLogic ReceiverLogic;
-  typedef TAO::DCPS::ReliableMulticast::detail::SenderLogic SenderLogic;
+  typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
+  typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
+  typedef OpenDDS::DCPS::ReliableMulticast::detail::Packetizer Packetizer;
+  typedef OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic ReceiverLogic;
+  typedef OpenDDS::DCPS::ReliableMulticast::detail::SenderLogic SenderLogic;
 
   void test_PacketSerializer()
   {

@@ -76,13 +76,13 @@ main (int argc, char *argv[])
       CORBA::Object_var tmp =
         orb->string_to_object (ior);
 
-      TAO::DCPS::DCPSInfo_var info =
-        TAO::DCPS::DCPSInfo::_narrow (tmp.in ());
+      OpenDDS::DCPS::DCPSInfo_var info =
+        OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
 
       if (CORBA::is_nil (info.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil TAO::DCPS::DCPSInfo reference <%s>\n",
+                             "Nil OpenDDS::DCPS::DCPSInfo reference <%s>\n",
                              ior),
                             1);
         }
@@ -103,14 +103,14 @@ main (int argc, char *argv[])
       const char* tname = "MYtopic";
       const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
-      TAO::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
+      OpenDDS::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
                                                            domainId,
                                                            dpId,
                                                            tname,
                                                            dname,
                                                            topicQos.in());
 
-      if (topicStatus != TAO::DCPS::CREATED)
+      if (topicStatus != OpenDDS::DCPS::CREATED)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("Topic creation failed and returned %d"), topicStatus));
         }
@@ -119,17 +119,17 @@ main (int argc, char *argv[])
       TAO_DDS_DCPSDataWriter_i dwi;
       PortableServer::ObjectId_var oid = poa->activate_object( &dwi );
       obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataWriterRemote_var dw = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
+      OpenDDS::DCPS::DataWriterRemote_var dw = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
       if (CORBA::is_nil (dw.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil TAO::DCPS::DataWriterRemote reference\n"),
+                             "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
                             1);
         }
 
       ::DDS::DataWriterQos_var dwq = new ::DDS::DataWriterQos;
       dwq->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
-      TAO::DCPS::TransportInterfaceInfo_var tii = new TAO::DCPS::TransportInterfaceInfo;
+      OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
       ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
 
       CORBA::Long pubId = info->add_publication(domainId,
@@ -149,14 +149,14 @@ main (int argc, char *argv[])
       const char* tname2 = "MYtopic";
       const char* dname2 = "MYnewdataname";
       ::DDS::TopicQos_var topicQos2 = new ::DDS::TopicQos;
-      TAO::DCPS::TopicStatus topicStatus2 = info->assert_topic(topicId2,
+      OpenDDS::DCPS::TopicStatus topicStatus2 = info->assert_topic(topicId2,
                                                             domainId,
                                                             dpId,
                                                             tname2,
                                                             dname2,
                                                             topicQos2.in());
 
-      if (topicStatus2 != TAO::DCPS::CONFLICTING_TYPENAME)
+      if (topicStatus2 != OpenDDS::DCPS::CONFLICTING_TYPENAME)
         {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("Inconsistent topic creation did not fail with ")
@@ -186,7 +186,7 @@ main (int argc, char *argv[])
       CORBA::Long topicIdAlmost;
       TAO_DDS_DCPSDataWriter_i* dwiAlmost = new TAO_DDS_DCPSDataWriter_i;
       PortableServer::ServantBase_var safe_servant = dwiAlmost;
-      TAO::DCPS::DataWriterRemote_var dwAlmost;
+      OpenDDS::DCPS::DataWriterRemote_var dwAlmost;
       ::DDS::DataWriterQos_var dwqAlmost = 0;
       CORBA::Long pubIdAlmost = 0;
 
@@ -207,7 +207,7 @@ main (int argc, char *argv[])
                                          dname,
                                          topicQos.in());
 
-        if (topicStatus != TAO::DCPS::CREATED)
+        if (topicStatus != OpenDDS::DCPS::CREATED)
           {
             ACE_ERROR((LM_ERROR,
                       ACE_TEXT("Topic creation for qos test failed and returned %d"),
@@ -217,11 +217,11 @@ main (int argc, char *argv[])
         // Add publication
         oid = poa->activate_object( dwiAlmost );
         obj = poa->id_to_reference( oid.in() );
-        dwAlmost = TAO::DCPS::DataWriterRemote::_narrow(obj.in());
+        dwAlmost = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
         if (CORBA::is_nil (dwAlmost.in ()))
           {
             ACE_ERROR_RETURN ((LM_DEBUG,
-                              "Nil TAO::DCPS::DataWriterRemote reference in qos test\n"),
+                              "Nil OpenDDS::DCPS::DataWriterRemote reference in qos test\n"),
                               1);
           }
 

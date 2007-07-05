@@ -20,7 +20,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
     namespace DCPS
     {
@@ -70,7 +70,7 @@ namespace TAO
 
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyAllocator_T.inl"

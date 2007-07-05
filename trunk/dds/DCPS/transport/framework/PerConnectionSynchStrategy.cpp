@@ -11,14 +11,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::PerConnectionSynchStrategy::~PerConnectionSynchStrategy()
+OpenDDS::DCPS::PerConnectionSynchStrategy::~PerConnectionSynchStrategy()
 {
   DBG_ENTRY_LVL("PerConnectionSynchStrategy","~PerConnectionSynchStrategy",5);
 }
 
 
-TAO::DCPS::ThreadSynch*
-TAO::DCPS::PerConnectionSynchStrategy::create_synch_object
+OpenDDS::DCPS::ThreadSynch*
+OpenDDS::DCPS::PerConnectionSynchStrategy::create_synch_object
                                        (ThreadSynchResource* synch_resource)
 {
   DBG_ENTRY_LVL("PerConnectionSynchStrategy","create_synch_object",5);

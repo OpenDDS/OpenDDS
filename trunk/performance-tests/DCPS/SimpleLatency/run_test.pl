@@ -21,9 +21,9 @@ unlink $dcpsrepo_ior;
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
 
-$Subscriber = new PerlACE::Process ("tao_sub", "$app_bit_conf");
+$Subscriber = new PerlACE::Process ("dds_sub", "$app_bit_conf");
 
-$Publisher = new PerlACE::Process ("tao_pub", "$app_bit_conf -s 200 -c 10000");
+$Publisher = new PerlACE::Process ("dds_pub", "$app_bit_conf -s 200 -c 10000");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

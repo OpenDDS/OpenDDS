@@ -7,7 +7,7 @@
 #include "SimpleTcpConnection.h"
 #include "SimpleTcpSendStrategy.h"
 
-TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
+OpenDDS::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
                                             (SimpleTcpConnection*  connection,
                                              const int& max_output_pause_period_ms)
   : ThreadSynchResource (connection->peer().get_handle())
@@ -26,14 +26,14 @@ TAO::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
 }
 
 
-TAO::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
+OpenDDS::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
 {
   DBG_ENTRY_LVL("SimpleTcpSynchResource","~SimpleTcpSynchResource",5);
 }
 
 
 void
-TAO::DCPS::SimpleTcpSynchResource::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::SimpleTcpSynchResource::notify_lost_on_backpressure_timeout ()
 {
   DBG_ENTRY_LVL("SimpleTcpSynchResource","notify_lost_on_backpressure_timeout",5);
 

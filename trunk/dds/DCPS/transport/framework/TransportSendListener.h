@@ -1,15 +1,15 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTSENDLISTENER_H
-#define TAO_DCPS_TRANSPORTSENDLISTENER_H
+#ifndef OPENDDS_DCPS_TRANSPORTSENDLISTENER_H
+#define OPENDDS_DCPS_TRANSPORTSENDLISTENER_H
 
 #include "dds/DCPS/dcps_export.h"
 
 class ACE_Message_Block;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -18,7 +18,7 @@ namespace TAO
     struct DataSampleListElement;
 
 
-    class TAO_DdsDcps_Export TransportSendListener
+    class OpenDDS_Dcps_Export TransportSendListener
     {
       public:
 
@@ -38,10 +38,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportSendListener.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_TRANSPORTSENDLISTENER_H */
+#endif /* OPENDDS_DCPS_TRANSPORTSENDLISTENER_H */

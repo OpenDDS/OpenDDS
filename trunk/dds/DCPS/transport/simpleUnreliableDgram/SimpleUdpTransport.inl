@@ -10,7 +10,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUdpTransport::SimpleUdpTransport()
+OpenDDS::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","SimpleUdpTransport",5);
   this->socket_ = new SimpleUdpSocket();
@@ -19,7 +19,7 @@ TAO::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleUdpTransport::deliver_sample
+OpenDDS::DCPS::SimpleUdpTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {

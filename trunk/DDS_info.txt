@@ -148,7 +148,7 @@ datawriters and their instances.
 >
 > I dunno.
 
-Note: "BITDurationLookupMsec" is "DCPSBitLookupDurationMsec" in TAO DDS 0.8.
+Note: "BITDurationLookupMsec" is "DCPSBitLookupDurationMsec" in OpenDDS 0.8.
 
 Simple answer:
 	don't ask - you do not want to know and it should not impact you.
@@ -184,12 +184,12 @@ distinguished from handles because they are < a large number (let's say
 54321 - because Info Repo entity ids start at 1 and increment up but handles
 are memory addresses  -- wow - too much information).
 
-WARNING: the TAO DDS implementers reserve the right to change the definition
+WARNING: the OpenDDS implementers reserve the right to change the definition
 of a handle at any time.  It may not be an address in the future.  Use
 handles as defined in the specification.  Do not misuse them by casting them
 to the internal types they represent.
 
-Note: when TAO DDS is changed to use BIT information to establish
+Note: when OpenDDS is changed to use BIT information to establish
 associations (as implied by RTSP), the need for DCPSBitLookupDurationMsec
 will disappear.
 
@@ -442,7 +442,7 @@ Date: 2/8/06
 DDS version: 0.7
 
 > When building DDS I get warnings reporting that the environment variable 
-> TAO_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no 
+> OPENDDS_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no 
 > reference to it there.  What's it for and what should it be set to (, or 
 > should I just ignore it)?
 

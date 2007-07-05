@@ -4,7 +4,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::TransportSendElement::TransportSendElement
+OpenDDS::DCPS::TransportSendElement::TransportSendElement
                                      (int                    initial_count,
                                       DataSampleListElement* sample,
                                       TransportSendElementAllocator* allocator)

@@ -11,7 +11,7 @@
 
 #include <ace/Select_Reactor.h>
 
-TAO::DCPS::TransportReactorTask::TransportReactorTask()
+OpenDDS::DCPS::TransportReactorTask::TransportReactorTask()
   : state_ (STATE_NOT_RUNNING),
     condition_(this->lock_)
 {
@@ -21,7 +21,7 @@ TAO::DCPS::TransportReactorTask::TransportReactorTask()
 }
 
 
-TAO::DCPS::TransportReactorTask::~TransportReactorTask()
+OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 {
   DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",5);
   delete this->reactor_;
@@ -29,7 +29,7 @@ TAO::DCPS::TransportReactorTask::~TransportReactorTask()
 
 
 int
-TAO::DCPS::TransportReactorTask::open(void*)
+OpenDDS::DCPS::TransportReactorTask::open(void*)
 {
   DBG_ENTRY_LVL("TransportReactorTask","open",5);
 
@@ -69,7 +69,7 @@ TAO::DCPS::TransportReactorTask::open(void*)
 
 
 int
-TAO::DCPS::TransportReactorTask::svc()
+OpenDDS::DCPS::TransportReactorTask::svc()
 {
   DBG_ENTRY_LVL("TransportReactorTask","svc",5);
 
@@ -124,7 +124,7 @@ TAO::DCPS::TransportReactorTask::svc()
 
 
 int
-TAO::DCPS::TransportReactorTask::close(u_long flags)
+OpenDDS::DCPS::TransportReactorTask::close(u_long flags)
 {
   DBG_ENTRY_LVL("TransportReactorTask","close",5);
   ACE_UNUSED_ARG (flags);
@@ -145,7 +145,7 @@ TAO::DCPS::TransportReactorTask::close(u_long flags)
 
 
 void
-TAO::DCPS::TransportReactorTask::stop()
+OpenDDS::DCPS::TransportReactorTask::stop()
 {
   DBG_ENTRY_LVL("TransportReactorTask","stop",5);
   {

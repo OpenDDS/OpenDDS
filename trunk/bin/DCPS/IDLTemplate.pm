@@ -25,7 +25,7 @@ sub contents { return <<'!EOT'
 #include "dds/DdsDcpsTopic.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
-#include "dds/DdsDcpsTypeSupportTao.idl"
+#include "dds/DdsDcpsTypeSupportExt.idl"
 
 #include "<%SUBDIR%><%IDLFILE%>"
 
@@ -41,7 +41,7 @@ native <%TYPE%>Seq;
  * See the DDS specification, OMG formal/04-12-02, for a description of  
  * this interface.
  */
-local interface <%TYPE%>TypeSupport : TAO::DCPS::TypeSupport {
+local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
                 in DDS::DomainParticipant participant,
                 in string type_name);

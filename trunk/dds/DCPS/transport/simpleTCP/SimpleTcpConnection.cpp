@@ -31,7 +31,7 @@
 // completes to when the reconnect request is dequeued.
 const ACE_Time_Value reconnect_delay (2);
 
-TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
+OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 : connected_ (false),
   is_connector_ (true),
   passive_reconnect_timer_id_ (-1),
@@ -51,7 +51,7 @@ TAO::DCPS::SimpleTcpConnection::SimpleTcpConnection()
     }
 }
 
-TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
+OpenDDS::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",5);
 
@@ -74,7 +74,7 @@ TAO::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 // This can not be inlined due to circular dependencies disallowing
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
-TAO::DCPS::SimpleTcpConnection::set_receive_strategy
+OpenDDS::DCPS::SimpleTcpConnection::set_receive_strategy
                                  (TransportReceiveStrategy* receive_strategy)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",5);
@@ -86,7 +86,7 @@ TAO::DCPS::SimpleTcpConnection::set_receive_strategy
 
 
 void
-TAO::DCPS::SimpleTcpConnection::set_send_strategy
+OpenDDS::DCPS::SimpleTcpConnection::set_send_strategy
                                  (SimpleTcpSendStrategy* send_strategy)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",5);
@@ -98,7 +98,7 @@ TAO::DCPS::SimpleTcpConnection::set_send_strategy
 
 
 int
-TAO::DCPS::SimpleTcpConnection::open(void* arg)
+OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","open",5);
 
@@ -205,7 +205,7 @@ TAO::DCPS::SimpleTcpConnection::open(void* arg)
 
 
 int
-TAO::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
+OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",5);
 
@@ -221,7 +221,7 @@ TAO::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 
 
 int
-TAO::DCPS::SimpleTcpConnection::close(u_long)
+OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","close",5);
 
@@ -235,7 +235,7 @@ TAO::DCPS::SimpleTcpConnection::close(u_long)
 
 
 int
-TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
+OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",5);
 
@@ -249,7 +249,7 @@ TAO::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_config)
+OpenDDS::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -300,7 +300,7 @@ TAO::DCPS::SimpleTcpConnection::set_sock_options (SimpleTcpConfiguration* tcp_co
 
 
 int
-TAO::DCPS::SimpleTcpConnection::active_establishment
+OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
                                      SimpleTcpConfiguration_rch tcp_config)
@@ -378,7 +378,7 @@ TAO::DCPS::SimpleTcpConnection::active_establishment
 /// previous lost and new association is added. The connector side needs to try to
 /// actively reconnect to remote.
 int
-TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
+OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",5);
 
@@ -396,7 +396,7 @@ TAO::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 
 
 int
-TAO::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
+OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",5);
   GuardType guard (this->reconnect_lock_);
@@ -419,7 +419,7 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 // A timer is scheduled to check if a new connection is created within the
 // passive_reconnect_duration_ period.
 int
-TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
+OpenDDS::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",5);
   GuardType guard (this->reconnect_lock_);
@@ -475,7 +475,7 @@ TAO::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 // - fifth at 4.0 (2*2.0) seconds
 // - sixth at  8.0 (2*4.0) seconds
 int
-TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
+OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",5);
 
@@ -575,7 +575,7 @@ TAO::DCPS::SimpleTcpConnection::active_reconnect_i ()
 /// A timer is scheduled on acceptor side to check if a new connection
 /// is accepted after the connection is lost.
 int
-TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
+OpenDDS::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",5);
@@ -622,7 +622,7 @@ TAO::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
 /// We need make the state in "new" connection object consistent with the "old"
 /// connection object.
 void
-TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
+OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","transfer",5);
 
@@ -717,7 +717,7 @@ TAO::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 /// and the connection needs be closed since we declared it as a "lost"
 /// connection.
 void
-TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",5);
   bool notify_lost = false;
@@ -744,7 +744,7 @@ TAO::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 /// when lost connection is detected. This method handles the connection
 /// to the reactor task to do the reconnecting.
 void
-TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
+OpenDDS::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","relink",5);
 
@@ -756,7 +756,7 @@ TAO::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 }
 
 bool
-TAO::DCPS::SimpleTcpConnection::tear_link ()
+OpenDDS::DCPS::SimpleTcpConnection::tear_link ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",5);
 
@@ -764,7 +764,7 @@ TAO::DCPS::SimpleTcpConnection::tear_link ()
 }
 
 void
-TAO::DCPS::SimpleTcpConnection::shutdown ()
+OpenDDS::DCPS::SimpleTcpConnection::shutdown ()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",5);
   this->shutdown_ = true;

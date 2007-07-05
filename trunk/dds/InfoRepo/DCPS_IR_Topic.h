@@ -38,7 +38,7 @@ class DCPS_IR_Subscription;
 class DCPS_IR_Topic
 {
 public:
-  DCPS_IR_Topic(TAO::DCPS::RepoId id,
+  DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,
                 ::DDS::TopicQos qos,
                 DCPS_IR_Domain* domain,
                 DCPS_IR_Participant* creator,
@@ -65,8 +65,8 @@ public:
   ///  qos status.
   void try_associate (DCPS_IR_Subscription* subscription);
 
-  TAO::DCPS::RepoId get_id () const;
-  TAO::DCPS::RepoId get_participant_id () const;
+  OpenDDS::DCPS::RepoId get_id () const;
+  OpenDDS::DCPS::RepoId get_participant_id () const;
 
   /// Return pointer to the Topic Description
   /// Domain retains ownership
@@ -83,7 +83,7 @@ public:
   void set_bit_status (CORBA::Boolean isBIT);
 
 private:
-  TAO::DCPS::RepoId id_;
+  OpenDDS::DCPS::RepoId id_;
   ::DDS::TopicQos qos_;
   DCPS_IR_Domain* domain_;
   DCPS_IR_Participant* participant_;
