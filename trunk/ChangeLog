@@ -1,3 +1,9 @@
+Thu Jul  5 21:15:23 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Added libpaths assignment to find the Sync library in $DDS_ROOT/lib.
+
 Thu Jul  5 20:30:45 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/Sync.mpc:
