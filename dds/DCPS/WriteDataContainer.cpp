@@ -777,47 +777,47 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
       guard,
       this->lock_);
-  while (sending_data_.size_ > 0)
-  {
-    DataSampleListElement* old_head = sending_data_.head_;
+    while (sending_data_.size_ > 0)
+    {
+      DataSampleListElement* old_head = sending_data_.head_;
 
-    if (old_head == 0)
-      {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
-          "NULL element at head of sending_data_, size %d head %X tail %X \n"), 
-          sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
-        break;
+      if (old_head == 0)
+        {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
+            "NULL element at head of sending_data_, size %d head %X tail %X \n"), 
+            sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
+          break;
+        }
+
+      // Tell transport remove all samples currently
+      // transport is processing.
+      writer->remove_sample (old_head);
+
+      if (old_head == sending_data_.head_) {
+        /*
+        ciju: In situations of repeated connection restablishment
+        from the subscriber, we seem to get some orphan messages
+        left behind in the system. When the system shuts down
+        due to the cleanup mechanism now in place we enter a
+        for-ever loop.
+        The problem is most probably due to missing error handling
+        somewhere in the element delivery path and fixing that is the
+        real solution as otherwise over time the internal buffers will
+        just fill up (currently only observed upon connection disruption).
+        For now I am putting this code which will trap and cleanup these
+        orphan messages at shutdown time.
+        keywords: forever loop orphan hang
+        ***********************************/
+
+        old_head->send_listener_->data_delivered( old_head );
       }
-
-    // Tell transport remove all samples currently
-    // transport is processing.
-    writer->remove_sample (old_head);
-
-    if (old_head == sending_data_.head_) {
-      /*
-      ciju: In situations of repeated connection restablishment
-      from the subscriber, we seem to get some orphan messages
-      left behind in the system. When the system shuts down
-      due to the cleanup mechanism now in place we enter a
-      for-ever loop.
-      The problem is most probably due to missing error handling
-      somewhere in the element delivery path and fixing that is the
-      real solution as otherwise over time the internal buffers will
-      just fill up (currently only observed upon connection disruption).
-      For now I am putting this code which will trap and cleanup these
-      orphan messages at shutdown time.
-      keywords: forever loop orphan hang
-      ***********************************/
-
-      old_head->send_listener_->data_delivered( old_head );
     }
-  }
 
-  // Broadcast to wake up all waiting threads.
-  if (waiting_on_release_)
-  {
-    condition_.broadcast ();
-  }
+    // Broadcast to wake up all waiting threads.
+    if (waiting_on_release_)
+    {
+      condition_.broadcast ();
+    }
   }
   ::DDS::ReturnCode_t ret;
   DataSample* registered_sample;
