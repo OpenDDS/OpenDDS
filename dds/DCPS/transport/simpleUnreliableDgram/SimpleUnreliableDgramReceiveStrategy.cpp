@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::~SimpleUnreliableDgramReceiveStrategy()
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::~SimpleUnreliableDgramReceiveStrategy()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","~SimpleUnreliableDgramReceiveStrategy",5);
 }
 
 
 ssize_t
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::receive_bytes(iovec          iov[],
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::receive_bytes(iovec          iov[],
                                                    int            n,
                                                    ACE_INET_Addr& remote_addr)
 {
@@ -27,7 +27,7 @@ TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::receive_bytes(iovec          io
 
 
 int
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::start_i()
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::start_i()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","start_i",5);
   return this->socket_->set_receive_strategy(this,this->task_.in());
@@ -35,7 +35,7 @@ TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::start_i()
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::stop_i()
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::stop_i()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","stop_i",5);
 
@@ -48,7 +48,7 @@ TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::stop_i()
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::deliver_sample
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::deliver_sample
                                         (ReceivedDataSample&  sample,
                                          const ACE_INET_Addr& remote_address)
 {

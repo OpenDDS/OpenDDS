@@ -31,7 +31,7 @@
 // occurs every packet and is released after packet is sent.
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
-TAO::DCPS::TransportSendStrategy::TransportSendStrategy
+OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 (TransportConfiguration* config,
  ThreadSynchResource*    synch_resource)
   : max_samples_(config->max_samples_per_packet_),
@@ -104,7 +104,7 @@ TAO::DCPS::TransportSendStrategy::TransportSendStrategy
 }
 
 
-TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
+OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",5);
 
@@ -138,8 +138,8 @@ TAO::DCPS::TransportSendStrategy::~TransportSendStrategy()
 }
 
 
-TAO::DCPS::TransportSendStrategy::WorkOutcome
-TAO::DCPS::TransportSendStrategy::perform_work()
+OpenDDS::DCPS::TransportSendStrategy::WorkOutcome
+OpenDDS::DCPS::TransportSendStrategy::perform_work()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","perform_work",5);
 
@@ -381,7 +381,7 @@ TAO::DCPS::TransportSendStrategy::perform_work()
 // may be packet header bytes and shouldn't affect the header_.length_
 // which doesn't include the packet header bytes.
 int
-TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
+OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 (ssize_t num_bytes_sent,
  UseDelayedNotification delay_notification)
 {
@@ -716,7 +716,7 @@ TAO::DCPS::TransportSendStrategy::adjust_packet_after_send
 
 
 void
-TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
+OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",5);
 
@@ -793,7 +793,7 @@ TAO::DCPS::TransportSendStrategy::send_delayed_notifications()
 
 /// Remove all samples in the backpressure queue and packet queue.
 void
-TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
+OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",5);
 
@@ -828,7 +828,7 @@ TAO::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 
 
 void
-TAO::DCPS::TransportSendStrategy::clear (SendMode mode)
+OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",5);
 
@@ -887,7 +887,7 @@ TAO::DCPS::TransportSendStrategy::clear (SendMode mode)
 
 
 void
-TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
+OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send",5);
 
@@ -1147,7 +1147,7 @@ TAO::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool reli
 
 
 void
-TAO::DCPS::TransportSendStrategy::send_stop()
+OpenDDS::DCPS::TransportSendStrategy::send_stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",5);
   {
@@ -1247,7 +1247,7 @@ TAO::DCPS::TransportSendStrategy::send_stop()
 }
 
 int
-TAO::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
+OpenDDS::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
 						   PacketRemoveVisitor& pac_rem_vis)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",5);
@@ -1366,7 +1366,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_re
 
 
 int
-TAO::DCPS::TransportSendStrategy::remove_sample
+OpenDDS::DCPS::TransportSendStrategy::remove_sample
 (const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",5);
@@ -1387,7 +1387,7 @@ TAO::DCPS::TransportSendStrategy::remove_sample
 
 
 void
-TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",5);
 
@@ -1404,7 +1404,7 @@ TAO::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 }
 
 void
-TAO::DCPS::TransportSendStrategy::direct_send( bool relink )
+OpenDDS::DCPS::TransportSendStrategy::direct_send( bool relink )
 {
   DBG_ENTRY_LVL("TransportSendStrategy","direct_send",5);
 
@@ -1527,7 +1527,7 @@ TAO::DCPS::TransportSendStrategy::direct_send( bool relink )
 
 
 void
-TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
+OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",5);
 
@@ -1599,7 +1599,7 @@ TAO::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 
 
 void
-TAO::DCPS::TransportSendStrategy::prepare_packet()
+OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",5);
   /*
@@ -1658,8 +1658,8 @@ TAO::DCPS::TransportSendStrategy::prepare_packet()
 }
 
 
-TAO::DCPS::TransportSendStrategy::SendPacketOutcome
-TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
+OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
+OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_packet",5);
 
@@ -1760,7 +1760,7 @@ TAO::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notif
 
 
 ssize_t
-TAO::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int n, int& bp)
+OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int n, int& bp)
 {
   int val = 0;
   ACE_HANDLE handle = this->get_handle();

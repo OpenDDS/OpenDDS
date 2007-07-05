@@ -1,8 +1,8 @@
 /// -*- C++ -*-
 ///
 /// $Id$
-#ifndef TAO_DCPS_DATASAMPLEHEADER_H
-#define TAO_DCPS_DATASAMPLEHEADER_H
+#ifndef OPENDDS_DCPS_DATASAMPLEHEADER_H
+#define OPENDDS_DCPS_DATASAMPLEHEADER_H
 
 #include "Definitions.h"
 
@@ -10,7 +10,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -30,7 +30,7 @@ namespace TAO
     /// The header message of a data sample.
     /// This header and the data sample are in different
     /// message block and will be chained together.
-    struct TAO_DdsDcps_Export DataSampleHeader {
+    struct OpenDDS_Dcps_Export DataSampleHeader {
       /// The enum MessageId.
       char message_id_;
 
@@ -115,12 +115,12 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 /// Marshal/Insertion into a buffer.
-extern TAO_DdsDcps_Export
+extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
-operator<< (ACE_Message_Block*&, TAO::DCPS::DataSampleHeader& value) ;
+operator<< (ACE_Message_Block*&, OpenDDS::DCPS::DataSampleHeader& value) ;
 
-#endif  /* TAO_DCPS_DATASAMPLEHEADER_H */
+#endif  /* OPENDDS_DCPS_DATASAMPLEHEADER_H */
 

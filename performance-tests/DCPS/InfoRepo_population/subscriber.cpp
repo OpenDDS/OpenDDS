@@ -229,9 +229,9 @@ Subscriber::run (void)
       topic_timer.stop();
 
       // Initialize the transport
-      TAO::DCPS::TransportImpl_rch tcp_impl =
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id_,
-                                                    ::TAO::DCPS::AUTO_CONFIG);
+                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
       ACE_High_Res_Timer sub_timer;
       sub_timer.start();
       for (size_t count = 0; count < reader_count_; count++)
@@ -246,8 +246,8 @@ Subscriber::run (void)
             return false;
           }
 
-          TAO::DCPS::SubscriberImpl* sub_impl =
-            ::TAO::DCPS::reference_to_servant< TAO::DCPS::SubscriberImpl,
+          OpenDDS::DCPS::SubscriberImpl* sub_impl =
+            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
             DDS::Subscriber_ptr> (subs_[count].in ());
           if (0 == sub_impl) {
             cerr << "Failed to obtain subscriber servant\n" << endl;
@@ -255,18 +255,18 @@ Subscriber::run (void)
           }
 
           // Attach the subscriber to the transport.
-          TAO::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
-          if (status != TAO::DCPS::ATTACH_OK)
+          OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+          if (status != OpenDDS::DCPS::ATTACH_OK)
             {
               std::string status_str;
               switch (status) {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -283,7 +283,7 @@ Subscriber::run (void)
         // activate the listener
         DataReaderListenerImpl        listener_servant;
         DDS::DataReaderListener_var listener =
-        ::TAO::DCPS::servant_to_reference(&listener_servant);
+        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
 
         if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;

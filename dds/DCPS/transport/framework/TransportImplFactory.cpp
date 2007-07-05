@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportImplFactory::~TransportImplFactory()
+OpenDDS::DCPS::TransportImplFactory::~TransportImplFactory()
 {
   DBG_ENTRY_LVL("TransportImplFactory","~TransportImplFactory",5);
 }
 
 
 int
-TAO::DCPS::TransportImplFactory::requires_reactor() const
+OpenDDS::DCPS::TransportImplFactory::requires_reactor() const
 {
   DBG_ENTRY_LVL("TransportImplFactory","requires_reactor",5);
   // Return "false" (aka 0).

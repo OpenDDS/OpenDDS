@@ -41,13 +41,13 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   }
 
   // Attach the subscriber to the transport.
-  TAO::DCPS::SubscriberImpl* sub_impl
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub_.in ());
+  OpenDDS::DCPS::SubscriberImpl* sub_impl
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
 
   if (0 == sub_impl)
   {
     ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")));
+               ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")));
     throw TestException() ;
   }
   sub_impl->attach_transport(reader_transport_impl.in());
@@ -73,7 +73,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
   dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
   ::DDS::DataReaderListener_var drl
-    = ::TAO::DCPS::servant_to_reference(&drl_servant_);
+    = ::OpenDDS::DCPS::servant_to_reference(&drl_servant_);
 
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),
                                 dr_qos,
@@ -151,7 +151,7 @@ Reader::read (const SampleInfoMap& si_map,
       }
 
       ::Xyz::FooDataReaderImpl* dr_servant =
-        TAO::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
+        OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,
@@ -210,13 +210,13 @@ int Reader::init_transport ()
   int status = 0;
 
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_tcp_config->local_address_ = reader_address;

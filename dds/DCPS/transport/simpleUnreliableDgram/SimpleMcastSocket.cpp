@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleMcastSocket::~SimpleMcastSocket()
+OpenDDS::DCPS::SimpleMcastSocket::~SimpleMcastSocket()
 {
   DBG_ENTRY_LVL("SimpleMcastSocket","~SimpleMcastSocket",5);
 }

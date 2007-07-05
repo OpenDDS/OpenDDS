@@ -11,7 +11,7 @@
 #include "SimpleTcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 
-TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
+OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                      (SimpleTcpDataLink*      link,
                                       SimpleTcpConfiguration* config,
                                       SimpleTcpConnection*    connection,
@@ -39,13 +39,13 @@ TAO::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
 }
 
 
-TAO::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
+OpenDDS::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",5);
 }
 
 int
-TAO::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
+OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",5);
 
@@ -110,7 +110,7 @@ TAO::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 
 
 ssize_t
-TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
+OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",5);
 
@@ -118,28 +118,28 @@ TAO::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 }
 
 ACE_HANDLE 
-TAO::DCPS::SimpleTcpSendStrategy::get_handle ()
+OpenDDS::DCPS::SimpleTcpSendStrategy::get_handle ()
 {
   return this->connection_->peer().get_handle();
 }
 
 
 ssize_t 
-TAO::DCPS::SimpleTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
+OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 {
   return this->connection_->peer().sendv(iov, n);
 }
 
 
 void
-TAO::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
+OpenDDS::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",5);
   this->connection_->relink (do_suspend);
 }
 
 void
-TAO::DCPS::SimpleTcpSendStrategy::stop_i()
+OpenDDS::DCPS::SimpleTcpSendStrategy::stop_i()
 {
   DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",5);
 

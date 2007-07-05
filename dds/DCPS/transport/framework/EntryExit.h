@@ -78,7 +78,7 @@ class EntryExit
     , addr_set_ (true)
     {
       // No processing unless debugging turned on.
-      if (::TAO::DCPS::Transport_debug_level == 1)
+      if (::OpenDDS::DCPS::Transport_debug_level == 1)
 	{
 	  class_[25] = method_[25] = 0;
 
@@ -98,7 +98,7 @@ class EntryExit
 
   ~EntryExit()
     {
-      if (::TAO::DCPS::Transport_debug_level == 1)
+      if (::OpenDDS::DCPS::Transport_debug_level == 1)
 	{
 	  if (this->addr_set_)
 	    {

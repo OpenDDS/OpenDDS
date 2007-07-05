@@ -10,13 +10,13 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "TransportImpl.h"
 
-TAO::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)
+OpenDDS::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)
   : transportImpl_ (transportImpl)
 {
   DBG_ENTRY_LVL("DataLinkCleanupTask", "DataLinkCleanupTask", 5);
 }
 
-TAO::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
+OpenDDS::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 {
   DBG_ENTRY_LVL("DataLinkCleanupTask", "~DataLinkCleanupTask", 5);
 
@@ -24,7 +24,7 @@ TAO::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 }
 
 void
-TAO::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
+OpenDDS::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 {
   DBG_ENTRY_LVL("DataLinkCleanupTask", "execute", 5);
 

@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_ASSOCIATIONDATA_H
-#define TAO_DCPS_ASSOCIATIONDATA_H
+#ifndef OPENDDS_DCPS_ASSOCIATIONDATA_H
+#define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -22,6 +22,6 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
-#endif  /* TAO_DCPS_ASSOCIATIONDATA_H */
+#endif  /* OPENDDS_DCPS_ASSOCIATIONDATA_H */

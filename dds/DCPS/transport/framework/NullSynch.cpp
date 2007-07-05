@@ -10,14 +10,14 @@
 #include "NullSynch.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::NullSynch::~NullSynch()
+OpenDDS::DCPS::NullSynch::~NullSynch()
 {
   DBG_ENTRY_LVL("NullSynch","~NullSynch",5);
 }
 
 
 void
-TAO::DCPS::NullSynch::work_available()
+OpenDDS::DCPS::NullSynch::work_available()
 {
   DBG_ENTRY_LVL("NullSynch","work_available",5);
 

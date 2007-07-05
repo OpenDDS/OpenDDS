@@ -10,7 +10,7 @@
 
 
 
-TAO::DCPS::SimpleTcpConnectionReplaceTask::SimpleTcpConnectionReplaceTask(
+OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::SimpleTcpConnectionReplaceTask(
   SimpleTcpTransport* trans)
   : trans_ (trans)
 {
@@ -18,14 +18,14 @@ TAO::DCPS::SimpleTcpConnectionReplaceTask::SimpleTcpConnectionReplaceTask(
 }
 
 
-TAO::DCPS::SimpleTcpConnectionReplaceTask::~SimpleTcpConnectionReplaceTask()
+OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::~SimpleTcpConnectionReplaceTask()
 {
   DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","~SimpleTcpConnectionReplaceTask",5);
 }
 
 
 
-void TAO::DCPS::SimpleTcpConnectionReplaceTask::execute (SimpleTcpConnection_rch& con)
+void OpenDDS::DCPS::SimpleTcpConnectionReplaceTask::execute (SimpleTcpConnection_rch& con)
 {
   DBG_ENTRY_LVL("SimpleTcpConnectionReplaceTask","execute",5);
 

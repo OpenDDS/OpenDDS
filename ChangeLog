@@ -1,3 +1,19 @@
+Thu Jul  5 16:27:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * 14a_README:
+        * AUTHORS:
+        * DDS_release_notes.txt:
+        * README:
+        * docs/INSTALL:
+
+	  Updated for the forthcoming OpenDDS 1.0 release
+
+        * ***ALL FILES***:
+
+          This product is now known as OpenDDS.  Removed references to TAO DDS
+          in text files, comments, and as namespace/module names.  Made other
+          fixes as necessary to make it all build and pass tests.
+
 Tue Jul  3 19:55:32 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -3947,7 +3963,7 @@ Mon Mar 26 21:25:07 UTC 2007  Scott Harris <harris_s@ociweb.com>
 
           Add some known problems to the release notes.
 
-Mon Mar 26 16:05:36 UTC 2007  Pan Dan  <dai_y@ociweb.com>
+Mon Mar 26 16:05:36 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 

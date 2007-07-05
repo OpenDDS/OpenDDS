@@ -39,10 +39,10 @@ class PubDriver
 
     SimplePublisher publisher_;
 
-    TAO::DCPS::RepoId pub_id_;
+    OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
 
     unsigned num_msgs_;

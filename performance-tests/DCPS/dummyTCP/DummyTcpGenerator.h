@@ -9,7 +9,7 @@
 #include "dds/DCPS/transport/framework/TransportGenerator.h"
 #include "ace/Synch.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS

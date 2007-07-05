@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_REPOIDSET_H
-#define TAO_DCPS_REPOIDSET_H
+#ifndef OPENDDS_DCPS_REPOIDSET_H
+#define OPENDDS_DCPS_REPOIDSET_H
 
 #include "TransportDefs.h"
 #include "dds/DCPS/dcps_export.h"
@@ -13,13 +13,13 @@
 
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -39,7 +39,7 @@ namespace TAO
 
         /// Serialize the map. The data order in the serialized 
         /// stream: size of map, list of keys in the map.
-        void serialize(Serializer & serializer);
+        void serialize(TAO::DCPS::Serializer & serializer);
 
         /// Check if contents in the two RepoIdSet are same.
         bool is_subset (RepoIdSet& map);
@@ -54,10 +54,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "RepoIdSet.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_REPOIDSET_H */
+#endif /* OPENDDS_DCPS_REPOIDSET_H */

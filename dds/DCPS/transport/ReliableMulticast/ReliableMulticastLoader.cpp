@@ -12,7 +12,7 @@
 #endif /* __ACE_INLINE__ */
 
 int
-TAO_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
+OPENDDS_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
 {
   ACE_UNUSED_ARG(argc);
   ACE_UNUSED_ARG(argv);
@@ -22,11 +22,11 @@ TAO_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
   if (initialized) return 0;
   initialized = 1;
 
-  TAO::DCPS::TransportGenerator* generator = 0;
+  OpenDDS::DCPS::TransportGenerator* generator = 0;
 
   ACE_NEW_RETURN(
     generator,
-    TAO::DCPS::ReliableMulticastTransportGenerator,
+    OpenDDS::DCPS::ReliableMulticastTransportGenerator,
     -1
     );
 
@@ -40,13 +40,13 @@ TAO_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
 
 ACE_FACTORY_DEFINE(
   ReliableMulticast,
-  TAO_DCPS_ReliableMulticastLoader
+  OPENDDS_DCPS_ReliableMulticastLoader
   )
 ACE_STATIC_SVC_DEFINE (
-  TAO_DCPS_ReliableMulticastLoader,
-  ACE_TEXT ("TAO_DCPS_ReliableMulticastLoader"),
+  OPENDDS_DCPS_ReliableMulticastLoader,
+  ACE_TEXT ("OPENDDS_DCPS_ReliableMulticastLoader"),
   ACE_SVC_OBJ_T,
-  &ACE_SVC_NAME (TAO_DCPS_ReliableMulticastLoader),
+  &ACE_SVC_NAME (OPENDDS_DCPS_ReliableMulticastLoader),
   ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,
   0
   )

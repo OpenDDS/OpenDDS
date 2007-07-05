@@ -11,7 +11,7 @@
 #include "Qos_Helper.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
-#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "dds/DdsDcpsTypeSupportExtS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "AssociationData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
@@ -19,7 +19,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -144,7 +144,7 @@ PublisherImpl::~PublisherImpl (void)
 
   TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic);
 
-  TAO::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
+  OpenDDS::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
 
   if (typesupport == 0)
     {
@@ -167,7 +167,7 @@ PublisherImpl::~PublisherImpl (void)
                  DataWriterRemoteImpl(dw_servant),
                  ::DDS::DataWriter::_nil());
 
-  ::TAO::DCPS::DataWriterRemote_var dw_remote_obj = 
+  ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
       servant_to_remote_reference(writer_remote_impl);
 
 
@@ -200,7 +200,7 @@ PublisherImpl::~PublisherImpl (void)
   }
     }
 
-  TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -303,7 +303,7 @@ PublisherImpl::~PublisherImpl (void)
     dw_servant->remove_all_associations();
     
     
-    TAO::DCPS::TransportImpl_rch impl = this->get_transport_impl();
+    OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
     if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -752,7 +752,7 @@ void PublisherImpl::remove_associations(
 }
 
 ::DDS::ReturnCode_t PublisherImpl::writer_enabled(
-              ::TAO::DCPS::DataWriterRemote_ptr remote_writer,
+              ::OpenDDS::DCPS::DataWriterRemote_ptr remote_writer,
               ::DDS::DataWriter_ptr    local_writer,
               const char*              topic_name,
               //BuiltinTopicKey_t topic_key
@@ -774,7 +774,7 @@ void PublisherImpl::remove_associations(
       ::DDS::DataWriterQos qos;
       info->local_writer_objref_->get_qos(qos);
 
-      TAO::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
 
       info->publication_id_
   = this->repository_->add_publication(
@@ -910,7 +910,7 @@ PublisherImpl::listener_for (::DDS::StatusKind kind)
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

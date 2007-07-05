@@ -12,13 +12,13 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace OpenDDS 
 {
   namespace DCPS 
   {
     class InstanceState ;
 
-    class TAO_DdsDcps_Export ReceivedDataElement
+    class OpenDDS_Dcps_Export ReceivedDataElement
     {
     public:
       ReceivedDataElement(void *received_data) :
@@ -83,7 +83,7 @@ namespace TAO
       ReceivedDataElement *next_data_sample_ ;
     } ; // class ReceivedDataElement
 
-    class TAO_DdsDcps_Export ReceivedDataElementList
+    class OpenDDS_Dcps_Export ReceivedDataElementList
     {
     public:
       ReceivedDataElementList(InstanceState *instance_state = 0) ;
@@ -111,7 +111,7 @@ namespace TAO
       InstanceState *instance_state_ ;
     } ; // ReceivedDataElementList
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 # include "ReceivedDataElementList.inl"

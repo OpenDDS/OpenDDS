@@ -17,13 +17,13 @@ struct Foo {
 
 typedef sequence<Foo> FooSeq;
 
-interface FooTypeSupport : TAO::DCPS::TypeSupport {
+interface FooTypeSupport : OpenDDS::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
 		in DDS::DomainParticipant participant,
 		in string type_name);
 };
 
-interface FooDataWriter : TAO::DCPS::DataWriterRemote {
+interface FooDataWriter : OpenDDS::DCPS::DataWriterRemote {
     DDS::InstanceHandle_t register(
 		in Foo instance_data);
 
@@ -64,7 +64,7 @@ interface FooDataWriter : TAO::DCPS::DataWriterRemote {
 		in DDS::InstanceHandle_t handle);
 };
 
-interface FooDataReader : TAO::DCPS::DataReaderRemote {
+interface FooDataReader : OpenDDS::DCPS::DataReaderRemote {
     DDS::ReturnCode_t read(
 		inout FooSeq received_data,
 		inout DDS::SampleInfoSeq info_seq,

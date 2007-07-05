@@ -6,7 +6,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUdpSocket::SimpleUdpSocket()
+OpenDDS::DCPS::SimpleUdpSocket::SimpleUdpSocket()
 {
   DBG_ENTRY_LVL("SimpleUdpSocket","SimpleUdpSocket",5);
 }
@@ -14,7 +14,7 @@ TAO::DCPS::SimpleUdpSocket::SimpleUdpSocket()
 
 ACE_INLINE
 ACE_HANDLE
-TAO::DCPS::SimpleUdpSocket::get_handle() const
+OpenDDS::DCPS::SimpleUdpSocket::get_handle() const
 {
   DBG_ENTRY_LVL("SimpleUdpSocket","get_handle",5);
   return this->socket_.get_handle();
@@ -22,7 +22,7 @@ TAO::DCPS::SimpleUdpSocket::get_handle() const
 
 
 ACE_INLINE int
-TAO::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,
+OpenDDS::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,
                                         const ACE_INET_Addr& multicast_group_address,
                                         bool receiver)
 {
@@ -65,7 +65,7 @@ TAO::DCPS::SimpleUdpSocket::open_socket(ACE_INET_Addr& local_address,
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleUdpSocket::close_socket()
+OpenDDS::DCPS::SimpleUdpSocket::close_socket()
 {
   DBG_ENTRY_LVL("SimpleUdpSocket","close_socket",5);
 
@@ -78,7 +78,7 @@ TAO::DCPS::SimpleUdpSocket::close_socket()
 
 
 ACE_INLINE ssize_t
-TAO::DCPS::SimpleUdpSocket::send_bytes(const iovec iov[],
+OpenDDS::DCPS::SimpleUdpSocket::send_bytes(const iovec iov[],
                                        int   n,
                                        const ACE_INET_Addr& remote_address)
 {
@@ -92,7 +92,7 @@ TAO::DCPS::SimpleUdpSocket::send_bytes(const iovec iov[],
 
 
 ACE_INLINE ssize_t
-TAO::DCPS::SimpleUdpSocket::receive_bytes(iovec iov[],
+OpenDDS::DCPS::SimpleUdpSocket::receive_bytes(iovec iov[],
                                           int   n,
                                           ACE_INET_Addr& remote_address)
 {

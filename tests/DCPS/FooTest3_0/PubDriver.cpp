@@ -27,7 +27,7 @@ const char* MY_TYPE     = "foo";
 
 long lease_duration_sec = 5;
 
-using namespace ::TAO::DCPS;
+using namespace ::OpenDDS::DCPS;
 
 int offered_incompatible_qos_called_on_dp = 0;
 int offered_incompatible_qos_called_on_pub = 0;
@@ -223,7 +223,7 @@ PubDriver::initialize(int& argc, char *argv[])
   ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
   ::Xyz::FooTypeSupport_var fts =
-    ::TAO::DCPS::servant_to_reference (fts_servant);
+    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
@@ -262,7 +262,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
     (publisher_.in ());
 
   attach_to_transport ();
@@ -381,7 +381,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl> (datawriter_.in ());
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl> (datawriter_.in ());
 
   foo_datawriter_
     = ::Xyz::FooDataWriter::_narrow(datawriter_.in ());
@@ -389,7 +389,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
-    = TAO::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
+    = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
     (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);
@@ -438,7 +438,7 @@ PubDriver::run()
     return;
   }
 
-  TAO::DCPS::PublicationId pub_id = datawriter_servant_->get_publication_id ();
+  OpenDDS::DCPS::PublicationId pub_id = datawriter_servant_->get_publication_id ();
 
   // Write the publication id to a file.
   ACE_DEBUG ((LM_DEBUG,
@@ -697,21 +697,21 @@ PubDriver::listener_test ()
            DomainParticipantListenerImpl());
 
   ::DDS::DomainParticipantListener_var dpl
-    = ::TAO::DCPS::servant_to_reference (dpl_servant);
+    = ::OpenDDS::DCPS::servant_to_reference (dpl_servant);
 
   PublisherListenerImpl* pl_servant;
   ACE_NEW (pl_servant,
            PublisherListenerImpl());
 
   ::DDS::PublisherListener_var pl
-    = ::TAO::DCPS::servant_to_reference (pl_servant);
+    = ::OpenDDS::DCPS::servant_to_reference (pl_servant);
 
   DataWriterListenerImpl* dwl_servant;
   ACE_NEW (dwl_servant,
            DataWriterListenerImpl());
 
   ::DDS::DataWriterListener_var dwl
-    = ::TAO::DCPS::servant_to_reference (dwl_servant);
+    = ::OpenDDS::DCPS::servant_to_reference (dwl_servant);
 
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got
@@ -753,7 +753,7 @@ PubDriver::listener_test ()
 
   // Test update_incompatible_qos/get_offered_incompatible_qos_status
   // and listener for specific status kind.
-  TAO::DCPS::IncompatibleQosStatus incomp_status;
+  OpenDDS::DCPS::IncompatibleQosStatus incomp_status;
   incomp_status.total_count = 20;
   incomp_status.count_since_last_send = 8;
   incomp_status.last_policy_id = 6;
@@ -848,7 +848,7 @@ PubDriver::listener_test ()
 
   //Test remove_associations
 
-  ::TAO::DCPS::ReaderIdSeq reader_ids;
+  ::OpenDDS::DCPS::ReaderIdSeq reader_ids;
   reader_ids.length (1);
   reader_ids[0] = this->sub_id_;
 
@@ -1110,16 +1110,16 @@ void PubDriver::add_subscription (
     const char *      sub_addr
     )
 {
-  ::TAO::DCPS::ReaderAssociationSeq associations;
+  ::OpenDDS::DCPS::ReaderAssociationSeq associations;
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
 
   ACE_INET_Addr sub_inet_addr(sub_addr);
-  TAO::DCPS::NetworkAddress network_order_address(sub_inet_addr);
+  OpenDDS::DCPS::NetworkAddress network_order_address(sub_inet_addr);
   associations[0].readerTransInfo.data
-    = TAO::DCPS::TransportInterfaceBLOB
-                                   (sizeof(TAO::DCPS::NetworkAddress),
-                                    sizeof(TAO::DCPS::NetworkAddress),
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
+                                    sizeof(OpenDDS::DCPS::NetworkAddress),
                                     (CORBA::Octet*)(&network_order_address));
 
 
@@ -1127,21 +1127,21 @@ void PubDriver::add_subscription (
   associations[0].subQos = TheServiceParticipant->initial_SubscriberQos ();
   associations[0].readerQos = TheServiceParticipant->initial_DataReaderQos ();
 
-  TAO::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
+  OpenDDS::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
   datawriter_servant_->add_associations (pub_id, associations);
 }
 
 
 void PubDriver::attach_to_transport ()
 {
-  TAO::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
 
@@ -1152,23 +1152,23 @@ void PubDriver::attach_to_transport ()
       throw TestException();
     }
 
-  TAO::DCPS::AttachStatus status
+  OpenDDS::DCPS::AttachStatus status
     = publisher_servant_->attach_transport(transport_impl.in());
 
-  if (status != TAO::DCPS::ATTACH_OK)
+  if (status != OpenDDS::DCPS::ATTACH_OK)
   {
     // We failed to attach to the transport for some reason.
     std::string status_str;
 
     switch (status)
       {
-        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
           status_str = "ATTACH_BAD_TRANSPORT";
           break;
-        case TAO::DCPS::ATTACH_ERROR:
+        case OpenDDS::DCPS::ATTACH_ERROR:
           status_str = "ATTACH_ERROR";
           break;
-        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
           status_str = "ATTACH_INCOMPATIBLE_QOS";
           break;
         default:

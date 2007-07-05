@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DUMMYTCPCONNECTION_H
-#define TAO_DCPS_DUMMYTCPCONNECTION_H
+#ifndef OPENDDS_DCPS_DUMMYTCPCONNECTION_H
+#define OPENDDS_DCPS_DUMMYTCPCONNECTION_H
 
 #include "DummyTcpConfiguration.h"
 #include "DummyTcpConfiguration_rch.h"
@@ -21,7 +21,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -184,4 +184,4 @@ namespace TAO
 #include "DummyTcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_DUMMYTCPCONNECTION_H */
+#endif  /* OPENDDS_DCPS_DUMMYTCPCONNECTION_H */

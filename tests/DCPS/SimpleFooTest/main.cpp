@@ -63,10 +63,10 @@ int main (int argc, char *argv[])
 
 
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
       FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
 
       ::DDS::DomainParticipant_var dp =
@@ -122,8 +122,8 @@ int main (int argc, char *argv[])
         dp->lookup_topicdescription(MY_TOPIC);
       TEST_CHECK (! CORBA::is_nil (description.in ()));
 
-      TAO::DCPS::TopicDescriptionImpl* ti =
-        TAO::DCPS::reference_to_servant<TAO::DCPS::TopicDescriptionImpl>
+      OpenDDS::DCPS::TopicDescriptionImpl* ti =
+        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicDescriptionImpl>
         (description.in ());
       TEST_CHECK (ti != 0);
 

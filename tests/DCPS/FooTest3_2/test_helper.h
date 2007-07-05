@@ -1,7 +1,7 @@
 #ifndef DDS_DCPS_TEST_INFOREPO_HELPER
 #define DDS_DCPS_TEST_INFOREPO_HELPER
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -20,11 +20,11 @@ namespace TAO
 class DDS_TEST
 {
 public:
-  static TAO::DCPS::DataWriterRemote_ptr
-  getRemoteInterface(const TAO::DCPS::DataWriterImpl &impl);
+  static OpenDDS::DCPS::DataWriterRemote_ptr
+  getRemoteInterface(const OpenDDS::DCPS::DataWriterImpl &impl);
 
-  static TAO::DCPS::DataReaderRemote_ptr
-  getRemoteInterface(const TAO::DCPS::DataReaderImpl &impl);
+  static OpenDDS::DCPS::DataReaderRemote_ptr
+  getRemoteInterface(const OpenDDS::DCPS::DataReaderImpl &impl);
 };
 
 #endif

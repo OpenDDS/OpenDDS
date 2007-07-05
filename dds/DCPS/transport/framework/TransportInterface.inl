@@ -13,7 +13,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::TransportInterface::TransportInterface()
+OpenDDS::DCPS::TransportInterface::TransportInterface()
   : swap_bytes_(0)
 {
   DBG_ENTRY_LVL("TransportInterface","TransportInterface",5);
@@ -27,8 +27,8 @@ TAO::DCPS::TransportInterface::TransportInterface()
 /// TransportImpl (in the attach_transport() method), we "cache" it in
 /// a data member (this->connection_info_) so that we don't have to ask
 /// the TransportImpl for it each time.
-ACE_INLINE const TAO::DCPS::TransportInterfaceInfo&
-TAO::DCPS::TransportInterface::connection_info() const
+ACE_INLINE const OpenDDS::DCPS::TransportInterfaceInfo&
+OpenDDS::DCPS::TransportInterface::connection_info() const
 {
   DBG_ENTRY_LVL("TransportInterface","connection_info",5);
   return this->connection_info_;
@@ -36,15 +36,15 @@ TAO::DCPS::TransportInterface::connection_info() const
 
 
 ACE_INLINE int
-TAO::DCPS::TransportInterface::swap_bytes() const
+OpenDDS::DCPS::TransportInterface::swap_bytes() const
 {
   DBG_ENTRY_LVL("TransportInterface","swap_bytes",5);
   return this->swap_bytes_;
 }
 
 
-ACE_INLINE TAO::DCPS::SendControlStatus
-TAO::DCPS::TransportInterface::send_control(RepoId                 pub_id,
+ACE_INLINE OpenDDS::DCPS::SendControlStatus
+OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
                                             TransportSendListener* listener,
                                             ACE_Message_Block*     msg)
 {
@@ -76,7 +76,7 @@ TAO::DCPS::TransportInterface::send_control(RepoId                 pub_id,
 
 
 ACE_INLINE int
-TAO::DCPS::TransportInterface::remove_sample
+OpenDDS::DCPS::TransportInterface::remove_sample
                                      (const DataSampleListElement* sample,
                                       bool  dropped_by_transport)
 {
@@ -117,7 +117,7 @@ TAO::DCPS::TransportInterface::remove_sample
 
 
 ACE_INLINE int
-TAO::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportInterface","remove_all_control_msgs",5);
 
@@ -135,7 +135,7 @@ TAO::DCPS::TransportInterface::remove_all_control_msgs(RepoId pub_id)
 
 
 ACE_INLINE int
-TAO::DCPS::TransportInterface::add_subscriptions
+OpenDDS::DCPS::TransportInterface::add_subscriptions
                                     (RepoId                 publisher_id,
                                      CORBA::Long            priority,
                                      ssize_t                size,
@@ -153,7 +153,7 @@ TAO::DCPS::TransportInterface::add_subscriptions
 
 
 ACE_INLINE int
-TAO::DCPS::TransportInterface::add_publications
+OpenDDS::DCPS::TransportInterface::add_publications
                                    (RepoId                    subscriber_id,
                                     TransportReceiveListener* receive_listener,
                                     CORBA::Long               priority,
@@ -173,7 +173,7 @@ TAO::DCPS::TransportInterface::add_publications
 
 
 ACE_INLINE void
-TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
+OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
 {
   DBG_ENTRY_LVL("TransportInterface","send",5);
 
@@ -251,8 +251,8 @@ TAO::DCPS::TransportInterface::send(const DataSampleList& samples)
 }
 
 
-ACE_INLINE TAO::DCPS::TransportImpl_rch
-TAO::DCPS::TransportInterface::get_transport_impl ()
+ACE_INLINE OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportInterface::get_transport_impl ()
 {
   return this->impl_;
 }

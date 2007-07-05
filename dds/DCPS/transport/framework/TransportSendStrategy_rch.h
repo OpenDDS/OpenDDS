@@ -1,12 +1,12 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTSENDSTRATEGY_RCH_H
-#define TAO_DCPS_TRANSPORTSENDSTRATEGY_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_RCH_H
+#define OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -35,6 +35,6 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
-#endif /* TAO_DCPS_TRANSPORTSENDSTRATEGY_RCH_H */
+#endif /* OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_RCH_H */

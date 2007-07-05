@@ -65,13 +65,13 @@ main (int argc, char *argv[])
       CORBA::Object_var tmp =
         orb->string_to_object (ior);
 
-      TAO::DCPS::DCPSInfo_var info =
-        TAO::DCPS::DCPSInfo::_narrow (tmp.in ());
+      OpenDDS::DCPS::DCPSInfo_var info =
+        OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
 
       if (CORBA::is_nil (info.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil TAO::DCPS::DCPSInfo reference <%s>\n",
+                             "Nil OpenDDS::DCPS::DCPSInfo reference <%s>\n",
                              ior),
                             1);
         }
@@ -91,14 +91,14 @@ main (int argc, char *argv[])
       const char* tname = "MYtopic";
       const char* dname = "MYdataname";
       ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
-      TAO::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
+      OpenDDS::DCPS::TopicStatus topicStatus = info->assert_topic(topicId,
                                                            domainId,
                                                            dpId,
                                                            tname,
                                                            dname,
                                                            topicQos.in());
 
-      if (topicStatus != TAO::DCPS::CREATED)
+      if (topicStatus != OpenDDS::DCPS::CREATED)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("Topic creation failed and returned %d"), topicStatus));
         }
@@ -108,18 +108,18 @@ main (int argc, char *argv[])
       TAO_DDS_DCPSDataReader_i dri;
       PortableServer::ObjectId_var oid = poa->activate_object( &dri );
       obj = poa->id_to_reference( oid.in() );
-      TAO::DCPS::DataReaderRemote_var dr = TAO::DCPS::DataReaderRemote::_narrow(obj.in());
+      OpenDDS::DCPS::DataReaderRemote_var dr = OpenDDS::DCPS::DataReaderRemote::_narrow(obj.in());
       if (CORBA::is_nil (dr.in ()))
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil TAO::DCPS::DataReaderRemote reference\n"),
+                             "Nil OpenDDS::DCPS::DataReaderRemote reference\n"),
                             1);
         }
 
       ::DDS::DataReaderQos_var drq = new ::DDS::DataReaderQos;
       drq->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       ::DDS::SubscriberQos_var sQos = new ::DDS::SubscriberQos;
-      TAO::DCPS::TransportInterfaceInfo_var tii = new TAO::DCPS::TransportInterfaceInfo;
+      OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
 
       CORBA::Long subId = info->add_subscription(domainId,
                                                  dpId,

@@ -6,19 +6,19 @@
 
 #include "tao/LocalObject.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
-    // support "TAO::DCPS" style _ptr and _var
+    // support "OpenDDS::DCPS" style _ptr and _var
     typedef CORBA::LocalObject_ptr LocalObject_ptr;
     typedef CORBA::LocalObject_var LocalObject_var;
 
 
-    /// TAO::DCPS::LocalObject resolves ambigously-inherited members like
+    /// OpenDDS::DCPS::LocalObject resolves ambigously-inherited members like
     /// _narrow and _ptr_type.  It is used from client code like so:
     /// class MyReaderListener
-    ///   : public TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener> {...};
+    ///   : public OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener> {...};
     template <class Stub>
     class LocalObject
       : public virtual Stub

@@ -50,10 +50,10 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   //  use another transport type.
   pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID, 
                                                               "SimpleTcp", 
-                                                              ::TAO::DCPS::AUTO_CONFIG);
+                                                              ::OpenDDS::DCPS::AUTO_CONFIG);
   sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID, 
                                                               "SimpleTcp", 
-                                                              ::TAO::DCPS::AUTO_CONFIG);
+                                                              ::OpenDDS::DCPS::AUTO_CONFIG);
 
   // Create publisher
   pub_ = dp_->create_publisher (PUBLISHER_QOS_DEFAULT,
@@ -66,8 +66,8 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
 
   // Attach the transport protocol with the publishing entity
-  TAO::DCPS::PublisherImpl* p_impl =
-    TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub_.in ());
+  OpenDDS::DCPS::PublisherImpl* p_impl =
+    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
   p_impl->attach_transport (pub_tcp_impl_.in ());
 
 
@@ -98,14 +98,14 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
 
   // Attach the transport protocol with the subscribing entity
-  TAO::DCPS::SubscriberImpl* sub_impl =
-    TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub_.in ());
+  OpenDDS::DCPS::SubscriberImpl* sub_impl =
+    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
   sub_impl->attach_transport(sub_tcp_impl_.in());
 
 
   // Create the listener for datareader
   FileInfoListener* listener_servant = new FileInfoListener(this);
-  listener_ = ::TAO::DCPS::servant_to_reference(listener_servant);
+  listener_ = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
 
 
   // Create the datareader
@@ -123,16 +123,16 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
   // We need the servants of the Domain Participant and the Data Reader to
   // get information to set up the ignore.
-  ::TAO::DCPS::DomainParticipantImpl* dp_servant =
-    ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DomainParticipantImpl>(dp_.in());
+  ::OpenDDS::DCPS::DomainParticipantImpl* dp_servant =
+    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DomainParticipantImpl>(dp_.in());
   if (0 == dp_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of domain participant failed.\n") ));
     return false;
   }
 
-  ::TAO::DCPS::DataReaderImpl* dr_servant =
-    ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::DataReaderImpl>(dr_.in());
+  ::OpenDDS::DCPS::DataReaderImpl* dr_servant =
+    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DataReaderImpl>(dr_.in());
   if (0 == dr_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of data reader failed.\n") ));
@@ -140,24 +140,24 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   }
 
   // Get the repo id for the data writer
-  ::TAO::DCPS::RepoId ignore_id = dr_servant->get_subscription_id ();
+  ::OpenDDS::DCPS::RepoId ignore_id = dr_servant->get_subscription_id ();
 
   ::DDS::InstanceHandleSeq handles;
-  ::TAO::DCPS::ReaderIdSeq ignore_ids;
+  ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
   ignore_ids.length (1);
   ignore_ids[0] = ignore_id;
 
   // helper object for retrieving information from the DCPSInfoRepo
-  ::TAO::DCPS::BIT_Helper_2 <
+  ::OpenDDS::DCPS::BIT_Helper_2 <
                 ::DDS::SubscriptionBuiltinTopicDataDataReader,
                 ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
                 ::DDS::SubscriptionBuiltinTopicDataSeq,
-                ::TAO::DCPS::ReaderIdSeq > bit_helper;
+                ::OpenDDS::DCPS::ReaderIdSeq > bit_helper;
 
   // Get the instance id of data writer from the Built-In Topic data
   ::DDS::ReturnCode_t ret =
       bit_helper.repo_ids_to_instance_handles(dp_servant,
-                                              ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+                                              ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
                                               ignore_ids,
                                               handles);
   if (ret != ::DDS::RETCODE_OK) {

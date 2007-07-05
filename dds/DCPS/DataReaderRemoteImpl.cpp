@@ -7,7 +7,7 @@
 #include "DataReaderImpl.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -33,8 +33,8 @@ DataReaderRemoteImpl::~DataReaderRemoteImpl (void)
 
 
 
-void DataReaderRemoteImpl::add_associations (::TAO::DCPS::RepoId yourId,
-				       const TAO::DCPS::WriterAssociationSeq & writers)
+void DataReaderRemoteImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
+				       const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   parent_->add_associations( yourId, writers);
@@ -42,7 +42,7 @@ void DataReaderRemoteImpl::add_associations (::TAO::DCPS::RepoId yourId,
 
 
 void DataReaderRemoteImpl::remove_associations (
-					  const TAO::DCPS::WriterIdSeq & writers,
+					  const OpenDDS::DCPS::WriterIdSeq & writers,
 					  ::CORBA::Boolean notify_lost
 					  )
   ACE_THROW_SPEC ((
@@ -55,7 +55,7 @@ void DataReaderRemoteImpl::remove_associations (
 
 
 void DataReaderRemoteImpl::update_incompatible_qos (
-					      const TAO::DCPS::IncompatibleQosStatus & status
+					      const OpenDDS::DCPS::IncompatibleQosStatus & status
 					      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -65,4 +65,4 @@ void DataReaderRemoteImpl::update_incompatible_qos (
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

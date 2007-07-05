@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ThreadSynchWorker::~ThreadSynchWorker()
+OpenDDS::DCPS::ThreadSynchWorker::~ThreadSynchWorker()
 {
   DBG_ENTRY_LVL("ThreadSynchWorker","~ThreadSynchWorker",5);
 }

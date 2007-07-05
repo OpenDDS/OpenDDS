@@ -12,7 +12,7 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
 
-TAO::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
+OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                      (DummyTcpDataLink*      link,
                                       DummyTcpConfiguration* config,
                                       DummyTcpConnection*    connection,
@@ -40,13 +40,13 @@ TAO::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
 }
 
 
-TAO::DCPS::DummyTcpSendStrategy::~DummyTcpSendStrategy()
+OpenDDS::DCPS::DummyTcpSendStrategy::~DummyTcpSendStrategy()
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","~DummyTcpSendStrategy",5);
 }
 
 int
-TAO::DCPS::DummyTcpSendStrategy::reset(DummyTcpConnection* connection)
+OpenDDS::DCPS::DummyTcpSendStrategy::reset(DummyTcpConnection* connection)
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","reset",5);
 
@@ -111,7 +111,7 @@ TAO::DCPS::DummyTcpSendStrategy::reset(DummyTcpConnection* connection)
 
 
 ssize_t
-TAO::DCPS::DummyTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
+OpenDDS::DCPS::DummyTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","send_bytes",5);
 
@@ -119,30 +119,30 @@ TAO::DCPS::DummyTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 }
 
 ACE_HANDLE
-TAO::DCPS::DummyTcpSendStrategy::get_handle ()
+OpenDDS::DCPS::DummyTcpSendStrategy::get_handle ()
 {
   return this->connection_->peer().get_handle();
 }
 
 
 ssize_t
-TAO::DCPS::DummyTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
+OpenDDS::DCPS::DummyTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 {
   PerformanceTest::stop_test ("Publisher Side Transport Performance Test",
-                              "TAO::DCPS::DummyTcpSendStrategy::send_bytes_i");
+                              "OpenDDS::DCPS::DummyTcpSendStrategy::send_bytes_i");
   return this->connection_->peer().sendv(iov, n);
 }
 
 
 void
-TAO::DCPS::DummyTcpSendStrategy::relink (bool do_suspend)
+OpenDDS::DCPS::DummyTcpSendStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","relink",5);
   this->connection_->relink (do_suspend);
 }
 
 void
-TAO::DCPS::DummyTcpSendStrategy::stop_i()
+OpenDDS::DCPS::DummyTcpSendStrategy::stop_i()
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","stop_i",5);
 

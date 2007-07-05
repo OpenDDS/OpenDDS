@@ -10,13 +10,13 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleMcastConfiguration::~SimpleMcastConfiguration()
+OpenDDS::DCPS::SimpleMcastConfiguration::~SimpleMcastConfiguration()
 {
   DBG_ENTRY_LVL("SimpleMcastConfiguration","~SimpleMcastConfiguration",5);
 }
 
 int
-TAO::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
+OpenDDS::DCPS::SimpleMcastConfiguration::load (const TransportIdType& id,
                                          ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.

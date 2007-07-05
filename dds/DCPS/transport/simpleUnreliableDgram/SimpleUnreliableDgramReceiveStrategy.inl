@@ -9,7 +9,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramReceiveStrategy::SimpleUnreliableDgramReceiveStrategy
+OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::SimpleUnreliableDgramReceiveStrategy
                                         (SimpleUnreliableDgramTransport*   transport,
                                          SimpleUnreliableDgramSocket* socket,
                                          TransportReactorTask* task)

@@ -5,7 +5,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
+OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
                                        (const ACE_Message_Block* sample)
   : sample_(sample),
     pub_id_(0),
@@ -16,7 +16,7 @@ TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
 }
 
 ACE_INLINE
-TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
+OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
   : sample_(0),
     pub_id_(pub_id),
     status_(0),
@@ -28,7 +28,7 @@ TAO::DCPS::QueueRemoveVisitor::QueueRemoveVisitor(RepoId pub_id)
 
 
 ACE_INLINE int
-TAO::DCPS::QueueRemoveVisitor::status() const
+OpenDDS::DCPS::QueueRemoveVisitor::status() const
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","status",5);
   return this->status_;
@@ -36,7 +36,7 @@ TAO::DCPS::QueueRemoveVisitor::status() const
 
 
 ACE_INLINE int
-TAO::DCPS::QueueRemoveVisitor::removed_bytes() const
+OpenDDS::DCPS::QueueRemoveVisitor::removed_bytes() const
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","removed_bytes",5);
   return this->removed_bytes_;

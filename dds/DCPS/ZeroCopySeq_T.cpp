@@ -155,7 +155,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer (
 
 
     } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 #endif /* ZEROCOPYSEQ_H  */

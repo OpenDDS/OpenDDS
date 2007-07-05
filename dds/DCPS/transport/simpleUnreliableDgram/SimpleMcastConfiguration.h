@@ -1,15 +1,15 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEMCASTCONFIGURATION_H
-#define TAO_DCPS_SIMPLEMCASTCONFIGURATION_H
+#ifndef OPENDDS_DCPS_SIMPLEMCASTCONFIGURATION_H
+#define OPENDDS_DCPS_SIMPLEMCASTCONFIGURATION_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramConfiguration.h"
 #include "ace/INET_Addr.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -34,11 +34,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleMcastConfiguration.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_SIMPLEMCASTCONFIGURATION_H */
+#endif  /* OPENDDS_DCPS_SIMPLEMCASTCONFIGURATION_H */

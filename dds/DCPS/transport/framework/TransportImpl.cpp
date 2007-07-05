@@ -29,7 +29,7 @@ namespace
   }
 }
 
-TAO::DCPS::TransportImpl::~TransportImpl()
+OpenDDS::DCPS::TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl","~TransportImpl",5);
   clear(dw_map_);
@@ -43,7 +43,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
 
 
 void
-TAO::DCPS::TransportImpl::shutdown()
+OpenDDS::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",5);
  
@@ -90,8 +90,8 @@ TAO::DCPS::TransportImpl::shutdown()
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::TransportImpl::reserve_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_subscriber_info,
                        RepoId                        subscriber_id,
                        RepoId                        publisher_id,
@@ -128,8 +128,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::TransportImpl::reserve_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_publisher_info,
                        RepoId                        publisher_id,
                        RepoId                        subscriber_id,
@@ -179,8 +179,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
 /// This is called by a TransportInterface object when it is handling
 /// its own request to attach_transport(TransportImpl*), and this
 /// TransportImpl object is the one to which it should be attached.
-TAO::DCPS::AttachStatus
-TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
+OpenDDS::DCPS::AttachStatus
+OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 {
   DBG_ENTRY_LVL("TransportImpl","attach_interface",5);
 
@@ -214,8 +214,8 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 
 
 int
-TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
-                                                TAO::DCPS::DataWriterImpl* dw)
+OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id,
+                                                OpenDDS::DCPS::DataWriterImpl* dw)
 {
   DBG_ENTRY_LVL("TransportImpl","register_publication",5);
   GuardType guard(this->lock_);
@@ -233,7 +233,7 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
   // ack is received by the publisher side, we need check the
   // map to see if it's the case. If it is,the datawriter will be
   // notified fully associated at this time.
-  TAO::DCPS::RepoIdSet_rch pending_subs
+  OpenDDS::DCPS::RepoIdSet_rch pending_subs
     = this->pending_sub_map_.find (pub_id);
   if (! pending_subs.is_nil () && this->acked (pub_id))
     this->fully_associated (pub_id);
@@ -243,7 +243,7 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
 
 
 int
-TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","unregister_publication",5);
   GuardType guard(this->lock_);
@@ -260,8 +260,8 @@ TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
 }
 
 
-TAO::DCPS::DataWriterImpl*
-TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_cpy)
+OpenDDS::DCPS::DataWriterImpl*
+OpenDDS::DCPS::TransportImpl::find_publication (OpenDDS::DCPS::RepoId pub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_publication",5);
   GuardType guard(this->lock_);
@@ -284,8 +284,8 @@ TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_
 
 
 int
-TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
-                                                 TAO::DCPS::DataReaderImpl* dr)
+OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_id,
+                                                 OpenDDS::DCPS::DataReaderImpl* dr)
 {
   DBG_ENTRY_LVL("TransportImpl","register_subscription",5);
   GuardType guard(this->lock_);
@@ -303,7 +303,7 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
 
 
 int
-TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
+OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","unregister_subscription",5);
   GuardType guard(this->lock_);
@@ -320,8 +320,8 @@ TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
 }
 
 
-TAO::DCPS::DataReaderImpl*
-TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe_cpy)
+OpenDDS::DCPS::DataReaderImpl*
+OpenDDS::DCPS::TransportImpl::find_subscription (OpenDDS::DCPS::RepoId sub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
   GuardType guard(this->lock_);
@@ -344,7 +344,7 @@ TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe
 
 
 int
-TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
+OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
                                                    size_t                  num_remote_associations,
                                                    const AssociationData*  remote_associations)
 {
@@ -390,7 +390,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 
 
 int
-TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
+OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
 {
   DBG_ENTRY_LVL("TransportImpl","demarshal",5);
 
@@ -412,7 +412,7 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
     itr != acked_pubs_map.end();
     ++itr)
   {
-    TAO::DCPS::RepoIdSet_rch pending_subs
+    OpenDDS::DCPS::RepoIdSet_rch pending_subs
       = this->pending_sub_map_.find (itr->first);
 
     if (! pending_subs.is_nil () && this->acked (itr->first))
@@ -423,7 +423,7 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
 
 
 void
-TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","fully_associated",5);
 
@@ -460,13 +460,13 @@ TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 
 
 bool
-TAO::DCPS::TransportImpl::acked (RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::acked (RepoId pub_id)
 {
   return this->pending_sub_map_.is_subset (this->acked_sub_map_, pub_id);
 }
 
 bool
-TAO::DCPS::TransportImpl::release_link_resources (DataLink* link)
+OpenDDS::DCPS::TransportImpl::release_link_resources (DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 5);
 

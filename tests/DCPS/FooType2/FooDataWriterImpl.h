@@ -47,11 +47,11 @@ struct FooLess
  *
  */
 class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
-                                         public virtual TAO::DCPS::DataWriterImpl
+                                         public virtual OpenDDS::DCPS::DataWriterImpl
 {
  public:
   typedef std::map<Foo, DDS::InstanceHandle_t, FooLess> FooMap;
-  typedef ::TAO::DCPS::Cached_Allocator_With_Overflow<Foo, ACE_Null_Mutex>  FooAllocator;
+  typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<Foo, ACE_Null_Mutex>  FooAllocator;
 
 
 
@@ -155,10 +155,10 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
         ::DDS::Topic_ptr                       a_topic,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
-        TAO::DCPS::DomainParticipantImpl*      participant,
-        TAO::DCPS::PublisherImpl*              publisher,
+        OpenDDS::DCPS::DomainParticipantImpl*      participant,
+        OpenDDS::DCPS::PublisherImpl*              publisher,
         ::DDS::Publisher_ptr                   publisher_objref,
-        TAO::DCPS::DataWriterRemote_ptr        dw_remote_objref
+        OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -169,8 +169,8 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
 private:
    FooMap  instance_map_;
    FooAllocator* foo_allocator_;
-   ::TAO::DCPS::MessageBlockAllocator* mb_allocator_;
-   ::TAO::DCPS::DataBlockAllocator*    db_allocator_;
+   ::OpenDDS::DCPS::MessageBlockAllocator* mb_allocator_;
+   ::OpenDDS::DCPS::DataBlockAllocator*    db_allocator_;
 };
 
 

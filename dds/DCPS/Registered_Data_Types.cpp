@@ -13,7 +13,7 @@
 
 #include <set>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -29,7 +29,7 @@ namespace TAO
 
       if (!domains_.empty() )
         {
-          std::set<TAO::DCPS::TypeSupport_ptr> typeSupports;
+          std::set<OpenDDS::DCPS::TypeSupport_ptr> typeSupports;
           DomainHash::iterator domainIter = domains_.begin();
           DomainHash::iterator domainEnd = domains_.end();
 
@@ -61,14 +61,14 @@ namespace TAO
 
           domains_.clear();
 
-          std::set<TAO::DCPS::TypeSupport_ptr>::iterator typesIter =
+          std::set<OpenDDS::DCPS::TypeSupport_ptr>::iterator typesIter =
             typeSupports.begin();
-          std::set<TAO::DCPS::TypeSupport_ptr>::iterator typesEnd =
+          std::set<OpenDDS::DCPS::TypeSupport_ptr>::iterator typesEnd =
             typeSupports.end();
 
           while (typesEnd != typesIter)
             {
-              TAO::DCPS::TypeSupport_ptr type = *typesIter;
+              OpenDDS::DCPS::TypeSupport_ptr type = *typesIter;
               ++typesIter;
               // if there are no more references then it will be deleted
               type->_remove_ref();
@@ -93,7 +93,7 @@ namespace TAO
     ::DDS::ReturnCode_t Data_Types_Register::register_type (
       ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name,
-      TAO::DCPS::TypeSupport_ptr the_type)
+      OpenDDS::DCPS::TypeSupport_ptr the_type)
     {
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash = NULL;
@@ -110,7 +110,7 @@ namespace TAO
             }
           else if (1 == lookup)
             {
-              TAO::DCPS::TypeSupport_ptr currentType = NULL;
+              OpenDDS::DCPS::TypeSupport_ptr currentType = NULL;
               if ( 0 == find(*supportHash, type_name.c_str(), currentType) )
                 {
                   // Allow different TypeSupport instances of the same TypeSupport
@@ -149,11 +149,11 @@ namespace TAO
     }
 
 
-    TAO::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
+    OpenDDS::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
       ::DDS::DomainParticipant_ptr domain_participant,
       ACE_CString type_name)
     {
-      TAO::DCPS::TypeSupport_ptr typeSupport = 0;
+      OpenDDS::DCPS::TypeSupport_ptr typeSupport = 0;
       ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, typeSupport);
 
       TypeSupportHash*  supportHash = NULL;

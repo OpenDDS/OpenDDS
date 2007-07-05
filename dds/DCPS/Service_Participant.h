@@ -26,7 +26,7 @@
 # pragma warning( disable : 4231 )
 #endif
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -49,7 +49,7 @@ namespace TAO
     *           configure Transports as well as DCPS (e.g. number of ORB
     *           threads).
     **/
-    class TAO_DdsDcps_Export Service_Participant : public ACE_Task_Base
+    class OpenDDS_Dcps_Export Service_Participant : public ACE_Task_Base
     {
       static int zero_argc;
 
@@ -230,8 +230,8 @@ namespace TAO
 
       /// The domain participant factory servant.
       /// Allocate the factory on the heap to avoid the circular dependency
-      /// since the TAO::DCPS::DomainParticipantFactoryImpl constructor calls the
-      /// TAO::DCPS::Service_Participant singleton.
+      /// since the OpenDDS::DCPS::DomainParticipantFactoryImpl constructor calls the
+      /// OpenDDS::DCPS::Service_Participant singleton.
       DomainParticipantFactoryImpl*        dp_factory_servant_;
 
       /// The domain participant factory object reference.
@@ -305,7 +305,7 @@ namespace TAO
       ACE_Configuration_Heap cf_;
     };
 
-    #define TheServiceParticipant                     TAO::DCPS::Service_Participant::instance()
+    #define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()
 
     #define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
 
@@ -386,7 +386,7 @@ namespace TAO
     }
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 #if defined(__ACE_INLINE__)

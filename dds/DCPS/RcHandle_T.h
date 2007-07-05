@@ -5,7 +5,7 @@
 #define TAO_DDS_RCHANDLE_T_H
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -128,6 +128,6 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #endif  /* TAO_DDS_RCHANDLE_T_H */

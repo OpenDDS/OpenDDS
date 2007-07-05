@@ -8,16 +8,16 @@
 #include "DomainParticipantListener_i.h"
 
 // Implementation skeleton constructor
-TAO_DCPS_DomainParticipantListener_i::TAO_DCPS_DomainParticipantListener_i (void)
+OPENDDS_DCPS_DomainParticipantListener_i::OPENDDS_DCPS_DomainParticipantListener_i (void)
   {
   }
 
 // Implementation skeleton destructor
-TAO_DCPS_DomainParticipantListener_i::~TAO_DCPS_DomainParticipantListener_i (void)
+OPENDDS_DCPS_DomainParticipantListener_i::~OPENDDS_DCPS_DomainParticipantListener_i (void)
   {
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_inconsistent_topic (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_inconsistent_topic (
     ::DDS::Topic_ptr ,
     const ::DDS::InconsistentTopicStatus &
   )
@@ -28,7 +28,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_inconsistent_topic (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_data_on_readers (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_data_on_readers (
     ::DDS::Subscriber_ptr
   )
   ACE_THROW_SPEC ((
@@ -38,7 +38,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_data_on_readers (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_offered_deadline_missed (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr ,
     const ::DDS::OfferedDeadlineMissedStatus &
   )
@@ -49,7 +49,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_offered_deadline_missed (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_offered_incompatible_qos (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr,
     const ::DDS::OfferedIncompatibleQosStatus &
   )
@@ -60,7 +60,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_offered_incompatible_qos (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_liveliness_lost (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_liveliness_lost (
     ::DDS::DataWriter_ptr ,
     const ::DDS::LivelinessLostStatus &
   )
@@ -71,7 +71,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_liveliness_lost (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_publication_match (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_publication_match (
     ::DDS::DataWriter_ptr ,
     const ::DDS::PublicationMatchStatus &
   )
@@ -82,7 +82,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_publication_match (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_requested_deadline_missed (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_requested_deadline_missed (
     ::DDS::DataReader_ptr ,
     const ::DDS::RequestedDeadlineMissedStatus &
   )
@@ -93,7 +93,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_requested_deadline_missed (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_requested_incompatible_qos (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_requested_incompatible_qos (
     ::DDS::DataReader_ptr ,
     const ::DDS::RequestedIncompatibleQosStatus &
   )
@@ -104,7 +104,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_requested_incompatible_qos (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_sample_rejected (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_sample_rejected (
     ::DDS::DataReader_ptr ,
     const ::DDS::SampleRejectedStatus &
   )
@@ -115,7 +115,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_sample_rejected (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_liveliness_changed (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_liveliness_changed (
     ::DDS::DataReader_ptr ,
     const ::DDS::LivelinessChangedStatus &
   )
@@ -126,7 +126,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_liveliness_changed (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_data_available (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_data_available (
     ::DDS::DataReader_ptr
   )
   ACE_THROW_SPEC ((
@@ -136,7 +136,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_data_available (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_subscription_match (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_subscription_match (
     ::DDS::DataReader_ptr ,
     const ::DDS::SubscriptionMatchStatus &
   )
@@ -147,7 +147,7 @@ void TAO_DCPS_DomainParticipantListener_i::on_subscription_match (
     // Add your implementation here
   }
 
-void TAO_DCPS_DomainParticipantListener_i::on_sample_lost (
+void OPENDDS_DCPS_DomainParticipantListener_i::on_sample_lost (
     ::DDS::DataReader_ptr ,
     const ::DDS::SampleLostStatus &
   )

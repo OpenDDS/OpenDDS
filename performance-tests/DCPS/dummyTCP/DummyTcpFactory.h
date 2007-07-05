@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DUMMYTCPFACTORY_H
-#define TAO_DCPS_DUMMYTCPFACTORY_H
+#ifndef OPENDDS_DCPS_DUMMYTCPFACTORY_H
+#define OPENDDS_DCPS_DUMMYTCPFACTORY_H
 
 #include "DummyTcp_export.h"
 
@@ -11,7 +11,7 @@
 class DummyTcpTransport;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -34,7 +34,7 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "DummyTcpFactory.inl"

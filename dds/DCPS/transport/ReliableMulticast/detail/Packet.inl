@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticast::detail::Packet::Packet(
+OpenDDS::DCPS::ReliableMulticast::detail::Packet::Packet(
   id_type id,
   const PacketType& type,
   id_type begin,

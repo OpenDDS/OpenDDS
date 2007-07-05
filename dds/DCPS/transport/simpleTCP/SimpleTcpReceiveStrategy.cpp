@@ -13,7 +13,7 @@
 #include "SimpleTcpReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
                                         (SimpleTcpDataLink*    link,
                                          SimpleTcpConnection*  connection,
                                          TransportReactorTask* task)
@@ -34,14 +34,14 @@ TAO::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
 }
 
 
-TAO::DCPS::SimpleTcpReceiveStrategy::~SimpleTcpReceiveStrategy()
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::~SimpleTcpReceiveStrategy()
 {
   DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","~SimpleTcpReceiveStrategy",5);
 }
 
 
 ssize_t
-TAO::DCPS::SimpleTcpReceiveStrategy::receive_bytes
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::receive_bytes
                                              (iovec iov[],
                                               int   n,
                                               ACE_INET_Addr& remote_address)
@@ -61,7 +61,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::receive_bytes
 
 
 void
-TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::deliver_sample
                                  (ReceivedDataSample&  sample,
                                   const ACE_INET_Addr& remote_address)
 {
@@ -88,7 +88,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::deliver_sample
 
 
 int
-TAO::DCPS::SimpleTcpReceiveStrategy::start_i()
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
 {
   DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","start_i",5);
 
@@ -121,7 +121,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::start_i()
 // The "old" connection object is unregistered with the reactor and the "new" connection
 // object is registered for receiving.
 int
-TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 {
   DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","reset",5);
 
@@ -186,7 +186,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 
 
 void
-TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::stop_i()
 {
   DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","stop_i",5);
 
@@ -205,7 +205,7 @@ TAO::DCPS::SimpleTcpReceiveStrategy::stop_i()
 
 
 void
-TAO::DCPS::SimpleTcpReceiveStrategy::relink (bool do_suspend)
+OpenDDS::DCPS::SimpleTcpReceiveStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","relink",5);
   this->connection_->relink (do_suspend);

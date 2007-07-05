@@ -6,7 +6,7 @@
 #include "ace/ACE.h"
 
 ACE_INLINE
-TAO::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
+OpenDDS::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
   : handle_ (handle),
     timeout_ (0)
 {
@@ -14,7 +14,7 @@ TAO::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
 }
 
 ACE_INLINE int
-TAO::DCPS::ThreadSynchResource::wait_to_unclog()
+OpenDDS::DCPS::ThreadSynchResource::wait_to_unclog()
 {
   DBG_ENTRY_LVL("ThreadSynchResource","wait_to_unclog",5);
 

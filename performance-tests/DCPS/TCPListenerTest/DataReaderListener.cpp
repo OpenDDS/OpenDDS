@@ -32,7 +32,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   //       and using the servant directly rather than the DataReader reference
   //       had performance benefits but with the change to local
   //       interfaces this is no longer needed.
-  //Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
+  //Rimpl* dr_servant = OpenDDS::DCPS::reference_to_servant<Rimpl> (var_dr.in ());
 
   if (subscriber_delay_msec)
     {

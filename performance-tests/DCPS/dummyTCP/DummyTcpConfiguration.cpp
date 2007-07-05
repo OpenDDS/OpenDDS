@@ -10,13 +10,13 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::DummyTcpConfiguration::~DummyTcpConfiguration()
+OpenDDS::DCPS::DummyTcpConfiguration::~DummyTcpConfiguration()
 {
   DBG_ENTRY_LVL("DummyTcpConfiguration","~DummyTcpConfiguration",5);
 }
 
 int
-TAO::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
+OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
                                          ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DATALINK_H
-#define TAO_DCPS_DATALINK_H
+#ifndef OPENDDS_DCPS_DATALINK_H
+#define OPENDDS_DCPS_DATALINK_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -20,7 +20,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -44,7 +44,7 @@ namespace TAO
      * 2) Own ThreadPerConnectionSendTask object which is used when thread_per_connection
      *    is enabled.
      */
-    class TAO_DdsDcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
     {
       friend class DataLinkCleanupTask;
 
@@ -283,10 +283,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "DataLink.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_DATALINK_H */
+#endif /* OPENDDS_DCPS_DATALINK_H */

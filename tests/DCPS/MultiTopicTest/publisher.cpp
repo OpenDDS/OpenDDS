@@ -26,7 +26,7 @@
 
 #include "common.h"
 
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 static const char * writer_address_str = "";
 static int writer_address_given = 0;
 
@@ -41,13 +41,13 @@ static int init_writer_tranport ()
       writer_transport_impl =
           TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleUdp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
 
-      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config
+        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -73,13 +73,13 @@ static int init_writer_tranport ()
       writer_transport_impl =
           TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
 
-      TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
       if (writer_address_given)
         {
@@ -222,7 +222,7 @@ int main (int argc, char *argv[])
           ::T1::Foo1TypeSupportImpl *fts_servant =
               new ::T1::Foo1TypeSupportImpl();
 
-          fts1 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts1 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T2)
@@ -230,7 +230,7 @@ int main (int argc, char *argv[])
           ::T2::Foo2TypeSupportImpl *fts_servant =
               new ::T2::Foo2TypeSupportImpl();
 
-          fts2 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts2 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T3)
@@ -238,7 +238,7 @@ int main (int argc, char *argv[])
           ::T3::Foo3TypeSupportImpl *fts_servant =
               new ::T3::Foo3TypeSupportImpl();
 
-          fts3 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts3 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       ::DDS::DomainParticipant_var dp =
@@ -353,33 +353,33 @@ int main (int argc, char *argv[])
       }
 
       // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in ());
+      OpenDDS::DCPS::PublisherImpl* pub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
 
       if (0 == pub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::PublisherImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
                           1);
       }
 
-      TAO::DCPS::AttachStatus attach_status =
+      OpenDDS::DCPS::AttachStatus attach_status =
         pub_impl->attach_transport(writer_transport_impl.in());
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           ACE_TString status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:

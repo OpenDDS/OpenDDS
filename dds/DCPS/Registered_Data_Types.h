@@ -7,7 +7,7 @@
 #include "dcps_export.h"
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "dds/DdsDcpsTypeSupportExtS.h"
 
 #include "tao/TAO_Singleton.h"
 
@@ -22,11 +22,11 @@
 # pragma warning( disable : 4231 )
 #endif
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
-    typedef std::map<std::string, TAO::DCPS::TypeSupport_ptr> TypeSupportHash;
+    typedef std::map<std::string, OpenDDS::DCPS::TypeSupport_ptr> TypeSupportHash;
     typedef std::map<void*, TypeSupportHash*> DomainHash;
 
     /**
@@ -34,7 +34,7 @@ namespace TAO
     * local to this process.
     * Data types are split into separate domains.
     */
-    class TAO_DdsDcps_Export Data_Types_Register
+    class OpenDDS_Dcps_Export Data_Types_Register
     {
       friend class TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>;
 
@@ -56,7 +56,7 @@ namespace TAO
        */
       ::DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr domain_participant,
                                          ACE_CString type_name,
-                                         TAO::DCPS::TypeSupport_ptr the_type);
+                                         OpenDDS::DCPS::TypeSupport_ptr the_type);
 
       /**
        * Find a data type by its type name.
@@ -65,7 +65,7 @@ namespace TAO
        *         type_name
        *         Otherwise returns TypeSupport::_nil()
        */
-      TAO::DCPS::TypeSupport_ptr lookup(::DDS::DomainParticipant_ptr domain_participant,
+      OpenDDS::DCPS::TypeSupport_ptr lookup(::DDS::DomainParticipant_ptr domain_participant,
                                       ACE_CString type_name);
     private:
       Data_Types_Register(void);

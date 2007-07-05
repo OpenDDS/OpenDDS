@@ -4,7 +4,7 @@
 #include "ThreadSynch.h"
 
 ACE_INLINE int
-TAO::DCPS::TransportSendStrategy::start()
+OpenDDS::DCPS::TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",5);
 
@@ -30,7 +30,7 @@ TAO::DCPS::TransportSendStrategy::start()
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::stop()
+OpenDDS::DCPS::TransportSendStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","stop",5);
 
@@ -52,7 +52,7 @@ TAO::DCPS::TransportSendStrategy::stop()
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::send_start()
+OpenDDS::DCPS::TransportSendStrategy::send_start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_start",5);
 
@@ -63,7 +63,7 @@ TAO::DCPS::TransportSendStrategy::send_start()
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::link_released (bool flag)
+OpenDDS::DCPS::TransportSendStrategy::link_released (bool flag)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","link_released",5);
 
@@ -73,7 +73,7 @@ TAO::DCPS::TransportSendStrategy::link_released (bool flag)
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::relink (bool)
+OpenDDS::DCPS::TransportSendStrategy::relink (bool)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","relink",5);
   // The subsclass needs implement this function for re-establishing
@@ -82,7 +82,7 @@ TAO::DCPS::TransportSendStrategy::relink (bool)
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::suspend_send ()
+OpenDDS::DCPS::TransportSendStrategy::suspend_send ()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","suspend_send",5);
   GuardType guard(this->lock_);
@@ -96,7 +96,7 @@ TAO::DCPS::TransportSendStrategy::suspend_send ()
 
 
 ACE_INLINE void
-TAO::DCPS::TransportSendStrategy::resume_send ()
+OpenDDS::DCPS::TransportSendStrategy::resume_send ()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","resume_send",5);
   GuardType guard(this->lock_);
@@ -126,7 +126,7 @@ TAO::DCPS::TransportSendStrategy::resume_send ()
 
 
 ACE_INLINE const char*
-TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
+OpenDDS::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
 {
   static const char* SendModeStr[] = { "MODE_NOT_SET",
                                        "MODE_DIRECT",
@@ -139,7 +139,7 @@ TAO::DCPS::TransportSendStrategy::mode_as_str (SendMode mode)
 }
 
 ACE_INLINE bool
-TAO::DCPS::TransportSendStrategy::isDirectMode ()
+OpenDDS::DCPS::TransportSendStrategy::isDirectMode ()
 {
   return this->mode_ == MODE_DIRECT;
 }

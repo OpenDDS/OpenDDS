@@ -20,7 +20,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
   R_ptr pt_dr
     = R::_narrow(reader);
 
-  Rimpl* dr_servant = TAO::DCPS::reference_to_servant<Rimpl> (pt_dr);
+  Rimpl* dr_servant = OpenDDS::DCPS::reference_to_servant<Rimpl> (pt_dr);
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);

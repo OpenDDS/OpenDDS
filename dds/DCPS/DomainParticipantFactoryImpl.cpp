@@ -10,7 +10,7 @@
 #include "Util.h"
 #include "tao/debug.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -129,7 +129,7 @@ namespace TAO
         {
           DPSet set;
 
-          if (TAO::DCPS::insert(set, pair) == -1)
+          if (OpenDDS::DCPS::insert(set, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -151,7 +151,7 @@ namespace TAO
         }
       else
         {
-          if (TAO::DCPS::insert(*entry, pair) == -1)
+          if (OpenDDS::DCPS::insert(*entry, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -249,7 +249,7 @@ namespace TAO
 
               Participant_Pair pair (the_servant, a_participant, DUP);
 
-              if (TAO::DCPS::remove(*entry, pair) == -1)
+              if (OpenDDS::DCPS::remove(*entry, pair) == -1)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: ")
@@ -411,4 +411,4 @@ namespace TAO
 
 
  } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

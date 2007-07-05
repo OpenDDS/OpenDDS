@@ -45,7 +45,7 @@ int read (::DDS::DataReader_ptr reader)
     }
 
     DR_impl* dr_servant =
-      TAO::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
 
     DT foo;
     ::DDS::SampleInfo si ;

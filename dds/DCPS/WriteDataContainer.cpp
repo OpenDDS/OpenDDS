@@ -14,7 +14,7 @@
 
 #include "Serializer.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -39,7 +39,7 @@ WriteDataContainer::WriteDataContainer(
                                        condition_ (lock_),
                                        n_chunks_ (n_chunks),
                                        sample_list_element_allocator_(2 * n_chunks_),
-                                       transport_send_element_allocator_(2 * n_chunks_, sizeof (TAO::DCPS::TransportSendElement)),
+                                       transport_send_element_allocator_(2 * n_chunks_, sizeof (OpenDDS::DCPS::TransportSendElement)),
                                        shutdown_ (false),
                                        next_handle_(1)
 {
@@ -94,7 +94,7 @@ WriteDataContainer::enqueue(
 }
 
 ::DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds)
+WriteDataContainer::reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
@@ -884,7 +884,7 @@ WriteDataContainer::get_next_handle ()
 
 void WriteDataContainer::copy_and_append (DataSampleList& list, 
                                            const DataSampleList& appended, 
-                                           const TAO::DCPS::ReaderIdSeq& rds)
+                                           const OpenDDS::DCPS::ReaderIdSeq& rds)
  {
    CORBA::ULong num_rds = rds.length ();
    CORBA::ULong num_iters_per_sample = num_rds / MAX_READERS_PER_ELEM + 1;
@@ -916,5 +916,5 @@ void WriteDataContainer::copy_and_append (DataSampleList& list,
  }
 
 
-} // namespace TAO
+} // namespace OpenDDS
 } // namespace DCPS

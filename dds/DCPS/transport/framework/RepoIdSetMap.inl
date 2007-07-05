@@ -6,19 +6,19 @@
 #include "dds/DCPS/Util.h"
 
 ACE_INLINE
-TAO::DCPS::RepoIdSetMap::RepoIdSetMap()
+OpenDDS::DCPS::RepoIdSetMap::RepoIdSetMap()
 {
   DBG_ENTRY_LVL("RepoIdSetMap","RepoIdSetMap",5);
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSet*
-TAO::DCPS::RepoIdSetMap::find(RepoId key)
+ACE_INLINE OpenDDS::DCPS::RepoIdSet*
+OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find",5);
   RepoIdSet_rch value;
 
-  if (TAO::DCPS::find(map_, key, value) != 0)
+  if (OpenDDS::DCPS::find(map_, key, value) != 0)
     {
       return 0;
     }
@@ -28,20 +28,20 @@ TAO::DCPS::RepoIdSetMap::find(RepoId key)
 
 
 ACE_INLINE size_t
-TAO::DCPS::RepoIdSetMap::size() const
+OpenDDS::DCPS::RepoIdSetMap::size() const
 {
   DBG_ENTRY_LVL("RepoIdSetMap","size",5);
   return this->map_.size();
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSet*
-TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
+ACE_INLINE OpenDDS::DCPS::RepoIdSet*
+OpenDDS::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find_or_create",5);
   RepoIdSet_rch value;
 
-  if (TAO::DCPS::find(map_, key, value) != 0)
+  if (OpenDDS::DCPS::find(map_, key, value) != 0)
     {
       // It wasn't found.  Create one and insert it.
       value = new RepoIdSet();
@@ -60,16 +60,16 @@ TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSetMap::MapType&
-TAO::DCPS::RepoIdSetMap::map()
+ACE_INLINE OpenDDS::DCPS::RepoIdSetMap::MapType&
+OpenDDS::DCPS::RepoIdSetMap::map()
 {
   DBG_SUB_ENTRY("RepoIdSetMap","map",1);
   return this->map_;
 }
 
 
-ACE_INLINE const TAO::DCPS::RepoIdSetMap::MapType&
-TAO::DCPS::RepoIdSetMap::map() const
+ACE_INLINE const OpenDDS::DCPS::RepoIdSetMap::MapType&
+OpenDDS::DCPS::RepoIdSetMap::map() const
 {
   DBG_SUB_ENTRY("RepoIdSetMap","map",2);
   return this->map_;
@@ -77,7 +77,7 @@ TAO::DCPS::RepoIdSetMap::map() const
 
 
 ACE_INLINE size_t
-TAO::DCPS::RepoIdSetMap::marshaled_size ()
+OpenDDS::DCPS::RepoIdSetMap::marshaled_size ()
 {
   DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",5);
 

@@ -19,7 +19,7 @@ namespace DDSPerfTest
 
 //Class PubDataReaderListenerImpl
 class PubDataReaderListenerImpl
-  : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor

@@ -7,14 +7,14 @@
 #include "dds/DCPS/Util.h"
 
 ACE_INLINE
-TAO::DCPS::ReceiveListenerSet::ReceiveListenerSet()
+OpenDDS::DCPS::ReceiveListenerSet::ReceiveListenerSet()
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","ReceiveListenerSet",5);
 }
 
 
 ACE_INLINE int
-TAO::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
+OpenDDS::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
                                       TransportReceiveListener* listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","insert",5);
@@ -23,7 +23,7 @@ TAO::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_id,
 
 
 ACE_INLINE int
-TAO::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
+OpenDDS::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","remove",5);
   if (unbind(map_, subscriber_id) != 0)
@@ -39,7 +39,7 @@ TAO::DCPS::ReceiveListenerSet::remove(RepoId subscriber_id)
 
 
 ACE_INLINE ssize_t
-TAO::DCPS::ReceiveListenerSet::size() const
+OpenDDS::DCPS::ReceiveListenerSet::size() const
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","size",5);
   return map_.size();
@@ -47,7 +47,7 @@ TAO::DCPS::ReceiveListenerSet::size() const
 
 
 ACE_INLINE void
-TAO::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
+OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","data_received",5);
 
@@ -64,16 +64,16 @@ TAO::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
 }
 
 
-ACE_INLINE TAO::DCPS::ReceiveListenerSet::MapType&
-TAO::DCPS::ReceiveListenerSet::map()
+ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet::MapType&
+OpenDDS::DCPS::ReceiveListenerSet::map()
 {
   DBG_SUB_ENTRY("ReceiveListenerSet","map",1);
   return this->map_;
 }
 
 
-ACE_INLINE const TAO::DCPS::ReceiveListenerSet::MapType&
-TAO::DCPS::ReceiveListenerSet::map() const
+ACE_INLINE const OpenDDS::DCPS::ReceiveListenerSet::MapType&
+OpenDDS::DCPS::ReceiveListenerSet::map() const
 {
   DBG_SUB_ENTRY("ReceiveListenerSet","map",2);
   return this->map_;

@@ -14,7 +14,7 @@
 #include "dds/DdsDcpsDomainC.h"
 
 using namespace ::DDS;
-using namespace ::TAO::DCPS;
+using namespace ::OpenDDS::DCPS;
 
 extern const long  TEST_DOMAIN ;
 extern const char* TEST_TOPIC;
@@ -50,8 +50,8 @@ enum Ignore_Kind
 
 extern int ignore_kind;
 
-extern TAO::DCPS::TransportImpl_rch reader_transport_impl;
-extern TAO::DCPS::TransportImpl_rch writer_transport_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 enum TransportTypeId
 {

@@ -7,7 +7,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::SimpleMcastTransport::SimpleMcastTransport()
+OpenDDS::DCPS::SimpleMcastTransport::SimpleMcastTransport()
   : receiver_(false)
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","SimpleMcastTransport",5);
@@ -17,7 +17,7 @@ TAO::DCPS::SimpleMcastTransport::SimpleMcastTransport()
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleMcastTransport::deliver_sample
+OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {

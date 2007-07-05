@@ -25,7 +25,7 @@
 # include "DataReaderImpl.inl"
 #endif /* ! __ACE_INLINE__ */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -133,7 +133,7 @@ void DataReaderImpl::init (
 			   SubscriberImpl*               subscriber,
 			   ::DDS::Subscriber_ptr         subscriber_objref,
 			   ::DDS::DataReader_ptr         dr_objref,
-               ::TAO::DCPS::DataReaderRemote_ptr dr_remote_objref
+               ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
 			   )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -172,14 +172,14 @@ void DataReaderImpl::init (
   subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
   subscriber_servant_->_add_ref ();
   dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
-  dr_remote_objref_ = ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
+  dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
   initialized_ = true;
 }
 
 
-void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
-				       const TAO::DCPS::WriterAssociationSeq & writers)
+void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
+				       const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
@@ -343,7 +343,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 
 
 void DataReaderImpl::remove_associations (
-					  const TAO::DCPS::WriterIdSeq & writers,
+					  const OpenDDS::DCPS::WriterIdSeq & writers,
 					  ::CORBA::Boolean notify_lost
 					  )
   ACE_THROW_SPEC ((
@@ -484,7 +484,7 @@ void DataReaderImpl::remove_all_associations ()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",5);
 
-  TAO::DCPS::WriterIdSeq writers;
+  OpenDDS::DCPS::WriterIdSeq writers;
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
@@ -515,7 +515,7 @@ void DataReaderImpl::remove_all_associations ()
 
 
 void DataReaderImpl::update_incompatible_qos (
-					      const TAO::DCPS::IncompatibleQosStatus & status
+					      const OpenDDS::DCPS::IncompatibleQosStatus & status
 					      )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
@@ -1080,7 +1080,7 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
 }
 
 // zero-copy version of this metod
-void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq, //x ::TAO::DCPS::SampleInfoZCSeq & info_seq,
+void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq, //x ::OpenDDS::DCPS::SampleInfoZCSeq & info_seq,
 				 size_t start_idx, size_t count,
 				 ReceivedDataElement *ptr)
 {
@@ -1335,7 +1335,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
 }
 
 
-TAO::DCPS::WriterInfo::WriterInfo ()
+OpenDDS::DCPS::WriterInfo::WriterInfo ()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     is_alive_(1),
     reader_(0),
@@ -1343,7 +1343,7 @@ TAO::DCPS::WriterInfo::WriterInfo ()
 {
 }
 
-TAO::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
+OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
 				   PublicationId   writer_id)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     is_alive_(1),
@@ -1357,7 +1357,7 @@ TAO::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
 }
 
 ACE_Time_Value
-TAO::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
+OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
 {
   ACE_Time_Value expires_at = ACE_Time_Value::max_time;
   if (is_alive_)
@@ -1746,7 +1746,7 @@ DataReaderImpl::num_zero_copies()
     {
       SubscriptionInstance *ptr = iter->second;
 
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
             item != 0 ; item = item->next_data_sample_)
         {
             loans += item->zero_copy_cnt_;
@@ -1757,4 +1757,4 @@ DataReaderImpl::num_zero_copies()
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

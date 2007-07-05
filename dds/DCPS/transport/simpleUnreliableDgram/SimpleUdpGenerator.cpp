@@ -7,16 +7,16 @@
 #include "SimpleUdpFactory.h"
 
 
-TAO::DCPS::SimpleUdpGenerator::SimpleUdpGenerator()
+OpenDDS::DCPS::SimpleUdpGenerator::SimpleUdpGenerator()
 {
 }
 
-TAO::DCPS::SimpleUdpGenerator::~SimpleUdpGenerator()
+OpenDDS::DCPS::SimpleUdpGenerator::~SimpleUdpGenerator()
 {
 }
 
-TAO::DCPS::TransportImplFactory* 
-TAO::DCPS::SimpleUdpGenerator::new_factory() 
+OpenDDS::DCPS::TransportImplFactory* 
+OpenDDS::DCPS::SimpleUdpGenerator::new_factory() 
 {
   SimpleUdpFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
@@ -25,8 +25,8 @@ TAO::DCPS::SimpleUdpGenerator::new_factory()
   return factory;
 }
 
-TAO::DCPS::TransportConfiguration* 
-TAO::DCPS::SimpleUdpGenerator::new_configuration(const TransportIdType id)
+OpenDDS::DCPS::TransportConfiguration* 
+OpenDDS::DCPS::SimpleUdpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
@@ -38,8 +38,8 @@ TAO::DCPS::SimpleUdpGenerator::new_configuration(const TransportIdType id)
 }
 
 void 
-TAO::DCPS::SimpleUdpGenerator::default_transport_ids (TransportIdList & ids)
+OpenDDS::DCPS::SimpleUdpGenerator::default_transport_ids (TransportIdList & ids)
 {
   ids.clear ();
-  ids.push_back (TAO::DCPS::DEFAULT_SIMPLE_UDP_ID);
+  ids.push_back (OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID);
 }

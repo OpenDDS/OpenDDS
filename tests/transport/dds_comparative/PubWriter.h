@@ -15,7 +15,7 @@
 class Pub;
 
 
-class PubWriter : public TAO::DCPS::TransportSendListener
+class PubWriter : public OpenDDS::DCPS::TransportSendListener
 {
   public:
 
@@ -32,7 +32,7 @@ class PubWriter : public TAO::DCPS::TransportSendListener
     void set_data_size(char data_size);
 
     /// The RepoId (publication id) for this DataWriter.
-    void set_id(TAO::DCPS::RepoId pub_id);
+    void set_id(OpenDDS::DCPS::RepoId pub_id);
 
     /// Send all of the messages.
     void run(Pub* publisher);
@@ -51,28 +51,28 @@ class PubWriter : public TAO::DCPS::TransportSendListener
 
     /// TransportSendListener method that confirms delivery of a message
     /// that we had previously sent to the TransportInterface.
-    virtual void data_delivered(TAO::DCPS::DataSampleListElement* sample);
+    virtual void data_delivered(OpenDDS::DCPS::DataSampleListElement* sample);
 
     /// TransportSendListener method that confirms a message has been
     /// been dropped from the transport, at our request.  We make the
     /// request by asking the TransportInterface to remove_sample().
     /// Thus, this should only be invoked if the remove_sample() method
     /// is actually used by the particular test.
-    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample,
+    virtual void data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                               bool dropped_by_transport = false);
 
 
   private:
 
-    TAO::DCPS::DataSampleListElement* get_element
-                                       (TAO::DCPS::DataSampleHeader& header);
+    OpenDDS::DCPS::DataSampleListElement* get_element
+                                       (OpenDDS::DCPS::DataSampleHeader& header);
 
     typedef ACE_SYNCH_MUTEX         LockType;
     typedef ACE_Guard<LockType>     GuardType;
     typedef ACE_Condition<LockType> ConditionType;
 
 
-    TAO::DCPS::RepoId pub_id_;
+    OpenDDS::DCPS::RepoId pub_id_;
 
     char data_size_;
 
@@ -86,7 +86,7 @@ class PubWriter : public TAO::DCPS::TransportSendListener
     unsigned num_delivered_;
     unsigned num_dropped_;
 
-    TAO::DCPS::TransportSendElementAllocator trans_allocator;
+    OpenDDS::DCPS::TransportSendElementAllocator trans_allocator;
 };
 
 #endif  /* PUBWRITER_H */

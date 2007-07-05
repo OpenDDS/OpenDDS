@@ -9,7 +9,7 @@
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_start()
+OpenDDS::DCPS::DataLink::send_start()
 {
   DBG_ENTRY_LVL("DataLink","send_start",5);
 
@@ -23,7 +23,7 @@ TAO::DCPS::DataLink::send_start()
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_start_i()
+OpenDDS::DCPS::DataLink::send_start_i()
 {
   DBG_ENTRY_LVL("DataLink","send_start_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -45,7 +45,7 @@ TAO::DCPS::DataLink::send_start_i()
 //MJM: Here is where inlining will become critical.  This can be
 //MJM: compiled completely away (if its not virtual, of course).
 ACE_INLINE void
-TAO::DCPS::DataLink::send(TransportQueueElement* element)
+OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("DataLink","send",5);
 
@@ -59,7 +59,7 @@ TAO::DCPS::DataLink::send(TransportQueueElement* element)
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
+OpenDDS::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 {
   DBG_ENTRY_LVL("DataLink","send_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -79,7 +79,7 @@ TAO::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_stop()
+OpenDDS::DCPS::DataLink::send_stop()
 {
   DBG_ENTRY_LVL("DataLink","send_stop",5);
 
@@ -93,7 +93,7 @@ TAO::DCPS::DataLink::send_stop()
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::send_stop_i()
+OpenDDS::DCPS::DataLink::send_stop_i()
 {
   DBG_ENTRY_LVL("DataLink","send_stop_i",5);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -113,7 +113,7 @@ TAO::DCPS::DataLink::send_stop_i()
 
 
 ACE_INLINE int
-TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
+OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
                                    bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataLink","remove_sample",5);
@@ -151,7 +151,7 @@ TAO::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
 
 
 ACE_INLINE void
-TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("DataLink","remove_all_control_msgs",5);
 
@@ -176,8 +176,8 @@ TAO::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 /// to virtual tables) than the "this" pointer when in a DataLink subclass.
 /// But since this is the only place where a DataLink provides its "id",
 /// this should all work out (comparing ids for equality/inequality).
-ACE_INLINE TAO::DCPS::DataLinkIdType
-TAO::DCPS::DataLink::id() const
+ACE_INLINE OpenDDS::DCPS::DataLinkIdType
+OpenDDS::DCPS::DataLink::id() const
 {
   DBG_ENTRY_LVL("DataLink","id",5);
   return id_;
@@ -185,7 +185,7 @@ TAO::DCPS::DataLink::id() const
 
 
 ACE_INLINE int
-TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
+OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
                            TransportReceiveStrategy* receive_strategy)
 {
   DBG_ENTRY_LVL("DataLink","start",5);
@@ -239,7 +239,7 @@ TAO::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
 ACE_INLINE
 const char*
-TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
 {
   static const char* NoticeStr[] = { "DISCONNECTED",
                                      "RECONNECTED",
@@ -252,7 +252,7 @@ TAO::DCPS::DataLink::connection_notice_as_str (enum ConnectionNotice notice)
 
 ACE_INLINE
 void
-TAO::DCPS::DataLink::fully_associated ()
+OpenDDS::DCPS::DataLink::fully_associated ()
 {
   //noop
 }
@@ -260,7 +260,7 @@ TAO::DCPS::DataLink::fully_associated ()
 
 ACE_INLINE
 void 
-TAO::DCPS::DataLink::terminate_send ()
+OpenDDS::DCPS::DataLink::terminate_send ()
 {
   this->send_strategy_->terminate_send (false);
 }

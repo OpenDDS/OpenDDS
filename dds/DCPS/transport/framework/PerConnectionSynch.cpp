@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::PerConnectionSynch::~PerConnectionSynch()
+OpenDDS::DCPS::PerConnectionSynch::~PerConnectionSynch()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","~PerConnectionSynch",5);
 }
 
 
 void
-TAO::DCPS::PerConnectionSynch::work_available()
+OpenDDS::DCPS::PerConnectionSynch::work_available()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","work_available",5);
   GuardType guard(this->lock_);
@@ -27,7 +27,7 @@ TAO::DCPS::PerConnectionSynch::work_available()
 
 
 int
-TAO::DCPS::PerConnectionSynch::open(void*)
+OpenDDS::DCPS::PerConnectionSynch::open(void*)
 {
   DBG_ENTRY_LVL("PerConnectionSynch","open",5);
   // Activate this object to start a new thread that will call
@@ -38,7 +38,7 @@ TAO::DCPS::PerConnectionSynch::open(void*)
 
 
 int
-TAO::DCPS::PerConnectionSynch::svc()
+OpenDDS::DCPS::PerConnectionSynch::svc()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","svc",5);
 
@@ -133,7 +133,7 @@ TAO::DCPS::PerConnectionSynch::svc()
 
 
 int
-TAO::DCPS::PerConnectionSynch::close(u_long)
+OpenDDS::DCPS::PerConnectionSynch::close(u_long)
 {
   DBG_ENTRY_LVL("PerConnectionSynch","close",5);
   return 0;
@@ -141,7 +141,7 @@ TAO::DCPS::PerConnectionSynch::close(u_long)
 
 
 int
-TAO::DCPS::PerConnectionSynch::register_worker_i()
+OpenDDS::DCPS::PerConnectionSynch::register_worker_i()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","register_worker_i",5);
   return this->open(0);
@@ -149,7 +149,7 @@ TAO::DCPS::PerConnectionSynch::register_worker_i()
 
 
 void
-TAO::DCPS::PerConnectionSynch::unregister_worker_i()
+OpenDDS::DCPS::PerConnectionSynch::unregister_worker_i()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","unregister_worker_i",5);
   // It is at this point that we need to stop the thread that

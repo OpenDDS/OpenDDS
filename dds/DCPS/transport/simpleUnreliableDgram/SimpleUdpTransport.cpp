@@ -13,14 +13,14 @@
 #include "SimpleUdpTransport.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::SimpleUdpTransport::~SimpleUdpTransport()
+OpenDDS::DCPS::SimpleUdpTransport::~SimpleUdpTransport()
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","~SimpleUdpTransport",5);
 }
 
 
 int
-TAO::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* config)
+OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","configure_i",5);
 
@@ -72,7 +72,7 @@ TAO::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* config)
 
 
 int
-TAO::DCPS::SimpleUdpTransport::connection_info_i
+OpenDDS::DCPS::SimpleUdpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","connection_info_i",5);
@@ -86,7 +86,7 @@ TAO::DCPS::SimpleUdpTransport::connection_info_i
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 2; // TBD Change magic number into a enum or constant value.
   // TBD SOON - Move the local_info.data "population" to the NetworkAddress.
-  local_info.data = TAO::DCPS::TransportInterfaceBLOB
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
                                     (sizeof(NetworkAddress),
                                      sizeof(NetworkAddress),
                                      (CORBA::Octet*)(&network_order_address));

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_REPOIDSETMAP_H
-#define TAO_DCPS_REPOIDSETMAP_H
+#ifndef OPENDDS_DCPS_REPOIDSETMAP_H
+#define OPENDDS_DCPS_REPOIDSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "RepoIdSet.h"
@@ -13,14 +13,14 @@
 #include "ace/Synch.h"
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
     class RepoIdSetMap;
 
-    class TAO_DdsDcps_Export RepoIdSetMap
+    class OpenDDS_Dcps_Export RepoIdSetMap
     {
       public:
 
@@ -68,10 +68,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_REPOIDSETMAP_H */
+#endif /* OPENDDS_DCPS_REPOIDSETMAP_H */

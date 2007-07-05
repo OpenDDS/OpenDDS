@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RECEIVERLOGIC_H
-#define TAO_DCPS_RECEIVERLOGIC_H
+#ifndef OPENDDS_DCPS_RECEIVERLOGIC_H
+#define OPENDDS_DCPS_RECEIVERLOGIC_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -18,7 +18,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -40,7 +40,7 @@ namespace TAO
           };
 
           typedef std::vector<
-            TAO::DCPS::ReliableMulticast::detail::Packet
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > PacketVector;
 
           ReceiverLogic(
@@ -49,46 +49,46 @@ namespace TAO
             );
 
           void receive(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
             PacketVector& nacks,
             PacketVector& delivered
             );
 
         private:
           bool in_range(
-            const TAO::DCPS::ReliableMulticast::detail::Packet::id_type& id,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
             int minadd,
             int maxadd
             );
 
           bool get_and_remove_buffered_packet(
-            const TAO::DCPS::ReliableMulticast::detail::Packet::id_type& id,
-            TAO::DCPS::ReliableMulticast::detail::Packet& p
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id,
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
             );
 
           void deliver(
             PacketVector& delivered,
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
             );
 
           void buffer_packet(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
             PacketVector& delivered
             );
 
           bool is_buffered(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
             ) const;
 
-          TAO::DCPS::ReliableMulticast::detail::Packet::id_type find_previous_received(
-            const TAO::DCPS::ReliableMulticast::detail::Packet::id_type& id
+          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_previous_received(
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& id
             ) const;
 
           size_t buffersize(
             ) const;
 
-          TAO::DCPS::ReliableMulticast::detail::Packet::id_type find_beginning_of_consecutive_range(
-            const TAO::DCPS::ReliableMulticast::detail::Packet::id_type& end
+          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type find_beginning_of_consecutive_range(
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type& end
             ) const;
 
           void handle_unreliable_operation(
@@ -96,15 +96,15 @@ namespace TAO
             );
 
           typedef std::map<
-            TAO::DCPS::ReliableMulticast::detail::Packet::id_type,
-            TAO::DCPS::ReliableMulticast::detail::Packet
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > BufferType;
 
           size_t receiver_buffer_size_;
           ReliabilityMode reliability_;
           bool seen_last_delivered_;
-          TAO::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;
-          TAO::DCPS::ReliableMulticast::detail::NackGenerator nacker_;
+          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type last_delivered_id_;
+          OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator nacker_;
           BufferType buffer_;
         };
 
@@ -114,7 +114,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReceiverLogic.inl"
@@ -122,4 +122,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RECEIVERLOGIC_H */
+#endif /* OPENDDS_DCPS_RECEIVERLOGIC_H */

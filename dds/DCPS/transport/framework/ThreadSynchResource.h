@@ -1,19 +1,19 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_THREADSYNCHRESOURCE_H
-#define TAO_DCPS_THREADSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_THREADSYNCHRESOURCE_H
+#define OPENDDS_DCPS_THREADSYNCHRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Time_Value.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export ThreadSynchResource
+    class OpenDDS_Dcps_Export ThreadSynchResource
     {
       public:
 
@@ -32,10 +32,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ThreadSynchResource.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_THREADSYNCHRESOURCE_H */
+#endif  /* OPENDDS_DCPS_THREADSYNCHRESOURCE_H */

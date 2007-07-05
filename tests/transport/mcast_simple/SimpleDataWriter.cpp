@@ -27,7 +27,7 @@ SimpleDataWriter::~SimpleDataWriter()
 
 
 void
-SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
+SimpleDataWriter::init(OpenDDS::DCPS::RepoId pub_id)
 {
   DBG_ENTRY("SimpleDataWriter","init");
 
@@ -50,7 +50,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   ACE_TString data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
-  TAO::DCPS::DataSampleHeader header;
+  OpenDDS::DCPS::DataSampleHeader header;
 
   // The +1 makes the null terminator ('/0') get placed into the block.
   header.message_length_ = data.length() + 1;
@@ -73,20 +73,20 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   header_block->cont(data_block);
 
   // Create the DataSampleListElement now.
-  TAO::DCPS::DataSampleListElementAllocator allocator(3);
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(3, sizeof (TAO::DCPS::TransportSendElement));
-  TAO::DCPS::DataSampleListElement* element;
+  OpenDDS::DCPS::DataSampleListElementAllocator allocator(3);
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(3, sizeof (OpenDDS::DCPS::TransportSendElement));
+  OpenDDS::DCPS::DataSampleListElement* element;
 
   ACE_NEW_MALLOC_RETURN(element,
-           static_cast<TAO::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (TAO::DCPS::DataSampleListElement))),
-           TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+           static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
+           OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
            1);
 
   // The Sample Element will hold on to the chain of blocks (header + data).
   element->sample_ = header_block;
 
   // Set up the DataSampleList
-  TAO::DCPS::DataSampleList samples;
+  OpenDDS::DCPS::DataSampleList samples;
 
   samples.head_ = element;
   samples.tail_ = element;
@@ -115,7 +115,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 {
   DBG_ENTRY("SimpleDataWriter","data_delivered");
 
@@ -137,7 +137,7 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
   DBG_ENTRY("SimpleDataWriter","data_dropped");

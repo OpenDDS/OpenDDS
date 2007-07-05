@@ -12,14 +12,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleMcastFactory::~SimpleMcastFactory()
+OpenDDS::DCPS::SimpleMcastFactory::~SimpleMcastFactory()
 {
   DBG_ENTRY_LVL("SimpleMcastFactory","~SimpleMcastFactory",5);
 }
 
 
 int
-TAO::DCPS::SimpleMcastFactory::requires_reactor() const
+OpenDDS::DCPS::SimpleMcastFactory::requires_reactor() const
 {
   DBG_ENTRY_LVL("SimpleMcastFactory","requires_reactor",5);
   // return "true"
@@ -27,8 +27,8 @@ TAO::DCPS::SimpleMcastFactory::requires_reactor() const
 }
 
 
-TAO::DCPS::TransportImpl*
-TAO::DCPS::SimpleMcastFactory::create()
+OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::SimpleMcastFactory::create()
 {
   DBG_ENTRY_LVL("SimpleMcastFactory","create",5);
   return new SimpleMcastTransport();

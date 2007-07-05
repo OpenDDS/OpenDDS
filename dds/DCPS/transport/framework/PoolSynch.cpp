@@ -12,7 +12,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::PoolSynch::~PoolSynch()
+OpenDDS::DCPS::PoolSynch::~PoolSynch()
 {
   DBG_ENTRY_LVL("PoolSynch","~PoolSynch",5);
   // TBD
@@ -20,7 +20,7 @@ TAO::DCPS::PoolSynch::~PoolSynch()
 
 
 void
-TAO::DCPS::PoolSynch::work_available()
+OpenDDS::DCPS::PoolSynch::work_available()
 {
   DBG_ENTRY_LVL("PoolSynch","work_available",5);
   // TBD
@@ -28,7 +28,7 @@ TAO::DCPS::PoolSynch::work_available()
 
 
 void
-TAO::DCPS::PoolSynch::unregister_worker_i()
+OpenDDS::DCPS::PoolSynch::unregister_worker_i()
 {
   DBG_ENTRY_LVL("PoolSynch","unregister_worker_i",5);
   // TBD

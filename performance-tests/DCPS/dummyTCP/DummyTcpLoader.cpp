@@ -50,9 +50,9 @@ DCPS_DummyTcpLoader::init (int argc, ACE_TCHAR* argv[])
                   -1);
               }
 
-            TAO::DCPS::DummyTcpGenerator* generator;
+            OpenDDS::DCPS::DummyTcpGenerator* generator;
             ACE_NEW_RETURN (generator,
-                            TAO::DCPS::DummyTcpGenerator (),
+                            OpenDDS::DCPS::DummyTcpGenerator (),
                             -1);
             TheTransportFactory->register_generator (type,
                                                      generator);

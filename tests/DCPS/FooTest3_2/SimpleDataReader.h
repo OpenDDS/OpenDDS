@@ -8,17 +8,17 @@
 #include  "dds/DCPS/Definitions.h"
 
 
-class SimpleDataReader : public TAO::DCPS::TransportReceiveListener
+class SimpleDataReader : public OpenDDS::DCPS::TransportReceiveListener
 {
   public:
 
     SimpleDataReader();
     virtual ~SimpleDataReader();
 
-    void init(TAO::DCPS::RepoId sub_id,
+    void init(OpenDDS::DCPS::RepoId sub_id,
               int               receive_delay_msec);
 
-    virtual void data_received(const TAO::DCPS::ReceivedDataSample& sample);
+    virtual void data_received(const OpenDDS::DCPS::ReceivedDataSample& sample);
 
     void transport_lost();
 
@@ -30,7 +30,7 @@ class SimpleDataReader : public TAO::DCPS::TransportReceiveListener
 
   private:
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
     int received_test_message_;
     int receive_delay_msec_;
 };

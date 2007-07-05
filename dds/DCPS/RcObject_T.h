@@ -9,7 +9,7 @@
 #include "ace/Malloc_Base.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -19,7 +19,7 @@ namespace TAO
     /// The T type is an ace lock type
     /// (eg, ACE_SYNCH_MUTEX, ACE_NULL_MUTEX, etc...)
     template <typename T>
-    class TAO_DdsDcps_Export RcObject
+    class OpenDDS_Dcps_Export RcObject
     {
     public:
 

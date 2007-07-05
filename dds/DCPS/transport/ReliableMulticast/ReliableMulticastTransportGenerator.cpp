@@ -11,8 +11,8 @@
 #include "ReliableMulticastTransportGenerator.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::TransportImplFactory*
-TAO::DCPS::ReliableMulticastTransportGenerator::new_factory()
+OpenDDS::DCPS::TransportImplFactory*
+OpenDDS::DCPS::ReliableMulticastTransportGenerator::new_factory()
 {
   ReliableMulticastTransportImplFactory* factory = 0;
   ACE_NEW_RETURN(factory,
@@ -21,8 +21,8 @@ TAO::DCPS::ReliableMulticastTransportGenerator::new_factory()
   return factory;
 }
 
-TAO::DCPS::TransportConfiguration*
-TAO::DCPS::ReliableMulticastTransportGenerator::new_configuration(const TransportIdType id)
+OpenDDS::DCPS::TransportConfiguration*
+OpenDDS::DCPS::ReliableMulticastTransportGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
@@ -34,9 +34,9 @@ TAO::DCPS::ReliableMulticastTransportGenerator::new_configuration(const Transpor
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportGenerator::default_transport_ids(TransportIdList& ids)
+OpenDDS::DCPS::ReliableMulticastTransportGenerator::default_transport_ids(TransportIdList& ids)
 {
   ids.clear();
-  ids.push_back(TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID);
-  ids.push_back(TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID);
+  ids.push_back(OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID);
+  ids.push_back(OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID);
 }

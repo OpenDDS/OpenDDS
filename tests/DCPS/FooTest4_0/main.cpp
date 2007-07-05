@@ -26,8 +26,8 @@
 
 #include "ace/Arg_Shifter.h"
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 int max_samples_per_instance = 10 ;
 int history_depth = 10 ;
@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
       ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
       ::Xyz::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,

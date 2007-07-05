@@ -42,7 +42,7 @@ class DCPS_IR_Topic_Description;
 typedef ACE_Unbounded_Set<DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
 
 class DCPS_IR_Participant;
-typedef ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex> DCPS_IR_Participant_Map;
+typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex> DCPS_IR_Participant_Map;
 typedef ACE_Unbounded_Set<DCPS_IR_Participant*> DCPS_IR_Participant_Set;
 
 class DCPS_IR_Topic;
@@ -77,24 +77,24 @@ public:
   /// The notify_lost parameter is passed to the remove_associations()
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
   /// or DdsDcpsDataReaderRemote.idl.
-  int remove_participant(TAO::DCPS::RepoId particpantId,
+  int remove_participant(OpenDDS::DCPS::RepoId particpantId,
                          CORBA::Boolean    notify_lost);
 
   /// Find the participant with the particpant id
   /// Does NOT take ownership of any initial memory pointed to by participant
   /// Returns 0 if exists and participant is changed, -1 otherwise
-  int find_participant(TAO::DCPS::RepoId particpantId,
+  int find_participant(OpenDDS::DCPS::RepoId particpantId,
                        DCPS_IR_Participant*& participant);
 
   /// Add a topic to the domain
-  /// Returns TAO::DCPS::CREATED if successfull
-  TAO::DCPS::TopicStatus add_topic(TAO::DCPS::RepoId_out topicId,
+  /// Returns OpenDDS::DCPS::CREATED if successfull
+  OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::RepoId_out topicId,
                                    const char * topicName,
                                    const char * dataTypeName,
                                    const ::DDS::TopicQos & qos,
                                    DCPS_IR_Participant* participantPtr);
 
-  TAO::DCPS::TopicStatus force_add_topic(TAO::DCPS::RepoId topicId,
+  OpenDDS::DCPS::TopicStatus force_add_topic(OpenDDS::DCPS::RepoId topicId,
 					 const char* topicName,
 					 const char* dataTypeName,
 					 const ::DDS::TopicQos & qos,
@@ -102,14 +102,14 @@ public:
 
   /// Find the topic with the topic name
   /// Does NOT take ownership of any initial memory pointed to by topic
-  /// Returns TAO::DCPS::FOUND if exists and topic is changed, -1 otherwise
-  TAO::DCPS::TopicStatus find_topic(const char * topicName,
+  /// Returns OpenDDS::DCPS::FOUND if exists and topic is changed, -1 otherwise
+  OpenDDS::DCPS::TopicStatus find_topic(const char * topicName,
                                     DCPS_IR_Topic*& topic);
 
   /// Remove the topic
   /// The topic has been deleted if returns successful
-  /// Returns TAO::DCPS::REMOVED if successful
-  TAO::DCPS::TopicStatus remove_topic(DCPS_IR_Participant* part,
+  /// Returns OpenDDS::DCPS::REMOVED if successful
+  OpenDDS::DCPS::TopicStatus remove_topic(DCPS_IR_Participant* part,
                                       DCPS_IR_Topic*& topic);
 
   /// Mark a participant as being unresponsive (dead) and
@@ -122,15 +122,15 @@ public:
 
   ::DDS::DomainId_t get_id ();
 
-  TAO::DCPS::RepoId get_next_participant_id ();
-  TAO::DCPS::RepoId get_next_topic_id ();
-  TAO::DCPS::RepoId get_next_publication_id ();
-  TAO::DCPS::RepoId get_next_subscription_id ();
+  OpenDDS::DCPS::RepoId get_next_participant_id ();
+  OpenDDS::DCPS::RepoId get_next_topic_id ();
+  OpenDDS::DCPS::RepoId get_next_publication_id ();
+  OpenDDS::DCPS::RepoId get_next_subscription_id ();
 
-  bool set_base_participant_id (TAO::DCPS::RepoId id);
-  bool set_base_topic_id (TAO::DCPS::RepoId id);
-  bool set_base_publication_id (TAO::DCPS::RepoId id);
-  bool set_base_subscription_id (TAO::DCPS::RepoId id);
+  bool set_base_participant_id (OpenDDS::DCPS::RepoId id);
+  bool set_base_topic_id (OpenDDS::DCPS::RepoId id);
+  bool set_base_publication_id (OpenDDS::DCPS::RepoId id);
+  bool set_base_subscription_id (OpenDDS::DCPS::RepoId id);
 
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
@@ -154,7 +154,7 @@ public:
   void dispose_publication_bit (DCPS_IR_Publication* publication);
 
 private:
-  TAO::DCPS::TopicStatus add_topic_i (TAO::DCPS::RepoId topicId,
+  OpenDDS::DCPS::TopicStatus add_topic_i (OpenDDS::DCPS::RepoId topicId,
 				      const char * topicName,
 				      const char * dataTypeName,
 				      const ::DDS::TopicQos & qos,
@@ -213,7 +213,7 @@ private:
   ::DDS::DomainParticipant_var                       bitParticipant_;
   ::DDS::DomainParticipantListener_var               bitParticipantListener_;
   ::DDS::Publisher_var                               bitPublisher_;
-  TAO::DCPS::TransportImpl_rch                       transportImpl_;
+  OpenDDS::DCPS::TransportImpl_rch                       transportImpl_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   ::DDS::Topic_var                                   bitParticipantTopic_;

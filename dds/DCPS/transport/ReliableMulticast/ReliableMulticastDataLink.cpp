@@ -14,13 +14,13 @@
 #include "ReliableMulticastDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
+OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   TransportReactorTask_rch& reactor_task,
   ReliableMulticastTransportConfiguration& configuration,
   const ACE_INET_Addr& multicast_group_address,
-  TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
+  OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl
   )
-  : TAO::DCPS::DataLink(&transport_impl)
+  : OpenDDS::DCPS::DataLink(&transport_impl)
   , local_address_(configuration.local_address_)
   , multicast_group_address_(multicast_group_address)
   , sender_history_size_(configuration.sender_history_size_)
@@ -29,14 +29,14 @@ TAO::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   , reactor_task_(reactor_task)
   , transport_impl_(&transport_impl)
   , receive_strategy_(*this)
-  , send_strategy_(configuration, new TAO::DCPS::ReliableMulticastThreadSynchResource)
+  , send_strategy_(configuration, new OpenDDS::DCPS::ReliableMulticastThreadSynchResource)
   , running_(false)
 {
   transport_impl_->_add_ref();
 }
 
 bool
-TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
+OpenDDS::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 {
   if (is_publisher)
   {
@@ -61,7 +61,7 @@ TAO::DCPS::ReliableMulticastDataLink::connect(bool is_publisher)
 }
 
 void
-TAO::DCPS::ReliableMulticastDataLink::stop_i()
+OpenDDS::DCPS::ReliableMulticastDataLink::stop_i()
 {
   if (running_)
   {

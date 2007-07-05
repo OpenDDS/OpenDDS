@@ -39,8 +39,8 @@ CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_SAMPLES = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_INSTANCES = ::DDS::LENGTH_UNLIMITED;
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 enum TransportTypeId
 {
@@ -60,12 +60,12 @@ int init_reader_tranport ()
   int status = 0;
 
   reader_transport_impl =
-      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleUdp", TAO::DCPS::DONT_AUTO_CONFIG);
-  TAO::DCPS::TransportConfiguration_rch reader_config 
+      TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleUdp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config 
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* reader_udp_config 
-    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
+    = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_udp_config->local_address_ = reader_address;
@@ -90,13 +90,13 @@ int init_writer_tranport ()
   writer_transport_impl =
       TheTransportFactory->create_transport_impl(PUB_TRAFFIC, 
                                                  "SimpleUdp",
-                                                 TAO::DCPS::DONT_AUTO_CONFIG);
+                                                 OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config 
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config 
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
-    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
+    = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {

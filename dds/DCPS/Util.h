@@ -1,7 +1,7 @@
-#ifndef TAO_DCPS_UTIL_H
-#define TAO_DCPS_UTIL_H
+#ifndef OPENDDS_DCPS_UTIL_H
+#define OPENDDS_DCPS_UTIL_H
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -126,4 +126,4 @@ namespace TAO
   }
 }
 
-#endif /* TAO_DCPS_UTIL_H */
+#endif /* OPENDDS_DCPS_UTIL_H */

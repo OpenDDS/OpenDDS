@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTHEADER_H
-#define TAO_DCPS_TRANSPORTHEADER_H
+#ifndef OPENDDS_DCPS_TRANSPORTHEADER_H
+#define OPENDDS_DCPS_TRANSPORTHEADER_H
 
 #include "dds/DCPS/Definitions.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -22,7 +22,7 @@ namespace TAO
      * header, followed by one or more data samples (all belonging to the
      * same transport packet).
      */
-    struct TAO_DdsDcps_Export TransportHeader
+    struct OpenDDS_Dcps_Export TransportHeader
     {
         /// Default constructor.
         TransportHeader();
@@ -68,14 +68,14 @@ namespace TAO
 
 extern
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block&, TAO::DCPS::TransportHeader& value);
+operator<<(ACE_Message_Block&, OpenDDS::DCPS::TransportHeader& value);
 extern
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block*&, TAO::DCPS::TransportHeader& value);
+operator<<(ACE_Message_Block*&, OpenDDS::DCPS::TransportHeader& value);
 
 extern
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block&, TAO::DCPS::TransportHeader& value);
+operator<<(ACE_Message_Block&, OpenDDS::DCPS::TransportHeader& value);
 // TBD
 //MJM: DUPLICATE declaration!(??)
 
@@ -83,4 +83,4 @@ operator<<(ACE_Message_Block&, TAO::DCPS::TransportHeader& value);
 #include "TransportHeader.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTHEADER_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTHEADER_H */

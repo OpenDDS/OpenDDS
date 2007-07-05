@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ReceiveListenerSetMap::~ReceiveListenerSetMap()
+OpenDDS::DCPS::ReceiveListenerSetMap::~ReceiveListenerSetMap()
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","~ReceiveListenerSetMap",5);
 }
 
 
 int
-TAO::DCPS::ReceiveListenerSetMap::insert
+OpenDDS::DCPS::ReceiveListenerSetMap::insert
                                 (RepoId                    publisher_id,
                                  RepoId                    subscriber_id,
                                  TransportReceiveListener* receive_listener)
@@ -82,13 +82,13 @@ TAO::DCPS::ReceiveListenerSetMap::insert
 
 
 int
-TAO::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
+OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
                                          RepoId subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",5);
   ReceiveListenerSet_rch listener_set;
 
-  if (TAO::DCPS::find(map_, publisher_id, listener_set) != 0)
+  if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
       return 0;
     }
@@ -129,13 +129,13 @@ TAO::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
 /// publisher_id is no longer associated with any subscribers (which
 /// also means it's element was removed from our map_).
 int
-TAO::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
+OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
                                                      RepoId subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",5);
   ReceiveListenerSet_rch listener_set;
 
-  if (TAO::DCPS::find(map_, publisher_id, listener_set) != 0)
+  if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
     {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: publisher id (%d) not found in map_.\n",

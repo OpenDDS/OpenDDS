@@ -32,16 +32,16 @@ SimpleDataWriter::~SimpleDataWriter()
 
 
 void
-SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
+SimpleDataWriter::init(OpenDDS::DCPS::RepoId pub_id)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   this->pub_id_ = pub_id;
-  allocator_ = new TAO::DCPS::DataSampleListElementAllocator(this->num_to_send_);
-  trans_allocator_ = new TAO::DCPS::TransportSendElementAllocator (this->num_to_send_, sizeof (TAO::DCPS::TransportSendElement));
+  allocator_ = new OpenDDS::DCPS::DataSampleListElementAllocator(this->num_to_send_);
+  trans_allocator_ = new OpenDDS::DCPS::TransportSendElementAllocator (this->num_to_send_, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   ACE_NEW_MALLOC(this->element_,
-           static_cast<TAO::DCPS::DataSampleListElement*> (allocator_->malloc(sizeof (TAO::DCPS::DataSampleListElement))),
-           TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_)
+           static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator_->malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
+           OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_)
            );
 }
 
@@ -55,12 +55,12 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
 
   std::string data = "Hello World!";
 
-  TAO::DCPS::DataSampleList samples;
+  OpenDDS::DCPS::DataSampleList samples;
   samples.head_ = this->element_;
   samples.tail_ = this->element_;
   samples.size_ = 1;
 
-  TAO::DCPS::DataSampleHeader header;
+  OpenDDS::DCPS::DataSampleHeader header;
   header.publication_id_ = this->pub_id_;
   header.message_id_ = 1;
   header.sequence_   = 0;
@@ -106,7 +106,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 {
   unsigned num_delivered = this->release_element(sample);
   ACE_UNUSED_ARG(num_delivered);
@@ -118,7 +118,7 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
   unsigned num_delivered = this->release_element(sample);
@@ -162,7 +162,7 @@ SimpleDataWriter::obtain_element(SimplePublisher* publisher)
 
 
 unsigned
-SimpleDataWriter::release_element(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::release_element(OpenDDS::DCPS::DataSampleListElement* sample)
 {
   ACE_UNUSED_ARG(sample);
 

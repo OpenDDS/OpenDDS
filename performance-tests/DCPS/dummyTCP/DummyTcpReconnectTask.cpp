@@ -9,22 +9,22 @@
 
 
 
-TAO::DCPS::DummyTcpReconnectTask::DummyTcpReconnectTask(
-  TAO::DCPS::DummyTcpConnection* connection)
+OpenDDS::DCPS::DummyTcpReconnectTask::DummyTcpReconnectTask(
+  OpenDDS::DCPS::DummyTcpConnection* connection)
   : connection_ (connection)
 {
   DBG_ENTRY_LVL("DummyTcpReconnectTask","DummyTcpReconnectTask",5);
 }
 
 
-TAO::DCPS::DummyTcpReconnectTask::~DummyTcpReconnectTask()
+OpenDDS::DCPS::DummyTcpReconnectTask::~DummyTcpReconnectTask()
 {
   DBG_ENTRY_LVL("DummyTcpReconnectTask","~DummyTcpReconnectTask",5);
 }
 
 
 
-void TAO::DCPS::DummyTcpReconnectTask::execute (ReconnectOpType& op)
+void OpenDDS::DCPS::DummyTcpReconnectTask::execute (ReconnectOpType& op)
 {
   DBG_ENTRY_LVL("DummyTcpReconnectTask","execute",5);
 

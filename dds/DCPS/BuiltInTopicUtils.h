@@ -19,20 +19,20 @@
 #include "Service_Participant.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
-namespace TAO {
+namespace OpenDDS {
   namespace DCPS {
 
-    TAO_DdsDcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC;
-    TAO_DdsDcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC_TYPE;
 
-    TAO_DdsDcps_Export extern const char* BUILT_IN_TOPIC_TOPIC;
-    TAO_DdsDcps_Export extern const char* BUILT_IN_TOPIC_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC_TYPE;
 
-    TAO_DdsDcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC;
-    TAO_DdsDcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 
-    TAO_DdsDcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
-    TAO_DdsDcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
     enum BuiltInTopicTransportTypeId
     {
@@ -319,6 +319,6 @@ namespace TAO {
     };
 
   } // End of namespace DCPS
-} // End of namespace TAO
+} // End of namespace OpenDDS
 
 #endif /* BUILTINTOPICUTILS_H  */

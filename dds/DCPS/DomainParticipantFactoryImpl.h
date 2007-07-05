@@ -17,7 +17,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -26,7 +26,7 @@ namespace TAO
     /**
     * @class DomainParticipantFactoryImpl
     *
-    * @brief Implements the ::TAO::DCPS::DomainParticipantFactory
+    * @brief Implements the ::OpenDDS::DCPS::DomainParticipantFactory
     *        interfaces.
     *
     * This class acts as factory of the DomainParticipant.
@@ -35,8 +35,8 @@ namespace TAO
     * the interface this class is implementing.
     *
     */
-    class TAO_DdsDcps_Export DomainParticipantFactoryImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantFactory>
+    class OpenDDS_Dcps_Export DomainParticipantFactoryImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipantFactory>
     {
     public:
 
@@ -122,6 +122,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H  */

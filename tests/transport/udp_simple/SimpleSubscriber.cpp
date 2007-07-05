@@ -24,10 +24,10 @@ SimpleSubscriber::~SimpleSubscriber()
 
 
 void
-SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
-                       TAO::DCPS::RepoId                   sub_id,
+SimpleSubscriber::init(OpenDDS::DCPS::TransportIdType          transport_id,
+                       OpenDDS::DCPS::RepoId                   sub_id,
                        ssize_t                             num_publications,
-                       const TAO::DCPS::AssociationData*   publications)
+                       const OpenDDS::DCPS::AssociationData*   publications)
 {
   // TURN_ON_VERBOSE_DEBUG ;
   DBG_ENTRY("SimpleSubscriber","init");
@@ -37,7 +37,7 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
              "that it knows as transport_id (%d).\n", transport_id));
 
   // Obtain the transport.
-  TAO::DCPS::TransportImpl_rch transport =
+  OpenDDS::DCPS::TransportImpl_rch transport =
                                     TheTransportFactory->obtain(transport_id);
 
   if (transport.is_nil())
@@ -53,22 +53,22 @@ SimpleSubscriber::init(TAO::DCPS::TransportIdType          transport_id,
              "Attach ourselves (SimpleSubscriber) to the TransportImpl.\n"));
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status = this->attach_transport(transport.in());
+  OpenDDS::DCPS::AttachStatus status = this->attach_transport(transport.in());
 
-  if (status != TAO::DCPS::ATTACH_OK)
+  if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       ACE_TString status_str;
 
       switch (status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             status_str = "ATTACH_BAD_TRANSPORT";
             break;
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             status_str = "ATTACH_ERROR";
             break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             status_str = "ATTACH_INCOMPATIBLE_QOS";
             break;
           default:

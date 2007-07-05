@@ -24,7 +24,7 @@
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -124,11 +124,11 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            TopicImpl                             *topic_servant,
            const ::DDS::DataWriterQos &           qos,
            ::DDS::DataWriterListener_ptr          a_listener,
-           TAO::DCPS::DomainParticipantImpl*      participant_servant,
+           OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
            ::DDS::Publisher_ptr                   publisher,
-           TAO::DCPS::PublisherImpl*              publisher_servant,
+           OpenDDS::DCPS::PublisherImpl*              publisher_servant,
            ::DDS::DataWriter_ptr                  dw_local,
-           TAO::DCPS::DataWriterRemote_ptr        dw_remote
+           OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -164,13 +164,13 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   publisher_servant_ = publisher_servant;
   publisher_servant_->_add_ref ();
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
-  dw_remote_objref_  = TAO::DCPS::DataWriterRemote::_duplicate (dw_remote);
+  dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
 
   initialized_ = true;
 }
 
 void
-DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
+DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
            const ReaderAssociationSeq & readers
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
@@ -213,7 +213,7 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
 
 
 void
-DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId myid,
+DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
            size_t                  num_remote_associations,
            const AssociationData*  remote_associations)
 {
@@ -425,7 +425,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 void DataWriterImpl::remove_all_associations ()
 {
 
-  TAO::DCPS::ReaderIdSeq readers;
+  OpenDDS::DCPS::ReaderIdSeq readers;
 
   CORBA::ULong size = readers_.length();
   readers.length(size);
@@ -450,7 +450,7 @@ void DataWriterImpl::remove_all_associations ()
 
 
 void
-DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus & status
+DataWriterImpl::update_incompatible_qos ( const OpenDDS::DCPS::IncompatibleQosStatus & status
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1535,4 +1535,4 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
 
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

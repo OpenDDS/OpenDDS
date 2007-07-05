@@ -35,14 +35,14 @@ void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   AckMessageDataWriter_var ackmessage_dw =
     AckMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ = 
-    TAO::DCPS::reference_to_servant<AckMessageDataWriterImpl>(ackmessage_dw.in());
+    OpenDDS::DCPS::reference_to_servant<AckMessageDataWriterImpl>(ackmessage_dw.in());
   DDSPerfTest::AckMessage msg;
   this->handle_ = this->dw_servant_->_cxx_register (msg);
 
   PubMessageDataReader_var pubmessage_dr = 
     PubMessageDataReader::_unchecked_narrow(this->reader_.in());
   this->dr_servant_ =
-    TAO::DCPS::reference_to_servant<PubMessageDataReaderImpl>(pubmessage_dr.in());
+    OpenDDS::DCPS::reference_to_servant<PubMessageDataReaderImpl>(pubmessage_dr.in());
 }
 
 // Implementation skeleton destructor

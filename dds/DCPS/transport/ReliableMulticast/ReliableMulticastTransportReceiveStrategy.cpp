@@ -10,9 +10,9 @@
 #include "ReliableMulticastTransportReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
-typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
-typedef TAO::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransportImpl;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver ReactivePacketReceiver;
+typedef OpenDDS::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransportImpl;
 
 namespace
 {
@@ -79,7 +79,7 @@ namespace
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::configure(
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::configure(
   ACE_Reactor* reactor,
   const ACE_INET_Addr& multicast_group_address,
   size_t receiver_buffer_size
@@ -95,7 +95,7 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::configure(
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::teardown()
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::teardown()
 {
   if (receiver_.get() != 0)
   {
@@ -105,7 +105,7 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::teardown()
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::received_packets(
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::received_packets(
   const std::vector<Packet>& packets
   )
 {
@@ -133,13 +133,13 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::received_packets(
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::reliability_compromised()
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::reliability_compromised()
 {
   gracefully_disconnected_ = true;
 }
 
 ssize_t
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::receive_bytes(
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::receive_bytes(
   iovec iov[],
   int n,
   ACE_INET_Addr& remote_address
@@ -151,7 +151,7 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::receive_bytes(
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
   ReceivedDataSample& sample,
   const ACE_INET_Addr& remote_address
   )
@@ -177,13 +177,13 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::deliver_sample(
 }
 
 int
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::start_i()
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::start_i()
 {
   return 0;
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::stop_i()
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::stop_i()
 {
   teardown();
 }

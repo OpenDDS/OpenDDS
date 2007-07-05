@@ -5,7 +5,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleMcastSocket::SimpleMcastSocket()
+OpenDDS::DCPS::SimpleMcastSocket::SimpleMcastSocket()
 {
   DBG_ENTRY_LVL("SimpleMcastSocket","SimpleMcastSocket",5);
 }
@@ -13,7 +13,7 @@ TAO::DCPS::SimpleMcastSocket::SimpleMcastSocket()
 
 ACE_INLINE
 ACE_HANDLE
-TAO::DCPS::SimpleMcastSocket::get_handle() const
+OpenDDS::DCPS::SimpleMcastSocket::get_handle() const
 {
   DBG_ENTRY_LVL("SimpleMcastSocket","get_handle",5);
   return this->socket_.get_handle();
@@ -21,7 +21,7 @@ TAO::DCPS::SimpleMcastSocket::get_handle() const
 
 
 ACE_INLINE int
-TAO::DCPS::SimpleMcastSocket::open_socket (ACE_INET_Addr& local_address,
+OpenDDS::DCPS::SimpleMcastSocket::open_socket (ACE_INET_Addr& local_address,
                                    const ACE_INET_Addr& multicast_group_address,
                                    bool receiver)
 {
@@ -63,7 +63,7 @@ TAO::DCPS::SimpleMcastSocket::open_socket (ACE_INET_Addr& local_address,
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleMcastSocket::close_socket ()
+OpenDDS::DCPS::SimpleMcastSocket::close_socket ()
 {
   DBG_ENTRY_LVL("SimpleMcastSocket","close",5);
 
@@ -77,7 +77,7 @@ TAO::DCPS::SimpleMcastSocket::close_socket ()
 
 
 ACE_INLINE ssize_t
-TAO::DCPS::SimpleMcastSocket::send_bytes(const iovec iov[],
+OpenDDS::DCPS::SimpleMcastSocket::send_bytes(const iovec iov[],
                                          int   n,
                                          const ACE_INET_Addr& multicast_group_address)
 {
@@ -93,7 +93,7 @@ TAO::DCPS::SimpleMcastSocket::send_bytes(const iovec iov[],
 
 
 ACE_INLINE ssize_t
-TAO::DCPS::SimpleMcastSocket::receive_bytes(iovec iov[],
+OpenDDS::DCPS::SimpleMcastSocket::receive_bytes(iovec iov[],
                                             int   n,
                                             ACE_INET_Addr& multicast_group_address)
 {

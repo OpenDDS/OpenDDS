@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTFACTORY_H
-#define TAO_DCPS_TRANSPORTFACTORY_H
+#ifndef OPENDDS_DCPS_TRANSPORTFACTORY_H
+#define OPENDDS_DCPS_TRANSPORTFACTORY_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
@@ -18,7 +18,7 @@
 #include <map>
 #include <string>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -34,7 +34,7 @@ namespace TAO
      * 1) Own the transport configuration objects, transport implementation objects
      *    and TransportReactorTask object.
      */
-    class TAO_DdsDcps_Export TransportFactory
+    class OpenDDS_Dcps_Export TransportFactory
     {
       public:
 
@@ -219,10 +219,10 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportFactory.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTFACTORY_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTFACTORY_H */

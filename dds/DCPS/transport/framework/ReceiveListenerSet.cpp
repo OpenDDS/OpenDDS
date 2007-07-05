@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ReceiveListenerSet::~ReceiveListenerSet()
+OpenDDS::DCPS::ReceiveListenerSet::~ReceiveListenerSet()
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",5);
 }
 
 
 bool 
-TAO::DCPS::ReceiveListenerSet::exist (const RepoId& local_id, 
+OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id, 
                                       bool& last)
 {
   last = true;

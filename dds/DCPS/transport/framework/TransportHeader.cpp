@@ -7,7 +7,7 @@
 #include "EntryExit.h"
 
 const ACE_CDR::Octet
-TAO::DCPS::TransportHeader::supported_id_[6]
+OpenDDS::DCPS::TransportHeader::supported_id_[6]
 = { 0x44, 0x43, 0x50, 0x53, 0x01, 0x00 } ;
 //   D     C     P     S     1     0
 
@@ -20,7 +20,7 @@ TAO::DCPS::TransportHeader::supported_id_[6]
 //MJM: I am still not sure why this is required by the compiler.  We
 //MJM: should be able to just delegate to the other one.
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block& buffer, TAO::DCPS::TransportHeader& value)
+operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   EntryExit dbg_1( "TransportHeader","operator<<", 0 );
 
@@ -35,7 +35,7 @@ operator<<(ACE_Message_Block& buffer, TAO::DCPS::TransportHeader& value)
 
 
 ACE_CDR::Boolean
-operator<<(ACE_Message_Block*& buffer, TAO::DCPS::TransportHeader& value)
+operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   EntryExit dbg_2( "TransportHeader","operator<<", 0 );
 

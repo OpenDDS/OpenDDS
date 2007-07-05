@@ -31,7 +31,7 @@
 // completes to when the reconnect request is dequeued.
 const ACE_Time_Value reconnect_delay (2);
 
-TAO::DCPS::DummyTcpConnection::DummyTcpConnection()
+OpenDDS::DCPS::DummyTcpConnection::DummyTcpConnection()
 : connected_ (false),
   is_connector_ (true),
   passive_reconnect_timer_id_ (-1),
@@ -51,7 +51,7 @@ TAO::DCPS::DummyTcpConnection::DummyTcpConnection()
     }
 }
 
-TAO::DCPS::DummyTcpConnection::~DummyTcpConnection()
+OpenDDS::DCPS::DummyTcpConnection::~DummyTcpConnection()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","~DummyTcpConnection",5);
 
@@ -74,7 +74,7 @@ TAO::DCPS::DummyTcpConnection::~DummyTcpConnection()
 // This can not be inlined due to circular dependencies disallowing
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
-TAO::DCPS::DummyTcpConnection::set_receive_strategy
+OpenDDS::DCPS::DummyTcpConnection::set_receive_strategy
                                  (TransportReceiveStrategy* receive_strategy)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","set_receive_strategy",5);
@@ -86,7 +86,7 @@ TAO::DCPS::DummyTcpConnection::set_receive_strategy
 
 
 void
-TAO::DCPS::DummyTcpConnection::set_send_strategy
+OpenDDS::DCPS::DummyTcpConnection::set_send_strategy
                                  (DummyTcpSendStrategy* send_strategy)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","set_send_strategy",5);
@@ -98,7 +98,7 @@ TAO::DCPS::DummyTcpConnection::set_send_strategy
 
 
 int
-TAO::DCPS::DummyTcpConnection::open(void* arg)
+OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","open",5);
 
@@ -205,7 +205,7 @@ TAO::DCPS::DummyTcpConnection::open(void* arg)
 
 
 int
-TAO::DCPS::DummyTcpConnection::handle_input(ACE_HANDLE)
+OpenDDS::DCPS::DummyTcpConnection::handle_input(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","handle_input",5);
 
@@ -221,7 +221,7 @@ TAO::DCPS::DummyTcpConnection::handle_input(ACE_HANDLE)
 
 
 int
-TAO::DCPS::DummyTcpConnection::close(u_long)
+OpenDDS::DCPS::DummyTcpConnection::close(u_long)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","close",5);
 
@@ -235,7 +235,7 @@ TAO::DCPS::DummyTcpConnection::close(u_long)
 
 
 int
-TAO::DCPS::DummyTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
+OpenDDS::DCPS::DummyTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","handle_close",5);
 
@@ -249,7 +249,7 @@ TAO::DCPS::DummyTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-TAO::DCPS::DummyTcpConnection::set_sock_options (DummyTcpConfiguration* tcp_config)
+OpenDDS::DCPS::DummyTcpConnection::set_sock_options (DummyTcpConfiguration* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -300,7 +300,7 @@ TAO::DCPS::DummyTcpConnection::set_sock_options (DummyTcpConfiguration* tcp_conf
 
 
 int
-TAO::DCPS::DummyTcpConnection::active_establishment
+OpenDDS::DCPS::DummyTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
                                      DummyTcpConfiguration_rch tcp_config)
@@ -378,7 +378,7 @@ TAO::DCPS::DummyTcpConnection::active_establishment
 /// previous lost and new association is added. The connector side needs to try to
 /// actively reconnect to remote.
 int
-TAO::DCPS::DummyTcpConnection::reconnect (bool on_new_association)
+OpenDDS::DCPS::DummyTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","reconnect",5);
 
@@ -396,7 +396,7 @@ TAO::DCPS::DummyTcpConnection::reconnect (bool on_new_association)
 
 
 int
-TAO::DCPS::DummyTcpConnection::active_reconnect_on_new_association ()
+OpenDDS::DCPS::DummyTcpConnection::active_reconnect_on_new_association ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","active_reconnect_on_new_association",5);
   GuardType guard (this->reconnect_lock_);
@@ -419,7 +419,7 @@ TAO::DCPS::DummyTcpConnection::active_reconnect_on_new_association ()
 // A timer is scheduled to check if a new connection is created within the
 // passive_reconnect_duration_ period.
 int
-TAO::DCPS::DummyTcpConnection::passive_reconnect_i ()
+OpenDDS::DCPS::DummyTcpConnection::passive_reconnect_i ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","passive_reconnect_i",5);
   GuardType guard (this->reconnect_lock_);
@@ -470,7 +470,7 @@ TAO::DCPS::DummyTcpConnection::passive_reconnect_i ()
 // - fifth at 4.0 (2*2.0) seconds
 // - sixth at  8.0 (2*4.0) seconds
 int
-TAO::DCPS::DummyTcpConnection::active_reconnect_i ()
+OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","active_reconnect_i",5);
 
@@ -570,7 +570,7 @@ TAO::DCPS::DummyTcpConnection::active_reconnect_i ()
 /// A timer is scheduled on acceptor side to check if a new connection
 /// is accepted after the connection is lost.
 int
-TAO::DCPS::DummyTcpConnection::handle_timeout (const ACE_Time_Value &,
+OpenDDS::DCPS::DummyTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","handle_timeout",5);
@@ -613,7 +613,7 @@ TAO::DCPS::DummyTcpConnection::handle_timeout (const ACE_Time_Value &,
 /// We need make the state in "new" connection object consistent with the "old"
 /// connection object.
 void
-TAO::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
+OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","transfer",5);
 
@@ -705,7 +705,7 @@ TAO::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
 /// and the connection needs be closed since we declared it as a "lost"
 /// connection.
 void
-TAO::DCPS::DummyTcpConnection::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::DummyTcpConnection::notify_lost_on_backpressure_timeout ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","notify_lost_on_backpressure_timeout",5);
   bool notify_lost = false;
@@ -732,7 +732,7 @@ TAO::DCPS::DummyTcpConnection::notify_lost_on_backpressure_timeout ()
 /// when lost connection is detected. This method handles the connection
 /// to the reactor task to do the reconnecting.
 void
-TAO::DCPS::DummyTcpConnection::relink (bool do_suspend)
+OpenDDS::DCPS::DummyTcpConnection::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","relink",5);
 
@@ -744,7 +744,7 @@ TAO::DCPS::DummyTcpConnection::relink (bool do_suspend)
 }
 
 bool
-TAO::DCPS::DummyTcpConnection::tear_link ()
+OpenDDS::DCPS::DummyTcpConnection::tear_link ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","tear_link",5);
 
@@ -752,7 +752,7 @@ TAO::DCPS::DummyTcpConnection::tear_link ()
 }
 
 void
-TAO::DCPS::DummyTcpConnection::shutdown ()
+OpenDDS::DCPS::DummyTcpConnection::shutdown ()
 {
   DBG_ENTRY_LVL("DummyTcpConnection","shutdown",5);
   this->shutdown_ = true;

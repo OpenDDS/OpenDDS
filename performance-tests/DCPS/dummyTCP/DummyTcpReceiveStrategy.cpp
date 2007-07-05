@@ -14,7 +14,7 @@
 #include "DummyTcpReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::DummyTcpReceiveStrategy::DummyTcpReceiveStrategy
+OpenDDS::DCPS::DummyTcpReceiveStrategy::DummyTcpReceiveStrategy
                                         (DummyTcpDataLink*    link,
                                          DummyTcpConnection*  connection,
                                          TransportReactorTask* task)
@@ -35,14 +35,14 @@ TAO::DCPS::DummyTcpReceiveStrategy::DummyTcpReceiveStrategy
 }
 
 
-TAO::DCPS::DummyTcpReceiveStrategy::~DummyTcpReceiveStrategy()
+OpenDDS::DCPS::DummyTcpReceiveStrategy::~DummyTcpReceiveStrategy()
 {
   DBG_ENTRY_LVL("DummyTcpReceiveStrategy","~DummyTcpReceiveStrategy",5);
 }
 
 
 ssize_t
-TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes
+OpenDDS::DCPS::DummyTcpReceiveStrategy::receive_bytes
                                              (iovec iov[],
                                               int   n,
                                               ACE_INET_Addr& remote_address)
@@ -54,7 +54,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes
 
   // begin the  performance test on the subscriber side
   PerformanceTest::start_test ("Subscriber Side Transport Performance Test",
-                               "TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes");
+                               "OpenDDS::DCPS::DummyTcpReceiveStrategy::receive_bytes");
 
   if (this->connection_.is_nil())
     {
@@ -66,7 +66,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::receive_bytes
 
 
 void
-TAO::DCPS::DummyTcpReceiveStrategy::deliver_sample
+OpenDDS::DCPS::DummyTcpReceiveStrategy::deliver_sample
                                  (ReceivedDataSample&  sample,
                                   const ACE_INET_Addr& remote_address)
 {
@@ -93,7 +93,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::deliver_sample
 
 
 int
-TAO::DCPS::DummyTcpReceiveStrategy::start_i()
+OpenDDS::DCPS::DummyTcpReceiveStrategy::start_i()
 {
   DBG_ENTRY_LVL("DummyTcpReceiveStrategy","start_i",5);
 
@@ -126,7 +126,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::start_i()
 // The "old" connection object is unregistered with the reactor and the "new" connection
 // object is registered for receiving.
 int
-TAO::DCPS::DummyTcpReceiveStrategy::reset(DummyTcpConnection* connection)
+OpenDDS::DCPS::DummyTcpReceiveStrategy::reset(DummyTcpConnection* connection)
 {
   DBG_ENTRY_LVL("DummyTcpReceiveStrategy","reset",5);
 
@@ -191,7 +191,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::reset(DummyTcpConnection* connection)
 
 
 void
-TAO::DCPS::DummyTcpReceiveStrategy::stop_i()
+OpenDDS::DCPS::DummyTcpReceiveStrategy::stop_i()
 {
   DBG_ENTRY_LVL("DummyTcpReceiveStrategy","stop_i",5);
 
@@ -210,7 +210,7 @@ TAO::DCPS::DummyTcpReceiveStrategy::stop_i()
 
 
 void
-TAO::DCPS::DummyTcpReceiveStrategy::relink (bool do_suspend)
+OpenDDS::DCPS::DummyTcpReceiveStrategy::relink (bool do_suspend)
 {
   DBG_ENTRY_LVL("DummyTcpReceiveStrategy","relink",5);
   this->connection_->relink (do_suspend);

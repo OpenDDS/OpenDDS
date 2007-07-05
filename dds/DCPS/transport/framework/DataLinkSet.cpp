@@ -23,7 +23,7 @@
 /// The number of chuncks in send control cached allocator per pub/sub.
 #define NUM_SEND_CONTROL_ELEMENT_CHUNKS 20
 
-TAO::DCPS::DataLinkSet::DataLinkSet()
+OpenDDS::DCPS::DataLinkSet::DataLinkSet()
   : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",5);
@@ -36,14 +36,14 @@ TAO::DCPS::DataLinkSet::DataLinkSet()
 }
 
 
-TAO::DCPS::DataLinkSet::~DataLinkSet()
+OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 {
   DBG_ENTRY_LVL("DataLinkSet","~DataLinkSet",5);
 }
 
 
 int
-TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
+OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",5);
   link->_add_ref();
@@ -58,7 +58,7 @@ TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
 // Perform "set subtraction" logic.  Subtract the released_set from
 // *this* set.  When complete, return the (new) size of the set.
 ssize_t
-TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
+OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_links",5);
 
@@ -90,7 +90,7 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 
 
 //void
-//TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
+//OpenDDS::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
 //                                            DataLinkSetMap& released_locals)
 //{
 //  DBG_ENTRY_LVL("DataLinkSet","release_reservations",5);
@@ -111,8 +111,8 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 //}
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
                                       const CORBA::ULong num_targets)
 {
   DBG_ENTRY_LVL("DataLinkSet","select_links",5);
@@ -140,8 +140,8 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::DataLinkSet::find_link(const RepoId remoteId,
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
                                      const RepoId localId, 
                                      const bool   pub_side)
 {
@@ -177,7 +177,7 @@ TAO::DCPS::DataLinkSet::find_link(const RepoId remoteId,
 
 
 bool 
-TAO::DCPS::DataLinkSet::empty ()
+OpenDDS::DCPS::DataLinkSet::empty ()
 {
   GuardType guard(this->lock_);
 

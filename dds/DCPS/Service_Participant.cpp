@@ -22,7 +22,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -782,7 +782,7 @@ namespace TAO
     }
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 // gcc on AIX needs explicit instantiation of the singleton templates

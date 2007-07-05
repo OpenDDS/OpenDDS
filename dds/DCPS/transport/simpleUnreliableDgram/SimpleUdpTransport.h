@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUDPTRANSPORT_H
-#define TAO_DCPS_SIMPLEUDPTRANSPORT_H
+#ifndef OPENDDS_DCPS_SIMPLEUDPTRANSPORT_H
+#define OPENDDS_DCPS_SIMPLEUDPTRANSPORT_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramTransport.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -38,11 +38,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUdpTransport.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_SIMPLEUDPTRANSPORT_H */
+#endif  /* OPENDDS_DCPS_SIMPLEUDPTRANSPORT_H */

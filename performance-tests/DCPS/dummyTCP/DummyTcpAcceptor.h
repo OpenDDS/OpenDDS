@@ -4,8 +4,8 @@
 
 
 
-#ifndef TAO_DCPS_DUMMYTCPACCEPTOR_H
-#define TAO_DCPS_DUMMYTCPACCEPTOR_H
+#ifndef OPENDDS_DCPS_DUMMYTCPACCEPTOR_H
+#define OPENDDS_DCPS_DUMMYTCPACCEPTOR_H
 
 #include "DummyTcpTransport_rch.h"
 #include "DummyTcpConnection.h"
@@ -13,7 +13,7 @@
 #include "ace/SOCK_Acceptor.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -44,8 +44,8 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 
 
-#endif  /* TAO_DCPS_DUMMYTCPACCEPTOR_H */
+#endif  /* OPENDDS_DCPS_DUMMYTCPACCEPTOR_H */

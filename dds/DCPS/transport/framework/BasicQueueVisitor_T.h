@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_BASICQUEUEVISITOR_T_H
-#define TAO_DCPS_BASICQUEUEVISITOR_T_H
+#ifndef OPENDDS_DCPS_BASICQUEUEVISITOR_T_H
+#define OPENDDS_DCPS_BASICQUEUEVISITOR_T_H
 
 #include "ace/CORBA_macros.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -73,4 +73,4 @@ namespace TAO
 
 }
 
-#endif  /* TAO_DCPS_BASICQUEUEVISITOR_T_H */
+#endif  /* OPENDDS_DCPS_BASICQUEUEVISITOR_T_H */

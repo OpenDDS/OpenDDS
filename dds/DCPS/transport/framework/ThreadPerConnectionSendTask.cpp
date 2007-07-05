@@ -11,8 +11,8 @@
 
 #include "ace/Auto_Ptr.h"
 
-TAO::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
-  TAO::DCPS::DataLink* link)
+OpenDDS::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
+  OpenDDS::DCPS::DataLink* link)
   : lock_ (),
     queue_ (1, 10),
     work_available_ (lock_),
@@ -24,13 +24,13 @@ TAO::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
 }
 
 
-TAO::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
+OpenDDS::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",5);
 }
 
 
-int TAO::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
+int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
                                                         TransportQueueElement* element)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","add");
@@ -60,7 +60,7 @@ int TAO::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
 }
 
 
-int TAO::DCPS::ThreadPerConnectionSendTask::open(void*)
+int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","open");
 
@@ -94,7 +94,7 @@ int TAO::DCPS::ThreadPerConnectionSendTask::open(void*)
 }
 
 
-int TAO::DCPS::ThreadPerConnectionSendTask::svc()
+int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc", 5);
 
@@ -136,7 +136,7 @@ int TAO::DCPS::ThreadPerConnectionSendTask::svc()
 }
 
 
-int TAO::DCPS::ThreadPerConnectionSendTask::close(u_long flag)
+int OpenDDS::DCPS::ThreadPerConnectionSendTask::close(u_long flag)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","close");
 
@@ -161,7 +161,7 @@ int TAO::DCPS::ThreadPerConnectionSendTask::close(u_long flag)
 }
 
 int
-TAO::DCPS::ThreadPerConnectionSendTask::remove_sample ( const DataSampleListElement* sample )
+OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample ( const DataSampleListElement* sample )
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","remove_sample");
 
@@ -176,7 +176,7 @@ TAO::DCPS::ThreadPerConnectionSendTask::remove_sample ( const DataSampleListElem
   return vistor.status();
 }
 
-void TAO::DCPS::ThreadPerConnectionSendTask::execute (SendRequest& req)
+void OpenDDS::DCPS::ThreadPerConnectionSendTask::execute (SendRequest& req)
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask","execute",5);
 

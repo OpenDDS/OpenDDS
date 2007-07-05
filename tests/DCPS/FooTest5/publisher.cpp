@@ -200,8 +200,8 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (pub.in());
+      OpenDDS::DCPS::PublisherImpl* pub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in());
 
       if (0 == pub_impl)
         {
@@ -210,7 +210,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
           return ::DDS::Publisher::_nil ();
         }
 
-      TAO::DCPS::AttachStatus attach_status;
+      OpenDDS::DCPS::AttachStatus attach_status;
 
       if (attach_to_udp)
         {
@@ -233,20 +233,20 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
           attach_status = pub_impl->attach_transport(writer_tcp_impl.in());
         }
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           ACE_TString status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooTypeSupportImpl* fts_servant
             = new ::Xyz::FooTypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -333,7 +333,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooTypeSupportImpl* fts_servant
             = new ::Xyz::FooTypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {

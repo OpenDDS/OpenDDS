@@ -13,7 +13,7 @@
 #include <vector>
 
 
-class Sub : public TAO::DCPS::TransportInterface
+class Sub : public OpenDDS::DCPS::TransportInterface
 {
   public:
 
@@ -27,10 +27,10 @@ class Sub : public TAO::DCPS::TransportInterface
     void set_data_size(char data_size);
 
     /// Set the local subscriber/reader info
-    void set_local_subscriber(TAO::DCPS::RepoId sub_id);
+    void set_local_subscriber(OpenDDS::DCPS::RepoId sub_id);
 
     /// Add a remote publisher
-    void add_remote_publisher(TAO::DCPS::RepoId    pub_id,
+    void add_remote_publisher(OpenDDS::DCPS::RepoId    pub_id,
                               const ACE_INET_Addr& pub_addr);
 
     void init(unsigned impl_id);
@@ -49,23 +49,23 @@ class Sub : public TAO::DCPS::TransportInterface
 
     struct PubInfo
     {
-      TAO::DCPS::RepoId pub_id_;
+      OpenDDS::DCPS::RepoId pub_id_;
       ACE_INET_Addr     pub_addr_;
 
-      PubInfo(TAO::DCPS::RepoId pub_id, const ACE_INET_Addr& pub_addr)
+      PubInfo(OpenDDS::DCPS::RepoId pub_id, const ACE_INET_Addr& pub_addr)
         : pub_id_(pub_id), pub_addr_(pub_addr)
         {}
 
-      void as_association(TAO::DCPS::AssociationData& assoc_data)
+      void as_association(OpenDDS::DCPS::AssociationData& assoc_data)
         {
           assoc_data.remote_id_ = this->pub_id_;
           assoc_data.remote_data_.transport_id = 1;
 
-          TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+          OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
 
-          assoc_data.remote_data_.data = TAO::DCPS::TransportInterfaceBLOB
-                                   (sizeof(TAO::DCPS::NetworkAddress),
-                                    sizeof(TAO::DCPS::NetworkAddress),
+          assoc_data.remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
+                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
+                                    sizeof(OpenDDS::DCPS::NetworkAddress),
                                     (CORBA::Octet*)(&network_order_address));
         }
     };
@@ -73,7 +73,7 @@ class Sub : public TAO::DCPS::TransportInterface
 
     typedef std::vector<PubInfo> PubInfoList;
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
 
     SubReader reader_;
 

@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
-TAO::DCPS::DummyTcpTransport::DummyTcpTransport()
+OpenDDS::DCPS::DummyTcpTransport::DummyTcpTransport()
   : acceptor_(new DummyTcpAcceptor (this)),
     connections_updated_(this->connections_lock_),
     con_checker_ (new DummyTcpConnectionReplaceTask(this))
@@ -27,7 +27,7 @@ TAO::DCPS::DummyTcpTransport::DummyTcpTransport()
 
 
 
-TAO::DCPS::DummyTcpTransport::~DummyTcpTransport()
+OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 {
   DBG_ENTRY_LVL("DummyTcpTransport","~DummyTcpTransport",5);
   delete acceptor_;
@@ -50,8 +50,8 @@ TAO::DCPS::DummyTcpTransport::~DummyTcpTransport()
 /// The connect_as_publisher will be set to 1 if this method was called
 /// due to an add_subscriptions() call on a TransportInterface object.
 /// This means true (1).  It *is* connecting as a publisher.
-TAO::DCPS::DataLink*
-TAO::DCPS::DummyTcpTransport::find_or_create_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
  int                           connect_as_publisher)
 {
@@ -171,7 +171,7 @@ TAO::DCPS::DummyTcpTransport::find_or_create_datalink
 
 
 int
-TAO::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","configure_i",5);
 
@@ -288,7 +288,7 @@ TAO::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
 }
 
 void
-TAO::DCPS::DummyTcpTransport::pre_shutdown_i()
+OpenDDS::DCPS::DummyTcpTransport::pre_shutdown_i()
 {
   DBG_ENTRY_LVL("DummyTcpTransport","pre_shutdown_i",5);
 
@@ -306,7 +306,7 @@ TAO::DCPS::DummyTcpTransport::pre_shutdown_i()
 
 
 void
-TAO::DCPS::DummyTcpTransport::shutdown_i()
+OpenDDS::DCPS::DummyTcpTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("DummyTcpTransport","shutdown_i",5);
 
@@ -360,7 +360,7 @@ TAO::DCPS::DummyTcpTransport::shutdown_i()
 
 
 int
-TAO::DCPS::DummyTcpTransport::connection_info_i
+OpenDDS::DCPS::DummyTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("DummyTcpTransport","connection_info_i",5);
@@ -372,7 +372,7 @@ TAO::DCPS::DummyTcpTransport::connection_info_i
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
-  local_info.data = TAO::DCPS::TransportInterfaceBLOB
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
     (sizeof(NetworkAddress),
      sizeof(NetworkAddress),
      (CORBA::Octet*)(&network_order_address));
@@ -382,7 +382,7 @@ TAO::DCPS::DummyTcpTransport::connection_info_i
 
 
 void
-TAO::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","release_datalink_i",5);
 
@@ -414,8 +414,8 @@ TAO::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link)
 }
 
 
-TAO::DCPS::DummyTcpConfiguration*
-TAO::DCPS::DummyTcpTransport::get_configuration()
+OpenDDS::DCPS::DummyTcpConfiguration*
+OpenDDS::DCPS::DummyTcpTransport::get_configuration()
 {
   return this->tcp_config_.in();
 }
@@ -428,7 +428,7 @@ TAO::DCPS::DummyTcpTransport::get_configuration()
 /// object needs to be paired with a DataLink object that is (or will be)
 /// expecting this passive connection to be established.
 void
-TAO::DCPS::DummyTcpTransport::passive_connection
+OpenDDS::DCPS::DummyTcpTransport::passive_connection
 (const ACE_INET_Addr& remote_address,
  DummyTcpConnection* connection)
 {
@@ -467,7 +467,7 @@ TAO::DCPS::DummyTcpTransport::passive_connection
 
 /// Actively establish a connection to the remote address.
 int
-TAO::DCPS::DummyTcpTransport::make_active_connection
+OpenDDS::DCPS::DummyTcpTransport::make_active_connection
 (const ACE_INET_Addr& remote_address,
  DummyTcpDataLink*   link)
 {
@@ -489,7 +489,7 @@ TAO::DCPS::DummyTcpTransport::make_active_connection
 
 
 int
-TAO::DCPS::DummyTcpTransport::make_passive_connection
+OpenDDS::DCPS::DummyTcpTransport::make_passive_connection
 (const ACE_INET_Addr& remote_address,
  DummyTcpDataLink*   link)
 {
@@ -550,7 +550,7 @@ TAO::DCPS::DummyTcpTransport::make_passive_connection
 
 /// Common code used by make_active_connection() and make_passive_connection().
 int
-TAO::DCPS::DummyTcpTransport::connect_datalink
+OpenDDS::DCPS::DummyTcpTransport::connect_datalink
 (DummyTcpDataLink*   link,
  DummyTcpConnection* connection)
 {
@@ -584,7 +584,7 @@ TAO::DCPS::DummyTcpTransport::connect_datalink
 /// accepted connection is the re-established connection. If it is, then the "old" connection
 /// object in the datalink is replaced by the "new" connection object.
 int
-TAO::DCPS::DummyTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
+OpenDDS::DCPS::DummyTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
                                            DummyTcpConnection_rch connection)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","fresh_link",5);

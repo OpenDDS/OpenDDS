@@ -155,10 +155,10 @@ SubDriver::init()
   // application code will be able use the obtain() method on
   // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
   // a reference to the cached TransportImpl will be returned.
-  TAO::DCPS::TransportImpl_rch transport_impl 
+  OpenDDS::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   // Get the existing or create a new SimpleTcpConfiguration object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
@@ -167,11 +167,11 @@ SubDriver::init()
   // See comments in the $TAO_ROOT/orbsvcs/tests/DDS/transport/simple/
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
-  TAO::DCPS::TransportConfiguration_rch config 
+  OpenDDS::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->sub_addr_;
 
@@ -192,16 +192,16 @@ void
 SubDriver::run()
 {
   // Set up the publications.
-  TAO::DCPS::AssociationData publications[1];
+  OpenDDS::DCPS::AssociationData publications[1];
   publications[0].remote_id_                = this->pub_id_;
   publications[0].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
-  TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
 
   publications[0].remote_data_.data =
-         TAO::DCPS::TransportInterfaceBLOB
-                                   (sizeof(TAO::DCPS::NetworkAddress),
-                                    sizeof(TAO::DCPS::NetworkAddress),
+         OpenDDS::DCPS::TransportInterfaceBLOB
+                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
+                                    sizeof(OpenDDS::DCPS::NetworkAddress),
                                     (CORBA::Octet*)(&network_order_address));
 
   // Write a file so that test script knows we're ready

@@ -45,7 +45,7 @@ sub contents { return <<'!EOT'
  *
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
-  : public virtual TAO::DCPS::LocalObject<<%TYPE%>TypeSupport>
+  : public virtual OpenDDS::DCPS::LocalObject<<%TYPE%>TypeSupport>
 {
 public:
 
@@ -98,14 +98,14 @@ public:
  * this interface.
  */
 class <%EXPORT%> <%TYPE%>DataWriterImpl
-  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataWriter>,
-    public virtual TAO::DCPS::DataWriterImpl
+  : public virtual OpenDDS::DCPS::LocalObject<<%TYPE%>DataWriter>,
+    public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
 
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
-  typedef ::TAO::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
+  typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
 
   //Constructor
   <%TYPE%>DataWriterImpl (void);
@@ -210,14 +210,14 @@ public:
    */
   virtual void init (
         ::DDS::Topic_ptr                       topic,
-        TAO::DCPS::TopicImpl                 *topic_servant,
+        OpenDDS::DCPS::TopicImpl                 *topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
-        TAO::DCPS::DomainParticipantImpl*      participant_servant,
+        OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
         ::DDS::Publisher_ptr                   publisher,
-        TAO::DCPS::PublisherImpl*              publisher_servant,
+        OpenDDS::DCPS::PublisherImpl*              publisher_servant,
         ::DDS::DataWriter_ptr                  dw_objref,
-        ::TAO::DCPS::DataWriterRemote_ptr      dw_remote_objref
+        ::OpenDDS::DCPS::DataWriterRemote_ptr      dw_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -282,8 +282,8 @@ private:
    // only one write call is allowed at a time.
    DataBlockLockPool*  db_lock_pool_;
    DataAllocator* data_allocator_;
-   ::TAO::DCPS::MessageBlockAllocator* mb_allocator_;
-   ::TAO::DCPS::DataBlockAllocator*    db_allocator_;
+   ::OpenDDS::DCPS::MessageBlockAllocator* mb_allocator_;
+   ::OpenDDS::DCPS::DataBlockAllocator*    db_allocator_;
 };
 <%NAMESPACEEND%>
 
@@ -293,19 +293,16 @@ private:
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  *
- * @note zero-copy methods are specific to TAO but this is allowed by
- *       the DDS specification.
- *
  */
 class <%EXPORT%> <%TYPE%>DataReaderImpl
-  : public virtual TAO::DCPS::LocalObject<<%TYPE%>DataReader>,
-    public virtual TAO::DCPS::DataReaderImpl
+  : public virtual OpenDDS::DCPS::LocalObject<<%TYPE%>DataReader>,
+    public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
 
   typedef std::map<<%SCOPE%><%TYPE%>, DDS::InstanceHandle_t,
       <%TYPE%>KeyLessThan> InstanceMap;
-  typedef ::TAO::DCPS::Cached_Allocator_With_Overflow<<%SCOPE%><%TYPE%>, ACE_Null_Mutex>  DataAllocator;
+  typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPE%><%TYPE%>, ACE_Null_Mutex>  DataAllocator;
 
   //Constructor
   <%TYPE%>DataReaderImpl (void);
@@ -326,14 +323,14 @@ public:
    */
   virtual
   void init (
-        TAO::DCPS::TopicImpl*                    a_topic,
+        OpenDDS::DCPS::TopicImpl*                    a_topic,
         const ::DDS::DataReaderQos &             qos,
         ::DDS::DataReaderListener_ptr            a_listener,
-        TAO::DCPS::DomainParticipantImpl*        participant,
-        TAO::DCPS::SubscriberImpl*               subscriber,
+        OpenDDS::DCPS::DomainParticipantImpl*        participant,
+        OpenDDS::DCPS::SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr                    subscriber_objref,
         ::DDS::DataReader_ptr					 dr_objerf,
-        TAO::DCPS::DataReaderRemote_ptr          dr_remote_objref
+        OpenDDS::DCPS::DataReaderRemote_ptr          dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -472,15 +469,15 @@ public:
 
   void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
 
-  void dec_ref_data_element(::TAO::DCPS::ReceivedDataElement* r);
+  void dec_ref_data_element(::OpenDDS::DCPS::ReceivedDataElement* r);
 
  protected:
 
-    virtual void dds_demarshal(const TAO::DCPS::ReceivedDataSample& sample) ;
+    virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample) ;
 
-    virtual void dispose(const TAO::DCPS::ReceivedDataSample& sample) ;
+    virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample) ;
 
-    //virtual TAO::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
+    //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
     
     virtual void release_instance_i (::DDS::InstanceHandle_t handle);
 
@@ -488,7 +485,7 @@ public:
   private:
     ::DDS::ReturnCode_t  store_instance_data(
          ::<%SCOPE%><%TYPE%> *instance_data,
-         const TAO::DCPS::DataSampleHeader& header
+         const OpenDDS::DCPS::DataSampleHeader& header
          ) ;
 
     /// common input read* & take* input processing and precondition checks

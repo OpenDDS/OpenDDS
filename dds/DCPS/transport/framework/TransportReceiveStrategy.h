@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTRECEIVESTRATEGY
-#define TAO_DCPS_TRANSPORTRECEIVESTRATEGY
+#ifndef OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY
+#define OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -12,7 +12,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -21,7 +21,7 @@ namespace TAO
      * This class provides buffer for data received by transports, de-assemble
      * the data to individual samples and deliver them. 
      */ 
-    class TAO_DdsDcps_Export TransportReceiveStrategy 
+    class OpenDDS_Dcps_Export TransportReceiveStrategy 
       : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
@@ -101,10 +101,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_TRANSPORTRECEIVESTRATEGY */
+#endif /* OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY */

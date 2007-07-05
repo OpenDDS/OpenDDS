@@ -10,8 +10,8 @@
 #include "Transient_Kludge.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::Transient_Kludge*
-TAO::DCPS::Transient_Kludge::instance (void)
+OpenDDS::DCPS::Transient_Kludge*
+OpenDDS::DCPS::Transient_Kludge::instance (void)
 {
   // Hide the template instantiation to prevent multiple instances
   // from being created.

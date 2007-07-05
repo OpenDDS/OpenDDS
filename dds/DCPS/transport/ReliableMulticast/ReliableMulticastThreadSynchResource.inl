@@ -5,12 +5,12 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastThreadSynchResource::ReliableMulticastThreadSynchResource()
-  : TAO::DCPS::ThreadSynchResource(ACE_INVALID_HANDLE)
+OpenDDS::DCPS::ReliableMulticastThreadSynchResource::ReliableMulticastThreadSynchResource()
+  : OpenDDS::DCPS::ThreadSynchResource(ACE_INVALID_HANDLE)
 {
 }
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastThreadSynchResource::~ReliableMulticastThreadSynchResource()
+OpenDDS::DCPS::ReliableMulticastThreadSynchResource::~ReliableMulticastThreadSynchResource()
 {
 }
