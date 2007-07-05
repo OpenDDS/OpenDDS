@@ -51,12 +51,13 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::receive_bytes
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
 
-  if (this->connection_.is_nil())
+  SimpleTcpConnection_rch connection = this->connection_;
+  if (connection.is_nil())
     {
       return 0;
     }
 
-  return this->connection_->peer().recvv(iov, n);
+  return connection->peer().recvv(iov, n);
 }
 
 
@@ -108,8 +109,8 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
       // Take back the "copy" we made.
       this->connection_->_remove_ref();
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpConnection can't register with "
-                        "reactor\n"),
+                        "(%P|%t) ERROR: SimpleTcpReceiveStrategy::start_i SimpleTcpConnection can't register with "
+                        "reactor %X %p\n", this->connection_.in(), "register_handler"),
                        -1);
     }
 
@@ -176,7 +177,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
       // Take back the "copy" we made.
       this->connection_->_remove_ref();
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpConnection can't register with "
+                        "(%P|%t) ERROR: SimpleTcpReceiveStrategy::reset SimpleTcpConnection can't register with "
                         "reactor\n"),
                        -1);
     }

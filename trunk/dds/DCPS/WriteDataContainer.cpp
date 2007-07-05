@@ -770,13 +770,22 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   int result = writer->remove_all_control_msgs ();
   ACE_UNUSED_ARG (result);
 
+  {
+    //The internal list needs protection since this call may result from the 
+    //the delete_datawriter call which does not acquire the lock in advance.
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+      guard,
+      this->lock_);
   while (sending_data_.size_ > 0)
   {
     DataSampleListElement* old_head = sending_data_.head_;
 
     if (old_head == 0)
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all, NULL element at head of sending_data_\n")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
+          "NULL element at head of sending_data_, size %d head %X tail %X \n"), 
+          sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
         break;
       }
 
@@ -809,7 +818,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   {
     condition_.broadcast ();
   }
-
+  }
   ::DDS::ReturnCode_t ret;
   DataSample* registered_sample;
   PublicationInstanceMapType::iterator it = instances_.begin ();

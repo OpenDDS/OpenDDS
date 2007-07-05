@@ -58,17 +58,8 @@ OpenDDS::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
         {
           // Each pub-id is mapped to a bunch of sub-id's
           //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
-          ssize_t sub_ids_count = sub_id_set->size();
-          ReaderIdSeq sub_ids (sub_ids_count);
-          sub_ids.length (sub_ids_count);
-
-          int count = 0;
-          // create a sequence of associated sub-id's
-          ReceiveListenerSet::MapType& sub_map = sub_id_set->map();
-          for (ReceiveListenerSet::MapType::iterator sub_entry = sub_map.begin();
-            sub_entry != sub_map.end(); ++sub_entry) {
-            sub_ids [count++] = sub_entry->first;
-          }
+          ReaderIdSeq sub_ids;
+          sub_id_set->get_keys (sub_ids);
 
           // after creating remote id sequence, remove from DataWriter
           // I believe the 'notify_lost' should be set to false, since

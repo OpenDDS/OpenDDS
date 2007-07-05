@@ -73,6 +73,7 @@ namespace OpenDDS
         /// DataLink that should be (or will be) expecting the passive
         /// connection.
         friend class SimpleTcpConnection;
+        friend class SimpleTcpDataLink;
 
         /// Called by the SimpleTcpConnection object when it has been
         /// created by the acceptor and needs to be attached to a DataLink.

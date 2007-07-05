@@ -150,33 +150,47 @@ OpenDDS::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
       return -1;
     }
 
+  this->connection_->transfer (connection);
+           
+  bool released = false;
+  TransportReceiveStrategy_rch brs;
+  TransportSendStrategy_rch bss;
+
+  {
+    GuardType guard2(this->strategy_lock_);
+
+    if (this->receive_strategy_.is_nil () && this->send_strategy_.is_nil ())
+    {
+      released = true;
+      this->connection_ = 0;
+    }
+    else
+    {
+      brs = this->receive_strategy_;
+      bss = this->send_strategy_;
+    }
+  }
+
+  if (released)
+  {
+    return this->transport_->connect_datalink (this, connection);
+  }
+
   // Keep a "copy" of the reference to the connection object for ourselves.
   connection->_add_ref();
-  this->connection_->transfer (connection);
   this->connection_ = connection;
 
   SimpleTcpReceiveStrategy* rs
-    = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+    = dynamic_cast <SimpleTcpReceiveStrategy*> (brs.in ());
 
-  if (rs == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect dynamic_cast failed\n"),
-        -1);
-    }
+  SimpleTcpSendStrategy* ss
+    = dynamic_cast <SimpleTcpSendStrategy*> (bss.in ());
+
+
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
   int rs_result = rs->reset (this->connection_.in ());
 
-  SimpleTcpSendStrategy* ss
-    = dynamic_cast <SimpleTcpSendStrategy*> (this->send_strategy_.in ());
-
-  if (ss == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect dynamic_cast failed\n"),
-        -1);
-    }
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
   int ss_result = ss->reset (this->connection_.in ());
