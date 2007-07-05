@@ -1,3 +1,10 @@
+Thu Jul  5 18:03:29 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * history:
+        * history/ChangeLog-01:
+
+          Adding old ChangeLog entries to a file in the history directory.
+
 Thu Jul  5 16:27:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * 14a_README:
@@ -6,7 +13,7 @@ Thu Jul  5 16:27:10 UTC 2007  Adam Mitz  <mitza@ociweb.com>
         * README:
         * docs/INSTALL:
 
-	  Updated for the forthcoming OpenDDS 1.0 release
+          Updated for the forthcoming OpenDDS 1.0 release
 
         * ***ALL FILES***:
 
@@ -10756,17 +10763,13 @@ Tue Jun 10 18:55:09 UTC 2005  Trevor Fields  <fields_t@ociweb.com>
 
           Moved files from a branch off of TAO 1.4a to this separate
           repository.
-          All files in ACE_wrappers\TAO\orbsvcs\DDS and
-                       ACE_wrappers\TAO\orbsvcs\orbsvcs\DDS and
-                       ACE_wrappers\bin\DCPS
+          All files in ACE_wrappers/TAO/orbsvcs/DDS and
+                       ACE_wrappers/TAO/orbsvcs/orbsvcs/DDS and
+                       ACE_wrappers/bin/DCPS
           were moved over.
 
-          See the ocitao/ACE_wrappers/TAO/Changelog_dds_branch
-          on the AAC-DDS-1_4_3_branch branch
-          in cvs.ociweb.com:/cvs for the original
+          See the file $DDS_ROOT/history/ChangeLog-01 for the original
           developement history.
-
-         LocalWords:  UTC txt
 
 LocalVariables:
 mode: change-log
