@@ -20,9 +20,11 @@ bool
 OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id, 
                                       bool& last)
 {
+  GuardType guard(this->lock_);
+
   last = true;
 
-  TransportReceiveListener* listener;
+  TransportReceiveListener* listener = 0;
   if (find(map_, local_id, listener) == -1)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ReceiveListenerSet::exist could not find local %d \n",
@@ -43,5 +45,27 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id,
   return true;
 }
 
+
+void 
+OpenDDS::DCPS::ReceiveListenerSet::get_keys (ReaderIdSeq & ids)
+{
+  GuardType guard(this->lock_);
+  for (MapType::iterator iter = map_.begin();
+    iter != map_.end(); ++ iter)
+  {
+    CORBA::ULong sz = ids.length ();
+    ids.length (sz + 1);
+    ids[sz] = iter->first;
+  }
+}
+
+bool 
+OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id)
+{
+  GuardType guard(this->lock_);
+
+  TransportReceiveListener* listener = 0;
+  return (find(map_, local_id, listener) == -1 ? false : true);
+}
 
 

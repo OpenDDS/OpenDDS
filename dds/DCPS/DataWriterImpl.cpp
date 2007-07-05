@@ -180,7 +180,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
   if (DCPS_debug_level >= 1)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::add_associations  "
-      "bit %d local %d remote %d\n", is_bit_, yourId, readers[0].readerId));
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, yourId, readers[0].readerId, readers.length ()));
   }
 
   if (entity_deleted_ == true)
@@ -222,7 +222,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
   if (DCPS_debug_level >= 1)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
-      "bit %d local %d remote %d\n", is_bit_, myid, remote_associations[0].remote_id_));
+      "bit %d local %d remote %d num remotes %d\n", is_bit_, myid, remote_associations[0].remote_id_, num_remote_associations));
   }
 
   {
@@ -339,7 +339,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   if (DCPS_debug_level >= 1)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
-      "bit %d local %d remote %d\n", is_bit_, publication_id_, readers[0]));
+      "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
   }
 
   CORBA::ULong num_removed_readers = readers.length();

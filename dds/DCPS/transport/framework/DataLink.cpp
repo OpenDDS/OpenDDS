@@ -466,13 +466,8 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
  DataLinkSetMap&     released_subscribers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_publisher",5);
-  ReceiveListenerSet::MapType& listener_map = listener_set->map();
 
-  for (ReceiveListenerSet::MapType::iterator itr = listener_map.begin();
-       itr != listener_map.end();
-       ++itr)
-    {
-      if (subscriber_id == itr->first)
+  if (listener_set->exist (subscriber_id))
       {
         // Remove the publisher_id => subscriber_id association.
         if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
@@ -486,7 +481,6 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
             }
           }
       }
-    }
 
   if (listener_set->remove (subscriber_id) == -1)
   {
@@ -579,17 +573,9 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
                            itr->first, connection_notice_as_str(notice)));
               }
             ReceiveListenerSet_rch subset = itr->second;
-            ReceiveListenerSet::MapType & imap = subset->map ();
 
             ReaderIdSeq subids;
-            subids.length (subset->size ());
-            CORBA::ULong i = 0;
-            for (ReceiveListenerSet::MapType::iterator iitr = imap.begin();
-                 iitr != imap.end();
-                 ++iitr)
-              {
-                subids[i++] = iitr->first;
-              }
+            subset->get_keys (subids);
 
             switch (notice)
               {

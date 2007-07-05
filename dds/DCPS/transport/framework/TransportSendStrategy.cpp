@@ -1765,6 +1765,9 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int 
   int val = 0;
   ACE_HANDLE handle = this->get_handle();
 
+  if (handle == ACE_INVALID_HANDLE)
+    return -1;
+
   ACE::record_and_set_non_blocking_mode(handle, val);
 
   // Set the back-pressure flag to false.
@@ -1793,7 +1796,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send (const iovec iov[], int 
           // by looking at the iovec
           for (int ii = 0; ii < n; ii++)
             {
-              ACE_ERROR((LM_ERROR, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
+              ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iob_base =%X\n",
                 ii, iov[ii].iov_len, iov[ii].iov_base ));
             }
         }

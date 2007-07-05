@@ -133,7 +133,8 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_start",5);
 
-  GuardType guard(this->lock_);
+  GuardType guard1(this->lock_);
+  GuardType guard2(link_set->lock_);
 
   for (MapType::iterator itr = link_set->map_.begin();
     itr != link_set->map_.end();

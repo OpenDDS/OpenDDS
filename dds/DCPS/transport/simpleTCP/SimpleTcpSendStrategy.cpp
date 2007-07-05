@@ -100,7 +100,7 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
       // Take back the "copy" we made.
       this->connection_->_remove_ref();
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: SimpleTcpConnection can't register with "
+                        "(%P|%t) ERROR: SimpleTcpSendStrategy::reset SimpleTcpConnection can't register with "
                         "reactor\n"),
                        -1);
     }
@@ -120,14 +120,21 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& 
 ACE_HANDLE 
 OpenDDS::DCPS::SimpleTcpSendStrategy::get_handle ()
 {
-  return this->connection_->peer().get_handle();
+  SimpleTcpConnection_rch connection = this->connection_;
+  if (connection.is_nil ())
+    return ACE_INVALID_HANDLE;
+  return connection->peer().get_handle();
 }
 
 
 ssize_t 
 OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 {
-  return this->connection_->peer().sendv(iov, n);
+  SimpleTcpConnection_rch connection = this->connection_;
+  if (connection.is_nil ())
+    return -1;
+
+  return connection->peer().sendv(iov, n);
 }
 
 

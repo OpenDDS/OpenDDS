@@ -40,7 +40,7 @@ $DCPSREPO = new PerlACE::Process
      . " -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = new PerlACE::Process
     ("subscriber"
-     , " $svc_config -DCPSConfigFile sub.ini".$common_opts);
+     , " -v $svc_config -DCPSConfigFile sub.ini".$common_opts);
 $Publisher = new PerlACE::Process
     ("publisher"
      , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
@@ -65,7 +65,7 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
-$PublisherResult = $Publisher->WaitKill (30);
+$PublisherResult = $Publisher->WaitKill (300);
 if ($$PublisherResult != 0) {
     # writing out to STDOUT as these tests redirect STDERR to a log file.
     # The nightly script parses STDERR to detect test failures.

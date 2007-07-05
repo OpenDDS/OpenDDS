@@ -62,7 +62,8 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_links",5);
 
-  GuardType guard(this->lock_);
+  GuardType guard1(this->lock_);
+  GuardType guard2(released_set->lock_);
 
   // Attempt to unbind each of the DataLinks in the released_set's
   // internal map from *this* object's internal map.

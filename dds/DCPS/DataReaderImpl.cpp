@@ -187,7 +187,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
   if (DCPS_debug_level >= 1)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::add_associations "
-      "bit %d local %d remote %d\n", is_bit_, yourId, writers[0].writerId));
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, yourId, writers[0].writerId, writers.length () ));
   }
 
   if (entity_deleted_ == true)
@@ -355,7 +355,7 @@ void DataReaderImpl::remove_associations (
   if (DCPS_debug_level >= 1)
   {
     ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::remove_associations "
-      "bit %d local %d remote %d\n", is_bit_, subscription_id_, writers[0]));
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, subscription_id_, writers[0], writers.length ()));
   }
 
   ::DDS::InstanceHandleSeq handles;
@@ -925,7 +925,10 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
       iter->second.received_activity (when);
     }
   else
-    ACE_ERROR((LM_ERROR,"(%P|%t) DataReaderImpl::writer_activity"
+    // This may not be an error since it could happen that the sample
+    // is delivered to the datareader after the write is dis-associated
+    // with this datareader.
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) DataReaderImpl::writer_activity"
 	       " reader %d is not associated with writer %d\n",
 	       this->subscription_id_, writer_id));
 }

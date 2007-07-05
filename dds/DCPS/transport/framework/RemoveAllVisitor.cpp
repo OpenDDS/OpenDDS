@@ -36,7 +36,7 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
 
   // Inform the element that we've made a decision - and it is
   // data_dropped()
-  element->data_dropped();
+  element->data_dropped(true);
 
   // Adjust our status_ to indicate that we actually found (and removed)
   // the sample.
