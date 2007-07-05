@@ -14,6 +14,7 @@ project(*SyncServer) : taoexe, portableserver, iortable {
   exename = syncServer
   includes += ../Sync
   libs += SyncServer
+  libpaths += $(DDS_ROOT)/lib
   after += *idl Sync_ServerLib
   avoids += minimum_corba
 
