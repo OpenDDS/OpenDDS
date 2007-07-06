@@ -1,3 +1,19 @@
+Fri Jul 06 18:06:18 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Built-In Topic topic for Participant was being stored into wrong
+          variable.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Fixed Built-In Topic transport only using localhost.
+
+          Added new configuration variable "DCPSBitTransportIPAddress"
+          to set the ip address (not port) for the Built-In Topic
+          transport.
+
 Fri Jul  6 17:33:43 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * README:

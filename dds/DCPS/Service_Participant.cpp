@@ -50,6 +50,7 @@ namespace OpenDDS
     static bool got_chunk_association_multiplier = false;
     static bool got_liveliness_factor = false;
     static bool got_bit_transport_port = false;
+    static bool got_bit_transport_ip = false;
     static bool got_bit_lookup_duration_msec = false;
     static bool got_bit_flag = false;
 
@@ -59,6 +60,7 @@ namespace OpenDDS
       n_chunks_ (DEFAULT_NUM_CHUNKS),
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
+      bit_transport_ip_(""),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (
 #ifdef DDS_HAS_MINIMUM_BIT
@@ -396,6 +398,12 @@ namespace OpenDDS
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
+          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportIPAddress")) != 0)
+            {
+              bit_transport_ip_ = currentArg;
+              arg_shifter.consume_arg ();
+              got_bit_transport_ip = true;
+            }
           else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationMsec")) != 0)
             {
               bit_lookup_duration_msec_ = ACE_OS::atoi (currentArg);
@@ -559,10 +567,14 @@ namespace OpenDDS
       SimpleTcpConfiguration* tcp_config
         = static_cast <SimpleTcpConfiguration*> (config.in ());
 
-      // localhost will only work for DCPSInfo on the same machine.
-      // Don't specify an address to an OS picked address is used.
-      tcp_config->local_address_
-        = ACE_INET_Addr (bit_transport_port_, ACE_LOCALHOST);
+      if (0 == bit_transport_ip_.length ())
+        {
+          tcp_config->local_address_ = ACE_INET_Addr (bit_transport_port_);
+        }
+      else
+        {
+          tcp_config->local_address_ = ACE_INET_Addr (bit_transport_port_, bit_transport_ip_.c_str());
+        }
 
       if (bit_transport_impl_->configure(config.in()) != 0)
         {
@@ -748,6 +760,15 @@ namespace OpenDDS
           else
             {
               GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitTransportPort", this->bit_transport_port_, int)
+            }
+          if (got_bit_transport_ip)
+            {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t)ignore DCPSBitTransportIPAddress config value, use command option.\n")));
+            }
+          else
+            {
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DCPSBitTransportIPAddress", this->bit_transport_ip_)
             }
           if (got_liveliness_factor)
             {
