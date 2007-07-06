@@ -289,7 +289,9 @@ namespace OpenDDS
       /// The propagation delay factor.
       int                                    liveliness_factor_;
 
-      /// The local transport port number.
+      /// The builtin topic transport address.
+      ACE_CString                            bit_transport_ip_;
+      /// The builtin topic transport port number.
       int                                    bit_transport_port_;
 
       /// The transport impl for builtin topics.

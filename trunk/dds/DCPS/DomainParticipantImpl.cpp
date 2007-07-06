@@ -1587,11 +1587,11 @@ namespace OpenDDS
               }
           }
 
-        bit_topic_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+        bit_part_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
                                                ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                                topic_qos,
                                                ::DDS::TopicListener::_nil());
-        if (CORBA::is_nil (bit_topic_topic_.in ()))
+        if (CORBA::is_nil (bit_part_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ")
