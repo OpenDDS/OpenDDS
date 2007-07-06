@@ -1,3 +1,9 @@
+Fri Jul  6 21:04:37 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Fixed incorrect description of the Perl dependency.
+
 Fri Jul  6 19:19:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * docs/Configuration_Settings.html:
