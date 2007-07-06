@@ -1,4 +1,10 @@
-Fri Jul 06 18:06:18 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+Fri Jul  6 19:19:30 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/Configuration_Settings.html:
+
+          Documented the DCPSBitTransportIPAddress setting.
+
+Fri Jul  6 18:06:18 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
 
