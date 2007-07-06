@@ -91,6 +91,13 @@ with this release of OpenDDS.
 GNU Make 3.8 was used for automating the compiling and linking of OpenDDS
 on Unix and Linux systems.
 
+** Perl
+
+Perl is needed if you will be running the automated tests and examples
+included in this source tree, or if you will be generating Makefiles or
+Visual Studio project files.  In most cases you will *not* need to generate
+Makefiles/project files, but see the docs/INSTALL file for details.
+
 * Build Targets
 
 * Operating Systems
@@ -99,8 +106,9 @@ This release of OpenDDS has been tested under the following platforms:
 
 ** Windows XP and Server 2003
 ** Linux RedHat EL 5, RedHat 7.2, Fedora Core (3, 4, 6), Ubuntu "Fiesty Fawn"
-** SunOS 5.9 and 5.10
-** QNX Neutrino 6.3.0
+        (both x86 and x86_64)
+** SunOS 5.9 (x86) and 5.10 (sparc)
+** QNX Neutrino 6.3.0 (x86)
 
 ======================================================================
 * Compilers

@@ -1,27 +1,34 @@
+Fri Jul  6 17:33:43 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+        * docs/INSTALL:
+
+          Added more information on which platforms are tested, etc.
+
 Thu Jul  5 22:21:50 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         These changes intended to fix the bugs and work around limitations
         observered during sub_init_loop test debugging.
-        
+
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Updated logging message to provide more detail infos.
-          
+
         * dds/DCPS/WriteDataContainer.cpp:
-        
+
           Added locking in unregister_all function to access the sending_data_
-          list since the function may be called from the thread calling 
+          list since the function may be called from the thread calling
           delete_datawriter which does not hold the lock in advance.
-        
+
         * dds/DCPS/transport/framework/DataLinkSet.inl:
         * dds/DCPS/transport/framework/DataLinkSet.cpp:
 
-          Made the send_start() and remove_links() also acquire the 
-          lock in the provided DataLinkSet. This would fix the access 
-          violation when send_start is using the link while the link 
+          Made the send_start() and remove_links() also acquire the
+          lock in the provided DataLinkSet. This would fix the access
+          violation when send_start is using the link while the link
           is removed from the DataLinkSet.
-          
+
         * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
 
           Fixed a bug in visit_element() that should pass true( data
@@ -32,61 +39,61 @@ Thu Jul  5 22:21:50 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/ReceiveListenerSet.h:
         * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
         * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
-        
-          Added get_keys() and exist() function to avoid the map iteration 
+
+          Added get_keys() and exist() function to avoid the map iteration
           outside ReceiveListenerSet class scope.
-          Added lock to protect the internal map to fix the access violation 
+          Added lock to protect the internal map to fix the access violation
           on the ReceiveListener object.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
 
           Applied the new functions defined in ReceiveListenerSet.
-          
+
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
-        
+
           Made the reconnect() function check if the send/receive strategy
           are reset to nil or not to avoid the access violation. If strategies
           are reset, a new strategy will be created.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
-                        
-          Made the strategy hold a reference of the connection while 
-          receiving/sending to avoid the problem that the connection 
+
+          Made the strategy hold a reference of the connection while
+          receiving/sending to avoid the problem that the connection
           is destroyed while receiving/sending samples.
           Updated some logging messages to provide the function name.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
-        
-          Added friendship with SimpleTcpDataLink so the 
-          connect_datalink() can be called in 
+
+          Added friendship with SimpleTcpDataLink so the
+          connect_datalink() can be called in
           SimpleTcpDataLink::reconnect().
 
         * tests/DCPS/sub_init_loop/pub.ini:
-        
+
           Made the publisher not try to reconnect to reduce the time
           period between connection tear down by the reconnect thread
           and association removing by the cleanup task thread.
-          
+
         * tests/DCPS/sub_init_loop/run_test.pl:
-        
-          Extended the publisher timeout since the unregistering the 
-          datawriter may take longer. 
-          
+
+          Extended the publisher timeout since the unregistering the
+          datawriter may take longer.
+
         * tests/DCPS/sub_init_loop/subscriber.cpp:
 
           Added time delay for the datareader restart. This is a
-          work around of the problem that the cleanup task removes 
-          the newly added associations and cause the datareader 
+          work around of the problem that the cleanup task removes
+          the newly added associations and cause the datareader
           timeout on waiting for new connection. The real solution
           is to get a snapshot of the associations in the datalink
           at the time the reconnect attempt failed and the cleanup
-          task should remove the associations based on the snapshot 
-          of the associations. 
-          
+          task should remove the associations based on the snapshot
+          of the associations.
+
 Thu Jul  5 22:21:49 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * README:
