@@ -1,3 +1,9 @@
+Sun Jul  8 16:10:37 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+
+          Added "libpaths += " for new location of the library.
+
 Sun Jul  8 15:39:28 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:

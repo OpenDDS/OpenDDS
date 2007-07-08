@@ -44,6 +44,7 @@ project(*ClientLib) : taolib_with_idl, portableserver {
 project(*Server) : taoexe, taoidldefaults, portableserver, iortable {
   exename = syncServer
   libs   += SyncServer
+  libpaths += $(DDS_ROOT)/lib
   after  += *ServerLib
   avoids += minimum_corba
 
