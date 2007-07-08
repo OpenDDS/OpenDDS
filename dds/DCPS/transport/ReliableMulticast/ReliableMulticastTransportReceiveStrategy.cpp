@@ -16,6 +16,10 @@ typedef OpenDDS::DCPS::ReliableMulticastTransportImpl ReliableMulticastTransport
 
 namespace
 {
+
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#pragma warning (disable:4996) //std::copy OK here
+#endif
   /// Fill an iovec as much as possible with data from a packet.
   /// Increment iovidx if we hit the end of an iovec,
   /// erase data from packets accordingly and increment packetidx if
@@ -52,6 +56,9 @@ namespace
     }
     return to_fill;
   }
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#pragma warning (default:4996)
+#endif
 
   size_t fillIovecArray(
     std::vector<Packet>& packets,

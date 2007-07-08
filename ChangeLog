@@ -1,3 +1,11 @@
+Sun Jul  8 15:39:28 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportReceiveStrategy.cpp:
+
+          Added #pragma warning disable for VC8.  std::copy is not used here in
+          a way that could lead to buffer overflow.
+
 Fri Jul  6 21:04:37 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * README:
