@@ -1,3 +1,11 @@
+Mon Jul  9 15:49:20 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Bumped version number to 1.01 in preparation for next release.  The
+          actual version number may change before the release.
+
 Mon Jul  9 14:58:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * OpenDDS version 1.0 released.

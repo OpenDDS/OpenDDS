@@ -1,3 +1,12 @@
+Version 1.01 (??) of OpenDDS.
+
+New to this version are the following changes:
+
+- First release note goes here
+
+
+=========================================================================
+
 Version 1.0 of OpenDDS.
 
 New to this version are the following changes:
