@@ -1,13 +1,8 @@
-This is DDS version 0_12, released Fri May 18 19:26:02 UTC 2007.
+This is OpenDDS version 1.0, released Mon Jul  9 14:58:42 UTC 2007.
 
-This software is open source and free of licensing fees, we do not
-derive any revenue other than through our services and support
-(and a little from book and CD sales).  So, unfortunately, we are
-unable to provide free support.
+This software is open source and free of licensing fees.  See the
+LICENSE file (in this directory) for license details.
 
-For more details, and information on opening a support contract
-please see http://www.theaceorb.com/support/index.html or contact
-sales@ociweb.com
+For information about OpenDDS support see the README file.
 
-Other sources of information you may want to consider using are:
-
+For more information about OpenDDS please visit www.opendds.org.
