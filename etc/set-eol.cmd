@@ -2,7 +2,7 @@
 :: Author: Adam Mitz (mitza@ociweb.com)
 :: Purpose: This fixes files that have Unix line endings on Windows systems
 :: Preconditions: Run from a completely clean svn checkout (no unversioned
-:: files present)
+:: files present) and CYGWIN_ROOT should be set to c:\cygwin or something.
 if not "%DDS_ROOT%" == "%CD%" (
         echo This script must be run from DDS_ROOT
         goto :EOF
