@@ -100,6 +100,7 @@ Additionally, Perl is used for running the automated tests and examples
 included in this source tree, or if you will be generating Makefiles or
 Visual Studio project files.  In most cases you will *not* need to generate
 Makefiles/project files, but see the docs/INSTALL file for details.
+On Windows platforms, we recommend the use of ActiveState Perl.
 
 * Build Targets
 
