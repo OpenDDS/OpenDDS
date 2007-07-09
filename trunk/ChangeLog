@@ -1,3 +1,34 @@
+Mon Jul  9 19:37:59 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS:
+
+        * examples/DCPS/IntroductionToOpenDDS/AAA_README.txt:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.idl:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mwc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoterCommon_Export.h:
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/domain_ids:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/udp.conf:
+
+          Added the source code to the "introduction" article example from the
+          website.  This will ensure that that we keep the code up-to-date
+          since it will be compiled in the nightly builds.
+
 Mon Jul  9 15:49:20 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_release_notes.txt:
