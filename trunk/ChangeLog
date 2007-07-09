@@ -1,3 +1,9 @@
+Mon Jul  9 14:46:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Added info on ActiveState Perl.
+
 Sun Jul  8 16:10:37 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/Sync.mpc:
