@@ -1,0 +1,6 @@
+This directory contains informal design documents.
+If a non-trivial feature is added to DDS, it should have document in this directory.
+The document should include a date when it was created (or last updated).
+Some of the documents are thoughts on future work.
+
+!!! WARNING !!! These documents may not be kept up-to-date.
