@@ -1,3 +1,10 @@
+Mon Jul  9 20:52:47 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/set-eol.cmd:
+
+          Added a script to fix files that show up with Unix line endings on
+          Windows systems.
+
 Mon Jul  9 19:37:59 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS:
