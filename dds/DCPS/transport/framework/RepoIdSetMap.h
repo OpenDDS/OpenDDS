@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_REPOIDSETMAP_H
-#define TAO_DCPS_REPOIDSETMAP_H
+#ifndef OPENDDS_DCPS_REPOIDSETMAP_H
+#define OPENDDS_DCPS_REPOIDSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "RepoIdSet.h"
@@ -10,26 +10,21 @@
 #include "RepoIdSet_rch.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Serializer.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
   {
     class RepoIdSetMap;
 
-    class TAO_DdsDcps_Export RepoIdSetMap
+    class OpenDDS_Dcps_Export RepoIdSetMap
     {
       public:
 
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        RepoIdSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
-
+        typedef std::map<RepoId, RepoIdSet_rch> MapType;
 
         RepoIdSetMap();
         virtual ~RepoIdSetMap();
@@ -73,10 +68,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_REPOIDSETMAP_H */
+#endif /* OPENDDS_DCPS_REPOIDSETMAP_H */

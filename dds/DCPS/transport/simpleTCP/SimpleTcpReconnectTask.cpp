@@ -9,22 +9,22 @@
 
 
 
-TAO::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
-  TAO::DCPS::SimpleTcpConnection* connection)
+OpenDDS::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
+  OpenDDS::DCPS::SimpleTcpConnection* connection)
   : connection_ (connection)
 {
   DBG_ENTRY_LVL("SimpleTcpReconnectTask","SimpleTcpReconnectTask",5);
 }
 
 
-TAO::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
+OpenDDS::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 {
   DBG_ENTRY_LVL("SimpleTcpReconnectTask","~SimpleTcpReconnectTask",5);
 }
 
 
 
-void TAO::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
+void OpenDDS::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
 {
   DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",5);
 

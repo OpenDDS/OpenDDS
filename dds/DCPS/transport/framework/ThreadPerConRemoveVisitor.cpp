@@ -13,14 +13,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::ThreadPerConRemoveVisitor::~ThreadPerConRemoveVisitor()
+OpenDDS::DCPS::ThreadPerConRemoveVisitor::~ThreadPerConRemoveVisitor()
 {
   DBG_ENTRY("ThreadPerConRemoveVisitor","~ThreadPerConRemoveVisitor");
 }
 
 
 int
-TAO::DCPS::ThreadPerConRemoveVisitor::visit_element(SendRequest* element,
+OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element(SendRequest* element,
                                                     int&         remove)
 {
   DBG_ENTRY("ThreadPerConRemoveVisitor","visit_element");

@@ -9,8 +9,8 @@
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "DataSampleList.h"
 #include "ace/Synch_T.h"
-#include "ace/Hash_Map_Manager.h"
 
+#include <map>
 #include <set>
 
 
@@ -19,18 +19,13 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
     class DataWriterImpl;
 
-    typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
-                                    PublicationInstance*,
-                                    ACE_Hash< ::DDS::InstanceHandle_t>,
-                                    ACE_Equal_To< ::DDS::InstanceHandle_t>,
-                                    ACE_Null_Mutex>        PublicationInstanceMapType;
-
+    typedef std::map< ::DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
     /**
     * @class WriteDataContainer
@@ -86,7 +81,7 @@ namespace TAO
     *          should be a recursive lock so that: 1) we do not deadlock; and,
     *          2) we incur the cost of obtaining the lock only once.
     */
-    class TAO_DdsDcps_Export WriteDataContainer
+    class OpenDDS_Dcps_Export WriteDataContainer
     {
     public:
 
@@ -128,7 +123,7 @@ namespace TAO
       * samples. The samples will be sent to the subscribers specified.
       */
       ::DDS::ReturnCode_t
-      reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds);
+      reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds);
 
       /**
       * Dynamically allocate a PublicationInstance object and add to
@@ -274,7 +269,7 @@ namespace TAO
 
       void copy_and_append (DataSampleList& list,
                             const DataSampleList& appended,
-                            const TAO::DCPS::ReaderIdSeq& rds);
+                            const OpenDDS::DCPS::ReaderIdSeq& rds);
 
       /**
       * Remove the oldest sample (head) from the instance history list.
@@ -381,7 +376,7 @@ namespace TAO
       ::DDS::InstanceHandle_t next_handle_;
     } ;
 
-  } /// namespace TAO
+  } /// namespace OpenDDS
 } /// namespace DCPS
 
 #endif /* TAO_DDS_DCPS_WRITE_DATA_CONTAINER_H */

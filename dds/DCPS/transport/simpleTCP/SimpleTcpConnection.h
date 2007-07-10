@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPCONNECTION_H
-#define TAO_DCPS_SIMPLETCPCONNECTION_H
+#ifndef OPENDDS_DCPS_SIMPLETCPCONNECTION_H
+#define OPENDDS_DCPS_SIMPLETCPCONNECTION_H
 
 #include "SimpleTcpConfiguration.h"
 #include "SimpleTcpConfiguration_rch.h"
@@ -21,7 +21,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -184,4 +184,4 @@ namespace TAO
 #include "SimpleTcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_SIMPLETCPCONNECTION_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPCONNECTION_H */

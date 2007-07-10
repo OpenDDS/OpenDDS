@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTDEFS_H
-#define TAO_DCPS_TRANSPORTDEFS_H
+#ifndef OPENDDS_DCPS_TRANSPORTDEFS_H
+#define OPENDDS_DCPS_TRANSPORTDEFS_H
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
@@ -113,7 +113,7 @@ static const char  TRANSPORT_SECTION_NAME_PREFIX[] = "transport_impl_";
 // The transport section name prefix is "transport_impl_" so the length is 15.
 static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX);
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -142,6 +142,7 @@ namespace TAO
     const TransportIdType DEFAULT_SIMPLE_MCAST_SUB_ID = 0xFFFFFF03;
     const TransportIdType DEFAULT_RELIABLE_MULTICAST_PUB_ID = 0xFFFFFF04;
     const TransportIdType DEFAULT_RELIABLE_MULTICAST_SUB_ID = 0xFFFFFF05;
+    const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF06;
 
     /// Return code type for send_control() operations.
     enum SendControlStatus
@@ -211,6 +212,6 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
-#endif  /* TAO_DCPS_TRANSPORTDEFS_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTDEFS_H */

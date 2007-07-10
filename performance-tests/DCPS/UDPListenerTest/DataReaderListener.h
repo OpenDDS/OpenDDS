@@ -16,7 +16,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl :
-  public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
+  public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor

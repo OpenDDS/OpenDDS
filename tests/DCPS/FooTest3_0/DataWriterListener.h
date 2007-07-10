@@ -13,7 +13,7 @@
 
 //Class DataWriterListenerImpl
 class DataWriterListenerImpl
-  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataWriterListener>
+  : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {
 public:
   //Constructor
@@ -58,7 +58,7 @@ virtual void on_publication_match (
 
 virtual void on_publication_disconnected (
     ::DDS::DataWriter_ptr writer,
-    const ::TAO::DCPS::PublicationDisconnectedStatus & status
+    const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -66,7 +66,7 @@ virtual void on_publication_disconnected (
 
 virtual void on_publication_reconnected (
     ::DDS::DataWriter_ptr writer,
-    const ::TAO::DCPS::PublicationReconnectedStatus & status
+    const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -74,7 +74,7 @@ virtual void on_publication_reconnected (
 
 virtual void on_publication_lost (
     ::DDS::DataWriter_ptr writer,
-    const ::TAO::DCPS::PublicationLostStatus & status
+    const ::OpenDDS::DCPS::PublicationLostStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

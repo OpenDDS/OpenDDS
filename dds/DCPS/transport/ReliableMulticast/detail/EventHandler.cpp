@@ -11,7 +11,7 @@
 #endif /* __ACE_INLINE__ */
 
 void
-TAO::DCPS::ReliableMulticast::detail::EventHandler::close()
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::close()
 {
   if (socket_.get_handle() != ACE_INVALID_HANDLE)
   {
@@ -24,7 +24,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::close()
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
   char* buffer,
   size_t size,
   const ACE_INET_Addr& dest
@@ -47,13 +47,13 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
 }
 
 ACE_HANDLE
-TAO::DCPS::ReliableMulticast::detail::EventHandler::get_handle() const
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::get_handle() const
 {
   return socket_.get_handle();
 }
 
 int
-TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
   ACE_HANDLE fd
   )
 {
@@ -74,7 +74,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_input(
 }
 
 int
-TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
   ACE_HANDLE fd
   )
 {
@@ -103,7 +103,7 @@ TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_output(
 }
 
 int
-TAO::DCPS::ReliableMulticast::detail::EventHandler::handle_close(
+OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::handle_close(
   ACE_HANDLE fd,
   ACE_Reactor_Mask mask
   )

@@ -12,7 +12,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -21,11 +21,11 @@ namespace TAO
     /**
     * @class DataWriterRemoteImpl
     *
-    * @brief Implements the ::TAO::DCPS::DataWriterRemote interface.
+    * @brief Implements the ::OpenDDS::DCPS::DataWriterRemote interface.
     *
     */
-    class TAO_DdsDcps_Export DataWriterRemoteImpl
-      : public virtual POA_TAO::DCPS::DataWriterRemote
+    class OpenDDS_Dcps_Export DataWriterRemoteImpl
+      : public virtual POA_OpenDDS::DCPS::DataWriterRemote
       , public virtual PortableServer::RefCountServantBase
     {
     public:
@@ -37,7 +37,7 @@ namespace TAO
 
 
     virtual void add_associations (
-        ::TAO::DCPS::RepoId yourId,
+        ::OpenDDS::DCPS::RepoId yourId,
         const ReaderAssociationSeq & readers
       )
       ACE_THROW_SPEC ((
@@ -53,7 +53,7 @@ namespace TAO
       ));
 
     virtual void update_incompatible_qos (
-        const TAO::DCPS::IncompatibleQosStatus & status
+        const OpenDDS::DCPS::IncompatibleQosStatus & status
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -65,6 +65,6 @@ namespace TAO
    };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* DDSDCPSPUBLICATION_DATAWRITER_H_  */

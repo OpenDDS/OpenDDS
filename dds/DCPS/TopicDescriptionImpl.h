@@ -5,14 +5,14 @@
 #define TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 
 #include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsTypeSupportTaoS.h"
+#include "dds/DdsDcpsTypeSupportExtS.h"
 #include "ace/SString.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -25,15 +25,15 @@ namespace TAO
     * the interface this class is implementing.
     *
     */
-    class TAO_DdsDcps_Export TopicDescriptionImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::TopicDescription>
+    class OpenDDS_Dcps_Export TopicDescriptionImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::TopicDescription>
     {
     public:
 
       //Constructor
       TopicDescriptionImpl (const char*                    topic_name,
                             const char*                    type_name,
-                            TAO::DCPS::TypeSupport_ptr type_support,
+                            OpenDDS::DCPS::TypeSupport_ptr type_support,
                             ::DDS::DomainParticipant_ptr   participant);
 
       //Destructor
@@ -62,7 +62,7 @@ namespace TAO
       *  internal use.
       *  Return the type support of the topic.
       */
-      TAO::DCPS::TypeSupport_ptr get_type_support ();
+      OpenDDS::DCPS::TypeSupport_ptr get_type_support ();
 
     protected:
       /// The name of the topic.
@@ -74,12 +74,12 @@ namespace TAO
       ::DDS::DomainParticipant_ptr   participant_;
 
       /// The type_support for this topic.
-      TAO::DCPS::TypeSupport_ptr type_support_;
+      OpenDDS::DCPS::TypeSupport_ptr type_support_;
     };
 
 
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H  */

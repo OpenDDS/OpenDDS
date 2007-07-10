@@ -13,14 +13,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
+OpenDDS::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
 {
   DBG_ENTRY_LVL("RemoveAllVisitor","~RemoveAllVisitor",5);
 }
 
 
 int
-TAO::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
+OpenDDS::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
                                            int&                   remove)
 {
   DBG_ENTRY_LVL("RemoveAllVisitor","visit_element",5);
@@ -36,7 +36,7 @@ TAO::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
 
   // Inform the element that we've made a decision - and it is
   // data_dropped()
-  element->data_dropped();
+  element->data_dropped(true);
 
   // Adjust our status_ to indicate that we actually found (and removed)
   // the sample.

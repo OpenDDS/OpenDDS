@@ -35,7 +35,7 @@ MyTypeSupportImpl::register_type (
   else
      tn = CORBA::string_dup (type_name);
 
-  return ::TAO::DCPS::Registered_Data_Types->register_type(participant,
+  return ::OpenDDS::DCPS::Registered_Data_Types->register_type(participant,
                                                            tn.in (),
                                                            this);
 }
@@ -65,7 +65,7 @@ MyTypeSupportImpl::get_type_name (
 
 
     ::DDS::DataWriter_ptr writer_obj
-      = ::TAO::DCPS::servant_to_reference (writer_impl);
+      = ::OpenDDS::DCPS::servant_to_reference (writer_impl);
 
     return writer_obj;
   }
@@ -83,7 +83,7 @@ MyTypeSupportImpl::get_type_name (
 
 
     ::DDS::DataReader_ptr reader_obj
-      = ::TAO::DCPS::servant_to_reference (reader_impl);
+      = ::OpenDDS::DCPS::servant_to_reference (reader_impl);
 
     return reader_obj;
   }

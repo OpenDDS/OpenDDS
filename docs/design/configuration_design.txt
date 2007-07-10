@@ -389,7 +389,7 @@ void TransportFactory::load_configuration (ACE_Configuration&) for details.
    - single step to create/configure TransportImpl when transport_id is NOT configured in the conf.ini
 
      // using the transport type's default configuration (hardcoded).
-     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, TAO::DCPS::AUTO_CONFIG);
+     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, OpenDDS::DCPS::AUTO_CONFIG);
    
 
 	e.g.     performance-tests\DCPS\SimpleLatency

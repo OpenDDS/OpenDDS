@@ -16,9 +16,9 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
+OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
-                                         TAO::DCPS::SimpleTcpTransport*  transport_impl)
+                                         OpenDDS::DCPS::SimpleTcpTransport*  transport_impl)
   : DataLink(transport_impl),
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
@@ -29,7 +29,7 @@ TAO::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
 }
 
 
-TAO::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
+OpenDDS::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","~SimpleTcpDataLink",5);
 }
@@ -42,7 +42,7 @@ TAO::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 /// it has just released the last remaining reservations from the DataLink,
 /// and the DataLink is in the process of "releasing" itself.
 void
-TAO::DCPS::SimpleTcpDataLink::stop_i()
+OpenDDS::DCPS::SimpleTcpDataLink::stop_i()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","stop_i",5);
 
@@ -58,7 +58,7 @@ TAO::DCPS::SimpleTcpDataLink::stop_i()
 
 
 void
-TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
+OpenDDS::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","pre_stop_i",5);
 
@@ -92,7 +92,7 @@ TAO::DCPS::SimpleTcpDataLink::pre_stop_i()
 /// connection object for us.  This call puts this SimpleTcpDataLink into
 /// the "connected" state.
 int
-TAO::DCPS::SimpleTcpDataLink::connect
+OpenDDS::DCPS::SimpleTcpDataLink::connect
                                  (SimpleTcpConnection*      connection,
                                   TransportSendStrategy*    send_strategy,
                                   TransportReceiveStrategy* receive_strategy)
@@ -137,7 +137,7 @@ TAO::DCPS::SimpleTcpDataLink::connect
 /// connection object and the "old" connection object is replaced by
 /// the new connection object.
 int
-TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
+OpenDDS::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","reconnect",5);
 
@@ -150,29 +150,63 @@ TAO::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
       return -1;
     }
 
+  this->connection_->transfer (connection);
+           
+  bool released = false;
+  TransportReceiveStrategy_rch brs;
+  TransportSendStrategy_rch bss;
+
+  {
+    GuardType guard2(this->strategy_lock_);
+
+    if (this->receive_strategy_.is_nil () && this->send_strategy_.is_nil ())
+    {
+      released = true;
+      this->connection_ = 0;
+    }
+    else
+    {
+      brs = this->receive_strategy_;
+      bss = this->send_strategy_;
+    }
+  }
+
+  if (released)
+  {
+    return this->transport_->connect_datalink (this, connection);
+  }
+
   // Keep a "copy" of the reference to the connection object for ourselves.
   connection->_add_ref();
-  this->connection_->transfer (connection);
   this->connection_ = connection;
 
   SimpleTcpReceiveStrategy* rs
-    = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+    = dynamic_cast <SimpleTcpReceiveStrategy*> (brs.in ());
 
-  if (rs == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-        "(%P|%t) ERROR: SimpleTcpDataLink::reconnect dynamic_cast failed\n"),
-        -1);
-    }
+  SimpleTcpSendStrategy* ss
+    = dynamic_cast <SimpleTcpSendStrategy*> (bss.in ());
+
+
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  return rs->reset (this->connection_.in ());
+  int rs_result = rs->reset (this->connection_.in ());
+
+  // Associate the new connection object with the sending strategy and disassociate
+  // the old connection object with the sending strategy.
+  int ss_result = ss->reset (this->connection_.in ());
+
+  if (rs_result == 0 && ss_result == 0)
+  {
+    return 0;
+  }
+
+  return -1;
 }
 
 
 
 void
-TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
+OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","send_graceful_disconnect_message",5);
 
@@ -192,7 +226,7 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //::DDS::Time_t source_timestamp
-  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //  = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;
@@ -250,10 +284,16 @@ TAO::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 
 
 void
-TAO::DCPS::SimpleTcpDataLink::fully_associated ()
+OpenDDS::DCPS::SimpleTcpDataLink::fully_associated ()
 {
   DBG_ENTRY_LVL("SimpleTcpDataLink","fully_associated",5);
 
+  while ( ! this->connection_->is_connected ())
+  {
+    ACE_Time_Value tv (0, 100000);
+    ACE_OS::sleep (tv);
+  }
+  this->resume_send ();
   bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
@@ -267,7 +307,7 @@ TAO::DCPS::SimpleTcpDataLink::fully_associated ()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //::DDS::Time_t source_timestamp
-  //  = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+  //  = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTRCHANDLES_H
-#define TAO_DCPS_RELIABLEMULTICASTRCHANDLES_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTRCHANDLES_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTRCHANDLES_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -14,7 +14,7 @@
 #include "ReliableMulticast_Export.h"
 #include "dds/DCPS/RcHandle_T.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -28,8 +28,8 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTRCHANDLES_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTRCHANDLES_H */

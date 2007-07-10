@@ -12,7 +12,7 @@
 #endif /* __ACE_INLINE__ */
 
 void
-TAO::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
+OpenDDS::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 {
   this->marshaled_size_ = 0;
 
@@ -79,7 +79,7 @@ TAO::DCPS::DataSampleHeader::init (ACE_Message_Block* buffer)
 }
 
 ACE_CDR::Boolean
-operator<< (ACE_Message_Block*& buffer, TAO::DCPS::DataSampleHeader& value)
+operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
 {
   TAO::DCPS::Serializer writer( buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
 
@@ -106,11 +106,11 @@ operator<< (ACE_Message_Block*& buffer, TAO::DCPS::DataSampleHeader& value)
   // We need to copy the publication ID here since we need to modify the
   // value as we encode it.
   //
-  TAO::DCPS::PublicationId id = value.publication_id_ ;
+  OpenDDS::DCPS::PublicationId id = value.publication_id_ ;
 
   // Encode.
-  const size_t amount = (((sizeof(TAO::DCPS::PublicationId)*8)%7)? 2: 1)
-                      +  ((sizeof(TAO::DCPS::PublicationId)*8)/7) ;
+  const size_t amount = (((sizeof(OpenDDS::DCPS::PublicationId)*8)%7)? 2: 1)
+                      +  ((sizeof(OpenDDS::DCPS::PublicationId)*8)/7) ;
   char  encoder[ amount] ;
   char* current = encoder + amount - 1 ;
   char* start   = current ;

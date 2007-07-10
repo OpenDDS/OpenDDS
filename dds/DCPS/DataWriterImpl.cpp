@@ -19,11 +19,12 @@
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
+#include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -123,11 +124,11 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            TopicImpl                             *topic_servant,
            const ::DDS::DataWriterQos &           qos,
            ::DDS::DataWriterListener_ptr          a_listener,
-           TAO::DCPS::DomainParticipantImpl*      participant_servant,
+           OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
            ::DDS::Publisher_ptr                   publisher,
-           TAO::DCPS::PublisherImpl*              publisher_servant,
+           OpenDDS::DCPS::PublisherImpl*              publisher_servant,
            ::DDS::DataWriter_ptr                  dw_local,
-           TAO::DCPS::DataWriterRemote_ptr        dw_remote
+           OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -163,18 +164,25 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   publisher_servant_ = publisher_servant;
   publisher_servant_->_add_ref ();
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
-  dw_remote_objref_  = TAO::DCPS::DataWriterRemote::_duplicate (dw_remote);
+  dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
 
   initialized_ = true;
 }
 
 void
-DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
+DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
            const ReaderAssociationSeq & readers
            )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","add_associations", 5);
+  
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::add_associations  "
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, yourId, readers[0].readerId, readers.length ()));
+  }
+
   if (entity_deleted_ == true)
   {
     if (DCPS_debug_level >= 1)
@@ -205,11 +213,17 @@ DataWriterImpl::add_associations ( ::TAO::DCPS::RepoId yourId,
 
 
 void
-DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
+DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
            size_t                  num_remote_associations,
            const AssociationData*  remote_associations)
 {
   DBG_ENTRY_LVL ("DataWriterImpl","fully_associated", 5);
+
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
+      "bit %d local %d remote %d num remotes %d\n", is_bit_, myid, remote_associations[0].remote_id_, num_remote_associations));
+  }
 
   {
     // protect readers_
@@ -253,7 +267,7 @@ DataWriterImpl::fully_associated ( ::TAO::DCPS::RepoId,
         publication_match_status_.total_count ++;
         publication_match_status_.total_count_change ++;
         subscription_handles_[sub_len + i] = handles[i];
-        if (id_to_handle_map_.bind (rd_ids[i], handles[i]) != 0)
+        if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataWriterImpl::fully_associated "
             "insert %d - %X to id_to_handle_map_ failed \n", rd_ids[i], handles[i]));
@@ -322,6 +336,12 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
               )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
+      "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
+  }
+
   CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -387,7 +407,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
     for (CORBA::ULong i = 0; i < num_removed_readers; i++)
     {
-      id_to_handle_map_.unbind (readers[i]);
+      id_to_handle_map_.erase(readers[i]);
     }
   }
 
@@ -405,7 +425,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 void DataWriterImpl::remove_all_associations ()
 {
 
-  TAO::DCPS::ReaderIdSeq readers;
+  OpenDDS::DCPS::ReaderIdSeq readers;
 
   CORBA::ULong size = readers_.length();
   readers.length(size);
@@ -430,7 +450,7 @@ void DataWriterImpl::remove_all_associations ()
 
 
 void
-DataWriterImpl::update_incompatible_qos ( const TAO::DCPS::IncompatibleQosStatus & status
+DataWriterImpl::update_incompatible_qos ( const OpenDDS::DCPS::IncompatibleQosStatus & status
             )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
@@ -1443,8 +1463,6 @@ bool
 DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
-  // TBD: Remove the condition check after we change to default support
-  //      builtin topics.
   if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
   {
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -1490,8 +1508,8 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
   for (CORBA::ULong i = 0; i < num_ids; ++i)
   {
     hdls.length (i + 1);
-    RepoIdToHandleMap::ENTRY* ientry;
-    if (id_to_handle_map_.find (ids[i], ientry) != 0)
+    RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
+    if (iter == id_to_handle_map_.end())
     {
       ACE_DEBUG ((LM_WARNING, "(%P|%t)DataWriterImpl::cache_lookup_instance_handles "
         "could not find instance handle for writer %d\n", ids[i]));
@@ -1500,7 +1518,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
     }
     else
     {
-      hdls[i] = ientry->int_id_;
+      hdls[i] = iter->second;
     }
   }
 
@@ -1509,4 +1527,4 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
 
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

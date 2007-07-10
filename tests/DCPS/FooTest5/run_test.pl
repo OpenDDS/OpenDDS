@@ -118,25 +118,31 @@ unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
+$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+$tcp_svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                                  "$tcp_svc_config -o $dcpsrepo_ior"
+                                  . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 
-$bit_off_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$bit_off_conf = "-DCPSBit 0";
+$svc_config = $tcp_svc_config;
 if ($use_udp == 1) {
-  $svc_config=" -ORBSvcConf udp.conf $bit_off_conf";
+  $svc_config = ($use_svc_config ? " -ORBSvcConf udp.conf " : '')
+      . $bit_off_conf;
 }
 elsif ($mixed_trans == 1) {
-  $svc_config= " -ORBSvcConf udp.conf -ORBSvcConf ../../tcp.conf $bit_off_conf";
+  $svc_config .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '')
+      . $bit_off_conf;
 }
 elsif ($use_mcast == 1) {
-  $svc_config=" -ORBSvcConf mcast.conf $bit_off_conf";
+  $svc_config = ($use_svc_config ? " -ORBSvcConf mcast.conf " : '')
+      . $bit_off_conf;
 }
 elsif ($use_reliable_multicast == 1) {
-  $svc_config=" -ORBSvcConf reliable_multicast.conf $bit_off_conf";
+  $svc_config = ($use_svc_config ? " -ORBSvcConf reliable_multicast.conf "
+                 : '') . $bit_off_conf;
 }
 
 # test multiple cases

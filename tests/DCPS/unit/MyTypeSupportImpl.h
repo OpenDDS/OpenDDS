@@ -29,7 +29,7 @@
  * @brief An implementation of a TypeSupport
  *
  */
-class MyTypeSupportImpl : public virtual TAO::DCPS::LocalObject<MyTypeSupport>
+class MyTypeSupportImpl : public virtual OpenDDS::DCPS::LocalObject<MyTypeSupport>
 {
 
 public:
@@ -68,7 +68,7 @@ public:
     ));
 };
 
-class MyDataReaderImpl :  public virtual TAO::DCPS::DataReaderImpl
+class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
@@ -83,11 +83,12 @@ public:
   }
   
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
-  virtual void dds_demarshal(const TAO::DCPS::ReceivedDataSample&) {}
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&) {}
+  virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
 
 };
 
-class MyDataWriterImpl :  public virtual TAO::DCPS::DataWriterImpl
+class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (

@@ -5,8 +5,14 @@
 #include "SimpleUnreliableDgramLoader.h"
 #include "ace/Dynamic_Service.h"
 
-TAO_DCPS_SimpleUnreliableDgram_Initializer::TAO_DCPS_SimpleUnreliableDgram_Initializer (void)
+OPENDDS_DCPS_SimpleUnreliableDgram_Initializer::OPENDDS_DCPS_SimpleUnreliableDgram_Initializer (void)
 {
-  ACE_Service_Config::process_directive (ace_svc_desc_TAO_DCPS_SimpleUnreliableDgramLoader);
+  ACE_Service_Config::process_directive (ace_svc_desc_OPENDDS_DCPS_SimpleUnreliableDgramLoader);
+
+#if SIMPLEUNRELIABLEDGRAM_HAS_DLL == 0
+  ACE_Service_Config::process_directive (
+    ACE_TEXT ("static OPENDDS_DCPS_SimpleUnreliableDgramLoader \"-type SimpleUdp "
+              "-type SimpleMcast\""));
+#endif
 }
 

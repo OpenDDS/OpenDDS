@@ -12,7 +12,7 @@
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleTcpConnection::disconnect()
+OpenDDS::DCPS::SimpleTcpConnection::disconnect()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","disconnect",5);
   this->peer().close();
@@ -23,7 +23,7 @@ TAO::DCPS::SimpleTcpConnection::disconnect()
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
+OpenDDS::DCPS::SimpleTcpConnection::remove_receive_strategy()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","remove_receive_strategy",5);
 
@@ -32,7 +32,7 @@ TAO::DCPS::SimpleTcpConnection::remove_receive_strategy()
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleTcpConnection::remove_send_strategy()
+OpenDDS::DCPS::SimpleTcpConnection::remove_send_strategy()
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","remove_send_strategy",5);
 
@@ -41,21 +41,21 @@ TAO::DCPS::SimpleTcpConnection::remove_send_strategy()
 
 
 ACE_INLINE bool
-TAO::DCPS::SimpleTcpConnection::is_connector ()
+OpenDDS::DCPS::SimpleTcpConnection::is_connector ()
 {
   return this->is_connector_;
 }
 
 
 ACE_INLINE bool
-TAO::DCPS::SimpleTcpConnection::is_connected ()
+OpenDDS::DCPS::SimpleTcpConnection::is_connected ()
 {
   return this->connected_.value ();
 }
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleTcpConnection::set_datalink (TAO::DCPS::SimpleTcpDataLink* link)
+OpenDDS::DCPS::SimpleTcpConnection::set_datalink (OpenDDS::DCPS::SimpleTcpDataLink* link)
 {
   // Keep a "copy" of the reference to the data link for ourselves.
   link->_add_ref ();
@@ -64,7 +64,7 @@ TAO::DCPS::SimpleTcpConnection::set_datalink (TAO::DCPS::SimpleTcpDataLink* link
 
 
 ACE_INLINE ACE_INET_Addr
-TAO::DCPS::SimpleTcpConnection::get_remote_address ()
+OpenDDS::DCPS::SimpleTcpConnection::get_remote_address ()
 {
   return this->remote_address_;
 }

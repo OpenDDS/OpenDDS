@@ -8,7 +8,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
-TAO::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchResource
+OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchResource
                                             (SimpleUnreliableDgramSocket*  socket,
                                              SimpleUnreliableDgramTransport* transport,
                                              const int& max_output_pause_period_ms)
@@ -29,14 +29,14 @@ TAO::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchResourc
 }
 
 
-TAO::DCPS::SimpleUnreliableDgramSynchResource::~SimpleUnreliableDgramSynchResource()
+OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::~SimpleUnreliableDgramSynchResource()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSynchResource","~SimpleUnreliableDgramSynchResource",5);
 }
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramSynchResource::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::notify_lost_on_backpressure_timeout ()
 {
   this->transport_->notify_lost_on_backpressure_timeout ();
   this->socket_->close_socket ();

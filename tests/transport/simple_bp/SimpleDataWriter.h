@@ -10,14 +10,14 @@
 class SimplePublisher;
 
 
-class SimpleDataWriter : public TAO::DCPS::TransportSendListener
+class SimpleDataWriter : public OpenDDS::DCPS::TransportSendListener
 {
   public:
 
     SimpleDataWriter();
     ~SimpleDataWriter();
 
-    void init(TAO::DCPS::RepoId pub_id);
+    void init(OpenDDS::DCPS::RepoId pub_id);
     int  run(SimplePublisher* publisher, unsigned num_messages, unsigned msg_size);
 
     // This means that the TransportImpl has been shutdown, making the
@@ -30,8 +30,8 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
     // message.
     void transport_lost();
 
-    virtual void data_delivered(TAO::DCPS::DataSampleListElement* sample);
-    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample,
+    virtual void data_delivered(OpenDDS::DCPS::DataSampleListElement* sample);
+    virtual void data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                               bool dropped_by_transport = false);
 
     int delivered_test_message();
@@ -39,7 +39,7 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
 
   private:
 
-    TAO::DCPS::RepoId pub_id_;
+    OpenDDS::DCPS::RepoId pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
 };

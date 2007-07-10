@@ -6,7 +6,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
-TAO::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)
+OpenDDS::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* msg_block)
 : TransportQueueElement(1),
   msg_ (msg_block)
 {
@@ -14,14 +14,14 @@ TAO::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Block* m
 }
 
 
-TAO::DCPS::TransportControlElement::~TransportControlElement()
+OpenDDS::DCPS::TransportControlElement::~TransportControlElement()
 {
   DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",5);
 }
 
 
 bool
-TAO::DCPS::TransportControlElement::requires_exclusive_packet() const
+OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
 {
   DBG_ENTRY_LVL("TransportControlElement","requires_exclusive_packet",5);
   return true;
@@ -29,7 +29,7 @@ TAO::DCPS::TransportControlElement::requires_exclusive_packet() const
 
 
 void
-TAO::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
+OpenDDS::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);
 
@@ -44,21 +44,21 @@ TAO::DCPS::TransportControlElement::release_element(bool dropped_by_transport)
 
 
 void
-TAO::DCPS::TransportControlElement::data_delivered()
+OpenDDS::DCPS::TransportControlElement::data_delivered()
 {
   DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",5);
 }
 
 
-TAO::DCPS::RepoId
-TAO::DCPS::TransportControlElement::publication_id() const
+OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::TransportControlElement::publication_id() const
 {
   return 0;
 }
 
 
 const ACE_Message_Block*
-TAO::DCPS::TransportControlElement::msg() const
+OpenDDS::DCPS::TransportControlElement::msg() const
 {
   return this->msg_;
 }

@@ -65,7 +65,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     assertTrue(transport.log_.empty());
 
@@ -93,7 +93,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 800);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 800);
 
     assertTrue(transport.log_.empty());
 
@@ -123,7 +123,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     linkImpl.open(0);
 
@@ -193,7 +193,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     linkImpl.open(0);
 
@@ -263,7 +263,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     linkImpl.open(0);
 
@@ -341,7 +341,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
 
     linkImpl.open(0);
 
@@ -379,7 +379,7 @@ namespace
   }
 
   struct DummyCallback
-    : public TAO::DCPS::LinkImplCallback
+    : public OpenDDS::DCPS::LinkImplCallback
   {
     DummyCallback()
       : numCallbacks(0)
@@ -404,7 +404,7 @@ namespace
   };
 
   void synthesizeMessage(
-    TAO::DCPS::LinkImpl& linkImpl,
+    OpenDDS::DCPS::LinkImpl& linkImpl,
     const TransportAPI::Id& requestId,
     size_t sequenceNumber,
     bool ending
@@ -439,7 +439,7 @@ namespace
   {
     DummyTransport transport;
     LinkGuard linkGuard(transport, transport.createLink());
-    TAO::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
     DummyCallback cb;
 
     linkImpl.open(0);

@@ -37,14 +37,16 @@ unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior"
+                             "$svc_config -o $dcpsrepo_ior"
 #                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+                             . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+
 # test multiple cases
 $sub_parameters = "$svc_config -s $sub_addr1 -s $sub_addr2 "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";

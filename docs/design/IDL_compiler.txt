@@ -521,7 +521,7 @@ less than operators are in stub code.
 --- how to implment---
 save #pragma DDS_DATA_TYPE "Xyz::Foo" in UTL_ScopedName as dcps_data_type_
 when TAO_ROOT_SERIALIZER_OP_CH finds dcps_data_type_.equals(node->name) when
-generating TAO::DCPS::Serializer stream operators then also generated Foo"KeyLessThan".
+generating OpenDDS::DCPS::Serializer stream operators then also generated Foo"KeyLessThan".
 
 -- meaning of "less than" --
 What does it mean to be "less than" for an array, sequence or struct?
@@ -608,7 +608,7 @@ between each Data and SampleInfo is represented by the use of the same index
  to access
 the corresponding elements on each of the collections. It is anticipated
  that additional
-data-accessing API’s may be provided on each target language to make this
+data-accessing APIs may be provided on each target language to make this
  operation as
 natural and efficient is it can be. The reason is that accessing data is the
  main purpose of

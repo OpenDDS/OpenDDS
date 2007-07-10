@@ -35,35 +35,35 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 }
 
 
-TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
-    TAO::DCPS::RepoId_out topicId,
+OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
+    OpenDDS::DCPS::RepoId_out topicId,
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId participantId,
     const char * topicName,
     const char * dataTypeName,
     const ::DDS::TopicQos & qos
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
       // bad domain id
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* participantPtr;
   if (domainPtr->find_participant(participantId,participantPtr) != 0)
     {
       // bad participant id
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  TAO::DCPS::TopicStatus topicStatus = domainPtr->add_topic(topicId,
+  OpenDDS::DCPS::TopicStatus topicStatus = domainPtr->add_topic(topicId,
                                                          topicName,
                                                          dataTypeName,
                                                          qos,
@@ -82,9 +82,9 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
 }
 
 bool
-TAO_DDS_DCPSInfo_i::add_topic (TAO::DCPS::RepoId topicId,
+TAO_DDS_DCPSInfo_i::add_topic (OpenDDS::DCPS::RepoId topicId,
                                ::DDS::DomainId_t domainId,
-                               TAO::DCPS::RepoId participantId,
+                               OpenDDS::DCPS::RepoId participantId,
                                const char* topicName,
                                const char* dataTypeName,
                                const ::DDS::TopicQos& qos)
@@ -103,37 +103,37 @@ TAO_DDS_DCPSInfo_i::add_topic (TAO::DCPS::RepoId topicId,
       return false;
     }
 
-  TAO::DCPS::TopicStatus topicStatus
+  OpenDDS::DCPS::TopicStatus topicStatus
     = domainPtr->force_add_topic (topicId, topicName, dataTypeName,
                                   qos, participantPtr);
 
-  if (topicStatus != TAO::DCPS::CREATED) {
+  if (topicStatus != OpenDDS::DCPS::CREATED) {
     return false;
   }
 
   return true;
 }
 
-TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
+OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
     ::DDS::DomainId_t domainId,
     const char * topicName,
     CORBA::String_out dataTypeName,
     ::DDS::TopicQos_out qos,
-    TAO::DCPS::RepoId_out topicId
+    OpenDDS::DCPS::RepoId_out topicId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Domain
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
       // bad domain id
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
-  TAO::DCPS::TopicStatus status = TAO::DCPS::NOT_FOUND;
+  OpenDDS::DCPS::TopicStatus status = OpenDDS::DCPS::NOT_FOUND;
 
   DCPS_IR_Topic* topic = 0;
   qos = new ::DDS::TopicQos;
@@ -141,7 +141,7 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
   status = domainPtr->find_topic(topicName, topic);
   if (0 != topic)
   {
-    status = TAO::DCPS::FOUND;
+    status = OpenDDS::DCPS::FOUND;
     const DCPS_IR_Topic_Description* desc = topic->get_topic_description();
     dataTypeName = desc->get_dataTypeName();
     *qos = *(topic->get_topic_qos());
@@ -152,37 +152,37 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
 }
 
 
-TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
+OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId topicId
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId topicId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      throw TAO::DCPS::Invalid_Topic();
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  TAO::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
+  OpenDDS::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
 
   if (um_) {
     um_->remove (Topic, topicId);
@@ -192,75 +192,75 @@ TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
 }
 
 
-TAO::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
+OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   ::DDS::DomainId_t domainId,
-  TAO::DCPS::RepoId participantId,
-  TAO::DCPS::RepoId topicId
+  OpenDDS::DCPS::RepoId participantId,
+  OpenDDS::DCPS::RepoId topicId
   )
   ACE_THROW_SPEC ((
   CORBA::SystemException
-  , TAO::DCPS::Invalid_Domain
-  , TAO::DCPS::Invalid_Participant
-  , TAO::DCPS::Invalid_Topic
+  , OpenDDS::DCPS::Invalid_Domain
+  , OpenDDS::DCPS::Invalid_Participant
+  , OpenDDS::DCPS::Invalid_Topic
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      throw TAO::DCPS::Invalid_Topic();
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  return TAO::DCPS::ENABLED;
+  return OpenDDS::DCPS::ENABLED;
 }
 
 
-TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
+OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId topicId,
-    TAO::DCPS::DataWriterRemote_ptr publication,
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId topicId,
+    OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const ::DDS::DataWriterQos & qos,
-    const TAO::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::PublisherQos & publisherQos
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      throw TAO::DCPS::Invalid_Topic();
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  TAO::DCPS::RepoId pubId = domainPtr->get_next_publication_id();
+  OpenDDS::DCPS::RepoId pubId = domainPtr->get_next_publication_id();
 
   DCPS_IR_Publication* pubPtr;
   ACE_NEW_RETURN(pubPtr,
@@ -297,7 +297,7 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
                                     , callback.c_str()
                                     , const_cast< ::DDS::PublisherQos &>(publisherQos)
                                     , const_cast< ::DDS::DataWriterQos &>(qos)
-                                    , const_cast< TAO::DCPS::TransportInterfaceInfo &>
+                                    , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
       um_->add (actor);
@@ -310,12 +310,12 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
 
 bool
 TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
-                                     TAO::DCPS::RepoId participantId,
-                                     TAO::DCPS::RepoId topicId,
-                                     TAO::DCPS::RepoId pubId,
+                                     OpenDDS::DCPS::RepoId participantId,
+                                     OpenDDS::DCPS::RepoId topicId,
+                                     OpenDDS::DCPS::RepoId pubId,
                                      const char* pub_str,
                                      const ::DDS::DataWriterQos & qos,
-                                     const TAO::DCPS::TransportInterfaceInfo & transInfo,
+                                     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
                                      const ::DDS::PublisherQos & publisherQos)
 {
   DCPS_IR_Domain* domainPtr;
@@ -343,8 +343,8 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
   domainPtr->set_base_publication_id (pubId + 1);
 
   CORBA::Object_var obj = orb_->string_to_object (pub_str);
-  TAO::DCPS::DataWriterRemote_var publication
-    = TAO::DCPS::DataWriterRemote::_unchecked_narrow (obj.in());
+  OpenDDS::DCPS::DataWriterRemote_var publication
+    = OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow (obj.in());
 
   DCPS_IR_Publication* pubPtr;
   ACE_NEW_RETURN(pubPtr,
@@ -384,26 +384,26 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
 
 void TAO_DDS_DCPSInfo_i::remove_publication (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId publicationId
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId publicationId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Publication
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Publication
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   if (partPtr->remove_publication(publicationId) != 0)
@@ -411,7 +411,7 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
       domainPtr->remove_dead_participants();
 
       // throw exception because the publication was not removed!
-      throw TAO::DCPS::Invalid_Publication();
+      throw OpenDDS::DCPS::Invalid_Publication();
     }
 
   domainPtr->remove_dead_participants();
@@ -422,41 +422,41 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
 }
 
 
-TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
+OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId topicId,
-    TAO::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId topicId,
+    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const ::DDS::DataReaderQos & qos,
-    const TAO::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::SubscriberQos & subscriberQos
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      throw TAO::DCPS::Invalid_Topic();
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  TAO::DCPS::RepoId subId = domainPtr->get_next_subscription_id ();
+  OpenDDS::DCPS::RepoId subId = domainPtr->get_next_subscription_id ();
 
   DCPS_IR_Subscription* subPtr;
   ACE_NEW_RETURN(subPtr,
@@ -494,7 +494,7 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                                     , callback.c_str()
                                     , const_cast< ::DDS::SubscriberQos &>(subscriberQos)
                                     , const_cast< ::DDS::DataReaderQos &>(qos)
-                                    , const_cast< TAO::DCPS::TransportInterfaceInfo &>
+                                    , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
       um_->add (actor);
@@ -508,12 +508,12 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
 bool
 TAO_DDS_DCPSInfo_i::add_subscription (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId topicId,
-    TAO::DCPS::RepoId subId,
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId topicId,
+    OpenDDS::DCPS::RepoId subId,
     const char* sub_str,
     const ::DDS::DataReaderQos & qos,
-    const TAO::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
     const ::DDS::SubscriberQos & subscriberQos
   )
 {
@@ -542,8 +542,8 @@ TAO_DDS_DCPSInfo_i::add_subscription (
   domainPtr->set_base_subscription_id (subId + 1);
 
   CORBA::Object_var obj = orb_->string_to_object (sub_str);
-  TAO::DCPS::DataReaderRemote_var subscription
-    = TAO::DCPS::DataReaderRemote::_unchecked_narrow (obj.in());
+  OpenDDS::DCPS::DataReaderRemote_var subscription
+    = OpenDDS::DCPS::DataReaderRemote::_unchecked_narrow (obj.in());
 
   DCPS_IR_Subscription* subPtr;
   ACE_NEW_RETURN(subPtr,
@@ -584,32 +584,32 @@ TAO_DDS_DCPSInfo_i::add_subscription (
 
 void TAO_DDS_DCPSInfo_i::remove_subscription (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId,
-    TAO::DCPS::RepoId subscriptionId
+    OpenDDS::DCPS::RepoId participantId,
+    OpenDDS::DCPS::RepoId subscriptionId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Subscription
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   if (partPtr->remove_subscription(subscriptionId) != 0)
     {
       // throw exception because the subscription was not removed!
-      throw TAO::DCPS::Invalid_Subscription();
+      throw OpenDDS::DCPS::Invalid_Subscription();
     }
 
   domainPtr->remove_dead_participants();
@@ -620,13 +620,13 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
 }
 
 
-TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
+OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     ::DDS::DomainId_t domain,
     const ::DDS::DomainParticipantQos & qos
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Domain
   ))
 {
   DCPS_IR_Domain* domainPtr;
@@ -634,10 +634,10 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
   if (domains_.find(domain, domainPtr) != 0)
     {
       // throw exception
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
-  TAO::DCPS::RepoId participantId = domainPtr->get_next_participant_id ();
+  OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id ();
 
   DCPS_IR_Participant* participant;
 
@@ -672,7 +672,7 @@ TAO::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 
 bool
 TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
-                                            , TAO::DCPS::RepoId participantId
+                                            , OpenDDS::DCPS::RepoId participantId
                                             , const ::DDS::DomainParticipantQos & qos)
 {
   DCPS_IR_Domain* domainPtr;
@@ -713,19 +713,19 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
 
 void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId participantId
+    OpenDDS::DCPS::RepoId participantId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
   ))
 {
   DCPS_IR_Domain* domainPtr;
 
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   CORBA::Boolean dont_notify_lost = 0;
@@ -734,32 +734,32 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
   if (0 != status)
     {
       // Removing the participant failed
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 }
 
 
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId myParticipantId,
-    TAO::DCPS::RepoId otherParticipantId
+    OpenDDS::DCPS::RepoId myParticipantId,
+    OpenDDS::DCPS::RepoId otherParticipantId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   partPtr->ignore_participant(otherParticipantId);
@@ -770,26 +770,26 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
 
 void TAO_DDS_DCPSInfo_i::ignore_topic (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId myParticipantId,
-    TAO::DCPS::RepoId topicId
+    OpenDDS::DCPS::RepoId myParticipantId,
+    OpenDDS::DCPS::RepoId topicId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Topic
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   partPtr->ignore_topic(topicId);
@@ -800,26 +800,26 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
 
 void TAO_DDS_DCPSInfo_i::ignore_subscription (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId myParticipantId,
-    TAO::DCPS::RepoId subscriptionId
+    OpenDDS::DCPS::RepoId myParticipantId,
+    OpenDDS::DCPS::RepoId subscriptionId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Subscription
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   partPtr->ignore_subscription(subscriptionId);
@@ -830,26 +830,26 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
 
 void TAO_DDS_DCPSInfo_i::ignore_publication (
     ::DDS::DomainId_t domainId,
-    TAO::DCPS::RepoId myParticipantId,
-    TAO::DCPS::RepoId publicationId
+    OpenDDS::DCPS::RepoId myParticipantId,
+    OpenDDS::DCPS::RepoId publicationId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
-    , TAO::DCPS::Invalid_Domain
-    , TAO::DCPS::Invalid_Participant
-    , TAO::DCPS::Invalid_Publication
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Publication
   ))
 {
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Domain();
+      throw OpenDDS::DCPS::Invalid_Domain();
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
     {
-      throw TAO::DCPS::Invalid_Participant();
+      throw OpenDDS::DCPS::Invalid_Participant();
     }
 
   partPtr->ignore_publication(publicationId);
@@ -958,16 +958,16 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
 {
   int status = 0;
 
-  TAO::DCPS::TransportImpl_rch trans_impl
-    = TheTransportFactory->create_transport_impl (TAO::DCPS::BIT_ALL_TRAFFIC,
+  OpenDDS::DCPS::TransportImpl_rch trans_impl
+    = TheTransportFactory->create_transport_impl (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->get_or_create_configuration (TAO::DCPS::BIT_ALL_TRAFFIC,
+  OpenDDS::DCPS::TransportConfiguration_rch config
+    = TheTransportFactory->get_or_create_configuration (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
                                                         "SimpleTcp");
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   if (listen_address_given)
     tcp_config->local_address_ = listen;

@@ -10,14 +10,14 @@
 #include "BuildChainVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::BuildChainVisitor::~BuildChainVisitor()
+OpenDDS::DCPS::BuildChainVisitor::~BuildChainVisitor()
 {
   DBG_ENTRY_LVL("BuildChainVisitor","~BuildChainVisitor",5);
 }
 
 
 int
-TAO::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
+OpenDDS::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("BuildChainVisitor","visit_element",5);
 

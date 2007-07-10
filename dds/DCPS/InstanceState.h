@@ -13,7 +13,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO 
+namespace OpenDDS 
 {
   namespace DCPS 
   {
@@ -31,7 +31,7 @@ namespace TAO
      * Accessors are provided to query the current value of each of
      * these states.
      */
-    class TAO_DdsDcps_Export InstanceState
+    class OpenDDS_Dcps_Export InstanceState
     {
     public:
       /// Constructor.
@@ -67,6 +67,8 @@ namespace TAO
 
       /// A read or take operation has been performed on this instance.
       void accessed() ;
+
+      bool most_recent_generation (ReceivedDataElement* item) const;
 
       /// DataReader has become empty.
       void empty( bool value) ; 
@@ -143,7 +145,7 @@ namespace TAO
 
   } // namespace DCPS
 
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 # include "InstanceState.inl"

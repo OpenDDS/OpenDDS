@@ -24,7 +24,7 @@ int operator== (::DDS::Duration_t op1,
 
 /// Increments the count of occurances of the incompatible policy
 ///  for the status
-void increment_incompatibility_count (TAO::DCPS::IncompatibleQosStatus* status,
+void increment_incompatibility_count (OpenDDS::DCPS::IncompatibleQosStatus* status,
                                       ::DDS::QosPolicyId_t incompatible_policy);
 
 /// Compares whether a publication and subscription are compatible

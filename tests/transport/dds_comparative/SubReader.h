@@ -8,7 +8,7 @@
 #include "dds/DCPS/Definitions.h"
 
 
-class SubReader : public TAO::DCPS::TransportReceiveListener
+class SubReader : public OpenDDS::DCPS::TransportReceiveListener
 {
   public:
 
@@ -17,16 +17,16 @@ class SubReader : public TAO::DCPS::TransportReceiveListener
 
     void set_num_to_receive(unsigned num_to_receive);
     void set_data_size(char data_size);
-    void set_id(TAO::DCPS::RepoId sub_id);
+    void set_id(OpenDDS::DCPS::RepoId sub_id);
     bool is_done() const;
     void transport_lost();
 
-    virtual void data_received(const TAO::DCPS::ReceivedDataSample& sample);
+    virtual void data_received(const OpenDDS::DCPS::ReceivedDataSample& sample);
 
 
   private:
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
 
     char data_size_;
 

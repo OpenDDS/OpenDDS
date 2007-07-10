@@ -4,21 +4,21 @@
 
 
 ACE_INLINE
-TAO::DCPS::Transient_Kludge::Transient_Kludge ()
+OpenDDS::DCPS::Transient_Kludge::Transient_Kludge ()
 : enabled_ (false)
 {
 }
 
 
 ACE_INLINE
-TAO::DCPS::Transient_Kludge::~Transient_Kludge ()
+OpenDDS::DCPS::Transient_Kludge::~Transient_Kludge ()
 {
 }
 
 
 ACE_INLINE
 void 
-TAO::DCPS::Transient_Kludge::enable ()
+OpenDDS::DCPS::Transient_Kludge::enable ()
 {
   enabled_ = true;
 }
@@ -26,7 +26,7 @@ TAO::DCPS::Transient_Kludge::enable ()
 
 ACE_INLINE
 void 
-TAO::DCPS::Transient_Kludge::disable ()
+OpenDDS::DCPS::Transient_Kludge::disable ()
 {
   enabled_ = false;
 }
@@ -34,7 +34,7 @@ TAO::DCPS::Transient_Kludge::disable ()
 
 ACE_INLINE
 bool 
-TAO::DCPS::Transient_Kludge::is_enabled ()
+OpenDDS::DCPS::Transient_Kludge::is_enabled ()
 {
   return enabled_;
 }

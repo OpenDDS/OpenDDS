@@ -63,8 +63,8 @@ void set_rt()
 /* Global Variables */
 
 
-const TAO::DCPS::TransportIdType UDP_IMPL_ID = 10;
-const TAO::DCPS::TransportIdType TCP_IMPL_ID = 20;
+const OpenDDS::DCPS::TransportIdType UDP_IMPL_ID = 10;
+const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 20;
 
 
 CORBA::Long size = 4;
@@ -132,20 +132,20 @@ int main(int argc, char *argv[])
                                DDS::PublisherListener::_nil ());
  
        /* Initialize the transports for publisher*/
-       TAO::DCPS::TransportImpl_rch pub_tcp_impl;
+       OpenDDS::DCPS::TransportImpl_rch pub_tcp_impl;
        if (useTCP) {
          pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
                                                      "SimpleTcp",
-                                                     ::TAO::DCPS::AUTO_CONFIG);
+                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
         } else {
          pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
                                                      "SimpleUdp",
-                                                     TAO::DCPS::DONT_AUTO_CONFIG);
-         TAO::DCPS::TransportConfiguration_rch config
+                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
+         OpenDDS::DCPS::TransportConfiguration_rch config 
            = TheTransportFactory->create_configuration (UDP_IMPL_ID, "SimpleUdp");
 
-         TAO::DCPS::SimpleUdpConfiguration* udp_config
-           = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
+         OpenDDS::DCPS::SimpleUdpConfiguration* udp_config 
+           = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          std::string addrStr(ACE_LOCALHOST);
          addrStr += ":12345";
@@ -155,8 +155,8 @@ int main(int argc, char *argv[])
  
 
        /* Attach the transport protocol with the publishing entity */
-       TAO::DCPS::PublisherImpl* p_impl =
-         TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl> (p.in ());
+       OpenDDS::DCPS::PublisherImpl* p_impl =
+         OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (p.in ());
        p_impl->attach_transport (pub_tcp_impl.in ());
 
 
@@ -185,22 +185,22 @@ int main(int argc, char *argv[])
 
 
        /* Initialize the transport for subscriber */
-       TAO::DCPS::TransportImpl_rch sub_tcp_impl;
+       OpenDDS::DCPS::TransportImpl_rch sub_tcp_impl;
        if (useTCP) {
          sub_tcp_impl
            = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1,
                                                          "SimpleTcp",
-                                                         ::TAO::DCPS::AUTO_CONFIG);
+                                                         ::OpenDDS::DCPS::AUTO_CONFIG);
        } else {
          sub_tcp_impl
            = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
                                                         "SimpleUdp",
-                                                        TAO::DCPS::DONT_AUTO_CONFIG);
-         TAO::DCPS::TransportConfiguration_rch config
+                                                        OpenDDS::DCPS::DONT_AUTO_CONFIG);
+         OpenDDS::DCPS::TransportConfiguration_rch config 
            = TheTransportFactory->create_configuration (UDP_IMPL_ID+1, "SimpleUdp");
 
-         TAO::DCPS::SimpleUdpConfiguration* udp_config
-           = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
+         OpenDDS::DCPS::SimpleUdpConfiguration* udp_config 
+           = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (config.in ());
 
          std::string addrStr(ACE_LOCALHOST);
          addrStr += ":12356";
@@ -211,8 +211,8 @@ int main(int argc, char *argv[])
 
 
        /* Attach the transport protocol with the subscribing entity */
-       TAO::DCPS::SubscriberImpl* sub_impl =
-         TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (s.in ());
+       OpenDDS::DCPS::SubscriberImpl* sub_impl =
+         OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (s.in ());
        sub_impl->attach_transport(sub_tcp_impl.in());
 
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
        /* Create the listener for datareader */
        AckDataReaderListenerImpl  listener_servant (size);
        DDS::DataReaderListener_var listener =
-       ::TAO::DCPS::servant_to_reference(&listener_servant);
+	     ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
 
 
        /* Create AckMessage datareader */

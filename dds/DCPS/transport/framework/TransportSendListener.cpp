@@ -10,20 +10,20 @@
 #include "TransportSendListener.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::TransportSendListener::TransportSendListener()
+OpenDDS::DCPS::TransportSendListener::TransportSendListener()
 {
   DBG_ENTRY_LVL("TransportSendListener","TransportSendListener",5);
 }
 
 
-TAO::DCPS::TransportSendListener::~TransportSendListener()
+OpenDDS::DCPS::TransportSendListener::~TransportSendListener()
 {
   DBG_ENTRY_LVL("TransportSendListener","~TransportSendListener",5);
 }
 
 
 void
-TAO::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sample)
+OpenDDS::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sample)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
@@ -32,7 +32,7 @@ TAO::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sample)
 
 
 void
-TAO::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
+OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
                                                   bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);

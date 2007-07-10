@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_LINKIMPL_H
-#define TAO_DCPS_LINKIMPL_H
+#ifndef OPENDDS_DCPS_LINKIMPL_H
+#define OPENDDS_DCPS_LINKIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "LinkImplCallback.h"
@@ -13,7 +13,7 @@
 #include <ace/Task.h>
 #include <queue>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -22,7 +22,7 @@ namespace TAO
      * This class implements the LinkCallback interface and handles
      * downstream calls that should go out on its Link.
      */
-    class TAO_DdsDcps_Export LinkImpl
+    class OpenDDS_Dcps_Export LinkImpl
       : public TransportAPI::LinkCallback
       , public ACE_Task_Base
     {
@@ -126,10 +126,10 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "LinkImpl.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_LINKIMPL_H */
+#endif  /* OPENDDS_DCPS_LINKIMPL_H */

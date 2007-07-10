@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H
-#define TAO_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -17,7 +17,7 @@
 #include "ace/Auto_Ptr.h"
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -39,7 +39,7 @@ namespace TAO
 
     class ReliableMulticast_Export ReliableMulticastTransportReceiveStrategy
       : public TransportReceiveStrategy
-      , public TAO::DCPS::ReliableMulticast::detail::PacketReceiverCallback
+      , public OpenDDS::DCPS::ReliableMulticast::detail::PacketReceiverCallback
     {
     public:
       ReliableMulticastTransportReceiveStrategy(
@@ -56,7 +56,7 @@ namespace TAO
       void teardown();
 
       virtual void received_packets(
-        const std::vector<TAO::DCPS::ReliableMulticast::detail::Packet>& packets
+        const std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet>& packets
         );
 
       virtual void reliability_compromised();
@@ -79,14 +79,14 @@ namespace TAO
 
     private:
       ReliableMulticastDataLink& data_link_;
-      ACE_Auto_Ptr<TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver> receiver_;
-      std::vector<TAO::DCPS::ReliableMulticast::detail::Packet> buffered_packets_;
-      std::vector<TAO::DCPS::ReliableMulticast::detail::Packet> to_deliver_;
+      ACE_Auto_Ptr<OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver> receiver_;
+      std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet> buffered_packets_;
+      std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet> to_deliver_;
     };
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportReceiveStrategy.inl"
@@ -94,4 +94,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTRECEIVESTRATEGY_H */

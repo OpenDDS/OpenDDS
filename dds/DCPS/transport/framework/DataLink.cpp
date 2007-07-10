@@ -22,7 +22,7 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
   : thr_per_con_send_task_ (0)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",5);
@@ -41,7 +41,7 @@ TAO::DCPS::DataLink::DataLink(TransportImpl* impl)
     }
 }
 
-TAO::DCPS::DataLink::~DataLink()
+OpenDDS::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY_LVL("DataLink","~DataLink",5);
 
@@ -52,6 +52,12 @@ TAO::DCPS::DataLink::~DataLink()
     }
 }
 
+void
+OpenDDS::DCPS::DataLink::resume_send ()
+{
+   if (!this->send_strategy_->isDirectMode())
+     this->send_strategy_->resume_send();
+}
 
 //MJM: Include the return value meanings to the header documentation as
 //MJM: well.
@@ -61,7 +67,7 @@ TAO::DCPS::DataLink::~DataLink()
 /// Return Codes: 0 means successful reservation made.
 ///              -1 means failure.
 int
-TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
+OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
                                       RepoId publisher_id)   /* local */
 {
   DBG_SUB_ENTRY("DataLink","make_reservation",5);
@@ -144,7 +150,7 @@ TAO::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
 /// Only called by our TransportImpl object.
 int
-TAO::DCPS::DataLink::make_reservation
+OpenDDS::DCPS::DataLink::make_reservation
 (RepoId                    publisher_id,     /* remote */
  RepoId                    subscriber_id,    /* local */
  TransportReceiveListener* receive_listener)
@@ -239,7 +245,7 @@ TAO::DCPS::DataLink::make_reservation
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
+OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
                                           RepoId          local_id,
                                           DataLinkSetMap& released_locals)
 {
@@ -369,7 +375,7 @@ TAO::DCPS::DataLink::release_reservations(RepoId          remote_id,
 /// within this DataLink that are interested in the (remote) publisher id
 /// that sent the sample.
 int
-TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
+OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("DataLink","data_received",5);
 
@@ -409,20 +415,21 @@ TAO::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-TAO::DCPS::DataLink::release_remote_subscriber
+OpenDDS::DCPS::DataLink::release_remote_subscriber
 (RepoId          subscriber_id,
  RepoId          publisher_id,
  RepoIdSet_rch&      pubid_set,
  DataLinkSetMap& released_publishers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_subscriber",5);
-  RepoIdSet::MapType::ENTRY* entry;
 
-  for (RepoIdSet::MapType::ITERATOR itr(pubid_set->map());
-       itr.next(entry);
-       itr.advance())
+  RepoIdSet::MapType& pubid_map = pubid_set->map();
+
+  for (RepoIdSet::MapType::iterator itr = pubid_map.begin();
+       itr != pubid_map.end();
+       ++itr)
     {
-      if (publisher_id == entry->ext_id_)
+      if (publisher_id == itr->first)
       {
         // Remove the publisher_id => subscriber_id association.
         if (this->pub_map_.release_subscriber(publisher_id,
@@ -452,20 +459,15 @@ TAO::DCPS::DataLink::release_remote_subscriber
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-TAO::DCPS::DataLink::release_remote_publisher
+OpenDDS::DCPS::DataLink::release_remote_publisher
 (RepoId              publisher_id,
  RepoId              subscriber_id,
  ReceiveListenerSet_rch& listener_set,
  DataLinkSetMap&     released_subscribers)
 {
   DBG_ENTRY_LVL("DataLink","release_remote_publisher",5);
-  ReceiveListenerSet::MapType::ENTRY* entry;
 
-  for (ReceiveListenerSet::MapType::ITERATOR itr(listener_set->map());
-       itr.next(entry);
-       itr.advance())
-    {
-      if (subscriber_id == entry->ext_id_)
+  if (listener_set->exist (subscriber_id))
       {
         // Remove the publisher_id => subscriber_id association.
         if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
@@ -479,7 +481,6 @@ TAO::DCPS::DataLink::release_remote_publisher
             }
           }
       }
-    }
 
   if (listener_set->remove (subscriber_id) == -1)
   {
@@ -493,7 +494,7 @@ TAO::DCPS::DataLink::release_remote_publisher
 
 // static
 ACE_UINT64
-TAO::DCPS::DataLink::get_next_datalink_id ()
+OpenDDS::DCPS::DataLink::get_next_datalink_id ()
 {
   static ACE_UINT64 next_id = 0;
   static LockType lock;
@@ -516,7 +517,7 @@ TAO::DCPS::DataLink::get_next_datalink_id ()
 
 
 void
-TAO::DCPS::DataLink::transport_shutdown()
+OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",5);
 
@@ -545,7 +546,7 @@ TAO::DCPS::DataLink::transport_shutdown()
 
 
 void
-TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
 {
   DBG_ENTRY_LVL("DataLink","notify",5);
 
@@ -559,32 +560,22 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
     // Notify the datawriters registered with TransportImpl
     // the lost publications due to a connection problem.
-    ReceiveListenerSetMap::MapType::ENTRY* entry;
-    for (ReceiveListenerSetMap::MapType::ITERATOR itr(map);
-         itr.next(entry);
-         itr.advance())
+    for (ReceiveListenerSetMap::MapType::iterator itr = map.begin();
+         itr != map.end();
+         ++itr)
       {
-        DataWriterImpl* dw = this->impl_->find_publication(entry->ext_id_);
+        DataWriterImpl* dw = this->impl_->find_publication(itr->first);
         if (dw != 0)
           {
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify pub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
-            ReceiveListenerSet_rch subset = entry->int_id_;
-            ReceiveListenerSet::MapType & imap = subset->map ();
+            ReceiveListenerSet_rch subset = itr->second;
 
             ReaderIdSeq subids;
-            subids.length (subset->size ());
-            CORBA::ULong i = 0;
-            ReceiveListenerSet::MapType::ENTRY* ientry;
-            for (ReceiveListenerSet::MapType::ITERATOR iitr(imap);
-                 iitr.next(ientry);
-                 iitr.advance())
-              {
-                subids[i++] = ientry->ext_id_;
-              }
+            subset->get_keys (subids);
 
             switch (notice)
               {
@@ -607,7 +598,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify  not notify pub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
           }
 
@@ -621,33 +612,32 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
     // the lost subscriptions due to a connection problem.
     RepoIdSetMap::MapType & map = this->sub_map_.map ();
 
-    RepoIdSetMap::MapType::ENTRY* entry;
-    for (RepoIdSetMap::MapType::ITERATOR itr(map);
-         itr.next(entry);
-         itr.advance())
+    for (RepoIdSetMap::MapType::iterator itr = map.begin();
+         itr != map.end();
+         ++itr)
       {
         // subscription_handles
-        DataReaderImpl* dr = this->impl_->find_subscription (entry->ext_id_);
+        DataReaderImpl* dr = this->impl_->find_subscription (itr->first);
 
         if (dr != 0)
           {
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify notify sub %d %s \n",
-                           entry->ext_id_, connection_notice_as_str(notice)));
+                           itr->first, connection_notice_as_str(notice)));
               }
-            RepoIdSet_rch pubset = entry->int_id_;
+            RepoIdSet_rch pubset = itr->second;
             RepoIdSet::MapType & map = pubset->map ();
 
             WriterIdSeq pubids;
             pubids.length (pubset->size ());
             CORBA::ULong i = 0;
-            RepoIdSet::MapType::ENTRY* ientry;
-            for (RepoIdSet::MapType::ITERATOR iitr(map);
-                 iitr.next(ientry);
-                 iitr.advance())
+
+            for (RepoIdSet::MapType::iterator iitr = map.begin();
+                 iitr != map.end();
+                 ++iitr)
               {
-                pubids[i++] = ientry->ext_id_;
+                pubids[i++] = iitr->first;
               }
 
             switch (notice)
@@ -671,7 +661,7 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
             if (TAO_debug_level > 0)
               {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify not notify sub %d subscription lost \n",
-                           entry->ext_id_));
+                           itr->first));
               }
 
           }
@@ -681,23 +671,23 @@ TAO::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
 
 void
-TAO::DCPS::DataLink::notify_connection_deleted ()
+OpenDDS::DCPS::DataLink::notify_connection_deleted ()
 {
   GuardType guard(this->released_local_lock_);
 
   RepoIdSet::MapType& pmap = released_local_pubs_.map ();
-  RepoIdSet::MapType::ENTRY* pentry;
-  for (RepoIdSet::MapType::ITERATOR itr(pmap);
-       itr.next(pentry);
-       itr.advance())
+
+  for (RepoIdSet::MapType::iterator itr = pmap.begin();
+       itr != pmap.end();
+       ++itr)
     {
-      DataWriterImpl* dw = this->impl_->find_publication(pentry->ext_id_);
+      DataWriterImpl* dw = this->impl_->find_publication(itr->first);
       if (dw != 0)
         {
           if (TAO_debug_level > 0)
             {
               ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify pub %d "
-                         "connection deleted \n", pentry->ext_id_));
+                         "connection deleted \n", itr->first));
             }
 
           dw->notify_connection_deleted ();
@@ -705,18 +695,18 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
     }
 
   RepoIdSet::MapType& smap = released_local_subs_.map ();
-  RepoIdSet::MapType::ENTRY* sentry;
-  for (RepoIdSet::MapType::ITERATOR itr2(smap);
-       itr2.next(sentry);
-       itr2.advance())
+
+  for (RepoIdSet::MapType::iterator itr2 = smap.begin();
+       itr2 != smap.end();
+       ++itr2)
     {
-      DataReaderImpl* dr = this->impl_->find_subscription(sentry->ext_id_);
+      DataReaderImpl* dr = this->impl_->find_subscription(itr2->first);
       if (dr != 0)
         {
           if (TAO_debug_level > 0)
             {
               ACE_DEBUG((LM_DEBUG, "(%P|%t)DataLink::notify_connection_deleted notify sub %d "
-                         "connection deleted \n", sentry->ext_id_));
+                         "connection deleted \n", itr2->first));
             }
 
           dr->notify_connection_deleted ();
@@ -726,7 +716,7 @@ TAO::DCPS::DataLink::notify_connection_deleted ()
 
 
 void
-TAO::DCPS::DataLink::pre_stop_i()
+OpenDDS::DCPS::DataLink::pre_stop_i()
 {
   if (this->thr_per_con_send_task_ != 0)
     {
@@ -736,14 +726,14 @@ TAO::DCPS::DataLink::pre_stop_i()
 
 
 ACE_Message_Block*
-TAO::DCPS::DataLink::marshal_acks (bool byte_order)
+OpenDDS::DCPS::DataLink::marshal_acks (bool byte_order)
 {
   DBG_ENTRY_LVL("DataLink","marshal_acks",5);
   return this->sub_map_.marshal (byte_order);
 }
 
 bool
-TAO::DCPS::DataLink::release_resources ()
+OpenDDS::DCPS::DataLink::release_resources ()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources", 5);
 
@@ -753,7 +743,7 @@ TAO::DCPS::DataLink::release_resources ()
 
 
 bool
-TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
+OpenDDS::DCPS::DataLink::is_target (const RepoId& sub_id)
 {
  GuardType guard(this->sub_map_lock_);
  RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
@@ -763,7 +753,7 @@ TAO::DCPS::DataLink::is_target (const RepoId& sub_id)
 
 
 bool
-TAO::DCPS::DataLink::exist (const RepoId& remote_id,
+OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
                             const RepoId& local_id,
                             const bool&   pub_side,
                             bool& last)

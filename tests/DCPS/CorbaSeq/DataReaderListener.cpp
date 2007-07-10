@@ -139,7 +139,7 @@ void DataReaderListenerImpl::on_sample_lost(
 
 void DataReaderListenerImpl::on_subscription_disconnected (
   DDS::DataReader_ptr,
-  const ::TAO::DCPS::SubscriptionDisconnectedStatus &)
+  const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus &)
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_disconnected" << endl;
@@ -147,7 +147,7 @@ void DataReaderListenerImpl::on_subscription_disconnected (
 
 void DataReaderListenerImpl::on_subscription_reconnected (
   DDS::DataReader_ptr,
-  const ::TAO::DCPS::SubscriptionReconnectedStatus &)
+  const ::OpenDDS::DCPS::SubscriptionReconnectedStatus &)
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_reconnected" << endl;
@@ -155,7 +155,7 @@ void DataReaderListenerImpl::on_subscription_reconnected (
 
 void DataReaderListenerImpl::on_subscription_lost (
   DDS::DataReader_ptr,
-  const ::TAO::DCPS::SubscriptionLostStatus &)
+  const ::OpenDDS::DCPS::SubscriptionLostStatus &)
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;

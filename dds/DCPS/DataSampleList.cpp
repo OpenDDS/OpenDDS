@@ -12,7 +12,7 @@
 #include "DataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {

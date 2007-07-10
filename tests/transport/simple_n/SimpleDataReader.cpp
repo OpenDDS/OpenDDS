@@ -20,7 +20,7 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
+SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id,
                        unsigned num_messages_expected)
 {
   this->sub_id_                = sub_id;
@@ -33,7 +33,7 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
 
 
 void
-SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: \"%s\"\n", sample.sample_->rd_ptr()));

@@ -5,7 +5,7 @@
 #include "DataView.h"
 
 ACE_INLINE
-TAO::DCPS::DataView::DataView(ACE_Message_Block& mb, size_t max_size)
+OpenDDS::DCPS::DataView::DataView(ACE_Message_Block& mb, size_t max_size)
   : mb_(mb)
   , max_size_(max_size)
 {
@@ -13,7 +13,7 @@ TAO::DCPS::DataView::DataView(ACE_Message_Block& mb, size_t max_size)
 
 ACE_INLINE
 void
-TAO::DCPS::DataView::get(View& packets)
+OpenDDS::DCPS::DataView::get(View& packets)
 {
   ACE_Message_Block* mbptr = &mb_;
   if (mbptr == 0)

@@ -212,35 +212,35 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      ::TAO::DCPS::SubscriberImpl* sub_impl
-        = ::TAO::DCPS::reference_to_servant< ::TAO::DCPS::SubscriberImpl,
+      ::OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::SubscriberImpl,
                                              ::DDS::Subscriber_ptr>
                               (sub.in());
 
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
-      TAO::DCPS::AttachStatus attach_status =
+      OpenDDS::DCPS::AttachStatus attach_status =
         sub_impl->attach_transport(reader_transport_impl.in());
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           std::string status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:

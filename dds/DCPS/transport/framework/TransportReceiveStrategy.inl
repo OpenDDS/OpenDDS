@@ -6,7 +6,7 @@
 
 
 ACE_INLINE int
-TAO::DCPS::TransportReceiveStrategy::start()
+OpenDDS::DCPS::TransportReceiveStrategy::start()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","start",5);
   return this->start_i();
@@ -14,7 +14,7 @@ TAO::DCPS::TransportReceiveStrategy::start()
 
 
 ACE_INLINE void
-TAO::DCPS::TransportReceiveStrategy::stop()
+OpenDDS::DCPS::TransportReceiveStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","stop",5);
   this->stop_i();
@@ -22,14 +22,14 @@ TAO::DCPS::TransportReceiveStrategy::stop()
 
 
 ACE_INLINE size_t
-TAO::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
+OpenDDS::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
 {
   return ++index % RECEIVE_BUFFERS;
 }
 
 
 ACE_INLINE void
-TAO::DCPS::TransportReceiveStrategy::relink (bool)
+OpenDDS::DCPS::TransportReceiveStrategy::relink (bool)
 {
   // The subsclass needs implement this function for re-establishing
   // the link upon recv failure.

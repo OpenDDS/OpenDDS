@@ -15,7 +15,7 @@ PubWriter::PubWriter()
     num_sent_(0),
     num_delivered_(0),
     num_dropped_(0),
-    trans_allocator(20, sizeof (TAO::DCPS::TransportSendElement))
+    trans_allocator(20, sizeof (OpenDDS::DCPS::TransportSendElement))
 {
 }
 
@@ -40,7 +40,7 @@ PubWriter::set_data_size(char data_size)
 
 
 void
-PubWriter::set_id(TAO::DCPS::RepoId pub_id)
+PubWriter::set_id(OpenDDS::DCPS::RepoId pub_id)
 {
   this->pub_id_ = pub_id;
 }
@@ -55,13 +55,13 @@ PubWriter::run(Pub* publisher)
   this->num_dropped_ = 0;
 
   // We use the same DataSampleList object for each send() call.
-  TAO::DCPS::DataSampleList samples;
+  OpenDDS::DCPS::DataSampleList samples;
 
   // We are only sending one message at a time.
   samples.size_ = 1;
 
   // We will reuse the same DataSampleHeader object for each message.
-  TAO::DCPS::DataSampleHeader header;
+  OpenDDS::DCPS::DataSampleHeader header;
 
   // The publication id only needs to be set once since it will be the same
   // for all of these messages.
@@ -129,7 +129,7 @@ PubWriter::transport_lost()
 
 
 void
-PubWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
+PubWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 {
   {
     GuardType guard(this->lock_);
@@ -149,7 +149,7 @@ PubWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-PubWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+PubWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                         bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);
@@ -171,13 +171,13 @@ PubWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
 }
 
 
-TAO::DCPS::DataSampleListElement*
-PubWriter::get_element(TAO::DCPS::DataSampleHeader& header)
+OpenDDS::DCPS::DataSampleListElement*
+PubWriter::get_element(OpenDDS::DCPS::DataSampleHeader& header)
 {
   // Each message needs to be "wrapped" inside of a DataSampleListElement.
   // TBD SOON - Use an allocator
-  TAO::DCPS::DataSampleListElement* elem =
-                         new TAO::DCPS::DataSampleListElement(this->pub_id_,
+  OpenDDS::DCPS::DataSampleListElement* elem =
+                         new OpenDDS::DCPS::DataSampleListElement(this->pub_id_,
                                                               this,
                                                               0,
                                                               &trans_allocator);

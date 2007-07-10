@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
-#define TAO_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
+#ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
+#define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
@@ -18,7 +18,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -106,11 +106,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleUnreliableDgramTransport.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H */
+#endif  /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAMTRANSPORT_H */

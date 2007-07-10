@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_BASICQUEUELINKALLOCATOR_T_H
-#define TAO_DCPS_BASICQUEUELINKALLOCATOR_T_H
+#ifndef OPENDDS_DCPS_BASICQUEUELINKALLOCATOR_T_H
+#define OPENDDS_DCPS_BASICQUEUELINKALLOCATOR_T_H
 
 #include "BasicQueueLink_T.h"
 #include "BasicQueueLinkChunk_T.h"
@@ -10,7 +10,7 @@
 #include "ace/OS.h"
 #include "ace/Null_Mutex.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -170,4 +170,4 @@ namespace TAO
 
 }
 
-#endif  /* TAO_DCPS_BASICQUEUELINKALLOCATOR_T_H */
+#endif  /* OPENDDS_DCPS_BASICQUEUELINKALLOCATOR_T_H */

@@ -9,10 +9,10 @@
 #include "NackGenerator.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
 
 bool
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::cancel(
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::cancel(
   Packet::id_type id
   )
 {
@@ -41,14 +41,14 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::cancel(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::cancel_all(
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::cancel_all(
   )
 {
   nacks_.clear();
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::nack_range(
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::nack_range(
   Packet::id_type begin,
   Packet::id_type end
   )
@@ -89,7 +89,7 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::nack_range(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::get_nacks(
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::get_nacks(
   std::vector<Packet>& nacks
   )
 {
@@ -97,8 +97,8 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::get_nacks(
   std::copy(nacks_.begin(), nacks_.end(), std::back_inserter(nacks));
 }
 
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::find_nack_containing(
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::find_nack_containing(
   const Packet& packet
   )
 {
@@ -129,10 +129,10 @@ TAO::DCPS::ReliableMulticast::detail::NackGenerator::find_nack_containing(
   return result;
 }
 
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator
-TAO::DCPS::ReliableMulticast::detail::NackGenerator::join_nacks(
-  TAO::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator first,
-  TAO::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator second
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator
+OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::join_nacks(
+  OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator first,
+  OpenDDS::DCPS::ReliableMulticast::detail::NackGenerator::PacketSet::iterator second
   )
 {
   if (second == nacks_.begin())

@@ -11,7 +11,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -22,7 +22,7 @@ namespace TAO
     * factory should be used. These values are used when the user wants to use 
     * the default qos provided by the entity factory.
     */
-    class TAO_DdsDcps_Export Marked_Default_Qos
+    class OpenDDS_Dcps_Export Marked_Default_Qos
     {
     public:
       static ::DDS::DomainParticipantQos  marked_default_DomainParticipantQos ();
@@ -39,23 +39,23 @@ namespace TAO
     // These values ARE NOT the default value but is an indicator to use the default 
     // qos via get_default_XXX_qos() call.
     #define PARTICIPANT_QOS_DEFAULT     \
-          TAO::DCPS::Marked_Default_Qos::marked_default_DomainParticipantQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_DomainParticipantQos ()
     #define TOPIC_QOS_DEFAULT           \
-          TAO::DCPS::Marked_Default_Qos::marked_default_TopicQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_TopicQos ()
     #define PUBLISHER_QOS_DEFAULT       \
-          TAO::DCPS::Marked_Default_Qos::marked_default_PublisherQos () 
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_PublisherQos () 
     #define SUBSCRIBER_QOS_DEFAULT      \
-          TAO::DCPS::Marked_Default_Qos::marked_default_SubscriberQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_SubscriberQos ()
     #define DATAWRITER_QOS_DEFAULT      \
-          TAO::DCPS::Marked_Default_Qos::marked_default_DataWriterQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_DataWriterQos ()
     #define DATAREADER_QOS_DEFAULT      \
-          TAO::DCPS::Marked_Default_Qos::marked_default_DataReaderQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_DataReaderQos ()
     #define DATAWRITER_QOS_USE_TOPIC_QOS    \
-          TAO::DCPS::Marked_Default_Qos::marked_default_DataWriter_Use_TopicQos ()   
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_DataWriter_Use_TopicQos ()   
     #define DATAREADER_QOS_USE_TOPIC_QOS    \
-          TAO::DCPS::Marked_Default_Qos::marked_default_DataReader_Use_TopicQos ()
+          OpenDDS::DCPS::Marked_Default_Qos::marked_default_DataReader_Use_TopicQos ()
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_MARKED_DEFAULT_QOS_H */

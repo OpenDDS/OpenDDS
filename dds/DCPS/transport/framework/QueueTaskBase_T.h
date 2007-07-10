@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_QUEUE_TASK_BASE_T_H
-#define TAO_DCPS_QUEUE_TASK_BASE_T_H
+#ifndef OPENDDS_DCPS_QUEUE_TASK_BASE_T_H
+#define OPENDDS_DCPS_QUEUE_TASK_BASE_T_H
 
 #include /**/ "ace/pre.h"
 
@@ -17,7 +17,7 @@
 #include "ace/Unbounded_Queue.h"
 #include "ace/INET_Addr.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -213,4 +213,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_QUEUE_TASK_BASE_T_H */
+#endif /* OPENDDS_DCPS_QUEUE_TASK_BASE_T_H */

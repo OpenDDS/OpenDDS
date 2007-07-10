@@ -14,20 +14,20 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
     /**
     * @class EntityImpl
     *
-    * @brief Implements the ::TAO::DCPS::Entity
+    * @brief Implements the ::OpenDDS::DCPS::Entity
     *        interfaces.
     *
     * This class is the base class of other servant classes.
     * e.g. DomainParticipantImpl, PublisherImpl ...
     */
-    class TAO_DdsDcps_Export EntityImpl
+    class OpenDDS_Dcps_Export EntityImpl
       : public virtual LocalObject<DDS::Entity>
     {
     public:
@@ -79,6 +79,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_ENTITY_IMPL_H */

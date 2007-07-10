@@ -13,7 +13,7 @@ class SubDriver
 {
   public:
   
-    typedef std::vector < ::TAO::DCPS::PublicationId > PublicationIds;
+    typedef std::vector < ::OpenDDS::DCPS::PublicationId > PublicationIds;
 
     SubDriver();
     virtual ~SubDriver();
@@ -47,7 +47,7 @@ class SubDriver
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
 
     int               num_writes_;

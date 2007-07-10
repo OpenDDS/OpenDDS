@@ -36,7 +36,7 @@ Writer::Writer(PubDriver*            pubdriver,
   pubdriver_ (pubdriver)
 {
   writer_servant_
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl>(writer_.in());
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl>(writer_.in());
   unbound_data_.length (5);
   for (CORBA::ULong i = 0; i < 5; i ++)
   {

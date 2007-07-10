@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_THETRANSPORTFACTORY_H
-#define TAO_DCPS_THETRANSPORTFACTORY_H
+#ifndef OPENDDS_DCPS_THETRANSPORTFACTORY_H
+#define OPENDDS_DCPS_THETRANSPORTFACTORY_H
 
 #include "TransportFactory.h"
 
@@ -10,19 +10,19 @@
 # pragma warning( disable : 4231 )
 #endif
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
 
-    #define TheTransportFactory TAO::DCPS::TransportFactory::instance()
+    #define TheTransportFactory OpenDDS::DCPS::TransportFactory::instance()
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TheTransportFactory.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_THETRANSPORTFACTORY_H */
+#endif  /* OPENDDS_DCPS_THETRANSPORTFACTORY_H */

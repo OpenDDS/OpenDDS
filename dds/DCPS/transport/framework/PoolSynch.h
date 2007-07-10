@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_POOLSYNCH_H
-#define TAO_DCPS_POOLSYNCH_H
+#ifndef OPENDDS_DCPS_POOLSYNCH_H
+#define OPENDDS_DCPS_POOLSYNCH_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -17,7 +17,7 @@ namespace TAO
     class ThreadSynchResource;
 
 
-    class TAO_DdsDcps_Export PoolSynch : public ThreadSynch
+    class OpenDDS_Dcps_Export PoolSynch : public ThreadSynch
     {
       public:
 
@@ -39,10 +39,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "PoolSynch.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_POOLSYNCH_H */
+#endif  /* OPENDDS_DCPS_POOLSYNCH_H */

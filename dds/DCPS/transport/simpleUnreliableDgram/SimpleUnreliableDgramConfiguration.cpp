@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleUnreliableDgramConfiguration::~SimpleUnreliableDgramConfiguration()
+OpenDDS::DCPS::SimpleUnreliableDgramConfiguration::~SimpleUnreliableDgramConfiguration()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","~SimpleUnreliableDgramConfiguration",5);
 }

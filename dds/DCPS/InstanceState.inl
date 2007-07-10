@@ -7,14 +7,14 @@
 
 
 ACE_INLINE
-TAO::DCPS::InstanceState::~InstanceState ()
+OpenDDS::DCPS::InstanceState::~InstanceState ()
 {
 }
 
 
 ACE_INLINE
 void
-TAO::DCPS::InstanceState::accessed()
+OpenDDS::DCPS::InstanceState::accessed()
 {
 //
 // Manage the view state due to data access here.
@@ -27,7 +27,19 @@ TAO::DCPS::InstanceState::accessed()
 
 
 ACE_INLINE
-void TAO::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
+bool
+OpenDDS::DCPS::InstanceState::most_recent_generation (ReceivedDataElement* item) const
+{
+  if (item->disposed_generation_count_ == this->disposed_generation_count_
+    && item->no_writers_generation_count_ == this->no_writers_generation_count_)
+    return true;
+  else
+    return false;
+}
+
+
+ACE_INLINE
+void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
                                 const ReceivedDataElement* de)
 {
   si.sample_state = de->sample_state_ ;
@@ -55,26 +67,26 @@ void TAO::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
 
 ACE_INLINE
 DDS::InstanceStateKind
-TAO::DCPS::InstanceState::instance_state() const
+OpenDDS::DCPS::InstanceState::instance_state() const
 {
   return this->instance_state_ ;
 }
 
 ACE_INLINE
 DDS::ViewStateKind
-TAO::DCPS::InstanceState::view_state() const
+OpenDDS::DCPS::InstanceState::view_state() const
 {
   return this->view_state_ ;
 }
 
 ACE_INLINE
-size_t TAO::DCPS::InstanceState::disposed_generation_count() const
+size_t OpenDDS::DCPS::InstanceState::disposed_generation_count() const
 {
   return disposed_generation_count_ ;
 }
 
 ACE_INLINE
-size_t TAO::DCPS::InstanceState::no_writers_generation_count() const
+size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
 {
   return no_writers_generation_count_ ;
 }
@@ -82,7 +94,7 @@ size_t TAO::DCPS::InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-TAO::DCPS::InstanceState::data_was_received()
+OpenDDS::DCPS::InstanceState::data_was_received()
 {
   //
   // Update the view state here, since only sample data received affects
@@ -125,7 +137,7 @@ TAO::DCPS::InstanceState::data_was_received()
 
 ACE_INLINE
 void
-TAO::DCPS::InstanceState::lively(PublicationId         writer_id)
+OpenDDS::DCPS::InstanceState::lively(PublicationId         writer_id)
 {
   ACE_UNUSED_ARG(writer_id);
   //
@@ -142,7 +154,7 @@ TAO::DCPS::InstanceState::lively(PublicationId         writer_id)
 
 ACE_INLINE
 void
-TAO::DCPS::InstanceState::empty( bool value)
+OpenDDS::DCPS::InstanceState::empty( bool value)
 {
   //
   // Manage the instance state due to the DataReader becoming empty

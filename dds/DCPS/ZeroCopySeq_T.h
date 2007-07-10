@@ -1,182 +1,199 @@
 // -*- C++ -*-
-// ============================================================================
-/**
- *  @file   ZeroCopySeq_T.h
- *
- *  $Id$
- *
- *
- */
-// ============================================================================
+// $Id$
 
 #ifndef ZEROCOPYSEQ_H
 #define ZEROCOPYSEQ_H
-
-#include /**/ "ace/pre.h"
-
-// not needed export for templates #include "dcps_export.h"
-#include "dds/DCPS/ZeroCopySeqBase.h"
-#include "dds/DCPS/ZeroCopyAllocator_T.h"
-#include <ace/Vector_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include /**/ "ace/pre.h"
+
+#include "dds/DCPS/ZeroCopySeqBase.h"
+#include "dds/DCPS/ZeroCopyAllocator_T.h"
+#include <ace/Vector_T.h>
+
+namespace OpenDDS
+{
+  namespace DCPS
+  {
+    class DataReaderImpl;
+    class ReceivedDataElement;
+  }
+}
+
+//This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO
 {
-    namespace DCPS
+  namespace DCPS
+  {
+
+    /**
+    * Provides [] operators returning sample references
+    *     but it is is implemented as
+    *     an "array" of pointers to the samples so they can be
+    *     "loaned" to the application code.
+    *
+    * Design Goals:
+    *  - Provide enhanced performance known as "zero-copy" in the DDS spec
+    *  - Conform to the C++ CORBA mapping for sequences
+    *    - When necessary, certain uncommon sequence operations (resize,
+    *      get_buffer, replace) will cause copies.  Performance impacts are
+    *      noted in comments on the individual methods.
+    */
+    template <class Sample_T, size_t DEF_MAX = DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE>
+    class ZeroCopyDataSeq
     {
+    public:
 
-        class DataReaderImpl;
-        class ReceivedDataElement;  // avoid circular reference with DdsDcpsInfrastructureC.h
+      /**
+      * Construct a sequence of sample data values that supports
+      * zero-copy reads.
+      *
+      * @param maximum Maximum number of samples to insert into the sequence.
+      *                If == 0 then use zero-copy reading.
+      *                Defaults to zero hence supporting zero-copy reads/takes.
+      *
+      * @param init_size Initial size of the underlying array of pointers.
+      *
+      * @param alloc The allocator used to allocate the array of pointers
+      *              to samples. If zero then use the default allocator.
+      *
+      * This constructor also serves as the "maximum" ctor and default ctor
+      * in the CORBA spec.
+      */
+      explicit ZeroCopyDataSeq(CORBA::ULong maximum = 0,
+        CORBA::ULong init_size = DEF_MAX, ACE_Allocator* alloc = 0);
 
-        /**
-        * Provides [] operators returning sample references
-        *     like the the CORBA sequence used by the normal
-        *     take and read operations.  But it is is implemented as
-        *     an "array" of pointers to the samples so they can be
-        *     "loaned" to the application code.
-        *
-        * @note: This class does not support resizing the maximum slots.
-        *        Resizing is not needed because of the preconditions for read/take.
-        *        hmm - but if init_size is < read's max_samples parametr then
-        *              read will return just init_size elements (if max_len == 0).
-        *        TBD - should we remove this limitation?
-        *        TBD - should the "init_size" constructor parameter be renamed to
-        *              "max_slots" in recognition of the non-resizing?
-        *
-        * @note:  I did not inherit from ACE_Vector or ACE_Array_base because
-        * I needed to override the [] operator and I did not
-        * want to confuse things by having the inherited methods/operators
-        * return pointers while the overridden methods/operators
-        * returned a reference to the Sample.
-        *
-        * @note: this class should have a similar interface to TAO's
-        * CORBA sequence implementation but allow [] operator to
-        * return a reference to Sample_T instead of the pointer.
-        *
-        * @note: Also have an interface as described in the DDS specification.
-        *
+      ZeroCopyDataSeq(CORBA::ULong maximum, CORBA::ULong length,
+        Sample_T* buffer, CORBA::Boolean release = false);
+
+      ZeroCopyDataSeq(const ZeroCopyDataSeq& frm);
+
+      ZeroCopyDataSeq& operator=(const ZeroCopyDataSeq& frm);
+
+      void swap(ZeroCopyDataSeq& frm);
+
+      ~ZeroCopyDataSeq();
+
+      CORBA::ULong maximum() const;
+
+      /** Performance note: increasing the length of a zero-copy sequence past
+       *  its current length may cause a copy (the sequence will no longer be
+       *  zero-copy enabled).
+       */
+      void length(CORBA::ULong length);
+      CORBA::ULong length() const;
+
+      const Sample_T& operator[](CORBA::ULong i) const;
+      Sample_T& operator[](CORBA::ULong i);
+
+      CORBA::Boolean release() const;
+
+      void replace(CORBA::ULong max, CORBA::ULong length, Sample_T* buffer,
+        CORBA::Boolean release = false);
+
+      Sample_T* get_buffer(CORBA::Boolean orphan = false);
+      const Sample_T* get_buffer() const;
+
+      static Sample_T* allocbuf(CORBA::ULong nelems);
+      static void freebuf(Sample_T* buffer);
+
+      ///Only used by the FooDataReaderImpl and tests
+      class PrivateMemberAccess
+      {
+      public:
+        PrivateMemberAccess(ZeroCopyDataSeq& seq)
+          : seq_(seq) {}
+
+        CORBA::ULong max_slots() const { return seq_.max_slots(); }
+
+        void internal_set_length(CORBA::ULong len)
+        { seq_.internal_set_length(len); }
+
+        void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner)
+        { seq_.set_loaner(loaner); }
+
+        void assign_ptr(CORBA::ULong ii, OpenDDS::DCPS::ReceivedDataElement* item)
+        { seq_.assign_ptr(ii, item); }
+
+        OpenDDS::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const
+        { return seq_.get_ptr(ii); }
+
+        void assign_sample(CORBA::ULong ii, const Sample_T& sample)
+        { seq_.assign_sample(ii, sample); }
+
+      private:
+        ZeroCopyDataSeq& seq_;
+      };
+      friend class PrivateMemberAccess;
+
+    private:
+
+      /** In some versions of ACE, ACE_Vector doesn't have a working swap()
+        * function, so we have to provide our own.
         */
-        template <class Sample_T, size_t ZCS_DEFAULT_SIZE>
-        class ZeroCopyDataSeq : public ZeroCopySeqBase
-        {
-        public:
+      class DDS_Vector
+        : public ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
+      {
+      public:
+        DDS_Vector(const size_t init_size = DEF_MAX, ACE_Allocator* alloc = 0);
 
-            /**
-             * Construct a sequence of sample data values that is supports
-             * zero-copy reads.
-             *
-             * @param max_len Maximum number of samples to insert into the sequence.
-             *                If == 0 then use zero-copy reading.
-             *                Defaults to zero hence supporting zero-copy reads/takes.
-             *
-             * @param init_size Initial size of the sequence.
-             *
-             * @param alloc The allocator used to allocate the array of pointers
-             *              to samples. If zero then use the default allocator.
-             *
-             */
-            ZeroCopyDataSeq(
-                const size_t max_len = 0,
-                const size_t init_size = ZCS_DEFAULT_SIZE,
-                ACE_Allocator* alloc = 0);
+        void swap(DDS_Vector&);
 
-            ZeroCopyDataSeq(const ZeroCopyDataSeq<Sample_T, ZCS_DEFAULT_SIZE> & seq);
+        typedef ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> BASE;
+        using BASE::allocator_;
+        using BASE::array_;
+      };
 
-            ~ZeroCopyDataSeq();
 
-            ZeroCopyDataSeq& operator= (const ZeroCopyDataSeq & frm);
+      /**
+      * Current allocated number of sample slots.
+      *
+      * @note The DDS specification's use of maximum=0 to designate
+      *       zero-copy read request requires some
+      *       way of knowing the internally allocated slots
+      *       for sample pointers that is not "maximum".
+      */
+      CORBA::ULong max_slots() const;
 
-            //======== DDS specification inspired methods =====
-            /** get the current length of the sequence.
-             */
-            CORBA::ULong length() const;
+      void internal_set_length(CORBA::ULong len);
 
-            /** Set the length of the sequence. (for user code)
-             */
-            void length(CORBA::ULong length);
+      void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner);
 
-            //======== CORBA sequence like methods ======
+      void assign_ptr(CORBA::ULong ii, OpenDDS::DCPS::ReceivedDataElement* item);
 
-            /// read reference to the sample at the given index.
-            Sample_T const & operator[](CORBA::ULong i) const;
+      OpenDDS::DCPS::ReceivedDataElement* get_ptr(CORBA::ULong ii) const;
 
-            /** Write reference to the sample at the given index.
-             *
-             * @note Should we even allow this?
-             * The spec says the DCPS layer will not change the sample's value
-             * but it does not restrict the user/application from changing it.
-             */
-            Sample_T & operator[](CORBA::ULong i);
+      void assign_sample(CORBA::ULong ii, const Sample_T& sample);
 
-            /**
-             * The CORBA sequence like version of max_len();
-             */
-            CORBA::ULong maximum() const;
+      bool is_zero_copy() const;
 
-            /**
-             * Current allocated number of sample slots.
-             *
-             * @note The DDS specification's use of max_len=0 to designate
-             *       zero-copy read request requires some
-             *       way of knowing the internally allocated slots
-             *       for sample pointers that is not "max_len".
-             */
-            CORBA::ULong max_slots() const;
+      void make_single_copy(CORBA::ULong maximum);
 
-            // TBD: ?support replace, get_buffer, allocbuf
-            //       and freebuf
+      /// The datareader that loaned its samples.
+      OpenDDS::DCPS::DataReaderImpl* loaner_;
 
-            // ==== OpenDDS internal methods =====
-            //!!!!!! User code should not use this methods.
+      /// the default allocator
+      OpenDDS::DCPS::FirstTimeFastAllocator<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>
+        default_allocator_;
 
-            // ?TBD - make this method not available to the DDS user.
-            //   idea: make this private and a friend helper class
-            //      used by type impls.
-            void assign_ptr(::CORBA::ULong ii,
-                            ::TAO::DCPS::ReceivedDataElement* item,
-                            ::TAO::DCPS::DataReaderImpl* loaner);
+      typedef DDS_Vector Ptr_Seq_Type;
 
-            TAO::DCPS::ReceivedDataElement* getPtr(::CORBA::ULong ii) const;
+      /// array of pointers if the sequence is supporting zero-copy reads
+      Ptr_Seq_Type ptrs_;
 
-            void assign_sample(::CORBA::ULong ii, const Sample_T& sample);
+      //single-copy (aka non-zero-copy) support
+      CORBA::ULong sc_maximum_;
+      CORBA::ULong sc_length_;
+      mutable Sample_T* sc_buffer_;
+      mutable CORBA::Boolean sc_release_;
 
-            /**
-             * This method is like length(len) but is for
-             * internal DCPS layer use to avoid the resizing when owns=false safty check.
-             */
-            void set_length(CORBA::ULong length);
+    }; // class ZeroCopyDataSeq
 
-        private:
-
-            /// true if this sequence is supporting zero-copy reads/takes
-            bool is_zero_copy_;
-
-            /// The datareader that loaned its samples.
-            ::TAO::DCPS::DataReaderImpl* loaner_;
-
-            /// the default allocator
-            FirstTimeFastAllocator<Sample_T*, ZCS_DEFAULT_SIZE> defaultAllocator_;
-
-            typedef ACE_Vector<TAO::DCPS::ReceivedDataElement*, ZCS_DEFAULT_SIZE> Ptr_Seq_Type;
-
-            /// "array" of pointers if the sequence is supporting zero-copy reads
-            Ptr_Seq_Type ptrs_;
-
-            // Note: use default size of zero but constructor may override that
-            //   It is overriden if max_len > 0.
-            typedef ACE_Vector<Sample_T, 0> Sample_Seq_Type;
-
-            /// "array" of samples if the sequence is supporting single-copy reads;
-            ///  otherwise it is an empty container.
-            Sample_Seq_Type samples_;
-
-        }; // class ZeroCopyDataSeq
-
-    } // namespace  ::DDS
-} // namespace TAO
+  } // namespace  ::DDS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopySeq_T.inl"

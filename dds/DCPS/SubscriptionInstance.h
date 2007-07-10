@@ -13,7 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO 
+namespace OpenDDS 
 {
   namespace DCPS 
   {

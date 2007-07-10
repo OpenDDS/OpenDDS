@@ -20,10 +20,14 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 #include "ace/Arg_Shifter.h"
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 int max_samples_per_instance = 10 ;
 int history_depth = 10 ;
@@ -83,7 +87,7 @@ int main (int argc, char *argv[])
       ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
 
       ::Xyz::FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -149,6 +153,7 @@ int main (int argc, char *argv[])
       si.absolute_generation_rank = 0;
       si_map['A'] = si ;
 
+      // Test1: write I1 A, reg I2
       writer->test1 ();
       reader->read (si_map);
 
@@ -193,6 +198,7 @@ int main (int argc, char *argv[])
       si.absolute_generation_rank = 0;
       si_map['Q'] = si ;
 
+      // Test2: write I2 X, write I1 B, reg I3, write I3 Q
       writer->test2 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
@@ -209,7 +215,11 @@ int main (int argc, char *argv[])
       si_map['A'].absolute_generation_rank = 2;
 
       si_map['B'].sample_state = ::DDS::READ_SAMPLE_STATE ;
-      si_map['B'].view_state = ::DDS::NOT_NEW_VIEW_STATE ;
+      // The samples of the same instance returned by 
+      // a single read() should have same view state
+      // so samples 'B','C','D' should have same view 
+      // state as 'A'.
+      si_map['B'].view_state = ::DDS::NEW_VIEW_STATE ;
       si_map['B'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si_map['B'].disposed_generation_count = 2 ;
       si_map['B'].no_writers_generation_count = 0 ;
@@ -218,7 +228,7 @@ int main (int argc, char *argv[])
       si_map['B'].absolute_generation_rank = 2 ;
 
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
-      si.view_state = ::DDS::NOT_NEW_VIEW_STATE ;
+      si.view_state = ::DDS::NEW_VIEW_STATE ;
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 2 ;
       si.no_writers_generation_count = 0 ;
@@ -228,7 +238,7 @@ int main (int argc, char *argv[])
       si_map['C'] = si ;
 
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
-      si.view_state = ::DDS::NOT_NEW_VIEW_STATE ;
+      si.view_state = ::DDS::NEW_VIEW_STATE ;
       si.instance_state  = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 2 ;
       si.no_writers_generation_count = 0 ;
@@ -240,6 +250,8 @@ int main (int argc, char *argv[])
       si_map['X'].sample_state = ::DDS::READ_SAMPLE_STATE ;
       si_map['X'].view_state = ::DDS::NOT_NEW_VIEW_STATE ;
       si_map['X'].instance_state = ::DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ;
+      // The disposed_generation_count will not be changed if the datareader
+      // has not received any new samples after dispose.
       si_map['X'].disposed_generation_count = 0 ;
       si_map['X'].no_writers_generation_count = 0 ;
       si_map['X'].sample_rank = 1 ;
@@ -265,6 +277,7 @@ int main (int argc, char *argv[])
       si_map['Q'].generation_rank = 0 ;
       si_map['Q'].absolute_generation_rank = 0 ;
 
+      //Test3: Dispose I1, write I1 C, dispose I1, write I1 D, write I2 Y, dispose I2.
       writer->test3 ();
       ACE_OS::sleep(5) ;
       reader->read (si_map);
@@ -292,10 +305,13 @@ int main (int argc, char *argv[])
       si.absolute_generation_rank = 0 ;
       si_map['c'] = si ;
 
+      //Test4: write I1 c.
       writer->test4 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
 
+      // Sleep to make no writer so the next read will get the instance
+      // with NOT_ALIVE_NO_WRITERS instance state.
       ACE_OS::sleep(20) ;
 
       si_map['c'].sample_state = ::DDS::READ_SAMPLE_STATE ;
@@ -319,7 +335,11 @@ int main (int argc, char *argv[])
       si_map['c'].absolute_generation_rank = 1 ;
 
       si.sample_state = ::DDS::NOT_READ_SAMPLE_STATE ;
-      si.view_state = ::DDS::NOT_NEW_VIEW_STATE ;
+      // The samples of the same instance returned by 
+      // a single read() should have same view state
+      // so sample 'd' should have same view state as 
+      // sample 'c'.      
+      si.view_state = ::DDS::NEW_VIEW_STATE ;
       si.instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si.disposed_generation_count = 0 ;
       si.no_writers_generation_count = 1 ;
@@ -328,6 +348,7 @@ int main (int argc, char *argv[])
       si.absolute_generation_rank = 0 ;
       si_map['d'] = si ;
 
+      //Test5: write I1 d
       writer->test5 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);
@@ -362,6 +383,7 @@ int main (int argc, char *argv[])
       si.absolute_generation_rank = 0 ;
       si_map['e'] = si ;
 
+      //Test6: write I1 e.
       writer->test6 ();
       ACE_OS::sleep(1) ;
       reader->read (si_map);

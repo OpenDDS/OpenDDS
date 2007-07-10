@@ -7,7 +7,7 @@
 #include <assert.h>
 
 ACE_INLINE
-TAO::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
+OpenDDS::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
   : sub_loan_count_(initial_count),
     dropped_(false)
 {
@@ -17,7 +17,7 @@ TAO::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
 
 ACE_INLINE
 bool
-TAO::DCPS::TransportQueueElement::operator==
+OpenDDS::DCPS::TransportQueueElement::operator==
                                      (const ACE_Message_Block* sample) const
 {
   DBG_ENTRY_LVL("TransportQueueElement","operator==",5);
@@ -27,7 +27,7 @@ TAO::DCPS::TransportQueueElement::operator==
 
 ACE_INLINE
 void
-TAO::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
+OpenDDS::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement","data_dropped",5);
   this->dropped_ = true;
@@ -37,7 +37,7 @@ TAO::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 
 ACE_INLINE
 void
-TAO::DCPS::TransportQueueElement::data_delivered()
+OpenDDS::DCPS::TransportQueueElement::data_delivered()
 {
   DBG_ENTRY_LVL("TransportQueueElement","data_delivered",5);
   bool dropped = false;
@@ -47,7 +47,7 @@ TAO::DCPS::TransportQueueElement::data_delivered()
 
 ACE_INLINE
 void
-TAO::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
+OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement","decision_made",5);
 
@@ -80,7 +80,7 @@ TAO::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 
 ACE_INLINE
 bool
-TAO::DCPS::TransportQueueElement::was_dropped() const
+OpenDDS::DCPS::TransportQueueElement::was_dropped() const
 {
   return this->dropped_;
 }

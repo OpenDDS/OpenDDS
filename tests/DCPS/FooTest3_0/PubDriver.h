@@ -86,16 +86,16 @@ class PubDriver
     ::DDS::DomainParticipant_var participant_;
     ::DDS::Topic_var             topic_;
     ::DDS::Publisher_var         publisher_;
-    ::TAO::DCPS::PublisherImpl*  publisher_servant_;
+    ::OpenDDS::DCPS::PublisherImpl*  publisher_servant_;
     ::DDS::DataWriter_var        datawriter_;
-    ::TAO::DCPS::DataWriterImpl* datawriter_servant_;
+    ::OpenDDS::DCPS::DataWriterImpl* datawriter_servant_;
     ::Xyz::FooDataWriter_var    foo_datawriter_;
     ::Xyz::FooDataWriterImpl*   foo_datawriter_servant_;
 
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
 
-    TAO::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::RepoId sub_id_;
     ACE_CString       sub_addr_;
     int               history_depth_;
     int               test_to_run_;

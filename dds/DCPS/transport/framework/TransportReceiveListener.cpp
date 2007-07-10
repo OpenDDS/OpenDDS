@@ -11,13 +11,13 @@
 #include "TransportReceiveListener.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::TransportReceiveListener::TransportReceiveListener()
+OpenDDS::DCPS::TransportReceiveListener::TransportReceiveListener()
 {
   DBG_ENTRY_LVL("TransportReceiveListener","TransportReceiveListener",5);
 }
 
 
-TAO::DCPS::TransportReceiveListener::~TransportReceiveListener()
+OpenDDS::DCPS::TransportReceiveListener::~TransportReceiveListener()
 {
   DBG_ENTRY_LVL("TransportReceiveListener","~TransportReceiveListener",5);
 }

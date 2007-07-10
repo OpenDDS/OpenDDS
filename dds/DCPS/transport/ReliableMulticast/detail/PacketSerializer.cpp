@@ -12,10 +12,10 @@
 #include "PacketSerializer.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
 
 char*
-TAO::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
+OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
   const Packet& packet,
   size_t& size
   ) const
@@ -39,7 +39,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
 }
 
 char*
-TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
+OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   const Packet& packet,
   char* buffer,
   size_t size
@@ -69,7 +69,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
+OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   const char* buffer,
   size_t size,
   Packet& packet

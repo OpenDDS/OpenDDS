@@ -6,7 +6,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "EntityImpl.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -111,4 +111,4 @@ namespace TAO
 
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

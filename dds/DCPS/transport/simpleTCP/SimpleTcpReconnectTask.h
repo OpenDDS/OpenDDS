@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPRECONNECTTASK_H
-#define TAO_DCPS_SIMPLETCPRECONNECTTASK_H
+#ifndef OPENDDS_DCPS_SIMPLETCPRECONNECTTASK_H
+#define OPENDDS_DCPS_SIMPLETCPRECONNECTTASK_H
 
 #include /**/ "ace/pre.h"
 
@@ -13,7 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -59,4 +59,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_SIMPLETCPRECONNECTTASK_H */
+#endif /* OPENDDS_DCPS_SIMPLETCPRECONNECTTASK_H */

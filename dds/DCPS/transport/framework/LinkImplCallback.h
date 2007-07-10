@@ -1,13 +1,13 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_LINKIMPLCALLBACK_H
-#define TAO_DCPS_LINKIMPLCALLBACK_H
+#ifndef OPENDDS_DCPS_LINKIMPLCALLBACK_H
+#define OPENDDS_DCPS_LINKIMPLCALLBACK_H
 
 #include "dds/DCPS/dcps_export.h"
 #include <ace/Message_Block.h>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -16,7 +16,7 @@ namespace TAO
      * This class represents the LinkImplCallback which should be
      * implemented by those who make requests of the LinkImpl class.
      */
-    class TAO_DdsDcps_Export LinkImplCallback
+    class OpenDDS_Dcps_Export LinkImplCallback
     {
     public:
       LinkImplCallback() {}
@@ -27,6 +27,6 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
-#endif  /* TAO_DCPS_LINKIMPLCALLBACK_H */
+#endif  /* OPENDDS_DCPS_LINKIMPLCALLBACK_H */

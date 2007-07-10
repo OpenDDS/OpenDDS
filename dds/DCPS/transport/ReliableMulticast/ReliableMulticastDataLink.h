@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTDATALINK_H
-#define TAO_DCPS_RELIABLEMULTICASTDATALINK_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTDATALINK_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTDATALINK_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -18,7 +18,7 @@
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -32,13 +32,13 @@ namespace TAO
         TransportReactorTask_rch& reactor_task,
         ReliableMulticastTransportConfiguration& configuration,
         const ACE_INET_Addr& multicast_group_address,
-        TAO::DCPS::ReliableMulticastTransportImpl& transport_impl
+        OpenDDS::DCPS::ReliableMulticastTransportImpl& transport_impl
         );
       virtual ~ReliableMulticastDataLink();
 
       bool connect(bool is_publisher);
 
-      TAO::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
+      OpenDDS::DCPS::ReliableMulticastTransportImpl_rch& get_transport_impl();
 
     protected:
       virtual void stop_i();
@@ -49,16 +49,16 @@ namespace TAO
       size_t sender_history_size_;
       size_t receiver_buffer_size_;
       bool is_publisher_;
-      TAO::DCPS::TransportReactorTask_rch reactor_task_;
-      TAO::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
-      TAO::DCPS::ReliableMulticastTransportReceiveStrategy receive_strategy_;
-      TAO::DCPS::ReliableMulticastTransportSendStrategy send_strategy_;
+      OpenDDS::DCPS::TransportReactorTask_rch reactor_task_;
+      OpenDDS::DCPS::ReliableMulticastTransportImpl_rch transport_impl_;
+      OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy receive_strategy_;
+      OpenDDS::DCPS::ReliableMulticastTransportSendStrategy send_strategy_;
       bool running_;
     };
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastDataLink.inl"
@@ -66,4 +66,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTDATALINK_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTDATALINK_H */

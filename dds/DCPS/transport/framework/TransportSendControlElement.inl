@@ -5,7 +5,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::TransportSendControlElement::TransportSendControlElement
+OpenDDS::DCPS::TransportSendControlElement::TransportSendControlElement
                                     (int                    initial_count,
                                      RepoId                 publisher_id,
                                      TransportSendListener* listener,

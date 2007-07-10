@@ -23,21 +23,27 @@ private:
 
   size_t pub_count_;
   size_t sub_count_;
+
+  std::string status_file_;
 };
 
 bool
 SyncServer::parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "p:s:");
+  ACE_Get_Opt get_opts (argc, argv, "p:s:o:");
   int c;
   std::string usage =
     " -p <publisher count>\n"
-    " -s <subscriber count>\n";
+    " -s <subscriber count>\n"
+    " -o <status file>\n";
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
       {
+      case 'o':
+        status_file_ = get_opts.opt_arg ();
+        break;
       case 'p':
         pub_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
@@ -59,6 +65,7 @@ SyncServer::parse_args (int argc, char *argv[])
 
 SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
   : pub_count_ (1), sub_count_ (1)
+    , status_file_ ("sync_status")
 {
   try
     {
@@ -66,6 +73,13 @@ SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
 
       sync_server_.reset (new SyncExt_i (pub_count_, sub_count_
                                           , CORBA::ORB::_nil()));
+
+      std::ofstream status_stream (status_file_.c_str());
+      if (!status_stream)
+        throw InitError ("Unable to open status file");
+
+      status_stream << "ready" << std::endl;
+
     }
   catch (SyncServer_i::InitError& e) {
     throw InitError (e);

@@ -146,10 +146,10 @@ int main (int argc, char *argv[])
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
       FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
+        OpenDDS::DCPS::servant_to_reference<FooTypeSupport,FooTypeSupportImpl,FooTypeSupport_ptr>(fts_servant);
 
 
       ::DDS::DomainParticipant_var dp =

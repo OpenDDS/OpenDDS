@@ -8,7 +8,7 @@
 
 ACE_INLINE
 void
-TAO::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
+OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 {
   // The default action is to simply add to the
   // tail - in the future we may want to add
@@ -41,15 +41,15 @@ TAO::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 
 
 ACE_INLINE
-TAO::DCPS::ReceivedDataElement *
-TAO::DCPS::ReceivedDataElementList::remove_head()
+OpenDDS::DCPS::ReceivedDataElement *
+OpenDDS::DCPS::ReceivedDataElementList::remove_head()
 {
   if (!size_)
   {
     return 0 ;
   }
 
-  TAO::DCPS::ReceivedDataElement *ptr = head_ ;
+  OpenDDS::DCPS::ReceivedDataElement *ptr = head_ ;
 
   remove(head_) ;
 
@@ -59,15 +59,15 @@ TAO::DCPS::ReceivedDataElementList::remove_head()
 
 
 ACE_INLINE
-TAO::DCPS::ReceivedDataElement *
-TAO::DCPS::ReceivedDataElementList::remove_tail()
+OpenDDS::DCPS::ReceivedDataElement *
+OpenDDS::DCPS::ReceivedDataElementList::remove_tail()
 {
   if (!size_)
   {
     return 0 ;
   }
 
-  TAO::DCPS::ReceivedDataElement *ptr = tail_ ;
+  OpenDDS::DCPS::ReceivedDataElement *ptr = tail_ ;
 
   remove(tail_) ;
 

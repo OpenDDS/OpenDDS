@@ -11,17 +11,17 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
-class SimpleSubscriber
+class SimpleSubscriber : public OpenDDS::DCPS::TransportInterface
 {
   public:
 
     SimpleSubscriber();
     virtual ~SimpleSubscriber();
 
-    void init(TAO::DCPS::TransportIdType               transport_id,
-              TAO::DCPS::RepoId                   sub_id,
+    void init(OpenDDS::DCPS::TransportIdType               transport_id,
+              OpenDDS::DCPS::RepoId                   sub_id,
               ssize_t                             num_publications,
-              const TAO::DCPS::AssociationData*   publications,
+              const OpenDDS::DCPS::AssociationData*   publications,
               unsigned                            num_msgs);
 
     /// Returns 0 if the data_received() has not been called/completed.
@@ -41,7 +41,7 @@ class SimpleSubscriber
 
     SimpleDataReader reader_;
 
-    TAO::DCPS::TransportInterface transport_interface_;
+    OpenDDS::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* SIMPLESUBSCRIBER_H */

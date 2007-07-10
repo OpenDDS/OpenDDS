@@ -7,16 +7,16 @@
 #include "SimpleMcastFactory.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
-TAO::DCPS::SimpleMcastGenerator::SimpleMcastGenerator()
+OpenDDS::DCPS::SimpleMcastGenerator::SimpleMcastGenerator()
 {
 }
 
-TAO::DCPS::SimpleMcastGenerator::~SimpleMcastGenerator()
+OpenDDS::DCPS::SimpleMcastGenerator::~SimpleMcastGenerator()
 {
 }
 
-TAO::DCPS::TransportImplFactory* 
-TAO::DCPS::SimpleMcastGenerator::new_factory() 
+OpenDDS::DCPS::TransportImplFactory* 
+OpenDDS::DCPS::SimpleMcastGenerator::new_factory() 
 {
   SimpleMcastFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
@@ -25,15 +25,15 @@ TAO::DCPS::SimpleMcastGenerator::new_factory()
   return factory;
 }
 
-TAO::DCPS::TransportConfiguration* 
-TAO::DCPS::SimpleMcastGenerator::new_configuration(const TransportIdType id)
+OpenDDS::DCPS::TransportConfiguration* 
+OpenDDS::DCPS::SimpleMcastGenerator::new_configuration(const TransportIdType id)
 {
   SimpleMcastConfiguration* trans_config = 0;
   ACE_NEW_RETURN(trans_config, 
                  SimpleMcastConfiguration(), 
                  0);
 
-  if (id == TAO::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID)
+  if (id == OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID)
     trans_config->receiver_ = true;
 
   return trans_config;
@@ -41,13 +41,13 @@ TAO::DCPS::SimpleMcastGenerator::new_configuration(const TransportIdType id)
 
 
 void 
-TAO::DCPS::SimpleMcastGenerator::default_transport_ids (TransportIdList & ids)
+OpenDDS::DCPS::SimpleMcastGenerator::default_transport_ids (TransportIdList & ids)
 {
   // SimpleMcast needs two default transport configuration, one for
   // publisher and one for subscriber.
   ids.clear ();
-  ids.push_back (TAO::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID);
-  ids.push_back (TAO::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID);
+  ids.push_back (OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID);
+  ids.push_back (OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID);
 }
 
 

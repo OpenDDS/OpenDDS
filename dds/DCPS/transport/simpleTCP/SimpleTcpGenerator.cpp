@@ -7,16 +7,16 @@
 #include "SimpleTcpFactory.h"
 
 
-TAO::DCPS::SimpleTcpGenerator::SimpleTcpGenerator()
+OpenDDS::DCPS::SimpleTcpGenerator::SimpleTcpGenerator()
 {
 }
 
-TAO::DCPS::SimpleTcpGenerator::~SimpleTcpGenerator()
+OpenDDS::DCPS::SimpleTcpGenerator::~SimpleTcpGenerator()
 {
 }
 
-TAO::DCPS::TransportImplFactory* 
-TAO::DCPS::SimpleTcpGenerator::new_factory() 
+OpenDDS::DCPS::TransportImplFactory* 
+OpenDDS::DCPS::SimpleTcpGenerator::new_factory() 
 {
   SimpleTcpFactory* factory = 0;
   ACE_NEW_RETURN(factory, 
@@ -25,8 +25,8 @@ TAO::DCPS::SimpleTcpGenerator::new_factory()
   return factory;
 }
 
-TAO::DCPS::TransportConfiguration* 
-TAO::DCPS::SimpleTcpGenerator::new_configuration(const TransportIdType id)
+OpenDDS::DCPS::TransportConfiguration* 
+OpenDDS::DCPS::SimpleTcpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
@@ -38,8 +38,8 @@ TAO::DCPS::SimpleTcpGenerator::new_configuration(const TransportIdType id)
 }
 
 void 
-TAO::DCPS::SimpleTcpGenerator::default_transport_ids (TransportIdList & ids)
+OpenDDS::DCPS::SimpleTcpGenerator::default_transport_ids (TransportIdList & ids)
 {
   ids.clear ();
-  ids.push_back (TAO::DCPS::DEFAULT_SIMPLE_TCP_ID);
+  ids.push_back (OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID);
 }

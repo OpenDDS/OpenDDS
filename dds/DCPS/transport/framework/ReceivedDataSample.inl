@@ -6,7 +6,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::ReceivedDataSample::ReceivedDataSample()
+OpenDDS::DCPS::ReceivedDataSample::ReceivedDataSample()
   : sample_(0)
 {
   DBG_ENTRY_LVL("ReceivedDataSample","ReceivedDataSample",5);
@@ -14,7 +14,7 @@ TAO::DCPS::ReceivedDataSample::ReceivedDataSample()
 
 
 ACE_INLINE
-TAO::DCPS::ReceivedDataSample::~ReceivedDataSample()
+OpenDDS::DCPS::ReceivedDataSample::~ReceivedDataSample()
 {
   DBG_ENTRY_LVL("ReceivedDataSample","~ReceivedDataSample",5);
 

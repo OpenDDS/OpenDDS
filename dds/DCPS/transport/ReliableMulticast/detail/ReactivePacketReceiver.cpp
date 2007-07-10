@@ -11,8 +11,8 @@
 #include "ReactivePacketReceiver.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
-typedef TAO::DCPS::ReliableMulticast::detail::PacketReceiverCallback PacketReceiverCallback;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketReceiverCallback PacketReceiverCallback;
 
 namespace
 {
@@ -24,7 +24,7 @@ namespace
   }
 }
 
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketReceiver(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketReceiver(
   const ACE_INET_Addr& multicast_group_address,
   PacketReceiverCallback& callback,
   size_t receiver_buffer_size
@@ -36,7 +36,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::ReactivePacketRece
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
   )
 {
   if (socket_.join(
@@ -68,19 +68,19 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::open(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::close(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::close(
 )
 {
   if (reactor()->cancel_timer(this) == -1)
   {
     logError("ReactivePacketReceiver: failure to cancel_timer\n");
   }
-  TAO::DCPS::ReliableMulticast::detail::EventHandler::close();
+  OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::close();
   reactor(0);
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive_packet_from(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive_packet_from(
   const Packet& packet,
   const ACE_INET_Addr& peer
   )
@@ -129,7 +129,7 @@ TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::receive_packet_fro
 }
 
 int
-TAO::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::handle_timeout(
+OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketReceiver::handle_timeout(
   const ACE_Time_Value& current_time,
   const void*
   )

@@ -35,10 +35,10 @@
 ::DDS::DomainParticipant_var participant[2];
 ::DDS::Topic_var topic[2];
 ::DDS::Subscriber_var subscriber[2];
-TAO::DCPS::TransportImpl_rch reader_impl[2];
+OpenDDS::DCPS::TransportImpl_rch reader_impl[2];
 ::DDS::DataReaderListener_var listener[2];
 ::DDS::DataReader_var datareader[2];
-TAO::DCPS::TransportIdType transport_id[2] = {SUB_TRAFFIC_TCP_1, SUB_TRAFFIC_TCP_2};
+OpenDDS::DCPS::TransportIdType transport_id[2] = {SUB_TRAFFIC_TCP_1, SUB_TRAFFIC_TCP_2};
 ACE_TString reader_address_str[2];
 
 /// parse the command line arguments
@@ -151,13 +151,13 @@ void init_dcps_objects (int i)
   reader_impl[i]
     = TheTransportFactory->create_transport_impl (transport_id[i],
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (transport_id[i], "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   if (reader_address_str[i] != "")
   {
@@ -184,8 +184,8 @@ void init_dcps_objects (int i)
     }
 
   // Attach the subscriber to the transport.
-  TAO::DCPS::SubscriberImpl* sub_impl
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>
+  OpenDDS::DCPS::SubscriberImpl* sub_impl
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
     (subscriber[i].in ());
 
   if (0 == sub_impl)
@@ -195,25 +195,25 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  TAO::DCPS::AttachStatus attach_status;
+  OpenDDS::DCPS::AttachStatus attach_status;
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
   attach_status = sub_impl->attach_transport(reader_impl[i].in());
 
-  if (attach_status != TAO::DCPS::ATTACH_OK)
+  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       ACE_TString status_str;
 
       switch (attach_status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             status_str = "ATTACH_BAD_TRANSPORT";
             break;
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             status_str = "ATTACH_ERROR";
             break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             status_str = "ATTACH_INCOMPATIBLE_QOS";
             break;
           default:
@@ -254,7 +254,7 @@ void init_listener()
   {
     DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
 
-    listener[i] = ::TAO::DCPS::servant_to_reference(listener_servant);
+    listener[i] = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
 
     if (CORBA::is_nil (listener[i].in ()))
       {

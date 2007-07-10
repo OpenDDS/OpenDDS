@@ -32,7 +32,7 @@
 #include "ace/Reactor.h"
 
 using namespace ::DDS;
-using namespace ::TAO::DCPS;
+using namespace ::OpenDDS::DCPS;
 
 int ignore_before_association = 0;
 
@@ -97,10 +97,10 @@ int init (int argc, ACE_TCHAR *argv[])
     ACE_OS::sleep (2);
 
       ::Xyz::FooTypeSupportImpl* ts_servant = new ::Xyz::FooTypeSupportImpl();
-      TAO::DCPS::LocalObject_var safe_servant = ts_servant;
+      OpenDDS::DCPS::LocalObject_var safe_servant = ts_servant;
 
       ::Xyz::FooTypeSupport_var ts =
-        TAO::DCPS::servant_to_reference (ts_servant);
+        OpenDDS::DCPS::servant_to_reference (ts_servant);
 
       if (::DDS::RETCODE_OK != ts->register_type(participant.in (), TEST_TOPIC_TYPE))
       {
@@ -110,7 +110,7 @@ int init (int argc, ACE_TCHAR *argv[])
       }
 
       participant_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::DomainParticipantImpl>
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
         (participant.in ());
 
       topic = participant->create_topic (TEST_TOPIC,
@@ -119,14 +119,14 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::TopicListener::_nil ());
 
       topic_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::TopicImpl> (topic.in ());
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl> (topic.in ());
 
       subscriber
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
                                          ::DDS::SubscriberListener::_nil ());
 
       subscriber_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl>
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
         (subscriber.in ());
 
       // Attach the subscriber to transport
@@ -146,7 +146,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::PublisherListener::_nil ());
 
       publisher_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
         (publisher.in ());
 
       // Attach the publisher to transport
@@ -170,7 +170,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::DataReaderListener::_nil ());
 
       datareader_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::DataReaderImpl>
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataReaderImpl>
         (datareader.in ());
 
       datawriter
@@ -179,7 +179,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                         ::DDS::DataWriterListener::_nil ());
 
       datawriter_servant
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::DataWriterImpl>
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl>
         (datawriter.in ());
   }
   catch (...)
@@ -224,7 +224,7 @@ void test_bit_participant ()
                                                 ANY_SAMPLE_STATE,
                                                 ANY_VIEW_STATE,
                                                 ANY_INSTANCE_STATE) ;
-#if 0
+
       TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
       CORBA::ULong data_len = part_data.length ();
@@ -239,12 +239,6 @@ void test_bit_participant ()
       TEST_CHECK (part_data[0].key[0] == TEST_DOMAIN);
       TEST_CHECK (part_data[0].key[1] == participant_servant->get_id ());
       TEST_CHECK (part_data[0].key[2] == 0);
-#else
-      // The paricipant will not know itself from repo since the
-      // bit participant topic datareader is created after
-      // DCPS gets add_domain_participant request.
-      TEST_CHECK (ret == ::DDS::RETCODE_NO_DATA);
-#endif
     }
   catch (...)
     {

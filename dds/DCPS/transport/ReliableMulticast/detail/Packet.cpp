@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 bool
-TAO::DCPS::ReliableMulticast::detail::Packet::operator<(
+OpenDDS::DCPS::ReliableMulticast::detail::Packet::operator<(
   const Packet& rhs
   ) const
 {
@@ -18,7 +18,7 @@ TAO::DCPS::ReliableMulticast::detail::Packet::operator<(
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::Packet::operator==(
+OpenDDS::DCPS::ReliableMulticast::detail::Packet::operator==(
   const Packet& rhs
   ) const
 {
@@ -42,7 +42,7 @@ TAO::DCPS::ReliableMulticast::detail::Packet::operator==(
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::Packet::operator!=(
+OpenDDS::DCPS::ReliableMulticast::detail::Packet::operator!=(
   const Packet& rhs
   ) const
 {

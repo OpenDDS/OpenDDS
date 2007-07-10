@@ -6,11 +6,11 @@
 #include "DataLinkSet_rch.h"
 
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/Util.h"
 #include "TransportImpl.h"
 #include "TransportSendListener.h"
 
 #include "EntryExit.h"
-
 
 #if !defined (__ACE_INLINE__)
 #include "DataLinkSet.inl"
@@ -23,113 +23,75 @@
 /// The number of chuncks in send control cached allocator per pub/sub.
 #define NUM_SEND_CONTROL_ELEMENT_CHUNKS 20
 
-/// The map_entry_allocator_ needs allocate one chunk per datalink/datareader.
-/// The number of chunks for the map entry allocator should be the number of
-/// datalinks per pub/sub.
-#define NUM_HASH_MAP_ENTRY_CHUNKS 20
-
-TAO::DCPS::DataLinkSet::DataLinkSet()
-  : map_entry_allocator_(NUM_HASH_MAP_ENTRY_CHUNKS),
-    map_(0),
-    send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
+OpenDDS::DCPS::DataLinkSet::DataLinkSet()
+  : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",5);
-  map_ = new MapType (ACE_Allocator::instance ());
 
   if (DCPS_debug_level >= 2)
     {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet map_entry_allocator %x with %d chunks \n",
-      &map_entry_allocator_, NUM_HASH_MAP_ENTRY_CHUNKS));
       ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
       &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
     }
 }
 
 
-TAO::DCPS::DataLinkSet::~DataLinkSet()
+OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 {
   DBG_ENTRY_LVL("DataLinkSet","~DataLinkSet",5);
-
-  // Note the unbind_all() and close() are not needed if the
-  // ACE_Hash_Map_Manager_Ex and ACE_Hash_Map_With_Allocator well
-  // define the intefaces to handle seperate allocators for hash
-  // table and buckets/entries.
-  // We call unbind_all() and then close() to work around
-  // the problem when we use seperate allocators for hash table
-  // and buckets/entries, the ACE_Hash_Map_Manager will use
-  // the bucket/entry allocator to try to free the hash table.
-
-  // This unbind_all() will use the allocator for previous bind/unbind
-  // operations.
-  this->map_->unbind_all ();
-  // Close with the default allocator since the hash map opened with
-  // the default allocator.
-  // Unless we pass it, the map will use the map_entry_allocator_ allocator.
-  this->map_->close (ACE_Allocator::instance ());
-  // Delete the hash map
-  delete this->map_;
-
-  //} // guard scope
 }
 
 
 int
-TAO::DCPS::DataLinkSet::insert_link(DataLink* link)
+OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",5);
   link->_add_ref();
   DataLink_rch mylink = link;
 
-  { // guard scope
-    GuardType guard(this->lock_);
+  GuardType guard(this->lock_);
 
-    return this->map_->bind(mylink->id(), mylink, &map_entry_allocator_);
-  }
+  return bind(map_, mylink->id(), mylink);
 }
 
 
 // Perform "set subtraction" logic.  Subtract the released_set from
 // *this* set.  When complete, return the (new) size of the set.
 ssize_t
-TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
+OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","remove_links",5);
-  MapType::ENTRY* entry;
 
-  ssize_t map_size = 0;
+  GuardType guard1(this->lock_);
+  GuardType guard2(released_set->lock_);
 
-  { // guard scope
-    GuardType guard(this->lock_);
-
-    // Attempt to unbind each of the DataLinks in the released_set's
-    // internal map from *this* object's internal map.
-    for (DataLinkSet::MapType::ITERATOR itr(*(released_set->map_));
-   itr.next(entry);
-   itr.advance())
-      {
-  DataLinkIdType link_id = entry->ext_id_;
-
-  if (this->map_->unbind(link_id, &map_entry_allocator_) != 0)
+  // Attempt to unbind each of the DataLinks in the released_set's
+  // internal map from *this* object's internal map.
+  for (DataLinkSet::MapType::iterator itr = released_set->map_.begin();
+      itr != released_set->map_.end();
+      ++itr)
     {
-      //MJM: This is an excellent candidate location for a level driven
-      //MJM: diagnostic (ORBDebugLevel 4).
-      // Just report to the log that we tried.
-      VDBG((LM_DEBUG,
-      "(%P|%t) link_id (%d) not found in map_->\n",
-      link_id));
+
+      DataLinkIdType link_id = itr->first;
+
+      if (unbind(map_, link_id) != 0)
+        {
+          //MJM: This is an excellent candidate location for a level driven
+          //MJM: diagnostic (ORBDebugLevel 4).
+          // Just report to the log that we tried.
+          VDBG((LM_DEBUG,
+          "(%P|%t) link_id (%d) not found in map_->\n",
+          link_id));
+        }
     }
-      }
 
-    // Return the current size of our map following all attempts to unbind().
-    map_size = this->map_->current_size();
-  }
-
-  return map_size;
+  // Return the current size of our map following all attempts to unbind().
+  return map_.size();
 }
 
 
 //void
-//TAO::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
+//OpenDDS::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
 //                                            DataLinkSetMap& released_locals)
 //{
 //  DBG_ENTRY_LVL("DataLinkSet","release_reservations",5);
@@ -150,32 +112,27 @@ TAO::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 //}
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
                                       const CORBA::ULong num_targets)
 {
   DBG_ENTRY_LVL("DataLinkSet","select_links",5);
 
   DataLinkSet_rch selected_links = new DataLinkSet ();
 
-  MapType::ENTRY* entry;
+  GuardType guard(this->lock_);
 
-  { // guard scope
-    GuardType guard(this->lock_);
-
-    for (MapType::ITERATOR itr(*map_);
-      itr.next(entry);
-      itr.advance())
+  for (MapType::iterator itr = map_.begin();
+    itr != map_.end();
+    ++itr)
+  {
+    for (CORBA::ULong i = 0; i < num_targets; ++i)
     {
-      for (CORBA::ULong i = 0; i < num_targets; ++i)
+      if (itr->second->is_target (remoteIds[i]))
       {
-        if (entry->int_id_->is_target (remoteIds[i]))
-        {
-          selected_links->map_->bind (entry->int_id_->id(),
-                                      entry->int_id_,
-                                      &(selected_links->map_entry_allocator_));
-          break;
-        }
+        bind (selected_links->map_,
+          itr->second->id(), itr->second);
+        break;
       }
     }
   }
@@ -184,32 +141,30 @@ TAO::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::DataLinkSet::find_link(const RepoId remoteId,
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
                                      const RepoId localId,
                                      const bool   pub_side)
 {
   DBG_ENTRY_LVL("DataLinkSet","find_link",5);
 
-  MapType::ENTRY* entry;
-
   { // guard scope
     GuardType guard(this->lock_);
 
-    for (MapType::ITERATOR itr(*map_);
-      itr.next(entry);
-      itr.advance())
+    for (MapType::iterator itr = map_.begin();
+      itr != map_.end();
+      ++itr)
     {
        bool last = true;
-       if (entry->int_id_->exist (remoteId, localId, pub_side, last))
+       if (itr->second->exist (remoteId, localId, pub_side, last))
         {
-          DataLink_rch link = entry->int_id_;
+          DataLink_rch link = itr->second;
 
           if (last)
           {
-            if (this->map_->unbind(entry->ext_id_, &map_entry_allocator_) != 0)
+            if (unbind(map_, itr->first) != 0)
             {
-              ACE_ERROR ((LM_ERROR, "(%P|%t)DataLinkSet::find_linkcan not remove"
+              ACE_ERROR ((LM_ERROR, "(%P|%t)DataLinkSet::find_link cannot remove"
                 " link for localId=%d pub_side=%d \n", localId, pub_side));
             }
           }
@@ -223,9 +178,9 @@ TAO::DCPS::DataLinkSet::find_link(const RepoId remoteId,
 
 
 bool
-TAO::DCPS::DataLinkSet::empty ()
+OpenDDS::DCPS::DataLinkSet::empty ()
 {
   GuardType guard(this->lock_);
 
-  return this->map_->current_size() == 0;
+  return map_.empty();
 }

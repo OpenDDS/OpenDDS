@@ -10,6 +10,9 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
 
 #include "ace/Arg_Shifter.h"
 
@@ -71,10 +74,10 @@ main (int argc, char *argv[])
         }
 
 
-      TAO_DCPS_DomainParticipantListener_i* dpListenerImpl = new TAO_DCPS_DomainParticipantListener_i;
+      OPENDDS_DCPS_DomainParticipantListener_i* dpListenerImpl = new OPENDDS_DCPS_DomainParticipantListener_i;
 
       ::DDS::DomainParticipantListener_var dpListener =
-        ::TAO::DCPS::servant_to_reference (dpListenerImpl);
+        ::OpenDDS::DCPS::servant_to_reference (dpListenerImpl);
       if ( CORBA::is_nil (dpListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -99,7 +102,7 @@ main (int argc, char *argv[])
       FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
 
       FooTypeSupport_var fts =
-        TAO::DCPS::servant_to_reference (fts_servant);
+        OpenDDS::DCPS::servant_to_reference (fts_servant);
 
       if (::DDS::RETCODE_OK != fts->register_type(participant.in (), TEST_TYPE_NAME))
         {
@@ -281,10 +284,10 @@ main (int argc, char *argv[])
         }
 
 
-      TAO_DCPS_TopicListener_i* topicListenerImpl = new TAO_DCPS_TopicListener_i;
+      OPENDDS_DCPS_TopicListener_i* topicListenerImpl = new OPENDDS_DCPS_TopicListener_i;
 
       ::DDS::TopicListener_var topicListener =
-        ::TAO::DCPS::servant_to_reference (topicListenerImpl);
+        ::OpenDDS::DCPS::servant_to_reference (topicListenerImpl);
       if ( CORBA::is_nil (topicListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -353,6 +356,12 @@ main (int argc, char *argv[])
                             9);
       }
 
+
+      // Sleep for 2 seconds to wait for all built in datareaders to receive the  
+      // add_associations from InfoRepo before delete the subscriber. Otherwise
+      // the add_associations will not add the remote_id to the transport mapping
+      // and the remove_associations will fail to find the remote id.
+      ACE_OS::sleep (2);
 
       ::DDS::ReturnCode_t deleteParticipantReturnCode =
         dpFactory->delete_participant(participant.in ());

@@ -12,7 +12,7 @@
 
 //Class DomainParticipantListenerImpl
 class DomainParticipantListenerImpl
-  : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantListener>
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipantListener>
 {
 public:
   //Constructor

@@ -172,20 +172,20 @@ SubDriver::init(int& argc, char* argv[])
   // application code will be able use the obtain() method on
   // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
   // a reference to the cached TransportImpl will be returned.
-  TAO::DCPS::TransportImpl_rch transport_impl
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   // Get or create SimpleTcpConfiguration object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
   // used to open an acceptor object to listen for passive connection
   // requests.  This is the TransportImpl object's (local) "endpoint" address.
-  TAO::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = ACE_INET_Addr (this->sub_addr_.c_str ());
 
@@ -231,7 +231,7 @@ public:
   virtual int svc (void)
   {
     ::Test::TestPubDriver_var pub_driver;
-    TAO::DCPS::RepoId sub_id = 0;
+    OpenDDS::DCPS::RepoId sub_id = 0;
     ACE_CString       sub_addr;
     int delay = -1;
 
@@ -269,7 +269,7 @@ public:
   };
 
   void register_invocation (const ::Test::TestPubDriver_var pub_driver
-                            , TAO::DCPS::RepoId sub_id, const char *sub_addr
+                            , OpenDDS::DCPS::RepoId sub_id, const char *sub_addr
                             , int delay = 0)
   {
     GuardType guard (lock_);
@@ -287,7 +287,7 @@ public:
 
 private:
   ::Test::TestPubDriver_var pub_driver_;
-  TAO::DCPS::RepoId sub_id_;
+  OpenDDS::DCPS::RepoId sub_id_;
   ACE_CString       sub_addr_;
   int delay_;
 
@@ -315,7 +315,7 @@ SubDriver::run()
 	}
       else
 	{
-	  ::TAO::DCPS::PublicationId pub_id = 0;
+	  ::OpenDDS::DCPS::PublicationId pub_id = 0;
 	  while (fscanf (fp, "%d\n", &pub_id) != EOF)
 	    {
 	      ids.push_back (pub_id);
@@ -345,8 +345,8 @@ SubDriver::run()
   size_t num_publications = ids.size ();
 
   // Set up the publications.
-  TAO::DCPS::AssociationData* publications
-    = new TAO::DCPS::AssociationData[num_publications];
+  OpenDDS::DCPS::AssociationData* publications
+    = new OpenDDS::DCPS::AssociationData[num_publications];
 
 
   for (size_t i = 0; i < num_publications; i ++)
@@ -354,11 +354,11 @@ SubDriver::run()
       publications[i].remote_id_                = ids[i];
       publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
-      TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+      OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
       publications[i].remote_data_.data
-	= TAO::DCPS::TransportInterfaceBLOB
-	(sizeof(TAO::DCPS::NetworkAddress),
-	 sizeof(TAO::DCPS::NetworkAddress),
+	= OpenDDS::DCPS::TransportInterfaceBLOB
+	(sizeof(OpenDDS::DCPS::NetworkAddress),
+	 sizeof(OpenDDS::DCPS::NetworkAddress),
 	 (CORBA::Octet*)(&network_order_address));
     }
 

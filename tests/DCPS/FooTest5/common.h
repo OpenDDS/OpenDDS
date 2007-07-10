@@ -46,14 +46,14 @@ extern long op_interval_ms;
 extern long blocking_ms;
 extern int mixed_trans;
 
-extern TAO::DCPS::TransportImpl_rch reader_tcp_impl;
-extern TAO::DCPS::TransportImpl_rch reader_udp_impl;
-extern TAO::DCPS::TransportImpl_rch reader_mcast_impl;
-extern TAO::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
-extern TAO::DCPS::TransportImpl_rch writer_tcp_impl;
-extern TAO::DCPS::TransportImpl_rch writer_udp_impl;
-extern TAO::DCPS::TransportImpl_rch writer_mcast_impl;
-extern TAO::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_mcast_impl;
+extern OpenDDS::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_tcp_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_udp_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_mcast_impl;
+extern OpenDDS::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
 
 extern ACE_TString synch_file_dir;
 // These files need to be unlinked in the run test script before and

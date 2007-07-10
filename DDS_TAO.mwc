@@ -2,7 +2,8 @@
 // $Id$
 
 workspace {
-  $(ACE_ROOT)/ace
+  cmdline = -include $PWD/MPC/config
+  $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
   $(TAO_ROOT)/tao/tao.mpc

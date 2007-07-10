@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTTRANSPORT_H
-#define TAO_DCPS_RELIABLEMULTICASTTRANSPORT_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORT_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORT_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -32,7 +32,7 @@ namespace TAO
       virtual ~ReliableMulticastTransportImpl();
 
     protected:
-      virtual TAO::DCPS::DataLink* find_or_create_datalink(
+      virtual OpenDDS::DCPS::DataLink* find_or_create_datalink(
         const TransportInterfaceInfo& remote_info,
         int connect_as_publisher
         );
@@ -43,7 +43,7 @@ namespace TAO
 
       virtual int connection_info_i(TransportInterfaceInfo& local_info) const;
 
-      virtual void release_datalink_i(TAO::DCPS::DataLink* link);
+      virtual void release_datalink_i(OpenDDS::DCPS::DataLink* link);
 
       virtual bool acked(RepoId);
 
@@ -52,7 +52,7 @@ namespace TAO
       // JSP: Add transport configuration storage
       typedef std::map<
         ACE_INET_Addr,
-        TAO::DCPS::ReliableMulticastDataLink_rch
+        OpenDDS::DCPS::ReliableMulticastDataLink_rch
         > ReliableMulticastDataLinkMap;
       ReliableMulticastDataLinkMap data_links_;
       TransportReactorTask_rch reactor_task_;
@@ -60,7 +60,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportImpl.inl"
@@ -68,4 +68,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTTRANSPORT_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORT_H */

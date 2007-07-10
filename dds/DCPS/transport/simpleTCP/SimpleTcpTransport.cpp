@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
-TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
+OpenDDS::DCPS::SimpleTcpTransport::SimpleTcpTransport()
   : acceptor_(new SimpleTcpAcceptor (this)),
     connections_updated_(this->connections_lock_),
     con_checker_ (new SimpleTcpConnectionReplaceTask(this))
@@ -27,7 +27,7 @@ TAO::DCPS::SimpleTcpTransport::SimpleTcpTransport()
 
 
 
-TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
+OpenDDS::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","~SimpleTcpTransport",5);
   delete acceptor_;
@@ -50,8 +50,8 @@ TAO::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 /// The connect_as_publisher will be set to 1 if this method was called
 /// due to an add_subscriptions() call on a TransportInterface object.
 /// This means true (1).  It *is* connecting as a publisher.
-TAO::DCPS::DataLink*
-TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
  int                           connect_as_publisher)
 {
@@ -87,12 +87,18 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 				  0);
 	      }
 	  }
-	// This means we found a suitable (and already connected) DataLink.
-	// We can return it now since we are done.
+	// This means we may or may not find a suitable (and already connected) DataLink.
+  // Thus we need more checks.
+  else
+  {
+    if(!con->is_connector () && !con->is_connected ())
+    {
+      // The passive connecting side will wait for the connection establishment.
+    }
 
+  }
 	VDBG_LVL ((LM_DEBUG, "(%P|%t)  Found existing connection,"
 		   " No need for passive connection establishment.\n"), 5);
-
 	return link._retn();
       }
   }
@@ -165,7 +171,7 @@ TAO::DCPS::SimpleTcpTransport::find_or_create_datalink
 
 
 int
-TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","configure_i",5);
 
@@ -282,7 +288,7 @@ TAO::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 }
 
 void
-TAO::DCPS::SimpleTcpTransport::pre_shutdown_i()
+OpenDDS::DCPS::SimpleTcpTransport::pre_shutdown_i()
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","pre_shutdown_i",5);
 
@@ -300,7 +306,7 @@ TAO::DCPS::SimpleTcpTransport::pre_shutdown_i()
 
 
 void
-TAO::DCPS::SimpleTcpTransport::shutdown_i()
+OpenDDS::DCPS::SimpleTcpTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","shutdown_i",5);
 
@@ -354,7 +360,7 @@ TAO::DCPS::SimpleTcpTransport::shutdown_i()
 
 
 int
-TAO::DCPS::SimpleTcpTransport::connection_info_i
+OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",5);
@@ -366,7 +372,7 @@ TAO::DCPS::SimpleTcpTransport::connection_info_i
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
-  local_info.data = TAO::DCPS::TransportInterfaceBLOB
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
     (sizeof(NetworkAddress),
      sizeof(NetworkAddress),
      (CORBA::Octet*)(&network_order_address));
@@ -376,7 +382,7 @@ TAO::DCPS::SimpleTcpTransport::connection_info_i
 
 
 void
-TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",5);
 
@@ -408,8 +414,8 @@ TAO::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 }
 
 
-TAO::DCPS::SimpleTcpConfiguration*
-TAO::DCPS::SimpleTcpTransport::get_configuration()
+OpenDDS::DCPS::SimpleTcpConfiguration*
+OpenDDS::DCPS::SimpleTcpTransport::get_configuration()
 {
   return this->tcp_config_.in();
 }
@@ -422,7 +428,7 @@ TAO::DCPS::SimpleTcpTransport::get_configuration()
 /// object needs to be paired with a DataLink object that is (or will be)
 /// expecting this passive connection to be established.
 void
-TAO::DCPS::SimpleTcpTransport::passive_connection
+OpenDDS::DCPS::SimpleTcpTransport::passive_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpConnection* connection)
 {
@@ -461,7 +467,7 @@ TAO::DCPS::SimpleTcpTransport::passive_connection
 
 /// Actively establish a connection to the remote address.
 int
-TAO::DCPS::SimpleTcpTransport::make_active_connection
+OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpDataLink*   link)
 {
@@ -483,7 +489,7 @@ TAO::DCPS::SimpleTcpTransport::make_active_connection
 
 
 int
-TAO::DCPS::SimpleTcpTransport::make_passive_connection
+OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpDataLink*   link)
 {
@@ -544,7 +550,7 @@ TAO::DCPS::SimpleTcpTransport::make_passive_connection
 
 /// Common code used by make_active_connection() and make_passive_connection().
 int
-TAO::DCPS::SimpleTcpTransport::connect_datalink
+OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 (SimpleTcpDataLink*   link,
  SimpleTcpConnection* connection)
 {
@@ -555,7 +561,8 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
 			      this->tcp_config_.in(),
 			      connection,
 			      new SimpleTcpSynchResource(connection,
-							 this->tcp_config_->max_output_pause_period_));
+							 this->tcp_config_->max_output_pause_period_),
+            this->reactor_task_.in());
 
   TransportReceiveStrategy_rch receive_strategy =
     new SimpleTcpReceiveStrategy(link,
@@ -577,7 +584,7 @@ TAO::DCPS::SimpleTcpTransport::connect_datalink
 /// accepted connection is the re-established connection. If it is, then the "old" connection
 /// object in the datalink is replaced by the "new" connection object.
 int
-TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
+OpenDDS::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
                                            SimpleTcpConnection_rch connection)
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","fresh_link",5);
@@ -590,7 +597,9 @@ TAO::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_addres
       SimpleTcpConnection_rch old_con = link->get_connection ();
       if (old_con.in () != connection.in ())
         // Replace the "old" connection object with the "new" connection object.
+      {
         return link->reconnect (connection.in ());
+      }
     }
 
   return 0;

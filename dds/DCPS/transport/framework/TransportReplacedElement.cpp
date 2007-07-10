@@ -10,14 +10,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportReplacedElement::~TransportReplacedElement()
+OpenDDS::DCPS::TransportReplacedElement::~TransportReplacedElement()
 {
   DBG_ENTRY_LVL("TransportReplacedElement","~TransportReplacedElement",5);
 }
 
 
 void
-TAO::DCPS::TransportReplacedElement::release_element(bool dropped_by_transport)
+OpenDDS::DCPS::TransportReplacedElement::release_element(bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);
   DBG_ENTRY_LVL("TransportReplacedElement","release_element",5);
@@ -35,8 +35,8 @@ TAO::DCPS::TransportReplacedElement::release_element(bool dropped_by_transport)
 }
 
 
-TAO::DCPS::RepoId
-TAO::DCPS::TransportReplacedElement::publication_id() const
+OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::TransportReplacedElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportReplacedElement","publication_id",5);
   return this->publisher_id_;
@@ -44,7 +44,7 @@ TAO::DCPS::TransportReplacedElement::publication_id() const
 
 
 const ACE_Message_Block*
-TAO::DCPS::TransportReplacedElement::msg() const
+OpenDDS::DCPS::TransportReplacedElement::msg() const
 {
   DBG_ENTRY_LVL("TransportReplacedElement","msg",5);
   return this->msg_;

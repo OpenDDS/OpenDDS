@@ -7,9 +7,10 @@
 #include "dds/DdsDcpsInfoC.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "Util.h"
 #include "tao/debug.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -123,12 +124,12 @@ namespace TAO
 
       Participant_Pair pair (dp, dp_obj, NO_DUP);
 
-      DPMap_Entry* entry;
-      if (participants_.find (domainId, entry) == -1)
+      DPSet* entry;
+      if (find(participants_, domainId, entry) == -1)
         {
           DPSet set;
 
-          if (set.insert (pair) == -1)
+          if (OpenDDS::DCPS::insert(set, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -138,7 +139,7 @@ namespace TAO
               return ::DDS::DomainParticipant::_nil ();
             }
 
-          if (participants_.bind (domainId, set)  == -1)
+            if (bind(participants_, domainId, set)  == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -150,7 +151,7 @@ namespace TAO
         }
       else
         {
-          if (entry->int_id_.insert (pair) == -1)
+          if (OpenDDS::DCPS::insert(*entry, pair) == -1)
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
@@ -206,8 +207,8 @@ namespace TAO
       ::DDS::DomainId_t domain_id = the_servant->get_domain_id ();
       RepoId dp_id = the_servant->get_id ();
 
-      DPMap_Entry* entry;
-      if (participants_.find (domain_id, entry) == -1)
+      DPSet* entry;
+      if (find(participants_, domain_id, entry) == -1)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
@@ -223,8 +224,8 @@ namespace TAO
                             this->participants_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          DPMap_Entry* entry;
-          if (participants_.find (domain_id, entry) == -1)
+          DPSet* entry;
+          if (find(participants_, domain_id, entry) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: ")
@@ -248,7 +249,7 @@ namespace TAO
 
               Participant_Pair pair (the_servant, a_participant, DUP);
 
-              if (entry->int_id_.remove (pair) == -1)
+              if (OpenDDS::DCPS::remove(*entry, pair) == -1)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: ")
@@ -258,9 +259,9 @@ namespace TAO
                                     ::DDS::RETCODE_ERROR);
                 }
 //xxx now obj rc=5 and servant rc=4
-              if (entry->int_id_.is_empty ())
+              if (entry->empty())
                 {
-                  if (participants_.unbind (entry->ext_id_) == -1)
+                  if (unbind(participants_, domain_id) == -1)
                     {
                       ACE_ERROR_RETURN ((LM_ERROR,
                                         ACE_TEXT("(%P|%t) ERROR: ")
@@ -317,8 +318,8 @@ namespace TAO
                         this->participants_protector_,
                         ::DDS::DomainParticipant::_nil ());
 
-      DPMap_Entry* entry;
-      if (participants_.find (domainId, entry) == -1)
+      DPSet* entry;
+      if (find(participants_, domainId, entry) == -1)
         {
           if (DCPS_debug_level >= 1)
             {
@@ -335,7 +336,7 @@ namespace TAO
           // No specification about which participant will return. We just return the first
           // object.
           // Note: We are not duplicate the object ref, so a delete call is not needed.
-          return ::DDS::DomainParticipant::_duplicate ((*(entry->int_id_.begin ())).obj_.in ());
+          return ::DDS::DomainParticipant::_duplicate ((*(entry->begin ())).obj_.in ());
         }
     }
 
@@ -377,25 +378,23 @@ namespace TAO
                         this->participants_protector_,
                         ::DDS::RETCODE_ERROR);
 
-      DPMap_Iterator mapIter(participants_);
+      DPMap::iterator mapIter(participants_.begin());
 
-      for (DPMap_Entry* entry = 0;
-          mapIter.next (entry) != 0;
-          mapIter.advance ())
+      for (DPMap::iterator mapIter = participants_.begin();
+        mapIter != participants_.end();
+        ++mapIter)
+      {
+        for (DPSet::iterator iter = mapIter->second.begin();
+          iter != mapIter->second.end();
+          ++iter)
         {
-
-          DPSet_Iterator setIter(entry->int_id_);
-          for (Participant_Pair* e = 0;
-              setIter.next (e) != 0;
-              setIter.advance ())
-            {
-              ::DDS::ReturnCode_t result = delete_participant ((*e).obj_.in ());
-              if (result != ::DDS::RETCODE_OK)
-                {
-                  return result;
-                }
-            }
+          ::DDS::ReturnCode_t result = delete_participant ((*iter).obj_.in ());
+          if (result != ::DDS::RETCODE_OK)
+          {
+            return result;
+          }
         }
+      }
 
       return ::DDS::RETCODE_OK;
     }
@@ -412,24 +411,4 @@ namespace TAO
 
 
  } // namespace DCPS
-} // namespace TAO
-
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Unbounded_Set <::DDS::DomainParticipant_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::DomainParticipant_ptr>;
-template class ACE_Hash_Map_Manager<::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Iterator <::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Entry<::DDS::DomainId_t, DPSet>;
-
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Unbounded_Set <::DDS::DomainParticipant_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::DomainParticipant_ptr>;
-#pragma instantiate ACE_Hash_Map_Manager<::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Iterator <::DDS::DomainId_t, DPSet, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Entry<::DDS::DomainId_t, DPSet>;
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+} // namespace OpenDDS

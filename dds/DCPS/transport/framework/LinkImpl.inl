@@ -5,7 +5,8 @@
 #include "LinkImpl.h"
 #include <stdexcept>
 
-TAO::DCPS::LinkImpl::IOItem::IOItem()
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::IOItem::IOItem()
   : data_begin_(0)
   , data_size_(0)
   , requestId_(0)
@@ -13,7 +14,8 @@ TAO::DCPS::LinkImpl::IOItem::IOItem()
 {
 }
 
-TAO::DCPS::LinkImpl::IOItem::IOItem(
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::IOItem::IOItem(
   ACE_Message_Block& mb,
   char* data,
   size_t size,
@@ -31,8 +33,9 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
 {
 }
 
-TAO::DCPS::LinkImpl::IOItem::IOItem(
-  const TAO::DCPS::LinkImpl::IOItem& rhs
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::IOItem::IOItem(
+  const OpenDDS::DCPS::LinkImpl::IOItem& rhs
   )
   : data_begin_(rhs.data_begin_)
   , data_size_(rhs.data_size_)
@@ -47,14 +50,16 @@ TAO::DCPS::LinkImpl::IOItem::IOItem(
   }
 }
 
-TAO::DCPS::LinkImpl::IOItem::~IOItem(
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::IOItem::~IOItem(
   )
 {
 }
 
-TAO::DCPS::LinkImpl::IOItem&
-TAO::DCPS::LinkImpl::IOItem::operator=(
-  const TAO::DCPS::LinkImpl::IOItem& rhs
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::IOItem&
+OpenDDS::DCPS::LinkImpl::IOItem::operator=(
+  const OpenDDS::DCPS::LinkImpl::IOItem& rhs
   )
 {
   if (this != &rhs)
@@ -77,7 +82,8 @@ TAO::DCPS::LinkImpl::IOItem::operator=(
   return *this;
 }
 
-TAO::DCPS::LinkImpl::LinkImpl(
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::LinkImpl(
   TransportAPI::Transport::Link& link,
   size_t max_transport_buffer_size
   )
@@ -99,7 +105,8 @@ TAO::DCPS::LinkImpl::LinkImpl(
   link_.setCallback(this);
 }
 
-TAO::DCPS::LinkImpl::~LinkImpl(
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::~LinkImpl(
   )
 {
   link_.setCallback(0);

@@ -13,7 +13,7 @@
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
-  : public virtual TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
+  : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
   //Constructor
@@ -62,19 +62,19 @@ public:
 
   virtual void on_subscription_disconnected (
     DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionDisconnectedStatus & status
+    const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus & status
   )
   throw (CORBA::SystemException);
 
   virtual void on_subscription_reconnected (
     DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionReconnectedStatus & status
+    const ::OpenDDS::DCPS::SubscriptionReconnectedStatus & status
   )
   throw (CORBA::SystemException);
 
   virtual void on_subscription_lost (
     DDS::DataReader_ptr reader,
-    const ::TAO::DCPS::SubscriptionLostStatus & status
+    const ::OpenDDS::DCPS::SubscriptionLostStatus & status
   )
   throw (CORBA::SystemException);
 

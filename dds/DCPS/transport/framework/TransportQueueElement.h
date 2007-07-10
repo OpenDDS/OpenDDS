@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTQUEUEELEMENT_H
-#define TAO_DCPS_TRANSPORTQUEUEELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
+#define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
@@ -11,7 +11,7 @@
 class ACE_Message_Block;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -37,7 +37,7 @@ namespace TAO
      * This wrapper object will "return the loan" when all DataLinks have
      * "returned" their sub-loans.
      */
-    class TAO_DdsDcps_Export TransportQueueElement
+    class OpenDDS_Dcps_Export TransportQueueElement
     {
       public:
 
@@ -115,4 +115,4 @@ namespace TAO
 #include "TransportQueueElement.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTQUEUEELEMENT_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H */

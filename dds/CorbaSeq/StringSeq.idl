@@ -17,8 +17,8 @@
 // ================================================================
 
 
-#ifndef TAO_CORBA_STRING_SEQ_IDL
-#define TAO_CORBA_STRING_SEQ_IDL
+#ifndef OPENDDS_CORBA_STRING_SEQ_IDL
+#define OPENDDS_CORBA_STRING_SEQ_IDL
 
 #pragma prefix "omg.org"
 
@@ -27,4 +27,4 @@ module CORBA
   typedef sequence<string> StringSeq;
 };
 
-#endif  /* TAO_CORBA_STRING_SEQ_IDL */
+#endif  /* OPENDDS_CORBA_STRING_SEQ_IDL */

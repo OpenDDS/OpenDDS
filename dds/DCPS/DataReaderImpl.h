@@ -22,8 +22,8 @@
 
 
 #include "ace/String_Base.h"
-//#include "ace/Unbounded_Set.h"
-#include "ace/Hash_Map_Manager.h"
+
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -31,7 +31,7 @@
 
 class DDS_TEST;
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -40,21 +40,21 @@ namespace TAO
     class SubscriptionInstance ;
     class TopicImpl;
 
-    typedef Cached_Allocator_With_Overflow< ::TAO::DCPS::ReceivedDataElement, ACE_Null_Mutex>
+    typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
 
     //typedef ZeroCopyInfoSeq<DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE> SampleInfoZCSeq;
 
     /// Keeps track of a DataWriter's liveliness for a DataReader.
-    class TAO_DdsDcps_Export WriterInfo {
+    class OpenDDS_Dcps_Export WriterInfo {
       public:
-        WriterInfo (); // needed for Hash_Map_Manager
+        WriterInfo (); // needed for maps
 
         WriterInfo (DataReaderImpl* reader,
                     PublicationId   writer_id);
 
         /// check to see if this writer is alive (called by handle_timeout).
-        /// @param next_timeout next time this DataWriter will become not active (not alive)
+        /// @param now next time this DataWriter will become not active (not alive)
         ///      if no sample or liveliness message is received.
         /// @returns absolute time when the Writer will become not active (if no activity)
         ///          of ACE_Time_Value::zero if the writer is already or became not alive
@@ -94,7 +94,7 @@ namespace TAO
     * is specific to the data-type associated with the topic.
     *
     */
-    class TAO_DdsDcps_Export DataReaderImpl
+    class OpenDDS_Dcps_Export DataReaderImpl
       : public virtual DDS::DataReader,
         public virtual EntityImpl,
         public virtual TransportReceiveListener,
@@ -102,11 +102,9 @@ namespace TAO
     {
     public:
 
-      typedef ACE_Hash_Map_Manager_Ex< ::DDS::InstanceHandle_t,
-                                      SubscriptionInstance*,
-                                      ACE_Hash< ::DDS::InstanceHandle_t>,
-                                      ACE_Equal_To< ::DDS::InstanceHandle_t>,
-                                      ACE_Null_Mutex>        SubscriptionInstanceMapType;
+      typedef std::map<
+        ::DDS::InstanceHandle_t,
+        SubscriptionInstance*> SubscriptionInstanceMapType;
 
       //Constructor
       DataReaderImpl (void);
@@ -116,15 +114,15 @@ namespace TAO
 
 
       virtual void add_associations (
-          ::TAO::DCPS::RepoId yourId,
-          const TAO::DCPS::WriterAssociationSeq & writers
+          ::OpenDDS::DCPS::RepoId yourId,
+          const OpenDDS::DCPS::WriterAssociationSeq & writers
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
         ));
 
       virtual void remove_associations (
-          const TAO::DCPS::WriterIdSeq & writers,
+          const OpenDDS::DCPS::WriterIdSeq & writers,
           ::CORBA::Boolean callback
         )
         ACE_THROW_SPEC ((
@@ -132,7 +130,7 @@ namespace TAO
         ));
 
       virtual void update_incompatible_qos (
-          const TAO::DCPS::IncompatibleQosStatus & status
+          const OpenDDS::DCPS::IncompatibleQosStatus & status
         )
         ACE_THROW_SPEC ((
           CORBA::SystemException
@@ -176,7 +174,7 @@ namespace TAO
         SubscriberImpl*               subscriber,
         ::DDS::Subscriber_ptr         subscriber_objref,
         ::DDS::DataReader_ptr         dr_objref,
-        ::TAO::DCPS::DataReaderRemote_ptr dr_remote_objref
+        ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -345,15 +343,17 @@ namespace TAO
        *
        * @returns Always RETCODE_OK.
        *
-       * @thows NONE.
+       * thows NONE.
        */
-      virtual DDS::ReturnCode_t auto_return_loan(void*) = 0;
+      virtual DDS::ReturnCode_t auto_return_loan(void* seq) = 0;
 
       /** This method is used for a precondition check of delete_datareader.
        *
        * @returns the number of outstanding zero-copy samples loaned out.
        */
       virtual int num_zero_copies();
+
+      virtual void dec_ref_data_element(ReceivedDataElement* r) = 0;
 
       /// Release the instance with the handle.
       void release_instance (::DDS::InstanceHandle_t handle);
@@ -440,11 +440,7 @@ namespace TAO
 
       ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
 
-      typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                      DDS::InstanceHandle_t,
-                                      ACE_Hash<RepoId>,
-                                      ACE_Equal_To<RepoId>,
-                                      ACE_Null_Mutex>        RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
       ::DDS::InstanceHandleSeq        publication_handles_;
@@ -481,11 +477,7 @@ namespace TAO
       /// Flag indicates that the init() is called.
       bool                       initialized_;
 
-      typedef ACE_Hash_Map_Manager_Ex<PublicationId,
-                                      WriterInfo,
-                                      ACE_Hash<PublicationId>,
-                                      ACE_Equal_To<PublicationId>,
-                                      ACE_Null_Mutex>        WriterMapType;
+      typedef std::map<PublicationId, WriterInfo> WriterMapType;
 
 
       /// publications writing to this reader.
@@ -493,7 +485,7 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"

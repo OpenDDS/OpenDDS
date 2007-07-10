@@ -47,7 +47,8 @@ GetOptions(
   "sport|y=i"      => \$subscriberPort,
 ) ;
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : " -ORBSvcConf ../../tcp.conf ";
 
 #
 # Subscriber command and arguments.

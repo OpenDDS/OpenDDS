@@ -25,7 +25,7 @@ SimpleDataWriter::~SimpleDataWriter()
 
 
 void
-SimpleDataWriter::init(TAO::DCPS::RepoId pub_id)
+SimpleDataWriter::init(OpenDDS::DCPS::RepoId pub_id)
 {
   this->pub_id_ = pub_id;
 }
@@ -38,7 +38,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
   this->num_messages_sent_      = num_messages;
 
   // Set up the DataSampleList
-  TAO::DCPS::DataSampleList samples;
+  OpenDDS::DCPS::DataSampleList samples;
 
   samples.head_ = 0;
   samples.tail_ = 0;
@@ -48,14 +48,14 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
   std::string data = "Hello World!";
 
   // Now we can create the DataSampleHeader struct and set its fields.
-  TAO::DCPS::DataSampleHeader header;
+  OpenDDS::DCPS::DataSampleHeader header;
   header.message_id_ = 1;
   header.publication_id_ = this->pub_id_;
 
-  TAO::DCPS::DataSampleListElement* prev_element = 0;
+  OpenDDS::DCPS::DataSampleListElement* prev_element = 0;
 
-  TAO::DCPS::DataSampleListElementAllocator allocator(num_messages);
-  TAO::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (TAO::DCPS::TransportSendElement));
+  OpenDDS::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   for (unsigned i = 1; i <= num_messages; ++i)
     {
@@ -82,11 +82,11 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
       header_block->cont(data_block);
 
       // Create the DataSampleListElement now.
-      TAO::DCPS::DataSampleListElement* element;
+      OpenDDS::DCPS::DataSampleListElement* element;
 
       ACE_NEW_MALLOC_RETURN(element,
-              static_cast<TAO::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (TAO::DCPS::DataSampleListElement))),
-              TAO::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+              static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
+              OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
               1);
 
       // The Sample Element will hold the chain of blocks (header + data).
@@ -120,7 +120,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(OpenDDS::DCPS::DataSampleListElement* sample)
 {
   ACE_UNUSED_ARG(sample);
 
@@ -140,7 +140,7 @@ SimpleDataWriter::data_delivered(TAO::DCPS::DataSampleListElement* sample)
 
 
 void
-SimpleDataWriter::data_dropped(TAO::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                                bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);

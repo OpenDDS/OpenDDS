@@ -21,7 +21,7 @@
 #include <vector>
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -29,9 +29,9 @@ namespace TAO
     class DataWriterImpl;
 
     /// Information about a DataWriter
-    struct TAO_DdsDcps_Export PublisherDataWriterInfo {
+    struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
-      ::TAO::DCPS::DataWriterRemote_ptr  remote_writer_objref_ ;
+      ::OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_ ;
       /// The local datawriter object reference.
       ::DDS::DataWriter_ptr        local_writer_objref_ ;
       /// The datawriter servant.
@@ -54,7 +54,7 @@ namespace TAO
     /**
     * @class PublisherImpl
     *
-    * @brief Implements the ::TAO::DCPS::Publisher interfaces.
+    * @brief Implements the ::OpenDDS::DCPS::Publisher interfaces.
     *
     * This class acts as a factory and container of the datawriter.
     * It is also an intermedia class which delegates the data from
@@ -63,9 +63,10 @@ namespace TAO
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export PublisherImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::Publisher>,
-        public virtual EntityImpl
+    class OpenDDS_Dcps_Export PublisherImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::Publisher>,
+        public virtual EntityImpl,
+        public virtual TransportInterface
     {
     public:
 
@@ -220,7 +221,7 @@ namespace TAO
     * a new datawriter/publication is associated with the topic.
     */
     ::DDS::ReturnCode_t writer_enabled (
-        ::TAO::DCPS::DataWriterRemote_ptr remote_writer,
+        ::OpenDDS::DCPS::DataWriterRemote_ptr remote_writer,
         ::DDS::DataWriter_ptr    local_writer,
         const char *            topic_name,
         //BuiltinTopicKey_t topic_key
@@ -334,6 +335,6 @@ namespace TAO
     };
 
   } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_PUBLISHER_IMPL_H  */

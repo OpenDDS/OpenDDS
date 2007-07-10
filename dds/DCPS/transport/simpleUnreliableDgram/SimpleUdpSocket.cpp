@@ -10,7 +10,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleUdpSocket::~SimpleUdpSocket()
+OpenDDS::DCPS::SimpleUdpSocket::~SimpleUdpSocket()
 {
   DBG_ENTRY_LVL("SimpleUdpSocket","~SimpleUdpSocket",5);
 }

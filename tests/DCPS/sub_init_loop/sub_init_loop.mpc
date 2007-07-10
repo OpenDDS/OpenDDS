@@ -1,7 +1,7 @@
 // $Id$
 
-project(*Publisher) : dcpsexe {
-  
+project(*Publisher) : dcpsexe_with_tcp {
+
   exename   = publisher
 
   TypeSupport_Files {
@@ -20,8 +20,8 @@ project(*Publisher) : dcpsexe {
   }
 }
 
-project(*Subscriber) : dcpsexe {
-  
+project(*Subscriber) : dcpsexe_with_tcp {
+
   exename   = subscriber
 
   TypeSupport_Files {

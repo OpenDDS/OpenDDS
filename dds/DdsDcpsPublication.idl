@@ -155,7 +155,7 @@ module DDS {
 
 };
 
-module TAO {
+module OpenDDS {
   module DCPS {
 
     struct PublicationLostStatus {
@@ -199,7 +199,7 @@ module TAO {
     };
 
   }; // End of module DCPS
-}; // End of module TAO
+}; // End of module OpenDDS
 
 
 

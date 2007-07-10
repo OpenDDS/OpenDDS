@@ -7,13 +7,14 @@
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
 #include "PublicationInstance.h"
+#include "Util.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "tao/debug.h"
 
 #include "Serializer.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -38,7 +39,7 @@ WriteDataContainer::WriteDataContainer(
                                        condition_ (lock_),
                                        n_chunks_ (n_chunks),
                                        sample_list_element_allocator_(2 * n_chunks_),
-                                       transport_send_element_allocator_(2 * n_chunks_, sizeof (TAO::DCPS::TransportSendElement)),
+                                       transport_send_element_allocator_(2 * n_chunks_, sizeof (OpenDDS::DCPS::TransportSendElement)),
                                        shutdown_ (false),
                                        next_handle_(1)
 {
@@ -93,7 +94,7 @@ WriteDataContainer::enqueue(
 }
 
 ::DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(const TAO::DCPS::ReaderIdSeq& rds)
+WriteDataContainer::reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
@@ -132,7 +133,7 @@ WriteDataContainer::register_instance(
 
     instance_handle = get_next_handle();
 
-    int insert_attempt = instances_.bind(instance_handle, instance);
+    int insert_attempt = bind(instances_, instance_handle, instance);
 
     if (0 != insert_attempt)
     {
@@ -148,7 +149,7 @@ WriteDataContainer::register_instance(
   }
   else
   {
-    int find_attempt = instances_.find(instance_handle, instance);
+    int find_attempt = find(instances_, instance_handle, instance);
 
     if (0 != find_attempt)
     {
@@ -182,7 +183,7 @@ WriteDataContainer::unregister(
 {
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(instance_handle, instance);
+  int find_attempt = find(instances_, instance_handle, instance);
 
   if (0 != find_attempt)
   {
@@ -221,7 +222,7 @@ WriteDataContainer::dispose(
 
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(instance_handle, instance);
+  int find_attempt = find(instances_, instance_handle, instance);
 
   if (0 != find_attempt)
   {
@@ -277,7 +278,7 @@ WriteDataContainer::num_samples (
     ::DDS::RETCODE_ERROR);
   PublicationInstance* instance = 0;
 
-  int find_attempt = instances_.find(handle, instance);
+  int find_attempt = find(instances_, handle, instance);
 
   if (0 != find_attempt)
   {
@@ -769,46 +770,55 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   int result = writer->remove_all_control_msgs ();
   ACE_UNUSED_ARG (result);
 
-  while (sending_data_.size_ > 0)
   {
-    DataSampleListElement* old_head = sending_data_.head_;
+    //The internal list needs protection since this call may result from the 
+    //the delete_datawriter call which does not acquire the lock in advance.
 
-    if (old_head == 0)
-      {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all, NULL element at head of sending_data_\n")));
-        break;
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+      guard,
+      this->lock_);
+    while (sending_data_.size_ > 0)
+    {
+      DataSampleListElement* old_head = sending_data_.head_;
+
+      if (old_head == 0)
+        {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
+            "NULL element at head of sending_data_, size %d head %X tail %X \n"), 
+            sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
+          break;
+        }
+
+      // Tell transport remove all samples currently
+      // transport is processing.
+      writer->remove_sample (old_head);
+
+      if (old_head == sending_data_.head_) {
+        /*
+        ciju: In situations of repeated connection restablishment
+        from the subscriber, we seem to get some orphan messages
+        left behind in the system. When the system shuts down
+        due to the cleanup mechanism now in place we enter a
+        for-ever loop.
+        The problem is most probably due to missing error handling
+        somewhere in the element delivery path and fixing that is the
+        real solution as otherwise over time the internal buffers will
+        just fill up (currently only observed upon connection disruption).
+        For now I am putting this code which will trap and cleanup these
+        orphan messages at shutdown time.
+        keywords: forever loop orphan hang
+        ***********************************/
+
+        old_head->send_listener_->data_delivered( old_head );
       }
+    }
 
-    // Tell transport remove all samples currently
-    // transport is processing.
-    writer->remove_sample (old_head);
-
-    if (old_head == sending_data_.head_) {
-      /*
-      ciju: In situations of repeated connection restablishment
-      from the subscriber, we seem to get some orphan messages
-      left behind in the system. When the system shuts down
-      due to the cleanup mechanism now in place we enter a
-      for-ever loop.
-      The problem is most probably due to missing error handling
-      somewhere in the element delivery path and fixing that is the
-      real solution as otherwise over time the internal buffers will
-      just fill up (currently only observed upon connection disruption).
-      For now I am putting this code which will trap and cleanup these
-      orphan messages at shutdown time.
-      keywords: forever loop orphan hang
-      ***********************************/
-
-      old_head->send_listener_->data_delivered( old_head );
+    // Broadcast to wake up all waiting threads.
+    if (waiting_on_release_)
+    {
+      condition_.broadcast ();
     }
   }
-
-  // Broadcast to wake up all waiting threads.
-  if (waiting_on_release_)
-  {
-    condition_.broadcast ();
-  }
-
   ::DDS::ReturnCode_t ret;
   DataSample* registered_sample;
   PublicationInstanceMapType::iterator it = instances_.begin ();
@@ -816,36 +826,36 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
   while (it != instances_.end ())
   {
     // Release the instance data.
-    ret = dispose ((*it).ext_id_, registered_sample, false);
+    ret = dispose (it->first, registered_sample, false);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("WriteDataContainer::unregister_all, ")
         ACE_TEXT("dispose instance %X failed\n"),
-        (*it).ext_id_));
+        it->first));
     }
 
     // Mark the instance unregistered.
-    ret = unregister ((*it).ext_id_, registered_sample, writer, false);
+    ret = unregister (it->first, registered_sample, writer, false);
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("WriteDataContainer::unregister_all, ")
         ACE_TEXT("unregister instance %X failed\n"),
-        (*it).ext_id_));
+        it->first));
     }
 
-    PublicationInstance* instance = (*it).int_id_;
+    PublicationInstance* instance = it->second;
 
     delete instance;
 
     // Get the next iterator before erase the instance handle.
     PublicationInstanceMapType::iterator it_next = it;
-    it_next ++;
+    ++it_next;
     // Remove the instance from the instance list.
-    instances_.unbind ((*it).ext_id_);
+    unbind(instances_, it->first);
     it = it_next;
   }
 
@@ -857,7 +867,7 @@ PublicationInstance*
 WriteDataContainer::get_handle_instance (::DDS::InstanceHandle_t handle)
 {
   PublicationInstance* instance = 0;
-  if (0 != instances_.find(handle, instance))
+  if (0 != find(instances_, handle, instance))
   {
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
@@ -883,7 +893,7 @@ WriteDataContainer::get_next_handle ()
 
 void WriteDataContainer::copy_and_append (DataSampleList& list,
                                            const DataSampleList& appended,
-                                           const TAO::DCPS::ReaderIdSeq& rds)
+                                           const OpenDDS::DCPS::ReaderIdSeq& rds)
  {
    CORBA::ULong num_rds = rds.length ();
    CORBA::ULong num_iters_per_sample = num_rds / MAX_READERS_PER_ELEM + 1;
@@ -915,5 +925,5 @@ void WriteDataContainer::copy_and_append (DataSampleList& list,
  }
 
 
-} // namespace TAO
+} // namespace OpenDDS
 } // namespace DCPS

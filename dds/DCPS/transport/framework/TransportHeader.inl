@@ -6,7 +6,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::TransportHeader::TransportHeader()
+OpenDDS::DCPS::TransportHeader::TransportHeader()
   : length_(0)
 {
   DBG_SUB_ENTRY("TransportHeader","TransportHeader",1);
@@ -22,7 +22,7 @@ TAO::DCPS::TransportHeader::TransportHeader()
 
 
 ACE_INLINE
-TAO::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
+OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
 {
   DBG_SUB_ENTRY("TransportHeader","TransportHeader",2);
   this->init(buffer);
@@ -30,7 +30,7 @@ TAO::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
 
 
 ACE_INLINE
-TAO::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
+OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
 {
   DBG_SUB_ENTRY("TransportHeader","TransportHeader",3);
   this->init(&buffer);
@@ -38,8 +38,8 @@ TAO::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
 
 
 ACE_INLINE
-TAO::DCPS::TransportHeader&
-TAO::DCPS::TransportHeader::operator=(ACE_Message_Block* buffer)
+OpenDDS::DCPS::TransportHeader&
+OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block* buffer)
 {
   DBG_SUB_ENTRY("TransportHeader","operator=",1);
   this->init(buffer);
@@ -48,8 +48,8 @@ TAO::DCPS::TransportHeader::operator=(ACE_Message_Block* buffer)
 
 
 ACE_INLINE
-TAO::DCPS::TransportHeader&
-TAO::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
+OpenDDS::DCPS::TransportHeader&
+OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
 {
   DBG_SUB_ENTRY("TransportHeader","operator=",2);
   this->init(&buffer);
@@ -59,7 +59,7 @@ TAO::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
 
 ACE_INLINE
 size_t
-TAO::DCPS::TransportHeader::max_marshaled_size()
+OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 {
   DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",5);
   // Representation takes no extra space for encoding.
@@ -69,7 +69,7 @@ TAO::DCPS::TransportHeader::max_marshaled_size()
 
 ACE_INLINE
 bool
-TAO::DCPS::TransportHeader::valid() const
+OpenDDS::DCPS::TransportHeader::valid() const
 {
   DBG_ENTRY_LVL("TransportHeader","valid",5);
 
@@ -93,7 +93,7 @@ TAO::DCPS::TransportHeader::valid() const
 
 ACE_INLINE
 void
-TAO::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
+OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",5);
 

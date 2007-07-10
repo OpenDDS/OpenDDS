@@ -13,8 +13,8 @@
 #include "TopicImpl.h"
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
+#include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -25,7 +25,7 @@
 # include "DataReaderImpl.inl"
 #endif /* ! __ACE_INLINE__ */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -126,15 +126,15 @@ DataReaderImpl::cleanup ()
 
 
 void DataReaderImpl::init (
-         TopicImpl*         a_topic,
-         const ::DDS::DataReaderQos &  qos,
-         ::DDS::DataReaderListener_ptr a_listener,
-         DomainParticipantImpl*        participant,
-         SubscriberImpl*               subscriber,
-         ::DDS::Subscriber_ptr         subscriber_objref,
-         ::DDS::DataReader_ptr         dr_objref,
-         DataReaderRemote_ptr          dr_remote_objref
-         )
+			   TopicImpl*         a_topic,
+			   const ::DDS::DataReaderQos &  qos,
+			   ::DDS::DataReaderListener_ptr a_listener,
+			   DomainParticipantImpl*        participant,
+			   SubscriberImpl*               subscriber,
+			   ::DDS::Subscriber_ptr         subscriber_objref,
+			   ::DDS::DataReader_ptr         dr_objref,
+               ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
+			   )
   ACE_THROW_SPEC ((
        CORBA::SystemException
        ))
@@ -172,17 +172,23 @@ void DataReaderImpl::init (
   subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
   subscriber_servant_->_add_ref ();
   dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
-  dr_remote_objref_ = ::TAO::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
+  dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
   initialized_ = true;
 }
 
 
-void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
-               const TAO::DCPS::WriterAssociationSeq & writers)
+void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
+				       const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
+
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::add_associations "
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, yourId, writers[0].writerId, writers.length () ));
+  }
 
   if (entity_deleted_ == true)
   {
@@ -210,7 +216,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
     {
       PublicationId writer_id = writers[i].writerId;
       WriterInfo info(this, writer_id);
-      if (this->writers_.bind(writer_id, info) != 0)
+      if (bind(writers_, writer_id, info) != 0)
       {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) DataReaderImpl::add_associations: "
@@ -243,7 +249,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
           ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
         return;
       }
-      if (this->writers_.current_size () !=
+      if (this->writers_.size() !=
         unsigned (liveliness_changed_status_.active_count +
         liveliness_changed_status_.inactive_count) )
       {
@@ -307,7 +313,7 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
         subscription_match_status_.total_count_change ++;
         publication_handles_[pub_len + i] = handles[i];
 
-        if (id_to_handle_map_.bind (wr_ids[i], handles[i]) != 0)
+        if (bind(id_to_handle_map_, wr_ids[i], handles[i]) != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "(%P|%t)ERROR: DataReaderImpl::add_associations "
             "insert %d - %X to id_to_handle_map_ failed \n", wr_ids[i], handles[i]));
@@ -337,14 +343,20 @@ void DataReaderImpl::add_associations (::TAO::DCPS::RepoId yourId,
 
 
 void DataReaderImpl::remove_associations (
-            const TAO::DCPS::WriterIdSeq & writers,
-            ::CORBA::Boolean notify_lost
-            )
+					  const OpenDDS::DCPS::WriterIdSeq & writers,
+					  ::CORBA::Boolean notify_lost
+					  )
   ACE_THROW_SPEC ((
        CORBA::SystemException
        ))
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_associations",5);
+
+  if (DCPS_debug_level >= 1)
+  {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderImpl::remove_associations "
+      "bit %d local %d remote %d num remotes %d \n", is_bit_, subscription_id_, writers[0], writers.length ()));
+  }
 
   ::DDS::InstanceHandleSeq handles;
 
@@ -357,11 +369,11 @@ void DataReaderImpl::remove_associations (
     PublicationId writer_id = writers[i];
 
     int was_alive = 0;
-    WriterMapType::ENTRY* entry;
-    if (this->writers_.find(writer_id, entry)  == 0)
-      was_alive = entry->int_id_.is_alive ();
+    WriterMapType::iterator iter = writers_.find(writer_id);
+    if (iter != writers_.end())
+      was_alive = iter->second.is_alive ();
 
-    if (this->writers_.unbind(writer_id) != 0)
+    if (this->writers_.erase(writer_id) == 0)
     {
       ACE_ERROR((LM_ERROR,
         "(%P|%t) DataReaderImpl::remove_associations: "
@@ -401,7 +413,7 @@ void DataReaderImpl::remove_associations (
         ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
       return;
     }
-    if (this->writers_.current_size () !=
+    if (this->writers_.size() !=
       unsigned (liveliness_changed_status_.active_count +
       liveliness_changed_status_.inactive_count) )
     {
@@ -452,7 +464,7 @@ void DataReaderImpl::remove_associations (
 
     for (CORBA::ULong i = 0; i < wr_len; ++i)
     {
-      id_to_handle_map_.unbind (writers[i]);
+      id_to_handle_map_.erase(writers[i]);
     }
   }
 
@@ -472,11 +484,11 @@ void DataReaderImpl::remove_all_associations ()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",5);
 
-  TAO::DCPS::WriterIdSeq writers;
+  OpenDDS::DCPS::WriterIdSeq writers;
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-  int size = writers_.current_size();
+  int size = writers_.size();
   writers.length(size);
   WriterMapType::iterator curr_writer = writers_.begin();
   WriterMapType::iterator end_writer = writers_.end();
@@ -484,8 +496,8 @@ void DataReaderImpl::remove_all_associations ()
   int i = 0;
   while (curr_writer != end_writer)
     {
-      writers[i++] = (*curr_writer).ext_id_;
-      curr_writer.advance();
+      writers[i++] = curr_writer->first;
+      ++curr_writer;
     }
 
   try
@@ -503,8 +515,8 @@ void DataReaderImpl::remove_all_associations ()
 
 
 void DataReaderImpl::update_incompatible_qos (
-                const TAO::DCPS::IncompatibleQosStatus & status
-                )
+					      const OpenDDS::DCPS::IncompatibleQosStatus & status
+					      )
   ACE_THROW_SPEC ((
        CORBA::SystemException
        ))
@@ -906,14 +918,17 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
 {
   // caller should have the sample_lock_ !!!
 
-  WriterMapType::ENTRY* entry;
-  if (this->writers_.find(writer_id, entry)  == 0)
+  WriterMapType::iterator iter = writers_.find(writer_id);
+  if (iter != writers_.end())
     {
       ACE_Time_Value when = ACE_OS::gettimeofday ();
-      entry->int_id_.received_activity (when);
+      iter->second.received_activity (when);
     }
   else
-    ACE_ERROR((LM_ERROR,"(%P|%t) DataReaderImpl::writer_activity"
+    // This may not be an error since it could happen that the sample
+    // is delivered to the datareader after the write is dis-associated
+    // with this datareader.
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) DataReaderImpl::writer_activity"
          " reader %d is not associated with writer %d\n",
          this->subscription_id_, writer_id));
 }
@@ -943,12 +958,12 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
       {
   this->writer_activity(sample.header_.publication_id_);
 
-  // tell all instances they got a liveliness message
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
-    {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+	// tell all instances they got a liveliness message
+	for (SubscriptionInstanceMapType::iterator iter = instances_.begin() ;
+	     iter != instances_.end() ;
+	     ++iter)
+	  {
+	    SubscriptionInstance *ptr = iter->second;
 
       ptr->instance_state_.lively (sample.header_.publication_id_);
     }
@@ -997,11 +1012,11 @@ bool DataReaderImpl::have_sample_states(
 {
   //!!! caller should have acquired sample_lock_
 
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin() ;
+       iter != instances_.end() ;
+       ++iter)
     {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      SubscriptionInstance *ptr = iter->second;
 
       for (ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
      item != 0 ; item = item->next_data_sample_)
@@ -1019,11 +1034,11 @@ bool DataReaderImpl::have_view_states(
               ::DDS::ViewStateMask view_states) const
 {
   //!!! caller should have acquired sample_lock_
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+       iter != instances_.end();
+       ++iter)
     {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      SubscriptionInstance *ptr = iter->second;
 
       if (ptr->instance_state_.view_state() & view_states)
   {
@@ -1037,11 +1052,11 @@ bool DataReaderImpl::have_instance_states(
             ::DDS::InstanceStateMask instance_states) const
 {
   //!!! caller should have acquired sample_lock_
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin() ;
+       iter != instances_.end() ;
+       ++iter)
     {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      SubscriptionInstance *ptr = iter->second;
 
       if (ptr->instance_state_.instance_state() & instance_states)
   {
@@ -1068,7 +1083,7 @@ DataReaderImpl::listener_for (::DDS::StatusKind kind)
 }
 
 // zero-copy version of this metod
-void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq, //x ::TAO::DCPS::SampleInfoZCSeq & info_seq,
+void DataReaderImpl::sample_info(::DDS::SampleInfoSeq & info_seq, //x ::OpenDDS::DCPS::SampleInfoZCSeq & info_seq,
          size_t start_idx, size_t count,
          ReceivedDataElement *ptr)
 {
@@ -1191,11 +1206,11 @@ CORBA::Long DataReaderImpl::total_samples() const
 {
   //!!! caller should have acquired sample_lock_
   CORBA::Long count(0) ;
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin() ;
+       iter != instances_.end() ;
+       ++iter)
     {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      SubscriptionInstance *ptr = iter->second;
 
       count += ptr->rcvd_sample_.size_ ;
     }
@@ -1242,17 +1257,16 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
 
   ACE_Time_Value smallest(ACE_Time_Value::max_time) ;
   ACE_Time_Value next_absolute ;
-  WriterMapType::ENTRY* entry;
   int alive_writers = 0;
 
   // Iterate over each writer to this reader
-  for (WriterMapType::ITERATOR itr(this->writers_);
-    itr.next(entry);
-    itr.advance())
+  for (WriterMapType::iterator iter = writers_.begin();
+    iter != writers_.end();
+    ++iter)
   {
     // deal with possibly not being alive or
     // tell when it will not be alive next (if no activity)
-    next_absolute = entry->int_id_.check_activity(tv);
+    next_absolute = iter->second.check_activity(tv);
 
     if (next_absolute != ACE_Time_Value::max_time)
     {
@@ -1312,7 +1326,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
 
   if (instance->rcvd_sample_.size_ == 0)
   {
-    this->instances_.unbind (handle); 
+    this->instances_.erase (handle); 
     this->release_instance_i (handle);
   }
   else
@@ -1324,7 +1338,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
 }
 
 
-TAO::DCPS::WriterInfo::WriterInfo ()
+OpenDDS::DCPS::WriterInfo::WriterInfo ()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     is_alive_(1),
     reader_(0),
@@ -1332,7 +1346,7 @@ TAO::DCPS::WriterInfo::WriterInfo ()
 {
 }
 
-TAO::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
+OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
            PublicationId   writer_id)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     is_alive_(1),
@@ -1346,7 +1360,7 @@ TAO::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
 }
 
 ACE_Time_Value
-TAO::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
+OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
 {
   ACE_Time_Value expires_at = ACE_Time_Value::max_time;
   if (is_alive_)
@@ -1403,7 +1417,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
       ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
       return;
     }
-  if (this->writers_.current_size () !=
+  if (this->writers_.size () !=
       unsigned (liveliness_changed_status_.active_count +
     liveliness_changed_status_.inactive_count) )
     {
@@ -1461,7 +1475,7 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
       ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
       return;
     }
-  if (this->writers_.current_size () !=
+  if (this->writers_.size () !=
       unsigned (liveliness_changed_status_.active_count +
     liveliness_changed_status_.inactive_count) )
     {
@@ -1472,18 +1486,18 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
     }
 
 
-    SubscriptionInstanceMapType::ITERATOR pos = instances_.begin();
-    SubscriptionInstanceMapType::ITERATOR next = pos;
+    SubscriptionInstanceMapType::iterator iter = instances_.begin();
+    SubscriptionInstanceMapType::iterator next = iter;
 
-    while (pos != instances_.end())
+    while (iter != instances_.end())
     {
-      next ++;
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      ++next;
+      SubscriptionInstance *ptr = iter->second;
 
       ptr->instance_state_.writer_became_dead (
         writer_id, liveliness_changed_status_.active_count, when);
 
-      pos = next;
+      iter = next;
     }
 
   ::DDS::DataReaderListener* listener
@@ -1537,16 +1551,17 @@ void DataReaderImpl::dispose(const ReceivedDataSample& sample)
 SubscriptionInstance*
 DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
 {
-  SubscriptionInstance* instance = 0;
-  if (0 != instances_.find(handle, instance))
+  SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
+  if (iter == instances_.end())
     {
       ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DataReaderImpl::get_handle_instance, ")
       ACE_TEXT("lookup for %d failed\n"),
       handle));
+      return 0;
     } // if (0 != instances_.find(handle, instance))
-  return instance;
+  return iter->second;
 }
 
 
@@ -1652,8 +1667,6 @@ bool
 DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
                 ::DDS::InstanceHandleSeq & hdls)
 {
-  // TBD: Remove the condition check after we change to default support
-  //      builtin topics.
   if (TheServiceParticipant->get_BIT () == true && ! TheTransientKludge->is_enabled ())
   {
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -1697,9 +1710,9 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
   CORBA::ULong num_ids = ids.length ();
   for (CORBA::ULong i = 0; i < num_ids; ++i)
   {
-    RepoIdToHandleMap::ENTRY* ientry;
+    RepoIdToHandleMap::iterator iter = id_to_handle_map_.find(ids[i]);
     hdls.length (i + 1);
-    if (id_to_handle_map_.find (ids[i], ientry) != 0)
+    if (iter == id_to_handle_map_.end())
     {
       ACE_DEBUG ((LM_WARNING, "(%P|%t)DataReaderImpl::cache_lookup_instance_handles "
         "could not find instance handle for writer %d\n", ids[i]));
@@ -1708,7 +1721,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
     }
     else
     {
-      hdls[i] = ientry->int_id_;
+      hdls[i] = iter->second;
     }
   }
 
@@ -1730,13 +1743,13 @@ DataReaderImpl::num_zero_copies()
                     this->sample_lock_,
                     1 /* assume we have loans */);
 
-  for (SubscriptionInstanceMapType::ITERATOR pos = instances_.begin() ;
-       pos != instances_.end() ;
-       ++pos)
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin() ;
+       iter != instances_.end() ;
+       ++iter)
     {
-      SubscriptionInstance *ptr = (*pos).int_id_;
+      SubscriptionInstance *ptr = iter->second;
 
-      for (TAO::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
+      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_sample_.head_ ;
             item != 0 ; item = item->next_data_sample_)
         {
             loans += item->zero_copy_cnt_;
@@ -1747,4 +1760,4 @@ DataReaderImpl::num_zero_copies()
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS

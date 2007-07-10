@@ -22,7 +22,8 @@ if ($ARGV[0] eq "-client_orb") {
  $client_orb = 1;
 }
 
-$svc_config = "-ORBSvcConf ../../tcp.conf";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf ../../tcp.conf";
 
 $REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
 			      , "-o $iorfile -d domain_ids $svc_config");

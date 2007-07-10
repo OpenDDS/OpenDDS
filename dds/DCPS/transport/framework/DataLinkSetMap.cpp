@@ -9,33 +9,34 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/Util.h"
 
-TAO::DCPS::DataLinkSetMap::DataLinkSetMap()
+OpenDDS::DCPS::DataLinkSetMap::DataLinkSetMap()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","DataLinkSetMap",5);
 }
 
 
-TAO::DCPS::DataLinkSetMap::~DataLinkSetMap()
+OpenDDS::DCPS::DataLinkSetMap::~DataLinkSetMap()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","~DataLinkSetMap",5);
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","find_or_create_set",5);
   DataLinkSet_rch link_set;
 
   GuardType guard(this->map_lock_);
 
-  if (this->map_.find(id, link_set) != 0)
+  if (find (this->map_, id, link_set) != 0)
     {
       // It wasn't found.  Create one and insert it.
       link_set = new DataLinkSet();
 
-      if (this->map_.bind(id, link_set) != 0)
+      if (bind(map_, id, link_set) != 0)
         {
            ACE_ERROR((LM_ERROR,
                       "(%P|%t) ERROR: Unable to insert new DataLinkSet into "
@@ -49,35 +50,35 @@ TAO::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_set(RepoId id)
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
   DataLinkSet_rch link_set;
   GuardType guard(this->map_lock_);
 
-  if (this->map_.find(id, link_set) != 0)
-    {
-      return 0;
-    }
+  if (find (this->map_, id, link_set) != 0)
+  {
+    return 0;
+  }
 
   return link_set._retn();
 }
 
 
-TAO::DCPS::DataLinkSet*
-TAO::DCPS::DataLinkSetMap::find_set(RepoId id,
-                                    const RepoId* remoteIds,
+OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSetMap::find_set(RepoId id, 
+                                    const RepoId* remoteIds, 
                                     const CORBA::ULong num_targets)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","find_set",5);
   DataLinkSet_rch link_set;
   GuardType guard(this->map_lock_);
 
-  if (this->map_.find(id, link_set) != 0)
-    {
-      return 0;
-    }
+  if (find (this->map_, id, link_set) != 0)
+  {
+    return 0;
+  }
 
   DataLinkSet_rch selected_links = link_set->select_links (remoteIds, num_targets);
 
@@ -87,7 +88,7 @@ TAO::DCPS::DataLinkSetMap::find_set(RepoId id,
 
 /// REMEMBER: This really means find_or_create_set_then_insert_link()
 int
-TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
+OpenDDS::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","insert_link",5);
 
@@ -101,7 +102,7 @@ TAO::DCPS::DataLinkSetMap::insert_link(RepoId id, DataLink* link)
 
 
 void
-TAO::DCPS::DataLinkSetMap::release_reservations
+OpenDDS::DCPS::DataLinkSetMap::release_reservations
                                        (ssize_t         num_remote_ids,
                                         const RepoId*   remote_ids,
                                         const RepoId    local_id,
@@ -118,7 +119,8 @@ TAO::DCPS::DataLinkSetMap::release_reservations
   for (ssize_t i = 0; i < num_remote_ids; ++i)
     {
       DataLinkSet_rch link_set;
-      if (this->map_.find(remote_ids[i], link_set) != 0)
+
+      if (find (this->map_, remote_ids[i], link_set) != 0)
       {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: Failed to find remote_id (%d) "
@@ -127,12 +129,12 @@ TAO::DCPS::DataLinkSetMap::release_reservations
         continue;
       }
 
-     // find the link has the local/remote id association.
-     DataLink_rch link = link_set->find_link(remote_ids[i], local_id, pub_side);
+      // find the link has the local/remote id association.
+      DataLink_rch link = link_set->find_link(remote_ids[i], local_id, pub_side);
 
-     if (link_set->empty ())
+      if (link_set->empty ())
       {
-        if (this->map_.unbind(remote_ids[i],link_set) != 0)
+        if (unbind(map_, remote_ids[i]) != 0)
         {
           VDBG((LM_DEBUG,
             "(%P|%t) Warning: Failed to unbind remote_id (%d) "
@@ -143,22 +145,22 @@ TAO::DCPS::DataLinkSetMap::release_reservations
         }
       }
 
-       // guard release scope
-       guard.release (); //release guard before DataLinkSet call
+      // guard release scope
+      guard.release (); //release guard before DataLinkSet call
 
-       // Invoke release_reservations() on the DataLink.  This can cause the
-       // released_locals map to be updated with local_id to DataLink "associations"
-       // that become invalid as a result of these reservation releases on
-       // behalf of the remote_id.
-       link->release_reservations(remote_ids[i], local_id, released_locals);
+      // Invoke release_reservations() on the DataLink.  This can cause the 
+      // released_locals map to be updated with local_id to DataLink "associations" 
+      // that become invalid as a result of these reservation releases on
+      // behalf of the remote_id.
+      link->release_reservations(remote_ids[i], local_id, released_locals);
 
-       guard.acquire ();
+      guard.acquire ();  
     }
 }
 
 
 void
-TAO::DCPS::DataLinkSetMap::release_all_reservations()
+OpenDDS::DCPS::DataLinkSetMap::release_all_reservations()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","release_all_reservations",5);
   // TBD SOON - IMPLEMENT DataLinkSetMap::release_all_reservations()
@@ -179,7 +181,7 @@ TAO::DCPS::DataLinkSetMap::release_all_reservations()
 // we will remove the DataLinkSet (and the corresponding local_id) from our
 // map_.
 void
-TAO::DCPS::DataLinkSetMap::remove_released
+OpenDDS::DCPS::DataLinkSetMap::remove_released
                                      (const DataLinkSetMap& released_locals)
 {
   DBG_ENTRY_LVL("DataLinkSetMap","remove_released",5);
@@ -188,64 +190,63 @@ TAO::DCPS::DataLinkSetMap::remove_released
   // due to the releasing of remote_id reservations from the DataLinks.
   GuardType guard(this->map_lock_);
 
-  MapType::ENTRY* entry;
-
-  for (MapType::CONST_ITERATOR itr(released_locals.map_);
-       itr.next(entry);
-       itr.advance())
-    {
-      RepoId local_id = entry->ext_id_;
+  for (MapType::const_iterator itr = released_locals.map_.begin();
+      itr != released_locals.map_.end();
+      ++itr)
+    { 
+      RepoId local_id = itr->first;
 
       DataLinkSet_rch link_set;
 
       // Find the DataLinkSet in our map_ that has the local_id as the key.
-      if (this->map_.find(local_id, link_set) != 0)
-        {
-          VDBG((LM_DEBUG,
-                     "(%P|%t) Released local_id (%d) is not associated with "
-                     "any DataLinkSet in map_. Skipping local_id.\n",
-                     local_id));
-          continue;
-        }
+      if (find (map_, local_id, link_set) != 0)
+      {
+        VDBG((LM_DEBUG,
+          "(%P|%t) Released local_id (%d) is not associated with "
+          "any DataLinkSet in map_. Skipping local_id.\n",
+          local_id));
+        continue;
+      }
 
       { // guard release scope
-  // Temporarily release lock for DataLinkSet invocation
-  guard.release ();
+        // Temporarily release lock for DataLinkSet invocation
+        guard.release ();
 
-  // Now we can have link_set remove all members found in
-  // entry->int_id_ (the released DataLinkSet for the local_id).
-  // The remove_links() performs "set subtraction" logic, removing
-  // the supplied set of DataLinks from the link_set.  This method
-  // will return the size of the set following the removal operation.
-  if (link_set->remove_links(entry->int_id_.in()) == 0)
-    {
-      guard.acquire (); // acquire map lock before map_ invocation
-      // The link_set has become empty.  Remove the entry from our map_.
-      if (this->map_.unbind(local_id) != 0)
+        // Now we can have link_set remove all members found in
+        // entry->int_id_ (the released DataLinkSet for the local_id).
+        // The remove_links() performs "set subtraction" logic, removing
+        // the supplied set of DataLinks from the link_set.  This method
+        // will return the size of the set following the removal operation.
+        if (link_set->remove_links(itr->second.in ()) == 0)
         {
-    // This really shouldn't happen since we did just find the
-    // link_set in the map_ using the key just a few steps earlier.
+          guard.acquire (); // acquire map lock before map_ invocation
+          // The link_set has become empty.  Remove the entry from our map_.
+          if (unbind (map_, local_id) != 0)
+          {
+            // This really shouldn't happen since we did just find the
+            // link_set in the map_ using the key just a few steps earlier.
 
-    // Just issue a warning.
-    VDBG((LM_DEBUG,
-          "(%P|%t) Failed to unbind released local_id (%d) "
-          "from the map_.\n",
-          local_id));
+            // Just issue a warning.
+            VDBG((LM_DEBUG,
+              "(%P|%t) Failed to unbind released local_id (%d) "
+              "from the map_.\n",
+              local_id));
+          }
+          
+          continue; // This prevents the deadlock from trying to acquire lock twice
         }
-      continue; // This prevents the deadlock from trying to acquire lock twice
-    }
-  guard.acquire ();
+        guard.acquire ();
       }
     }
 }
 
 
 void
-TAO::DCPS::DataLinkSetMap::clear()
+OpenDDS::DCPS::DataLinkSetMap::clear()
 {
   DBG_ENTRY_LVL("DataLinkSetMap","clear",5);
   GuardType guard(this->map_lock_);
-  this->map_.close();
+  this->map_.clear();
 }
 
 

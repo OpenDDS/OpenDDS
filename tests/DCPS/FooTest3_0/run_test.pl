@@ -23,7 +23,8 @@ $shutdown_pub = 1;
 $add_new_subscription = 0;
 $num_subscribers = 1;
 $shutdown_delay_secs=10;
-$svc_config="-ORBSvcConf ../../tcp.conf";
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf ../../tcp.conf";
 
 if ($ARGV[0] eq 'unregister') {
     $test_to_run = 1;

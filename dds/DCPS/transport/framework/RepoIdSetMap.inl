@@ -3,21 +3,22 @@
 // $Id$
 #include "RepoIdSet.h"
 #include "EntryExit.h"
+#include "dds/DCPS/Util.h"
 
 ACE_INLINE
-TAO::DCPS::RepoIdSetMap::RepoIdSetMap()
+OpenDDS::DCPS::RepoIdSetMap::RepoIdSetMap()
 {
   DBG_ENTRY_LVL("RepoIdSetMap","RepoIdSetMap",5);
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSet*
-TAO::DCPS::RepoIdSetMap::find(RepoId key)
+ACE_INLINE OpenDDS::DCPS::RepoIdSet*
+OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find",5);
   RepoIdSet_rch value;
 
-  if (this->map_.find(key, value) != 0)
+  if (OpenDDS::DCPS::find(map_, key, value) != 0)
     {
       return 0;
     }
@@ -27,25 +28,25 @@ TAO::DCPS::RepoIdSetMap::find(RepoId key)
 
 
 ACE_INLINE size_t
-TAO::DCPS::RepoIdSetMap::size() const
+OpenDDS::DCPS::RepoIdSetMap::size() const
 {
   DBG_ENTRY_LVL("RepoIdSetMap","size",5);
-  return this->map_.current_size();
+  return this->map_.size();
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSet*
-TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
+ACE_INLINE OpenDDS::DCPS::RepoIdSet*
+OpenDDS::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find_or_create",5);
   RepoIdSet_rch value;
 
-  if (this->map_.find(key, value) != 0)
+  if (OpenDDS::DCPS::find(map_, key, value) != 0)
     {
       // It wasn't found.  Create one and insert it.
       value = new RepoIdSet();
 
-      if (this->map_.bind(key, value) != 0)
+      if (bind(map_, key, value) != 0)
         {
            ACE_ERROR((LM_ERROR,
                       "(%P|%t) ERROR: Unable to insert new RepoIdSet into "
@@ -59,16 +60,16 @@ TAO::DCPS::RepoIdSetMap::find_or_create(RepoId key)
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSetMap::MapType&
-TAO::DCPS::RepoIdSetMap::map()
+ACE_INLINE OpenDDS::DCPS::RepoIdSetMap::MapType&
+OpenDDS::DCPS::RepoIdSetMap::map()
 {
   DBG_SUB_ENTRY("RepoIdSetMap","map",1);
   return this->map_;
 }
 
 
-ACE_INLINE const TAO::DCPS::RepoIdSetMap::MapType&
-TAO::DCPS::RepoIdSetMap::map() const
+ACE_INLINE const OpenDDS::DCPS::RepoIdSetMap::MapType&
+OpenDDS::DCPS::RepoIdSetMap::map() const
 {
   DBG_SUB_ENTRY("RepoIdSetMap","map",2);
   return this->map_;
@@ -76,7 +77,7 @@ TAO::DCPS::RepoIdSetMap::map() const
 
 
 ACE_INLINE size_t
-TAO::DCPS::RepoIdSetMap::marshaled_size ()
+OpenDDS::DCPS::RepoIdSetMap::marshaled_size ()
 {
   DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",5);
 
@@ -84,16 +85,15 @@ TAO::DCPS::RepoIdSetMap::marshaled_size ()
   size_t size = (this->size () + 1) * sizeof (CORBA::ULong);
 
   size_t num_ids = 0;
-  MapType::ENTRY* entry;
 
-  for (MapType::ITERATOR itr(this->map_);
-    itr.next(entry);
-    itr.advance())
+  for (MapType::iterator itr = map_.begin();
+    itr != map_.end();
+    ++itr)
   {
     // one sub id
     ++ num_ids;
     // num of pubids in the RepoIdSet.
-    num_ids += entry->int_id_->size ();
+    num_ids += itr->second->size ();
   }
 
   size += num_ids * sizeof (RepoId);

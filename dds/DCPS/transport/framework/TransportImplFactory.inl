@@ -6,14 +6,14 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::TransportImplFactory::TransportImplFactory()
+OpenDDS::DCPS::TransportImplFactory::TransportImplFactory()
 {
   DBG_ENTRY_LVL("TransportImplFactory","TransportImplFactory",5);
 }
 
 
-ACE_INLINE TAO::DCPS::TransportImpl*
-TAO::DCPS::TransportImplFactory::create_impl()
+ACE_INLINE OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::TransportImplFactory::create_impl()
 {
   DBG_SUB_ENTRY("TransportImplFactory","create_impl",1);
   // This one is easy.  Simply delegate to the concrete subclass.
@@ -21,8 +21,8 @@ TAO::DCPS::TransportImplFactory::create_impl()
 }
 
 
-ACE_INLINE TAO::DCPS::TransportImpl*
-TAO::DCPS::TransportImplFactory::create_impl
+ACE_INLINE OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::TransportImplFactory::create_impl
                                        (TransportReactorTask* reactor_task)
 {
   DBG_SUB_ENTRY("TransportImplFactory","create_impl",2);

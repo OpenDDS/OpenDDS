@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_SENDERLOGIC_H
-#define TAO_DCPS_SENDERLOGIC_H
+#ifndef OPENDDS_DCPS_SENDERLOGIC_H
+#define OPENDDS_DCPS_SENDERLOGIC_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -16,7 +16,7 @@
 #include <vector>
 #include <map>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -32,43 +32,43 @@ namespace TAO
         {
         public:
           typedef std::vector<
-            TAO::DCPS::ReliableMulticast::detail::Packet
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > PacketVector;
 
 	  SenderLogic(size_t sender_history_size);
 
           void receive(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
             PacketVector& redelivered
             ) const;
 
           void send(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
             PacketVector& delivered
             );
 
-          void make_heartbeat(TAO::DCPS::ReliableMulticast::detail::Packet& p);
+          void make_heartbeat(OpenDDS::DCPS::ReliableMulticast::detail::Packet& p);
 
         private:
           void buffer_packet(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p,
             PacketVector& delivered
             );
 
           bool is_buffered(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& p
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& p
             ) const;
 
           size_t buffersize(
             ) const;
 
           typedef std::map<
-            TAO::DCPS::ReliableMulticast::detail::Packet::id_type,
-            TAO::DCPS::ReliableMulticast::detail::Packet
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type,
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > BufferType;
 
           size_t sender_history_size_;
-          TAO::DCPS::ReliableMulticast::detail::Packet::id_type current_id_;
+          OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type current_id_;
           BufferType buffer_;
         };
 
@@ -78,7 +78,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SenderLogic.inl"
@@ -86,4 +86,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_SENDERLOGIC_H */
+#endif /* OPENDDS_DCPS_SENDERLOGIC_H */

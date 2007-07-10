@@ -34,9 +34,9 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return register_w_timestamp (instance_data,
-                               ::TAO::DCPS::HANDLE_NIL,
+                               ::OpenDDS::DCPS::HANDLE_NIL,
                                source_timestamp);
 }
 
@@ -83,7 +83,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return unregister_w_timestamp (instance_data,
                                  handle,
                                  source_timestamp);
@@ -105,7 +105,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   ::DDS::InstanceHandle_t registered_handle
       = this->get_instance_handle(instance_data);
 
-  if(registered_handle == ::TAO::DCPS::HANDLE_NIL)
+  if(registered_handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     // This case could be the instance is not registered yet or
     // already unregistered.
@@ -115,7 +115,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
                         ACE_TEXT("The instance is not registered.\n")),
                         ::DDS::RETCODE_ERROR);
   }
-  else if (handle != ::TAO::DCPS::HANDLE_NIL && handle != registered_handle)
+  else if (handle != ::OpenDDS::DCPS::HANDLE_NIL && handle != registered_handle)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
@@ -143,7 +143,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return write_w_timestamp (instance_data,
                             handle,
                             source_timestamp);
@@ -185,7 +185,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
                 ret));
   }
 
-  if (handle == ::TAO::DCPS::HANDLE_NIL)
+  if (handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     // note: do not tell subscriber if there is an implicit registration.
     //    Subscriber must be able to handle a new instance without being
@@ -194,7 +194,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     handle = registered_handle;
   }
 
-  if (handle == ::TAO::DCPS::HANDLE_NIL)
+  if (handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT("(%P|%t) ")
@@ -227,7 +227,7 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   ))
 {
   ::DDS::Time_t source_timestamp
-    = ::TAO::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
+    = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
   return dispose_w_timestamp (instance_data,
                               handle,
                               source_timestamp);
@@ -250,9 +250,9 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
   ACE_Message_Block* marshalled;
   ::DDS::InstanceHandle_t registered_handle
       = this->get_instance_handle(instance_data);
-  if(handle == ::TAO::DCPS::HANDLE_NIL)
+  if(handle == ::OpenDDS::DCPS::HANDLE_NIL)
   {
-    if (registered_handle == ::TAO::DCPS::HANDLE_NIL)
+    if (registered_handle == ::OpenDDS::DCPS::HANDLE_NIL)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -363,7 +363,7 @@ ACE_Message_Block*
 		ACE_Message_Block*& marshalled, // only if is_new==1
                 const ::DDS::Time_t & source_timestamp)
 {
-  handle = ::TAO::DCPS::HANDLE_NIL;
+  handle = ::OpenDDS::DCPS::HANDLE_NIL;
   FooMap::const_iterator it = instance_map_.find(instance_data);
 
   if (it == instance_map_.end())
@@ -410,7 +410,7 @@ ACE_Message_Block*
 
   if (it == instance_map_.end())
   {
-    return ::TAO::DCPS::HANDLE_NIL;
+    return ::OpenDDS::DCPS::HANDLE_NIL;
   }
   else
   {
@@ -422,10 +422,10 @@ void FooDataWriterImpl::init (
       ::DDS::Topic_ptr                       a_topic,
       const ::DDS::DataWriterQos &           qos,
       ::DDS::DataWriterListener_ptr          a_listener,
-      TAO::DCPS::DomainParticipantImpl*      participant,
-      TAO::DCPS::PublisherImpl*              publisher,
+      OpenDDS::DCPS::DomainParticipantImpl*      participant,
+      OpenDDS::DCPS::PublisherImpl*              publisher,
       ::DDS::Publisher_ptr                   publisher_objref,
-      TAO::DCPS::DataWriterRemote_ptr        dw_remote_objref
+      OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote_objref
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -442,8 +442,8 @@ void FooDataWriterImpl::init (
   if (qos.resource_limits.max_samples == ::DDS::LENGTH_UNLIMITED)
   {
     foo_allocator_ = new FooAllocator (n_chunks_);
-    mb_allocator_ = new ::TAO::DCPS::MessageBlockAllocator (n_chunks_);
-    db_allocator_ = new ::TAO::DCPS::DataBlockAllocator (n_chunks_);
+    mb_allocator_ = new ::OpenDDS::DCPS::MessageBlockAllocator (n_chunks_);
+    db_allocator_ = new ::OpenDDS::DCPS::DataBlockAllocator (n_chunks_);
   }
 }
 

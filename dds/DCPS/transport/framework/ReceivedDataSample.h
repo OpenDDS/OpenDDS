@@ -1,8 +1,8 @@
 /// -*- C++ -*-
 ///
 /// $Id$
-#ifndef TAO_DCPS_RECEIVEDDATASAMPLE_H
-#define TAO_DCPS_RECEIVEDDATASAMPLE_H
+#ifndef OPENDDS_DCPS_RECEIVEDDATASAMPLE_H
+#define OPENDDS_DCPS_RECEIVEDDATASAMPLE_H
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "ace/Synch.h"
@@ -10,7 +10,7 @@
 class ACE_Message_Block;
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -27,7 +27,7 @@ namespace TAO
      * demarshalled by the transport, and the ACE_Message_Block (chain)
      * represents the "data" portion of the sample.
      */
-    class TAO_DdsDcps_Export ReceivedDataSample
+    class OpenDDS_Dcps_Export ReceivedDataSample
     {
       public:
 
@@ -46,11 +46,11 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 
 #if defined(__ACE_INLINE__)
 #include "ReceivedDataSample.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_RECEIVEDDATASAMPLE_H */
+#endif  /* OPENDDS_DCPS_RECEIVEDDATASAMPLE_H */

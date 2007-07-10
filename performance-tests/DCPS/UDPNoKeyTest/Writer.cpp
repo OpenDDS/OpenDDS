@@ -48,7 +48,7 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant = TAO::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
+  Wimpl* pt_servant = OpenDDS::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
 
   //SHH remove this kludge when the transport is fixed.
   ACE_OS::sleep(2); // ensure that the connection has been fully established
