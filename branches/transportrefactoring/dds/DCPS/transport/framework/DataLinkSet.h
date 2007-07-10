@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DATALINKSET_H
-#define TAO_DCPS_DATALINKSET_H
+#ifndef OPENDDS_DCPS_DATALINKSET_H
+#define OPENDDS_DCPS_DATALINKSET_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -10,10 +10,11 @@
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
-#include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Synch.h"
 
-namespace TAO
+#include <map>
+
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -23,7 +24,7 @@ namespace TAO
     class DataLinkSetMap;
     struct DataSampleListElement;
  
-    class TAO_DdsDcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -97,16 +98,10 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef ACE_Hash_Map_With_Allocator<DataLinkIdType,
-                                            DataLink_rch>            MapType;
-        typedef Cached_Allocator_With_Overflow<MapType::ENTRY,
-                                               ACE_Null_Mutex>       MapEntryAllocator ;
-
-        /// Allocator for MapType::ENTRY.
-        MapEntryAllocator map_entry_allocator_;
+        typedef std::map<DataLinkIdType, DataLink_rch> MapType;
 
         /// Hash map for DataLinks.
-        MapType*  map_;
+        MapType map_;
 
         /// Allocator for TransportSendControlElement.
         TransportSendControlElementAllocator send_control_element_allocator_;
@@ -118,10 +113,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "DataLinkSet.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_DATALINKSET_H */
+#endif /* OPENDDS_DCPS_DATALINKSET_H */

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTCONFIGURATION_H
-#define TAO_DCPS_TRANSPORTCONFIGURATION_H
+#ifndef OPENDDS_DCPS_TRANSPORTCONFIGURATION_H
+#define OPENDDS_DCPS_TRANSPORTCONFIGURATION_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
@@ -13,7 +13,7 @@
 
 class ACE_Reactor;
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -48,7 +48,7 @@ namespace TAO
      * The TransportConfiguration object is supplied to the
      * TransportImpl::configure() method.
      */
-    class TAO_DdsDcps_Export TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 

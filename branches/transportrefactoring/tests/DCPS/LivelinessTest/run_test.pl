@@ -33,14 +33,15 @@ $use_take = 0;
 $use_udp = 0;
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:29803";
-$svc_conf = " -ORBSvcConf ../../tcp.conf ";
+$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
+$svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $arg_idx = 0;
 
 if ($ARGV[0] eq 'udp') {
   $use_udp = 1;
   $arg_idx = 1;
-  $svc_conf = " -ORBSvcConf udp.conf ";
+  $svc_conf = $use_svc_conf ? " -ORBSvcConf udp.conf " : '';
   $app_bit_conf = " -DCPSBit 0 "
 }
 
@@ -58,7 +59,7 @@ else {
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
+$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior; 
 

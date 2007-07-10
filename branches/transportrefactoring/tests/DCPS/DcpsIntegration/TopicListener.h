@@ -32,16 +32,16 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-//Class TAO_DCPS_TopicListener_i
-class TAO_DCPS_TopicListener_i
-  : public virtual TAO::DCPS::LocalObject<DDS::TopicListener>
+//Class OPENDDS_DCPS_TopicListener_i
+class OPENDDS_DCPS_TopicListener_i
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::TopicListener>
 {
 public:
   //Constructor
-  TAO_DCPS_TopicListener_i (void);
+  OPENDDS_DCPS_TopicListener_i (void);
 
   //Destructor
-  virtual ~TAO_DCPS_TopicListener_i (void);
+  virtual ~OPENDDS_DCPS_TopicListener_i (void);
 
 
 

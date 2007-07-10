@@ -10,14 +10,14 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::TransportImpl::TransportImpl()
+OpenDDS::DCPS::TransportImpl::TransportImpl()
   : dl_clean_task_ (this)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",5);
 }
 
 ACE_INLINE int
-TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
+OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("TransportImpl","configure",5);
 
@@ -74,8 +74,8 @@ TAO::DCPS::TransportImpl::configure(TransportConfiguration* config)
 //MJM: He gets a current snapshot of the value.  If it changes, his copy
 //MJM: is stale.  Or do you mean that his stale copy may be stopped if
 //MJM: his _use_ of the reactor task is not guarded?
-ACE_INLINE TAO::DCPS::TransportReactorTask*
-TAO::DCPS::TransportImpl::reactor_task()
+ACE_INLINE OpenDDS::DCPS::TransportReactorTask*
+OpenDDS::DCPS::TransportImpl::reactor_task()
 {
   DBG_ENTRY_LVL("TransportImpl","reactor_task",5);
   TransportReactorTask_rch task = this->reactor_task_;
@@ -84,7 +84,7 @@ TAO::DCPS::TransportImpl::reactor_task()
 
 
 ACE_INLINE int
-TAO::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
+OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 {
   DBG_ENTRY_LVL("TransportImpl","set_reactor",5);
 
@@ -110,7 +110,7 @@ TAO::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 /// object, the DataLink has lost all of its associations, and is not needed
 /// any longer.
 ACE_INLINE void
-TAO::DCPS::TransportImpl::release_datalink(DataLink* link)
+OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl","release_datalink",5);
 
@@ -123,7 +123,7 @@ TAO::DCPS::TransportImpl::release_datalink(DataLink* link)
 /// its own request to detach_transport(), and this TransportImpl object
 /// is the one to which it is currently attached.
 ACE_INLINE void
-TAO::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
+OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
 {
   DBG_ENTRY_LVL("TransportImpl","detach_interface",5);
 
@@ -132,20 +132,20 @@ TAO::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
   // We really don't care if this unbind "works" or not.  As long as we
   // don't have the interface pointer in our interfaces_ collection, then
   // we are happy.
-  this->interfaces_.unbind(interface);
+  unbind(interfaces_, interface);
 }
 
 
-ACE_INLINE TAO::DCPS::TransportImpl::ReservationLockType&
-TAO::DCPS::TransportImpl::reservation_lock()
+ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&
+OpenDDS::DCPS::TransportImpl::reservation_lock()
 {
   DBG_SUB_ENTRY("TransportImpl","reservation_lock",1);
   return this->reservation_lock_;
 }
 
 
-ACE_INLINE const TAO::DCPS::TransportImpl::ReservationLockType&
-TAO::DCPS::TransportImpl::reservation_lock() const
+ACE_INLINE const OpenDDS::DCPS::TransportImpl::ReservationLockType&
+OpenDDS::DCPS::TransportImpl::reservation_lock() const
 {
   DBG_SUB_ENTRY("TransportImpl","reservation_lock",2);
   return this->reservation_lock_;
@@ -155,7 +155,7 @@ TAO::DCPS::TransportImpl::reservation_lock() const
 /// Note that this will return -1 if the TransportImpl has not been
 /// configure()'d yet.
 ACE_INLINE int
-TAO::DCPS::TransportImpl::connection_info
+OpenDDS::DCPS::TransportImpl::connection_info
                                    (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("TransportImpl","connection_info",5);
@@ -179,7 +179,7 @@ TAO::DCPS::TransportImpl::connection_info
 /// Note that this will return -1 if the TransportImpl has not been
 /// configure()'d yet.
 ACE_INLINE int
-TAO::DCPS::TransportImpl::swap_bytes() const
+OpenDDS::DCPS::TransportImpl::swap_bytes() const
 {
   DBG_ENTRY_LVL("TransportImpl","swap_bytes",5);
 
@@ -198,7 +198,7 @@ TAO::DCPS::TransportImpl::swap_bytes() const
 
 
 ACE_INLINE void
-TAO::DCPS::TransportImpl::pre_shutdown_i ()
+OpenDDS::DCPS::TransportImpl::pre_shutdown_i ()
 {
   //noop
 }

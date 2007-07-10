@@ -11,13 +11,13 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportInterface::~TransportInterface()
+OpenDDS::DCPS::TransportInterface::~TransportInterface()
 {
   DBG_ENTRY_LVL("TransportInterface","~TransportInterface",5);
 }
 
 void
-TAO::DCPS::TransportInterface::transport_detached_i()
+OpenDDS::DCPS::TransportInterface::transport_detached_i()
 {
   DBG_ENTRY_LVL("TransportInterface","transport_detached_i",5);
   // Subclass should override if interested in the "transport detached event".
@@ -26,8 +26,8 @@ TAO::DCPS::TransportInterface::transport_detached_i()
 
 /// The client application calls this to attach this TransportInterface
 /// object to the supplied TransportImpl object.
-TAO::DCPS::AttachStatus
-TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
+OpenDDS::DCPS::AttachStatus
+OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 {
   DBG_ENTRY_LVL("TransportInterface","attach_transport",5);
 
@@ -84,7 +84,7 @@ TAO::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 /// client application thread is calling this method.  This assumption makes
 /// the locking concerns much easier to deal with.
 void
-TAO::DCPS::TransportInterface::detach_transport()
+OpenDDS::DCPS::TransportInterface::detach_transport()
 {
   DBG_ENTRY_LVL("TransportInterface","detach_transport",5);
   TransportImpl_rch impl;
@@ -132,7 +132,7 @@ TAO::DCPS::TransportInterface::detach_transport()
 /// The generic add_associations() method used by both add_publications()
 /// and add_subscriptions().
 int
-TAO::DCPS::TransportInterface::add_associations
+OpenDDS::DCPS::TransportInterface::add_associations
                          (RepoId                    local_id,
                           CORBA::Long               priority,
                           const char*               local_id_str,
@@ -302,7 +302,7 @@ TAO::DCPS::TransportInterface::add_associations
 
 
 void
-TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
+OpenDDS::DCPS::TransportInterface::remove_associations(ssize_t       size,
                                                    const RepoId* remote_ids,
                                                    const RepoId  local_id,
                                                    const bool pub_side)
@@ -330,7 +330,7 @@ TAO::DCPS::TransportInterface::remove_associations(ssize_t       size,
 /// to detach itself from this TransportInterface.  This is called
 /// as a result of the TransportImpl being shutdown().
 void
-TAO::DCPS::TransportInterface::transport_detached()
+OpenDDS::DCPS::TransportInterface::transport_detached()
 {
   DBG_ENTRY_LVL("TransportInterface","transport_detached",5);
   {

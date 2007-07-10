@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPDATALINK_H
-#define TAO_DCPS_SIMPLETCPDATALINK_H
+#ifndef OPENDDS_DCPS_SIMPLETCPDATALINK_H
+#define OPENDDS_DCPS_SIMPLETCPDATALINK_H
 
 #include "SimpleTcpConnection_rch.h"
 #include "SimpleTcpTransport_rch.h"
@@ -10,7 +10,7 @@
 #include "ace/INET_Addr.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -57,7 +57,7 @@ namespace TAO
 
 
       private:
-      
+
         void send_graceful_disconnect_message ();
 
         ACE_INET_Addr           remote_address_;
@@ -68,11 +68,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleTcpDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_SIMPLETCPDATALINK_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPDATALINK_H */

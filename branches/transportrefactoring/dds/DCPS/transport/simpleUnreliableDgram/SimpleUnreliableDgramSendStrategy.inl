@@ -8,7 +8,7 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrategy
+OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrategy
                                      (TransportConfiguration* config,
                                       const ACE_INET_Addr&    remote_address,
                                       SimpleUnreliableDgramSocket*        socket,
@@ -27,7 +27,7 @@ TAO::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrategy
 
 ACE_INLINE
 void
-TAO::DCPS::SimpleUnreliableDgramSendStrategy::stop_i()
+OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::stop_i()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","stop_i",5);
   //TODO: noop

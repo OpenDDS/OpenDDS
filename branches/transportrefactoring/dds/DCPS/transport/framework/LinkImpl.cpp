@@ -13,7 +13,7 @@
 #include "ace/Guard_T.h"
 
 void
-TAO::DCPS::LinkImpl::setCallback(
+OpenDDS::DCPS::LinkImpl::setCallback(
   LinkImplCallback* cb
   )
 {
@@ -42,7 +42,7 @@ namespace
 }
 
 int
-TAO::DCPS::LinkImpl::open(void* args)
+OpenDDS::DCPS::LinkImpl::open(void* args)
 {
   Guard guard(lock_);
   if (running_)
@@ -55,7 +55,7 @@ TAO::DCPS::LinkImpl::open(void* args)
 }
 
 int
-TAO::DCPS::LinkImpl::close(u_long flags)
+OpenDDS::DCPS::LinkImpl::close(u_long flags)
 {
   {
     Guard guard(lock_);
@@ -74,7 +74,7 @@ TAO::DCPS::LinkImpl::close(u_long flags)
 }
 
 int
-TAO::DCPS::LinkImpl::svc()
+OpenDDS::DCPS::LinkImpl::svc()
 {
   {
     Guard guard(lock_);
@@ -97,7 +97,7 @@ TAO::DCPS::LinkImpl::svc()
 }
 
 bool
-TAO::DCPS::LinkImpl::performWork(
+OpenDDS::DCPS::LinkImpl::performWork(
   ACE_Thread_Mutex& extLock,
   ACE_Condition<ACE_Thread_Mutex>& extCondition,
   bool& extShutdown,
@@ -171,7 +171,7 @@ TAO::DCPS::LinkImpl::performWork(
 }
 
 TransportAPI::Status
-TAO::DCPS::LinkImpl::connect(
+OpenDDS::DCPS::LinkImpl::connect(
   TransportAPI::BLOB* endpoint
   )
 {
@@ -198,7 +198,7 @@ TAO::DCPS::LinkImpl::connect(
 }
 
 TransportAPI::Status
-TAO::DCPS::LinkImpl::disconnect(
+OpenDDS::DCPS::LinkImpl::disconnect(
   )
 {
   Guard guard(lock_);
@@ -223,7 +223,7 @@ TAO::DCPS::LinkImpl::disconnect(
 }
 
 TransportAPI::Status
-TAO::DCPS::LinkImpl::send(
+OpenDDS::DCPS::LinkImpl::send(
   ACE_Message_Block& mb,
   TransportAPI::Id& requestId
   )
@@ -245,7 +245,7 @@ namespace
     {
     }
 
-    bool operator()(const TAO::DCPS::LinkImpl::IOItem& item)
+    bool operator()(const OpenDDS::DCPS::LinkImpl::IOItem& item)
     {
       if (item.requestId_ == id_)
       {
@@ -264,19 +264,19 @@ namespace
 }
 
 TransportAPI::Status
-TAO::DCPS::LinkImpl::recall(
+OpenDDS::DCPS::LinkImpl::recall(
   const TransportAPI::Id& requestId
   )
 {
   Guard guard(lock_);
   bool found = false;
   bool done = false;
-  std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator beginIter = queue_.begin();
-  std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator endIter = queue_.begin();
+  std::deque<OpenDDS::DCPS::LinkImpl::IOItem>::iterator beginIter = queue_.begin();
+  std::deque<OpenDDS::DCPS::LinkImpl::IOItem>::iterator endIter = queue_.begin();
   RemoveItemsTest shouldRemove(requestId);
 
   for (
-    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    std::deque<OpenDDS::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
     iter != queue_.end() && !done;
     ++iter
     )
@@ -307,7 +307,7 @@ TAO::DCPS::LinkImpl::recall(
 }
 
 void
-TAO::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
+OpenDDS::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
   connected_ = true;
@@ -319,7 +319,7 @@ TAO::DCPS::LinkImpl::connected(const TransportAPI::Id& requestId)
 }
 
 void
-TAO::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
+OpenDDS::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
   connected_ = false;
@@ -331,13 +331,13 @@ TAO::DCPS::LinkImpl::disconnected(const TransportAPI::failure_reason& reason)
 }
 
 void
-TAO::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
+OpenDDS::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
 {
   Guard guard(lock_);
   // TBD: check requestId w/front of queue
   bool done = false;
   for (
-    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    std::deque<OpenDDS::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
     iter != queue_.end() && !done;
     ++iter
     )
@@ -353,14 +353,14 @@ TAO::DCPS::LinkImpl::sendSucceeded(const TransportAPI::Id& requestId)
 }
 
 void
-TAO::DCPS::LinkImpl::sendFailed(const TransportAPI::failure_reason& reason)
+OpenDDS::DCPS::LinkImpl::sendFailed(const TransportAPI::failure_reason& reason)
 {
  
   Guard guard(lock_);
   // TBD: check requestId w/front of queue
   bool done = false;
   for (
-    std::deque<TAO::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
+    std::deque<OpenDDS::DCPS::LinkImpl::IOItem>::iterator iter = queue_.begin();
     iter != queue_.end() && !done;
     ++iter
     )
@@ -376,7 +376,7 @@ TAO::DCPS::LinkImpl::sendFailed(const TransportAPI::failure_reason& reason)
 }
 
 void
-TAO::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason)
+OpenDDS::DCPS::LinkImpl::backPressureChanged(bool applyBackpressure, const TransportAPI::failure_reason& reason)
 {
   Guard guard(lock_);
   backpressure_ = applyBackpressure;
@@ -427,7 +427,7 @@ namespace
   void
   receivedData(
     const ACE_Message_Block& mb,
-    TAO::DCPS::LinkImplCallback* callback
+    OpenDDS::DCPS::LinkImplCallback* callback
     )
   {
     if (callback != 0)
@@ -438,8 +438,8 @@ namespace
 
   void
   receivedData(
-    const TAO::DCPS::LinkImpl::IOItem& item,
-    TAO::DCPS::LinkImplCallback* callback
+    const OpenDDS::DCPS::LinkImpl::IOItem& item,
+    OpenDDS::DCPS::LinkImplCallback* callback
     )
   {
     if (item.mb_.get() != 0)
@@ -449,15 +449,15 @@ namespace
   }
 
   void
-  clear(TAO::DCPS::LinkImpl::IOItem& cache)
+  clear(OpenDDS::DCPS::LinkImpl::IOItem& cache)
   {
-    cache = TAO::DCPS::LinkImpl::IOItem();
+    cache = OpenDDS::DCPS::LinkImpl::IOItem();
   }
 
   void
   append(
-    TAO::DCPS::LinkImpl::IOItem& cache,
-    TAO::DCPS::LinkImpl::IOItem& item
+    OpenDDS::DCPS::LinkImpl::IOItem& cache,
+    OpenDDS::DCPS::LinkImpl::IOItem& item
     )
   {
     if (cache.mb_.get() == 0)
@@ -499,7 +499,7 @@ namespace
 }
 
 void
-TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
+OpenDDS::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 {
   Guard guard(lock_);
   ACE_Message_Block mb(getTotalSize(buffers, iovecSize));
@@ -581,7 +581,7 @@ TAO::DCPS::LinkImpl::received(const iovec buffers[], size_t iovecSize)
 }
 
 TransportAPI::Id
-TAO::DCPS::LinkImpl::getNextRequestId(
+OpenDDS::DCPS::LinkImpl::getNextRequestId(
   const Guard&
   )
 {
@@ -594,7 +594,7 @@ TAO::DCPS::LinkImpl::getNextRequestId(
 }
 
 void
-TAO::DCPS::LinkImpl::deliver(
+OpenDDS::DCPS::LinkImpl::deliver(
   const Guard&,
   ACE_Message_Block& mb,
   const TransportAPI::Id& requestId
@@ -639,7 +639,7 @@ TAO::DCPS::LinkImpl::deliver(
 }
 
 bool
-TAO::DCPS::LinkImpl::trySending(
+OpenDDS::DCPS::LinkImpl::trySending(
   IOItem& item
   )
 {

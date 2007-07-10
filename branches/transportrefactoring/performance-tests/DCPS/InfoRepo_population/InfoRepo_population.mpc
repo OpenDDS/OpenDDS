@@ -1,5 +1,6 @@
 project(*idl) : taoidldefaults {
   idlflags    += -I../Sync
+  after       += Sync_Idl
 
   IDL_Files {
     SyncExt.idl
@@ -13,6 +14,7 @@ project(*SyncServer) : taoexe, portableserver, iortable {
   exename = syncServer
   includes += ../Sync
   libs += SyncServer
+  libpaths += $(DDS_ROOT)/lib
   after += *idl Sync_ServerLib
   avoids += minimum_corba
 
@@ -26,7 +28,7 @@ project(*SyncServer) : taoexe, portableserver, iortable {
   }
 }
 
-project(*Publisher) : dcpsexe {
+project(*Publisher) : dcpsexe_with_tcp {
 
   exename   = publisher
   libs     += SyncClient
@@ -51,7 +53,7 @@ project(*Publisher) : dcpsexe {
   }
 }
 
-project(*Subscriber) : dcpsexe {
+project(*Subscriber) : dcpsexe_with_tcp {
 
   exename   = subscriber
   libs     += SyncClient

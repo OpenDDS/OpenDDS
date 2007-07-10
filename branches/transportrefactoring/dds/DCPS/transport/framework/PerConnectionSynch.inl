@@ -5,7 +5,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::PerConnectionSynch::PerConnectionSynch
+OpenDDS::DCPS::PerConnectionSynch::PerConnectionSynch
                                         (ThreadSynchResource* synch_resource)
   : ThreadSynch(synch_resource),
     condition_(this->lock_),

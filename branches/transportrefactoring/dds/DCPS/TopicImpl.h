@@ -13,7 +13,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -27,8 +27,8 @@ namespace TAO
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export TopicImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::Topic>,
+    class OpenDDS_Dcps_Export TopicImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::Topic>,
         public virtual EntityImpl,
         public virtual TopicDescriptionImpl
     {
@@ -38,7 +38,7 @@ namespace TAO
       TopicImpl (const RepoId                   topic_id,
                  const char*                    topic_name,
                  const char*                    type_name,
-                 TAO::DCPS::TypeSupport_ptr type_support,
+                 OpenDDS::DCPS::TypeSupport_ptr type_support,
                  const ::DDS::TopicQos &        qos,
                  ::DDS::TopicListener_ptr       a_listener,
                  ::DDS::DomainParticipant_ptr   participant);
@@ -128,6 +128,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_TOPIC_IMPL_H  */

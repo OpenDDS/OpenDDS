@@ -33,7 +33,7 @@
 
 //Class TAO_DDS_DCPSDataReader_i
 class TAO_DDS_DCPSDataReader_i   
-  : public virtual POA_TAO::DCPS::DataReaderRemote
+  : public virtual POA_OpenDDS::DCPS::DataReaderRemote
 {
 public:
   //Constructor
@@ -51,15 +51,15 @@ public:
 
 
   virtual void add_associations (
-      ::TAO::DCPS::RepoId yourId,
-      const TAO::DCPS::WriterAssociationSeq & writers
+      ::OpenDDS::DCPS::RepoId yourId,
+      const OpenDDS::DCPS::WriterAssociationSeq & writers
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
 
   virtual void remove_associations (
-      const TAO::DCPS::WriterIdSeq & writers,
+      const OpenDDS::DCPS::WriterIdSeq & writers,
       ::CORBA::Boolean notify_lost
     )
     ACE_THROW_SPEC ((
@@ -67,7 +67,7 @@ public:
     ));
 
   virtual void update_incompatible_qos (
-      const TAO::DCPS::IncompatibleQosStatus & status
+      const OpenDDS::DCPS::IncompatibleQosStatus & status
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

@@ -7,7 +7,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::ReliableMulticastTransportReceiveStrategy(
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::ReliableMulticastTransportReceiveStrategy(
   ReliableMulticastDataLink& data_link
   )
   : data_link_(data_link)
@@ -15,6 +15,6 @@ TAO::DCPS::ReliableMulticastTransportReceiveStrategy::ReliableMulticastTransport
 }
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastTransportReceiveStrategy::~ReliableMulticastTransportReceiveStrategy()
+OpenDDS::DCPS::ReliableMulticastTransportReceiveStrategy::~ReliableMulticastTransportReceiveStrategy()
 {
 }

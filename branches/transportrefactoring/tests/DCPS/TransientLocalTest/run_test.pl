@@ -11,13 +11,14 @@ use PerlACE::Run_Test;
 
 $status = 0;
 
-$opts =  "-ORBSvcConf tcp.conf";
+$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf tcp.conf";
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$repo_bit_opt = "-ORBSvcConf tcp.conf";
+$repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
@@ -52,6 +53,11 @@ while ($line = <DATA>)
     break;
    }
 }
+
+#Sleep for 2 seconds after publisher send all samples to avoid the timing issue
+#that the subscriber may start and finish in 1 second while the publisher is waiting 
+#for it to start.
+sleep (2);
 
 $Subscriber->Spawn ();
 

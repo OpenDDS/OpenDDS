@@ -213,8 +213,8 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
         {
@@ -223,7 +223,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           return ::DDS::Subscriber::_nil ();
         }
 
-      TAO::DCPS::AttachStatus attach_status;
+      OpenDDS::DCPS::AttachStatus attach_status;
 
       if (attach_to_udp)
         {
@@ -246,20 +246,20 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           attach_status = sub_impl->attach_transport(reader_tcp_impl.in());
         }
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           ACE_TString status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -325,7 +325,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooNoKeyTypeSupportImpl* nokey_fts_servant
             = new ::Xyz::FooNoKeyTypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = nokey_fts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = nokey_fts_servant;
 
           if (::DDS::RETCODE_OK != nokey_fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -352,7 +352,7 @@ int main (int argc, char *argv[])
         {
           ::Xyz::FooTypeSupportImpl* fts_servant
             = new ::Xyz::FooTypeSupportImpl();
-          TAO::DCPS::LocalObject_var safe_servant = fts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
             {
@@ -465,7 +465,7 @@ int main (int argc, char *argv[])
       DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
 
       ::DDS::DataReaderListener_var listener
-        = ::TAO::DCPS::servant_to_reference(listener_servant);
+        = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
 
       if (CORBA::is_nil (listener.in ()))
         {

@@ -34,7 +34,7 @@ SubReader::set_data_size(char data_size)
 
 
 void
-SubReader::set_id(TAO::DCPS::RepoId sub_id)
+SubReader::set_id(OpenDDS::DCPS::RepoId sub_id)
 {
   this->sub_id_ = sub_id;
 }
@@ -54,7 +54,7 @@ SubReader::transport_lost()
 
 
 void
-SubReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SubReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   ++this->num_received_;
   ACE_DEBUG((LM_DEBUG,

@@ -5,6 +5,6 @@
 
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
-TAO_DdsDcps_Export unsigned int TAO::DCPS::Transport_debug_level = 0;
+OpenDDS_Dcps_Export unsigned int OpenDDS::DCPS::Transport_debug_level = 0;
 
 

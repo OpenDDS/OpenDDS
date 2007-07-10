@@ -6,14 +6,14 @@
 
 
 ACE_INLINE
-TAO::DCPS::SimpleUnreliableDgramTransport::SimpleUnreliableDgramTransport()
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::SimpleUnreliableDgramTransport()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","SimpleUnreliableDgramTransport",5);
 }
 
 
 ACE_INLINE void
-TAO::DCPS::SimpleUnreliableDgramTransport::deliver_sample
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {
@@ -30,7 +30,7 @@ TAO::DCPS::SimpleUnreliableDgramTransport::deliver_sample
 
 
 ACE_INLINE bool
-TAO::DCPS::SimpleUnreliableDgramTransport::acked (RepoId)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId)
 {
   return true;
 }

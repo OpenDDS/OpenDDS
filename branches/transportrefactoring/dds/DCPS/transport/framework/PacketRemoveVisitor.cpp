@@ -13,7 +13,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
+OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
                               (const ACE_Message_Block* sample,
                                ACE_Message_Block*&      unsent_head_block,
                                ACE_Message_Block*       header_block,
@@ -31,7 +31,7 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
 }
 
 
-TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
+OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
                                     (RepoId              pub_id,
                                      ACE_Message_Block*& unsent_head_block,
                                      ACE_Message_Block*  header_block,
@@ -49,14 +49,14 @@ TAO::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
 }
 
 
-TAO::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
+OpenDDS::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
 {
   DBG_ENTRY_LVL("PacketRemoveVisitor","~PacketRemoveVisitor",5);
 }
 
 
 int
-TAO::DCPS::PacketRemoveVisitor::visit_element_ref
+OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
                                             (TransportQueueElement*& element)
 {
   DBG_ENTRY_LVL("PacketRemoveVisitor","visit_element_ref",5);

@@ -12,7 +12,7 @@
 #include /**/ "tao/debug.h"
 
 
-DCPS_IR_Topic::DCPS_IR_Topic(TAO::DCPS::RepoId id,
+DCPS_IR_Topic::DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,
                              ::DDS::TopicQos qos,
                              DCPS_IR_Domain* domain,
                              DCPS_IR_Participant* creator,
@@ -117,13 +117,13 @@ int DCPS_IR_Topic::remove_publication_reference (DCPS_IR_Publication* publicatio
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Topic::get_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_id () const
 {
   return id_;
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Topic::get_participant_id () const
+OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_participant_id () const
 {
   return participant_->get_id();
 }
@@ -154,7 +154,7 @@ void DCPS_IR_Topic::try_associate (DCPS_IR_Subscription* subscription)
     {
       // check all publications for compatibility
       DCPS_IR_Publication* pub = 0;
-      TAO::DCPS::IncompatibleQosStatus* qosStatus = 0;
+      OpenDDS::DCPS::IncompatibleQosStatus* qosStatus = 0;
 
       DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
       DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();

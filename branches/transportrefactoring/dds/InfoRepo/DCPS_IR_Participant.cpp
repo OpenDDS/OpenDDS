@@ -9,7 +9,7 @@
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "tao/debug.h"
 
-DCPS_IR_Participant::DCPS_IR_Participant (TAO::DCPS::RepoId id,
+DCPS_IR_Participant::DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
                                           ::DDS::DomainParticipantQos qos,
                                           UpdateManager* um)
@@ -75,7 +75,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
 
   if (0 != topicRefs_.current_size())
     {
-      TAO::DCPS::RepoId topicId = 0;
+      OpenDDS::DCPS::RepoId topicId = 0;
       DCPS_IR_Topic_Map::ITERATOR iter = topicRefs_.begin();
       DCPS_IR_Topic_Map::ITERATOR end = topicRefs_.end();
 
@@ -101,7 +101,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
 
 int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
 {
-  TAO::DCPS::RepoId pubId = pub->get_id();
+  OpenDDS::DCPS::RepoId pubId = pub->get_id();
   int status = publications_.bind(pubId, pub);
 
   switch (status)
@@ -177,7 +177,7 @@ int DCPS_IR_Participant::remove_publication (long pubId)
 
 int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
 {
-  TAO::DCPS::RepoId subId = sub->get_id();
+  OpenDDS::DCPS::RepoId subId = sub->get_id();
   int status = subscriptions_.bind(subId, sub);
 
   switch (status)
@@ -251,7 +251,7 @@ int DCPS_IR_Participant::remove_subscription (long subId)
 
 int DCPS_IR_Participant::add_topic_reference (DCPS_IR_Topic* topic)
 {
-  TAO::DCPS::RepoId topicId = topic->get_id();
+  OpenDDS::DCPS::RepoId topicId = topic->get_id();
   int status = topicRefs_.bind(topicId, topic);
 
   switch (status)
@@ -436,7 +436,7 @@ void DCPS_IR_Participant::mark_dead ()
 }
 
 
-TAO::DCPS::RepoId DCPS_IR_Participant::get_id ()
+OpenDDS::DCPS::RepoId DCPS_IR_Participant::get_id ()
 {
   return id_;
 }
@@ -455,7 +455,7 @@ void DCPS_IR_Participant::set_alive (CORBA::Boolean alive)
 
 
 
-void DCPS_IR_Participant::ignore_participant (TAO::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_participant (OpenDDS::DCPS::RepoId id)
 {
   if (TAO_debug_level > 0)
     {
@@ -492,7 +492,7 @@ void DCPS_IR_Participant::ignore_participant (TAO::DCPS::RepoId id)
 }
 
 
-void DCPS_IR_Participant::ignore_topic (TAO::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_topic (OpenDDS::DCPS::RepoId id)
 {
   if (TAO_debug_level > 0)
     {
@@ -529,7 +529,7 @@ void DCPS_IR_Participant::ignore_topic (TAO::DCPS::RepoId id)
 }
 
 
-void DCPS_IR_Participant::ignore_publication (TAO::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_publication (OpenDDS::DCPS::RepoId id)
 {
     if (TAO_debug_level > 0)
     {
@@ -555,7 +555,7 @@ void DCPS_IR_Participant::ignore_publication (TAO::DCPS::RepoId id)
 }
 
 
-void DCPS_IR_Participant::ignore_subscription (TAO::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_subscription (OpenDDS::DCPS::RepoId id)
 {
     if (TAO_debug_level > 0)
     {
@@ -581,25 +581,25 @@ void DCPS_IR_Participant::ignore_subscription (TAO::DCPS::RepoId id)
 
 
 
-CORBA::Boolean DCPS_IR_Participant::is_participant_ignored (TAO::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_participant_ignored (OpenDDS::DCPS::RepoId id)
 {
   return (0 == ignoredParticipants_.find(id));
 }
 
 
-CORBA::Boolean DCPS_IR_Participant::is_topic_ignored (TAO::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_topic_ignored (OpenDDS::DCPS::RepoId id)
 {
   return (0 == ignoredTopics_.find(id));
 }
 
 
-CORBA::Boolean DCPS_IR_Participant::is_publication_ignored (TAO::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_publication_ignored (OpenDDS::DCPS::RepoId id)
 {
   return (0 == ignoredPublications_.find(id));
 }
 
 
-CORBA::Boolean DCPS_IR_Participant::is_subscription_ignored (TAO::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_subscription_ignored (OpenDDS::DCPS::RepoId id)
 {
   return (0 == ignoredSubscriptions_.find(id));
 }
@@ -638,38 +638,38 @@ void DCPS_IR_Participant::set_bit_status (CORBA::Boolean isBIT)
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
-template class ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Publication*>;
-template class ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
+template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*>;
+template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
+template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
 
-template class ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Subscription*>;
-template class ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
+template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*>;
+template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
+template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
+template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
 
-template class ACE_Node<TAO::DCPS::RepoId>;
-template class ACE_Unbounded_Set<TAO::DCPS::RepoId>;
-template class ACE_Unbounded_Set_Iterator<TAO::DCPS::RepoId>;
+template class ACE_Node<OpenDDS::DCPS::RepoId>;
+template class ACE_Unbounded_Set<OpenDDS::DCPS::RepoId>;
+template class ACE_Unbounded_Set_Iterator<OpenDDS::DCPS::RepoId>;
 
 #elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
 
-#pragma instantiate ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Publication*>
-#pragma instantiate ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*>
+#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
 
-#pragma instantiate ACE_Map_Entry<TAO::DCPS::RepoId,DCPS_IR_Subscription*>
-#pragma instantiate ACE_Map_Manager<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<TAO::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*>
+#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
+#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
 
-#pragma instantiate ACE_Node<TAO::DCPS::RepoId>
-#pragma instantiate ACE_Unbounded_Set<TAO::DCPS::RepoId>
-#pragma instantiate ACE_Unbounded_Set_Iterator<TAO::DCPS::RepoId>
+#pragma instantiate ACE_Node<OpenDDS::DCPS::RepoId>
+#pragma instantiate ACE_Unbounded_Set<OpenDDS::DCPS::RepoId>
+#pragma instantiate ACE_Unbounded_Set_Iterator<OpenDDS::DCPS::RepoId>
 
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

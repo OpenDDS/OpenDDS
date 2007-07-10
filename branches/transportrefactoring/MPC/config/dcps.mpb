@@ -4,7 +4,7 @@
 project: taolib, portableserver, dcps_ts_defaults, built_in_topic_support, dds_suppress_any_support, taoidldefaults {
   // override the taolib default library output directory
   libout      = $(DDS_ROOT)/lib
-  libs        += TAO_DdsDcps
+  libs        += OpenDDS_Dcps
   after       += DdsDcps
   libpaths    += $(DDS_ROOT)/lib
 

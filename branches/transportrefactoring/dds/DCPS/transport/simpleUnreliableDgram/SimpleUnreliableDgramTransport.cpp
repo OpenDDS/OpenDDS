@@ -18,14 +18,14 @@
 #include "SimpleUnreliableDgramTransport.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","~SimpleUnreliableDgramTransport",5);
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
                           int                           connect_as_publisher)
 {
@@ -96,7 +96,7 @@ TAO::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
 
 
 int
-TAO::DCPS::SimpleUnreliableDgramTransport::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::configure_i(TransportConfiguration* config)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","configure_i",5);
 
@@ -163,7 +163,7 @@ TAO::DCPS::SimpleUnreliableDgramTransport::configure_i(TransportConfiguration* c
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","shutdown_i",5);
 
@@ -205,7 +205,7 @@ TAO::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link)
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","release_datalink_i",5);
 
@@ -238,7 +238,7 @@ TAO::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link)
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramTransport::notify_lost_on_backpressure_timeout ()
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::notify_lost_on_backpressure_timeout ()
 {
   typedef std::vector <SimpleUnreliableDgramDataLink_rch> LinkVector;
  

@@ -4,9 +4,10 @@
 
 #include "EntryExit.h"
 
+#include "dds/DCPS/Util.h"
 
 ACE_INLINE
-TAO::DCPS::RepoIdSet::RepoIdSet()
+OpenDDS::DCPS::RepoIdSet::RepoIdSet()
 {
   DBG_ENTRY_LVL("RepoIdSet","RepoIdSet",5);
 }
@@ -14,18 +15,18 @@ TAO::DCPS::RepoIdSet::RepoIdSet()
 
 
 ACE_INLINE int
-TAO::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
+OpenDDS::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
   DBG_ENTRY_LVL("RepoIdSet","insert_id",5);
-  return this->map_.bind(key, value);
+  return bind(map_, key, value);
 }
 
 
 ACE_INLINE int
-TAO::DCPS::RepoIdSet::remove_id(RepoId id)
+OpenDDS::DCPS::RepoIdSet::remove_id(RepoId id)
 {
   DBG_ENTRY_LVL("RepoIdSet","remove_id",5);
-  int result = this->map_.unbind(id);
+  int result = unbind(map_, id);
 
   if (result != 0)
     {
@@ -37,23 +38,23 @@ TAO::DCPS::RepoIdSet::remove_id(RepoId id)
 
 
 ACE_INLINE size_t
-TAO::DCPS::RepoIdSet::size() const
+OpenDDS::DCPS::RepoIdSet::size() const
 {
   DBG_ENTRY_LVL("RepoIdSet","size",5);
-  return this->map_.current_size();
+  return map_.size();
 }
 
 
-ACE_INLINE TAO::DCPS::RepoIdSet::MapType&
-TAO::DCPS::RepoIdSet::map()
+ACE_INLINE OpenDDS::DCPS::RepoIdSet::MapType&
+OpenDDS::DCPS::RepoIdSet::map()
 {
   DBG_SUB_ENTRY("RepoIdSet","map",1);
   return this->map_;
 }
 
 
-ACE_INLINE const TAO::DCPS::RepoIdSet::MapType&
-TAO::DCPS::RepoIdSet::map() const
+ACE_INLINE const OpenDDS::DCPS::RepoIdSet::MapType&
+OpenDDS::DCPS::RepoIdSet::map() const
 {
   DBG_SUB_ENTRY("RepoIdSet","map",2);
   return this->map_;

@@ -24,7 +24,7 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
+SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id,
                        unsigned num_messages_expected)
 {
   // TURN_ON_VERBOSE_DEBUG ;
@@ -38,7 +38,7 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
 
 
 void
-SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   VDBG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
   VDBG((LM_DEBUG, "(%P|%t) Message: \"%s\"\n", sample.sample_->rd_ptr()));

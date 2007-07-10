@@ -11,15 +11,15 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class TAO_DCPS_DomainParticipantListener_i
-class TAO_DCPS_DomainParticipantListener_i : public virtual DDS::DomainParticipantListener
+//Class OPENDDS_DCPS_DomainParticipantListener_i
+class OPENDDS_DCPS_DomainParticipantListener_i : public virtual DDS::DomainParticipantListener
 {
 public:
   //Constructor
-  TAO_DCPS_DomainParticipantListener_i (void);
+  OPENDDS_DCPS_DomainParticipantListener_i (void);
 
   //Destructor
-  virtual ~TAO_DCPS_DomainParticipantListener_i (void);
+  virtual ~OPENDDS_DCPS_DomainParticipantListener_i (void);
 
 
 

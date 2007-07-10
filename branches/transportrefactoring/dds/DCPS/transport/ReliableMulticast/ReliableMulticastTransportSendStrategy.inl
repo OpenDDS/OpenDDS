@@ -8,15 +8,15 @@
 #include "detail/ReactivePacketSender.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastTransportSendStrategy::ReliableMulticastTransportSendStrategy(
-  TAO::DCPS::ReliableMulticastTransportConfiguration& configuration,
-  TAO::DCPS::ReliableMulticastThreadSynchResource* synch_resource
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::ReliableMulticastTransportSendStrategy(
+  OpenDDS::DCPS::ReliableMulticastTransportConfiguration& configuration,
+  OpenDDS::DCPS::ReliableMulticastThreadSynchResource* synch_resource
   )
-  : TAO::DCPS::TransportSendStrategy(&configuration, synch_resource)
+  : OpenDDS::DCPS::TransportSendStrategy(&configuration, synch_resource)
 {
 }
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticastTransportSendStrategy::~ReliableMulticastTransportSendStrategy()
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::~ReliableMulticastTransportSendStrategy()
 {
 }

@@ -5,6 +5,9 @@
 #include  "dds/DCPS/Qos_Helper.h"
 #include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
 
 #include "ace/Arg_Shifter.h"
 
@@ -86,10 +89,10 @@ main (int argc, char *argv[])
       // Check the DomainParticipantFactory
       // --
 
-      TAO_DCPS_DomainParticipantListener_i* dpListenerImpl = new TAO_DCPS_DomainParticipantListener_i;
+      OPENDDS_DCPS_DomainParticipantListener_i* dpListenerImpl = new OPENDDS_DCPS_DomainParticipantListener_i;
 
       ::DDS::DomainParticipantListener_var dpListener =
-        ::TAO::DCPS::servant_to_reference (dpListenerImpl);
+        ::OpenDDS::DCPS::servant_to_reference (dpListenerImpl);
       if ( CORBA::is_nil (dpListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,

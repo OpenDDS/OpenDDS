@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_BASICQUEUELINKCHUNK_T_H
-#define TAO_DCPS_BASICQUEUELINKCHUNK_T_H
+#ifndef OPENDDS_DCPS_BASICQUEUELINKCHUNK_T_H
+#define OPENDDS_DCPS_BASICQUEUELINKCHUNK_T_H
 
 #include "BasicQueueLink_T.h"
 
 #include "ace/OS_NS_stdlib.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -42,4 +42,4 @@ namespace TAO
 
 }
 
-#endif  /* TAO_DCPS_BASICQUEUELINKCHUNK_T_H */
+#endif  /* OPENDDS_DCPS_BASICQUEUELINKCHUNK_T_H */

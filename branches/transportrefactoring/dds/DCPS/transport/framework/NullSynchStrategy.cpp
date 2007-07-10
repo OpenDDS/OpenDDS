@@ -8,20 +8,20 @@
 #include "EntryExit.h"
 
 
-TAO::DCPS::NullSynchStrategy::NullSynchStrategy()
+OpenDDS::DCPS::NullSynchStrategy::NullSynchStrategy()
 {
   DBG_ENTRY_LVL("NullSynchStrategy","NullSynchStrategy",5);
 }
 
 
-TAO::DCPS::NullSynchStrategy::~NullSynchStrategy()
+OpenDDS::DCPS::NullSynchStrategy::~NullSynchStrategy()
 {
   DBG_ENTRY_LVL("NullSynchStrategy","~NullSynchStrategy",5);
 }
 
 
-TAO::DCPS::ThreadSynch*
-TAO::DCPS::NullSynchStrategy::create_synch_object
+OpenDDS::DCPS::ThreadSynch*
+OpenDDS::DCPS::NullSynchStrategy::create_synch_object
                                        (ThreadSynchResource* synch_resource)
 {
   DBG_ENTRY_LVL("NullSynchStrategy","create_synch_object",5);

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_PERCONNECTIONSYNCH_H
-#define TAO_DCPS_PERCONNECTIONSYNCH_H
+#ifndef OPENDDS_DCPS_PERCONNECTIONSYNCH_H
+#define OPENDDS_DCPS_PERCONNECTIONSYNCH_H
 
 #include "ThreadSynch.h"
 #include "ace/Task.h"
@@ -10,7 +10,7 @@
 #include "ace/Condition_T.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -49,10 +49,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "PerConnectionSynch.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_THREADSYNCH_H */
+#endif  /* OPENDDS_DCPS_THREADSYNCH_H */

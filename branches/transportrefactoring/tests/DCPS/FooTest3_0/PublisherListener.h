@@ -13,7 +13,7 @@
 
 //Class PublisherListenerImpl
 class PublisherListenerImpl
-  : public virtual TAO::DCPS::LocalObject<DDS::PublisherListener>
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::PublisherListener>
 {
 public:
   //Constructor

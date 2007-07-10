@@ -20,7 +20,7 @@ namespace TransportAPI
   /// @note The BLOB should contain information related to the current endpoint, and
   /// ideally enough to communicate to a remote endpoint how it should connect to
   /// this one.
-  class TAO_DdsDcps_Export BLOB
+  class OpenDDS_Dcps_Export BLOB
   {
   public:
     virtual ~BLOB();

@@ -33,7 +33,7 @@ Pub::set_data_size(char data_size)
 
 
 void
-Pub::set_local_publisher(TAO::DCPS::RepoId pub_id)
+Pub::set_local_publisher(OpenDDS::DCPS::RepoId pub_id)
 {
   this->pub_id_ = pub_id;
   this->writer_.set_id(pub_id);
@@ -41,7 +41,7 @@ Pub::set_local_publisher(TAO::DCPS::RepoId pub_id)
 
 
 void
-Pub::add_remote_subscriber(TAO::DCPS::RepoId    sub_id,
+Pub::add_remote_subscriber(OpenDDS::DCPS::RepoId    sub_id,
                            const ACE_INET_Addr& sub_addr)
 {
   this->subs_.push_back(SubInfo(sub_id,sub_addr));
@@ -82,7 +82,7 @@ Pub::wait()
 
 
 void
-Pub::send_samples(const TAO::DCPS::DataSampleList& samples)
+Pub::send_samples(const OpenDDS::DCPS::DataSampleList& samples)
 {
   transport_interface_.send(samples);
 }
@@ -100,7 +100,7 @@ void
 Pub::init_attach_transport(unsigned impl_id)
 {
   // Obtain the transport.
-  TAO::DCPS::TransportImpl_rch transport =
+  OpenDDS::DCPS::TransportImpl_rch transport =
                                       TheTransportFactory->obtain(impl_id);
 
   if (transport.is_nil())
@@ -114,23 +114,22 @@ Pub::init_attach_transport(unsigned impl_id)
     }
 
   // Attempt to attach the transport to ourselves.
-  TAO::DCPS::AttachStatus status =
-    transport_interface_.attach_transport(transport.in());
+  OpenDDS::DCPS::AttachStatus status = this->attach_transport(transport.in());
 
-  if (status != TAO::DCPS::ATTACH_OK)
+  if (status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       const char* emsg = "Failed attachment to transport. AttachStatus == ";
 
       switch (status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_BAD_TRANSPORT\n",emsg));
             throw TestException();
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_ERROR\n",emsg));
             throw TestException();
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             ACE_ERROR((LM_ERROR,"(%P|%t) %s ATTACH_INCOMPATIBLE_QOS\n",emsg));
             throw TestException();
           default:
@@ -147,7 +146,7 @@ Pub::init_add_subscriptions()
 {
   unsigned num_subs = this->subs_.size();
 
-  TAO::DCPS::AssociationData* subs = new TAO::DCPS::AssociationData[num_subs];
+  OpenDDS::DCPS::AssociationData* subs = new OpenDDS::DCPS::AssociationData[num_subs];
 
   for (unsigned i = 0; i < num_subs; i++)
     {

@@ -41,7 +41,7 @@ private:
   
   InstanceDataMap       data_map_;
   ::DDS::DataWriter_var writer_;
-  ::TAO::DCPS::DataWriterImpl* writer_servant_;
+  ::OpenDDS::DCPS::DataWriterImpl* writer_servant_;
   int num_thread_to_write_;
   int num_writes_per_thread_;
   int multiple_instances_;

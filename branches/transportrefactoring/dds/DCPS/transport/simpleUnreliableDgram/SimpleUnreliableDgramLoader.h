@@ -3,8 +3,8 @@
 // $Id$
 
 
-#ifndef TAO_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H
-#define TAO_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H
+#ifndef OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H
+#define OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H
 #include /**/ "ace/pre.h"
 
 #include "SimpleUnreliableDgram_export.h"
@@ -19,23 +19,23 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-class SimpleUnreliableDgram_Export TAO_DCPS_SimpleUnreliableDgramLoader : public ACE_Service_Object
+class SimpleUnreliableDgram_Export OPENDDS_DCPS_SimpleUnreliableDgramLoader : public ACE_Service_Object
 {
 public:
   /// Constructor.
-  TAO_DCPS_SimpleUnreliableDgramLoader (void);
+  OPENDDS_DCPS_SimpleUnreliableDgramLoader (void);
 
   /// Destructor.
-  virtual ~TAO_DCPS_SimpleUnreliableDgramLoader (void);
+  virtual ~OPENDDS_DCPS_SimpleUnreliableDgramLoader (void);
 
   /// Initialize the loader hooks.
   virtual int init (int argc,
                     ACE_TCHAR* []);
 };
 
-ACE_STATIC_SVC_DECLARE_EXPORT (SimpleUnreliableDgram, TAO_DCPS_SimpleUnreliableDgramLoader)
-ACE_FACTORY_DECLARE (SimpleUnreliableDgram, TAO_DCPS_SimpleUnreliableDgramLoader)
+ACE_STATIC_SVC_DECLARE_EXPORT (SimpleUnreliableDgram, OPENDDS_DCPS_SimpleUnreliableDgramLoader)
+ACE_FACTORY_DECLARE (SimpleUnreliableDgram, OPENDDS_DCPS_SimpleUnreliableDgramLoader)
 
 
 #include /**/ "ace/post.h"
-#endif /* TAO_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H */
+#endif /* OPENDDS_DCPS_SIMPLEUNRELIABLEDGRAM_LOADER_H */

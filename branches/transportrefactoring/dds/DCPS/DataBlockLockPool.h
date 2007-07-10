@@ -28,7 +28,7 @@
  *
  * @NOTE: This class is NOT thread safe.
  */
-class TAO_DdsDcps_Export DataBlockLockPool
+class OpenDDS_Dcps_Export DataBlockLockPool
 {
 public:
   typedef ACE_Lock_Adapter<ACE_Thread_Mutex> DataBlockLock;

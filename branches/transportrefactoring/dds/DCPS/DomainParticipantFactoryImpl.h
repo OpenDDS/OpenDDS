@@ -6,18 +6,18 @@
 
 #include "Definitions.h"
 #include "dds/DdsDcpsDomainS.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Unbounded_Set.h"
 #include "dds/DCPS/LocalObject.h"
 
+#include <map>
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -26,7 +26,7 @@ namespace TAO
     /**
     * @class DomainParticipantFactoryImpl
     *
-    * @brief Implements the ::TAO::DCPS::DomainParticipantFactory
+    * @brief Implements the ::OpenDDS::DCPS::DomainParticipantFactory
     *        interfaces.
     *
     * This class acts as factory of the DomainParticipant.
@@ -35,8 +35,8 @@ namespace TAO
     * the interface this class is implementing.
     *
     */
-    class TAO_DdsDcps_Export DomainParticipantFactoryImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipantFactory>
+    class OpenDDS_Dcps_Export DomainParticipantFactoryImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipantFactory>
     {
     public:
 
@@ -44,11 +44,8 @@ namespace TAO
                                    ::DDS::DomainParticipant,
                                    ::DDS::DomainParticipant_ptr,
                                    ::DDS::DomainParticipant_var > Participant_Pair;
-      typedef ACE_Unbounded_Set < Participant_Pair > DPSet;
-      typedef ACE_Unbounded_Set_Iterator < Participant_Pair > DPSet_Iterator;
-      typedef ACE_Hash_Map_Manager <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap;
-      typedef ACE_Hash_Map_Iterator <DDS::DomainId_t, DPSet, ACE_Null_Mutex> DPMap_Iterator;
-      typedef ACE_Hash_Map_Entry <DDS::DomainId_t, DPSet> DPMap_Entry;
+      typedef std::set<Participant_Pair> DPSet;
+      typedef std::map<DDS::DomainId_t, DPSet> DPMap;
 
       /** Constructor **/
       DomainParticipantFactoryImpl (void);
@@ -125,6 +122,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H  */

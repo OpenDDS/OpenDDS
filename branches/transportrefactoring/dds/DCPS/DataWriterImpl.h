@@ -20,13 +20,15 @@
 
 #include "ace/Event_Handler.h"
 
+#include <map>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class DDS_TEST;
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -36,7 +38,7 @@ namespace TAO
     /**
     * @class DataWriterImpl
     *
-    * @brief Implements the ::TAO::DCPS::DataWriterRemote interfaces and
+    * @brief Implements the ::OpenDDS::DCPS::DataWriterRemote interfaces and
     *        ::DDS::DataWrite interfaces.
     *
     * See the DDS specification, OMG formal/04-12-02, for a description of
@@ -54,13 +56,13 @@ namespace TAO
     *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
     *        up ownership to this WriteDataContainer.
     */
-    class TAO_DdsDcps_Export DataWriterImpl
+    class OpenDDS_Dcps_Export DataWriterImpl
       : public virtual DDS::DataWriter,
         public virtual EntityImpl,
         public virtual TransportSendListener,
         public virtual ACE_Event_Handler
       //DataWriterLocal is conceptual - no need to implement - just use DataWriterImpl
-      //public virtual TAO::DCPS::DataWriterLocal
+      //public virtual OpenDDS::DCPS::DataWriterLocal
     {
     public:
       ///Constructor
@@ -169,7 +171,7 @@ namespace TAO
       ));
 
     virtual void add_associations (
-        ::TAO::DCPS::RepoId yourId,
+        ::OpenDDS::DCPS::RepoId yourId,
         const ReaderAssociationSeq & readers
       )
       ACE_THROW_SPEC ((
@@ -185,7 +187,7 @@ namespace TAO
       ));
 
     virtual void update_incompatible_qos (
-        const TAO::DCPS::IncompatibleQosStatus & status
+        const OpenDDS::DCPS::IncompatibleQosStatus & status
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -205,11 +207,11 @@ namespace TAO
         TopicImpl                             *topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
-        TAO::DCPS::DomainParticipantImpl*      participant_servant,
+        OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
         ::DDS::Publisher_ptr                   publisher,
-        TAO::DCPS::PublisherImpl*              publisher_servant,
+        OpenDDS::DCPS::PublisherImpl*              publisher_servant,
         ::DDS::DataWriter_ptr                  dw_local,
-        TAO::DCPS::DataWriterRemote_ptr        dw_remote
+        OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -407,7 +409,7 @@ namespace TAO
     /// Called by transport after transport received the FULLY_ASSOCIATED
     /// ack from the associated subscriber.
     void fully_associated (
-      ::TAO::DCPS::RepoId     yourId,
+      ::OpenDDS::DCPS::RepoId     yourId,
       size_t                  num_remote_associations,
       const AssociationData*  remote_associations);
 
@@ -499,7 +501,7 @@ namespace TAO
       /// the object reference of the local datawriter
       ::DDS::DataWriter_var           dw_local_objref_;
       /// The object reference of the remote datawriter.
-      ::TAO::DCPS::DataWriterRemote_var dw_remote_objref_;
+      ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_objref_;
       /// The repository id of this datawriter/publication.
       PublicationId                   publication_id_;
       /// The sequence number unique in DataWriter scope.
@@ -513,11 +515,7 @@ namespace TAO
       /// The list of active subscriptions.
       ::DDS::InstanceHandleSeq        subscription_handles_;
 
-      typedef ACE_Hash_Map_Manager_Ex<RepoId,
-        DDS::InstanceHandle_t,
-        ACE_Hash<RepoId>,
-        ACE_Equal_To<RepoId>,
-        ACE_Null_Mutex>        RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
 
@@ -565,6 +563,6 @@ namespace TAO
    };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* DDSDCPSPUBLICATION_DATAWRITER_H_  */

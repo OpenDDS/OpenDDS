@@ -12,7 +12,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO 
+namespace OpenDDS 
 {
   namespace DCPS 
   {
@@ -25,7 +25,7 @@ namespace TAO
      *        from typed datawriter. The data will be duplicated for the register, 
      *        unregister and dispose control message. 
      */
-    struct TAO_DdsDcps_Export PublicationInstance 
+    struct OpenDDS_Dcps_Export PublicationInstance 
     {
 
       PublicationInstance (DataSample* registered_sample)

@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_NACKGENERATOR_H
-#define TAO_DCPS_NACKGENERATOR_H
+#ifndef OPENDDS_DCPS_NACKGENERATOR_H
+#define OPENDDS_DCPS_NACKGENERATOR_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -16,7 +16,7 @@
 #include <set>
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -32,27 +32,27 @@ namespace TAO
         {
         public:
           typedef std::set<
-            TAO::DCPS::ReliableMulticast::detail::Packet
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet
             > PacketSet;
 
           bool cancel(
-            TAO::DCPS::ReliableMulticast::detail::Packet::id_type id
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type id
             );
 
           void cancel_all();
 
           void nack_range(
-            TAO::DCPS::ReliableMulticast::detail::Packet::id_type begin,
-            TAO::DCPS::ReliableMulticast::detail::Packet::id_type end
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type begin,
+            OpenDDS::DCPS::ReliableMulticast::detail::Packet::id_type end
             );
 
           void get_nacks(
-            std::vector<TAO::DCPS::ReliableMulticast::detail::Packet>& nacks
+            std::vector<OpenDDS::DCPS::ReliableMulticast::detail::Packet>& nacks
             );
 
         private:
           PacketSet::iterator find_nack_containing(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& packet
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet
             );
 
           PacketSet::iterator join_nacks(
@@ -69,7 +69,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "NackGenerator.inl"
@@ -77,4 +77,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_NACKGENERATOR_H */
+#endif /* OPENDDS_DCPS_NACKGENERATOR_H */

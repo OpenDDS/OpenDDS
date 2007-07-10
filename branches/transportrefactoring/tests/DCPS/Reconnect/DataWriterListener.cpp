@@ -75,7 +75,7 @@ void DataWriterListenerImpl::on_publication_match (
 
 void DataWriterListenerImpl::on_publication_disconnected (
   ::DDS::DataWriter_ptr,
-  const ::TAO::DCPS::PublicationDisconnectedStatus & status
+  const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -93,7 +93,7 @@ void DataWriterListenerImpl::on_publication_disconnected (
 
 void DataWriterListenerImpl::on_publication_reconnected (
   ::DDS::DataWriter_ptr,
-  const ::TAO::DCPS::PublicationReconnectedStatus & status
+  const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -111,7 +111,7 @@ void DataWriterListenerImpl::on_publication_reconnected (
 
 void DataWriterListenerImpl::on_publication_lost (
   ::DDS::DataWriter_ptr,
-  const ::TAO::DCPS::PublicationLostStatus & status
+  const ::OpenDDS::DCPS::PublicationLostStatus & status
   )
   ACE_THROW_SPEC ((
   ::CORBA::SystemException

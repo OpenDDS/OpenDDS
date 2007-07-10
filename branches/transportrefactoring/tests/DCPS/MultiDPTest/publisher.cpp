@@ -29,7 +29,7 @@
 ::DDS::DomainParticipant_var participant;
 ::DDS::Topic_var topic[2];
 ::DDS::Publisher_var publisher;
-TAO::DCPS::TransportImpl_rch writer_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_impl;
 ::DDS::DataWriter_var datawriter[2];
 Writer* writers[2];
 int writer_address_given = 0;
@@ -137,13 +137,13 @@ void init ()
   writer_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
   if (writer_address_given)
     {
@@ -171,8 +171,8 @@ void init ()
     }
 
   // Attach the publisher to the transport.
-  TAO::DCPS::PublisherImpl* pub_impl
-    = TAO::DCPS::reference_to_servant<TAO::DCPS::PublisherImpl>
+  OpenDDS::DCPS::PublisherImpl* pub_impl
+    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
     (publisher.in ());
 
   if (0 == pub_impl)
@@ -183,23 +183,23 @@ void init ()
     }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
-  TAO::DCPS::AttachStatus attach_status
+  OpenDDS::DCPS::AttachStatus attach_status
     = pub_impl->attach_transport(writer_impl.in());
 
-  if (attach_status != TAO::DCPS::ATTACH_OK)
+  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
     {
       // We failed to attach to the transport for some reason.
       ACE_TString status_str;
 
       switch (attach_status)
         {
-          case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
             status_str = "ATTACH_BAD_TRANSPORT";
             break;
-          case TAO::DCPS::ATTACH_ERROR:
+          case OpenDDS::DCPS::ATTACH_ERROR:
             status_str = "ATTACH_ERROR";
             break;
-          case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
             status_str = "ATTACH_INCOMPATIBLE_QOS";
             break;
           default:

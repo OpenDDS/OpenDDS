@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_THREADSYNCH_H
-#define TAO_DCPS_THREADSYNCH_H
+#ifndef OPENDDS_DCPS_THREADSYNCH_H
+#define OPENDDS_DCPS_THREADSYNCH_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynchWorker.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -26,7 +26,7 @@ namespace TAO
      * 2) The ThreadSynch object is created by the ThreadSynchResource object and it owns
      *    the ThreadSynchResource object.
      */
-    class TAO_DdsDcps_Export ThreadSynch
+    class OpenDDS_Dcps_Export ThreadSynch
     {
       public:
 
@@ -84,10 +84,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ThreadSynch.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_THREADSYNCH_H */
+#endif  /* OPENDDS_DCPS_THREADSYNCH_H */

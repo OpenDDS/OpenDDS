@@ -39,12 +39,12 @@ class DCPS_IR_Topic;
 class DCPS_IR_Subscription
 {
 public:
-  DCPS_IR_Subscription (TAO::DCPS::RepoId id,
+  DCPS_IR_Subscription (OpenDDS::DCPS::RepoId id,
                         DCPS_IR_Participant* participant,
                         DCPS_IR_Topic* topic,
-                        TAO::DCPS::DataReaderRemote_ptr reader,
+                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                         ::DDS::DataReaderQos qos,
-                        TAO::DCPS::TransportInterfaceInfo info,
+                        OpenDDS::DCPS::TransportInterfaceInfo info,
                         ::DDS::SubscriberQos subscriberQos);
 
   ~DCPS_IR_Subscription ();
@@ -79,13 +79,13 @@ public:
   int remove_associations (CORBA::Boolean notify_lost);
 
   /// Remove any publications whose participant has the id
-  void disassociate_participant (TAO::DCPS::RepoId id);
+  void disassociate_participant (OpenDDS::DCPS::RepoId id);
 
   /// Remove any publications whose topic has the id
-  void disassociate_topic (TAO::DCPS::RepoId id);
+  void disassociate_topic (OpenDDS::DCPS::RepoId id);
 
   /// Remove any publications with id
-  void disassociate_publication (TAO::DCPS::RepoId id);
+  void disassociate_publication (OpenDDS::DCPS::RepoId id);
 
   /// Notify the reader of incompatible qos status
   ///  and reset the status' count_since_last_send to 0
@@ -94,9 +94,9 @@ public:
   /// Check that none of the ids given are ones that
   ///  this subscription should ignore.
   /// returns 1 if one of these ids is an ignored id
-  CORBA::Boolean is_publication_ignored (TAO::DCPS::RepoId partId,
-                                         TAO::DCPS::RepoId topicId,
-                                         TAO::DCPS::RepoId pubId);
+  CORBA::Boolean is_publication_ignored (OpenDDS::DCPS::RepoId partId,
+                                         OpenDDS::DCPS::RepoId topicId,
+                                         OpenDDS::DCPS::RepoId pubId);
 
   /// Return pointer to the DataReader qos
   /// Subscription retains ownership
@@ -107,18 +107,18 @@ public:
   const ::DDS::SubscriberQos* get_subscriber_qos ();
 
   /// get the transport ID of the transport implementation type.
-  TAO::DCPS::TransportInterfaceId   get_transport_id () const;
+  OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
 
   /// Returns a copy of the TransportInterfaceInfo object
-  TAO::DCPS::TransportInterfaceInfo get_transportInterfaceInfo () const;
+  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo () const;
 
   /// Return pointer to the incompatible qos status
   /// Subscription retains ownership
-  TAO::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus (); 
+  OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus (); 
 
-  TAO::DCPS::RepoId get_id ();
-  TAO::DCPS::RepoId get_topic_id ();
-  TAO::DCPS::RepoId get_participant_id ();
+  OpenDDS::DCPS::RepoId get_id ();
+  OpenDDS::DCPS::RepoId get_topic_id ();
+  OpenDDS::DCPS::RepoId get_participant_id ();
 
   DCPS_IR_Topic_Description* get_topic_description();
 
@@ -131,21 +131,21 @@ public:
   void set_bit_status (CORBA::Boolean isBIT);
 
 private:
-  TAO::DCPS::RepoId id_;
+  OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;
   ::DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
 
   /// the corresponding DataReaderRemote object
-  TAO::DCPS::DataReaderRemote_var reader_;
+  OpenDDS::DCPS::DataReaderRemote_var reader_;
   ::DDS::DataReaderQos qos_;
-  TAO::DCPS::TransportInterfaceInfo info_;
+  OpenDDS::DCPS::TransportInterfaceInfo info_;
   ::DDS::SubscriberQos subscriberQos_;
 
   DCPS_IR_Publication_Set associations_;
 
-  TAO::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
+  OpenDDS::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
 };
 
 #endif /* DCPS_IR_SUBSCRIPTION_H */

@@ -31,7 +31,7 @@
  *
  */
 class FooType_Export FooDataReaderImpl : public virtual POA_FooDataReader,
-  public virtual TAO::DCPS::DataReaderImpl
+  public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
   //Constructor

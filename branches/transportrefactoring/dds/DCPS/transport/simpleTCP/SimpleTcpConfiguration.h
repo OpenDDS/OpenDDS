@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPCONFIGURATION_H
-#define TAO_DCPS_SIMPLETCPCONFIGURATION_H
+#ifndef OPENDDS_DCPS_SIMPLETCPCONFIGURATION_H
+#define OPENDDS_DCPS_SIMPLETCPCONFIGURATION_H
 
 #include "SimpleTcp_export.h"
 
@@ -10,7 +10,7 @@
 #include "ace/INET_Addr.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -76,11 +76,11 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "SimpleTcpConfiguration.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* TAO_DCPS_SIMPLETCPCONFIGURATION_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPCONFIGURATION_H */

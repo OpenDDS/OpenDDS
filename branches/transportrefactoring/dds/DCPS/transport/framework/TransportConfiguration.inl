@@ -16,7 +16,7 @@
 //MJM: specified lifetime.  I could be very wrong about the use case.
 
 ACE_INLINE
-TAO::DCPS::TransportConfiguration::TransportConfiguration()
+OpenDDS::DCPS::TransportConfiguration::TransportConfiguration()
   : swap_bytes_(0),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
@@ -36,7 +36,7 @@ TAO::DCPS::TransportConfiguration::TransportConfiguration()
 //MJM: This is where we need to decide on ownership, 'nest pas?
 ACE_INLINE
 void
-TAO::DCPS::TransportConfiguration::send_thread_strategy
+OpenDDS::DCPS::TransportConfiguration::send_thread_strategy
                                          (ThreadSynchStrategy* strategy)
 {
   DBG_SUB_ENTRY("TransportConfiguration","send_thread_strategy",1);
@@ -51,8 +51,8 @@ TAO::DCPS::TransportConfiguration::send_thread_strategy
 
 
 ACE_INLINE
-TAO::DCPS::ThreadSynchStrategy*
-TAO::DCPS::TransportConfiguration::send_thread_strategy()
+OpenDDS::DCPS::ThreadSynchStrategy*
+OpenDDS::DCPS::TransportConfiguration::send_thread_strategy()
 {
   DBG_SUB_ENTRY("TransportConfiguration","send_thread_strategy",2);
   return this->send_thread_strategy_;
@@ -61,7 +61,7 @@ TAO::DCPS::TransportConfiguration::send_thread_strategy()
 
 ACE_INLINE
 void
-TAO::DCPS::TransportConfiguration::adjust_config_value ()
+OpenDDS::DCPS::TransportConfiguration::adjust_config_value ()
 {
   // Ensure that the number of samples put into the packet does
   // not exceed the allowed number of io vectors to be sent by the OS.

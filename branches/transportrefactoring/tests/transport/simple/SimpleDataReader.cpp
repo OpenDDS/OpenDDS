@@ -23,7 +23,7 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(TAO::DCPS::RepoId sub_id)
+SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id)
 {
   DBG_ENTRY("SimpleDataReader","init");
 
@@ -32,7 +32,7 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id)
 
 
 void
-SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   DBG_ENTRY("SimpleDataReader","data_received");
 

@@ -11,14 +11,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleUnreliableDgramSocket::~SimpleUnreliableDgramSocket()
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::~SimpleUnreliableDgramSocket()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","~SimpleUnreliableDgramSocket",5);
 }
 
 
 int
-TAO::DCPS::SimpleUnreliableDgramSocket::handle_input(ACE_HANDLE)
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::handle_input(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","handle_input",5);
 
@@ -32,7 +32,7 @@ TAO::DCPS::SimpleUnreliableDgramSocket::handle_input(ACE_HANDLE)
 
 
 int
-TAO::DCPS::SimpleUnreliableDgramSocket::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","handle_close",5);
 
@@ -41,7 +41,7 @@ TAO::DCPS::SimpleUnreliableDgramSocket::handle_close(ACE_HANDLE, ACE_Reactor_Mas
 
 
 int
-TAO::DCPS::SimpleUnreliableDgramSocket::set_receive_strategy
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::set_receive_strategy
                                      (TransportReceiveStrategy* strategy,
                                       TransportReactorTask*     reactor_task)
 {
@@ -77,7 +77,7 @@ TAO::DCPS::SimpleUnreliableDgramSocket::set_receive_strategy
 
 
 void
-TAO::DCPS::SimpleUnreliableDgramSocket::remove_receive_strategy()
+OpenDDS::DCPS::SimpleUnreliableDgramSocket::remove_receive_strategy()
 {
   DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","remove_receive_strategy",5);
 

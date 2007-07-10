@@ -1,19 +1,19 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_NULLSYNCH_H
-#define TAO_DCPS_NULLSYNCH_H
+#ifndef OPENDDS_DCPS_NULLSYNCH_H
+#define OPENDDS_DCPS_NULLSYNCH_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
 
-    class TAO_DdsDcps_Export NullSynch : public ThreadSynch
+    class OpenDDS_Dcps_Export NullSynch : public ThreadSynch
     {
       public:
 
@@ -24,10 +24,10 @@ namespace TAO
     };
 
   } /* namespace DCPS */
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "NullSynch.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_NULLSYNCH_H */
+#endif  /* OPENDDS_DCPS_NULLSYNCH_H */

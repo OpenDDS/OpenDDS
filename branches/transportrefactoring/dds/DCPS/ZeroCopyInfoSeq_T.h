@@ -12,112 +12,53 @@
 #ifndef ZEROCOPYINFOSEQ_H
 #define ZEROCOPYINFOSEQ_H
 
-#include /**/ "ace/pre.h"
-
-// not needed export for templates #include "dcps_export.h"
-#include "dds/DCPS/ZeroCopySeqBase.h"
-#include "dds/DCPS/ZeroCopyAllocator_T.h"
-#include <ace/Vector_T.h>
-
-// kludge to be sure LocalObject is defined in DdsDcpsInfrastructureC.h
-// because a listener might be defined without #including
-// any non-listener entitiy implementations.
-#include "dds/DCPS/LocalObject.h"
-
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include /**/ "ace/pre.h"
+
+#include "dds/DCPS/ZeroCopySeqBase.h"
+
+// kludge to be sure LocalObject is defined in DdsDcpsInfrastructureC.h
+// because a listener might be defined without #including
+// any non-listener entity implementations.
+#include "dds/DCPS/LocalObject.h"
+
+#include <tao/Version.h>
+#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION == 4
+#  include <tao/Sequence_T.h>
+#  define TAO_BASE_SEQUENCE TAO_Unbounded_Sequence
+#else
+#  include <tao/Unbounded_Value_Sequence_T.h>
+#  define TAO_BASE_SEQUENCE TAO::unbounded_value_sequence
+#endif
+
+//This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO
 {
-    namespace DCPS
+  namespace DCPS
+  {
+
+    template <class InfoType, size_t DEF_MAX = DCPS_ZERO_COPY_SEQ_DEFAULT_SIZE>
+    class ZeroCopyInfoSeq : public TAO_BASE_SEQUENCE <InfoType>
     {
+    public:
 
-        /**
-         * Sequence of ::DDS::SampleInfos supportting zero-copy read/take operations.
-         */
+      ZeroCopyInfoSeq();
 
-      template <class InfoType, size_t ZCS_DEFAULT_SIZE>
-        class ZeroCopyInfoSeq : public ZeroCopySeqBase
-        {
-        public:
+      //This ctor serves as the CORBA "max" ctor as well as providing
+      //symmetry with the ZeroCopyDataSeq class template.
+      explicit ZeroCopyInfoSeq(CORBA::ULong maximum,
+        CORBA::ULong init_size = DEF_MAX, ACE_Allocator* = 0);
 
-            /**
-             * Construct a sequence of sample data values that is supports
-             * zero-copy reads.
-             *
-             * @param max_len Maximum number of samples to insert into the sequence.
-             *                If == 0 then use zero-copy reading.
-             *                Defaults to zero hence supporting zero-copy reads/takes.
-             *
-             * @param init_size Initial size of the sequence.
-             *
-             * @param alloc The allocator used to allocate the array of pointers
-             *              to samples. If zero then use the default allocator.
-             *
-             */
-            ZeroCopyInfoSeq(
-                const size_t max_len = 0,
-                const size_t init_size = ZCS_DEFAULT_SIZE,
-                ACE_Allocator* alloc = 0);
+      ZeroCopyInfoSeq(CORBA::ULong maximum, CORBA::ULong length,
+        InfoType* buffer, CORBA::Boolean release = false);
 
-            ZeroCopyInfoSeq (const ZeroCopyInfoSeq<InfoType, ZCS_DEFAULT_SIZE> & frm);
+    };
 
-            ZeroCopyInfoSeq& operator= (const ZeroCopyInfoSeq & frm);
-
-            //======== CORBA sequence like methods ======
-
-            /// read reference to the sample at the given index.
-            InfoType const & operator[](CORBA::ULong i) const;
-
-            /** Write reference to the sample at the given index.
-             *
-             * @note Should we even allow this?
-             * The spec says the DCPS layer will not change the sample's value
-             * but it does not restrict the user/application from changing it.
-             */
-            InfoType & operator[](CORBA::ULong i);
-
-            /** get the current length of the sequence.
-             */
-            CORBA::ULong length() const;
-
-            /** Set the length of the sequence.
-             */
-            void length(CORBA::ULong length);
-
-
-            /**
-             * The CORBA sequence like version of max_len();
-             */
-            CORBA::ULong maximum() const;
-
-            /**
-             * Current allocated number of sample slots.
-             *
-             * @note The DDS specification's use of max_len=0 to designate
-             *       zero-copy read request requires some
-             *       way of knowing the internally allocated slots
-             *       for sample pointers that is not "max_len".
-             */
-            CORBA::ULong max_slots() const;
-
-
-        private:
-            // The default allocator will be very fast for the first
-            // allocation but use the standard heap for subsequent allocations
-            // such as if the max_size gets bigger.
-            FirstTimeFastAllocator< InfoType, ZCS_DEFAULT_SIZE> defaultAllocator_;
-
-            //typedef ACE_Array_Base<Sample_T> Ptr_Seq_Type;
-            typedef ACE_Vector< InfoType, ZCS_DEFAULT_SIZE> Info_Seq_Type;
-            Info_Seq_Type info_;
-
-        }; // class ZeroCopyInfoSeq
-
-    } // namespace  ::DDS
-} // namespace TAO
+  } // namespace  ::DDS
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyInfoSeq_T.inl"

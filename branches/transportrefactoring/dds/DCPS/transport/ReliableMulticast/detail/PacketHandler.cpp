@@ -11,11 +11,11 @@
 #include "PacketHandler.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
-typedef TAO::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer PacketSerializer;
 
 void
-TAO::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
+OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
   const Packet& packet,
   const ACE_INET_Addr& dest
   )
@@ -27,7 +27,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
     );
   char* begin = packetSerializer.serializeFromTo(packet, serialized.get(), buffer_size);
 
-  TAO::DCPS::ReliableMulticast::detail::EventHandler::send(
+  OpenDDS::DCPS::ReliableMulticast::detail::EventHandler::send(
     begin,
     buffer_size - (begin - serialized.get()),
     dest
@@ -35,7 +35,7 @@ TAO::DCPS::ReliableMulticast::detail::PacketHandler::send_packet_to(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::PacketHandler::receive(
+OpenDDS::DCPS::ReliableMulticast::detail::PacketHandler::receive(
   const char* buffer,
   size_t size,
   const ACE_INET_Addr& peer

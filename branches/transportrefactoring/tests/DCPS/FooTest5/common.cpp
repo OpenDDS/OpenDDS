@@ -13,6 +13,7 @@
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.h"
 #include "dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h"
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
 
 
 const char* MY_TOPIC    = "foo";
@@ -51,14 +52,14 @@ long op_interval_ms = 0;
 long blocking_ms = 0;
 int mixed_trans = 0;
 
-TAO::DCPS::TransportImpl_rch reader_tcp_impl;
-TAO::DCPS::TransportImpl_rch reader_udp_impl;
-TAO::DCPS::TransportImpl_rch reader_mcast_impl;
-TAO::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
-TAO::DCPS::TransportImpl_rch writer_tcp_impl;
-TAO::DCPS::TransportImpl_rch writer_udp_impl;
-TAO::DCPS::TransportImpl_rch writer_mcast_impl;
-TAO::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_mcast_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_reliable_multicast_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_tcp_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_udp_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_mcast_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_reliable_multicast_impl;
 
 ACE_TString synch_file_dir;
 
@@ -74,50 +75,17 @@ int init_reader_transport ()
 {
   int status = 0;
 
-  if (mixed_trans || using_udp)
-    {
-      reader_udp_impl 
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_UDP, 
-                                                      "SimpleUdp", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch reader_config 
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, "SimpleUdp");
-
-      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config 
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
-
-      if (!reader_address_given)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
-                    ACE_TEXT(" Must specify an address for UDP.\n")));
-          return 11;
-        }
-
-
-      ACE_INET_Addr reader_address (reader_address_str);
-      reader_udp_config->local_address_ = reader_address;
-
-      if (reader_udp_impl->configure(reader_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-
   if (using_mcast)
     {
       reader_mcast_impl 
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_MCAST, 
                                                       "SimpleMcast", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch reader_config 
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC_MCAST, "SimpleMcast");
 
-      TAO::DCPS::SimpleMcastConfiguration* reader_mcast_config 
-        = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::SimpleMcastConfiguration* reader_mcast_config 
+        = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -151,18 +119,17 @@ int init_reader_transport ()
           status = 1;
         }
     }
-
-  if (using_reliable_multicast)
+  else if (using_reliable_multicast)
     {
       reader_reliable_multicast_impl 
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_RELIABLE_MULTICAST, 
                                                       "ReliableMulticast", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-      TAO::DCPS::TransportConfiguration_rch reader_config 
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config 
         = TheTransportFactory->create_configuration (SUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
 
-      TAO::DCPS::ReliableMulticastTransportConfiguration* reader_reliable_multicast_config 
-        = static_cast <TAO::DCPS::ReliableMulticastTransportConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::ReliableMulticastTransportConfiguration* reader_reliable_multicast_config 
+        = static_cast <OpenDDS::DCPS::ReliableMulticastTransportConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -197,32 +164,68 @@ int init_reader_transport ()
         }
     }
 
-  else if (mixed_trans || ! using_udp)
+  else
     {
-      reader_tcp_impl 
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_TCP,
-                                                      "SimpleTcp", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
-
-      TAO::DCPS::TransportConfiguration_rch reader_config 
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, "SimpleTcp");
-
-      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config 
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-
-      if (reader_address_given)
+      if (mixed_trans || using_udp)
         {
+          reader_udp_impl 
+            = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_UDP, 
+                                                          "SimpleUdp", 
+                                                          OpenDDS::DCPS::DONT_AUTO_CONFIG);
+          OpenDDS::DCPS::TransportConfiguration_rch reader_config 
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, "SimpleUdp");
+
+          OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
+            = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+
+          if (!reader_address_given)
+            {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
+                        ACE_TEXT(" Must specify an address for UDP.\n")));
+              return 11;
+            }
+
+
           ACE_INET_Addr reader_address (reader_address_str);
-          reader_tcp_config->local_address_ = reader_address;
-        }
-      // else use default address - OS assigned.
+          reader_udp_config->local_address_ = reader_address;
 
-      if (reader_tcp_impl->configure(reader_config.in()) != 0)
+          if (reader_udp_impl->configure(reader_config.in()) != 0)
+            {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) init_reader_transport: sub UDP")
+                        ACE_TEXT(" Failed to configure the transport.\n")));
+              status = 1;
+            }
+        }
+
+      if (!using_udp)
         {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_reader_transport: sub TCP ")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
+          reader_tcp_impl 
+            = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_TCP,
+                                                          "SimpleTcp", 
+                                                          OpenDDS::DCPS::DONT_AUTO_CONFIG);
+
+          OpenDDS::DCPS::TransportConfiguration_rch reader_config 
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, "SimpleTcp");
+
+          OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+            = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+
+          if (reader_address_given)
+            {
+              ACE_INET_Addr reader_address (reader_address_str);
+              reader_tcp_config->local_address_ = reader_address;
+            }
+          // else use default address - OS assigned.
+
+          if (reader_tcp_impl->configure(reader_config.in()) != 0)
+            {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) init_reader_transport: sub TCP ")
+                        ACE_TEXT(" Failed to configure the transport.\n")));
+              status = 1;
+            }
         }
     }
 
@@ -240,13 +243,13 @@ int init_writer_transport ()
       writer_mcast_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_MCAST, 
                                                       "SimpleMcast", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config 
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_MCAST, "SimpleMcast");
 
-      TAO::DCPS::SimpleMcastConfiguration* writer_mcast_config 
-        = static_cast <TAO::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleMcastConfiguration* writer_mcast_config 
+        = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -273,13 +276,13 @@ int init_writer_transport ()
       writer_reliable_multicast_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_RELIABLE_MULTICAST, 
                                                       "ReliableMulticast", 
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config 
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
 
-      TAO::DCPS::ReliableMulticastTransportConfiguration* writer_reliable_multicast_config 
-        = static_cast <TAO::DCPS::ReliableMulticastTransportConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::ReliableMulticastTransportConfiguration* writer_reliable_multicast_config 
+        = static_cast <OpenDDS::DCPS::ReliableMulticastTransportConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -308,13 +311,13 @@ int init_writer_transport ()
       writer_udp_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_UDP, 
         "SimpleUdp", 
-        TAO::DCPS::DONT_AUTO_CONFIG);
+        OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch writer_config 
+      OpenDDS::DCPS::TransportConfiguration_rch writer_config 
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, "SimpleUdp");
 
-      TAO::DCPS::SimpleUdpConfiguration* writer_udp_config 
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
+        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
       if (!writer_address_given)
       {
@@ -342,13 +345,13 @@ int init_writer_transport ()
     writer_tcp_impl 
       = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
                                                     "SimpleTcp", 
-                                                    TAO::DCPS::DONT_AUTO_CONFIG);
+                                                    OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-    TAO::DCPS::TransportConfiguration_rch writer_config 
+    OpenDDS::DCPS::TransportConfiguration_rch writer_config 
       = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
 
-    TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config 
-      = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+    OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
 
     if (writer_address_given)
       {

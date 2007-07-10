@@ -22,7 +22,7 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
+SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id,
                        int               receive_delay_msec)
 {
   this->sub_id_ = sub_id;
@@ -31,7 +31,7 @@ SimpleDataReader::init(TAO::DCPS::RepoId sub_id,
 
 
 void
-SimpleDataReader::data_received(const TAO::DCPS::ReceivedDataSample& sample)
+SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   // Shouldn't be printing this all the time.
   //ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));

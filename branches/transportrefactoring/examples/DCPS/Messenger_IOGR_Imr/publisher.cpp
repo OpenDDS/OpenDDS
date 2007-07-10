@@ -26,7 +26,7 @@
 
 using namespace Messenger;
 
-TAO::DCPS::TransportIdType transport_impl_id = 1;
+OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 std::string publisher_trigger ("publisher_trigger");
 std::string driver_trigger ("driver_trigger");
 
@@ -60,14 +60,14 @@ parse_args (int argc, char *argv[])
       }
       // test with DEFAULT_SIMPLE_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_TCP_ID;
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
       }
       // test with DEFAULT_SIMPLE_UDP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_UDP_ID;
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
       else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_mcast_pub") == 0) {
-        transport_impl_id = TAO::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_PUB_ID;
       }
       break;
     case '?':
@@ -135,7 +135,7 @@ int main (int argc, char *argv[]) {
       }
 
       MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
-      TAO::DCPS::LocalObject_var safe_servant = servant;
+      OpenDDS::DCPS::LocalObject_var safe_servant = servant;
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -156,9 +156,9 @@ int main (int argc, char *argv[]) {
         exit(1);
       }
 
-      TAO::DCPS::TransportImpl_rch tcp_impl =
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (transport_impl_id,
-                                                    ::TAO::DCPS::AUTO_CONFIG);
+                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
 
       DDS::Publisher_var pub =
         participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -169,24 +169,24 @@ int main (int argc, char *argv[]) {
       }
 
       // Attach the publisher to the transport.
-      TAO::DCPS::PublisherImpl* pub_impl =
-        TAO::DCPS::reference_to_servant< TAO::DCPS::PublisherImpl>(pub.in ());
+      OpenDDS::DCPS::PublisherImpl* pub_impl =
+        OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl>(pub.in ());
       if (0 == pub_impl) {
         cerr << "Failed to obtain publisher servant" << endl;
         exit(1);
       }
 
-      TAO::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
-      if (status != TAO::DCPS::ATTACH_OK) {
+      OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
+      if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {
-        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
           status_str = "ATTACH_BAD_TRANSPORT";
           break;
-        case TAO::DCPS::ATTACH_ERROR:
+        case OpenDDS::DCPS::ATTACH_ERROR:
           status_str = "ATTACH_ERROR";
           break;
-        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
           status_str = "ATTACH_INCOMPATIBLE_QOS";
           break;
         default:

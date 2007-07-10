@@ -33,14 +33,14 @@ Writer::start ()
 
   try
   {
-    TAO::DCPS::DataReaderImpl* dr_servant =
-      TAO::DCPS::reference_to_servant<TAO::DCPS::DataReaderImpl> (reader_);
+    OpenDDS::DCPS::DataReaderImpl* dr_servant =
+      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataReaderImpl> (reader_);
 
     ::Xyz::Foo foo;
     foo.x = 0.0 ;
     foo.y = 0.0 ;
 
-    ::TAO::DCPS::SequenceNumber seq ;
+    ::OpenDDS::DCPS::SequenceNumber seq ;
 
     if (!multiple_instances_)
     {
@@ -63,10 +63,10 @@ Writer::start ()
 
       ACE_OS::printf ("\"writing\" foo.x = %f foo.y = %f, foo.key = %d\n",
                       foo.x, foo.y, foo.key);
-      ::TAO::DCPS::ReceivedDataSample sample ;
+      ::OpenDDS::DCPS::ReceivedDataSample sample ;
 
       sample.header_.message_length_ = sizeof(foo) ;
-      sample.header_.message_id_ = ::TAO::DCPS::SAMPLE_DATA ;
+      sample.header_.message_id_ = ::OpenDDS::DCPS::SAMPLE_DATA ;
       sample.header_.sequence_ = seq.value_ ;
       sample.header_.publication_id_ = 1 ;
       sample.header_.source_timestamp_sec_ =

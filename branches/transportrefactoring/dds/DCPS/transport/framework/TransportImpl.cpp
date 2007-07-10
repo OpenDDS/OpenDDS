@@ -6,38 +6,34 @@
 #include "TransportImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Util.h"
 #include "tao/debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace
+{
+  template <typename Container>
+  void clear(Container& c)
+  {
+    Container copy;
+    copy.swap(c);
+    for (typename Container::iterator itr = copy.begin();
+      itr != copy.end();
+      ++itr)
+    {
+      itr->second->_remove_ref ();
+    }
+  }
+}
 
-TAO::DCPS::TransportImpl::~TransportImpl()
+OpenDDS::DCPS::TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl","~TransportImpl",5);
-  {
-    PublicationObjectMap::ENTRY* entry;
-    for (PublicationObjectMap::ITERATOR itr(dw_map_);
-      itr.next(entry);
-      itr.advance ())
-    {
-      entry->int_id_->_remove_ref ();
-    }
-    dw_map_.unbind_all ();
-  }
-
-  {
-    SubscriptionObjectMap::ENTRY* entry;
-    for (SubscriptionObjectMap::ITERATOR itr(dr_map_);
-      itr.next(entry);
-      itr.advance ())
-    {
-      entry->int_id_->_remove_ref ();
-    }
-
-    dr_map_.unbind_all ();
-  }
+  clear(dw_map_);
+  clear(dr_map_);
 
   // The DL Cleanup task belongs to the Transportimpl object.
   // Cleanup before leaving the house.
@@ -47,7 +43,7 @@ TAO::DCPS::TransportImpl::~TransportImpl()
 
 
 void
-TAO::DCPS::TransportImpl::shutdown()
+OpenDDS::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",5);
  
@@ -69,17 +65,15 @@ TAO::DCPS::TransportImpl::shutdown()
         return;
       }
 
-    InterfaceMapType::ENTRY* entry;
-
-    for (InterfaceMapType::ITERATOR itr(this->interfaces_);
-         itr.next(entry);
-         itr.advance())
+    for (InterfaceMapType::iterator itr = interfaces_.begin();
+         itr != interfaces_.end();
+         ++itr)
       {
-        entry->int_id_->transport_detached();
+        itr->second->transport_detached();
       }
 
     // Clear our collection of TransportInterface pointers.
-    this->interfaces_.unbind_all();
+    interfaces_.clear();
 
     // Drop our references to the config_ and reactor_task_.
     this->config_ = 0;
@@ -96,8 +90,8 @@ TAO::DCPS::TransportImpl::shutdown()
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::TransportImpl::reserve_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_subscriber_info,
                        RepoId                        subscriber_id,
                        RepoId                        publisher_id,
@@ -134,8 +128,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
 }
 
 
-TAO::DCPS::DataLink*
-TAO::DCPS::TransportImpl::reserve_datalink
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::TransportImpl::reserve_datalink
                       (const TransportInterfaceInfo& remote_publisher_info,
                        RepoId                        publisher_id,
                        RepoId                        subscriber_id,
@@ -185,8 +179,8 @@ TAO::DCPS::TransportImpl::reserve_datalink
 /// This is called by a TransportInterface object when it is handling
 /// its own request to attach_transport(TransportImpl*), and this
 /// TransportImpl object is the one to which it should be attached.
-TAO::DCPS::AttachStatus
-TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
+OpenDDS::DCPS::AttachStatus
+OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 {
   DBG_ENTRY_LVL("TransportImpl","attach_interface",5);
 
@@ -205,7 +199,7 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
                        ATTACH_BAD_TRANSPORT);
     }
 
-  if (this->interfaces_.bind(interface,interface) != 0)
+    if (bind(interfaces_, interface, interface) != 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
@@ -220,13 +214,15 @@ TAO::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 
 
 int
-TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
-                                                TAO::DCPS::DataWriterImpl* dw)
+OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id,
+                                                OpenDDS::DCPS::DataWriterImpl* dw)
 {
   DBG_ENTRY_LVL("TransportImpl","register_publication",5);
   GuardType guard(this->lock_);
 
-  int ret = this->dw_map_.bind (pub_id, dw);
+  int ret =
+    bind(dw_map_, pub_id, dw);
+
   if (ret != -1)
     {
       dw->_add_ref ();
@@ -237,7 +233,7 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
   // ack is received by the publisher side, we need check the
   // map to see if it's the case. If it is,the datawriter will be
   // notified fully associated at this time.
-  TAO::DCPS::RepoIdSet_rch pending_subs
+  OpenDDS::DCPS::RepoIdSet_rch pending_subs
     = this->pending_sub_map_.find (pub_id);
   if (! pending_subs.is_nil () && this->acked (pub_id))
     this->fully_associated (pub_id);
@@ -247,49 +243,56 @@ TAO::DCPS::TransportImpl::register_publication (TAO::DCPS::RepoId pub_id,
 
 
 int
-TAO::DCPS::TransportImpl::unregister_publication (TAO::DCPS::RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","unregister_publication",5);
   GuardType guard(this->lock_);
-  DataWriterImpl* dw = 0;
-  int result = this->dw_map_.unbind (pub_id, dw);
-  if (dw != 0)
-    dw->_remove_ref ();
-
-  return result;
+  PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
+  int ret = -1;
+  if (iter != dw_map_.end())
+  {
+    ret = 0;
+    if (iter->second != 0)
+      iter->second->_remove_ref ();
+    dw_map_.erase(iter);
+  }
+  return ret;
 }
 
 
-TAO::DCPS::DataWriterImpl*
-TAO::DCPS::TransportImpl::find_publication (TAO::DCPS::RepoId pub_id, bool safe_cpy)
+OpenDDS::DCPS::DataWriterImpl*
+OpenDDS::DCPS::TransportImpl::find_publication (OpenDDS::DCPS::RepoId pub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_publication",5);
   GuardType guard(this->lock_);
-  TAO::DCPS::DataWriterImpl* dw = 0;
-  if (this->dw_map_.find (pub_id, dw) == -1)
+  PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
+  if (iter == dw_map_.end())
     {
       if (TAO_debug_level > 0)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_publication   pub(%d) "
             "not found\n", pub_id));
         }
+      return 0;
     }
-  else if (safe_cpy) {
-    dw->_add_ref ();
+  else if (safe_cpy && iter->second != 0) {
+    iter->second->_add_ref ();
   }
 
-  return dw;
+  return iter->second;
 }
 
 
 int
-TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
-                                                 TAO::DCPS::DataReaderImpl* dr)
+OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_id,
+                                                 OpenDDS::DCPS::DataReaderImpl* dr)
 {
   DBG_ENTRY_LVL("TransportImpl","register_subscription",5);
   GuardType guard(this->lock_);
 
-  int ret = this->dr_map_.bind (sub_id, dr);
+  int ret =
+    bind(dr_map_, sub_id, dr);
+
   if (ret != -1)
   {
     dr->_add_ref ();
@@ -300,46 +303,48 @@ TAO::DCPS::TransportImpl::register_subscription (TAO::DCPS::RepoId sub_id,
 
 
 int
-TAO::DCPS::TransportImpl::unregister_subscription (TAO::DCPS::RepoId sub_id)
+OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","unregister_subscription",5);
   GuardType guard(this->lock_);
 
-  DataReaderImpl* dr = 0;
-  int result = this->dr_map_.unbind (sub_id, dr);
-
-  if (dr != 0)
-  { 
-    dr->_remove_ref ();
+  SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
+  if (iter != dr_map_.end())
+  {
+    if (iter->second != 0)
+      iter->second->_remove_ref ();
+    dr_map_.erase(iter);
+    return 0;
   }
-  return result;
+  return -1;
 }
 
 
-TAO::DCPS::DataReaderImpl*
-TAO::DCPS::TransportImpl::find_subscription (TAO::DCPS::RepoId sub_id, bool safe_cpy)
+OpenDDS::DCPS::DataReaderImpl*
+OpenDDS::DCPS::TransportImpl::find_subscription (OpenDDS::DCPS::RepoId sub_id, bool safe_cpy)
 {
   DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
   GuardType guard(this->lock_);
-  TAO::DCPS::DataReaderImpl* dr = 0;
-  if (this->dr_map_.find (sub_id, dr) == -1)
+  SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
+  if (iter == dr_map_.end())
     {
       if (TAO_debug_level > 0)
         {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_subscription   sub(%d) not found\n",
-            sub_id));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_subscription   sub(%d) "
+            "not found\n", sub_id));
         }
+      return 0;
     }
-  else if (safe_cpy) {
-    dr->_add_ref ();
+  else if (safe_cpy && iter->second != 0) {
+    iter->second->_add_ref ();
   }
 
-  return dr;
+  return iter->second;
 }
 
 
 int
-TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
+OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
                                                    size_t                  num_remote_associations,
                                                    const AssociationData*  remote_associations)
 {
@@ -362,17 +367,19 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
   // Cache the Association data so it can be used for the callback
   // to notify datawriter on_publication_match.
 
-  PendingAssociationsMap::ENTRY* entry;
-  if (this->pending_association_sub_map_.find (pub_id, entry) == 0)
-    entry->int_id_->push_back (info);
+  PendingAssociationsMap::iterator iter = pending_association_sub_map_.find(pub_id);
+  if (iter != pending_association_sub_map_.end())
+    iter->second->push_back (info);
   else {
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back (info);
-    if (this->pending_association_sub_map_.bind (pub_id, infos) == -1)
+    if (bind(pending_association_sub_map_, pub_id, infos) == -1)
+    {
       ACE_ERROR_RETURN ((LM_ERROR,
       "(%P|%t) ERROR: add_pending_association: Failed to add pending associations for pub %d\n",
       pub_id),
       -1);
+    }
   }
 
   if (this->acked (pub_id))
@@ -383,7 +390,7 @@ TAO::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 
 
 int
-TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
+OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
 {
   DBG_ENTRY_LVL("TransportImpl","demarshal",5);
 
@@ -399,63 +406,67 @@ TAO::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_ord
 
   this->acked_sub_map_.get_keys (acked_pubs);
 
-  RepoIdSet::MapType::ENTRY* entry;
+  RepoIdSet::MapType& acked_pubs_map = acked_pubs.map();
 
-  for (RepoIdSet::MapType::ITERATOR itr(acked_pubs.map ());
-    itr.next(entry);
-    itr.advance())
+  for (RepoIdSet::MapType::iterator itr = acked_pubs_map.begin();
+    itr != acked_pubs_map.end();
+    ++itr)
   {
-    TAO::DCPS::RepoIdSet_rch pending_subs
-      = this->pending_sub_map_.find (entry->ext_id_);
+    OpenDDS::DCPS::RepoIdSet_rch pending_subs
+      = this->pending_sub_map_.find (itr->first);
 
-    if (! pending_subs.is_nil () && this->acked (entry->ext_id_))
-      this->fully_associated (entry->ext_id_);
+    if (! pending_subs.is_nil () && this->acked (itr->first))
+      this->fully_associated (itr->first);
   }
   return 0;
 }
 
 
 void
-TAO::DCPS::TransportImpl::fully_associated (RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportImpl","fully_associated",5);
 
-  TAO::DCPS::DataWriterImpl* dw = 0;
-  int ret = this->dw_map_.find (pub_id, dw);
+  PublicationObjectMap::iterator pubiter = dw_map_.find(pub_id);
 
   AssociationInfoList* remote_associations = 0;
-  int status = this->pending_association_sub_map_.find (pub_id, remote_associations);
-  size_t len = remote_associations->size ();
+  PendingAssociationsMap::iterator penditer =
+    pending_association_sub_map_.find(pub_id);
 
-  if (ret == 0 && status == 0)
+  if (
+    (pubiter != dw_map_.end()) &&
+    (penditer != pending_association_sub_map_.end())
+    )
   {
+    size_t len = penditer->second->size();
     for (size_t i = 0; i < len; ++i)
     {
-      dw->fully_associated (pub_id,
-      (*remote_associations)[i].num_associations_,
-      (*remote_associations)[i].association_data_);
+      pubiter->second->fully_associated (pub_id,
+      (*penditer->second)[i].num_associations_,
+      (*penditer->second)[i].association_data_);
     }
     RepoIdSet_rch tmp = this->pending_sub_map_.remove_set (pub_id);
     tmp = this->acked_sub_map_.remove_set (pub_id);
     delete remote_associations;
-    this->pending_association_sub_map_.unbind (pub_id);
+    pending_association_sub_map_.erase(pub_id);
   }
-  else if (status == 0)
+  else if (penditer != pending_association_sub_map_.end())
   {
+    size_t len = penditer->second->size();
     for (size_t i = 0; i < len; ++i)
-      (*remote_associations)[i].status_ = Fully_Associated;
+      (*penditer->second)[i].status_ = Fully_Associated;
   }
 }
 
 
 bool
-TAO::DCPS::TransportImpl::acked (RepoId pub_id)
+OpenDDS::DCPS::TransportImpl::acked (RepoId pub_id)
 {
   return this->pending_sub_map_.is_subset (this->acked_sub_map_, pub_id);
 }
 
 bool
-TAO::DCPS::TransportImpl::release_link_resources (DataLink* link)
+OpenDDS::DCPS::TransportImpl::release_link_resources (DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 5);
 

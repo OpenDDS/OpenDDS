@@ -29,7 +29,7 @@
 
 #include "common.h"
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
 static const char * reader_address_str = "";
 static int reader_address_given = 0;
 
@@ -44,13 +44,13 @@ static int init_reader_tranport ()
       reader_transport_impl =
           TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleUdp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
 
-      TAO::DCPS::SimpleUdpConfiguration* reader_udp_config
-        = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config
+        = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -78,13 +78,13 @@ static int init_reader_tranport ()
       reader_transport_impl =
           TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                       "SimpleTcp",
-                                                      TAO::DCPS::DONT_AUTO_CONFIG);
+                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      TAO::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
 
-      TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-        = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
       if (reader_address_given)
         {
@@ -229,7 +229,7 @@ int main (int argc, char *argv[])
           ::T1::Foo1TypeSupportImpl *fts_servant =
               new ::T1::Foo1TypeSupportImpl();
 
-          fts1 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts1 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T2)
@@ -237,7 +237,7 @@ int main (int argc, char *argv[])
           ::T2::Foo2TypeSupportImpl *fts_servant =
               new ::T2::Foo2TypeSupportImpl();
 
-          fts2 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts2 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       if (topics & TOPIC_T3)
@@ -245,7 +245,7 @@ int main (int argc, char *argv[])
           ::T3::Foo3TypeSupportImpl *fts_servant =
               new ::T3::Foo3TypeSupportImpl();
 
-          fts3 = TAO::DCPS::servant_to_reference (fts_servant);
+          fts3 = OpenDDS::DCPS::servant_to_reference (fts_servant);
         }
 
       ::DDS::DomainParticipant_var dp =
@@ -398,33 +398,33 @@ int main (int argc, char *argv[])
       }
 
       // Attach the subscriber to the transport.
-      TAO::DCPS::SubscriberImpl* sub_impl
-        = TAO::DCPS::reference_to_servant<TAO::DCPS::SubscriberImpl> (sub.in ());
+      OpenDDS::DCPS::SubscriberImpl* sub_impl
+        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
 
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::TAO::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
-      TAO::DCPS::AttachStatus attach_status =
+      OpenDDS::DCPS::AttachStatus attach_status =
         sub_impl->attach_transport(reader_transport_impl.in());
 
-      if (attach_status != TAO::DCPS::ATTACH_OK)
+      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
         {
           // We failed to attach to the transport for some reason.
           ACE_TString status_str;
 
           switch (attach_status)
             {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -464,7 +464,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T1)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant1);
+            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant1);
 
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
@@ -474,7 +474,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T2)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant2);
+            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant2);
 
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
@@ -484,7 +484,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T3)
         {
           ::DDS::DataReaderListener_var drl
-            = ::TAO::DCPS::servant_to_reference(&drl_servant3);
+            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant3);
 
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,

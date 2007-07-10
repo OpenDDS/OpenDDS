@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTSENDELEMENT_H
-#define TAO_DCPS_TRANSPORTSENDELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORTSENDELEMENT_H
+#define OPENDDS_DCPS_TRANSPORTSENDELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
 #include "dds/DCPS/DataSampleList.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -16,7 +16,7 @@ namespace TAO
     //Yan struct DataSampleListElement;
 
 
-    class TAO_DdsDcps_Export TransportSendElement : public TransportQueueElement
+    class OpenDDS_Dcps_Export TransportSendElement : public TransportQueueElement
     {
       public:
 
@@ -54,4 +54,4 @@ namespace TAO
 #include "TransportSendElement.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTSENDELEMENT_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTSENDELEMENT_H */

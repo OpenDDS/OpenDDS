@@ -7,14 +7,14 @@
 #include "TopicImpl.h"
 #include "Service_Participant.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
     // Implementation skeleton constructor
     TopicDescriptionImpl::TopicDescriptionImpl (const char*                    topic_name,
                                                 const char*                    type_name,
-                                                TAO::DCPS::TypeSupport_ptr     type_support,
+                                                OpenDDS::DCPS::TypeSupport_ptr     type_support,
                                                 ::DDS::DomainParticipant_ptr   participant)
       : topic_name_(topic_name),
         type_name_(type_name),
@@ -68,7 +68,7 @@ namespace TAO
     }
 
 
-    TAO::DCPS::TypeSupport_ptr
+    OpenDDS::DCPS::TypeSupport_ptr
     TopicDescriptionImpl::get_type_support ()
     {
       return type_support_;
@@ -76,5 +76,5 @@ namespace TAO
 
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 

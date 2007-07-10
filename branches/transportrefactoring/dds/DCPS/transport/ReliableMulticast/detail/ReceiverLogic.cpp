@@ -9,10 +9,10 @@
 #include "ReceiverLogic.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
   const Packet& p,
   PacketVector& nacks,
   PacketVector& delivered
@@ -94,7 +94,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::receive(
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::in_range(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::in_range(
   const Packet::id_type& id,
   int minadd,
   int maxadd
@@ -116,7 +116,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::in_range(
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::get_and_remove_buffered_packet(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::get_and_remove_buffered_packet(
   const Packet::id_type& id,
   Packet& p
   )
@@ -134,7 +134,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::get_and_remove_buffered_pac
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::deliver(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::deliver(
   PacketVector& delivered,
   const Packet& p
   )
@@ -144,7 +144,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::deliver(
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::buffer_packet(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::buffer_packet(
   const Packet& p,
   PacketVector& delivered
   )
@@ -158,7 +158,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::buffer_packet(
 }
 
 bool
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::is_buffered(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::is_buffered(
   const Packet& p
   ) const
 {
@@ -166,7 +166,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::is_buffered(
 }
 
 Packet::id_type
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::find_previous_received(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::find_previous_received(
   const Packet::id_type& id
   ) const
 {
@@ -192,14 +192,14 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::find_previous_received(
 }
 
 size_t
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::buffersize(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::buffersize(
   ) const
 {
   return buffer_.size();
 }
 
 Packet::id_type
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::find_beginning_of_consecutive_range(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::find_beginning_of_consecutive_range(
   const Packet::id_type& end
   ) const
 {
@@ -217,7 +217,7 @@ TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::find_beginning_of_consecuti
 }
 
 void
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::handle_unreliable_operation(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::handle_unreliable_operation(
   PacketVector& delivered
   )
 {

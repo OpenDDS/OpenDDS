@@ -11,14 +11,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportSendControlElement::~TransportSendControlElement()
+OpenDDS::DCPS::TransportSendControlElement::~TransportSendControlElement()
 {
   DBG_ENTRY_LVL("TransportSendControlElement","~TransportSendControlElement",5);
 }
 
 
 bool
-TAO::DCPS::TransportSendControlElement::requires_exclusive_packet() const
+OpenDDS::DCPS::TransportSendControlElement::requires_exclusive_packet() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement","requires_exclusive_packet",5);
   return true;
@@ -26,7 +26,7 @@ TAO::DCPS::TransportSendControlElement::requires_exclusive_packet() const
 
 
 void
-TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transport)
+OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_transport)
 {
   ACE_UNUSED_ARG (dropped_by_transport);
 
@@ -48,8 +48,8 @@ TAO::DCPS::TransportSendControlElement::release_element(bool dropped_by_transpor
 }
 
 
-TAO::DCPS::RepoId
-TAO::DCPS::TransportSendControlElement::publication_id() const
+OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::TransportSendControlElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement","publication_id",5);
   return this->publisher_id_;
@@ -57,7 +57,7 @@ TAO::DCPS::TransportSendControlElement::publication_id() const
 
 
 const ACE_Message_Block*
-TAO::DCPS::TransportSendControlElement::msg() const
+OpenDDS::DCPS::TransportSendControlElement::msg() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement","msg",5);
   return this->msg_;
@@ -65,7 +65,7 @@ TAO::DCPS::TransportSendControlElement::msg() const
 
 
 bool
-TAO::DCPS::TransportSendControlElement::is_control(RepoId pub_id) const
+OpenDDS::DCPS::TransportSendControlElement::is_control(RepoId pub_id) const
 {
   return (pub_id == this->publisher_id_);
 }

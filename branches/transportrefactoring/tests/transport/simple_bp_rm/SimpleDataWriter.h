@@ -12,20 +12,20 @@
 
 class SimplePublisher;
 
-class SimpleDataWriter : public TAO::DCPS::TransportSendListener
+class SimpleDataWriter : public OpenDDS::DCPS::TransportSendListener
 {
   public:
 
     SimpleDataWriter();
     ~SimpleDataWriter();
 
-    void init(TAO::DCPS::RepoId pub_id);
+    void init(OpenDDS::DCPS::RepoId pub_id);
     int  run(SimplePublisher* publisher, unsigned num_messages);
 
     void transport_lost();
 
-    virtual void data_delivered(TAO::DCPS::DataSampleListElement* sample);
-    virtual void data_dropped(TAO::DCPS::DataSampleListElement* sample,
+    virtual void data_delivered(OpenDDS::DCPS::DataSampleListElement* sample);
+    virtual void data_dropped(OpenDDS::DCPS::DataSampleListElement* sample,
                               bool dropped_by_transport = false);
 
     int delivered_test_message();
@@ -38,22 +38,22 @@ class SimpleDataWriter : public TAO::DCPS::TransportSendListener
     typedef ACE_Condition<LockType>    ConditionType;
 
     void obtain_element(SimplePublisher* publisher);
-    unsigned release_element(TAO::DCPS::DataSampleListElement* sample);
+    unsigned release_element(OpenDDS::DCPS::DataSampleListElement* sample);
 
     LockType lock_;
 
-    TAO::DCPS::RepoId pub_id_;
+    OpenDDS::DCPS::RepoId pub_id_;
 
     unsigned num_sent_;
     unsigned num_to_send_;
     unsigned num_delivered_;
 
-    TAO::DCPS::DataSampleListElement* element_;
+    OpenDDS::DCPS::DataSampleListElement* element_;
 
     ConditionType condition_;
 
-    TAO::DCPS::DataSampleListElementAllocator* allocator_;
-    TAO::DCPS::TransportSendElementAllocator* trans_allocator_;
+    OpenDDS::DCPS::DataSampleListElementAllocator* allocator_;
+    OpenDDS::DCPS::TransportSendElementAllocator* trans_allocator_;
 };
 
 #endif  /* SIMPLEDATAWRITER_H */

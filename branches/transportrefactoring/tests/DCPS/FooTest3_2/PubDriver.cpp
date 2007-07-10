@@ -263,7 +263,7 @@ PubDriver::init(int& argc, char *argv[])
   ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
 
   ::Xyz::FooTypeSupport_var fts =
-    ::TAO::DCPS::servant_to_reference (fts_servant);
+    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
 
 
   participant_ =
@@ -391,9 +391,9 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
-    TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+    OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
@@ -408,15 +408,15 @@ PubDriver::run()
   fclose (fp);
 
   // Set up the subscriptions.
-  ::TAO::DCPS::ReaderAssociationSeq associations;
+  ::OpenDDS::DCPS::ReaderAssociationSeq associations;
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
 
-  TAO::DCPS::NetworkAddress network_order_address(this->sub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_);
   associations[0].readerTransInfo.data
-    = TAO::DCPS::TransportInterfaceBLOB
-                                   (sizeof(TAO::DCPS::NetworkAddress),
-                                    sizeof(TAO::DCPS::NetworkAddress),
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
+                                    sizeof(OpenDDS::DCPS::NetworkAddress),
                                     (CORBA::Octet*)(&network_order_address));
 
 
@@ -429,10 +429,10 @@ PubDriver::run()
   {
 
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = TAO::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
       (datawriters_[i].in ());
-    TAO::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
-    ::TAO::DCPS::DataWriterRemote_var dw_remote =
+    OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+    ::OpenDDS::DCPS::DataWriterRemote_var dw_remote =
         DDS_TEST::getRemoteInterface(*datawriter_servant);
 
     dw_remote->add_associations (pub_id, associations);
@@ -557,14 +557,14 @@ void PubDriver::shutdown (
 void PubDriver::attach_to_transport ()
 {
   // create TransportImpl.
-  TAO::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
 
@@ -576,29 +576,29 @@ void PubDriver::attach_to_transport ()
     }
 
   // Attach the Publisher with the TransportImpl.
-  ::TAO::DCPS::PublisherImpl* pub_servant
-    = ::TAO::DCPS::reference_to_servant < ::TAO::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
+  ::OpenDDS::DCPS::PublisherImpl* pub_servant
+    = ::OpenDDS::DCPS::reference_to_servant < ::OpenDDS::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
       (publisher_.in());
 
   TEST_CHECK (pub_servant != 0);
 
-  TAO::DCPS::AttachStatus status
+  OpenDDS::DCPS::AttachStatus status
     = pub_servant->attach_transport(transport_impl.in ());
 
-  if (status != TAO::DCPS::ATTACH_OK)
+  if (status != OpenDDS::DCPS::ATTACH_OK)
   {
     // We failed to attach to the transport for some reason.
     std::string status_str;
 
     switch (status)
       {
-        case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
           status_str = "ATTACH_BAD_TRANSPORT";
           break;
-        case TAO::DCPS::ATTACH_ERROR:
+        case OpenDDS::DCPS::ATTACH_ERROR:
           status_str = "ATTACH_ERROR";
           break;
-        case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
           status_str = "ATTACH_INCOMPATIBLE_QOS";
           break;
         default:

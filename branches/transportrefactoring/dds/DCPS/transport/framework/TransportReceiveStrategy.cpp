@@ -11,7 +11,7 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
+OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
     mb_allocator_(MESSAGE_BLOCKS),
@@ -41,7 +41,7 @@ TAO::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
 }
 
 
-TAO::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
+OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) TransportReceiveStrategy::~TransportReceiveStrategy\n"));
   //fflush (stdout);
@@ -54,9 +54,9 @@ TAO::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 ///
 /// Our handle_input() method is called by the reactor when there is
 /// data to be pulled from our peer() ACE_SOCK_Stream.
-//TAO::DCPS::TransportReceiveStrategy::handle_input(ACE_HANDLE)
+//OpenDDS::DCPS::TransportReceiveStrategy::handle_input(ACE_HANDLE)
 int
-TAO::DCPS::TransportReceiveStrategy::handle_input()
+OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",5);
 
@@ -455,7 +455,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                        "packet header.\n"));
 
             // only do the hexdump if it will be printed - to not impact perfomance.
-            if (::TAO::DCPS::Transport_debug_level)
+            if (::OpenDDS::DCPS::Transport_debug_level)
               {
                 char xbuffer[4096];
                 int xbytes =
@@ -561,7 +561,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                            "header.  Demarshall the sample header now.\n"));
 
                 // only do the hexdump if it will be printed - to not impact perfomance.
-                if (::TAO::DCPS::Transport_debug_level)
+                if (::OpenDDS::DCPS::Transport_debug_level)
                   {
                     char ebuffer[4096] ;
                     ACE::format_hexdump
@@ -582,7 +582,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
                 //
                 // Check the DataSampleHeader.
                 //
-                /// @TODO
+                /// TODO
 
                 //
                 // Set the amount to parse into the message buffer.  We
@@ -796,7 +796,7 @@ TAO::DCPS::TransportReceiveStrategy::handle_input()
             // Release the entire chain.  This manages the data block
             // refcount and buffer space as well.
             //
-            // @TODO: Manage this differently if we pass ownership.
+            // TODO: Manage this differently if we pass ownership.
             //
             this->receive_sample_.sample_->release() ;
             this->receive_sample_.sample_ = 0 ;

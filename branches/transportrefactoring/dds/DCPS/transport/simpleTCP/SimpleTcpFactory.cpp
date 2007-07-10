@@ -13,14 +13,14 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleTcpFactory::~SimpleTcpFactory()
+OpenDDS::DCPS::SimpleTcpFactory::~SimpleTcpFactory()
 {
   DBG_ENTRY_LVL("SimpleTcpFactory","~SimpleTcpFactory",5);
 }
 
 
 int
-TAO::DCPS::SimpleTcpFactory::requires_reactor() const
+OpenDDS::DCPS::SimpleTcpFactory::requires_reactor() const
 {
   DBG_ENTRY_LVL("SimpleTcpFactory","requires_reactor",5);
   // return "true"
@@ -28,8 +28,8 @@ TAO::DCPS::SimpleTcpFactory::requires_reactor() const
 }
 
 
-TAO::DCPS::TransportImpl*
-TAO::DCPS::SimpleTcpFactory::create()
+OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::SimpleTcpFactory::create()
 {
   DBG_ENTRY_LVL("SimpleTcpFactory","create",5);
   return new SimpleTcpTransport();

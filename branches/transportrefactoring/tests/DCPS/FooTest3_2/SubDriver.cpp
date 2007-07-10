@@ -147,14 +147,14 @@ SubDriver::init(int& argc, char* argv[])
                           argv,
                           "TAO_DDS_DCPS");
 
-  TAO::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", TAO::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
 
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->sub_addr_;
 
@@ -189,7 +189,7 @@ SubDriver::run()
     }
     else
     {
-      ::TAO::DCPS::PublicationId pub_id = 0;
+      ::OpenDDS::DCPS::PublicationId pub_id = 0;
       while (fscanf (fp, "%d\n", &pub_id) != EOF)
       {
         ids.push_back (pub_id);
@@ -214,8 +214,8 @@ SubDriver::run()
   size_t num_publications = ids.size ();
 
   // Set up the publications.
-  TAO::DCPS::AssociationData* publications
-    = new TAO::DCPS::AssociationData[num_publications];
+  OpenDDS::DCPS::AssociationData* publications
+    = new OpenDDS::DCPS::AssociationData[num_publications];
 
 
   for (size_t i = 0; i < num_publications; i ++)
@@ -223,11 +223,11 @@ SubDriver::run()
     publications[i].remote_id_                = ids[i];
     publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
-    TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+    OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
     publications[i].remote_data_.data
-      = TAO::DCPS::TransportInterfaceBLOB
-                  (sizeof(TAO::DCPS::NetworkAddress),
-                   sizeof(TAO::DCPS::NetworkAddress),
+      = OpenDDS::DCPS::TransportInterfaceBLOB
+                  (sizeof(OpenDDS::DCPS::NetworkAddress),
+                   sizeof(OpenDDS::DCPS::NetworkAddress),
                    (CORBA::Octet*)(&network_order_address));
   }
 

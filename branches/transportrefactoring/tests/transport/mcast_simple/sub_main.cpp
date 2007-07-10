@@ -3,6 +3,9 @@
 #include "ace/Log_Msg.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h"
+#endif
 
 
 int

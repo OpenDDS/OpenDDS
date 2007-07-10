@@ -1,14 +1,14 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DATAVIEW_H
-#define TAO_DCPS_DATAVIEW_H
+#ifndef OPENDDS_DCPS_DATAVIEW_H
+#define OPENDDS_DCPS_DATAVIEW_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Message_Block.h"
 #include <vector>
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -29,10 +29,10 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "DataView.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_DATAVIEW_H */
+#endif  /* OPENDDS_DCPS_DATAVIEW_H */

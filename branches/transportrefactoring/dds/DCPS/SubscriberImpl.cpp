@@ -11,7 +11,7 @@
 #include "TopicImpl.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
-#include "dds/DdsDcpsTypeSupportTaoC.h"
+#include "dds/DdsDcpsTypeSupportExtC.h"
 #include "TopicDescriptionImpl.h"
 #include "Marked_Default_Qos.h"
 #include "DataSampleList.h"
@@ -24,7 +24,7 @@
 #include "tao/debug.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -145,7 +145,7 @@ SubscriberImpl::create_datareader (
       return ::DDS::DataReader::_nil();
     }
 
-  TAO::DCPS::TypeSupport_ptr typesupport =
+  OpenDDS::DCPS::TypeSupport_ptr typesupport =
     topic_servant->get_type_support();
 
   if (0 == typesupport)
@@ -169,7 +169,7 @@ SubscriberImpl::create_datareader (
                     DataReaderRemoteImpl(dr_servant),
                     ::DDS::DataReader::_nil());
 
-  ::TAO::DCPS::DataReaderRemote_var dr_remote_obj = 
+  ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
   DomainParticipantImpl* participant =
@@ -200,7 +200,7 @@ SubscriberImpl::create_datareader (
   }
     }
 
-  TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
+  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -319,8 +319,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
       return ::DDS::RETCODE_ERROR;
     }
 
+  // Call remove association before unregistering the datareader from the transport,
+  // otherwise some callbacks resulted from remove_association may lost. 
 
-  TAO::DCPS::TransportImpl_rch impl = transport_interface_.get_transport_impl();
+  dr_servant->remove_all_associations();
+
+  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
   if (impl.is_nil ())
     {
       ACE_ERROR ((LM_ERROR,
@@ -341,7 +345,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   // Clean up any remaining associations
-  dr_servant->remove_all_associations();
+  //dr_servant->remove_all_associations();
 
   delete dr_info;
 
@@ -849,17 +853,16 @@ SubscriberImpl::reader_enabled(
       ::DDS::DataReaderQos qos;
       info->local_reader_objref_->get_qos(qos);
 
-      TAO::DCPS::TransportInterfaceInfo trans_conf_info =
-        transport_interface_.connection_info ();
-      info->subscription_id_ =
-        this->repository_->add_subscription(
-          participant_->get_domain_id (),
-          participant_->get_id (),
-          info->topic_id_,
-          info->remote_reader_objref_,
-          qos,
-          trans_conf_info,
-          qos_) ;
+      OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      info->subscription_id_
+	= this->repository_->add_subscription(
+					      participant_->get_domain_id (),
+					      participant_->get_id (),
+					      info->topic_id_,
+					      info->remote_reader_objref_,
+					      qos,
+					      trans_conf_info,
+					      qos_) ;
       info->local_reader_impl_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)
@@ -939,7 +942,7 @@ SubscriberImpl::set_object_reference (const ::DDS::Subscriber_ptr& sub)
 }
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

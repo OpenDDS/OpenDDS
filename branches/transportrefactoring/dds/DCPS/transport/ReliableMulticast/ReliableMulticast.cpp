@@ -11,7 +11,11 @@
 #include "ReliableMulticast.inl"
 #endif /* __ACE_INLINE__ */
 
-TAO_DCPS_ReliableMulticast_Initializer::TAO_DCPS_ReliableMulticast_Initializer()
+OPENDDS_DCPS_ReliableMulticast_Initializer::OPENDDS_DCPS_ReliableMulticast_Initializer()
 {
-  ACE_Service_Config::process_directive (ace_svc_desc_TAO_DCPS_ReliableMulticastLoader);
+  ACE_Service_Config::process_directive (ace_svc_desc_OPENDDS_DCPS_ReliableMulticastLoader);
+#if RELIABLEMULTICAST_HAS_DLL == 0
+  ACE_Service_Config::process_directive (
+    ACE_TEXT("static OPENDDS_DCPS_ReliableMulticastLoader \"\""));
+#endif
 }

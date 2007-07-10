@@ -1,17 +1,18 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_RECEIVELISTENERSETMAP_H
-#define TAO_DCPS_RECEIVELISTENERSETMAP_H
+#ifndef OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
+#define OPENDDS_DCPS_RECEIVELISTENERSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ReceiveListenerSet.h"
 #include "ReceiveListenerSet_rch.h"
 #include "dds/DCPS/Definitions.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 
-namespace TAO
+#include <map>
+
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -22,15 +23,11 @@ namespace TAO
     class ReceivedDataSample;
 
 
-    class TAO_DdsDcps_Export ReceiveListenerSetMap
+    class OpenDDS_Dcps_Export ReceiveListenerSetMap
     {
       public:
        
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        ReceiveListenerSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
+        typedef std::map<RepoId, ReceiveListenerSet_rch> MapType;
 
         ReceiveListenerSetMap();
         virtual ~ReceiveListenerSetMap();
@@ -73,10 +70,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReceiveListenerSetMap.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_RECEIVELISTENERSETMAP_H */
+#endif /* OPENDDS_DCPS_RECEIVELISTENERSETMAP_H */

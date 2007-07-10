@@ -15,7 +15,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -27,7 +27,7 @@ namespace TAO
 
     /// Lolipop sequencing (never wrap to negative).
     /// This helps distinguish new and old sequence numbers. (?)
-    struct TAO_DdsDcps_Export SequenceNumber 
+    struct OpenDDS_Dcps_Export SequenceNumber 
     {
       /// Default constructor starts negative.
       SequenceNumber() { value_ = SHRT_MIN ; }
@@ -103,11 +103,16 @@ namespace TAO
         return pair.svt_ == this->svt_;
       };
 
+      bool operator< (const Objref_Servant_Pair & pair) const
+      {
+        return this->svt_ < pair.svt_;
+      };
+
       T_impl* svt_;
       T_var   obj_;
     };
 
-  } // namespace TAO
+  } // namespace OpenDDS
 } // namespace DCPS
 
 #endif /* TAO_DDS_DCPS_DEFINITION_H */

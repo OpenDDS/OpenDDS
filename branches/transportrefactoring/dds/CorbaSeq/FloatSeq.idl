@@ -21,8 +21,8 @@
  */
 
 
-#ifndef TAO_CORBA_FLOAT_SEQ_IDL
-#define TAO_CORBA_FLOAT_SEQ_IDL
+#ifndef OPENDDS_CORBA_FLOAT_SEQ_IDL
+#define OPENDDS_CORBA_FLOAT_SEQ_IDL
 
 #pragma prefix "omg.org"
 
@@ -31,4 +31,4 @@ module CORBA
   typedef sequence<float> FloatSeq;
 };
 
-#endif  /* TAO_CORBA_FLOAT_SEQ_IDL */
+#endif  /* OPENDDS_CORBA_FLOAT_SEQ_IDL */

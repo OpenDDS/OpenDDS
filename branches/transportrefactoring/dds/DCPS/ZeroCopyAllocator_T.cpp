@@ -22,7 +22,7 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.inl"
 #endif /* __//ACE_INLINE__ */
 
-namespace TAO
+namespace OpenDDS
 {
     namespace DCPS
     {
@@ -177,7 +177,7 @@ FirstTimeFastAllocator<T, N>::dump (void) const
 }
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 #endif /* ZEROCOPYALLOCATOR_T_CPP  */

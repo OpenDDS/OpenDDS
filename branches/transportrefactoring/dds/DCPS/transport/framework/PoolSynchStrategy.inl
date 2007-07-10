@@ -5,7 +5,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::PoolSynchStrategy::PoolSynchStrategy()
+OpenDDS::DCPS::PoolSynchStrategy::PoolSynchStrategy()
   : condition_(this->lock_),
     shutdown_(0)
 {

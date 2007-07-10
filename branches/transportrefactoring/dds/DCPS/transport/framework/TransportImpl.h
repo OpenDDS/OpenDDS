@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTIMPL_H
-#define TAO_DCPS_TRANSPORTIMPL_H
+#ifndef OPENDDS_DCPS_TRANSPORTIMPL_H
+#define OPENDDS_DCPS_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -15,12 +15,11 @@
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
 #include "ace/Vector_T.h"
+#include <map>
 
-
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -60,7 +59,7 @@ namespace TAO
     *     but has a references via smart pointer then the reference should be freed;
     *     if this object has ownership of task objects then the tasks should be closed.
     */
-    class TAO_DdsDcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX>
     {
       public:
 
@@ -277,35 +276,16 @@ private:
         int swap_bytes() const;
 
 
-        typedef ACE_Hash_Map_Manager_Ex<void*,
-                                        TransportInterface*,
-                                        ACE_Hash<void*>,
-                                        ACE_Equal_To<void*>,
-                                        ACE_Null_Mutex>      InterfaceMapType;
+        typedef std::map<void*, TransportInterface*>         InterfaceMapType;
 
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                DataWriterImpl*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              PublicationObjectMap;
+        typedef std::map<RepoId, DataWriterImpl*>            PublicationObjectMap;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                DataReaderImpl*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              SubscriptionObjectMap;
+        typedef std::map<RepoId, DataReaderImpl*>            SubscriptionObjectMap;
 
-        typedef ACE_Hash_Map_Manager_Ex
-                               <RepoId,
-                                AssociationInfoList*,
-                                ACE_Hash<RepoId>,
-                                ACE_Equal_To<RepoId>,
-                                ACE_Null_Mutex>              PendingAssociationsMap;
+        typedef std::map<RepoId, AssociationInfoList*>       PendingAssociationsMap;
 
         /// The collection of the DataWriterImpl objects that are created by
         /// the PublisherImpl currently "attached" to this TransportImpl.
@@ -354,10 +334,10 @@ private:
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTIMPL_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTIMPL_H */

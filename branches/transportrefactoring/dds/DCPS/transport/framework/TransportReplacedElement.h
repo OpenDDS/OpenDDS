@@ -1,15 +1,15 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
-#define TAO_DCPS_TRANSPORTREPLACEDELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORTREPLACEDELEMENT_H
+#define OPENDDS_DCPS_TRANSPORTREPLACEDELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -19,7 +19,7 @@ namespace TAO
     typedef Cached_Allocator_With_Overflow<TransportReplacedElement, ACE_SYNCH_NULL_MUTEX> 
                                              TransportReplacedElementAllocator;
 
-    class TAO_DdsDcps_Export TransportReplacedElement : public TransportQueueElement
+    class OpenDDS_Dcps_Export TransportReplacedElement : public TransportQueueElement
     {
       public:
 
@@ -58,4 +58,4 @@ namespace TAO
 #include "TransportReplacedElement.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTREPLACEDELEMENT_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTREPLACEDELEMENT_H */

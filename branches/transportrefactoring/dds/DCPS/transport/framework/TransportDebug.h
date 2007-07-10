@@ -16,7 +16,7 @@
 #endif
 
 
-#define DDS_RUN_DEBUG_LEVEL ::TAO::DCPS::Transport_debug_level
+#define DDS_RUN_DEBUG_LEVEL ::OpenDDS::DCPS::Transport_debug_level
 
 #define TURN_ON_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = DDS_BLD_DEBUG_LEVEL;
 #define TURN_OFF_VERBOSE_DEBUG DDS_RUN_DEBUG_LEVEL = 0;
@@ -28,7 +28,7 @@
 #if DDS_BLD_DEBUG_LEVEL > 0
 
 #define VDBG_CORE(DBG_ARGS) \
-if (::TAO::DCPS::Transport_debug_level) ACE_DEBUG(DBG_ARGS)
+if (::OpenDDS::DCPS::Transport_debug_level) ACE_DEBUG(DBG_ARGS)
 
 #define VDBG0(DBG_ARGS)
 #define VDBG1(DBG_ARGS)
@@ -90,15 +90,15 @@ VDBG_LVL(DBG_ARGS,5)
 #endif // #if DDS_BLD_DEBUG_LEVEL > 0
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
     /// Transport Logging verbosity level.
     // This needs to be initialized somewhere.
-    extern TAO_DdsDcps_Export unsigned int Transport_debug_level;
+    extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
 
-  } // namespace TAO
+  } // namespace OpenDDS
 } // namespace DCPS
 
 #endif /* TAO_DDS_TRANSPORT_DEBUG_H */

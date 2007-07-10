@@ -5,7 +5,7 @@
 // TMB - I had to add the following line
 #include "Service_Participant.h"
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -587,7 +587,7 @@ namespace TAO
     }
 
   } // namespace ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 
 ACE_INLINE

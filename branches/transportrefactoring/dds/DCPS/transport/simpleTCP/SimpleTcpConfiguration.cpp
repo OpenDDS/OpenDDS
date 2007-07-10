@@ -10,13 +10,13 @@
 #endif /* __ACE_INLINE__ */
 
 
-TAO::DCPS::SimpleTcpConfiguration::~SimpleTcpConfiguration()
+OpenDDS::DCPS::SimpleTcpConfiguration::~SimpleTcpConfiguration()
 {
   DBG_ENTRY_LVL("SimpleTcpConfiguration","~SimpleTcpConfiguration",5);
 }
 
 int
-TAO::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
+OpenDDS::DCPS::SimpleTcpConfiguration::load (const TransportIdType& id,
                                          ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.

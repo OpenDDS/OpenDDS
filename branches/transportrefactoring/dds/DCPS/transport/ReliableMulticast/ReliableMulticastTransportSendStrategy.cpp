@@ -10,12 +10,12 @@
 #include "ReliableMulticastTransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-typedef TAO::DCPS::ReliableMulticast::detail::Packet Packet;
-typedef TAO::DCPS::ReliableMulticast::detail::Packetizer Packetizer;
-typedef TAO::DCPS::ReliableMulticast::detail::ReactivePacketSender ReactivePacketSender;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packet Packet;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::Packetizer Packetizer;
+typedef OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender ReactivePacketSender;
 
 void
-TAO::DCPS::ReliableMulticastTransportSendStrategy::configure(
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::configure(
   ACE_Reactor* reactor,
   const ACE_INET_Addr& local_address,
   const ACE_INET_Addr& multicast_group_address,
@@ -32,7 +32,7 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::configure(
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportSendStrategy::teardown()
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::teardown()
 {
   if (sender_.get() != 0)
   {
@@ -42,13 +42,13 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::teardown()
 }
 
 void
-TAO::DCPS::ReliableMulticastTransportSendStrategy::stop_i()
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::stop_i()
 {
   teardown();
 }
 
 ssize_t
-TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
   ACE_UNUSED_ARG(bp);
 
@@ -75,13 +75,13 @@ TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes(const iovec iov[],
 }
 
 ACE_HANDLE
-TAO::DCPS::ReliableMulticastTransportSendStrategy::get_handle()
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::get_handle()
 {
   return ACE_INVALID_HANDLE;
 }
 
 ssize_t
-TAO::DCPS::ReliableMulticastTransportSendStrategy::send_bytes_i(const iovec iov[], int n)
+OpenDDS::DCPS::ReliableMulticastTransportSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
   ACE_UNUSED_ARG(iov);
   ACE_UNUSED_ARG(n);

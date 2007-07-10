@@ -1,19 +1,19 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DATALINKSETMAP_H
-#define TAO_DCPS_DATALINKSETMAP_H
+#ifndef OPENDDS_DCPS_DATALINKSETMAP_H
+#define OPENDDS_DCPS_DATALINKSETMAP_H
 
 #include "dds/DCPS/dcps_export.h"
 //borland #include "DataLinkSet.h"
 #include "DataLinkSet_rch.h"
 #include "TransportDefs.h"
 #include "dds/DCPS/Definitions.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include <map>
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -22,7 +22,7 @@ namespace TAO
     class DataLink;
 
 
-    class TAO_DdsDcps_Export DataLinkSetMap
+    class OpenDDS_Dcps_Export DataLinkSetMap
     {
       public:
 
@@ -92,18 +92,14 @@ namespace TAO
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef ACE_Hash_Map_Manager_Ex<RepoId,
-                                        DataLinkSet_rch,
-                                        ACE_Hash<RepoId>,
-                                        ACE_Equal_To<RepoId>,
-                                        ACE_Null_Mutex>        MapType;
+        typedef std::map <RepoId, DataLinkSet_rch>      MapType;
 
-      LockType map_lock_; // This lock is explicitly for this->map_ protection
+        LockType map_lock_; // This lock is explicitly for this->map_ protection
         MapType  map_;
     };
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
-#endif /* TAO_DCPS_DATALINKSETMAP_H */
+#endif /* OPENDDS_DCPS_DATALINKSETMAP_H */

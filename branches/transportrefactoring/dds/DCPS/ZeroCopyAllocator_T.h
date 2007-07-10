@@ -20,7 +20,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-namespace TAO
+namespace OpenDDS
 {
     namespace DCPS
     {
@@ -57,13 +57,11 @@ namespace TAO
 #endif /* ACE_HAS_MALLOC_STATS */
             virtual void dump (void) const;
 
-        private:
-            // do not allow copies.
-            FirstTimeFastAllocator(const FirstTimeFastAllocator&);
-            FirstTimeFastAllocator& operator=(const FirstTimeFastAllocator&);
+            T* pool() { return pool_; }
 
+        private:
             /// is this the first time this is allocated?
-            int firstTime_;
+            bool firstTime_;
 
             /// the pool of allocated memory.
             T pool_[N];
@@ -72,7 +70,7 @@ namespace TAO
 
 
     } // namespace  ::DDS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyAllocator_T.inl"

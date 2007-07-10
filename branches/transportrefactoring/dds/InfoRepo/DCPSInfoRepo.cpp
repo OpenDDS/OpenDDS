@@ -208,8 +208,8 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   info_poa_->activate_object_with_id (oid.in (),
                                       info_.get());
   obj = info_poa_->id_to_reference(oid.in());
-  TAO::DCPS::DCPSInfo_var info_repo
-    = TAO::DCPS::DCPSInfo::_narrow (obj.in ());
+  OpenDDS::DCPS::DCPSInfo_var info_repo
+    = OpenDDS::DCPS::DCPSInfo::_narrow (obj.in ());
 
   CORBA::String_var objref_str =
     orb_->object_to_string (info_repo.in ());

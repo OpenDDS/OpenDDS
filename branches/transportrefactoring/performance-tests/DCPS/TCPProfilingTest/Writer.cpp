@@ -33,7 +33,7 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   ::profilingTest::testMsgDataWriterImpl* pt_servant =
-    ::TAO::DCPS::reference_to_servant< ::profilingTest::testMsgDataWriterImpl, ::profilingTest::testMsgDataWriter_ptr>
+    ::OpenDDS::DCPS::reference_to_servant< ::profilingTest::testMsgDataWriterImpl, ::profilingTest::testMsgDataWriter_ptr>
             (pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,

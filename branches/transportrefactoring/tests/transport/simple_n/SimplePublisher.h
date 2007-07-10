@@ -10,21 +10,21 @@
 #include "dds/DCPS/Definitions.h"
 
 
-class SimplePublisher
+class SimplePublisher : public OpenDDS::DCPS::TransportInterface
 {
   public:
 
     SimplePublisher();
     virtual ~SimplePublisher();
 
-    void init(TAO::DCPS::TransportIdType               transport_id,
-              TAO::DCPS::RepoId                   pub_id,
+    void init(OpenDDS::DCPS::TransportIdType               transport_id,
+              OpenDDS::DCPS::RepoId                   pub_id,
               ssize_t                             num_subscriptions,
-              const TAO::DCPS::AssociationData*   subscriptions);
+              const OpenDDS::DCPS::AssociationData*   subscriptions);
 
     int run(unsigned num_messages);
 
-    void send_samples(const TAO::DCPS::DataSampleList& samples);
+    void send_samples(const OpenDDS::DCPS::DataSampleList& samples);
 
     /// Returns 0 if the data_delivered() has not been called by the
     /// transport framework.  Returns 1 if the data_delivered() has been
@@ -43,7 +43,7 @@ class SimplePublisher
 
     SimpleDataWriter writer_;
 
-    TAO::DCPS::TransportInterface transport_interface_;
+    OpenDDS::DCPS::TransportInterface transport_interface_;
 };
 
 #endif  /* SIMPLEPUBLISHER_H */

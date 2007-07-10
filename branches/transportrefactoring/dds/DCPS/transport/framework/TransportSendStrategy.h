@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTSENDSTRATEGY_H
-#define TAO_DCPS_TRANSPORTSENDSTRATEGY_H
+#ifndef OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_H
+#define OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -15,7 +15,7 @@
 
 #include "ace/Synch.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -38,7 +38,7 @@ namespace TAO
      * 1) Owns ThreadSynch object, list of samples in current packet and list
      *    of samples in queue.
      */ 
-    class TAO_DdsDcps_Export TransportSendStrategy
+    class OpenDDS_Dcps_Export TransportSendStrategy
       : public RcObject<ACE_SYNCH_MUTEX>,
         public ThreadSynchWorker
     {
@@ -118,6 +118,8 @@ namespace TAO
         virtual void stop_i() = 0;
 
         void link_released (bool flag);
+
+        bool isDirectMode();
 
       protected:
 
@@ -355,10 +357,10 @@ namespace TAO
 
   }  /* namespace DCPS */
 
-}  /* namespace TAO */
+}  /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DCPS_TRANSPORTSENDSTRATEGY_H */
+#endif /* OPENDDS_DCPS_TRANSPORTSENDSTRATEGY_H */

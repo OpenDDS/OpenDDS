@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLETCPTRANSPORT_H
-#define TAO_DCPS_SIMPLETCPTRANSPORT_H
+#ifndef OPENDDS_DCPS_SIMPLETCPTRANSPORT_H
+#define OPENDDS_DCPS_SIMPLETCPTRANSPORT_H
 
 #include "SimpleTcp_export.h"
 
@@ -16,7 +16,7 @@
 #include "ace/Synch.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -73,6 +73,7 @@ namespace TAO
         /// DataLink that should be (or will be) expecting the passive
         /// connection.
         friend class SimpleTcpConnection;
+        friend class SimpleTcpDataLink;
 
         /// Called by the SimpleTcpConnection object when it has been
         /// created by the acceptor and needs to be attached to a DataLink.
@@ -166,7 +167,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 
-#endif  /* TAO_DCPS_SIMPLETCPTRANSPORT_H */
+#endif  /* OPENDDS_DCPS_SIMPLETCPTRANSPORT_H */

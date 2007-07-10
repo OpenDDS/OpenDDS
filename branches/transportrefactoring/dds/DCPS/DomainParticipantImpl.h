@@ -21,17 +21,19 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "ace/Hash_Map_Manager.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Unbounded_Set.h"
+
+#include <map>
+#include <set>
+#include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -41,7 +43,7 @@ namespace TAO
     /**
     * @class DomainParticipantImpl
     *
-    * @brief Implements the ::TAO::DCPS::DomainParticipant interfaces.
+    * @brief Implements the ::OpenDDS::DCPS::DomainParticipant interfaces.
     *
     * This class acts as an entrypoint of the service and a factory
     * for publisher, subscriber and topic. It also acts as a container
@@ -50,9 +52,9 @@ namespace TAO
     * See the DDS specification, OMG formal/04-12-02, for a description of
     * the interface this class is implementing.
     */
-    class TAO_DdsDcps_Export DomainParticipantImpl
-      : public virtual TAO::DCPS::LocalObject<DDS::DomainParticipant>,
-        public virtual TAO::DCPS::EntityImpl
+    class OpenDDS_Dcps_Export DomainParticipantImpl
+      : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
+        public virtual OpenDDS::DCPS::EntityImpl
     {
     public:
 
@@ -69,10 +71,8 @@ namespace TAO
                                    ::DDS::Topic_ptr,
                                    ::DDS::Topic_var > Topic_Pair;
 
-      typedef ACE_Unbounded_Set < Subscriber_Pair > SubscriberSet;
-      typedef ACE_Unbounded_Set_Iterator < Subscriber_Pair > SubscriberSet_Iterator;
-      typedef ACE_Unbounded_Set < Publisher_Pair > PublisherSet;
-      typedef ACE_Unbounded_Set_Iterator < Publisher_Pair > PublisherSet_Iterator;
+      typedef std::set<Subscriber_Pair> SubscriberSet;
+      typedef std::set<Publisher_Pair> PublisherSet;
 
       struct RefCounted_Topic
       {
@@ -91,9 +91,7 @@ namespace TAO
         CORBA::Long    client_refs_;
       };
 
-      typedef ACE_Hash_Map_Manager<ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap;
-      typedef ACE_Hash_Map_Iterator < ACE_CString, RefCounted_Topic, ACE_Null_Mutex> TopicMap_Iterator;
-      typedef ACE_Hash_Map_Entry < ACE_CString, RefCounted_Topic> TopicMap_Entry;
+      typedef std::map<std::string, RefCounted_Topic> TopicMap;
 
       ///Constructor
       DomainParticipantImpl (const ::DDS::DomainId_t&             domain_id,
@@ -431,6 +429,6 @@ namespace TAO
     };
 
   } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */

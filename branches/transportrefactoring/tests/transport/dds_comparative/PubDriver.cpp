@@ -107,16 +107,16 @@ PubDriver::init()
   // create_transport_impl() has completed, the 
   // obtain() would give a "copy" of the cached reference to the 
   // TransportImpl object.
-  TAO::DCPS::TransportImpl_rch transport_impl 
+  OpenDDS::DCPS::TransportImpl_rch transport_impl 
     = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
                                                   "SimpleTcp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
-  TAO::DCPS::TransportConfiguration_rch config 
+  OpenDDS::DCPS::TransportConfiguration_rch config 
     = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, "SimpleTcp");
       
-  TAO::DCPS::SimpleTcpConfiguration* tcp_config 
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   // We use all of the default configuration settings, except for those
   // that need to be set (ie, the default values are not valid).
@@ -264,7 +264,7 @@ PubDriver::parse_arg_p(const char* arg, bool& flag)
   std::string pub_id_str(arg_str,0,pos);
   std::string pub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  TAO::DCPS::RepoId pub_id = ACE_OS::atoi(pub_id_str.c_str());
+  OpenDDS::DCPS::RepoId pub_id = ACE_OS::atoi(pub_id_str.c_str());
 
   this->local_address_ = ACE_INET_Addr(pub_addr_str.c_str());
 
@@ -312,7 +312,7 @@ PubDriver::parse_arg_s(const char* arg, bool& flag)
   std::string sub_id_str(arg_str,0,pos);
   std::string sub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  TAO::DCPS::RepoId sub_id = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::RepoId sub_id = ACE_OS::atoi(sub_id_str.c_str());
 
   ACE_INET_Addr sub_addr(sub_addr_str.c_str());
 

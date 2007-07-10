@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTINTERFACE_H
-#define TAO_DCPS_TRANSPORTINTERFACE_H
+#ifndef OPENDDS_DCPS_TRANSPORTINTERFACE_H
+#define OPENDDS_DCPS_TRANSPORTINTERFACE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportImpl_rch.h"
@@ -14,7 +14,7 @@
 class ACE_Message_Block;
 
 
-namespace TAO
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -33,7 +33,7 @@ namespace TAO
      * application sends data to subscriptions and manages associations between
      * publications and subscriptions in the service.
      */
-    class TAO_DdsDcps_Export TransportInterface
+    class OpenDDS_Dcps_Export TransportInterface
     {
       public:
 
@@ -208,10 +208,10 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "TransportInterface.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTINTERFACE_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTINTERFACE_H */

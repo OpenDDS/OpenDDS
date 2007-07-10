@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_TRANSPORTSENDCONTROLELEMENT_H
-#define TAO_DCPS_TRANSPORTSENDCONTROLELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORTSENDCONTROLELEMENT_H
+#define OPENDDS_DCPS_TRANSPORTSENDCONTROLELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
@@ -10,7 +10,7 @@
 
 class ACE_Message_Block ;
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -23,7 +23,7 @@ namespace TAO
     typedef Cached_Allocator_With_Overflow<TransportSendControlElement, ACE_SYNCH_NULL_MUTEX> 
                                              TransportSendControlElementAllocator;
 
-    class TAO_DdsDcps_Export TransportSendControlElement : public TransportQueueElement
+    class OpenDDS_Dcps_Export TransportSendControlElement : public TransportQueueElement
     {
       public:
 
@@ -76,4 +76,4 @@ namespace TAO
 #include "TransportSendControlElement.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_TRANSPORTSENDCONTROLELEMENT_H */
+#endif  /* OPENDDS_DCPS_TRANSPORTSENDCONTROLELEMENT_H */

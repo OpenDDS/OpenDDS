@@ -156,19 +156,19 @@ SubDriver::init()
   // application code will be able use the obtain() method on
   // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
   // a reference to the cached TransportImpl will be returned.
-  TAO::DCPS::TransportImpl_rch transport_impl
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   "SimpleUdp",
-                                                  TAO::DCPS::DONT_AUTO_CONFIG);
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create a new SimpleUdpConfiguration object.\n"));
 
-  TAO::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleUdp");
 
-  TAO::DCPS::SimpleUdpConfiguration* udp_config
-    = static_cast <TAO::DCPS::SimpleUdpConfiguration*> (config.in ());
+  OpenDDS::DCPS::SimpleUdpConfiguration* udp_config
+    = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) sub_addr_.\n"));
@@ -202,16 +202,16 @@ SubDriver::run()
              "Create the 'publications' (array of AssociationData).\n"));
 
   // Set up the publications.
-  TAO::DCPS::AssociationData publications[1];
+  OpenDDS::DCPS::AssociationData publications[1];
   publications[0].remote_id_                = this->pub_id_;
   publications[0].remote_data_.transport_id = 2; // TBD later - wrong
 
-  TAO::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
 
   publications[0].remote_data_.data =
-         TAO::DCPS::TransportInterfaceBLOB
-                                   (sizeof(TAO::DCPS::NetworkAddress),
-                                    sizeof(TAO::DCPS::NetworkAddress),
+         OpenDDS::DCPS::TransportInterfaceBLOB
+                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
+                                    sizeof(OpenDDS::DCPS::NetworkAddress),
                                     (CORBA::Octet*)(&network_order_address));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "

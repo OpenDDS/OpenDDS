@@ -15,8 +15,8 @@ TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   }
 
 void TAO_DDS_DCPSDataWriter_i::add_associations (
-    ::TAO::DCPS::RepoId yourId,
-    const TAO::DCPS::ReaderAssociationSeq & readers
+    ::OpenDDS::DCPS::RepoId yourId,
+    const OpenDDS::DCPS::ReaderAssociationSeq & readers
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -47,7 +47,7 @@ void TAO_DDS_DCPSDataWriter_i::add_associations (
 
 
 void TAO_DDS_DCPSDataWriter_i::remove_associations (
-    const TAO::DCPS::ReaderIdSeq & readers,
+    const OpenDDS::DCPS::ReaderIdSeq & readers,
     ::CORBA::Boolean notify_lost
   )
   ACE_THROW_SPEC ((
@@ -76,7 +76,7 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
 
 
 void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
-    const TAO::DCPS::IncompatibleQosStatus & status
+    const OpenDDS::DCPS::IncompatibleQosStatus & status
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException

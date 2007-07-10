@@ -4,7 +4,7 @@
 #define TAO_DDS_DCPS_INFO_UTILS_IDL
 #include "dds/DdsDcpsInfrastructure.idl"
 
-module TAO
+module OpenDDS
 {
   module DCPS
   {
@@ -63,6 +63,6 @@ module TAO
 
 
   }; // module DDS
-}; // module TAO
+}; // module OpenDDS
 
 #endif // TAO_DDS_DCPS_INFO_UTILS_IDL

@@ -4,7 +4,7 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::TransportReplacedElement::TransportReplacedElement
+OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
                                            (TransportQueueElement* orig_elem,
                                             TransportReplacedElementAllocator* allocator)
   : TransportQueueElement(1),

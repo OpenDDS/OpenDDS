@@ -20,8 +20,8 @@
  */
 
 
-#ifndef TAO_CORBA_OCTET_SEQ_IDL
-#define TAO_CORBA_OCTET_SEQ_IDL
+#ifndef OPENDDS_CORBA_OCTET_SEQ_IDL
+#define OPENDDS_CORBA_OCTET_SEQ_IDL
 
 #pragma prefix "omg.org"
 
@@ -30,4 +30,4 @@ module CORBA
   typedef sequence<octet> OctetSeq;
 };
 
-#endif  /* TAO_CORBA_OCTET_SEQ_IDL */
+#endif  /* OPENDDS_CORBA_OCTET_SEQ_IDL */

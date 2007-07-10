@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_PACKETHANDLER_H
-#define TAO_DCPS_PACKETHANDLER_H
+#ifndef OPENDDS_DCPS_PACKETHANDLER_H
+#define OPENDDS_DCPS_PACKETHANDLER_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -16,7 +16,7 @@
 #include "Packet.h"
 #include <cstring>
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -29,7 +29,7 @@ namespace TAO
       {
 
         class ReliableMulticast_Export PacketHandler
-          : public TAO::DCPS::ReliableMulticast::detail::EventHandler
+          : public OpenDDS::DCPS::ReliableMulticast::detail::EventHandler
         {
         public:
           template <typename Container> void send_many(
@@ -48,7 +48,7 @@ namespace TAO
           }
 
           virtual void send_packet_to(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
             const ACE_INET_Addr& dest
             );
 
@@ -59,7 +59,7 @@ namespace TAO
             );
 
           virtual void receive_packet_from(
-            const TAO::DCPS::ReliableMulticast::detail::Packet& packet,
+            const OpenDDS::DCPS::ReliableMulticast::detail::Packet& packet,
             const ACE_INET_Addr& peer
             ) = 0;
         };
@@ -70,7 +70,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "PacketHandler.inl"
@@ -78,4 +78,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_PACKETHANDLER_H */
+#endif /* OPENDDS_DCPS_PACKETHANDLER_H */

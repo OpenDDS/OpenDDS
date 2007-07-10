@@ -8,7 +8,7 @@
 /// Note that we allow the ThreadSynchResource pointer to be NULL to
 /// support the NullSynch case.
 ACE_INLINE
-TAO::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
+OpenDDS::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
   : worker_(0),
     resource_(resource)
 {
@@ -18,7 +18,7 @@ TAO::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
 
 
 ACE_INLINE int
-TAO::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
+OpenDDS::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
 {
   DBG_ENTRY_LVL("ThreadSynch","register_worker",5);
   this->worker_ = worker;
@@ -27,7 +27,7 @@ TAO::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
 
 
 ACE_INLINE void
-TAO::DCPS::ThreadSynch::unregister_worker()
+OpenDDS::DCPS::ThreadSynch::unregister_worker()
 {
   DBG_ENTRY_LVL("ThreadSynch","unregister_worker",5);
   this->unregister_worker_i();
@@ -37,8 +37,8 @@ TAO::DCPS::ThreadSynch::unregister_worker()
 }
 
 
-ACE_INLINE TAO::DCPS::ThreadSynchWorker::WorkOutcome
-TAO::DCPS::ThreadSynch::perform_work()
+ACE_INLINE OpenDDS::DCPS::ThreadSynchWorker::WorkOutcome
+OpenDDS::DCPS::ThreadSynch::perform_work()
 {
   DBG_ENTRY_LVL("ThreadSynch","perform_work",5);
 
@@ -52,7 +52,7 @@ TAO::DCPS::ThreadSynch::perform_work()
 
 
 ACE_INLINE int
-TAO::DCPS::ThreadSynch::wait_on_clogged_resource()
+OpenDDS::DCPS::ThreadSynch::wait_on_clogged_resource()
 {
   DBG_ENTRY_LVL("ThreadSynch","wait_on_clogged_resource",5);
 

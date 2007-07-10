@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 
-#ifndef TAO_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H
-#define TAO_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H
+#ifndef OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H
+#define OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H
 
 #include /**/ "ace/pre.h"
 #include /**/ "ace/config-all.h"
@@ -15,7 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "ace/INET_Addr.h"
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -42,7 +42,7 @@ namespace TAO
 
   } /* namespace DCPS */
 
-} /* namespace TAO */
+} /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
 #include "ReliableMulticastTransportConfiguration.inl"
@@ -50,4 +50,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H */
+#endif /* OPENDDS_DCPS_RELIABLEMULTICASTTRANSPORTCONFIGURATION_H */

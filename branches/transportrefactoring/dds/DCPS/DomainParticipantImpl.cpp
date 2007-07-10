@@ -10,6 +10,7 @@
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
+#include "Util.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -21,7 +22,27 @@
 
 #include "tao/debug.h"
 
-namespace TAO
+namespace Util
+{
+  template <typename Key>
+  int find(
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
+    const Key& key,
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value
+    )
+  {
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
+      c.find(key);
+    if (iter == c.end())
+    {
+      return -1;
+    }
+    value = &iter->second;
+    return 0;
+  }
+}
+
+namespace OpenDDS
 {
   namespace DCPS
   {
@@ -116,7 +137,7 @@ namespace TAO
 
       Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
-      if (publishers_.insert (pair) == -1)
+      if (OpenDDS::DCPS::insert(publishers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_publisher, ")
@@ -170,7 +191,7 @@ namespace TAO
 
       Publisher_Pair pair (the_servant, p, DUP);
 
-      if (publishers_.remove (pair) == -1)
+      if (OpenDDS::DCPS::remove(publishers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
@@ -254,7 +275,7 @@ namespace TAO
 
       Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
-      if (subscribers_.insert (pair) == -1)
+      if (OpenDDS::DCPS::insert(subscribers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_subscriber, ")
@@ -320,7 +341,7 @@ namespace TAO
 
       Subscriber_Pair pair (the_servant, s, DUP);
 
-      if (subscribers_.remove (pair) == -1)
+      if (OpenDDS::DCPS::remove(subscribers_, pair) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
@@ -398,7 +419,7 @@ namespace TAO
           return ::DDS::Topic::_nil();
         }
 
-      TopicMap_Entry* entry = 0;
+      TopicMap::mapped_type* entry = 0;
       bool found = false;
       {
         ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -406,7 +427,7 @@ namespace TAO
                           this->topics_protector_,
                           ::DDS::Topic::_nil());
 
-        if (topics_.find (topic_name, entry) == 0)
+        if (Util::find(topics_, topic_name, entry) == 0)
           {
             found = true;
           }
@@ -415,12 +436,12 @@ namespace TAO
       if ( found )
       {
       	CORBA::String_var found_type
-      	  = entry->int_id_.pair_.svt_->get_type_name();
+      	  = entry->pair_.svt_->get_type_name();
 
         if (ACE_OS::strcmp(type_name, found_type) == 0)
           {
             ::DDS::TopicQos found_qos;
-            entry->int_id_.pair_.svt_->get_qos(found_qos);
+            entry->pair_.svt_->get_qos(found_qos);
             if (topic_qos == found_qos)  // match type name, qos
               {
                 {
@@ -428,9 +449,9 @@ namespace TAO
                                     tao_mon,
                                     this->topics_protector_,
                                     ::DDS::Topic::_nil());
-                  entry->int_id_.client_refs_ ++;
+                  entry->client_refs_ ++;
                 }
-                return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+                return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
               }
             else
               {
@@ -558,8 +579,8 @@ namespace TAO
                             this->topics_protector_,
                             ::DDS::RETCODE_ERROR);
 
-          TopicMap_Entry* entry = 0;
-          if (topics_.find (topic_name.in (), entry) == -1)
+          TopicMap::mapped_type* entry = 0;
+          if (Util::find(topics_, topic_name.in (), entry) == -1)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
@@ -568,10 +589,10 @@ namespace TAO
                                 ::DDS::RETCODE_ERROR);
             }
 
-          entry->int_id_.client_refs_ --;
+          entry->client_refs_ --;
 
           if (remove_objref == true ||
-              0 == entry->int_id_.client_refs_)
+              0 == entry->client_refs_)
             {
               //TBD - mark the TopicImpl as deleted and make it
               //      reject calls to the TopicImpl.
@@ -597,7 +618,7 @@ namespace TAO
 
               // note: this will destroy the TopicImpl if there are no
               // client object reference to it.
-              if (topics_.unbind(topic_name.in ()) == -1)
+              if (topics_.erase(topic_name.in ()) == 0)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
                                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
@@ -662,17 +683,17 @@ namespace TAO
                   first_time = 0;
                 }
 
-              TopicMap_Entry* entry = 0;
+              TopicMap::mapped_type* entry = 0;
               {
                 ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                                   tao_mon,
                                   this->topics_protector_,
                                   ::DDS::Topic::_nil());
 
-                if (topics_.find (topic_name, entry) == 0)
+                if (Util::find(topics_, topic_name, entry) == 0)
                   {
-                    entry->int_id_.client_refs_ ++;
-                    return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+                    entry->client_refs_ ++;
+                    return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
                   }
               }
 
@@ -762,14 +783,14 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry = 0;
-      if (topics_.find (name, entry) == -1)
+      TopicMap::mapped_type* entry = 0;
+      if (Util::find(topics_, name, entry) == -1)
         {
           return ::DDS::TopicDescription::_nil();
         }
       else
         {
-          return ::DDS::TopicDescription::_duplicate(entry->int_id_.pair_.obj_.in ());
+          return ::DDS::TopicDescription::_duplicate(entry->pair_.obj_.in ());
         }
     }
 
@@ -799,15 +820,14 @@ namespace TAO
                           this->publishers_protector_,
                           ::DDS::RETCODE_ERROR);
 
-        PublisherSet_Iterator pubIter(publishers_);
-        pubIter.first();
+        PublisherSet::iterator pubIter = publishers_.begin();
         ::DDS::Publisher_ptr pubPtr;
         size_t pubsize = publishers_.size();
 
         while (pubsize > 0)
           {
             pubPtr = (*pubIter).obj_.in ();
-            pubIter.advance();
+            ++pubIter;
 
             ::DDS::ReturnCode_t result
               = pubPtr->delete_contained_entities ();
@@ -833,15 +853,14 @@ namespace TAO
                           this->subscribers_protector_,
                           ::DDS::RETCODE_ERROR);
 
-        SubscriberSet_Iterator subIter(subscribers_);
-        subIter.first();
+        SubscriberSet::iterator subIter = subscribers_.begin();
         ::DDS::Subscriber_ptr subPtr;
         size_t subsize = subscribers_.size();
 
         while (subsize > 0)
           {
             subPtr = (*subIter).obj_.in ();
-            subIter.advance();
+            ++subIter;
 
             ::DDS::ReturnCode_t result = subPtr->delete_contained_entities ();
             if (result != ::DDS::RETCODE_OK)
@@ -870,16 +889,14 @@ namespace TAO
 
         while (1)
           {
-            TopicMap_Iterator topicIter(topics_);
-            TopicMap_Entry* entry = 0;
-            if (topicIter.next (entry) == 0)
+            if (topics_.begin() == topics_.end())
               {
                 break;
               }
 
             // Delete the topic the reference count.
             ::DDS::ReturnCode_t result = this->delete_topic_i(
-                                    entry->int_id_.pair_.obj_.in (), true);
+                                    topics_.begin()->second.pair_.obj_.in (), true);
             if (result != ::DDS::RETCODE_OK)
               {
                 ret = result;
@@ -1412,15 +1429,15 @@ namespace TAO
                         this->topics_protector_,
                         ::DDS::Topic::_nil());
 
-      TopicMap_Entry* entry = 0;
-      if (topics_.find (topic_name, entry) == 0)
+      TopicMap::mapped_type* entry = 0;
+      if (Util::find(topics_, topic_name, entry) == 0)
         {
-          entry->int_id_.client_refs_ ++;
-          return ::DDS::Topic::_duplicate(entry->int_id_.pair_.obj_.in ());
+          entry->client_refs_ ++;
+          return ::DDS::Topic::_duplicate(entry->pair_.obj_.in ());
         }
 
-      TAO::DCPS::TypeSupport_ptr type_support =
-        TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (),type_name);
+      OpenDDS::DCPS::TypeSupport_ptr type_support =
+        OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (),type_name);
 
       if (0 == type_support)
         {
@@ -1448,7 +1465,7 @@ namespace TAO
 
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
-      if (topics_.bind (topic_name, refCounted_topic)  == -1)
+      if (bind(topics_, topic_name, refCounted_topic) == -1)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
@@ -1470,8 +1487,8 @@ namespace TAO
     int
     DomainParticipantImpl::is_clean () const
     {
-      int sub_is_clean = subscribers_.is_empty () == 1;
-      int topics_is_clean = topics_.current_size () == 0;
+      int sub_is_clean = subscribers_.empty();
+      int topics_is_clean = topics_.size () == 0;
 
       if (! TheTransientKludge->is_enabled ())
         {
@@ -1479,10 +1496,10 @@ namespace TAO
           // left.
 
           sub_is_clean = sub_is_clean == 0 ? subscribers_.size () == 1 : 1;
-          topics_is_clean = topics_is_clean == 0 ? topics_.current_size () == 4 : 1;
+          topics_is_clean = topics_is_clean == 0 ? topics_.size () == 4 : 1;
         }
 
-      return (publishers_.is_empty () == 1
+      return (publishers_.empty()
               && sub_is_clean == 1
               && topics_is_clean == 1);
     }
@@ -1548,8 +1565,8 @@ namespace TAO
         ::DDS::TopicQos topic_qos;
         this->get_default_topic_qos(topic_qos);
 
-        TAO::DCPS::TypeSupport_ptr type_support =
-          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
+        OpenDDS::DCPS::TypeSupport_ptr type_support =
+          OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1570,23 +1587,23 @@ namespace TAO
               }
           }
 
-        bit_topic_topic_ = this->create_topic (::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                               ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
+        bit_part_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                               ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
                                                topic_qos,
                                                ::DDS::TopicListener::_nil());
-        if (CORBA::is_nil (bit_topic_topic_.in ()))
+        if (CORBA::is_nil (bit_part_topic_.in ()))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ")
                                ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
-                               ::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
+                               ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
                                ::DDS::RETCODE_ERROR);
           }
 
         // Topic topic
         type_support =
-          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_TOPIC_TOPIC_TYPE);
+          OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_TOPIC_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1608,8 +1625,8 @@ namespace TAO
               }
           }
 
-        bit_topic_topic_ = this->create_topic (::TAO::DCPS::BUILT_IN_TOPIC_TOPIC,
-                                               ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
+        bit_topic_topic_ = this->create_topic (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
+                                               ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
                                                topic_qos,
                                                ::DDS::TopicListener::_nil());
         if (CORBA::is_nil (bit_topic_topic_.in ()))
@@ -1618,13 +1635,13 @@ namespace TAO
                                ACE_TEXT("(%P|%t) ")
                                ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
-                               ::TAO::DCPS::BUILT_IN_TOPIC_TOPIC),
+                               ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC),
                                ::DDS::RETCODE_ERROR);
           }
 
         // Subscription topic
         type_support =
-          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
+          OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1646,8 +1663,8 @@ namespace TAO
           }
 
         bit_sub_topic_ =
-          this->create_topic (::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-                              ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
+          this->create_topic (::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+                              ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                               topic_qos,
                               ::DDS::TopicListener::_nil());
         if (CORBA::is_nil (bit_sub_topic_.in ()))
@@ -1656,13 +1673,13 @@ namespace TAO
                                ACE_TEXT("(%P|%t) ")
                                ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
-                               ::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
+                               ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
                                ::DDS::RETCODE_ERROR);
           }
 
         // Publication topic
         type_support =
-          TAO::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PUBLICATION_TOPIC_TYPE);
+          OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in (), BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
         if (0 == type_support)
           {
@@ -1684,8 +1701,8 @@ namespace TAO
           }
 
         bit_pub_topic_ =
-          this->create_topic (::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-                              ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
+          this->create_topic (::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+                              ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
                               topic_qos,
                               ::DDS::TopicListener::_nil());
         if (CORBA::is_nil (bit_pub_topic_.in ()))
@@ -1693,7 +1710,7 @@ namespace TAO
             ACE_ERROR_RETURN ((LM_ERROR,
                                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_bit_topics, ")
                                ACE_TEXT("Nil %s Topic \n"),
-                               ::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC),
+                               ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC),
                                ::DDS::RETCODE_ERROR);
           }
       }
@@ -1744,7 +1761,7 @@ namespace TAO
           bit_subscriber_->get_default_datareader_qos(dr_qos);
 
           ::DDS::TopicDescription_var bit_part_topic_desc
-            = this->lookup_topicdescription (::TAO::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+            = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
 
           ::DDS::DataReader_var dr
             = bit_subscriber_->create_datareader (bit_part_topic_desc.in (),
@@ -1755,7 +1772,7 @@ namespace TAO
             = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow (dr.in ());
 
           ::DDS::TopicDescription_var bit_topic_topic_desc
-            = this->lookup_topicdescription (::TAO::DCPS::BUILT_IN_TOPIC_TOPIC);
+            = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
 
           dr = bit_subscriber_->create_datareader (bit_topic_topic_desc.in (),
                                                    dr_qos,
@@ -1765,7 +1782,7 @@ namespace TAO
             = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (dr.in ());
 
           ::DDS::TopicDescription_var bit_pub_topic_desc
-            = this->lookup_topicdescription (::TAO::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+            = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
 
           dr = bit_subscriber_->create_datareader (bit_pub_topic_desc.in (),
                                                    dr_qos,
@@ -1775,7 +1792,7 @@ namespace TAO
             = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (dr.in ());
 
           ::DDS::TopicDescription_var bit_sub_topic_desc
-            = this->lookup_topicdescription (::TAO::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+            = this->lookup_topicdescription (::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
 
           dr = bit_subscriber_->create_datareader (bit_sub_topic_desc.in (),
                                                    dr_qos,
@@ -1806,28 +1823,28 @@ namespace TAO
        try
       {
         // Attach the Subscriber with the TransportImpl.
-        ::TAO::DCPS::SubscriberImpl* sub_servant
-          = reference_to_servant<TAO::DCPS::SubscriberImpl> (bit_subscriber_.in ());
+        ::OpenDDS::DCPS::SubscriberImpl* sub_servant
+          = reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (bit_subscriber_.in ());
 
         TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ();
 
-        TAO::DCPS::AttachStatus status
+        OpenDDS::DCPS::AttachStatus status
           = sub_servant->attach_transport(impl.in());
 
-        if (status != TAO::DCPS::ATTACH_OK)
+        if (status != OpenDDS::DCPS::ATTACH_OK)
           {
             // We failed to attach to the transport for some reason.
             const char* status_str = "" ;
 
             switch (status)
               {
-              case TAO::DCPS::ATTACH_BAD_TRANSPORT:
+              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
                 status_str = "ATTACH_BAD_TRANSPORT";
                 break;
-              case TAO::DCPS::ATTACH_ERROR:
+              case OpenDDS::DCPS::ATTACH_ERROR:
                 status_str = "ATTACH_ERROR";
                 break;
-              case TAO::DCPS::ATTACH_INCOMPATIBLE_QOS:
+              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
                 status_str = "ATTACH_INCOMPATIBLE_QOS";
                 break;
               default:
@@ -1856,30 +1873,4 @@ namespace TAO
     }
 
    } // namespace DCPS
-} // namespace TAO
-
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Unbounded_Set <::DDS::Subscriber_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::Subscriber_ptr>;
-template class ACE_Unbounded_Set <::DDS::Publisher_ptr>;
-template class ACE_Unbounded_Set_Iterator <::DDS::Publisher_ptr>;
-template class ACE_Hash_Map_Manager<ACE_CString, ::DDS::Topic_ptr, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Iterator <ACE_CString, ::DDS::Topic_ptr, ACE_NULL_SYNCH>;
-template class ACE_Hash_Map_Entry<ACE_CString, ::DDS::Topic_ptr>;
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Unbounded_Set <::DDS::Subscriber_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::Subscriber_ptr>;
-#pragma instantiate ACE_Unbounded_Set <::DDS::Publisher_ptr>;
-#pragma instantiate ACE_Unbounded_Set_Iterator <::DDS::Publisher_ptr>;
-#pragma instantiate ACE_Hash_Map_Manager<ACE_CString, ::DDS::RefCounted_Topic, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Iterator <ACE_CString, ::DDS::RefCounted_Topic, ACE_NULL_SYNCH>;
-#pragma instantiate ACE_Hash_Map_Entry<ACE_CString, ::DDS::RefCounted_Topic>;
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
-
-
-
+} // namespace OpenDDS

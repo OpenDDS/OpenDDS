@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-TAO::DCPS::ReliableMulticast::detail::ReceiverLogic::ReceiverLogic(
+OpenDDS::DCPS::ReliableMulticast::detail::ReceiverLogic::ReceiverLogic(
   size_t receiver_buffer_size,
   const ReliabilityMode& reliability
   )

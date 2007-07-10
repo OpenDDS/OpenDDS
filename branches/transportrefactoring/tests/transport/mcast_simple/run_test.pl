@@ -32,18 +32,21 @@ my $subscriberPort = 10002 + PerlACE::uniqueid ();
 my $subreadyfile = "subready.txt";
 unlink $subreadyfile;
 
+my $svc_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : '-ORBSvcConf mcast.conf';
+
 #
 # Subscriber command and arguments.
 #
 my $subscriberCmd  = "./simple_subscriber" ;
-my $subscriberArgs = "-ORBSvcConf mcast.conf -p $publisherId:$publisherHost:$publisherPort "
+my $subscriberArgs = "$svc_conf -p $publisherId:$publisherHost:$publisherPort "
                    . "-s $subscriberId:$subscriberHost:$subscriberPort " ;
 
 #
 # Publisher command and arguments.
 #
 my $publisherCmd  = "./simple_publisher" ;
-my $publisherArgs = "-ORBSvcConf mcast.conf -p $publisherId:$publisherHost:$publisherPort "
+my $publisherArgs = "$svc_conf -p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$localInterface " ;
 
 #

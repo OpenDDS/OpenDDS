@@ -26,7 +26,7 @@ project(*idl): dcps {
 project(DDS*Pub): dcpsexe {
   after += *idl
   
-  exename = tao_pub
+  exename = dds_pub
 
   IDL_Files {
     DDSPerfTest.idl
@@ -46,7 +46,7 @@ project(DDS*Pub): dcpsexe {
 project(DDS*Sub): dcpsexe {
   after += *idl
   
-  exename = tao_sub
+  exename = dds_sub
 
   IDL_Files {
     DDSPerfTest.idl

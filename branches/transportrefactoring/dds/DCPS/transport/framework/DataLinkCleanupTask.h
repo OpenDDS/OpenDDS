@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_DATALINKCLEANUP_H
-#define TAO_DCPS_DATALINKCLEANUP_H
+#ifndef OPENDDS_DCPS_DATALINKCLEANUP_H
+#define OPENDDS_DCPS_DATALINKCLEANUP_H
 
 #include /**/ "ace/pre.h"
 
@@ -15,7 +15,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -28,7 +28,7 @@ namespace TAO
      * @brief Active Object responsible for cleaning up DataLink resources.
      *
      */
-    class TAO_DdsDcps_Export DataLinkCleanupTask : public QueueTaskBase <DataLink_rch>
+    class OpenDDS_Dcps_Export DataLinkCleanupTask : public QueueTaskBase <DataLink_rch>
     {
     public:
       /// Constructor.
@@ -50,4 +50,4 @@ namespace TAO
 
 #include /**/ "ace/post.h"
 
-#endif /* TAO_DCPS_DATALINKCLEANUP_H */
+#endif /* OPENDDS_DCPS_DATALINKCLEANUP_H */

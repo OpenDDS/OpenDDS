@@ -1,15 +1,15 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DCPS_SIMPLEMCASTSOCKET_H
-#define TAO_DCPS_SIMPLEMCASTSOCKET_H
+#ifndef OPENDDS_DCPS_SIMPLEMCASTSOCKET_H
+#define OPENDDS_DCPS_SIMPLEMCASTSOCKET_H
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramSocket.h"
 #include "ace/SOCK_Dgram_Mcast.h"
 
 
-namespace TAO
+namespace OpenDDS
 {
 
   namespace DCPS
@@ -55,4 +55,4 @@ namespace TAO
 #include "SimpleMcastSocket.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* TAO_DCPS_SIMPLEMCASTSOCKET_H */
+#endif  /* OPENDDS_DCPS_SIMPLEMCASTSOCKET_H */

@@ -40,8 +40,8 @@ CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_SAMPLES = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_INSTANCES = ::DDS::LENGTH_UNLIMITED;
 
-TAO::DCPS::TransportImpl_rch reader_transport_impl;
-TAO::DCPS::TransportImpl_rch writer_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
+OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 
 enum TransportTypeId
 {
@@ -59,13 +59,13 @@ enum TransportInstanceId
 int init_reader_tranport ()
 {
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config 
     = TheTransportFactory->get_configuration (SUB_TRAFFIC);
 
-  TAO::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config 
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
  
   if (0 != ACE_OS::strcmp("default", reader_address_str) )
     {
@@ -88,13 +88,13 @@ int init_reader_tranport ()
 int init_writer_tranport ()
 {
   writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, TAO::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  TAO::DCPS::TransportConfiguration_rch writer_config
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config 
     = TheTransportFactory->get_configuration (PUB_TRAFFIC);
 
-  TAO::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <TAO::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config 
+    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
  
   if (0 != ACE_OS::strcmp("default", writer_address_str) )
     {

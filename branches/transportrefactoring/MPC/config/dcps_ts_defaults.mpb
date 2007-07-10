@@ -9,5 +9,5 @@ project {
     keyword dcps_ts_flags = commandflags
   }
 
-  dcps_ts_flags += $(TAO_DCPS_TS_FLAGS)
+  dcps_ts_flags += $(OPENDDS_DCPS_TS_FLAGS)
 }
