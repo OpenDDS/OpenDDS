@@ -1,3 +1,13 @@
+Tue Jul 10 17:07:05 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
+
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.h:
+        * examples/DCPS/DistributedContent/main.cpp:
+
+          Added ability to make the example user interactive.
+          Define the DDS_DISTRIBUTEDCONTENT_REQUIRES_USER macro to
+          build the user interaction code.
+
 Mon Jul  9 21:28:42 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mwc:
