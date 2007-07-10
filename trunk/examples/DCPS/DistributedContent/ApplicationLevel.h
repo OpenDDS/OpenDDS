@@ -58,6 +58,15 @@ public:
   bool generate_new_file (const std::string& filename, long size);
 
   /**
+   * Open and publish a existing file.
+   *
+   * @param filename - name of the new file
+   *
+   * @return  true if the new file is opened and published
+   */
+  bool publish_file (const std::string& filename);
+
+  /**
    * Get the number of files that have been written.
    *
    * @return number of files written

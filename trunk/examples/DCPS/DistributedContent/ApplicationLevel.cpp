@@ -64,6 +64,11 @@ ApplicationLevel::receive_diff(const DistributedContent::FileDiff& diff)
 
   write_difference_file(diff_file_name, diff);
 
+  ACE_DEBUG((LM_INFO,
+    ACE_TEXT("Received file \"%s\" from %s\n"),
+    diff.filename.in(),
+    diff.change_source.in()
+    ));
 }
 
 
@@ -204,3 +209,68 @@ ApplicationLevel::generate_diff_filename(std::string& filename,
   filename += outstr;
 }
 
+bool
+ApplicationLevel::publish_file (const std::string& filename)
+{
+  bool publish_result = false;
+  file_name_ = filename;
+  DistributedContent::FileDiff diff;
+  diff.file_id = ACE_OS::rand() % 32765;
+  diff.filename = CORBA::string_dup(file_name_.c_str());
+  diff.change_source = CORBA::string_dup(nodename_.c_str());
+  diff.previous_version = -1;
+  diff.new_version = 0;
+
+  //std::string  full_file_name = directory_ + file_name_;
+  // Expect the files to be in the current directory.
+  std::string  full_file_name = file_name_;
+
+  ACE_stat file_state;
+  if (0 != ACE_OS::stat(full_file_name.c_str(), &file_state))
+  {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR - Unable to get state of file \"%s\"\n"), full_file_name.c_str()));
+  }
+  else
+  {
+    size_t size = file_state.st_size;
+
+    FILE* file_handle = ACE_OS::fopen(full_file_name.c_str(), ACE_TEXT("rb"));
+
+    if ( NULL == file_handle)
+    {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR - Unable to open file \"%s\"\n"), full_file_name.c_str()));
+    }
+    else
+    {
+      // intialize the data
+      diff.difference.length(size);
+
+      size_t read_size = fread(diff.difference.get_buffer(false), 1, size, file_handle);
+      if (size != read_size)
+      {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR - Read error only read %d out of %d expected bytes from file \"%s\"\n"),
+                   read_size, size, full_file_name.c_str() ));
+      }
+      else
+      {
+        // save the file information
+        file_name_ = diff.filename.in();
+        file_id_ = diff.file_id;
+
+        // publish the diff
+        if (0 != abstraction_layer_)
+        {
+          publish_result = abstraction_layer_->send_diff(diff);
+          if (publish_result)
+          {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("Published file \"%s\".\n"), diff.filename.in() ));
+          }
+        }
+      } // end of fread
+
+      ACE_OS::fclose(file_handle);
+    } // end of file open
+  } // end of file stat
+  return publish_result;
+}

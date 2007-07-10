@@ -3,6 +3,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
 #include "ace/Time_Value.h"
+#include "ace/streams.h"
 
 #include "AbstractionLayer.h"
 #include "ApplicationLevel.h"
@@ -109,12 +110,34 @@ int main (int argc, char *argv[])
       ACE_RANDR_TYPE seed = (ACE_RANDR_TYPE) (curr_time.usec() + curr_time.sec());
       ACE_OS::srand(seed);
 
+      // Wait before publishing
+      ACE_OS::sleep(2);
+
+#if defined DDS_DISTRIBUTEDCONTENT_REQUIRES_USER
       // Check if this node publishes the first file or not
       if (publish_first_file)
       {
-        // Wait before publishing
-        ACE_OS::sleep(2);
+        app_level.publish_file(publish_file_name);
+      }
 
+      char user_file_name[1025];
+
+      std::cout << "Enter name of file to publish (Enter to quit):" << std::endl;
+      std::cin.getline(user_file_name, 1025);
+      publish_file_name = user_file_name;
+
+      while (publish_file_name.size() > 0)
+      {
+        app_level.publish_file(publish_file_name);
+
+        std::cout << "Enter name of file to publish (Enter to quit):" << std::endl;
+        std::cin.getline(user_file_name, 1025);
+        publish_file_name = user_file_name;
+      }
+#else
+      // Check if this node publishes the first file or not
+      if (publish_first_file)
+      {
         app_level.generate_new_file(publish_file_name, 1000000);
       }
       else
@@ -150,6 +173,7 @@ int main (int argc, char *argv[])
 
       // sleep waiting for other nodes to finish
       ACE_OS::sleep(40 - time);
+#endif /* DDS_DISTRIBUTEDCONTENT_REQUIRES_USER */
 
     }
 
