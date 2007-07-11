@@ -70,7 +70,7 @@ SubscriberImpl::~SubscriberImpl (void)
 
   // Tell the transport to detach this
   // Subscriber/TransportInterface.
-  transport_interface_.detach_transport ();
+  this->detach_transport ();
   //
   // The datareders should be deleted already before calling delete
   // subscriber.
@@ -798,7 +798,7 @@ SubscriberImpl::add_associations (
 
   // TBD - pass the priority as part of the associations data
   //       because there is a priority per remote publication.
-  transport_interface_.add_publications(reader->get_subscription_id(),
+  this->add_publications(reader->get_subscription_id(),
     reader,
     writers[0].writerQos.transport_priority.value,
     length,
@@ -824,7 +824,7 @@ SubscriberImpl::remove_associations(
   // TMB - I don't know why I need to call it this way, but gcc complains
   //       under linux otherwise.
 
-  transport_interface_.remove_associations(writers.length(),
+  TransportInterface::remove_associations(writers.length(),
             writers.get_buffer(), reader, false) ; // as sub side
 }
 
@@ -905,11 +905,6 @@ SubscriberImpl::reader_enabled(
   info->local_reader_impl_->_add_ref ();
 }
 
-AttachStatus
-SubscriberImpl::attach_transport (TransportImpl* impl)
-{
-  return transport_interface_.attach_transport(impl);
-}
 
 ::DDS::SubscriberListener*
 SubscriberImpl::listener_for (::DDS::StatusKind kind)

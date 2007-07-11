@@ -1,3 +1,13 @@
+Wed Jul 11 06:46:43 UTC 2007  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed the transport_interface_ member in PublisherImpl
+          and SubscriberImpl. 
+
 Tue Jul 10 19:42:39 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * MPC\config\dcpsexe_with_unreliable_dgram.mpb:
@@ -1057,7 +1067,7 @@ Tue Jul 10 19:42:39 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * examples\DCPS\DistributedContent\README:
         * examples\DCPS\DistributedContent\run_test.pl:
 
-          svn merge -r813:924 https://svn.dre.vanderbilt.edu/DOC/DDS/trunk    
+          svn merge -r813:924 https://svn.dre.vanderbilt.edu/DOC/DDS/trunk
 
 Tue Jun  5 16:45:50 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
