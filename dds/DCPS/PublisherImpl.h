@@ -263,8 +263,6 @@ namespace OpenDDS
     /*
      * Exposed TransportImpl methods
      */
-    int swap_bytes() const;
-
     SendControlStatus send_control(RepoId                 pub_id,
                                    TransportSendListener* listener,
                                    ACE_Message_Block*     msg);
@@ -272,8 +270,6 @@ namespace OpenDDS
     int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
     int remove_all_control_msgs(RepoId pub_id);
-
-    AttachStatus attach_transport(TransportImpl* impl);
 
     /**
     * This is used to retrieve the listener for a certain status change.
@@ -330,8 +326,6 @@ namespace OpenDDS
 
       /// The catched available data while suspending.
       DataSampleList                available_data_list_ ;
-
-      TransportInterface            transport_interface_;
     };
 
   } // namespace  ::DDS

@@ -225,11 +225,6 @@ namespace OpenDDS
         CORBA::SystemException
       ));
 
-    /*
-     * Exposed TransportImpl methods
-     */
-    AttachStatus attach_transport(TransportImpl* impl);
-
     //void cleanup();
 
     ::DDS::SubscriberListener* listener_for (::DDS::StatusKind kind);
@@ -256,8 +251,6 @@ namespace OpenDDS
       /// It also projects the TransportInterface (it must be held when
       /// calling any TransportInterface method).
       ACE_Recursive_Thread_Mutex    si_lock_;
-
-      TransportInterface            transport_interface_;
     };
 
   } // namespace DCPS

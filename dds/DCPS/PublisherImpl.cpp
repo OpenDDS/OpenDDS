@@ -72,7 +72,7 @@ PublisherImpl::~PublisherImpl (void)
 
   // Tell the transport to detach this
   // Publisher/TransportInterface.
-  transport_interface_.detach_transport ();
+  this->detach_transport ();
 
   //The datawriters should be deleted already before calling delete
   //publisher.
@@ -573,7 +573,7 @@ void PublisherImpl::get_qos (
 
   if (suspend_depth_count_ == 0)
     {
-      transport_interface_.send (available_data_list_);
+      this->send (available_data_list_);
       available_data_list_.reset ();
     }
 
@@ -730,7 +730,7 @@ void PublisherImpl::add_associations (
       associations[i].remote_data_ = readers[i].readerTransInfo;
     }
 
-  transport_interface_.add_subscriptions (writer->get_publication_id (),
+  this->add_subscriptions (writer->get_publication_id (),
     writer_qos.transport_priority.value,
     length,
     associations);
@@ -747,7 +747,7 @@ void PublisherImpl::remove_associations(
 
   // TMB - I don't know why I have to do it this way, but the compiler
   //       on linux complains with an error otherwise.
-  transport_interface_.remove_associations(readers.length(),
+  TransportInterface::remove_associations(readers.length(),
             readers.get_buffer(), writer, true); // as pub side
 }
 
@@ -886,42 +886,36 @@ PublisherImpl::data_available(DataWriterImpl* writer,
       // Do LATENCY_BUDGET processing here.
       // Do coherency processing here.
       // tell the transport to send the data sample(s).
-      transport_interface_.send(list) ;
+      this->send(list) ;
     }
  
   return ::DDS::RETCODE_OK;
 }
 
-int
-PublisherImpl::swap_bytes () const
-{
-  return transport_interface_.swap_bytes();
-}
+//int
+//PublisherImpl::swap_bytes () const
+//{
+//  return this->swap_bytes();
+//}
 
 SendControlStatus
 PublisherImpl::send_control(RepoId                 pub_id,
                             TransportSendListener* listener,
                             ACE_Message_Block*     msg)
 {
-  return transport_interface_.send_control(pub_id, listener, msg);
+  return TransportInterface::send_control(pub_id, listener, msg);
 }
 
 int
 PublisherImpl::remove_sample(const DataSampleListElement* sample, bool dropped_by_transport)
 {
-  return transport_interface_.remove_sample(sample, dropped_by_transport);
+  return TransportInterface::remove_sample(sample, dropped_by_transport);
 }
 
 int
 PublisherImpl::remove_all_control_msgs(RepoId pub_id)
 {
-  return transport_interface_.remove_all_control_msgs(pub_id);
-}
-
-AttachStatus
-PublisherImpl::attach_transport(TransportImpl* impl)
-{
-  return transport_interface_.attach_transport(impl);
+  return TransportInterface::remove_all_control_msgs(pub_id);
 }
 
 ::DDS::PublisherListener*
