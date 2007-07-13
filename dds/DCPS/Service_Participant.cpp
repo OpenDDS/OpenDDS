@@ -38,11 +38,11 @@ namespace OpenDDS
 
     //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
     //     Change it to be from configuration file.
-    static ACE_CString ior ("file://repo.ior");
+    static ACE_TString ior (ACE_TEXT("file://repo.ior"));
 
-    static ACE_CString config_fname ("");
+    static ACE_TString config_fname (ACE_TEXT(""));
 
-    static const char COMMON_SECTION_NAME[] = "common";
+    static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
 
     static bool got_debug_level = false;
     static bool got_info = false;
@@ -219,12 +219,14 @@ namespace OpenDDS
                 {
                   if (CORBA::is_nil (orb_.in ()))
                     {
+                      ACE_Argv_Type_Converter converter (argc, argv);
+
                       //TBD: allow user to specify the ORB id
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
                       orb_ = CORBA::ORB_init (argc,
-                                              argv,
+                                              converter.get_ASCII_argv(),
                                               "TAO_DDS_DCPS");
                     }
 
@@ -235,7 +237,7 @@ namespace OpenDDS
 
                   ACE_ASSERT ( ! CORBA::is_nil (orb_.in ()));
 
-                  if (config_fname == "")
+                  if (config_fname == ACE_TEXT(""))
                     {
                       ACE_DEBUG ((LM_INFO,
                         ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration "
@@ -348,69 +350,69 @@ namespace OpenDDS
 
       while (arg_shifter.is_anything_left ())
         {
-          const char *currentArg = 0;
+          const ACE_TCHAR *currentArg = 0;
 
-          if ((currentArg = arg_shifter.get_the_parameter("-DCPSDebugLevel")) != 0)
+          if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDebugLevel"))) != 0)
             {
               set_DCPS_debug_level (ACE_OS::atoi (currentArg));
               arg_shifter.consume_arg ();
               got_debug_level = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfoRepo")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfoRepo"))) != 0)
             {
               ior = currentArg;
               arg_shifter.consume_arg ();
               got_info = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSInfo")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfo"))) != 0)
             {
               // Deprecated, use -DCPSInfoRepo
               ior = currentArg;
               arg_shifter.consume_arg ();
               got_info = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunks")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunks"))) != 0)
             {
               n_chunks_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_chunks = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSChunkAssociationMutltiplier")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunkAssociationMutltiplier"))) != 0)
             {
               association_chunk_multiplier_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_chunk_association_multiplier = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSConfigFile")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSConfigFile"))) != 0)
             {
               config_fname = currentArg;
               arg_shifter.consume_arg ();
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSLivelinessFactor")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSLivelinessFactor"))) != 0)
             {
               liveliness_factor_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_liveliness_factor = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportPort")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportPort"))) != 0)
             {
               bit_transport_port_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitTransportIPAddress")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportIPAddress"))) != 0)
             {
               bit_transport_ip_ = currentArg;
               arg_shifter.consume_arg ();
               got_bit_transport_ip = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBitLookupDurationMsec")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitLookupDurationMsec"))) != 0)
             {
               bit_lookup_duration_msec_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_lookup_duration_msec = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter("-DCPSBit")) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBit"))) != 0)
             {
               bit_enabled_ = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();

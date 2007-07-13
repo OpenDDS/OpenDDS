@@ -1,3 +1,16 @@
+Fri Jul 13 15:48:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+          minor layout changes.
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+          Use default Topic and DataWriter QOS indentifiers instead of
+          explicitly creating default QOS objects. This simplifies code.
+
+        * dds/DCPS/Service_Participant.cpp:
+          minor wide-char related modifications.
+
 Tue Jul 10 17:07:05 UTC 2007  Trevor Fields  <fields_t@ociweb.com>
 
         * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
