@@ -106,12 +106,10 @@ int main (int argc, char *argv[])
 
       CORBA::String_var type_name = mts->get_type_name ();
 
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
       DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
-                                                        type_name.in (),
-                                                        topic_qos,
-                                                        DDS::TopicListener::_nil());
+                                                       type_name.in (),
+                                                       TOPIC_QOS_DEFAULT,
+                                                       DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ())) {
         cerr << "Failed to create_topic." << endl;
         exit(1);
@@ -173,10 +171,8 @@ int main (int argc, char *argv[])
       }
 
       // Create the Datareaders
-      DDS::DataReaderQos dr_qos;
-      sub->get_default_datareader_qos (dr_qos);
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
-                                                      dr_qos,
+                                                      DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
       if (CORBA::is_nil (dr.in ())) {
         cerr << "create_datareader failed." << endl;

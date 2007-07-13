@@ -102,12 +102,10 @@ int main (int argc, char *argv[]) {
 
       CORBA::String_var type_name = mts->get_type_name ();
 
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
       DDS::Topic_var topic =
         participant->create_topic ("Movie Discussion List",
                                    type_name.in (),
-                                   topic_qos,
+                                   TOPIC_QOS_DEFAULT,
                                    DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ())) {
         cerr << "create_topic failed." << endl;
@@ -157,11 +155,9 @@ int main (int argc, char *argv[]) {
       }
 
       // Create the datawriter
-      DDS::DataWriterQos dw_qos;
-      pub->get_default_datawriter_qos (dw_qos);
       DDS::DataWriter_var dw =
         pub->create_datawriter(topic.in (),
-                               dw_qos,
+                               DATAWRITER_QOS_DEFAULT,
                                DDS::DataWriterListener::_nil());
       if (CORBA::is_nil (dw.in ())) {
         cerr << "create_datawriter failed." << endl;
