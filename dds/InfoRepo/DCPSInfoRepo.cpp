@@ -171,14 +171,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   orb_ = CORBA::ORB_init (argc, argv, "");
   info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
 
-  // ciju: Hard-code the 'RW' wait strategy directive.
-  // Deadlocks have been observed to occur otherwise under stress conditions.
-  ACE_Service_Config::process_directive
-    (ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw ")
-     ACE_TEXT("-ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked\""));
-  ACE_Service_Config::process_directive
-    (ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""));
-
   CORBA::Object_var obj =
     orb_->resolve_initial_references ("RootPOA");
   root_poa_ = PortableServer::POA::_narrow (obj.in ());
