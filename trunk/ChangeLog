@@ -1,3 +1,10 @@
+Wed Jul 18 20:09:31 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Revert to the default LF Wait Strategy. The RW startegy doesn't
+          detect server side connection closures when using oneway
+          invocations (outbound OpenDDS invocations are mostly oneways).
+
 Fri Jul 13 15:48:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
