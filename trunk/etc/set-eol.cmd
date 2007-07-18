@@ -7,7 +7,7 @@ if not "%DDS_ROOT%" == "%CD%" (
         echo This script must be run from DDS_ROOT
         goto :EOF
 )
-echo if (!/\r\n$/) {print "$ARGV: $_\n"; exit 1} > ../detect.pl
+echo if (/[^^\r]\n$/) {print "$ARGV: $_\n"; exit 1} > ../detect.pl
 del ..\files.txt > NUL 2>&1
 for /r %%f in (*.h *.cpp *.inl *.mp? *.txt *.idl *.pl *. domain_id* *.conf *.ini *.mw?) do (
 	echo %%f | findstr \.svn > NUL
@@ -22,6 +22,7 @@ for /r %%f in (*.h *.cpp *.inl *.mp? *.txt *.idl *.pl *. domain_id* *.conf *.ini
 )
 if not exist ..\files.txt (
         echo No files found with bad line endings
+        del ..\detect.pl
         goto :EOF
 )
 echo Check the files with svn stat in another window and then

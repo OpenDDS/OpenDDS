@@ -1,3 +1,10 @@
+Wed Jul 18 21:30:21 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * etc/set-eol.cmd:
+
+          Fixed a bug in the regexp that was detecting text files that ended
+          with no line ending as if they had the wrong sort of line ending.
+
 Wed Jul 18 20:09:31 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
