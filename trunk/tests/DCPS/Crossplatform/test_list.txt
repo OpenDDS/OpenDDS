@@ -1,0 +1,3 @@
+# group		client	server
+   1		spider	oci1176
+#    1		oci1176	spider

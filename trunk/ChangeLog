@@ -1,3 +1,18 @@
+Tue Aug 14 16:32:55 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/CrossSync.pm:
+        * bin/CrossSyncDDS.pm:
+          Simple framework for crossplatform testing.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Crossplatform:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/Crossplatform/README:
+        * tests/DCPS/Crossplatform/test_list.txt:
+          New crossplatform test piggybacking on the DevGuide Messenger
+          test. This directory is intended to hold test scripts that drive
+          other concrete tests across the network.
+
 Wed Jul 18 21:30:21 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * etc/set-eol.cmd:
