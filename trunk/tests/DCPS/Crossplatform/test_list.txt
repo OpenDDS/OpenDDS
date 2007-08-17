@@ -1,3 +1,5 @@
 # group		client	server
-   1		spider	oci1176
-#    1		oci1176	spider
+
+# dds_doc_trunk_mosquito_linux_gcc_d1o0s1 \
+# dds_oci_tao-1_4_3_sydney.phx_sunos59_gcc_d1o0
+  1		mosquito	sydney.phx

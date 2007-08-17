@@ -1,3 +1,8 @@
+Fri Aug 17 14:12:44 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/Crossplatform/test_list.txt:
+          Add involved build names to the schedule file.
+
 Tue Aug 14 16:32:55 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/CrossSync.pm:
