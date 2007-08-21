@@ -1,3 +1,39 @@
+Tue Aug 21 17:56:14 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/CrossSync.pm:
+        * bin/CrossSyncDDS.pm:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastLoader.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/Crossplatform/test_list.txt:
+          Add wide char support to DDS core. Currently only compatible
+          with DOC TAO release. Haven't yet tested InfoRepo persistence.
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+          Add wide char support to example.
+
 Mon Aug 20 22:39:51 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/dcps_tests.lst:

@@ -16,6 +16,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Service_Config.h"
+#include "ace/Argv_Type_Converter.h"
 
 #include <string>
 #include <fstream>
@@ -63,7 +64,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , resurrect_ (true)
 {
   listen_address_str_ = ACE_LOCALHOST;
-  listen_address_str_ += ":2839";
+  listen_address_str_ += ACE_TEXT(":2839");
 
   init (argc, argv);
 }
@@ -107,18 +108,18 @@ InfoRepo::parse_args (int argc,
 {
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  const char* current_arg = 0;
+  const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
     {
-      if ( (current_arg = arg_shifter.get_the_parameter("-a")) != 0)
+      if ( (current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
         {
           listen_address_str_ = current_arg;
           listen_address_given_ = 1;
           arg_shifter.consume_arg();
         }
       else if ((current_arg = arg_shifter.get_the_parameter
-                ("-r")) != 0)
+                (ACE_TEXT("-r"))) != 0)
         {
           int p = ACE_OS::atoi (current_arg);
           resurrect_ = true;
@@ -128,29 +129,29 @@ InfoRepo::parse_args (int argc,
           }
           arg_shifter.consume_arg ();
         }
-      else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0)
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
         {
           domain_file_ = current_arg;
           arg_shifter.consume_arg ();
         }
-      else if ((current_arg = arg_shifter.get_the_parameter("-o")) != 0)
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
         {
           ior_file_ = current_arg;
           arg_shifter.consume_arg ();
         }
-      else if (arg_shifter.cur_arg_strncasecmp("-NOBITS") == 0)
+      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-NOBITS")) == 0)
         {
           use_bits_ = false;
           arg_shifter.consume_arg ();
         }
-      else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
         {
           TURN_ON_VERBOSE_DEBUG;
           arg_shifter.consume_arg();
         }
 
       // The '-?' option
-      else if (arg_shifter.cur_arg_strncasecmp("-?") == 0)
+      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
         {
           this->usage (argv[0]);
           ACE_OS::exit (0);
@@ -168,7 +169,9 @@ InfoRepo::parse_args (int argc,
 bool
 InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 {
-  orb_ = CORBA::ORB_init (argc, argv, "");
+  ACE_Argv_Type_Converter cvt (argc, argv);
+
+  orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
   info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
 
   CORBA::Object_var obj =
@@ -207,7 +210,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     orb_->object_to_string (info_repo.in ());
 
   TheServiceParticipant->set_ORB(orb_.in());
-  TheServiceParticipant->set_repo_ior(objref_str.in());
+  TheServiceParticipant->set_repo_ior(ACE_TEXT_CHAR_TO_TCHAR(objref_str.in()));
 
   // Initialize the DomainParticipantFactory
   ::DDS::DomainParticipantFactory_var dpf
@@ -239,7 +242,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   // the transport
   if (0 >= info_->load_domains (domain_file_.c_str(), use_bits_))
     {
-      //ACE_ERROR_RETURN((LM_ERROR, "ERROR: Failed to load any domains!\n"), -1);
+      //ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: Failed to load any domains!\n")), -1);
     }
 
   CORBA::Object_var table_object =
@@ -248,20 +251,21 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   IORTable::Table_var adapter =
     IORTable::Table::_narrow (table_object.in ());
   if (CORBA::is_nil (adapter.in ())) {
-    ACE_ERROR ((LM_ERROR, "Nil IORTable\n"));
+    ACE_ERROR ((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
   }
   else {
     adapter->bind ("DCPSInfoRepo", objref_str.in ());
   }
 
-  std::ofstream ior_stream (ior_file_.c_str());
-  if (!ior_stream)
-    {
-      ACE_ERROR((LM_ERROR, "ERROR: Unable to open IOR file: %s\n"
+  FILE *output_file= ACE_OS::fopen (ior_file_.c_str (), ACE_TEXT("w"));
+  if (output_file == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Unable to open IOR file: %s\n")
                  , ior_file_.c_str()));
       throw InitError ("Unable to open IOR file.");
   }
-  ior_stream << objref_str.in ();
+
+  ACE_OS::fprintf (output_file, "%s", objref_str.in ());
+  ACE_OS::fclose (output_file);
 
   return true;
 }

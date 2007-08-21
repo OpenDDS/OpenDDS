@@ -20,26 +20,29 @@ class ACE_Data_Block ;
  */
 #define RECEIVE_SYNCH ACE_SYNCH_NULL_MUTEX
 
-/// Macro to get the individual configuration value from ACE_Configuration_Heap and cast to the specific
-/// type from integer.
+/// Macro to get the individual configuration value
+///  from ACE_Configuration_Heap and cast to the specific
+///  type from integer.
 #define GET_CONFIG_VALUE(CF, SECT, KEY, VALUE, TYPE)                           \
 {                                                                              \
-  ACE_CString stringvalue;                                                     \
+  ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
+                            "file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
-  else  if (stringvalue == "")                                                 \
+  else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "         \
+                          "file - using code default.\n"),                     \
                 KEY));                                                         \
     }                                                                          \
   }                                                                            \
@@ -49,25 +52,28 @@ class ACE_Data_Block ;
   }                                                                            \
 }
 
-/// Macro to get the individual configuration value from ACE_Configuration_Heap as string type.
+/// Macro to get the individual configuration value
+///  from ACE_Configuration_Heap as string type.
 #define GET_CONFIG_STRING_VALUE(CF, SECT, KEY, VALUE)                          \
 {                                                                              \
-  ACE_CString stringvalue;                                                     \
+  ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
+                            "file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
-  else  if (stringvalue == "")                                                 \
+  else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                  ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "       \
+                            "file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
@@ -77,7 +83,7 @@ class ACE_Data_Block ;
   }                                                                            \
 }
 
-#define GET_CONFIG_DOUBLE_VALUE(CF, SECT, KEY, VALUE)                           \
+#define GET_CONFIG_DOUBLE_VALUE(CF, SECT, KEY, VALUE)                          \
 {                                                                              \
   ACE_CString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
@@ -85,7 +91,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config file - using code default.\n"),\
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
+                            "file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
@@ -94,7 +101,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config file - using code default.\n"),\
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "         \
+                          "file - using code default.\n"),                     \
                 KEY));                                                         \
     }                                                                          \
   }                                                                            \
@@ -104,14 +112,19 @@ class ACE_Data_Block ;
   }                                                                            \
 }
 
+
 // The factory section name prefix.
-static const char FACTORY_SECTION_NAME_PREFIX[] = "transport_factory_";
+static const ACE_TCHAR FACTORY_SECTION_NAME_PREFIX[]
+= ACE_TEXT("transport_factory_");
 // The factory section name prefix is "transport_factory_" so the length is 18.
-static const size_t FACTORY_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (FACTORY_SECTION_NAME_PREFIX);
+static const size_t FACTORY_SECTION_NAME_PREFIX_LEN =
+ACE_OS::strlen (FACTORY_SECTION_NAME_PREFIX);
 // The transport section name prefix.
-static const char  TRANSPORT_SECTION_NAME_PREFIX[] = "transport_impl_";
+static const ACE_TCHAR  TRANSPORT_SECTION_NAME_PREFIX[]
+= ACE_TEXT("transport_impl_");
 // The transport section name prefix is "transport_impl_" so the length is 15.
-static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN = ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX);
+static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN =
+ACE_OS::strlen (TRANSPORT_SECTION_NAME_PREFIX);
 
 namespace OpenDDS
 {
@@ -123,7 +136,7 @@ namespace OpenDDS
     const bool DONT_AUTO_CONFIG = 0;
 
     /// The TransportImplFactory instance ID type.
-    typedef ACE_CString FactoryIdType;
+    typedef ACE_TString FactoryIdType;
 
     /// The TransportImpl instance ID type.
     typedef ACE_UINT32 TransportIdType;
@@ -188,7 +201,7 @@ namespace OpenDDS
                                               TransportDataBlockAllocator ;
 
     typedef Cached_Allocator_With_Overflow<
-              char[RECEIVE_DATA_BUFFER_SIZE],
+              ACE_TCHAR[RECEIVE_DATA_BUFFER_SIZE],
               RECEIVE_SYNCH>                  TransportDataAllocator ;
 
 

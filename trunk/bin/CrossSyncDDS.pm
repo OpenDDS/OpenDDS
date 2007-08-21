@@ -2,8 +2,6 @@ package CrossSyncDDS;
 
 use CrossSync;
 
-use Sys::Hostname;
-
 @ISA = ("CrossSync"); #inherits from CrossSync
 
 sub new {
@@ -53,7 +51,7 @@ sub _create_custom_config {
 
     $self->{PUB_INI_TMP} = "pub$pid.ini";
     $self->{SUB_INI_TMP} = "sub$pid.ini";
-    my $my_name = hostname();
+    my $my_name = $self->{SELF};
     my $in_fh = new FileHandle();
     my $out_fh = new FileHandle();
 

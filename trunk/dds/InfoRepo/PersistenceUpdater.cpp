@@ -178,7 +178,7 @@ PersistenceUpdater::IdType_ExtId::hash (void) const
 
 
 PersistenceUpdater::PersistenceUpdater (void)
-  : persistence_file_ ("InforepoPersist")
+  : persistence_file_ (ACE_TEXT("InforepoPersist"))
     , reset_ (false)
     , um_ (0)
 { }
@@ -226,7 +226,7 @@ index_cleanup (I* index
       iter++;
 
       if (index->unbind ((*current_iter).ext_id_, allocator) != 0) {
-        ACE_ERROR ((LM_ERROR, "Index unbind failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("Index unbind failed.\n")));
       }
     }
 }
@@ -239,7 +239,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
     ("UpdateManager");
 
   if (um_ == 0) {
-    ACE_ERROR ((LM_ERROR, "PersistenceUpdater initialization failed. "
+    ACE_ERROR ((LM_ERROR, ACE_TEXT("PersistenceUpdater initialization failed. ")
                 "No UpdateManager discovered.\n"));
     return -1;
   }
@@ -264,7 +264,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
   char* topic_index = (char*)createIndex (topic_tag, *allocator_
                                           , sizeof (TopicIndex), ex);
   if (topic_index == 0) {
-    ACE_DEBUG ((LM_DEBUG, "Initial allocation/Bind failed 1.\n"));
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 1.\n")));
     return -1;
   }
   exists = exists || ex;
@@ -272,7 +272,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
   char* participant_index = (char*)createIndex (participant_tag, *allocator_
                                                 , sizeof (ParticipantIndex), ex);
   if (participant_index == 0) {
-    ACE_DEBUG ((LM_DEBUG, "Initial allocation/Bind failed 2.\n"));
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 2.\n")));
     return -1;
   }
   exists = exists || ex;
@@ -280,7 +280,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
   char* actor_index = (char*)createIndex (actor_tag, *allocator_
                                           , sizeof (ActorIndex), ex);
   if (actor_index == 0) {
-    ACE_DEBUG ((LM_DEBUG, "Initial allocation/Bind failed 2.\n"));
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 2.\n")));
     return -1;
   }
   exists = exists || ex;
@@ -292,7 +292,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
       actor_index_ = reinterpret_cast<ActorIndex*> (actor_index);
 
       if (!(topic_index_ && participant_index_ && actor_index_)) {
-        ACE_ERROR ((LM_DEBUG, "Unable to narrow persistent indexes.\n"));
+        ACE_ERROR ((LM_DEBUG, ACE_TEXT("Unable to narrow persistent indexes.\n")));
         return -1;
       }
     }
@@ -321,7 +321,7 @@ PersistenceUpdater::parse (int argc, ACE_TCHAR *argv[])
 {
   for (ssize_t count = 0; count < argc; count++)
     {
-      if (ACE_OS::strcasecmp (argv[count], "-file") == 0)
+      if (ACE_OS::strcasecmp (argv[count], ACE_TEXT("-file")) == 0)
         {
           if ((count + 1) < argc)
             {
@@ -329,7 +329,7 @@ PersistenceUpdater::parse (int argc, ACE_TCHAR *argv[])
               count++;
             }
         }
-      else if (ACE_OS::strcasecmp (argv[count], "-reset") == 0)
+      else if (ACE_OS::strcasecmp (argv[count], ACE_TEXT("-reset")) == 0)
         {
           if ((count + 1) < argc)
             {
@@ -343,7 +343,7 @@ PersistenceUpdater::parse (int argc, ACE_TCHAR *argv[])
             }
         }
       else {
-        ACE_DEBUG ((LM_DEBUG, "Unknown option %s\n"
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Unknown option %s\n")
                     , argv[count]));
         return -1;
       }
@@ -386,7 +386,7 @@ PersistenceUpdater::requestImage (void)
       ACE_NEW_NORETURN (buf, char[qos_len]);
       qos_sequences.push_back (ArrDelAdapter<char>(buf));
       if (buf == 0) {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("UpdateManager::add> Allocation failed.\n")));
         return;
       }
       ACE_OS::memcpy (buf, topic->topicQos.second.second, qos_len);
@@ -410,7 +410,7 @@ PersistenceUpdater::requestImage (void)
       ACE_NEW_NORETURN (buf, char[qos_len]);
       qos_sequences.push_back (ArrDelAdapter<char>(buf));
       if (buf == 0) {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("UpdateManager::add> Allocation failed.\n")));
         return;
       }
       ACE_OS::memcpy (buf, participant->participantQos.second.second, qos_len);
@@ -433,7 +433,7 @@ PersistenceUpdater::requestImage (void)
       ACE_NEW_NORETURN (buf, char[qos_len]);
       qos_sequences.push_back (ArrDelAdapter<char>(buf));
       if (buf == 0) {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("UpdateManager::add> Allocation failed.\n")));
         return;
       }
       ACE_OS::memcpy (buf, actor->pubsubQos.second.second, qos_len);
@@ -447,7 +447,7 @@ PersistenceUpdater::requestImage (void)
       ACE_NEW_NORETURN (buf, char[qos_len]);
       qos_sequences.push_back (ArrDelAdapter<char>(buf));
       if (buf == 0) {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("UpdateManager::add> Allocation failed.\n")));
         return;
       }
       ACE_OS::memcpy (buf, actor->drdwQos.second.second, qos_len);
@@ -461,7 +461,7 @@ PersistenceUpdater::requestImage (void)
       ACE_NEW_NORETURN (buf, char[qos_len]);
       qos_sequences.push_back (ArrDelAdapter<char>(buf));
       if (buf == 0) {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("UpdateManager::add> Allocation failed.\n")));
         return;
       }
       ACE_OS::memcpy (buf, actor->transportInterfaceInfo.second, qos_len);
@@ -577,7 +577,7 @@ PersistenceUpdater::remove (ItemType type, const IdType& idType)
       }
       break;
     default:
-      ACE_ERROR ((LM_ERROR, "(%P | %t) Unknown entity: %d\n", idType));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P | %t) Unknown entity: %d\n"), idType));
     }
 }
 

@@ -53,8 +53,8 @@ my($port1) = 10001 + @ports[0];
 my $domains_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/domain_ids";
 my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 my $repo_host;
-if ($role == 1) {
-    $repo_host = hostname();
+if ($role == CrossSync::SERVER) {
+    $repo_host = $CS->self();
 } else {
     $repo_host = $CS->peer();
 }

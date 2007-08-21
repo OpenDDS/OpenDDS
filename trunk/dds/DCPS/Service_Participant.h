@@ -162,7 +162,7 @@ namespace OpenDDS
       * NOTE: This has to be called before the get_domain_participant_factory
       *       method.
       */
-      void set_repo_ior(const char* repo_ior);
+      void set_repo_ior(const ACE_TCHAR* repo_ior);
 
       /**
       * Accessors for bit_transport_port_.
@@ -290,7 +290,7 @@ namespace OpenDDS
       int                                    liveliness_factor_;
 
       /// The builtin topic transport address.
-      ACE_CString                            bit_transport_ip_;
+      ACE_TString                            bit_transport_ip_;
       /// The builtin topic transport port number.
       int                                    bit_transport_port_;
 

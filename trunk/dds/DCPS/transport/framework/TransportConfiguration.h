@@ -62,9 +62,9 @@ namespace OpenDDS
         /// Accessor for the "send thread strategy" object.
         ThreadSynchStrategy* send_thread_strategy();
 
-        /// Overwrite the default configurations with the configuration for the 
+        /// Overwrite the default configurations with the configuration for the
         /// give transport_id in ACE_Configuration_Heap object.
-        virtual int  load (const TransportIdType& id, 
+        virtual int  load (const TransportIdType& id,
                            ACE_Configuration_Heap& config);
 
         /// Flag used to marshall/demarshall bytes sent/received.
@@ -87,9 +87,9 @@ namespace OpenDDS
         /// Optimum size (in bytes) of a packet (packet header + sample(s)).
         ACE_UINT32 optimum_packet_size_;
 
-        ACE_CString transport_type_;
+        ACE_TString transport_type_;
 
-        /// Flag for whether a new thread is needed for connection to  
+        /// Flag for whether a new thread is needed for connection to
         /// send without backpressure.
         bool thread_per_connection_;
 
