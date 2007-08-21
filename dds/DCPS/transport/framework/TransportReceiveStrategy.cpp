@@ -457,7 +457,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             // only do the hexdump if it will be printed - to not impact perfomance.
             if (::OpenDDS::DCPS::Transport_debug_level)
               {
-                char xbuffer[4096];
+                ACE_TCHAR xbuffer[4096];
                 int xbytes =
                         this->receive_buffers_[this->buffer_index_]->length();
                 if (xbytes > 8) { xbytes = 8; }
@@ -563,7 +563,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                 // only do the hexdump if it will be printed - to not impact perfomance.
                 if (::OpenDDS::DCPS::Transport_debug_level)
                   {
-                    char ebuffer[4096] ;
+                    ACE_TCHAR ebuffer[4096] ;
                     ACE::format_hexdump
                        (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
                         this->receive_sample_.header_.max_marshaled_size(),

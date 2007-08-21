@@ -11,7 +11,7 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::ReliableMulticastTranspo
   , sender_history_size_(1024)
   , receiver_buffer_size_(256)
 {
-  transport_type_ = "ReliableMulticast";
+  transport_type_ = ACE_TEXT("ReliableMulticast");
 }
 
 ACE_INLINE

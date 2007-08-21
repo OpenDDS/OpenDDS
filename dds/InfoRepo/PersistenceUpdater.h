@@ -91,7 +91,7 @@ public:
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
 
-  std::string persistence_file_;
+  ACE_TString persistence_file_;
   bool reset_;
 
   UpdateManager *um_;

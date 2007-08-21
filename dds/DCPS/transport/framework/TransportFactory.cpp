@@ -69,7 +69,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_i
     {
           // Create a new reactor task for each transport.
           // We need create (and activate) the reactor task.
-          // In the future, we may let the DDS user choose to 
+          // In the future, we may let the DDS user choose to
           // which reactor to use.
           TransportReactorTask* tp;
           ACE_NEW_THROW_EX (tp,
@@ -179,9 +179,9 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration
         {
           ACE_TString transport_type;
           // Get the factory_id for the transport.
-          GET_CONFIG_STRING_VALUE (cf, sect, "transport_type", transport_type)
+          GET_CONFIG_STRING_VALUE (cf, sect, ACE_TEXT("transport_type"), transport_type)
 
-          if (transport_type == "")
+          if (transport_type == ACE_TEXT(""))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
                               ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: "
@@ -217,7 +217,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl (TransportIdType transpor
 
 OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportFactory::create_transport_impl (TransportIdType transport_id,
-                                                    ACE_CString transport_type,
+                                                    ACE_TString transport_type,
                                                     bool auto_configure)
 {
   if (transport_type.length() == 0)
@@ -277,7 +277,7 @@ OpenDDS::DCPS::TransportFactory::get_configuration (TransportIdType transport_id
 
 OpenDDS::DCPS::TransportConfiguration_rch
 OpenDDS::DCPS::TransportFactory::create_configuration (TransportIdType transport_id,
-                                                   ACE_CString transport_type)
+                                                   ACE_TString transport_type)
 {
   int result = 0;
   TransportGenerator_rch generator;
@@ -303,11 +303,11 @@ OpenDDS::DCPS::TransportFactory::create_configuration (TransportIdType transport
 
 OpenDDS::DCPS::TransportConfiguration_rch
 OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType transport_id,
-                                                          ACE_CString transport_type)
+                                                          ACE_TString transport_type)
 {
-  if (transport_type == "")
+  if (transport_type == ACE_TEXT(""))
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_configuration transport_type"
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type")
                             "is null. \n"));
       throw CORBA::BAD_PARAM ();
     }
@@ -323,7 +323,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType tr
     {
       if (transport_type != config->transport_type_)
         {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_configuration transport_type "
+          ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type ")
                                 "conflict - provided %s configured %s\n", transport_type.c_str(),
                                 config->transport_type_.c_str ()));
           throw Transport::ConfigurationConflict ();
@@ -340,9 +340,9 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id
 {
   DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",1);
 
-  if (factory_id == "")
+  if (factory_id == ACE_TEXT(""))
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)TransportFactory::get_or_create_factory factory_id is null. \n"));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_factory factory_id is null. \n")));
       throw CORBA::BAD_PARAM ();
     }
 
@@ -380,8 +380,8 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id
 }
 
 void
-OpenDDS::DCPS::TransportFactory::register_generator (const char* type,
-                                                 TransportGenerator* generator)
+OpenDDS::DCPS::TransportFactory::register_generator (const ACE_TCHAR* type,
+                                                     TransportGenerator* generator)
 {
   DBG_ENTRY_LVL("TransportFactory","register_generator",5);
   // We take ownership (reasons explained above) of the impl_factory

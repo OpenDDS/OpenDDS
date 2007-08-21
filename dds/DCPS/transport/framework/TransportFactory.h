@@ -24,10 +24,10 @@ namespace OpenDDS
   {
 
     /**
-     * The TransportFactory is a singleton object which provides a mechanism to 
-     * the application code to create objects of individual transport implementations. 
-     * It is possible to have more than a single object of a given implementation 
-     * in order to support separation of communications between different DDS Domains 
+     * The TransportFactory is a singleton object which provides a mechanism to
+     * the application code to create objects of individual transport implementations.
+     * It is possible to have more than a single object of a given implementation
+     * in order to support separation of communications between different DDS Domains
      * or application defined areas of control.
      *
      * Notes about object ownership:
@@ -67,7 +67,7 @@ namespace OpenDDS
         /// library creates a concrete transport generator and register with TransportFactory singleton.
         /// Special Note: Caller is "giving away" the generator to
         ///               this TransportFactory.
-        void register_generator (const char* name,
+        void register_generator (const ACE_TCHAR* name,
                                  TransportGenerator* generator);
 
         /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory
@@ -89,7 +89,7 @@ namespace OpenDDS
         /// transport_id is already configured then an exception (Transport::duplicate)
         /// is raised.
         TransportConfiguration_rch create_configuration (TransportIdType transport_id,
-                                                         ACE_CString transport_type);
+                                                         ACE_TString transport_type);
 
         /// This interface is the easiest way for user to get the TransportConfiguration
         /// object without knowing whether the application is configured via a
@@ -99,7 +99,7 @@ namespace OpenDDS
         /// different from provided transport_type then the an exception
         /// (Transport::ConfigurationConflict) is raised.:
         TransportConfiguration_rch get_or_create_configuration (TransportIdType transport_id,
-                                                                ACE_CString transport_type);
+                                                                ACE_TString transport_type);
 
         /// This interface is used when the transport_id is configured via the configuration
         /// file. In this case, the TransportConfiguration object should be already registered
@@ -127,7 +127,7 @@ namespace OpenDDS
         /// The auto_configure flag gives option to configure the TransportImpl object with the
         /// registered TransportConfiguration object via TransportImpl::configure() call.
         TransportImpl_rch create_transport_impl (TransportIdType transport_id,
-                                                 ACE_CString transport_type,
+                                                 ACE_TString transport_type,
                                                  bool auto_configure = AUTO_CONFIG);
 
         /// Client application calls this to retrieve a previously
@@ -162,7 +162,7 @@ namespace OpenDDS
         ///
         ///  Key  == "Transport type"
         ///  Value == TransportGenerator object
-        typedef std::map<std::string, TransportGenerator_rch> GeneratorMap;
+        typedef std::map<ACE_TString, TransportGenerator_rch> GeneratorMap;
 
         /// The "TransportConfiguration Map"
         ///

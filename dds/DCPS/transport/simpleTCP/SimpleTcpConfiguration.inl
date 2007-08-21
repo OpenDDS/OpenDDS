@@ -16,7 +16,7 @@ OpenDDS::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
 {
   DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",5);
 
-  transport_type_ = "SimpleTcp";
+  transport_type_ = ACE_TEXT("SimpleTcp");
 
   if (local_address_.set (static_cast<unsigned short> (0),
                 static_cast<ACE_UINT32> (INADDR_ANY),

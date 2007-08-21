@@ -30,10 +30,8 @@ OPENDDS_DCPS_ReliableMulticastLoader::init(int argc, ACE_TCHAR* argv[])
     -1
     );
 
-  TheTransportFactory->register_generator(
-    "ReliableMulticast", 
-    generator
-    );
+  TheTransportFactory->register_generator (ACE_TEXT("ReliableMulticast")
+                                           , generator);
 
   return 0;
 }

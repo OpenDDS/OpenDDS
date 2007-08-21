@@ -9,6 +9,5 @@ OpenDDS::DCPS::SimpleMcastConfiguration::SimpleMcastConfiguration()
     receiver_(false)
 {
   DBG_ENTRY_LVL("SimpleMcastConfiguration","SimpleMcastConfiguration",5);
-  this->transport_type_ = "SimpleMcast";
+  this->transport_type_ = ACE_TEXT("SimpleMcast");
 }
-

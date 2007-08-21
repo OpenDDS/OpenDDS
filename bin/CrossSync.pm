@@ -71,7 +71,7 @@ sub wait {
 	return -1;
     }
 
-    my $my_name = hostname();
+    my $my_name = $self->{SELF};
     if ($verbose) {
 	print "Hostname: $my_name\n";
     }
@@ -86,17 +86,26 @@ sub wait {
 
 	my $sock;
 
+	if ($verbose) {
+	    my $peer = $self->{PEER};
+	    print "client> connecting to $peer:$server_port\n";
+	}
 	my $remaining_time = $total_timeout;
 	while (($remaining_time > 1)  && !$sock) {
 	    $sock = new IO::Socket::INET (PeerHost => $self->{PEER}
 					  , PeerPort => $server_port
 					  , Proto => 'tcp',);
 	    if (!$sock) {
+		print ". \n";
 		$remaining_time -= sleep (5);
 	    }
 	}
-	die "Client connection could not be established: $!"
-	    unless $sock;
+	if (!$sock) {
+	    if ($verbose) {
+		print STDERR "Client connection could not be established: $!\n";
+	    }
+	    return -1;
+	}
 	if ($verbose) {
 	    print "client $my_name> Connection established.\n";
 	}
@@ -144,7 +153,12 @@ sub wait {
 					      , Listen => 1
 					      , Proto => 'tcp'
 					      , Reuse => 1,);
-	die "Server socket could not be created: $!" unless $main_sock;
+	if (!$main_sock) {
+	    if ($verbose) {
+		print STDERR "Server socket could not be created: $!\n";
+	    }
+	    return -1;
+	}
 
 	my $read_set = new IO::Select;
 	$read_set->add ($main_sock);
@@ -210,7 +224,7 @@ sub ready {
     my $self = shift;
 
     my $verbose = $self->{VERBOSE};
-    my $my_name = hostname();
+    my $my_name = $self->{SELF};
     my $peer = $self->{PEER_FD};
 
     my $server_port = $self->{SERVER_PORT};
@@ -268,6 +282,12 @@ sub peer {
     return $self->{PEER};
 }
 
+sub self {
+    my $self = shift;
+
+    return $self->{SELF};
+}
+
 sub _initialize {
     my $self = shift;
 
@@ -280,7 +300,13 @@ sub _parse_schedule {
 
     my $in_fh = new FileHandle();
 
-    open ($in_fh, "$self->{SCHEDULE_FILE}") || die $!;
+    open ($in_fh, "$self->{SCHEDULE_FILE}");
+    if (!$in_fh) {
+	if ($verbose) {
+	    print STDERR "Unable to open file for parsing.\n";
+	}
+	return -1;
+    }
     my @argv;
     while(<$in_fh>) {
 	if (!/ +\#/) {
@@ -300,12 +326,15 @@ sub _parse_schedule {
     }
 
     my $my_name = hostname();
-    if ($my_name =~ /@argv[1]/) {
+    $my_name =~ s/(.*?)\..*/\1/; # get just the machine name
+    if (@argv[1] =~ /$my_name/) {
 	$self->{ROLE} = CLIENT;
 	$self->{PEER} = @argv[2];
-    } elsif ($my_name =~ /@argv[2]/) {
+	$self->{SELF} = @argv[1];
+    } elsif (@argv[2] =~ /$my_name/) {
         $self->{ROLE} = SERVER;
 	$self->{PEER} = @argv[1];
+	$self->{SELF} = @argv[2];
     } else {
 	return -1;
     }
@@ -316,8 +345,8 @@ sub _parse_schedule {
 sub DESTROY {
     my $self = shift;
 
-    unlink $self->{PUB_INI_TMP};
-    unlink $self->{SUB_INI_TMP};
+    #unlink $self->{PUB_INI_TMP};
+    #unlink $self->{SUB_INI_TMP};
     close ($self->{PEER_FD});
 }
 

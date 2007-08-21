@@ -22,7 +22,7 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   // The default transport can not be configured by user.
   if (id == DEFAULT_SIMPLE_UDP_ID)
     {
-       ACE_ERROR ((LM_ERROR, "(%P|%t)You can not configure the default SimpleUdp transport(id=%u) !!! \n",
+       ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)You can not configure the default SimpleUdp transport(id=%u) !!! \n"),
          id));
        return -1;
     }
@@ -31,8 +31,9 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   // what to do.
   this->TransportConfiguration::load (id, cf);
 
-  char section [50];
-  ACE_OS::sprintf (section, "%s%d", TRANSPORT_SECTION_NAME_PREFIX, id);
+  ACE_TCHAR section [50];
+  ACE_OS::sprintf (section, ACE_TEXT("%s%d")
+                   , ACE_TEXT_ALWAYS_CHAR(TRANSPORT_SECTION_NAME_PREFIX), id);
   const ACE_Configuration_Section_Key &root = cf.root_section ();
   ACE_Configuration_Section_Key trans_sect;
   if (cf.open_section (root, section, 0, trans_sect) != 0)
@@ -40,16 +41,15 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
                        ACE_TEXT ("Failed to open section: section %s\n"), section),
                        -1);
 
-  ACE_CString local_address;
-  GET_CONFIG_STRING_VALUE (cf, trans_sect, "local_address", local_address);
-  if (local_address != "")
+  ACE_TString local_address;
+  GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT("local_address"), local_address);
+  if (local_address != ACE_TEXT(""))
   {
     this->local_address_.set (local_address.c_str ());
   }
 
-  GET_CONFIG_VALUE (cf, trans_sect, "max_output_pause_period",
+  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT("max_output_pause_period"),
     this->max_output_pause_period_, int);
 
   return 0;
 }
-

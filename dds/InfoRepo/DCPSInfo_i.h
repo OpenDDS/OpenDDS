@@ -260,7 +260,7 @@ public:
   /// returns the number of domains that were loaded.
   /// Currently after loading domains, it
   ///  invoke 'init_persistence'
-  int load_domains (const char* filename, bool use_bit);
+  int load_domains (const ACE_TCHAR* filename, bool use_bit);
 
   /// Initialize the transport for the Built-In Topics
   /// Returns 0 (zero) if succeeds

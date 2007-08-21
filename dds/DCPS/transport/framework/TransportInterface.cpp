@@ -161,142 +161,142 @@ OpenDDS::DCPS::TransportInterface::add_associations
 
     for (size_t i = 0; i < num_remote_associations; ++i)
       {
-  RepoId remote_id = remote_associations[i].remote_id_;
+        RepoId remote_id = remote_associations[i].remote_id_;
 
-  DataLink_rch link;
+        DataLink_rch link;
 
-  // There are two ways to reserve the DataLink -- as a local publisher,
-  // or as a local subscriber.  If the receive_listener argument is
-  // a NULL pointer (0), then use the local publisher version.  Otherwise,
-  // use the local subscriber version.
-  if (receive_listener == 0)
-    {
-      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
-      local_id, remote_id));
-      // Local publisher, remote subscriber.
-      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-             remote_id,
-             local_id,
-             priority);
-    }
-  else
-    {
-      VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
-      local_id, remote_id));
-      // Local subscriber, remote publisher.
-      link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
-             remote_id,
-             local_id,
-             receive_listener,
-             priority);
-    }
+        // There are two ways to reserve the DataLink -- as a local publisher,
+        // or as a local subscriber.  If the receive_listener argument is
+        // a NULL pointer (0), then use the local publisher version.  Otherwise,
+        // use the local subscriber version.
+        if (receive_listener == 0)
+          {
+            VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() pub %d to sub %d\n",
+                  local_id, remote_id));
+            // Local publisher, remote subscriber.
+            link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+                                                 remote_id,
+                                                 local_id,
+                                                 priority);
+          }
+        else
+          {
+            VDBG((LM_DEBUG,"(%P|%t) TransportInterface::add_associations() sub %d to pub %d\n",
+                  local_id, remote_id));
+            // Local subscriber, remote publisher.
+            link = this->impl_->reserve_datalink(remote_associations[i].remote_data_,
+                                                 remote_id,
+                                                 local_id,
+                                                 receive_listener,
+                                                 priority);
+          }
 
-  if (link.is_nil())
-    {
-      // reserve_datalink failure
-      ACE_ERROR_RETURN((LM_ERROR,
-            "(%P|%t) ERROR: Failed to reserve a DataLink with the "
-            "TransportImpl for association from local "
-            "[%s %d] to remote [%s %d].\n",
-            local_id_str,local_id,
-            remote_id_str,remote_id),
-           -1);
-    }
+        if (link.is_nil())
+          {
+            // reserve_datalink failure
+            ACE_ERROR_RETURN((LM_ERROR,
+                              "(%P|%t) ERROR: Failed to reserve a DataLink with the "
+                              "TransportImpl for association from local "
+                              "[%s %d] to remote [%s %d].\n",
+                              local_id_str,local_id,
+                              remote_id_str,remote_id),
+                             -1);
+          }
 
-  // At this point, the DataLink knows about our association.
+        // At this point, the DataLink knows about our association.
 
-  //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
+        //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
 
-  //MJM: The logic from here to the end of the loop needs to be broken out
-  //MJM: and moved to another method.  That method should collect up all
-  //MJM: of the new connections.  When they _all_ have been established,
-  //MJM: then this routine can move forward.  In the meantime, after this
-  //MJM: method has made all of the reserve_datalink() calls, it should
-  //MJM: then wait on a condition that indicates that _all_ of the
-  //MJM: datalinks are available.
+        //MJM: The logic from here to the end of the loop needs to be broken out
+        //MJM: and moved to another method.  That method should collect up all
+        //MJM: of the new connections.  When they _all_ have been established,
+        //MJM: then this routine can move forward.  In the meantime, after this
+        //MJM: method has made all of the reserve_datalink() calls, it should
+        //MJM: then wait on a condition that indicates that _all_ of the
+        //MJM: datalinks are available.
 
-  //MJM: It is then the responsibility of the datalinks to not report
-  //MJM: their successful connection until both sides have checked in.
-  //MJM: This means adding some additional traffic during connection
-  //MJM: establishment.  See the datalink details for more info.
+        //MJM: It is then the responsibility of the datalinks to not report
+        //MJM: their successful connection until both sides have checked in.
+        //MJM: This means adding some additional traffic during connection
+        //MJM: establishment.  See the datalink details for more info.
 
-  //MJM: Hmm...
-  //MJM: 1) make another method to do the rest of the registration
-  //MJM:    code here.
-  //MJM: 2) Make that method aware of how many datalinks need to
-  //MJM:    be established.
-  //MJM: 3) After that many links have been established, signal the
-  //MJM:    condition.
-  //MJM: 4) Have this method wait() on the signal() after all the
-  //MJM:    reserve_datalinks() calls have been made.
+        //MJM: Hmm...
+        //MJM: 1) make another method to do the rest of the registration
+        //MJM:    code here.
+        //MJM: 2) Make that method aware of how many datalinks need to
+        //MJM:    be established.
+        //MJM: 3) After that many links have been established, signal the
+        //MJM:    condition.
+        //MJM: 4) Have this method wait() on the signal() after all the
+        //MJM:    reserve_datalinks() calls have been made.
 
-  //MJM: What remains is to add a ready protocol to the connection
-  //MJM: establishment.
+        //MJM: What remains is to add a ready protocol to the connection
+        //MJM: establishment.
 
-  //MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
+        //MJM: ^^^ CONNECTION ESTABLISHMENT CHANGES ^^^
 
-  // Now we need to update the local_map_ to associate the local_id
-  // with the new DataLink.  We do this by inserting the DataLink into
-  // the local_set that we found (or created) earlier.
+        // Now we need to update the local_map_ to associate the local_id
+        // with the new DataLink.  We do this by inserting the DataLink into
+        // the local_set that we found (or created) earlier.
 
-  // We consider a result of 1 or 0 to indicate success here.  A result
-  // of 0 means that the insert_link() succeeded, and a result of 1 means
-  // that the local_id already has an existing reservation with the
-  // DataLink.  This is expected to happen.
-  if (this->local_map_.insert_link(local_id, link.in()) != -1)
-    {
-      // Now that we know the local_set contains the new DataLink,
-      // we need to get the new DataLink into a remote_set within
-      // our remote_map_.
+        // We consider a result of 1 or 0 to indicate success here.  A result
+        // of 0 means that the insert_link() succeeded, and a result of 1 means
+        // that the local_id already has an existing reservation with the
+        // DataLink.  This is expected to happen.
+        if (this->local_map_.insert_link(local_id, link.in()) != -1)
+          {
+            // Now that we know the local_set contains the new DataLink,
+            // we need to get the new DataLink into a remote_set within
+            // our remote_map_.
 
-      if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
-        {
-    // Ok.  We are done handling the current association.
-    // This means we can continue the loop and go on to
-    // the next association.
-    continue;
-        }
-      else
-        {
-    // The remote_set->insert_link() failed.
-    ACE_ERROR((LM_ERROR,
-         "(%P|%t) ERROR: Failed to insert DataLink into remote_map_ "
-         "(DataLinkSetMap) for remote [%s %d].\n",
-         remote_id_str,remote_id));
-        }
+            if (this->remote_map_.insert_link(remote_id, link.in()) != -1)
+              {
+                // Ok.  We are done handling the current association.
+                // This means we can continue the loop and go on to
+                // the next association.
+                continue;
+              }
+            else
+              {
+                // The remote_set->insert_link() failed.
+                ACE_ERROR((LM_ERROR,
+                           "(%P|%t) ERROR: Failed to insert DataLink into remote_map_ "
+                           "(DataLinkSetMap) for remote [%s %d].\n",
+                           remote_id_str,remote_id));
+              }
 
-      // "Undo" logic due to error would go here.
-      //   * We would need to undo the local_set->insert_link() operation.
-      //MJM: Make it so.
-    }
-  else
-    {
-      // The local_set->insert_link() failed.
-      ACE_ERROR((LM_ERROR,
-           "(%P|%t) ERROR: Failed to insert DataLink into "
-           "local_map_ for local [%s %d].\n",
-           local_id_str,local_id));
-    }
+            // "Undo" logic due to error would go here.
+            //   * We would need to undo the local_set->insert_link() operation.
+            //MJM: Make it so.
+          }
+        else
+          {
+            // The local_set->insert_link() failed.
+            ACE_ERROR((LM_ERROR,
+                       "(%P|%t) ERROR: Failed to insert DataLink into "
+                       "local_map_ for local [%s %d].\n",
+                       local_id_str,local_id));
+          }
 
-  // "Undo" logic due to error would go here.
-  //   * We would need to undo the impl->reserve_datalink() operation.
-  //   * We also would need to iterate over the remote_assocations that
-  //     have worked thus far, and nuke them.
-  //MJM: Right.
-  //MJM: We will need to make sure that we do _not_ leave the transport in
-  //MJM: a funky state after a failure to associate.  This will probably
-  //MJM: be a fairly common occurance in some environments.
+        // "Undo" logic due to error would go here.
+        //   * We would need to undo the impl->reserve_datalink() operation.
+        //   * We also would need to iterate over the remote_assocations that
+        //     have worked thus far, and nuke them.
+        //MJM: Right.
+        //MJM: We will need to make sure that we do _not_ leave the transport in
+        //MJM: a funky state after a failure to associate.  This will probably
+        //MJM: be a fairly common occurance in some environments.
 
-  // Only failure conditions will cause the logic to get here.
-  return -1;
+        // Only failure conditions will cause the logic to get here.
+        return -1;
       } // for scope
 
     if (ACE_OS::strcmp (local_id_str, "publisher_id") == 0)
       {
-  if (this->impl_->add_pending_association (local_id,
-              num_remote_associations,
-              remote_associations) != 0)
-    return -1;
+        if (this->impl_->add_pending_association (local_id,
+                                                  num_remote_associations,
+                                                  remote_associations) != 0)
+          return -1;
       }
     // We completed everything without a problem.
   } // guard scope

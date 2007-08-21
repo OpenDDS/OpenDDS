@@ -92,14 +92,14 @@ TAO_DDS_DCPSInfo_i::add_topic (OpenDDS::DCPS::RepoId topicId,
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid domain Id: %d\n", domainId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
       return false;
     }
 
   DCPS_IR_Participant* participantPtr;
   if (domainPtr->find_participant(participantId,participantPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid participant Id: %d\n", participantId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n"), participantId));
       return false;
     }
 
@@ -321,14 +321,14 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid domain Id: %d\n", domainId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
       return false;
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid participant Id: %d\n"
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n")
                   , participantId));
       return false;
     }
@@ -336,7 +336,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid topic Id: %d\n", topicId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid topic Id: %d\n"), topicId));
       return false;
     }
 
@@ -360,7 +360,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
 
   if (partPtr->add_publication(pubPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Failed to add publisher to "
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
                   "participant list.\n"));
 
       // failed to add.  we are responsible for the memory.
@@ -369,7 +369,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
     }
   else if (topic->add_publication_reference(pubPtr, false) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Failed to add publisher to "
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
                   "topic list.\n"));
 
       // Failed to add to the topic
@@ -520,14 +520,14 @@ TAO_DDS_DCPSInfo_i::add_subscription (
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid domain Id: %d\n", domainId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
       return false;
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid participant Id: %d\n"
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n")
                   , participantId));
       return false;
     }
@@ -535,7 +535,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid topic Id: %d\n", topicId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid topic Id: %d\n"), topicId));
       return false;
     }
 
@@ -561,7 +561,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
 
   if (partPtr->add_subscription(subPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Failed to add publisher to "
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
                   "participant list.\n"));
 
       // failed to add.  we are responsible for the memory.
@@ -570,7 +570,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     }
   else if (description->add_subscription_reference(subPtr, false) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Failed to add publisher to "
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
                   "topic list.\n"));
 
       // No associations were made so remove and fail.
@@ -678,14 +678,14 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
   DCPS_IR_Domain* domainPtr;
   if (domains_.find(domainId, domainPtr) != 0)
     {
-      ACE_ERROR ((LM_ERROR, "Invalid domain Id: %d\n", domainId));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
       return false;
     }
 
   DCPS_IR_Participant* partPtr;
   if (domainPtr->find_participant(participantId, partPtr) == 0)
     {
-      ACE_ERROR ((LM_ERROR, "A participant already exists for Id: %d\n"
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("A participant already exists for Id: %d\n")
                   , participantId));
       return false;
     }
@@ -702,7 +702,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
 
   if (0 != status)
     {
-      ACE_ERROR ((LM_ERROR, "InfoRepo servant failed to add Participant.\n"));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("InfoRepo servant failed to add Participant.\n")));
 
       delete participant;
       return false;
@@ -858,16 +858,16 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
 }
 
 
-int TAO_DDS_DCPSInfo_i::load_domains (const char* filename,
+int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
                                       bool use_bit)
 {
   int status;
 
   FILE* file = 0;
-  file = ACE_OS::fopen (filename, "r");
+  file = ACE_OS::fopen (filename, ACE_TEXT("r"));
   if (file == 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, "ERROR: cannot open domain id file <%s>\n",
+      ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("ERROR: cannot open domain id file <%s>\n"),
                          filename), -1);
     }
 
@@ -960,12 +960,12 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
 
   OpenDDS::DCPS::TransportImpl_rch trans_impl
     = TheTransportFactory->create_transport_impl (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->get_or_create_configuration (OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                        "SimpleTcp");
+                                                        ACE_TEXT("SimpleTcp"));
   OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
@@ -993,7 +993,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
 
       if (!this->add_domain_participant (part->domainId, part->participantId
                                          , part->participantQos)) {
-        ACE_ERROR ((LM_ERROR, "Failed to add Domain Participant.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add Domain Participant.\n")));
         return false;
       }
     }
@@ -1006,7 +1006,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
       if (!this->add_topic (topic->topicId, topic->domainId
                             , topic->participantId, topic->name.c_str()
                             , topic->dataType.c_str(), topic->topicQos)) {
-        ACE_ERROR ((LM_ERROR, "Failed to add Domain Topic.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add Domain Topic.\n")));
         return false;
       }
     }
@@ -1021,7 +1021,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
                                    , sub->callback.c_str(), sub->drdwQos
                                    , sub->transportInterfaceInfo
                                    , sub->pubsubQos)) {
-        ACE_ERROR ((LM_ERROR, "Failed to add Subscriber.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add Subscriber.\n")));
         return false;
       }
     }
@@ -1036,7 +1036,7 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
                                   , pub->callback.c_str() , pub->drdwQos
                                   , pub->transportInterfaceInfo
                                   , pub->pubsubQos)) {
-        ACE_ERROR ((LM_ERROR, "Failed to add Publisher.\n"));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add Publisher.\n")));
         return false;
       }
     }
@@ -1060,7 +1060,7 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
       }
     }
   else {
-    ACE_ERROR_RETURN ((LM_ERROR, "TAO_DDS_DCPSInfo_i> Failed to discover "
+    ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("TAO_DDS_DCPSInfo_i> Failed to discover ")
                        "UpdateManager.\n"), false);
   }
 

@@ -60,7 +60,7 @@ namespace OpenDDS
       n_chunks_ (DEFAULT_NUM_CHUNKS),
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
-      bit_transport_ip_(""),
+      bit_transport_ip_(ACE_TEXT("")),
       bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (
 #ifdef DDS_HAS_MINIMUM_BIT
@@ -252,7 +252,7 @@ namespace OpenDDS
                           ACE_DEBUG ((LM_INFO,
                                       ACE_TEXT("(%P|%t)INFO: not using file configuration - "
                                       "can not open \"%s\" for reading. %p\n"),
-                                      config_fname.c_str(), "fopen"));
+                                      config_fname.c_str(), ACE_TEXT("fopen")));
                         }
                       else
                         {
@@ -301,7 +301,8 @@ namespace OpenDDS
                     }
 
 
-                  CORBA::Object_var obj = orb_->string_to_object (ior.c_str());
+                  CORBA::Object_var obj = orb_->string_to_object
+                    (ACE_TEXT_ALWAYS_CHAR (ior.c_str()));
 
                   repo_ = DCPSInfo::_narrow (obj.in ());
 
@@ -538,7 +539,7 @@ namespace OpenDDS
     }
 
     void
-    Service_Participant::set_repo_ior(const char* repo_ior)
+    Service_Participant::set_repo_ior(const ACE_TCHAR* repo_ior)
     {
       ior = repo_ior;
       got_info = true;
@@ -561,10 +562,10 @@ namespace OpenDDS
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
       this->bit_transport_impl_
-        = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, "SimpleTcp", DONT_AUTO_CONFIG);
+        = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), DONT_AUTO_CONFIG);
 
       TransportConfiguration_rch config
-        = TheTransportFactory->get_or_create_configuration (BIT_ALL_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->get_or_create_configuration (BIT_ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       SimpleTcpConfiguration* tcp_config
         = static_cast <SimpleTcpConfiguration*> (config.in ());
@@ -664,7 +665,8 @@ namespace OpenDDS
       int status = 0;
       if ((status = this->cf_.open ()) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration open() returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
+                                     "open() returned %d\n"),
                            status),
                            -1);
 
@@ -725,7 +727,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSDebugLevel", DCPS_debug_level, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSDebugLevel"), DCPS_debug_level, int)
             }
           if (got_info)
             {
@@ -734,7 +736,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DCPSInfoRepo", ior)
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), ior)
             }
           if (got_chunks)
             {
@@ -743,7 +745,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSChunks", this->n_chunks_, size_t)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSChunks"), this->n_chunks_, size_t)
             }
           if (got_chunk_association_multiplier)
             {
@@ -752,7 +754,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSChunkAssociationMutltiplier", this->association_chunk_multiplier_, size_t)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
             }
           if (got_bit_transport_port)
             {
@@ -761,7 +763,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitTransportPort", this->bit_transport_port_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bit_transport_port_, int)
             }
           if (got_bit_transport_ip)
             {
@@ -770,7 +772,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_STRING_VALUE (this->cf_, sect, "DCPSBitTransportIPAddress", this->bit_transport_ip_)
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
             }
           if (got_liveliness_factor)
             {
@@ -779,7 +781,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSLivelinessFactor", this->liveliness_factor_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSLivelinessFactor"), this->liveliness_factor_, int)
             }
           if (got_bit_lookup_duration_msec)
             {
@@ -788,7 +790,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBitLookupDurationMsec", this->bit_lookup_duration_msec_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitLookupDurationMsec"), this->bit_lookup_duration_msec_, int)
             }
           if (got_bit_flag)
             {
@@ -797,7 +799,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, "DCPSBit", this->bit_enabled_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
             }
         }
 
