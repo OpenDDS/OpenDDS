@@ -77,7 +77,7 @@ if ($role == CrossSync::SERVER) {
     $DCPSREPO = new PerlACE::Process
 	("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 	 "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-	 . "-ORBEndpoint iiop://$repo_host:$port1");
+	 . "-ORBEndpoint iiop://:$port1");
 
     print $DCPSREPO->CommandLine(). "\n";
     $DCPSREPO->Spawn ();

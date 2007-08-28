@@ -1,3 +1,16 @@
+Tue Aug 28 19:00:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+          Add wide-char support.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.cpp:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+          Bumping up log level. Slight performance boost in ordinary
+          builds.
+
 Tue Aug 21 17:56:14 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/CrossSync.pm:
