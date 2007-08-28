@@ -50,7 +50,7 @@ OpenDDS::DCPS::TransportFactory::instance (void)
 OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_id, FactoryIdType type_id)
 {
-  DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",1);
+  DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",5);
 
   TransportImplFactory_rch impl_factory = this->get_or_create_factory (type_id);
 
@@ -338,7 +338,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType tr
 OpenDDS::DCPS::TransportImplFactory_rch
 OpenDDS::DCPS::TransportFactory::get_or_create_factory (FactoryIdType factory_id)
 {
-  DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",1);
+  DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",5);
 
   if (factory_id == ACE_TEXT(""))
     {
@@ -443,7 +443,7 @@ void
 OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
                                               TransportImplFactory_rch factory)
 {
-  DBG_ENTRY_LVL("TransportFactory","register_factory",1);
+  DBG_ENTRY_LVL("TransportFactory","register_factory",5);
 
   int result;
 
@@ -543,7 +543,7 @@ OpenDDS::DCPS::TransportFactory::obtain(TransportIdType impl_id)
 void
 OpenDDS::DCPS::TransportFactory::release()
 {
-  DBG_SUB_ENTRY("TransportFactory","release",1);
+  DBG_SUB_ENTRY("TransportFactory","release",5);
   GuardType guard(this->lock_);
 
   // Iterate over all of the entries in the impl_map_, and

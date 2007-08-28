@@ -72,56 +72,45 @@ DBG_ENTRY_LVL(CNAME,MNAME,5)
 class EntryExit
 {
  public:
-  EntryExit (const char* className, const char* methodName, const void* addr, unsigned num = 0)
-    : num_ (num)
+  EntryExit (const char* className, const char* methodName, const void* addr
+	     , unsigned recurse_level = 0)
+    : recurse_level_ (recurse_level)
     , addr_ (addr)
     , addr_set_ (true)
     {
       // No processing unless debugging turned on.
-      if (::OpenDDS::DCPS::Transport_debug_level == 1)
+      if (::OpenDDS::DCPS::Transport_debug_level > 0)
 	{
 	  class_[25] = method_[25] = 0;
 
 	  ACE_OS::strncpy (this->class_, className, 25);
 	  ACE_OS::strncpy (this->method_, methodName, 25);
 
-	  if (this->num_ == 0) {
+	  if (this->recurse_level_ == 0) {
 	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@]\n"
 			, this->class_, this->method_, this->addr_));
 	  }
 	  else {
 	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: ENTRY: [%s::%s() ::%@ :%d]\n"
-			, this->class_, this->method_, this->addr_, this->num_));
+			, this->class_, this->method_, this->addr_
+			, this->recurse_level_));
 	  }
 	}
     };
 
   ~EntryExit()
     {
-      if (::OpenDDS::DCPS::Transport_debug_level == 1)
+      if (::OpenDDS::DCPS::Transport_debug_level > 0)
 	{
-	  if (this->addr_set_)
-	    {
-	      if (this->num_ == 0) {
-		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@]\n"
-			    , this->class_, this->method_, this->addr_));
-	      }
-	      else {
-		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@:%d]\n"
-			    , this->class_, this->method_, this->addr_, this->num_));
-	      }
-	    }
-	  else
-	    {
-	      if (this->num_ == 0) {
-		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s()]\n"
-			    , this->class_, this->method_));
-	      }
-	      else {
-		ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s():%d]\n"
-			    , this->class_, this->method_, this->num_));
-	      }
-	    }
+	  if (this->recurse_level_ == 0) {
+	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@]\n"
+			, this->class_, this->method_, this->addr_));
+	  }
+	  else {
+	    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DBG: EXIT : [%s::%s() ::%@:%d]\n"
+			, this->class_, this->method_, this->addr_
+			, this->recurse_level_));
+	  }
 	}
     };
 
@@ -129,21 +118,9 @@ class EntryExit
 
   char class_[26];
   char method_[26];
-  unsigned    num_;
+  unsigned    recurse_level_;
   const void *addr_;
   bool addr_set_;
-
-  /*
-    Common code to be executed by all constructors
-  */
-  void ctr_init (const char* className, const char* methodName)
-    {
-      class_[25] = method_[25] = 0;
-
-      ACE_OS::strncpy (this->class_, className, 25);
-      ACE_OS::strncpy (this->method_, methodName, 25);
-    }
-
 };
 
 #endif  /* ENTRYEXIT_H */
