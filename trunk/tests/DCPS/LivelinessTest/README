@@ -5,5 +5,4 @@ run_test.pl
     
 run_test.pl take
   Run the same test but "take" instead of "read".
-  Currently this test FAILS because the instance state does not terminate
-  and restart as expected.
+
