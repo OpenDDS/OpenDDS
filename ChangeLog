@@ -1,3 +1,10 @@
+Mon Sep 10 16:48:59 UTC 2007  Scott Harris <harris_s at ociweb dot com>
+
+        * tests/DCPS/LivelinessTest/README
+
+	  RT 11603 - removed comments about test failure because the it was fixed
+          by Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>.
+
 Tue Aug 28 19:00:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
