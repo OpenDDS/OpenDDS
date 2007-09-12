@@ -1,5 +1,5 @@
 # group		client	server
 
-# dds_doc_trunk_mosquito_linux_gcc_d1o0s1 \
-# dds_oci_tao-1_4_3_sydney.phx_sunos59_gcc_d1o0
-  1		oci1176.ociweb.com		spider.ociweb.com
+  1		mosquito.ociweb.com	cicada.ociweb.com
+  2		mantis.ociweb.com	mosquito.ociweb.com
+  3		cicada.ociweb.com	mantis.ociweb.com
