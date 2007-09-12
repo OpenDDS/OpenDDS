@@ -35,37 +35,10 @@ namespace
     }
   }
 
-  // We need this class to guarantee that the link exists as long as we have
-  // a LinkImpl. See the test code below.
-  class LinkGuard
-  {
-  public:
-    LinkGuard(TransportAPI::Transport& transport, TransportAPI::Transport::Link* link)
-      : transport_(transport)
-      , link_(link)
-    {
-    }
-
-    ~LinkGuard()
-    {
-      transport_.destroyLink(link_);
-    }
-
-    TransportAPI::Transport::Link& get()
-    {
-      return *link_;
-    }
-
-  private:
-    TransportAPI::Transport& transport_;
-    TransportAPI::Transport::Link* link_;
-  };
-
   void testNoFragmentationSend()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
 
     assertTrue(transport.log_.empty());
 
@@ -73,7 +46,7 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
@@ -92,8 +65,7 @@ namespace
   void testFragmentationSend()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 800);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 800);
 
     assertTrue(transport.log_.empty());
 
@@ -101,7 +73,7 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
@@ -122,8 +94,7 @@ namespace
   void testBackpressureSend()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
 
     linkImpl.open(0);
 
@@ -133,7 +104,7 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
@@ -192,8 +163,7 @@ namespace
   void testDisconnectedSend()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
 
     linkImpl.open(0);
 
@@ -203,7 +173,7 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
@@ -262,8 +232,7 @@ namespace
   void testAsynchronousSend()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
 
     linkImpl.open(0);
 
@@ -273,11 +242,11 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
-    dynamic_cast<DummyTransport::Link&>(linkGuard.get()).setDeferred();
+    transport.setDeferred();
 
     ACE_Message_Block testMessage(1024);
     testMessage.wr_ptr(1024);
@@ -323,7 +292,7 @@ namespace
     assertTrue(transport.log_.size() == 0);
 
     // Now we stop deferring, but we had an outstanding deferred request.
-    dynamic_cast<DummyTransport::Link&>(linkGuard.get()).setDeferred(false);
+    transport.setDeferred(false);
 
     // If we send success, the queue will drain and we'll get the remainnig message.
     linkImpl.sendSucceeded(id - 1);
@@ -340,8 +309,7 @@ namespace
   void testSendFailure()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
 
     linkImpl.open(0);
 
@@ -351,13 +319,13 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 
     // Make the link report 5 consecutive failures
 
-    dynamic_cast<DummyTransport::Link&>(linkGuard.get()).setFailTimes(5);
+    transport.setFailTimes(5);
 
     ACE_Message_Block testMessage(1024);
     testMessage.wr_ptr(1024);
@@ -438,8 +406,7 @@ namespace
   void testInOrderReceipt()
   {
     DummyTransport transport;
-    LinkGuard linkGuard(transport, transport.createLink());
-    OpenDDS::DCPS::LinkImpl linkImpl(linkGuard.get(), 0);
+    OpenDDS::DCPS::LinkImpl linkImpl(transport, 0);
     DummyCallback cb;
 
     linkImpl.open(0);
@@ -451,7 +418,7 @@ namespace
     TransportAPI::Status status = linkImpl.connect(blob);
     assertTrue(status.first == TransportAPI::SUCCESS);
     assertTrue(transport.log_.size() == 1);
-    assertTrue(transport.log_[0].first == "establish");
+    assertTrue(transport.log_[0].first == "establishLink");
     assertTrue(transport.log_[0].second == 1);
     transport.log_.clear();
 

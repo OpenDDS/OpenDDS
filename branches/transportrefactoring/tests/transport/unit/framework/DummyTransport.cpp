@@ -9,6 +9,12 @@ namespace
   }
 }
 
+DummyTransport::DummyTransport()
+  : shouldFailTimes_(0)
+  , defer_(false)
+{
+}
+
 void
 DummyTransport::getBLOB(const TransportAPI::BLOB*& endpoint) const
 {
@@ -32,10 +38,21 @@ DummyTransport::configure(const TransportAPI::NVPList& configuration)
   return TransportAPI::make_success();
 }
 
-TransportAPI::Transport::Link*
-DummyTransport::createLink()
+std::pair<TransportAPI::Status, TransportAPI::Transport::Link*>
+DummyTransport::establishLink(
+  const TransportAPI::BLOB* endpoint,
+  const TransportAPI::Id& requestId,
+  TransportAPI::LinkCallback* callback,
+  bool active
+  )
 {
-  return new DummyTransport::Link(log_);
+  log_.push_back(logEntry("establishLink", requestId));
+  TransportAPI::Transport::Link* link = new DummyTransport::Link(log_, shouldFailTimes_, defer_, callback);
+  if (defer_)
+  {
+    return std::make_pair(TransportAPI::make_deferred(), link);
+  }
+  return std::make_pair(TransportAPI::make_success(), link);
 }
 
 void
@@ -45,30 +62,12 @@ DummyTransport::destroyLink(TransportAPI::Transport::Link* link)
   delete myLink;
 }
 
-DummyTransport::Link::Link(Log& log)
-  : callback_(0)
+DummyTransport::Link::Link(Log& log, unsigned int& shouldFailTimes, bool& defer, TransportAPI::LinkCallback* callback)
+  : callback_(callback)
   , log_(log)
-  , shouldFailTimes_(0)
-  , defer_(false)
+  , shouldFailTimes_(shouldFailTimes)
+  , defer_(defer)
 {
-}
-
-TransportAPI::Status
-DummyTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
-{
-  callback_ = callback;
-  return TransportAPI::make_success();
-}
-
-TransportAPI::Status
-DummyTransport::Link::establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId)
-{
-  log_.push_back(logEntry("establish", requestId));
-  if (defer_)
-  {
-    return TransportAPI::make_deferred();
-  }
-  return TransportAPI::make_success();
 }
 
 TransportAPI::Status

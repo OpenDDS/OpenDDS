@@ -11,6 +11,8 @@ class DummyTransport
   : public TransportAPI::Transport
 {
 public:
+  DummyTransport();
+
   /**
    *  @name Configuration methods (synchronous)
    */
@@ -25,28 +27,33 @@ public:
    *  @name Link creation / deletion methods (synchronous)
    */
   //@{
-  virtual TransportAPI::Transport::Link* createLink();
+  virtual std::pair<TransportAPI::Status, TransportAPI::Transport::Link*> establishLink(
+    const TransportAPI::BLOB* endpoint,
+    const TransportAPI::Id& requestId,
+    TransportAPI::LinkCallback* callback,
+    bool active
+    );
   virtual void destroyLink(TransportAPI::Transport::Link* link);
   //@}
 
+  void setFailTimes(unsigned int times) { shouldFailTimes_ = times; }
+  void setDeferred(bool defer = true) { defer_ = defer; }
+
+  virtual ~DummyTransport() {}
+
+  Log log_;
+
+protected:
   class Link
     : public TransportAPI::Transport::Link
   {
   public:
-    Link(Log& log);
-
-    /**
-     *  @name Configuration methods (synchronous)
-     */
-    //@{
-    virtual TransportAPI::Status setCallback(TransportAPI::LinkCallback* callback);
-    //@}
+    Link(Log& log, unsigned int& shouldFailTimes, bool& defer, TransportAPI::LinkCallback* callback);
 
     /**
      *  @name Connection methods (asynchronous)
      */
     //@{
-    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
     virtual TransportAPI::Status shutdown(const TransportAPI::Id& requestId);
     //@}
 
@@ -59,19 +66,15 @@ public:
 
     virtual ~Link() {}
 
-    void setFailTimes(unsigned int times) { shouldFailTimes_ = times; }
-    void setDeferred(bool defer = true) { defer_ = defer; }
-
   private:
     TransportAPI::LinkCallback* callback_;
     Log& log_;
-    unsigned int shouldFailTimes_;
-    bool defer_;
+    unsigned int& shouldFailTimes_;
+    bool& defer_;
   };
 
-  virtual ~DummyTransport() {}
-
-  Log log_;
+  unsigned int shouldFailTimes_;
+  bool defer_;
 };
 
 #endif /* DUMMYTRANSPORT_H */

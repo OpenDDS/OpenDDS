@@ -84,11 +84,12 @@ OpenDDS::DCPS::LinkImpl::IOItem::operator=(
 
 ACE_INLINE
 OpenDDS::DCPS::LinkImpl::LinkImpl(
-  TransportAPI::Transport::Link& link,
+  TransportAPI::Transport& transport,
   size_t max_transport_buffer_size
   )
   : callback_(0)
-  , link_(link)
+  , transport_(transport)
+  , link_(transport_)
   , max_transport_buffer_size_(max_transport_buffer_size)
   , connectedCondition_(lock_)
   , condition_(lock_)
@@ -102,13 +103,65 @@ OpenDDS::DCPS::LinkImpl::LinkImpl(
   , deferredConnectionStatus_(TransportAPI::make_failure())
   , lastReceived_(std::make_pair(0, 0))
 {
-  link_.setCallback(this);
 }
 
 ACE_INLINE
 OpenDDS::DCPS::LinkImpl::~LinkImpl(
   )
 {
-  link_.setCallback(0);
   close(0);
+}
+
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::LinkGuard::LinkGuard(TransportAPI::Transport& transport)
+  : transport_(transport)
+  , link_(0)
+{
+}
+
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::LinkGuard::~LinkGuard()
+{
+  tryFree();
+}
+
+ACE_INLINE
+OpenDDS::DCPS::LinkImpl::LinkGuard&
+OpenDDS::DCPS::LinkImpl::LinkGuard::operator=(TransportAPI::Transport::Link* link)
+{
+  reset(link);
+  return *this;
+}
+
+ACE_INLINE
+void
+OpenDDS::DCPS::LinkImpl::LinkGuard::reset(TransportAPI::Transport::Link* link)
+{
+  tryFree();
+  link_ = link;
+}
+
+ACE_INLINE
+TransportAPI::Transport::Link*
+OpenDDS::DCPS::LinkImpl::LinkGuard::operator->() const
+{
+  return get();
+}
+
+ACE_INLINE
+TransportAPI::Transport::Link*
+OpenDDS::DCPS::LinkImpl::LinkGuard::get() const
+{
+  return link_;
+}
+
+ACE_INLINE
+void
+OpenDDS::DCPS::LinkImpl::LinkGuard::tryFree()
+{
+  if (link_ != 0)
+  {
+    transport_.destroyLink(link_);
+    link_ = 0;
+  }
 }

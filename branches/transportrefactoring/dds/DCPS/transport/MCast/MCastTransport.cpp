@@ -2,15 +2,33 @@
 #include "dds/DCPS/transport/framework/LinkCallback.h"
 #include <ace/SOCK_Dgram_Mcast.h>
 
-TransportAPI::Transport::Link*
-MCastTransport::createLink()
+std::pair<TransportAPI::Status, TransportAPI::Transport::Link*>
+MCastTransport::establishLink(
+  const TransportAPI::BLOB* endpoint,
+  const TransportAPI::Id& requestId,
+  TransportAPI::LinkCallback* callback,
+  bool active
+  )
 {
-  return new Link();
+  TransportAPI::Status status = TransportAPI::make_failure(
+    TransportAPI::failure_reason("Invalid BLOB")
+    );
+  Link* link = 0;
+  const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
+
+  if (blob != 0)
+  {
+    link = new MCastTransport::Link;
+    link->setCallback(callback);
+    status = link->establish(endpoint, requestId, active);
+  }
+  return std::make_pair(status, link);
 }
 
 TransportAPI::Status
 MCastTransport::Link::establish(const TransportAPI::BLOB* endpoint,
-                                const TransportAPI::Id& requestId)
+                                const TransportAPI::Id& requestId,
+                                bool active)
 {
   // Get down to our BLOB type
   const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
@@ -25,7 +43,7 @@ MCastTransport::Link::establish(const TransportAPI::BLOB* endpoint,
   remote_.set(blob->getRemotePort(),
               blob->getHostname().c_str());
 
-  if (blob->getActive()) {
+  if (active) {
     ACE_SOCK_Dgram* sock = new ACE_SOCK_Dgram();
     if (sock == 0) {
       return TransportAPI::make_failure(TransportAPI::failure_reason(

@@ -1,3 +1,22 @@
+Wed Sep 12 20:43:38 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/MCast/MCastTransport.h:
+        * dds/DCPS/transport/MCast/MCastTransport.cpp:
+        * dds/DCPS/transport/UDP/UDPTransport.h:
+        * dds/DCPS/transport/UDP/UDPTransport.cpp:
+        * dds/DCPS/transport/framework/LinkImpl.h:
+        * dds/DCPS/transport/framework/LinkImpl.inl:
+        * dds/DCPS/transport/framework/LinkImpl.cpp:
+        * dds/DCPS/transport/framework/Transport.h:
+        * tests/transport/unit/framework/DummyTransport.h:
+        * tests/transport/unit/framework/DummyTransport.cpp:
+        * tests/transport/unit/framework/main.cpp:
+        * tests/transport/unit/mcast/publisher.cpp:
+        * tests/transport/unit/mcast/subscriber.cpp:
+
+          Checking in changes as they stand. There are currently compilation
+          errors.
+
 Wed Jul 11 06:46:43 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/PublisherImpl.h:
@@ -6,7 +25,7 @@ Wed Jul 11 06:46:43 UTC 2007  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/SubscriberImpl.cpp:
 
           Removed the transport_interface_ member in PublisherImpl
-          and SubscriberImpl. 
+          and SubscriberImpl.
 
 Tue Jul 10 19:42:39 UTC 2007  Yan Dai  <dai_y@ociweb.com>
 

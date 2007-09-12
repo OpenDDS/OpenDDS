@@ -10,13 +10,18 @@
 class MCast_Export MCastTransport: public UDPTransport
 {
 public:
-  virtual TransportAPI::Transport::Link* createLink();
+  virtual std::pair<TransportAPI::Status, TransportAPI::Transport::Link*> establishLink(
+    const TransportAPI::BLOB* endpoint,
+    const TransportAPI::Id& requestId,
+    TransportAPI::LinkCallback* callback,
+    bool active
+    );
  
 protected:
   class Link: public UDPTransport::Link
   {
   public:
-    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId, bool active);
   };
 };
 

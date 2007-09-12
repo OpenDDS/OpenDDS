@@ -181,7 +181,9 @@ OpenDDS::DCPS::LinkImpl::connect(
     TransportAPI::Id requestId(getNextRequestId(guard));
     deferredConnectionStatus_ = TransportAPI::make_deferred();
     connectionDeferred_ = true;
-    TransportAPI::Status status = link_.establish(endpoint, requestId);
+    std::pair<TransportAPI::Status, TransportAPI::Transport::Link*> result =
+      transport_.establishLink(endpoint, requestId, this, true /* TBD: active? */ );
+    TransportAPI::Status& status = result.first;
     if (status.first == TransportAPI::DEFERRED)
     {
       // Wait for deferred resolution
@@ -191,6 +193,10 @@ OpenDDS::DCPS::LinkImpl::connect(
     {
       connectionDeferred_ = false;
       connected_ = (status.first == TransportAPI::SUCCESS);
+      if (connected_)
+      {
+        link_.reset(result.second);
+      }
     }
     return status;
   }
@@ -207,7 +213,7 @@ OpenDDS::DCPS::LinkImpl::disconnect(
     TransportAPI::Id requestId(getNextRequestId(guard));
     deferredConnectionStatus_ = TransportAPI::make_deferred();
     connectionDeferred_ = true;
-    TransportAPI::Status status = link_.shutdown(requestId);
+    TransportAPI::Status status = link_->shutdown(requestId);
     if (status.first == TransportAPI::DEFERRED)
     {
       // Wait for deferred resolution
@@ -217,6 +223,8 @@ OpenDDS::DCPS::LinkImpl::disconnect(
     {
       connectionDeferred_ = false;
     }
+    transport_.destroyLink(link_.get());
+    link_.reset();
     return status;
   }
   return TransportAPI::make_success();
@@ -665,7 +673,7 @@ OpenDDS::DCPS::LinkImpl::trySending(
   iovs[1].iov_len = item.data_size_;
 
   item.deferred_ = true;
-  TransportAPI::Status status = link_.send(iovs, 2, item.requestId_);
+  TransportAPI::Status status = link_->send(iovs, 2, item.requestId_);
   item.deferred_ = (status.first == TransportAPI::DEFERRED);
   return status.first == TransportAPI::SUCCESS;
 }
