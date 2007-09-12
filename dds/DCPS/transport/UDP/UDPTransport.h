@@ -18,7 +18,12 @@ public:
   virtual TransportAPI::Status isCompatibleEndpoint(const TransportAPI::BLOB* endpoint) const;
   virtual TransportAPI::Status configure(const TransportAPI::NVPList& configuration);
 
-  virtual TransportAPI::Transport::Link* createLink();
+  virtual std::pair<TransportAPI::Status, TransportAPI::Transport::Link*> establishLink(
+    const TransportAPI::BLOB* endpoint,
+    const TransportAPI::Id& requestId,
+    TransportAPI::LinkCallback* callback,
+    bool active
+    );
   virtual void destroyLink(TransportAPI::Transport::Link* link);
 
 public:
@@ -30,17 +35,14 @@ public:
          unsigned short port,
          const std::string& remoteHostname,
          unsigned short remotePort,
-         bool active,
          unsigned long);
     const std::string& getHostname() const;
     unsigned short getPort() const;
     const std::string& getRemoteHostname() const;
     unsigned short getRemotePort() const;
-    bool getActive() const;
     unsigned long getTimeout() const;
 
   private:
-    bool active_;
     std::string hostname_;
     unsigned short port_;
     std::string remoteHostname_;
@@ -67,7 +69,7 @@ public:
 
     virtual TransportAPI::Status setCallback(TransportAPI::LinkCallback* callback);
 
-    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId);
+    virtual TransportAPI::Status establish(const TransportAPI::BLOB* endpoint, const TransportAPI::Id& requestId, bool active);
     virtual TransportAPI::Status shutdown(const TransportAPI::Id& requestId);
 
     virtual TransportAPI::Status send(const iovec buffers[], size_t iovecSize, const TransportAPI::Id& requestId);

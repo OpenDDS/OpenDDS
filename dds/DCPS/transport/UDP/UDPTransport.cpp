@@ -61,9 +61,6 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
     else if (configuration[i].first == "remotePort") {
       remotePort_ = ACE_OS::atoi(configuration[i].second.c_str());
     }
-    else if (configuration[i].first == "active") {
-      active_ = ACE_OS::atoi(configuration[i].second.c_str());
-    }
     else if (configuration[i].first == "max_output_pause_period") {
       timeout_ = ACE_OS::strtol(configuration[i].second.c_str(), 0, 10);
     }
@@ -72,7 +69,7 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
       remoteHostname_.length() != 0 && remotePort_ != 0) {
     endpointConfiguration_ =
       BLOB(hostname_, port_, remoteHostname_, remotePort_,
-                      active_, timeout_);
+                      timeout_);
     return TransportAPI::make_success();
   }
   return TransportAPI::make_failure(TransportAPI::failure_reason(
@@ -80,10 +77,27 @@ UDPTransport::configure(const TransportAPI::NVPList& configuration)
                                       "and a port number"));
 }
 
-TransportAPI::Transport::Link*
-UDPTransport::createLink()
+std::pair<TransportAPI::Status, TransportAPI::Transport::Link*>
+UDPTransport::establishLink(
+  const TransportAPI::BLOB* endpoint,
+  const TransportAPI::Id& requestId,
+  TransportAPI::LinkCallback* callback,
+  bool active
+  )
 {
-  return new Link();
+  TransportAPI::Status status = TransportAPI::make_failure(
+    TransportAPI::failure_reason("Invalid BLOB")
+    );
+  Link* link = 0;
+  const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
+
+  if (blob != 0)
+  {
+    link = new UDPTransport::Link;
+    link->setCallback(callback);
+    status = link->establish(endpoint, requestId, active);
+  }
+  return std::make_pair(status, link);
 }
 
 void
@@ -100,8 +114,7 @@ UDPTransport::destroyLink(TransportAPI::Transport::Link* link)
 }
 
 UDPTransport::BLOB::BLOB()
-  : active_(false),
-    port_(0),
+  : port_(0),
     remotePort_(0),
     timeout_(0)
 {
@@ -112,10 +125,8 @@ UDPTransport::BLOB::BLOB(const std::string& hostname,
                          unsigned short port,
                          const std::string& remoteHostname,
                          unsigned short remotePort,
-                         bool active,
                          unsigned long timeout)
- : active_(active),
-   hostname_(hostname),
+ : hostname_(hostname),
    port_(port),
    remoteHostname_(remoteHostname),
    remotePort_(remotePort),
@@ -148,12 +159,6 @@ UDPTransport::BLOB::getRemotePort() const
   return remotePort_;
 }
 
-bool
-UDPTransport::BLOB::getActive() const
-{
-  return active_;
-}
-
 unsigned long
 UDPTransport::BLOB::getTimeout() const
 {
@@ -184,7 +189,8 @@ UDPTransport::Link::setCallback(TransportAPI::LinkCallback* callback)
 
 TransportAPI::Status
 UDPTransport::Link::establish(const TransportAPI::BLOB* endpoint,
-                              const TransportAPI::Id& requestId)
+                              const TransportAPI::Id& requestId,
+                              bool active)
 {
   // Get down to our BLOB type
   const UDPTransport::BLOB* blob = dynamic_cast<const UDPTransport::BLOB*>(endpoint);
@@ -205,7 +211,7 @@ UDPTransport::Link::establish(const TransportAPI::BLOB* endpoint,
   remote_.set(blob->getRemotePort(),
               blob->getHostname().c_str());
 
-  if (blob->getActive()) {
+  if (active) {
     unsigned long ms = blob->getTimeout();
     if (ms > 0) {
       timeout_ = new ACE_Time_Value (ms / 1000, ms % 1000 * 1000);

@@ -27,7 +27,7 @@ namespace OpenDDS
       , public ACE_Task_Base
     {
     public:
-      LinkImpl(TransportAPI::Transport::Link& link, size_t max_transport_buffer_size);
+      LinkImpl(TransportAPI::Transport& transport, size_t max_transport_buffer_size);
       virtual ~LinkImpl();
 
       // Set the callback. LinkImpl does not participate in the ownership of
@@ -95,6 +95,25 @@ namespace OpenDDS
       virtual void received(const iovec buffers[], size_t iovecSize);
 
     private:
+      class LinkGuard
+      {
+      public:
+        LinkGuard(TransportAPI::Transport& transport);
+        ~LinkGuard();
+        LinkGuard& operator=(TransportAPI::Transport::Link* link);
+        void reset(TransportAPI::Transport::Link* link = 0);
+        TransportAPI::Transport::Link* operator->() const;
+        TransportAPI::Transport::Link* get() const;
+
+      private:
+        LinkGuard(const LinkGuard& rhs);
+
+        void tryFree();
+
+        TransportAPI::Transport& transport_;
+        TransportAPI::Transport::Link* link_;
+      };
+
       typedef ACE_Guard<ACE_Thread_Mutex> Guard;
 
       void deliver(
@@ -106,7 +125,8 @@ namespace OpenDDS
       TransportAPI::Id getNextRequestId(const Guard&);
 
       LinkImplCallback* callback_;
-      TransportAPI::Transport::Link& link_;
+      TransportAPI::Transport& transport_;
+      LinkGuard link_;
       size_t max_transport_buffer_size_;
       ACE_Thread_Mutex lock_;
       ACE_Condition<ACE_Thread_Mutex> connectedCondition_;

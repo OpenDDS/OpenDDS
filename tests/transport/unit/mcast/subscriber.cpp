@@ -179,20 +179,6 @@ int main(int argc, char** argv)
                      "       %s\n", status.second.what()), 1);
   }
 
-  DataSink sink;
-  TransportAPI::Transport::Link* link = transport.createLink();
-  if (link == 0) {
-   ACE_ERROR_RETURN((LM_ERROR,
-                     "ERROR: Unable to get a link\n"), 1);
-  }
-
-  status = link->setCallback(&sink);
-  if (status.first != TransportAPI::SUCCESS) {
-   ACE_ERROR_RETURN((LM_ERROR,
-                     "ERROR: Setting the link callback failed\n"
-                     "       %s\n", status.second.what()), 1);
-  }
-
   const TransportAPI::BLOB* endpoint = 0;
   transport.getBLOB(endpoint);
   if (endpoint == 0) {
@@ -200,12 +186,20 @@ int main(int argc, char** argv)
                      "ERROR: Unable to get the endpoint\n"), 1);
   }
 
+  DataSink sink;
   TransportAPI::Id id = 0;
-  status = link->establish(endpoint, id++);
-  if (status.first != TransportAPI::SUCCESS) {
+  std::pair<TransportAPI::Status, TransportAPI::Transport::Link*> pr =
+    transport.establishLink(endpoint, id++, &sink, true);
+  if (pr.first.first != TransportAPI::SUCCESS) {
    ACE_ERROR_RETURN((LM_ERROR,
                      "ERROR: Unable to establish the link\n"
-                     "       %s\n", status.second.what()), 1);
+                     "       %s\n", pr.first.second.what()), 1);
+  }
+
+  TransportAPI::Transport::Link* link = pr.second;
+  if (link == 0) {
+   ACE_ERROR_RETURN((LM_ERROR,
+                     "ERROR: Unable to get a link\n"), 1);
   }
 
   // Create this file so the test script knows to

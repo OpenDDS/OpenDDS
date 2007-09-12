@@ -7,6 +7,23 @@ namespace TransportAPI
 {
 
   class LinkCallback;
+  class TransportCallback;
+  class Transport;
+
+  /// TransportFactory
+  class TransportFactory
+  {
+  public:
+    virtual Transport* createTransport(
+      TransportCallback* callback
+      ) = 0;
+    virtual void destroyTransport(
+      Transport* transport
+      ) = 0;
+
+  protected:
+    virtual ~TransportFactory() {}
+  };
 
   /// Transport
   class Transport
@@ -29,7 +46,12 @@ namespace TransportAPI
      *  @name Link creation / deletion methods (synchronous)
      */
     //@{
-    virtual Link* createLink() = 0;
+    virtual std::pair<Status, Link*> establishLink(
+      const BLOB* endpoint,
+      const Id& requestId,
+      LinkCallback* callback,
+      bool active
+      ) = 0;
     virtual void destroyLink(Link* link) = 0;
     //@}
 
@@ -37,17 +59,9 @@ namespace TransportAPI
     {
     public:
       /**
-       *  @name Configuration methods (synchronous)
-       */
-      //@{
-      virtual Status setCallback(LinkCallback* callback) = 0;
-      //@}
-
-      /**
        *  @name Connection methods (asynchronous)
        */
       //@{
-      virtual Status establish(const BLOB* endpoint, const Id& requestId) = 0;
       virtual Status shutdown(const Id& requestId) = 0;
       //@}
 
@@ -64,6 +78,19 @@ namespace TransportAPI
 
   protected:
     virtual ~Transport() {}
+  };
+
+  class TransportCallback
+  {
+  public:
+    virtual void linkEstablished(
+      const BLOB* endpoint,
+      const Id& requestId,
+      TransportAPI::Transport::Link* link
+      ) = 0;
+
+  protected:
+    virtual ~TransportCallback() {}
   };
 }
 
