@@ -42,15 +42,36 @@ sub _init {
     }
 }
 
+# Returns a unique id, uid for unix, last digit of IP for NT
+sub uniqueid {
+    if ($^O eq "MSWin32") {
+	my $uid = 1;
+
+	open (IPNUM, "ipconfig|") || die "Can't run ipconfig: $!\n";
+
+	while (<IPNUM>) {
+	    if (/Address/) {
+		$uid = (split (/: (\d+)\.(\d+)\.(\d+)\.(\d+)/))[4];
+	    }
+	}
+
+	close IPNUM;
+
+	return $uid;
+    } else {
+	return getpgrp(0);
+    }
+}
+
 sub _create_custom_config {
     my $self = shift;
     $self->{PUB_INI_TMP} = $self->{PUB_INI};
     $self->{SUB_INI_TMP} = $self->{SUB_INI};
-    my $pid = getpgrp(0);
+    my $id = uniqueid ();
     my $verbose = $self->{VERBOSE};
 
-    $self->{PUB_INI_TMP} = "pub$pid.ini";
-    $self->{SUB_INI_TMP} = "sub$pid.ini";
+    $self->{PUB_INI_TMP} = "pub$id.ini";
+    $self->{SUB_INI_TMP} = "sub$id.ini";
     my $my_name = $self->{SELF};
     my $in_fh = new FileHandle();
     my $out_fh = new FileHandle();

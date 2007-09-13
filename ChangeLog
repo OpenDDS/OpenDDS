@@ -1,3 +1,8 @@
+Thu Sep 13 17:42:09 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/CrossSyncDDS.pm:
+          Add method to construct uniqid.
+
 Wed Sep 12 20:48:30 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/cross_tests.lst:
