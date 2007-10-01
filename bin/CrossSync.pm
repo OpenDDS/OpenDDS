@@ -77,7 +77,6 @@ sub wait {
     }
     my $role = $self->{ROLE};
 
-    my $total_timeout = 60 * 60 * 2; # 2 hrs in seconds
     # sync up here.
     if ($role == CLIENT) {
 	if ($verbose) {
@@ -170,6 +169,13 @@ sub wait {
 		= IO::Select->select ($read_set
 				      , undef, undef
 				      , $total_timeout);
+
+	    if (scalar ($new_readables) == 0) {
+		if ($verbose) {
+		    print "server> Timed out waiting for client.\n";
+		}
+		return -1;
+	    }
 
 	    if ($verbose) {
 		print "server> Activity detected on some fd.\n";
@@ -345,8 +351,8 @@ sub _parse_schedule {
 sub DESTROY {
     my $self = shift;
 
-    #unlink $self->{PUB_INI_TMP};
-    #unlink $self->{SUB_INI_TMP};
+    unlink $self->{PUB_INI_TMP};
+    unlink $self->{SUB_INI_TMP};
     close ($self->{PEER_FD});
 }
 

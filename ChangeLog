@@ -1,3 +1,9 @@
+Mon Oct  1 16:53:45 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/CrossSync.pm:
+          Bail out upon timeout.
+          Delete temporary config files.
+
 Thu Sep 13 17:42:09 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/CrossSyncDDS.pm:
