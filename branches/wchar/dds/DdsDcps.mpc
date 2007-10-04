@@ -1,0 +1,65 @@
+project: taolib, portableserver, core, dcps_bits {
+
+  requires    += exceptions
+
+  sharedname   = OpenDDS_Dcps
+  dynamicflags = OPENDDS_DCPS_BUILD_DLL
+  libout       = $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT) 
+
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
+
+  //The following is only to make the PCH work, client projects should not have
+  //this as an include path.
+  includes    += $(DDS_ROOT)/dds
+
+  Source_Files {
+    DCPS/*.cpp
+    DCPS/transport/framework/*.cpp
+  }
+
+  Header_Files {
+    DCPS/dcps_export.h
+    DCPS/ZeroCopySeq_T.h
+    DCPS/ZeroCopyInfoSeq_T.h
+    DCPS/ZeroCopyAllocator_T.h
+  }
+  
+  Inline_Files {
+    *.inl
+  }
+
+  Template_Files {
+    DCPS/ZeroCopySeq_T.cpp
+    DCPS/ZeroCopyInfoSeq_T.cpp
+    DCPS/ZeroCopyAllocator_T.cpp
+  }
+
+  IDL_Files {
+    // DDS specification defined
+    //
+    // Do not put DdsDcpsInfrastructure.idl here or it will 
+    //           override was is in dcps_bits.mpb 
+    // ^^^ DdsDcpsInfrastructure.idl
+    DdsDcpsDomain.idl
+    DdsDcpsPublication.idl
+    DdsDcpsSubscription.idl
+    DdsDcpsTopic.idl
+    DdsDcps.idl
+    // OpenDDS specific below
+    DdsDcpsInfo.idl
+    DdsDcpsDataReaderRemote.idl
+    DdsDcpsDataWriterRemote.idl
+    DdsDcpsInfoUtils.idl
+    DdsDcpsTypeSupportExt.idl
+  }
+
+
+  IDL_Files {
+    idlflags += -Gdcpsonly
+    gendir = .
+    CorbaSeq/*.idl
+  }
+
+}
