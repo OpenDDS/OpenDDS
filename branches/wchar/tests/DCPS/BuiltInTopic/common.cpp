@@ -47,10 +47,10 @@ OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 int init_transport ()
 {
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
@@ -67,10 +67,10 @@ int init_transport ()
   }
 
   writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
@@ -124,7 +124,7 @@ int attach_publisher_transport ()
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) Failed to attach publisher with the transport. ")
                         ACE_TEXT("AttachStatus == %s\n"),
-                        status_str.c_str()),
+                        ACE_TEXT_CHAR_TO_TCHAR (status_str.c_str())),
                         -1);
     }
 
@@ -160,7 +160,7 @@ int attach_subscriber_transport ()
       ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) Failed to attach subscriber with the transport. ")
                         ACE_TEXT("AttachStatus == %s\n"),
-                        status_str.c_str()),
+                        ACE_TEXT_CHAR_TO_TCHAR (status_str.c_str())),
                         -1);
     }
 

@@ -31,7 +31,7 @@ TestDriver::~TestDriver()
 
 
 void
-TestDriver::run(int& argc, char* argv[])
+TestDriver::run(int& argc, ACE_TCHAR* argv[])
 {
   parse_args(argc, argv);
   init();
@@ -40,7 +40,7 @@ TestDriver::run(int& argc, char* argv[])
 
 
 void
-TestDriver::parse_args(int& argc, char* argv[])
+TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 {
   // Command-line arguments:
   //
@@ -53,12 +53,12 @@ TestDriver::parse_args(int& argc, char* argv[])
   //
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  const char* current_arg = 0;
+  const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
   {
     // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
       int tmp = ACE_OS::atoi(current_arg);
       arg_shifter.consume_arg();
 
@@ -72,7 +72,7 @@ TestDriver::parse_args(int& argc, char* argv[])
       publisher_id_ = tmp;
     }
     // The '-n' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-n"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n")))) {
       int tmp = ACE_OS::atoi(current_arg);
       arg_shifter.consume_arg();
 
@@ -86,7 +86,7 @@ TestDriver::parse_args(int& argc, char* argv[])
       num_packets_ = tmp;
     }
     // The '-d' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-d"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d")))) {
       int tmp = ACE_OS::atoi(current_arg);
       arg_shifter.consume_arg();
 
@@ -100,13 +100,13 @@ TestDriver::parse_args(int& argc, char* argv[])
       data_size_ = tmp;
     }
     // A '-s' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-s"))) {
-      std::string subscriber_spec = current_arg;
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {
+      std::string subscriber_spec = ACE_TEXT_ALWAYS_CHAR(current_arg);
       arg_shifter.consume_arg();
       subscriber_addrs_.push_back(parse_subscriber_address(subscriber_spec));
     }
     // The '-?' option
-    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
                  "usage: %s "
                  "-p publisher_id -n num_packets "

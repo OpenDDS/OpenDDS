@@ -217,11 +217,11 @@ int init_tranport ()
 
       reader_transport_impl
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -233,10 +233,10 @@ int init_tranport ()
 
       writer_transport_impl
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      "SimpleTcp",
+                                                      ACE_TEXT("SimpleTcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -274,7 +274,7 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
 }
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
 
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
@@ -289,29 +289,29 @@ int parse_args (int argc, char *argv[])
     //  -z                          verbose transport debug
     //  -b                          enable client side Built-In topic support
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-b") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-b")) == 0)
     {
       support_client_side_BIT = true;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-i") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-i")) == 0)
     {
       do_by_instance = true;
       arg_shifter.consume_arg();
@@ -423,7 +423,7 @@ void check_return_loan_status(DDS::ReturnCode_t status,
       }
 }
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
 
 

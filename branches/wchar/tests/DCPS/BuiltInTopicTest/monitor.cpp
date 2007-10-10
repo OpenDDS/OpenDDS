@@ -31,9 +31,9 @@ const char* topic_name = "Movie Discussion List";
 const char* topic_type_name = "Messenger";
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "l:d:t:s:p:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("l:d:t:s:p:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -74,7 +74,7 @@ parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {

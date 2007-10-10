@@ -21,6 +21,7 @@
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
+#include "ace/Argv_Type_Converter.h"
 
 const long  MY_DOMAIN   = 911;
 const char* MY_TOPIC    = "foo";
@@ -113,9 +114,9 @@ parse_args (int argc,
 
   while (arg_shifter.is_anything_left ())
   {
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
       client_orb = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -463,9 +464,10 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (client_orb)
         {
+          ACE_Argv_Type_Converter conv (argc, argv);
           // Client creates the orb.
-          orb = CORBA::ORB_init (argc,
-                                 argv,
+          orb = CORBA::ORB_init (conv.get_argc (),
+                                 conv.get_ASCII_argv (),
                                  "TAO_DDS_DCPS");
 
           TheServiceParticipant->set_ORB(orb.in());

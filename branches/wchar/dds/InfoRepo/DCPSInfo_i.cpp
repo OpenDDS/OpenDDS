@@ -361,7 +361,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
   if (partPtr->add_publication(pubPtr) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "participant list.\n"));
+                  ACE_TEXT("participant list.\n")));
 
       // failed to add.  we are responsible for the memory.
       delete pubPtr;
@@ -370,7 +370,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
   else if (topic->add_publication_reference(pubPtr, false) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "topic list.\n"));
+                  ACE_TEXT("topic list.\n")));
 
       // Failed to add to the topic
       // so remove from participant and fail.
@@ -562,7 +562,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
   if (partPtr->add_subscription(subPtr) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "participant list.\n"));
+                  ACE_TEXT ("participant list.\n")));
 
       // failed to add.  we are responsible for the memory.
       delete subPtr;
@@ -571,7 +571,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
   else if (description->add_subscription_reference(subPtr, false) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "topic list.\n"));
+                  ACE_TEXT ("topic list.\n")));
 
       // No associations were made so remove and fail.
       partPtr->remove_subscription(subId);
@@ -1061,7 +1061,7 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
     }
   else {
     ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("TAO_DDS_DCPSInfo_i> Failed to discover ")
-                       "UpdateManager.\n"), false);
+                       ACE_TEXT ("UpdateManager.\n")), false);
   }
 
   return true;

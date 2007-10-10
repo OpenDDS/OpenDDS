@@ -13,7 +13,7 @@
 
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   /// return status of main
   int status = 0;
@@ -28,14 +28,14 @@ int main (int argc, char *argv[])
   {
 
     /// Where the distributed content will be written defaults to "files"
-    std::string directory_name("files");
+    ACE_TString directory_name(ACE_TEXT("files"));
     /// Name of the file to start writing (option should only be given on one node)
     /// This file will be created by this application.
-    std::string publish_file_name("");
+    ACE_TString publish_file_name;
     /// Indicates that this node will publish the first file
     bool        publish_first_file = false;
     /// Overide the default name of this node.  The default is the hostname.
-    std::string node_name("");
+    ACE_TString node_name;
 
 
     // parse commmand line options
@@ -84,9 +84,9 @@ int main (int argc, char *argv[])
 
 
     // check that the node name is set
-    if (0 == ACE_OS::strcmp(node_name.c_str(), ""))
+    if (0 == ACE_OS::strcmp(node_name.c_str(), ACE_TEXT("")))
     {
-      char local_hostname[1024];
+      ACE_TCHAR local_hostname[1024];
       if ( 0 == ACE_OS::hostname(local_hostname, 1023))
       {
         node_name = local_hostname;

@@ -156,8 +156,8 @@ WriteDataContainer::register_instance(
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("WriteDataContainer::register_instance, ")
-        ACE_TEXT("The provided instance handle=%X is not a valid"
-        "handle.\n"), instance_handle));
+        ACE_TEXT("The provided instance handle=%X is not a valid")
+        ACE_TEXT("handle.\n"), instance_handle));
       delete instance;
       return ::DDS::RETCODE_ERROR;
     } // if (0 != insert_attempt)
@@ -783,8 +783,8 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
 
       if (old_head == 0)
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,"
-            "NULL element at head of sending_data_, size %d head %X tail %X \n"), 
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::unregister_all,")
+            ACE_TEXT("NULL element at head of sending_data_, size %d head %X tail %X \n"), 
             sending_data_.size_,  sending_data_.head_,  sending_data_.tail_));
           break;
         }

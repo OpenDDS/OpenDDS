@@ -20,8 +20,8 @@
 const long  TEST_DOMAIN   = 411;
 const char* TEST_TOPIC    = "PerfTest";
 const char* TEST_TYPE     = "PerfTestType";
-const char * reader_address_str = "default";
-const char * writer_address_str = "default";
+const ACE_TCHAR* reader_address_str = ACE_TEXT("default");
+const ACE_TCHAR* writer_address_str = ACE_TEXT("default");
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITY_SEC);
 
@@ -60,11 +60,11 @@ int init_reader_tranport ()
 
   reader_transport_impl 
     = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                  "SimpleUdp", 
+                                                  ACE_TEXT("SimpleUdp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleUdp");
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
 
   OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
     = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
@@ -91,17 +91,17 @@ int init_writer_tranport ()
 
   writer_transport_impl 
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, 
-                                                  "SimpleUdp",
+                                                  ACE_TEXT("SimpleUdp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleUdp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleUdp"));
 
   OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
     = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
 
 
-  if (0 != ACE_OS::strcmp("default", writer_address_str) )
+  if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);
       writer_udp_config->local_address_ = writer_address;

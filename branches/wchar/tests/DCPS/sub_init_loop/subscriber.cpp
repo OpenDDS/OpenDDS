@@ -36,16 +36,16 @@ int sub_reinit_itr = 10; // number of Subscriber iterations
 bool verbose = false;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vi:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("vi:"));
   int c;
 
   while ((c = get_opts ()) != -1)
     switch (c)
       {
       case 'v':
-  verbose = true;
+        verbose = true;
         break;
       case 'i':
         sub_reinit_itr = ACE_OS::atoi (get_opts.opt_arg ());
@@ -65,7 +65,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
         TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Indicate that the subscriber is about to become ready
-      FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, "w");
+      FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT("w"));
       if (readers_ready == 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
                            "(%P|%t) ERROR Unable to create subscriber ready file.\n")
@@ -161,20 +161,20 @@ int main (int argc, char *argv[])
           OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
           if (status != OpenDDS::DCPS::ATTACH_OK)
             {
-              std::string status_str;
+              ACE_TString status_str;
               switch (status)
                 {
                 case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                  status_str = "ATTACH_BAD_TRANSPORT";
+                  status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
                   break;
                 case OpenDDS::DCPS::ATTACH_ERROR:
-                  status_str = "ATTACH_ERROR";
+                  status_str = ACE_TEXT("ATTACH_ERROR");
                   break;
                 case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                  status_str = "ATTACH_INCOMPATIBLE_QOS";
+                  status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
                   break;
                 default:
-                  status_str = "Unknown Status";
+                  status_str = ACE_TEXT("Unknown Status");
                   break;
                 }
               ACE_ERROR_RETURN ((LM_ERROR,
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
       TheServiceParticipant->shutdown ();
 
       // Indicate that the subscriber is done
-      FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, "w");
+      FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT("w"));
       if (readers_completed == 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
                            "(%P|%t) ERROR Unable to create subscriber completed file.\n")

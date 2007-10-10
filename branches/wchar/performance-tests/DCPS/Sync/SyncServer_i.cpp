@@ -18,8 +18,8 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
         {
           // create new ORB
           int argc = 2;
-          ACE_TCHAR* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
-          orb_ = CORBA::ORB_init (argc, (ACE_TCHAR **)argv, "SyncServer");
+          char* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
+          orb_ = CORBA::ORB_init (argc, argv, "SyncServer");
           if (CORBA::is_nil (orb_.in())) {
             throw InitError ("SyncServer_i::ctr> Orb init failed.");
           }

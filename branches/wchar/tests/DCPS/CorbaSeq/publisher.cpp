@@ -26,7 +26,7 @@ using namespace Messenger;
 
 const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);

@@ -46,7 +46,7 @@ enum TransportId {
 };
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
@@ -62,34 +62,34 @@ int parse_args (int argc, char *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth           defaults to 1
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       multiple_instances = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_reads_per_thread = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-r")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
     {
       num_datareaders = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
@@ -104,7 +104,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -179,10 +179,10 @@ int main (int argc, char *argv[])
         }
 
       OpenDDS::DCPS::TransportImpl_rch transport_impl
-        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch config
-        = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
+        = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
       if (transport_impl->configure(config.in ()) != 0)
         {
@@ -197,27 +197,27 @@ int main (int argc, char *argv[])
       if (status != OpenDDS::DCPS::ATTACH_OK)
       {
         // We failed to attach to the transport for some reason.
-        ACE_CString status_str;
+        ACE_TString status_str;
 
         switch (status)
           {
             case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = "ATTACH_BAD_TRANSPORT";
+              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
               break;
             case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = "ATTACH_ERROR";
+              status_str = ACE_TEXT("ATTACH_ERROR");
               break;
             case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = "ATTACH_INCOMPATIBLE_QOS";
+              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
               break;
             default:
-              status_str = "Unknown Status";
+              status_str = ACE_TEXT("Unknown Status");
               break;
           }
 
         ACE_ERROR((LM_ERROR,
-                    "(%P|%t) Failed to attach to the transport. "
-                    "AttachStatus == %s\n", status_str.c_str()));
+                    ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
+                    ACE_TEXT("AttachStatus == %s\n"), status_str.c_str()));
         return 1;
       }
 

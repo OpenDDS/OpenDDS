@@ -62,9 +62,9 @@ parse_args (int argc,
 
   while (arg_shifter.is_anything_left ())
     {
-      const char *currentArg = 0;
+      const ACE_TCHAR *currentArg = 0;
 
-      if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+      if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
 	{
 	  arg_shifter.consume_arg ();
 	}
@@ -185,7 +185,7 @@ displayChain( ACE_Message_Block* chain)
   for( ACE_Message_Block* current = chain ; current ; current = current->cont()) {
     if( current->length() > 0) {
       //std::cout << "DISPLAYING BLOCK" << std::endl ;
-      char buffer[4096] ;
+      ACE_TCHAR buffer[4096] ;
       ACE::format_hexdump( current->base(), current->length(), buffer, sizeof(buffer)) ;
       std::cout << buffer << std::endl ;
     }
@@ -195,8 +195,8 @@ displayChain( ACE_Message_Block* chain)
 void
 checkValues( const Values& expected, const Values& observed)
 {
-  char ebuffer[512] ;
-  char obuffer[512] ;
+  ACE_TCHAR ebuffer[512] ;
+  ACE_TCHAR obuffer[512] ;
   if( expected.charValue       != observed.charValue) {
     std::cout << "char values not correct after insertion and extraction." << std::endl ;
     std::cout << "(expected: " << expected.charValue << ", observed: " << observed.charValue << ")." << std::endl ;
@@ -285,8 +285,8 @@ checkValues( const Values& expected, const Values& observed)
 void
 checkArrayValues( const ArrayValues& expected, const ArrayValues& observed)
 {
-  char ebuffer[512] ;
-  char obuffer[512] ;
+  ACE_TCHAR ebuffer[512] ;
+  ACE_TCHAR obuffer[512] ;
   for( size_t i = 0 ; i < ARRAYSIZE ; ++i) {
     if( expected.charValue[i]       != observed.charValue[i]) {
       std::cout << "char " << i << " values not correct after insertion and extraction." << std::endl ;

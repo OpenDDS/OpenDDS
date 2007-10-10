@@ -10,6 +10,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "SimplePublisher.h"
 #include <ace/Arg_Shifter.h>
+#include <ace/Argv_Type_Converter.h>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
@@ -27,15 +28,16 @@ PubDriver::~PubDriver()
 
 
 void
-PubDriver::run(int& argc, char* argv[])
+PubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
   DBG_SUB_ENTRY("PubDriver","run",1);
 
   // Need call the ORB_init to dynamically load the SimpleMcast library via
   // service configurator.
   // initialize the orb
-  CORBA::ORB_var orb = CORBA::ORB_init (argc,
-                                        argv,
+  ACE_Argv_Type_Converter conv(argc, argv);
+  CORBA::ORB_var orb = CORBA::ORB_init (conv.get_argc(),
+                                        conv.get_ASCII_argv(),
                                         "TAO_DDS_DCPS");
 
   this->parse_args(argc, argv);
@@ -45,7 +47,7 @@ PubDriver::run(int& argc, char* argv[])
 
 
 void
-PubDriver::parse_args(int& argc, char* argv[])
+PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 {
   DBG_ENTRY("PubDriver","parse_args");
 
@@ -59,12 +61,12 @@ PubDriver::parse_args(int& argc, char* argv[])
   bool got_p = false;
   bool got_s = false;
 
-  const char* current_arg = 0;
+  const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
   {
     // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
       if (got_p) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -p allowed on command-line.\n"));
@@ -83,7 +85,7 @@ PubDriver::parse_args(int& argc, char* argv[])
       got_p = true;
     }
     // A '-s' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-s"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {
       if (got_s) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -s allowed on command-line.\n"));
@@ -102,7 +104,7 @@ PubDriver::parse_args(int& argc, char* argv[])
       got_s = true;
     }
     // The '-?' option
-    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
                  "usage: %s "
                  "-p pub_id:pub_host:pub_port -s sub_id:if_addr\n",
@@ -144,14 +146,14 @@ PubDriver::init()
 
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
-                                                  "SimpleMcast",
+                                                  ACE_TEXT("SimpleMcast"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Get the existing or create a new SimpleMcastConfiguration object.\n"));
 
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleMcast");
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleMcast"));
 
   OpenDDS::DCPS::SimpleMcastConfiguration* mcast_config
     = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (config.in ());
@@ -240,14 +242,14 @@ PubDriver::run()
 
 
 int
-PubDriver::parse_pub_arg(const std::string& arg)
+PubDriver::parse_pub_arg(const ACE_TString &arg)
 {
   DBG_ENTRY("PubDriver","parse_pub_arg");
 
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -271,8 +273,8 @@ PubDriver::parse_pub_arg(const std::string& arg)
   }
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
-  std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString pub_id_str(arg.c_str(), pos);
+  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
 
   this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
   this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
@@ -282,14 +284,14 @@ PubDriver::parse_pub_arg(const std::string& arg)
 
 
 int
-PubDriver::parse_sub_arg(const std::string& arg)
+PubDriver::parse_sub_arg(const ACE_TString& arg)
 {
   DBG_ENTRY("PubDriver","parse_sub_arg");
 
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -s command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -313,14 +315,14 @@ PubDriver::parse_sub_arg(const std::string& arg)
   }
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
-  std::string sub_id_str(arg,0,pos);
-  std::string if_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString sub_id_str(arg.c_str(), pos);
+  ACE_TString if_addr_str(arg.c_str() + pos + 1);
 
   this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   // Add in a dummy port # so ACE_INET_Addr can parse the address
-  if_addr_str += ":0";
+  if_addr_str += ACE_TEXT(":0");
   this->if_addr_ = ACE_INET_Addr(if_addr_str.c_str());
 
   return 0;

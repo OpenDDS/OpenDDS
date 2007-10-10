@@ -192,16 +192,16 @@ void DataReaderListenerImpl::on_sample_rejected(
   ))
   {
     ACE_UNUSED_ARG(reader) ;
-    ACE_TString str = "";
+    ACE_TString str = ACE_TEXT("");
 
     if (::DDS::REJECTED_BY_INSTANCE_LIMIT == status.last_reason)
     {
-      str += " Instance Limit";
+      str += ACE_TEXT(" Instance Limit");
     }
 
     if (::DDS::REJECTED_BY_TOPIC_LIMIT == status.last_reason)
     {
-      str += " Topic Limit";
+      str += ACE_TEXT(" Topic Limit");
     }
 
     ACE_DEBUG((LM_DEBUG,

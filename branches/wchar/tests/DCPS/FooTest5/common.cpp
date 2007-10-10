@@ -24,9 +24,9 @@ const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
 const char* MY_TYPE_FOR_MCAST = "FooMcast";
 const char* MY_TYPE_FOR_RELIABLE_MULTICAST = "FooReliableMulticast";
-const char * reader_address_str = "";
-const char * multicast_group_address_str = "";
-const char * writer_address_str = "";
+const ACE_TCHAR* reader_address_str = ACE_TEXT("");
+const ACE_TCHAR* multicast_group_address_str = ACE_TEXT("");
+const ACE_TCHAR* writer_address_str = ACE_TEXT("");
 int reader_address_given = 0;
 int multicast_group_address_given = 0;
 int writer_address_given = 0;
@@ -79,10 +79,10 @@ int init_reader_transport ()
     {
       reader_mcast_impl 
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_MCAST, 
-                                                      "SimpleMcast", 
+                                                      ACE_TEXT("SimpleMcast"), 
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC_MCAST, "SimpleMcast");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC_MCAST, ACE_TEXT("SimpleMcast"));
 
       OpenDDS::DCPS::SimpleMcastConfiguration* reader_mcast_config 
         = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (reader_config.in ());
@@ -123,10 +123,10 @@ int init_reader_transport ()
     {
       reader_reliable_multicast_impl 
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_RELIABLE_MULTICAST, 
-                                                      "ReliableMulticast", 
+                                                      ACE_TEXT("ReliableMulticast"), 
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
       OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC_RELIABLE_MULTICAST, ACE_TEXT("ReliableMulticast"));
 
       OpenDDS::DCPS::ReliableMulticastTransportConfiguration* reader_reliable_multicast_config 
         = static_cast <OpenDDS::DCPS::ReliableMulticastTransportConfiguration*> (reader_config.in ());
@@ -170,10 +170,10 @@ int init_reader_transport ()
         {
           reader_udp_impl 
             = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_UDP, 
-                                                          "SimpleUdp", 
+                                                          ACE_TEXT("SimpleUdp"), 
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
           OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-            = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, "SimpleUdp");
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
 
           OpenDDS::DCPS::SimpleUdpConfiguration* reader_udp_config 
             = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (reader_config.in ());
@@ -203,11 +203,11 @@ int init_reader_transport ()
         {
           reader_tcp_impl 
             = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_TCP,
-                                                          "SimpleTcp", 
+                                                          ACE_TEXT("SimpleTcp"), 
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
           OpenDDS::DCPS::TransportConfiguration_rch reader_config 
-            = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, "SimpleTcp");
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
 
           OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config 
             = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
@@ -242,11 +242,11 @@ int init_writer_transport ()
     {
       writer_mcast_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_MCAST, 
-                                                      "SimpleMcast", 
+                                                      ACE_TEXT("SimpleMcast"), 
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_MCAST, "SimpleMcast");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_MCAST, ACE_TEXT("SimpleMcast"));
 
       OpenDDS::DCPS::SimpleMcastConfiguration* writer_mcast_config 
         = static_cast <OpenDDS::DCPS::SimpleMcastConfiguration*> (writer_config.in ());
@@ -275,11 +275,11 @@ int init_writer_transport ()
     {
       writer_reliable_multicast_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_RELIABLE_MULTICAST, 
-                                                      "ReliableMulticast", 
+                                                      ACE_TEXT("ReliableMulticast"), 
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_RELIABLE_MULTICAST, "ReliableMulticast");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_RELIABLE_MULTICAST, ACE_TEXT("ReliableMulticast"));
 
       OpenDDS::DCPS::ReliableMulticastTransportConfiguration* writer_reliable_multicast_config 
         = static_cast <OpenDDS::DCPS::ReliableMulticastTransportConfiguration*> (writer_config.in ());
@@ -310,11 +310,11 @@ int init_writer_transport ()
     {
       writer_udp_impl 
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_UDP, 
-        "SimpleUdp", 
+        ACE_TEXT("SimpleUdp"), 
         OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, "SimpleUdp");
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("SimpleUdp"));
 
       OpenDDS::DCPS::SimpleUdpConfiguration* writer_udp_config 
         = static_cast <OpenDDS::DCPS::SimpleUdpConfiguration*> (writer_config.in ());
@@ -344,11 +344,11 @@ int init_writer_transport ()
 
     writer_tcp_impl 
       = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                    "SimpleTcp", 
+                                                    ACE_TEXT("SimpleTcp"), 
                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch writer_config 
-      = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, "SimpleTcp");
+      = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
 
     OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config 
       = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());

@@ -31,7 +31,7 @@ class PubDriver
     PubDriver();
     virtual ~PubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
     virtual void shutdown (
       )
@@ -67,18 +67,18 @@ class PubDriver
     void listener_test ();
     void allocator_test ();
     void liveliness_test ();
-    void parse_args(int& argc, char* argv[]);
-    void initialize(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
+    void initialize(int& argc, ACE_TCHAR* argv[]);
     void run();
     void end();
     void run_test (int test_to_run);
 
-    int parse_pub_arg(const std::string& arg);
-    int parse_sub_arg(const std::string& arg);
+    int parse_pub_arg(const ACE_TString& arg);
+    int parse_sub_arg(const ACE_TString& arg);
 
     void add_subscription (
     CORBA::Long       reader_id,
-    const char *      sub_addr
+    const ACE_TCHAR *      sub_addr
     );
 
     void attach_to_transport ();
@@ -92,11 +92,11 @@ class PubDriver
     ::Xyz::FooDataWriter_var    foo_datawriter_;
     ::Xyz::FooDataWriterImpl*   foo_datawriter_servant_;
 
-    ACE_CString       pub_id_fname_;
+    ACE_TString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
 
     OpenDDS::DCPS::RepoId sub_id_;
-    ACE_CString       sub_addr_;
+    ACE_TString       sub_addr_;
     int               history_depth_;
     int               test_to_run_;
 

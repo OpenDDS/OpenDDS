@@ -454,7 +454,7 @@ namespace
 }
 
 int
-main(int argc, char* argv[])
+ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   ACE_UNUSED_ARG(argc);
   ACE_UNUSED_ARG(argv);

@@ -48,14 +48,14 @@ parse_args (int argc,
 
   while (arg_shifter.is_anything_left ())
   {
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       ignore_kind = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();

@@ -33,7 +33,7 @@
 
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
@@ -61,41 +61,41 @@ int parse_args (int argc, char *argv[])
     //                              defaults to current directory.
     //  -v                          verbose transport debug
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-t")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-r")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
     {
       num_datareaders = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-s")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
     {
       reader_address_str = currentArg;
       reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
       multicast_group_address_str = currentArg;
       multicast_group_address_given = 1;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-u")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
     {
       using_udp = ACE_OS::atoi (currentArg);
       if (using_udp == 1)
@@ -104,7 +104,7 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
       using_mcast = ACE_OS::atoi (currentArg);
       if (using_mcast == 1)
@@ -113,7 +113,7 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-a")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
     {
       using_reliable_multicast = ACE_OS::atoi (currentArg);
       if (using_reliable_multicast == 1)
@@ -122,42 +122,42 @@ int parse_args (int argc, char *argv[])
       }
       arg_shifter.consume_arg();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-w")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-w"))) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-z")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-z"))) != 0)
     {
       sequence_length = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-k")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
     {
       no_key = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-y")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-y"))) != 0)
     {
       op_interval_ms = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-f")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
     {
       mixed_trans = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-o")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
     {
       synch_file_dir = currentArg;
       pub_ready_filename = synch_file_dir + pub_ready_filename;
@@ -167,7 +167,7 @@ int parse_args (int argc, char *argv[])
 
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-v") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
@@ -254,16 +254,16 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
           switch (attach_status)
             {
               case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = "ATTACH_BAD_TRANSPORT";
+                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
                 break;
               case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = "ATTACH_ERROR";
+                status_str = ACE_TEXT("ATTACH_ERROR");
                 break;
               case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = "ATTACH_INCOMPATIBLE_QOS";
+                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
                 break;
               default:
-                status_str = "Unknown Status";
+                status_str = ACE_TEXT("Unknown Status");
                 break;
             }
 
@@ -290,7 +290,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 }
 
 
-int main (int argc, char *argv[])
+int main (int argc, ACE_TCHAR *argv[])
 {
 
   ::DDS::DomainParticipantFactory_var dpf;

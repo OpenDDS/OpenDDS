@@ -31,8 +31,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
-                            "file - using code default.\n"),                   \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                  ACE_TEXT ("file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
@@ -41,8 +41,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "         \
-                          "file - using code default.\n"),                     \
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")        \
+                ACE_TEXT ("file - using code default.\n"),                     \
                 KEY));                                                         \
     }                                                                          \
   }                                                                            \
@@ -62,8 +62,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
-                            "file - using code default.\n"),                   \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                  ACE_TEXT ("file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
@@ -72,8 +72,8 @@ class ACE_Data_Block ;
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "       \
-                            "file - using code default.\n"),                   \
+                  ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")      \
+                  ACE_TEXT ("file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
@@ -85,30 +85,30 @@ class ACE_Data_Block ;
 
 #define GET_CONFIG_DOUBLE_VALUE(CF, SECT, KEY, VALUE)                          \
 {                                                                              \
-  ACE_CString stringvalue;                                                     \
+  ACE_TString stringvalue;                                                     \
   if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config "          \
-                            "file - using code default.\n"),                   \
+                  ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                  ACE_TEXT ("file - using code default.\n"),                   \
                   KEY));                                                       \
     }                                                                          \
   }                                                                            \
-  else  if (stringvalue == "")                                                 \
+  else  if (stringvalue == ACE_TEXT(""))                                       \
   {                                                                            \
     if (DCPS_debug_level > 0)                                                  \
     {                                                                          \
       ACE_DEBUG ((LM_WARNING,                                                  \
-                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config "         \
-                          "file - using code default.\n"),                     \
+                ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")        \
+                ACE_TEXT ("file - using code default.\n"),                     \
                 KEY));                                                         \
     }                                                                          \
   }                                                                            \
   else                                                                         \
   {                                                                            \
-    VALUE = atof (stringvalue.c_str ());                                       \
+    VALUE = ACE_OS::strtod (stringvalue.c_str (), 0);                          \
   }                                                                            \
 }
 

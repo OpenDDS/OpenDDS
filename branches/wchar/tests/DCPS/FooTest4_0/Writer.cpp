@@ -331,11 +331,11 @@ int Writer::init_transport ()
 
   writer_transport_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                  "SimpleTcp",
+                                                  ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
