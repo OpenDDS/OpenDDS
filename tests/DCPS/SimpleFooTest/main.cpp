@@ -32,9 +32,9 @@ const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT(""));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -55,7 +55,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {

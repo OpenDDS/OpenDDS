@@ -41,9 +41,9 @@ int expected_deleted_connections = 1;
 int num_deleted_connections = 0;
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "va:n:i:l:d:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("va:n:i:l:d:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -86,7 +86,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -196,7 +196,7 @@ int main (int argc, char *argv[]) {
     Writer* writer = new Writer(dw.in());
 
     // Indicate that the publisher is ready
-    FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, "w");
+    FILE* writers_ready = ACE_OS::fopen (pub_ready_filename, ACE_TEXT ("w"));
     if (writers_ready == 0) {
       cerr << "ERROR Unable to create publisher ready file" << endl;
       exit(1);
@@ -208,7 +208,7 @@ int main (int argc, char *argv[]) {
     do {
       ACE_Time_Value small(0,250000);
       ACE_OS::sleep (small);
-      readers_ready = ACE_OS::fopen (sub_ready_filename, "r");
+      readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT ("r"));
     } while (0 == readers_ready);
     ACE_OS::fclose(readers_ready);
 
@@ -221,7 +221,7 @@ int main (int argc, char *argv[]) {
     }
 
     // Indicate that the publisher is done
-    FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, "w");
+    FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, ACE_TEXT ("w"));
     if (writers_completed == 0) {
       cerr << "ERROR Unable to i publisher completed file" << endl;
     } else {
@@ -235,7 +235,7 @@ int main (int argc, char *argv[]) {
     do {
       ACE_Time_Value small(0,250000);
       ACE_OS::sleep (small);
-      readers_completed = ACE_OS::fopen (sub_finished_filename, "r");
+      readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT ("r"));
     } while (0 == readers_completed);
     ACE_OS::fclose(readers_completed);
 

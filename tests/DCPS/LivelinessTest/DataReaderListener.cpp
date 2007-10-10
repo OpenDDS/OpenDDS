@@ -18,7 +18,7 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")
-      " use_take=%d num_ops_per_thread=%d\n",
+      ACE_TEXT(" use_take=%d num_ops_per_thread=%d\n"),
       use_take, num_ops_per_thread
       ));
     ACE_UNUSED_ARG(max_samples_per_instance);

@@ -64,8 +64,9 @@ SimpleSubscriber::init(OpenDDS::DCPS::TransportIdType          transport_id,
         }
 
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) Failed to attach to the transport. "
-                 "AttachStatus == %s\n", status_str.c_str()));
+                ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
+                ACE_TEXT("AttachStatus == %s\n"),
+                ACE_TEXT_CHAR_TO_TCHAR(status_str.c_str())));
       throw TestException();
     }
 

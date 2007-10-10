@@ -35,7 +35,7 @@
 
 
 /// parse the command line arguments
-int parse_args (int argc, char *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Arg_Shifter arg_shifter (argc, argv);
 
@@ -54,60 +54,60 @@ int parse_args (int argc, char *argv[])
     // -mxi <max instances>
     // -z  <verbose transport debug>
 
-    const char *currentArg = 0;
+    const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter("-p")) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-c")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
       use_zero_copy_reads = ! ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       int shift_bits = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
       DATA_SIZE = 1 << shift_bits;
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       NUM_SAMPLES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       RECVS_BTWN_READS = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-a")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
     {
       reader_address_str = currentArg;
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-msi")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-msi"))) != 0)
     {
       MAX_SAMPLES_PER_INSTANCE = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-mxs")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-mxs"))) != 0)
     {
       MAX_SAMPLES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-mxi")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-mxi"))) != 0)
     {
       MAX_INSTANCES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter("-sd")) != 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-sd"))) != 0)
     {
       subscriber_delay_msec = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-z") == 0)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
@@ -124,7 +124,7 @@ int parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
 
   int status = 0;

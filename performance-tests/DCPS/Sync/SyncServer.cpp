@@ -13,12 +13,12 @@ class SyncServer
 public:
   typedef std::string InitError;
 
-  SyncServer (int argc, char *argv[]) throw (InitError);
+  SyncServer (int argc, ACE_TCHAR *argv[]) throw (InitError);
 
   bool run ();
 
 private:
-  bool parse_args (int argc, char *argv[]);
+  bool parse_args (int argc, ACE_TCHAR *argv[]);
 
   std::auto_ptr<SyncServer_i> sync_server_;
 
@@ -27,9 +27,9 @@ private:
 };
 
 bool
-SyncServer::parse_args (int argc, char *argv[])
+SyncServer::parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "p:s:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("p:s:"));
   int c;
   std::string usage =
     " -p <publisher count>\n"

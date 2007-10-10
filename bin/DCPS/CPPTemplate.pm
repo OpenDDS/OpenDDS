@@ -273,8 +273,8 @@ DDS::ReturnCode_t
     ACE_ERROR_RETURN ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("<%TYPE%>DataWriterImpl::unregister, ")
-                        ACE_TEXT("The given handle=%X is different from "
-                        "registered handle=%X.\n"),
+                        ACE_TEXT("The given handle=%X is different from ")
+                        ACE_TEXT("registered handle=%X.\n"),
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
@@ -602,8 +602,8 @@ ACE_Message_Block*
       if (pair.second == false)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) "
-                            "<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
+                            ACE_TEXT("(%P|%t) ")
+                            ACE_TEXT("<%TYPE%>DataWriterImpl::get_or_create_instance_handle, ")
                             ACE_TEXT("insert <%SCOPE%><%TYPE%> failed. \n")),
                             ::DDS::RETCODE_ERROR);
       }
@@ -1640,8 +1640,8 @@ void
     if (ret != 0)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) "
-                        "<%TYPE%>DataReaderImpl::store_instance_data, ")
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("<%TYPE%>DataReaderImpl::store_instance_data, ")
                         ACE_TEXT("insert handle failed. \n")),
                         ::DDS::RETCODE_ERROR);
       return ::DDS::RETCODE_ERROR;
@@ -1653,8 +1653,8 @@ void
     if (bpair.second == false)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) "
-                        "<%TYPE%>DataReaderImpl::store_instance_data, ")
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("<%TYPE%>DataReaderImpl::store_instance_data, ")
                         ACE_TEXT("insert ::<%SCOPE%><%TYPE%> failed. \n")),
                         ::DDS::RETCODE_ERROR);
     }

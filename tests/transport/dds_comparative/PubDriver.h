@@ -21,7 +21,7 @@ class PubDriver
 
     /// The only public method (other than ctor/dtor) to "run" the
     /// application.  Called by the process' main() function.
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
@@ -37,7 +37,7 @@ class PubDriver
     };
 
     /// First method called by our public run(argc,argv) method.
-    void parse_args(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
 
     /// Second method called by our public run(argc,argv) method.
     void init();
@@ -48,25 +48,25 @@ class PubDriver
 
     /// Helper method invoked by parse_args() when a '-n arg' is encountered
     /// on the command-line.
-    void parse_arg_n(const char* arg, bool& flag);
+    void parse_arg_n(const ACE_TCHAR* arg, bool& flag);
 
     /// Helper method invoked by parse_args() when a '-d arg' is encountered
     /// on the command-line.
-    void parse_arg_d(const char* arg, bool& flag);
+    void parse_arg_d(const ACE_TCHAR* arg, bool& flag);
 
     /// Helper method invoked by parse_args() when a '-p arg' is encountered
     /// on the command-line.
-    void parse_arg_p(const char* arg, bool& flag);
+    void parse_arg_p(const ACE_TCHAR* arg, bool& flag);
 
     /// Helper method invoked by parse_args() when a '-s arg' is encountered
     /// on the command-line.
-    void parse_arg_s(const char* arg, bool& flag);
+    void parse_arg_s(const ACE_TCHAR* arg, bool& flag);
 
     /// Helper method to dump the usage statement.
-    void print_usage(const char* exe_name);
+    void print_usage(const ACE_TCHAR* exe_name);
 
     /// Helper method to make sure an arg was supplied via cmd-line.
-    void required_arg(char opt, bool flag);
+    void required_arg(ACE_TCHAR opt, bool flag);
 
 
     /// The publisher object.  The Pub class derives from TransportInterface.

@@ -71,8 +71,8 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
     }
 
 
-  char ebuffer[51200] ; ebuffer[0] = '\0' ;
-  char obuffer[51200] ; obuffer[0] = '\0' ;
+  ACE_TCHAR ebuffer[51200] ; ebuffer[0] = ACE_TEXT('\0') ;
+  ACE_TCHAR obuffer[51200] ; obuffer[0] = ACE_TEXT('\0') ;
 
   TAO::DCPS::Serializer ss(mb);
 
@@ -125,7 +125,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
 }
 
 // this test tests the -Gdcps generated code for type XyZ::Foo from foo_test1_lib.
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
  
   if (argc > 1) dump_buffer = true;

@@ -12,12 +12,12 @@ class TestDriver
     TestDriver();
     virtual ~TestDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
 
-    void parse_args(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
     void init();
     void run_i();
 

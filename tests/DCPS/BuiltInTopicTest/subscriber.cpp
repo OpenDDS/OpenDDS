@@ -25,7 +25,7 @@
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) subscriber main\n"));
   try

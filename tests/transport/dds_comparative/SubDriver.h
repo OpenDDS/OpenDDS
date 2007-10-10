@@ -16,7 +16,7 @@ class SubDriver
     SubDriver();
     virtual ~SubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
@@ -27,16 +27,16 @@ class SubDriver
       TRANSPORT_IMPL_ID
     };
 
-    void parse_args(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
     void init();
     void run();
 
-    void parse_arg_n(const char* arg, bool& flag);
-    void parse_arg_d(const char* arg, bool& flag);
-    void parse_arg_p(const char* arg, bool& flag);
-    void parse_arg_s(const char* arg, bool& flag);
-    void print_usage(const char* exe_name);
-    void required_arg(char opt, bool flag);
+    void parse_arg_n(const ACE_TCHAR* arg, bool& flag);
+    void parse_arg_d(const ACE_TCHAR* arg, bool& flag);
+    void parse_arg_p(const ACE_TCHAR* arg, bool& flag);
+    void parse_arg_s(const ACE_TCHAR* arg, bool& flag);
+    void print_usage(const ACE_TCHAR* exe_name);
+    void required_arg(ACE_TCHAR opt, bool flag);
 
 
     Sub subscriber_;

@@ -6,8 +6,8 @@
 #include "ace/OS_NS_stdlib.h"
 
 ApplicationLevel::ApplicationLevel(AbstractionLayer*  abstract,
-                                   const std::string& directory,
-                                   const std::string& nodename)
+                                   const ACE_TString& directory,
+                                   const ACE_TString& nodename)
 : abstraction_layer_(abstract)
 , directory_(directory)
 , nodename_(nodename)
@@ -31,8 +31,8 @@ ApplicationLevel::~ApplicationLevel()
 void
 ApplicationLevel::receive_diff(const DistributedContent::FileDiff& diff)
 {
-  std::string diff_name("");
-  std::string diff_file_name = directory_;
+  ACE_TString diff_name;
+  ACE_TString diff_file_name = directory_;
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("%s received new diff (%d) -> (%d) for file \"%s\" id %d size %d bytes from %s\n"),
@@ -49,9 +49,9 @@ ApplicationLevel::receive_diff(const DistributedContent::FileDiff& diff)
   // Handle the case where the first file is received
   if (-1 == diff.previous_version)
   {
-    diff_name += diff.filename.in();
+    diff_name += ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in());
 
-    file_name_ = diff.filename.in();
+    file_name_ = ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in());
     file_id_ = diff.file_id;
 
   }
@@ -79,9 +79,9 @@ ApplicationLevel::generate_diff (long size)
 
   // Create the FileDiff and set the values
   DistributedContent::FileDiff diff;
-  diff.filename = CORBA::string_dup(file_name_.c_str());
+  diff.filename = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(file_name_.c_str()));
   diff.file_id = file_id_;
-  diff.change_source = CORBA::string_dup(nodename_.c_str());
+  diff.change_source = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(nodename_.c_str()));
   diff.previous_version = current_file_version_;
   diff.new_version = current_file_version_ + 1;
 
@@ -93,9 +93,9 @@ ApplicationLevel::generate_diff (long size)
   }
 
   // write the file 
-  std::string diffname;
+  ACE_TString diffname;
   generate_diff_filename(diffname, diff);
-  std::string full_file_name = directory_ + diffname;
+  ACE_TString full_file_name = directory_ + diffname;
   write_difference_file(full_file_name, diff);
 
   // publish the diff
@@ -109,14 +109,14 @@ ApplicationLevel::generate_diff (long size)
 
 
 bool
-ApplicationLevel::generate_new_file (const std::string& filename, long size)
+ApplicationLevel::generate_new_file (const ACE_TString& filename, long size)
 {
   bool generate_result = false;
   file_name_ = filename;
   DistributedContent::FileDiff diff;
   diff.file_id = ACE_OS::rand() % 32765;
-  diff.filename = CORBA::string_dup(file_name_.c_str());
-  diff.change_source = CORBA::string_dup(nodename_.c_str());
+  diff.filename = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(file_name_.c_str()));
+  diff.change_source = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(nodename_.c_str()));
   diff.previous_version = -1;
   diff.new_version = 0;
 
@@ -128,11 +128,11 @@ ApplicationLevel::generate_new_file (const std::string& filename, long size)
   }
 
   // save the file information
-  file_name_ = diff.filename.in();
+  file_name_ = ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in());
   file_id_ = diff.file_id;
 
   // write the file 
-  std::string  full_file_name = directory_ + file_name_;
+  ACE_TString full_file_name = directory_ + file_name_;
   write_difference_file(full_file_name, diff);
 
   // publish the diff
@@ -146,7 +146,7 @@ ApplicationLevel::generate_new_file (const std::string& filename, long size)
 
 
 void
-ApplicationLevel::write_difference_file (const std::string& filename,
+ApplicationLevel::write_difference_file (const ACE_TString& filename,
                                          const DistributedContent::FileDiff& diff)
 {
 
@@ -195,14 +195,14 @@ ApplicationLevel::get_write_count()
 
 
 void
-ApplicationLevel::generate_diff_filename(std::string& filename,
+ApplicationLevel::generate_diff_filename(ACE_TString& filename,
                                          const DistributedContent::FileDiff& diff)
 {
-  char outstr[1024];
-  sprintf(outstr,
-          "diff_%s_%s_%d_%d",
-          diff.change_source.in(),
-          diff.filename.in(),
+  ACE_TCHAR outstr[1024];
+  ACE_OS::sprintf(outstr,
+          ACE_TEXT("diff_%s_%s_%d_%d"),
+          ACE_TEXT_CHAR_TO_TCHAR(diff.change_source.in()),
+          ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in()),
           diff.previous_version,
           diff.new_version);
 
@@ -210,20 +210,20 @@ ApplicationLevel::generate_diff_filename(std::string& filename,
 }
 
 bool
-ApplicationLevel::publish_file (const std::string& filename)
+ApplicationLevel::publish_file (const ACE_TString& filename)
 {
   bool publish_result = false;
   file_name_ = filename;
   DistributedContent::FileDiff diff;
   diff.file_id = ACE_OS::rand() % 32765;
-  diff.filename = CORBA::string_dup(file_name_.c_str());
-  diff.change_source = CORBA::string_dup(nodename_.c_str());
+  diff.filename = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(file_name_.c_str()));
+  diff.change_source = CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(nodename_.c_str()));
   diff.previous_version = -1;
   diff.new_version = 0;
 
   //std::string  full_file_name = directory_ + file_name_;
   // Expect the files to be in the current directory.
-  std::string  full_file_name = file_name_;
+  ACE_TString full_file_name = file_name_;
 
   ACE_stat file_state;
   if (0 != ACE_OS::stat(full_file_name.c_str(), &file_state))
@@ -255,7 +255,7 @@ ApplicationLevel::publish_file (const std::string& filename)
       else
       {
         // save the file information
-        file_name_ = diff.filename.in();
+        file_name_ = ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in());
         file_id_ = diff.file_id;
 
         // publish the diff

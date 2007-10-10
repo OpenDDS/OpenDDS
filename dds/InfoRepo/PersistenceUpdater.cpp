@@ -240,7 +240,7 @@ PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
 
   if (um_ == 0) {
     ACE_ERROR ((LM_ERROR, ACE_TEXT("PersistenceUpdater initialization failed. ")
-                "No UpdateManager discovered.\n"));
+                ACE_TEXT("No UpdateManager discovered.\n")));
     return -1;
   }
 

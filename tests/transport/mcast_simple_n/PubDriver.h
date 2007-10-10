@@ -4,7 +4,7 @@
 #include "SimplePublisher.h"
 #include "dds/DCPS/Definitions.h"
 #include "ace/INET_Addr.h"
-#include <string>
+#include "ace/String_Base.h"
 
 
 class PubDriver
@@ -14,7 +14,7 @@ class PubDriver
     PubDriver();
     virtual ~PubDriver();
 
-    void run(int& argc, char* argv[]);
+    void run(int& argc, ACE_TCHAR* argv[]);
 
 
   private:
@@ -29,12 +29,12 @@ class PubDriver
       ALL_TRAFFIC
     };
 
-    void parse_args(int& argc, char* argv[]);
+    void parse_args(int& argc, ACE_TCHAR* argv[]);
     void init();
     void run();
 
-    int parse_pub_arg(const std::string& arg);
-    int parse_sub_arg(const std::string& arg);
+    int parse_pub_arg(const ACE_TString& arg);
+    int parse_sub_arg(const ACE_TString& arg);
 
 
     SimplePublisher publisher_;

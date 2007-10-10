@@ -225,7 +225,7 @@ namespace OpenDDS
 
                       // Use a unique ORB for the ::DDS Service
                       // to avoid conflicts with other CORBA code
-                      orb_ = CORBA::ORB_init (argc,
+                      orb_ = CORBA::ORB_init (converter.get_argc(),
                                               converter.get_ASCII_argv(),
                                               "TAO_DDS_DCPS");
                     }
@@ -240,8 +240,8 @@ namespace OpenDDS
                   if (config_fname == ACE_TEXT(""))
                     {
                       ACE_DEBUG ((LM_INFO,
-                        ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration "
-                        "file specified.\n")));
+                        ACE_TEXT ("(%P|%t)INFO: not using file configuration - no configuration ")
+                        ACE_TEXT ("file specified.\n")));
                     }
                   else
                     {
@@ -250,8 +250,8 @@ namespace OpenDDS
                       if (!in)
                         {
                           ACE_DEBUG ((LM_INFO,
-                                      ACE_TEXT("(%P|%t)INFO: not using file configuration - "
-                                      "can not open \"%s\" for reading. %p\n"),
+                                      ACE_TEXT("(%P|%t)INFO: not using file configuration - ")
+                                      ACE_TEXT ("can not open \"%s\" for reading. %p\n"),
                                       config_fname.c_str(), ACE_TEXT("fopen")));
                         }
                       else
@@ -665,8 +665,8 @@ namespace OpenDDS
       int status = 0;
       if ((status = this->cf_.open ()) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                                     "open() returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("open() returned %d\n"),
                            status),
                            -1);
 
@@ -675,8 +675,8 @@ namespace OpenDDS
 
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "import_config () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("import_config () returned %d\n"),
                            status),
                            -1);
       }
@@ -684,16 +684,16 @@ namespace OpenDDS
       status = this->load_common_configuration ();
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_common_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_common_configuration () returned %d\n"),
                            status),
                            -1);
       }
       status = TheTransportFactory->load_transport_configuration (this->cf_);
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration "
-                           "load_transport_configuration () returned %d\n"),
+                           ACE_TEXT ("(%P|%t)Service_Participant::load_configuration ")
+                           ACE_TEXT ("load_transport_configuration () returned %d\n"),
                            status),
                            -1);
       }
@@ -712,8 +712,8 @@ namespace OpenDDS
               // This is not an error if the configuration file does not have
               // a common section. The code default configuration will be used.
               ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration "
-                          "failed to open section %s\n"),
+                ACE_TEXT ("(%P|%t)Service_Participant::load_common_configuration ")
+                ACE_TEXT ("failed to open section %s\n"),
                           COMMON_SECTION_NAME));
             }
           return 0;

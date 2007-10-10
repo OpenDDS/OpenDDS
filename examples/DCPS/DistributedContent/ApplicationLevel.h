@@ -2,7 +2,8 @@
 #define APPLICATIONLEVEL_H_
 
 #include "FileInfoC.h"
-#include <string>
+
+#include <ace/String_Base.h>
 
 /// Forward Declarations
 class AbstractionLayer;
@@ -26,8 +27,8 @@ public:
    * @return 
    */
   ApplicationLevel(AbstractionLayer*  abstract,
-                   const std::string& directory,
-                   const std::string& nodename);
+                   const ACE_TString& directory,
+                   const ACE_TString& nodename);
   /** Destructor **/
   virtual ~ApplicationLevel();
 
@@ -55,7 +56,7 @@ public:
    *
    * @return  true if the new file is created and published
    */
-  bool generate_new_file (const std::string& filename, long size);
+  bool generate_new_file (const ACE_TString& filename, long size);
 
   /**
    * Open and publish a existing file.
@@ -64,7 +65,7 @@ public:
    *
    * @return  true if the new file is opened and published
    */
-  bool publish_file (const std::string& filename);
+  bool publish_file (const ACE_TString& filename);
 
   /**
    * Get the number of files that have been written.
@@ -81,7 +82,7 @@ protected:
    * @param filename - name of the file to write
    * @param diff - FileDiff holding the data to write
    */
-  void write_difference_file (const std::string& filename,
+  void write_difference_file (const ACE_TString& filename,
                               const DistributedContent::FileDiff& diff);
 
   /**
@@ -89,7 +90,7 @@ protected:
    * @param filename - the filename that will be generated
    * @param diff - FileDiff with the information to be stored
    */
-  void generate_diff_filename(std::string& filename,
+  void generate_diff_filename(ACE_TString& filename,
                               const DistributedContent::FileDiff& diff);
 
 private:
@@ -97,12 +98,12 @@ private:
   /// on the DDS system.
   AbstractionLayer* abstraction_layer_;
   /// Directory to store the files in
-  std::string       directory_;
+  ACE_TString       directory_;
   /// Name of this node
-  std::string       nodename_;
+  ACE_TString       nodename_;
 
   /// Name of the file that the differences are for
-  std::string       file_name_;
+  ACE_TString       file_name_;
   /// Id of the file that the differences are for
   ::CORBA::Long     file_id_;
   /// The latest difference version of the file 

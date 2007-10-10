@@ -83,8 +83,8 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_i
           if (reactor_task->open(0) != 0)
             {
               ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for "
-                 "factory (id=%s).\n"), type_id.c_str ()));
+                 ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for ")
+                 ACE_TEXT("factory (id=%s).\n"), type_id.c_str ()));
               // We failed to activate the reactor task.
               throw Transport::MiscProblem();
             }
@@ -107,8 +107,8 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_i
         }
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Failed to create TransportImpl object for "
-                 "factory (id=%s).\n"), type_id.c_str ()));
+                 ACE_TEXT("(%P|%t) ERROR: Failed to create TransportImpl object for ")
+                 ACE_TEXT("factory (id=%s).\n"), type_id.c_str ()));
       throw Transport::UnableToCreate();
     }
 
@@ -137,8 +137,8 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i (TransportIdType impl_i
   if (result == 1)
     {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: transport (%u) has already been created in the "
-                 "TransportFactory.\n"), impl_id));
+                 ACE_TEXT("(%P|%t) ERROR: transport (%u) has already been created in the ")
+                 ACE_TEXT("TransportFactory.\n"), impl_id));
       throw Transport::Duplicate();
     }
   else
@@ -171,8 +171,8 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration
         ACE_Configuration_Section_Key sect;
         if (cf.open_section (root, sect_name.c_str (), 0, sect) != 0)
           ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: "
-                             "failed to open section %s\n"),
+                             ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: ")
+                             ACE_TEXT ("failed to open section %s\n"),
                              sect_name.c_str ()),
                              -1);
         else
@@ -184,8 +184,8 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration (ACE_Configuration
           if (transport_type == ACE_TEXT(""))
           {
             ACE_ERROR_RETURN ((LM_ERROR,
-                              ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: "
-                              "missing transport_type in \"%s\" section.\n"),
+                              ACE_TEXT ("(%P|%t)TransportFactory::load_transport_configuration: ")
+                              ACE_TEXT ("missing transport_type in \"%s\" section.\n"),
                               sect_name.c_str ()),
                               -1);
           }
@@ -265,8 +265,8 @@ OpenDDS::DCPS::TransportFactory::get_configuration (TransportIdType transport_id
 
   if (result != 0)
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_configuration "
-                            "transport (id=%u) is not configured. \n"),
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_configuration ")
+                            ACE_TEXT("transport (id=%u) is not configured. \n"),
                             transport_id));
       throw Transport::NotConfigured ();
     }
@@ -289,8 +289,8 @@ OpenDDS::DCPS::TransportFactory::create_configuration (TransportIdType transport
   if (result != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t)TransportFactory::create_configuration: "
-        "transport_type=%s is not registered.\n"),
+        ACE_TEXT("(%P|%t)TransportFactory::create_configuration: ")
+        ACE_TEXT("transport_type=%s is not registered.\n"),
         transport_type.c_str ()));
       return TransportConfiguration_rch ();
     }
@@ -308,7 +308,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType tr
   if (transport_type == ACE_TEXT(""))
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type")
-                            "is null. \n"));
+                            ACE_TEXT("is null. \n")));
       throw CORBA::BAD_PARAM ();
     }
 
@@ -324,7 +324,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration (TransportIdType tr
       if (transport_type != config->transport_type_)
         {
           ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type ")
-                                "conflict - provided %s configured %s\n", transport_type.c_str(),
+                                ACE_TEXT("conflict - provided %s configured %s\n"), transport_type.c_str(),
                                 config->transport_type_.c_str ()));
           throw Transport::ConfigurationConflict ();
         }
@@ -404,8 +404,8 @@ OpenDDS::DCPS::TransportFactory::register_generator (const ACE_TCHAR* type,
   if (result == 1)
     {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: transport type=%s already registered "
-                 "with TransportFactory.\n"), type));
+                 ACE_TEXT("(%P|%t) ERROR: transport type=%s already registered ")
+                 ACE_TEXT("with TransportFactory.\n"), type));
       throw Transport::Duplicate();
     }
   else if (result == -1)
@@ -461,8 +461,8 @@ OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            facto
   if (result == 1)
     {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: factory (id=%s) already registered "
-                 "in impl_type_map_.\n"), factory_id.c_str ()));
+                 ACE_TEXT("(%P|%t) ERROR: factory (id=%s) already registered ")
+                 ACE_TEXT("in impl_type_map_.\n"), factory_id.c_str ()));
       throw Transport::Duplicate();
     }
   else if (result == -1)
@@ -497,8 +497,8 @@ OpenDDS::DCPS::TransportFactory::register_configuration(TransportIdType       tr
   if (result == 1)
     {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: transport (id=%u) already registered "
-                 "in configuration_map_.\n"), transport_id));
+                 ACE_TEXT("(%P|%t) ERROR: transport (id=%u) already registered ")
+                 ACE_TEXT("in configuration_map_.\n"), transport_id));
       throw Transport::Duplicate();
     }
   else if (result == -1)

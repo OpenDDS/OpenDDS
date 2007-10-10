@@ -6,7 +6,7 @@
 
 
 int
-main(int argc, char* argv[])
+ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   //TURN_ON_VERBOSE_DEBUG;
 

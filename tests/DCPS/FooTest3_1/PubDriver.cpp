@@ -27,7 +27,7 @@ PubDriver::PubDriver()
   publisher_ (::DDS::Publisher::_nil ()),
   datawriters_ (0),
   writers_ (0),
-  pub_id_fname_ ("pub_id.txt"),
+  pub_id_fname_ (ACE_TEXT("pub_id.txt")),
   sub_id_ (0),
   block_on_write_ (0),
   num_threads_to_write_ (0),
@@ -58,7 +58,7 @@ PubDriver::~PubDriver()
 
 
 void
-PubDriver::run(int& argc, char* argv[])
+PubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
   parse_args(argc, argv);
   init(argc, argv);
@@ -75,7 +75,7 @@ PubDriver::run(int& argc, char* argv[])
 
 
 void
-PubDriver::parse_args(int& argc, char* argv[])
+PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 {
   // Command-line arguments:
   //
@@ -97,12 +97,12 @@ PubDriver::parse_args(int& argc, char* argv[])
   bool got_p = false;
   bool got_s = false;
 
-  const char* current_arg = 0;
+  const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
   {
     // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter("-p"))) {
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
       if (got_p) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -p allowed on command-line.\n"));
@@ -121,7 +121,7 @@ PubDriver::parse_args(int& argc, char* argv[])
       got_p = true;
     }
     // A '-s' option
-    else if ((current_arg = arg_shifter.get_the_parameter("-s"))) {
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {
       if (got_s) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) Only one -s allowed on command-line.\n"));
@@ -139,68 +139,68 @@ PubDriver::parse_args(int& argc, char* argv[])
 
       got_s = true;
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-b")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
     {
       block_on_write_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-t")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
       num_threads_to_write_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-m")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       multiple_instances_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-i")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_writes_per_thread_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-w")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-w"))) != 0)
     {
       num_datawriters_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-n")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if (arg_shifter.cur_arg_strncasecmp("-DCPS") != -1)
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-DCPS")) != -1)
     {
       // ignore -DCPSxxx options that will be handled by Service_Participant
       arg_shifter.ignore_arg();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-d")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-y")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-y"))) != 0)
     {
       has_key_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-v")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-v"))) != 0)
     {
-      pub_driver_ior_ = current_arg;
+      pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-l")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
       write_delay_msec_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter("-r")) != 0)
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
     {
       check_data_dropped_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
     // The '-?' option
-    else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
                  "usage: %s "
                  "-p pub_id:pub_host:pub_port -s sub_id:sub_host:sub_port\n",
@@ -231,7 +231,7 @@ PubDriver::parse_args(int& argc, char* argv[])
 
 
 void
-PubDriver::init(int& argc, char *argv[])
+PubDriver::init(int& argc, ACE_TCHAR *argv[])
 {
   // Create DomainParticipant and then publisher, topic and datawriter.
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -249,7 +249,7 @@ PubDriver::init(int& argc, char *argv[])
   //
   // Write the IOR to a file.
   //
-  FILE *output_file= ACE_OS::fopen (pub_driver_ior_.c_str (), "w");
+  FILE *output_file= ACE_OS::fopen (pub_driver_ior_.c_str (), ACE_TEXT("w"));
   if (output_file == 0)
   {
     ACE_ERROR ((LM_ERROR,
@@ -465,12 +465,12 @@ PubDriver::run()
 }
 
 int
-PubDriver::parse_pub_arg(const std::string& arg)
+PubDriver::parse_pub_arg(const ACE_TString& arg)
 {
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -494,8 +494,8 @@ PubDriver::parse_pub_arg(const std::string& arg)
   }
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
-  std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString pub_id_str(arg.c_str(), pos);
+  ACE_TString pub_addr_str(arg.c_str() + pos + 1);
 
   this->pub_id_fname_ = pub_id_str.c_str();
   this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
@@ -504,12 +504,12 @@ PubDriver::parse_pub_arg(const std::string& arg)
 }
 
 int
-PubDriver::parse_sub_arg(const std::string& arg)
+PubDriver::parse_sub_arg(const ACE_TString& arg)
 {
-  std::string::size_type pos;
+  ACE_TString::size_type pos;
 
   // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = arg.find_first_of(':')) == std::string::npos) {
+  if ((pos = arg.find(ACE_TEXT(':'))) == ACE_TString::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -s command-line value (%s). Missing ':' char.\n",
                arg.c_str()));
@@ -533,8 +533,8 @@ PubDriver::parse_sub_arg(const std::string& arg)
   }
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
-  std::string sub_id_str(arg,0,pos);
-  std::string sub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  ACE_TString sub_id_str(arg.c_str(), pos);
+  ACE_TString sub_addr_str(arg.c_str() + pos + 1);
 
   this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
 
@@ -558,10 +558,10 @@ void PubDriver::attach_to_transport ()
 {
   // create TransportImpl.
   OpenDDS::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, "SimpleTcp");
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
   OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
@@ -606,8 +606,9 @@ void PubDriver::attach_to_transport ()
       }
 
     ACE_ERROR((LM_ERROR,
-                "(%P|%t) Failed to attach to the transport. "
-                "AttachStatus == %s\n", status_str.c_str()));
+                ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
+                ACE_TEXT("AttachStatus == %s\n"),
+                ACE_TEXT_CHAR_TO_TCHAR(status_str.c_str())));
     throw TestException();
   }
 }

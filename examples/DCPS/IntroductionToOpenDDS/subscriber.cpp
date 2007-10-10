@@ -30,7 +30,7 @@ const char* QUOTER_QUOTE_TOPIC = "Stock Quotes";
 const char* QUOTER_EXCHANGE_EVENT_TYPE = "Exchange Event Type";
 const char* QUOTER_EXCHANGE_EVENT_TOPIC = "Stock Exchange Events";
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
   DDS::DomainParticipantFactory_var dpf = DDS::DomainParticipantFactory::_nil();
   DDS::DomainParticipant_var participant = DDS::DomainParticipant::_nil();

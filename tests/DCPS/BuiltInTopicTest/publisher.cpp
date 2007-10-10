@@ -24,7 +24,7 @@
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try
     {
       DDS::DomainParticipantFactory_var dpf =

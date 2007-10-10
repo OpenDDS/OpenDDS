@@ -8,17 +8,18 @@
 #include "ace/OS_NS_stdio.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_fcntl.h"
+#include "ace/Argv_Type_Converter.h"
 
 // Files which have the IOR
-const char *first_ior = 0;
-const char *second_ior = 0;
-const char *ior_output_file = 0;
+const ACE_TCHAR *first_ior = 0;
+const ACE_TCHAR *second_ior = 0;
+const ACE_TCHAR *ior_output_file = 0;
 
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "a:b:c:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("a:b:c:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -36,13 +37,9 @@ parse_args (int argc, char *argv[])
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "-a <iorfile>"
-                           "-b <iorfile>"
-                           "-c <output ior file>"
-                           "\n",
-                           argv [0]),
-                          -1);
+          ACE_TEXT("usage:  %s -a <iorfile> -b <iorfile> ")
+          ACE_TEXT("-c <output ior file>\n"),
+          argv [0]), -1);
       }
   // Indicates sucessful parsing of the command line
   return 0;
@@ -51,43 +48,35 @@ parse_args (int argc, char *argv[])
 
 int
 main (int argc,
-      char *argv[])
+      ACE_TCHAR *argv[])
 {
-  ACE_DECLARE_NEW_CORBA_ENV;
-
   Aggregator manager;
 
-  ACE_TRY
+  try
     {
+      ACE_Argv_Type_Converter converter (argc, argv);
       // Initilaize the ORB, POA etc.
-      manager.init (argc,
-                    argv
-                    ACE_ENV_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      manager.init (converter.get_argc(), converter.get_ASCII_argv());
 
       // the command line arguments
       if (parse_args (argc, argv) == -1)
         return -1;
 
       // Merge the different IORS
-      manager.make_merged_iors (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      manager.make_merged_iors ();
 
       // Set properties. This is the most important portion of the
       // test
-      manager.set_properties (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      manager.set_properties ();
 
       // Write IOR to file
       manager.write_to_file ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception& e)
     {
-      ACE_PRINT_EXCEPTION (ACE_ANY_EXCEPTION,
-                           "Caught");
+      ACE_PRINT_EXCEPTION (e, ACE_TEXT("Caught"));
       return -1;
     }
-  ACE_ENDTRY;
 
   return 0;
 }
@@ -100,61 +89,42 @@ Aggregator::Aggregator (void)
 }
 
 void
-Aggregator::init (int argc,
-               char *argv[]
-               ACE_ENV_ARG_DECL)
+Aggregator::init (int argc, char *argv[])
 {
-  this->orb_ = CORBA::ORB_init (argc,
-                                argv,
-                                0
-                                ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+  this->orb_ = CORBA::ORB_init (argc, argv);
 
   // Obtain the RootPOA.
   CORBA::Object_var obj_var =
-    this->orb_->resolve_initial_references ("RootPOA"
-                                            ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    this->orb_->resolve_initial_references ("RootPOA");
 
   // Get the POA_var object from Object_var.
   PortableServer::POA_var root_poa_var =
-    PortableServer::POA::_narrow (obj_var.in () ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK;
+    PortableServer::POA::_narrow (obj_var.in ());
 
   // Get the POAManager of the RootPOA.
   PortableServer::POAManager_var poa_manager_var =
-    root_poa_var->the_POAManager (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+    root_poa_var->the_POAManager ();
 
-  poa_manager_var->activate (ACE_ENV_SINGLE_ARG_PARAMETER);
-  ACE_CHECK;
+  poa_manager_var->activate ();
 }
 
 int
-Aggregator::make_merged_iors (ACE_ENV_SINGLE_ARG_DECL)
+Aggregator::make_merged_iors ()
 {
   // First  server
   object_primary_ =
-    this->orb_->string_to_object (first_ior
-                                  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
+    this->orb_->string_to_object (ACE_TEXT_ALWAYS_CHAR(first_ior));
 
   //Second server
   object_secondary_ =
-    this->orb_->string_to_object (second_ior
-                                  ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
+    this->orb_->string_to_object (ACE_TEXT_ALWAYS_CHAR(second_ior));
 
   // Get an object reference for the ORBs IORManipultion object!
   CORBA::Object_var IORM =
-    this->orb_->resolve_initial_references (TAO_OBJID_IORMANIPULATION,
-                                            0
-                                            ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
+    this->orb_->resolve_initial_references (TAO_OBJID_IORMANIPULATION, 0);
 
   iorm_ =
-    TAO_IOP::TAO_IOR_Manipulation::_narrow (IORM.in() ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
+    TAO_IOP::TAO_IOR_Manipulation::_narrow (IORM.in());
 
 
   // Create the list
@@ -165,14 +135,12 @@ Aggregator::make_merged_iors (ACE_ENV_SINGLE_ARG_DECL)
 
   // Create a merged set 1;
   merged_set_ =
-    iorm_->merge_iors (iors ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
-
+    iorm_->merge_iors (iors);
   return 0;
 }
 
 int
-Aggregator::set_properties (ACE_ENV_SINGLE_ARG_DECL)
+Aggregator::set_properties ()
 {
   FT::TagFTGroupTaggedComponent ft_tag_component;
 
@@ -199,9 +167,7 @@ Aggregator::set_properties (ACE_ENV_SINGLE_ARG_DECL)
 
   // Set the property
   CORBA::Boolean retval = iorm_->set_property (&iogr_prop,
-                                              this->merged_set_.in ()
-                                              ACE_ENV_ARG_PARAMETER);
-  ACE_CHECK_RETURN (-1);
+                                              this->merged_set_.in ());
 
   // Set the primary
   // See we are setting the first ior as the primary
@@ -209,29 +175,25 @@ Aggregator::set_properties (ACE_ENV_SINGLE_ARG_DECL)
     {
       retval = iorm_->set_primary (&iogr_prop,
                                   object_primary_.in (),
-                                  this->merged_set_.in ()
-                                  ACE_ENV_ARG_PARAMETER);
-      ACE_CHECK_RETURN (-1);
+                                  this->merged_set_.in ());
     }
 
   return 0;
 }
 
 int
-Aggregator::run (ACE_ENV_SINGLE_ARG_DECL)
+Aggregator::run ()
 {
-  ACE_TRY
+  try
     {
-      this->orb_->run (ACE_ENV_SINGLE_ARG_PARAMETER);
-      ACE_TRY_CHECK;
+      this->orb_->run ();
     }
-  ACE_CATCHANY
+  catch (const CORBA::Exception&)
     {
       ACE_ERROR_RETURN ((LM_DEBUG,
                          "Error in run \n"),
                         -1);
     }
-  ACE_ENDTRY;
 
   return 0;
 }
@@ -245,7 +207,7 @@ Aggregator::write_to_file (void)
 
   if (ior_output_file != 0)
     {
-      FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
+      FILE *output_file= ACE_OS::fopen (ior_output_file, ACE_TEXT("w"));
       if (output_file == 0)
         ACE_ERROR_RETURN ((LM_ERROR,
                            "Cannot open output file for writing IOR: %s",
