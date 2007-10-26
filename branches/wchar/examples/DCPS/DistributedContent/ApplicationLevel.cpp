@@ -151,7 +151,7 @@ ApplicationLevel::write_difference_file (const ACE_TString& filename,
 {
 
 
-  ofstream output_stream (filename.c_str(), ios::out | ios::trunc | ios::binary);
+  ofstream output_stream (ACE_TEXT_ALWAYS_CHAR (filename.c_str()), ios::out | ios::trunc | ios::binary);
 
   // Check that the stream opened correctly
   if (output_stream.fail ())
