@@ -1,3 +1,13 @@
+Mon Nov 12 22:58:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+
+          Changed integer counters to ACE_Atomic_Op's.  These track the number
+          of allocations and frees from the allocator for debugging purposes
+          only.  Thanks to Wilfried Moritz
+          <wilfried dot moritz at ila dot uni-stuttgart dot de> for the
+          contribution.
+
 Mon Oct  1 16:53:45 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/CrossSync.pm:
@@ -24,7 +34,7 @@ Mon Sep 10 16:48:59 UTC 2007  Scott Harris <harris_s at ociweb dot com>
 
         * tests/DCPS/LivelinessTest/README
 
-	  RT 11603 - removed comments about test failure because the it was fixed
+          RT 11603 - removed comments about test failure because the it was fixed
           by Fri Jun  1 19:56:29 UTC 2007  Yan Dai  <dai_y@ociweb.com>.
 
 Tue Aug 28 19:00:59 UTC 2007  Ciju John  <johnc at ociweb dot com>
