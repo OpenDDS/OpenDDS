@@ -1,3 +1,10 @@
+Wed Nov 21 22:23:07 UTC 2007  Ciju John  <johnc at ociweb dot com>
+
+        * bin/cross_tests.lst:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+          Extend test to test various transport configurations (tcp, udp,
+          mcast, reliable mcast & default mcast).
+
 Mon Nov 12 22:58:14 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
