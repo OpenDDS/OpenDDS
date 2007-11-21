@@ -16,9 +16,44 @@ use CrossSyncDDS;
 
 $| = 1;
 my $status = 0;
+my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-my $pub_config_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/pub.ini";
-my $sub_config_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/sub.ini";
+my $file_prefix = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger";
+my $pub_config_file = "$file_prefix/pub.ini";
+my $sub_config_file = "$file_prefix/sub.ini";
+my $opts = $use_svc_config ? "-ORBSvcConf $file_prefix/tcp.conf" : '';
+my $pub_opts = "";
+my $sub_opts = "";
+my $repo_bit_opt = $opts;
+
+if ($ARGV[0] eq 'udp') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/udp.conf " : '')
+	. "-t udp";
+    $pub_config_file = "$file_prefix/pub_udp.ini";
+    $sub_config_file = "$file_prefix/sub_udp.ini";
+}
+elsif ($ARGV[0] eq 'mcast') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/mcast.conf " : '')
+	. "-t mcast";
+    $pub_config_file = "$file_prefix/pub_mcast.ini";
+    $sub_config_file = "$file_prefix/sub_mcast.ini";
+}
+elsif ($ARGV[0] eq 'reliable_mcast') {
+    $opts .= ($use_svc_config ?
+	      " -ORBSvcConf $file_prefix/reliable_mcast.conf " : '')
+        . "-t reliable_mcast";
+    $pub_config_file = "$file_prefix/pub_reliable_mcast.ini";
+    $sub_config_file = "$file_prefix/sub_reliable_mcast.ini";
+}
+elsif ($ARGV[0] eq 'default_mcast') {
+    $opts .= ($use_svc_config ?
+		  " -ORBSvcConf $file_prefix/mcast.conf " : '');
+    $pub_opts = "-t default_mcast_pub";
+    $sub_opts = "-t default_mcast_sub";
+}
+
 $CS = new CrossSyncDDS (1, PerlACE::uniqueid(), PerlACE::uniqueid()
 			, $pub_config_file, $sub_config_file);
 if (!$CS) {
@@ -36,18 +71,6 @@ if ($role == -1) {
     exit -1;
 }
 
-my $svc_conf = '';
-my $repo_bit_opt = '';
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-  $repo_bit_opt = "-ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/tcp.conf";
-  if ($ARGV[0] eq 'udp') {
-    $svc_conf = " -ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/udp.conf ";
-  }
-  else {
-    $svc_conf = " -ORBSvcConf $ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/tcp.conf";
-  }
-}
-
 @ports = $CS->boot_ports ();
 my($port1) = 10001 + @ports[0];
 my $domains_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/domain_ids";
@@ -59,18 +82,16 @@ if ($role == CrossSync::SERVER) {
     $repo_host = $CS->peer();
 }
 my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
-    . " $svc_conf";
+    . " $opts";
 
 unlink $dcpsrepo_ior;
 
 $Subscriber = new PerlACE::Process
     ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
-     "-DCPSConfigFile $sub_config_file $common_args");
-#$Subscriber = new PerlACE::Process ("subscriber",
-#                                    "-DCPSConfigFile $sub_config_file $common_args");
+     "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
 $Publisher = new PerlACE::Process
     ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
-     "-DCPSConfigFile $pub_config_file $common_args");
+     "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
 
 if ($role == CrossSync::SERVER) {
     unlink $dcpsrepo_ior;
@@ -128,3 +149,5 @@ if ($status == 0) {
 }
 
 exit $status;
+
+#  LocalWords:  eval
