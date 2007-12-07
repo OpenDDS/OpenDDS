@@ -22,6 +22,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::getBuffer(
 {
   // In case of alignment issues
   size = ACE_CDR::MAX_ALIGNMENT;
+  size += 4; // alignment
   size += 4 + 4;
   if (packet.type_ == Packet::NACK)
   {
@@ -47,6 +48,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
 {
   ACE_OutputCDR output(buffer, size);
 
+  output << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
   output << packet.id_;
   output << packet.type_;
   if (packet.type_ == Packet::NACK)
@@ -76,9 +78,12 @@ OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
   ) const
 {
   ACE_InputCDR input(buffer, size);
+  ACE_CDR::Boolean byteOrder;
   ACE_INT32 type;
 
   packet.payload_.clear();
+  input >> ACE_InputCDR::to_boolean (byteOrder);
+  input.reset_byte_order(byteOrder);
   input >> packet.id_;
   input >> type;
   packet.type_ = Packet::PacketType(type);

@@ -1,3 +1,9 @@
+Fri Dec  7 16:05:54 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.cpp:
+
+          Added byte ordering to the serialized stream.
+
 Wed Nov 21 22:23:07 UTC 2007  Ciju John  <johnc at ociweb dot com>
 
         * bin/cross_tests.lst:
