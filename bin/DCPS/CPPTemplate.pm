@@ -1644,7 +1644,6 @@ void
                         "<%TYPE%>DataReaderImpl::store_instance_data, ")
                         ACE_TEXT("insert handle failed. \n")),
                         ::DDS::RETCODE_ERROR);
-      return ::DDS::RETCODE_ERROR;
     }
 
     std::pair<InstanceMap::iterator, bool> bpair

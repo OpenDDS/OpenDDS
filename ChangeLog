@@ -1,3 +1,11 @@
+Tue Dec 11 00:00:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+
+          Resolved warnings from VC8 warning level 4.  Thanks to Charles
+          Calkins <calkinsc at ociweb dot com> for sending the patches.
+
 Fri Dec  7 16:05:54 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.cpp:
