@@ -17,6 +17,7 @@ project(DDS*idl): dcps {
 project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb {
 
   exename = Aggregator
+  requires += tao_orbsvcs
 
   IDL_Files {
   }

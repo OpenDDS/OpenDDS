@@ -1,3 +1,12 @@
+Wed Dec 12 22:25:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * rules.dds.GNU:
+
+          Added an MPC feature "tao_orbsvcs" which can be turned off to skip
+          building examples that require TAO's ORB services.
+
 Fri Oct 26 20:23:39 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
