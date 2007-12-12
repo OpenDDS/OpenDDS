@@ -1,3 +1,11 @@
+Wed Dec 12 19:28:46 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          Find OpenDDS libraries in $(DDS_ROOT)/lib, not $(DDS_ROOT)/dds.
+          Also added a comment regarding when MPC features need to be listed in
+          this file.
+
 Tue Dec 11 00:00:56 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
