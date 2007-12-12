@@ -2,6 +2,7 @@
 project(*Common) : dcps {
   sharedname = StockQuoterCommon
   libout = .
+  requires += tao_orbsvcs
 
   includes += $(TAO_ROOT)/orbsvcs
   idlflags += -I$(TAO_ROOT)/orbsvcs
@@ -35,6 +36,7 @@ project(*Common) : dcps {
 project(*Publisher) : dcpsexe, svc_utils {
   after += *Common
   exename   = publisher
+  requires += tao_orbsvcs
 
   includes += $(TAO_ROOT)/orbsvcs
   libs += StockQuoterCommon
@@ -67,6 +69,7 @@ project(*Publisher) : dcpsexe, svc_utils {
 project(*Subscriber) : dcpsexe {
   after += *Common
   exename   = subscriber
+  requires += tao_orbsvcs
 
   includes += $(TAO_ROOT)/orbsvcs
   libs += StockQuoterCommon
