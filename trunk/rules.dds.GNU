@@ -16,14 +16,15 @@ ifndef DDS_ROOT
   DDS_ROOT = $(TAO_ROOT)/DDS
 endif
 
-ifeq (,$(findstring -L$(DDS_ROOT)/ciao,$(LDFLAGS)))
-  LDFLAGS += -L$(DDS_ROOT)/dds
+ifeq (,$(findstring -L$(DDS_ROOT)/lib,$(LDFLAGS)))
+  LDFLAGS += -L$(DDS_ROOT)/lib
 endif
 ifeq (,$(findstring -I$(DDS_ROOT),$(INCLDIRS)))
   INCLDIRS += -I$(DDS_ROOT)
 endif
 
 # Set defaults for gnumake macros corresponding to MPC features used by DDS
+# This is needed for features used in requires/avoids statements in .mpc files
 built_in_topics ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow
