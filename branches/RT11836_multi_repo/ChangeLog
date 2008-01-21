@@ -1,3 +1,81 @@
+Mon Jan 21 20:45:48 UTC 2008  martinezm  <martinezm@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+	  load_configuration()
+	    Added domain and repository sections.
+	  load_domain_configuration()
+	  load_repo_configuration()
+	    New methods.
+	    New section processing implementation.
+	  domain_to_repo()
+	  set_repo_domain()
+	    New methods.
+	    Establish and examine mappings between repositories and
+	    domains.
+	  init_bit_transport_impl()
+	  bit_transport_impl()
+	  bit_transport_port()
+	    Added repository key to parameters.
+	    Added separate transport for each individual repostory's
+	    Builtin Topics.
+	  get_repository()
+	  set_repo_ior()
+	    Added repository key to parameters.
+
+	  Added a map to store object references to more than one
+	  repository and the infrastructure to manage the map and its
+	  usage.
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+	  Changed semantics from throwing Transport::NotFound to
+	  returning nil() when an implementation is not available.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+	  Added some additional diagnostics above level 4.  Demoted not
+	  finding a subscription to delete from error to warning.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+	  Use new set_repo_ior() signature.  Done after initialization
+	  as well since we create a reference at this time now.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+	  Use new get_repository() signature.
+	  Use new bit_transport_impl() signature.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+	  Use new get_repository() signature.
+
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/MultiRepoTest.mpc:
+        * tests/DCPS/MultiRepoTest/README:
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestException.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.h:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/domain1_ids:
+        * tests/DCPS/MultiRepoTest/domain2_ids:
+        * tests/DCPS/MultiRepoTest/domain3_ids:
+        * tests/DCPS/MultiRepoTest/monitor.cpp:
+        * tests/DCPS/MultiRepoTest/monitor.ini:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/system.cpp:
+        * tests/DCPS/MultiRepoTest/system1.ini:
+        * tests/DCPS/MultiRepoTest/system2.ini:
+        * tests/DCPS/MultiRepoTest/system3.ini:
+        * bin/dcps_tests.lst:
+	  Add new MultiRepoTest test cases.  This can be used as an
+	  example of how an application can use the new feature.
+
 Wed Dec 12 19:28:46 UTC 2007  Adam Mitz  <mitza@ociweb.com>
 
         * rules.dds.GNU:
