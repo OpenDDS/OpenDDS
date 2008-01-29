@@ -1,15 +1,30 @@
+Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@>
+
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+	  Use service configurator when needed.
+
 Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:
         * dds/DCPS/Service_Participant.cpp:
-	  get_repository(): removed const qualification and extended to
-	                    resolve default repository IOR if none has
-			    been specified by the time this method has
-			    been called.
+          get_repository(): removed const qualification and extended to
+                            resolve default repository IOR if none has
+                            been specified by the time this method has
+                            been called.
 
         * tests/DCPS/LivelinessTest/run_test.pl:
-	  Added explicit specification of domain file to InfoRepo.
+          Added explicit specification of domain file to InfoRepo.
 
 Mon Jan 21 20:45:48 UTC 2008  martinezm  <martinezm@ociweb.com>
 

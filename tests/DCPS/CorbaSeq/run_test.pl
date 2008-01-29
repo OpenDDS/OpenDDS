@@ -28,7 +28,7 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "-NOBITS -o $dcpsrepo_ior -d $domains_file");
+				  "$svc_conf -NOBITS -o $dcpsrepo_ior -d $domains_file");
 $Subscriber = new PerlACE::Process ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
 $Publisher = new PerlACE::Process ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
 
