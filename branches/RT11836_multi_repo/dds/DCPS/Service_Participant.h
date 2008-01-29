@@ -110,7 +110,7 @@ namespace OpenDDS
       PortableServer::POA_ptr the_poa ();
 
       /** Accessor of the DCPSInfo object reference. **/
-      DCPSInfo_ptr get_repository ( const ::DDS::DomainId_t domain) const;
+      DCPSInfo_ptr get_repository ( const ::DDS::DomainId_t domain);
 
       /** Accessors of the qos policy initial values. **/
       ::DDS::UserDataQosPolicy               initial_UserDataQosPolicy () const;

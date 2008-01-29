@@ -604,6 +604,38 @@ namespace OpenDDS
       }
     }
 
+    DCPSInfo_ptr 
+    Service_Participant::get_repository( const ::DDS::DomainId_t domain)
+    {
+      RepoKey repo = DEFAULT_REPO;
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where != this->domainRepoMap_.end()) {
+        repo = where->second;
+      }
+      RepoMap::const_iterator location = this->repoMap_.find( repo);
+      if( location == this->repoMap_.end()) {
+        if( repo == DEFAULT_REPO) {
+          // Set the default repository IOR if it hasn't already happened
+          // by this point.  This is why this can't be const.
+          this->set_repo_ior( DEFAULT_REPO_IOR, DEFAULT_REPO);
+          location = this->repoMap_.find( repo);
+          if( location == this->repoMap_.end()) {
+            // The default IOR was invalid.
+            return OpenDDS::DCPS::DCPSInfo::_nil();
+
+          } else {
+            // Found the default!
+            return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
+          }
+
+        } else {
+          // Non-default repositories _must_ be loaded by application.
+          return OpenDDS::DCPS::DCPSInfo::_nil();
+        }
+      }
+      return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
+    }
+
     int
     Service_Participant::bit_transport_port ( RepoKey repo) const
     {
