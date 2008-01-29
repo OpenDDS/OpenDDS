@@ -1,3 +1,9 @@
+Tue Jan 29 21:53:13 UTC 2008  Mike Martinez  <martinez_m@>
+
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+	  Made this script executable so that the test will execute on
+	  *nix systems.
+
 Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
@@ -11,7 +17,7 @@ Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@>
         * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
         * tests/DCPS/ViewState/run_test.pl:
         * tests/DCPS/ZeroCopyRead/run_test.pl:
-	  Use service configurator when needed.
+          Use service configurator when needed.
 
 Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@>
 
