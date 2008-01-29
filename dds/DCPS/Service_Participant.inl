@@ -16,23 +16,6 @@ namespace OpenDDS
     }
 
     ACE_INLINE
-    DCPSInfo_ptr 
-    Service_Participant::get_repository( const ::DDS::DomainId_t domain) const
-    {
-      // Lots of pain here to maintain the const'ness of it all...
-      RepoKey repo = DEFAULT_REPO;
-      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
-      if( where != this->domainRepoMap_.end()) {
-        repo = where->second;
-      }
-      RepoMap::const_iterator location = this->repoMap_.find( repo);
-      if( location == this->repoMap_.end()) {
-        return OpenDDS::DCPS::DCPSInfo::_nil();
-      }
-      return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
-    }
-
-    ACE_INLINE
     ::DDS::UserDataQosPolicy               
     Service_Participant::initial_UserDataQosPolicy () const
     {
