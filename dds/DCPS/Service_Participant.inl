@@ -3,11 +3,16 @@ namespace OpenDDS
   namespace DCPS
   {
     ACE_INLINE
-    DCPSInfo_ptr 
-    Service_Participant::get_repository() const
+    const Service_Participant::RepoKey
+    Service_Participant::domain_to_repo( const ::DDS::DomainId_t domain) const
     {
-      ACE_ASSERT ( ! CORBA::is_nil (repo_.in ()));
-      return DCPSInfo::_duplicate (repo_.in ());
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where == this->domainRepoMap_.end()) {
+        return DEFAULT_REPO;
+
+      } else {
+        return where->second;
+      }
     }
 
     ACE_INLINE

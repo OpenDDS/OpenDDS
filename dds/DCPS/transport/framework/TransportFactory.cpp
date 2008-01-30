@@ -515,28 +515,20 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportFactory::obtain(TransportIdType impl_id)
 {
   DBG_ENTRY_LVL("TransportFactory","obtain",5);
-  TransportImpl_rch impl;
+  GuardType guard(this->lock_);
 
-  // Use separate scope for guard
-//MJM: I don't understand why the guard scope is restricted here.  Is
-//MJM: there a reason to release the lock before we return instead of as
-//MJM: we return?
-  {
-    GuardType guard(this->lock_);
+  // This is a bit complex to avoid creating nil entries in the map.
+  // The entire class would need to be cleansed of assumptions about
+  // contents in order to just
+  //   return this->impl_map_[ impl_id];
+  ImplMap::iterator where = this->impl_map_.find( impl_id);
+  if( where == this->impl_map_.end()) {
+    return TransportImpl_rch();
 
-    // Attempt to locate the TransportImpl object
-    int result = find(impl_map_, impl_id, impl);
-
-    // 0 means we found it, and -1 means we didn't.
-    if (result != 0)
-      {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unknown impl_id (%d).\n", impl_id));
-        throw Transport::NotFound();
-      }
+  } else {
+    return where->second;
   }
 
-  return impl;
 }
 
 

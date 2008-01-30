@@ -36,13 +36,13 @@ namespace OpenDDS
 
     const int BIT_LOOKUP_DURATION_MSEC = 2000;
 
-    //tbd: Temeporary hardcode the repo ior for DSCPInfo object reference.
-    //     Change it to be from configuration file.
-    static ACE_TString ior (ACE_TEXT("file://repo.ior"));
-
     static ACE_TString config_fname (ACE_TEXT(""));
 
+    static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
+
     static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
+    static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
+    static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
 
     static bool got_debug_level = false;
     static bool got_info = false;
@@ -60,8 +60,6 @@ namespace OpenDDS
       n_chunks_ (DEFAULT_NUM_CHUNKS),
       association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
       liveliness_factor_ (80),
-      bit_transport_ip_(ACE_TEXT("")),
-      bit_transport_port_(DEFAULT_BIT_TRANSPORT_PORT),
       bit_enabled_ (
 #ifdef DDS_HAS_MINIMUM_BIT
                     false
@@ -71,6 +69,7 @@ namespace OpenDDS
                     ),
       bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
+      this->set_repo_domain( ANY_DOMAIN, DEFAULT_REPO);
       initialize();
     }
 
@@ -301,20 +300,6 @@ namespace OpenDDS
                     }
 
 
-                  CORBA::Object_var obj = orb_->string_to_object
-                    (ACE_TEXT_ALWAYS_CHAR (ior.c_str()));
-
-                  repo_ = DCPSInfo::_narrow (obj.in ());
-
-                  if (CORBA::is_nil (repo_.in ()))
-                    {
-                      ACE_ERROR ((LM_ERROR,
-                                  ACE_TEXT ("(%P|%t) ERROR: ")
-                                  ACE_TEXT ("Service_Participant::get_domain_participant_factory, ")
-                                  ACE_TEXT ("nil DCPSInfo. \n")));
-                      return ::DDS::DomainParticipantFactory::_nil ();
-                    }
-
                   if (! this->orb_from_user_)
                     {
                       PortableServer::POAManager_var poa_manager =
@@ -361,14 +346,14 @@ namespace OpenDDS
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfoRepo"))) != 0)
             {
-              ior = currentArg;
+              this->set_repo_ior( currentArg, DEFAULT_REPO);
               arg_shifter.consume_arg ();
               got_info = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfo"))) != 0)
             {
               // Deprecated, use -DCPSInfoRepo
-              ior = currentArg;
+              this->set_repo_ior( currentArg, DEFAULT_REPO);
               arg_shifter.consume_arg ();
               got_info = true;
             }
@@ -397,13 +382,13 @@ namespace OpenDDS
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportPort"))) != 0)
             {
-              bit_transport_port_ = ACE_OS::atoi (currentArg);
+              this->bitTransportPortMap_[ DEFAULT_REPO] = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
               got_bit_transport_port = true;
             }
           else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportIPAddress"))) != 0)
             {
-              bit_transport_ip_ = currentArg;
+              this->bitTransportIpMap_[ DEFAULT_REPO] = currentArg;
               arg_shifter.consume_arg ();
               got_bit_transport_ip = true;
             }
@@ -539,51 +524,190 @@ namespace OpenDDS
     }
 
     void
-    Service_Participant::set_repo_ior(const ACE_TCHAR* repo_ior)
+    Service_Participant::set_repo_ior( const ACE_TCHAR* ior, const RepoKey repo)
     {
-      ior = repo_ior;
+      if( DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Repo[ %d] == %s\n"),
+          repo, ior
+        ));
+      }
+
       got_info = true;
-    }
-    int
-    Service_Participant::bit_transport_port () const
-    {
-       return bit_transport_port_;
+      RepoMap::const_iterator location = this->repoMap_.find( repo);
+      if( location != this->repoMap_.end()) {
+        // Repository is already loaded.  Remove the repository only if
+        // it is bound to no domains.
+        for( DomainRepoMap::const_iterator current = this->domainRepoMap_.begin();
+             current != this->domainRepoMap_.end();
+             ++current
+           ) {
+          if( current->second == location->first) {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT( "(%P|%t) ERROR: ")
+              ACE_TEXT( "Service_Participant::set_repo_ior, ")
+              ACE_TEXT( "attempt to set new repository for key %d ")
+              ACE_TEXT( "while previous repository still bound. \n"),
+              repo
+            ));
+            return; // throw;
+          }
+        }
+        // @TODO: determine if (how?) we need to destroy the existing transport.
+      }
+
+      CORBA::Object_var obj
+        = orb_->string_to_object(ACE_TEXT_ALWAYS_CHAR (ior));
+      if( CORBA::is_nil( obj.in())) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("(%P|%t) ERROR: ")
+                    ACE_TEXT ("Service_Participant::set_repo_ior, ")
+                    ACE_TEXT ("nil DCPSInfo (%s) for key %d. \n"), ior, repo));
+        return; // throw;
+
+      } else {
+        this->repoMap_[ repo] = DCPSInfo::_narrow( obj.in());
+        if( CORBA::is_nil( this->repoMap_[ repo].in())) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT ("(%P|%t) ERROR: ")
+                      ACE_TEXT ("Service_Participant::set_repo_ior, ")
+                      ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
+                      ior, repo));
+          return; // throw;
+        }
+      }
+
+      // Create and install the Built In Topic transport for this
+      // repository.
+      this->init_bit_transport_impl( repo);
     }
 
     void
-    Service_Participant::bit_transport_port (int port)
+    Service_Participant::set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey repo)
     {
-       bit_transport_port_ = port;
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where != this->domainRepoMap_.end()) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) WARNING: ")
+          ACE_TEXT("Service_Participant::set_repo_domain, ")
+          ACE_TEXT("discarding previous mapping for domain %d.\n"),
+          domain
+        ));
+        /// @TODO: Determine correct action here.
+      }
+      this->domainRepoMap_[ domain] = repo;
+      if( DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Domain[ %d] == Repo[ %d]\n"),
+          domain, repo
+        ));
+      }
+    }
+
+    DCPSInfo_ptr 
+    Service_Participant::get_repository( const ::DDS::DomainId_t domain)
+    {
+      RepoKey repo = DEFAULT_REPO;
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where != this->domainRepoMap_.end()) {
+        repo = where->second;
+      }
+      RepoMap::const_iterator location = this->repoMap_.find( repo);
+      if( location == this->repoMap_.end()) {
+        if( repo == DEFAULT_REPO) {
+          // Set the default repository IOR if it hasn't already happened
+          // by this point.  This is why this can't be const.
+          this->set_repo_ior( DEFAULT_REPO_IOR, DEFAULT_REPO);
+          location = this->repoMap_.find( repo);
+          if( location == this->repoMap_.end()) {
+            // The default IOR was invalid.
+            return OpenDDS::DCPS::DCPSInfo::_nil();
+
+          } else {
+            // Found the default!
+            return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
+          }
+
+        } else {
+          // Non-default repositories _must_ be loaded by application.
+          return OpenDDS::DCPS::DCPSInfo::_nil();
+        }
+      }
+      return OpenDDS::DCPS::DCPSInfo::_duplicate( location->second);
+    }
+
+    int
+    Service_Participant::bit_transport_port ( RepoKey repo) const
+    {
+       RepoTransportPortMap::const_iterator where = this->bitTransportPortMap_.find( repo);
+       if( where == this->bitTransportPortMap_.end()) {
+         return -1;
+       }
+       return where->second;
+    }
+
+    void
+    Service_Participant::bit_transport_port (int port, RepoKey repo)
+    {
+       this->bitTransportPortMap_[ repo] = port;
        got_bit_transport_port = true;
     }
 
     int
-    Service_Participant::init_bit_transport_impl ()
+    Service_Participant::init_bit_transport_impl ( RepoKey repo)
     {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      this->bit_transport_impl_
-        = TheTransportFactory->create_transport_impl (BIT_ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), DONT_AUTO_CONFIG);
+      // Assign BIT transport key values starting from BIT_ALL_TRAFFIC as a base.
+      // Allow for the DEFAULT_REPO value of -1 here as well.
+      OpenDDS::DCPS::TransportIdType transportKey = BIT_ALL_TRAFFIC + 1 + repo;
+
+      if( false == TheTransportFactory->obtain( transportKey).is_nil()) {
+        // The transport for this repo has already been created/configured.
+        if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Repo[ %d].transport already loaded.\n"),
+            repo
+          ));
+        }
+        return 0;
+      }
+
+      this->bitTransportMap_[ repo]
+        = TheTransportFactory->create_transport_impl (transportKey, ACE_TEXT("SimpleTcp"), DONT_AUTO_CONFIG);
+
+      if( DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Repo[ %d].transport == %x\n"),
+          repo, this->bitTransportMap_[ repo].in()
+        ));
+      }
 
       TransportConfiguration_rch config
-        = TheTransportFactory->get_or_create_configuration (BIT_ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
+        = TheTransportFactory->get_or_create_configuration (transportKey, ACE_TEXT("SimpleTcp"));
 
       SimpleTcpConfiguration* tcp_config
         = static_cast <SimpleTcpConfiguration*> (config.in ());
 
-      if (0 == bit_transport_ip_.length ())
+      if (0 == this->bitTransportIpMap_[ repo].length ())
         {
-          tcp_config->local_address_ = ACE_INET_Addr (bit_transport_port_);
+          tcp_config->local_address_ = ACE_INET_Addr( this->bitTransportPortMap_[ repo]);
         }
       else
         {
-          tcp_config->local_address_ = ACE_INET_Addr (bit_transport_port_, bit_transport_ip_.c_str());
+          tcp_config->local_address_
+            = ACE_INET_Addr(
+                this->bitTransportPortMap_[ repo],
+                this->bitTransportIpMap_[ repo].c_str()
+              );
         }
 
-      if (bit_transport_impl_->configure(config.in()) != 0)
+      if( this->bitTransportMap_[ repo]->configure(config.in()) != 0)
         {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_bit_transport_impl: ")
-                     ACE_TEXT("Failed to configure the transport.\n")));
+            ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_bit_transport_impl: ")
+            ACE_TEXT("Failed to configure transport for repo %d.\n"),
+            repo
+          ));
           return -1;
         }
       else
@@ -595,16 +719,25 @@ namespace OpenDDS
 #endif // DDS_HAS_MINIMUM_BIT
     }
 
-
     TransportImpl_rch
-    Service_Participant::bit_transport_impl ()
+    Service_Participant::bit_transport_impl( const ::DDS::DomainId_t domain)
     {
-      if (bit_transport_impl_.is_nil ())
-        {
-          init_bit_transport_impl ();
+      RepoKey repo = DEFAULT_REPO;
+      DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
+      if( where != this->domainRepoMap_.end()) {
+        repo = where->second;
+      }
+      if( this->bitTransportMap_[ repo].is_nil ()) {
+        if( DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Initializing BIT transport for domain %d\n"),
+            domain
+          ));
         }
+        init_bit_transport_impl( repo);
+      }
 
-      return bit_transport_impl_;
+      return this->bitTransportMap_[ repo];
     }
 
     int
@@ -689,6 +822,23 @@ namespace OpenDDS
                            status),
                            -1);
       }
+
+      status = this->load_domain_configuration ();
+      if (status != 0) {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration "
+                           "load_domain_configuration () returned %d\n"),
+                           status),
+                           -1);
+      }
+      status = this->load_repo_configuration ();
+      if (status != 0) {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           ACE_TEXT ("(%P|%t) Service_Participant::load_configuration "
+                           "load_repo_configuration () returned %d\n"),
+                           status),
+                           -1);
+      }
       status = TheTransportFactory->load_transport_configuration (this->cf_);
       if (status != 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -736,7 +886,9 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), ior)
+              ACE_TString value;
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), value)
+              this->set_repo_ior( value.c_str(), DEFAULT_REPO);
             }
           if (got_chunks)
             {
@@ -763,7 +915,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bit_transport_port_, int)
+              GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bitTransportPortMap_[ DEFAULT_REPO], int)
             }
           if (got_bit_transport_ip)
             {
@@ -772,7 +924,7 @@ namespace OpenDDS
             }
           else
             {
-              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
+              GET_CONFIG_STRING_VALUE (this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bitTransportIpMap_[ DEFAULT_REPO])
             }
           if (got_liveliness_factor)
             {
@@ -802,6 +954,166 @@ namespace OpenDDS
               GET_CONFIG_VALUE (this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
             }
         }
+
+      return 0;
+    }
+
+    int
+    Service_Participant::load_domain_configuration ()
+    {
+      const ACE_Configuration_Section_Key &root = this->cf_.root_section ();
+      ACE_Configuration_Section_Key domainKey;
+      if( this->cf_.open_section (root, DOMAIN_SECTION_NAME, 0, domainKey) != 0) {
+        if( DCPS_debug_level > 0) {
+          // This is not an error if the configuration file does not have
+          // any domain (sub)section. The code default configuration will be used.
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+            ACE_TEXT("failed to open [%s] section.\n"),
+            DOMAIN_SECTION_NAME
+          ));
+        }
+        return 0;
+
+      } else {
+        ACE_TString sectionName;
+        for( int index = 0;
+             (0 == this->cf_.enumerate_sections( domainKey, index, sectionName));
+             ++index) {
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG(( LM_DEBUG, ACE_TEXT("(%P|%t) Examining section: %s\n"), sectionName.c_str()));
+          }
+
+          ACE_Configuration_Section_Key sectionKey;
+          if( 0 != this->cf_.open_section( domainKey, sectionName.c_str(), 0, sectionKey)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+              ACE_TEXT("Unable to open [%s] section.\n"),
+              sectionName.c_str()
+            ));
+            continue;
+          }
+
+          ACE_TString domainIdString;
+          if( 0 != this->cf_.get_string_value( sectionKey, ACE_TEXT("DomainId"), domainIdString)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+              ACE_TEXT("Unable to obtain value for DomainId in [%s] section\n"),
+              sectionName.c_str()));
+            continue;
+          }
+
+          /// @TODO: Check this conversion.
+          ::DDS::DomainId_t domainId = ACE_OS::atoi(domainIdString.c_str());
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DomainId == %d\n"),
+              sectionName.c_str(), domainId
+            ));
+          }
+
+          ACE_TString keyString;
+          if( 0 != this->cf_.get_string_value( sectionKey, ACE_TEXT("DomainRepoKey"), keyString)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+              ACE_TEXT("Unable to obtain value for DomainRepoKey in [%s] section\n"),
+              sectionName.c_str()));
+            continue;
+
+          }
+
+          RepoKey repoKey = DEFAULT_REPO;
+          if( keyString != ACE_TEXT("DEFAULT_REPO")) {
+            /// @TODO: Check this conversion.
+            repoKey = ACE_OS::atoi(keyString.c_str());
+          }
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DomainRepoKey == %d\n"),
+              sectionName.c_str(), repoKey
+            ));
+          }
+
+          this->set_repo_domain( domainId, repoKey);
+        }
+      }
+
+      return 0;
+    }
+
+    int
+    Service_Participant::load_repo_configuration ()
+    {
+      const ACE_Configuration_Section_Key &root = this->cf_.root_section ();
+      ACE_Configuration_Section_Key domainKey;
+      if( this->cf_.open_section (root, REPO_SECTION_NAME, 0, domainKey) != 0) {
+        if( DCPS_debug_level > 0) {
+          // This is not an error if the configuration file does not have
+          // any domain (sub)section. The code default configuration will be used.
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+            ACE_TEXT("failed to open [%s] section.\n"),
+            REPO_SECTION_NAME
+          ));
+        }
+        return 0;
+
+      } else {
+        ACE_TString sectionName;
+        for( int index = 0;
+             (0 == this->cf_.enumerate_sections( domainKey, index, sectionName));
+             ++index) {
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG(( LM_DEBUG, ACE_TEXT("(%P|%t) Examining section: %s\n"), sectionName.c_str()));
+          }
+
+          ACE_Configuration_Section_Key sectionKey;
+          if( 0 != this->cf_.open_section( domainKey, sectionName.c_str(), 0, sectionKey)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+              ACE_TEXT("Unable to open [%s] section.\n"),
+              sectionName.c_str()
+            ));
+            continue;
+          }
+
+          ACE_TString keyString;
+          if( 0 != this->cf_.get_string_value( sectionKey, ACE_TEXT("RepositoryKey"), keyString)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+              ACE_TEXT("Unable to obtain value for RepositoryKey in [%s] section\n"),
+                       sectionName.c_str()));
+            continue;
+          }
+
+          /// @TODO: Check this conversion.
+          RepoKey repoKey = ACE_OS::atoi(keyString.c_str());
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: RepositoryKey == %d\n"),
+              sectionName.c_str(), repoKey
+            ));
+          }
+
+          ACE_TString repoIor;
+          if( 0 != this->cf_.get_string_value( sectionKey, ACE_TEXT("RepositoryIor"), repoIor)) {
+            ACE_ERROR(( LM_ERROR,
+              ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+              ACE_TEXT("Unable to obtain value for RepositoryIor in [%s] section\n"),
+              sectionName.c_str()));
+            continue;
+
+          }
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: RepositoryIor == %s\n"),
+              sectionName.c_str(), repoIor.c_str()
+            ));
+          }
+
+          this->set_repo_ior( repoIor.c_str(), repoKey);
+        }
+      }
 
       return 0;
     }

@@ -20,7 +20,7 @@ $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 $sync_status_file = PerlACE::LocalFile ("sync_status");
-$repo_bit_opt = "-NOBITS";
+$repo_bit_opt = "$opts -NOBITS";
 
 unlink $dcpsrepo_ior;
 unlink $sync_status_file;

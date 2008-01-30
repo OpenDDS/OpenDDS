@@ -238,6 +238,14 @@ OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id
   if (! pending_subs.is_nil () && this->acked (pub_id))
     this->fully_associated (pub_id);
 
+  if (TAO_debug_level > 4)
+    {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) transport %x added publication %d.\n"),
+        this, pub_id
+      ));
+    }
+
   return ret;
 }
 
@@ -256,6 +264,15 @@ OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_
       iter->second->_remove_ref ();
     dw_map_.erase(iter);
   }
+
+  if (TAO_debug_level > 4)
+    {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) transport %x released publication %d.\n"),
+        this, pub_id
+      ));
+    }
+
   return ret;
 }
 
@@ -298,6 +315,14 @@ OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_i
     dr->_add_ref ();
   }
 
+  if (TAO_debug_level > 4)
+    {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) transport %x added subscription %d.\n"),
+        this, sub_id
+      ));
+    }
+
   return ret;
 }
 
@@ -314,9 +339,26 @@ OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub
     if (iter->second != 0)
       iter->second->_remove_ref ();
     dr_map_.erase(iter);
-    return 0;
+
+  } else {
+    ACE_ERROR((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: TransportImpl::unregister_subscription ")
+      ACE_TEXT("subscription (id==%d) not found to unregister.\n"),
+      sub_id
+    ));
   }
-  return -1;
+
+  if (TAO_debug_level > 4)
+    {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) transport %x released subscription %d.\n"),
+        this, sub_id
+      ));
+    }
+
+  // We can't fail here - at this point the subscription is _not_
+  // registered with this transport.
+  return 0;
 }
 
 

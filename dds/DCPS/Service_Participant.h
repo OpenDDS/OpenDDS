@@ -18,6 +18,9 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/Configuration.h"
 
+#include <map>
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -54,6 +57,15 @@ namespace OpenDDS
       static int zero_argc;
 
     public:
+      /// Domain value for the default repository IOR.
+      enum { ANY_DOMAIN = -1 };
+
+      /// Key value for the default repository IOR.
+      enum { DEFAULT_REPO = -1 };
+
+      /// Key type for storing repository objects.
+      typedef int RepoKey;
+
       /** Constructor **/
       Service_Participant ();
 
@@ -98,7 +110,7 @@ namespace OpenDDS
       PortableServer::POA_ptr the_poa ();
 
       /** Accessor of the DCPSInfo object reference. **/
-      DCPSInfo_ptr get_repository () const;
+      DCPSInfo_ptr get_repository ( const ::DDS::DomainId_t domain);
 
       /** Accessors of the qos policy initial values. **/
       ::DDS::UserDataQosPolicy               initial_UserDataQosPolicy () const;
@@ -158,11 +170,20 @@ namespace OpenDDS
       /// @return % of lease period before sending a liveliness message.
       int liveliness_factor () const;
 
-      /** Set the InfoRepo's ior manually.
-      * NOTE: This has to be called before the get_domain_participant_factory
-      *       method.
-      */
-      void set_repo_ior(const ACE_TCHAR* repo_ior);
+      /**
+       * Load DCPSInfoRepo IORs.
+       */
+      void set_repo_ior( const ACE_TCHAR* ior, const RepoKey repo = DEFAULT_REPO);
+
+      /**
+       * Bind DCPSInfoRepo IORs to domains.
+       */
+      void set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey repo);
+
+      /**
+        * Convert domainId to repository key.
+        */
+      const RepoKey domain_to_repo( const ::DDS::DomainId_t domain) const;
 
       /**
       * Accessors for bit_transport_port_.
@@ -172,11 +193,11 @@ namespace OpenDDS
       * Note: The default port is INVALID. The user needs call
       *       this function to setup the desired port number.
       */
-      int bit_transport_port () const;
-      void bit_transport_port (int port);
+      int bit_transport_port ( RepoKey repo = DEFAULT_REPO) const;
+      void bit_transport_port (int port, RepoKey repo = DEFAULT_REPO);
 
       /// Accessor of the TransportImpl used by the builtin topics.
-      TransportImpl_rch bit_transport_impl ();
+      TransportImpl_rch bit_transport_impl ( ::DDS::DomainId_t domain = ANY_DOMAIN);
 
       /**
       * Accessor for bit_lookup_duration_msec_.
@@ -194,7 +215,7 @@ namespace OpenDDS
 
       /** Create the TransportImpl for all builtin topics.
        */
-      int init_bit_transport_impl ();
+      int init_bit_transport_impl ( RepoKey repo = DEFAULT_REPO);
 
     private:
 
@@ -218,6 +239,14 @@ namespace OpenDDS
        */
       int load_common_configuration ();
 
+      /** Load the domain configuration to the Service_Participant singleton.
+       */
+      int load_domain_configuration ();
+
+      /** Load the repository configuration to the Service_Participant singleton.
+       */
+      int load_repo_configuration ();
+
       /// The orb object reference which can be provided by client or initialized
       /// by this sigleton.
       CORBA::ORB_var orb_;
@@ -237,8 +266,13 @@ namespace OpenDDS
       /// The domain participant factory object reference.
       ::DDS::DomainParticipantFactory_var  dp_factory_;
 
-      /// The DCPSInfo/repository object reference.
-      DCPSInfo_var repo_;
+      /// The DomainId to RepoKey mapping.
+      typedef std::map< ::DDS::DomainId_t, RepoKey> DomainRepoMap;
+      DomainRepoMap domainRepoMap_;
+
+      /// The DomainId to DCPSInfo/repository object references container.
+      typedef std::map< RepoKey, DCPSInfo_var> RepoMap;
+      RepoMap repoMap_;
 
       /// The lock to serialize DomainParticipantFactory singleton creation
       /// and shutdown.
@@ -290,12 +324,16 @@ namespace OpenDDS
       int                                    liveliness_factor_;
 
       /// The builtin topic transport address.
-      ACE_TString                            bit_transport_ip_;
-      /// The builtin topic transport port number.
-      int                                    bit_transport_port_;
+      typedef std::map< RepoKey, ACE_TString> RepoTransportIpMap;
+      RepoTransportIpMap bitTransportIpMap_;
 
-      /// The transport impl for builtin topics.
-      TransportImpl_rch                      bit_transport_impl_;
+      /// The builtin topic transport port number.
+      typedef std::map< RepoKey, int> RepoTransportPortMap;
+      RepoTransportPortMap bitTransportPortMap_;
+
+      /// The mapping from repository key to transport implementations.
+      typedef std::map< RepoKey, TransportImpl_rch> RepoTransportMap;
+      RepoTransportMap bitTransportMap_;
 
 
       bool bit_enabled_;
