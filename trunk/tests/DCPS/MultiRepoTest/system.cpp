@@ -15,12 +15,12 @@
 #include "dds/DCPS/debug.h"
 
 int
-main( int argc, char** argv, char** envp)
+main( int argc, char** argv)
 {
   OpenDDS::DCPS::set_DCPS_debug_level( 0);
   int status = 0;
   try {
-    TestSystem system( argc, argv, envp);
+    TestSystem system( argc, argv, 0);
     system.run();
 
   } catch (const CORBA::Exception& ex) {
