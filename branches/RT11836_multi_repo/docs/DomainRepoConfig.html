@@ -9,7 +9,7 @@
 <p>
 With the ability to attach a process to more than a single DCPSInfoRepo
 repository object, repository information and the associations between
-domains and the repostory that contains the information for a given
+domains and the repository that contains the information for a given
 domain become more complex.  Each repository needs to be made known to
 the application, and each domain must be associated with a specific
 repository.  DCPSInfoRepo objects provide DDS service information to
@@ -86,12 +86,12 @@ name is also arbitrary and can be used for documentation purposes.
 
 <p>
 Subsections are specified using a slash separated path syntax, similar
-to directory paths used on Unix systems ans their derivatives.
+to directory paths used on Unix systems and their derivatives.
 A repository subsection should be on a path with the format
-<strong>[repository/NAME]</strong> where the &quot;repository/&quot;
-is literal and the &quot;NAME&quot; is to be replaced by a unique
+<strong>[repository/&lt;NAME&gt;]</strong> where the &quot;repository/&quot;
+is literal and the &quot;&lt;NAME&gt;&quot; is to be replaced by a unique
 subsection name.  similarly a domain subsection would be specified as
-<strong>[domain/NAME]</strong>.  There may be any number of repository
+<strong>[domain/&lt;NAME&gt;]</strong>.  There may be any number of repository
 or domain sections within a single configuration file.
 </p>
 
@@ -124,6 +124,41 @@ If more than one subsection specifies an association between a single
 domain and different repositories, only the last (in the file) association
 will be honored.
 </p>
+
+<table border>
+<caption><strong>Multiple repository configuration sections</strong></caption>
+<tr><th>(Sub)section</th><th>Key</th><th width="40%">Value</th><th>Default</th></tr>
+<tr>
+  <td>[common]</td>
+  <td>DCPSInfoRepo</td>
+  <td>IOR locating the default repository.</td>
+  <td>file://repo.ior</td>
+</tr>
+<tr>
+  <td rowspan="2">[repository/&lt;NAME&gt;]</td>
+  <td>RepositoryIor</td>
+  <td>IOR locating the repository.</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>RepositoryKey</td>
+  <td>Unique key value for the repository.</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td rowspan="2">[domain/&lt;NAME&gt;]</td>
+  <td>DomainId</td>
+  <td>Domain for which an association with a repository is being defined.</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>DomainRepoKey</td>
+  <td>Key value for the repository.  The special value
+  &quot;DEFAULT_REPO&quot; can be used to explicitly associate the domain
+  with the default repository.</td>
+  <td>none</td>
+</tr>
+</table>
 
 <hr>
 <h2>Examples</h2>
