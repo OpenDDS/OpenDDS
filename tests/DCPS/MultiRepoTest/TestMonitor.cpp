@@ -716,8 +716,8 @@ TestMonitor::run()
   // Write the requested number of samples.
   for( int sample = 0; sample < this->config_.samples(); ++sample) {
     // Make the data unique for each sample.
-    foo.x = 1000.0 + 100.0f * sample;
-    foo.y = 2000.0 + 100.0f * sample;
+    foo.x = 1000.0f + 100.0f * sample;
+    foo.y = 2000.0f + 100.0f * sample;
     if( sample == (this->config_.samples() - 1)) {
       // Final sample is the answer that ends the universe.
       foo.data_source = 42;
@@ -737,6 +737,7 @@ TestMonitor::run()
   // Wait until we receive the final message at the last receiver, then
   // we are done.
   //
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run about to wait.\n")));
   this->forwarder_[ this->forwarder_.size() - 1]->waitForCompletion();
 
   // This is now a termination message.
@@ -744,7 +745,7 @@ TestMonitor::run()
 
   // The first data writer is already narrowed, terminate it.
   foo.x = 0.0;
-  foo.y = 355.0 / 113.0;
+  foo.y = 355.0f / 113.0f;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run terminating %d.\n"),0));
   if( ::DDS::RETCODE_OK != fooWriter->write( foo, ::DDS::HANDLE_NIL)) {
     ACE_ERROR((LM_ERROR,

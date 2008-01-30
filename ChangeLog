@@ -1,13 +1,28 @@
+Wed Jan 30 19:51:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+
+          Need to lock the mutex before waiting on the condition variable.
+
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+
+          Fixed floating point conversion warnings, added some logging.
+
+        * tests/DCPS/MultiRepoTest/monitor.cpp:
+        * tests/DCPS/MultiRepoTest/system.cpp:
+
+          The third arg to main (envp) is not supported by ACE on all platforms
+
 Wed Jan 30 15:56:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-	Merging the RT11836_mult_repo branch (-r 952:958) back to trunk.
+        Merging the RT11836_mult_repo branch (-r 952:958) back to trunk.
 
-	Wed Jan 30 15:41:17 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Wed Jan 30 15:41:17 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/DomainRepoConfig.html:
           Added table of key/value pairs for sections.
 
-	Wed Jan 30 00:19:21 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Wed Jan 30 00:19:21 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * DDS_release_notes.txt:
         * docs/DomainRepoConfig.html:
@@ -15,13 +30,13 @@ Wed Jan 30 15:56:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Added some documentation describing the changes and how they
           can be configured.
 
-	Tue Jan 29 21:53:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Tue Jan 29 21:53:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/ZeroCopyRead/run_test.pl:
           Made this script executable so that the test will execute on
           *nix systems.
 
-	Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
@@ -36,7 +51,7 @@ Wed Jan 30 15:56:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/ZeroCopyRead/run_test.pl:
           Use service configurator when needed.
 
-	Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:
@@ -49,7 +64,7 @@ Wed Jan 30 15:56:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/LivelinessTest/run_test.pl:
           Added explicit specification of domain file to InfoRepo.
 
-	Mon Jan 21 20:45:48 UTC 2008  martinezm  <martinezm@ociweb.com>
+        Mon Jan 21 20:45:48 UTC 2008  martinezm  <martinezm@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:

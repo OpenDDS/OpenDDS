@@ -114,6 +114,7 @@ void ForwardingListenerImpl::dataWriter(
 void
 ForwardingListenerImpl::waitForCompletion()
 {
+  ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
   this->condition_.wait();
 }
 
