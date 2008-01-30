@@ -21,8 +21,8 @@ $num_writers=1;
 $num_readers=1;
 $num_msgs_btwn_rec=20;
 $pub_writer_id=0;
-$repo_bit_conf = "-NOBITS";
-$app_bit_conf = "-DCPSBit 0";
+$repo_bit_conf = "-NOBITS ";
+$app_bit_conf = "-DCPSBit 0 ";
 $copy_sample=0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
@@ -40,10 +40,12 @@ if ($ARGV[2] ne '') {
 
 if ($ARGV[3] eq 'bit') {
   $repo_bit_conf = $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
-  $app_bit_conf = "";
+  $app_bit_conf = $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
 }
 elsif ($ARGV[3] eq '' or $ARGV[3] eq 'nobit') {
   # default test with bit off
+  $repo_bit_conf .= $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
+  $app_bit_conf .= $use_svc_config ? "-ORBSvcConf ../../tcp.conf" : '';
 }
 else {
   print STDERR "ERROR: invalid parameter $ARGV[3] \n";

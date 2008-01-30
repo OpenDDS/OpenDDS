@@ -62,7 +62,7 @@ namespace OpenDDS
         domain_id_(domain_id),
         dp_id_(dp_id)
     {
-      repository_ = TheServiceParticipant->get_repository();
+      repository_ = TheServiceParticipant->get_repository( domain_id);
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
     }
@@ -1826,7 +1826,7 @@ namespace OpenDDS
         ::OpenDDS::DCPS::SubscriberImpl* sub_servant
           = reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (bit_subscriber_.in ());
 
-        TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ();
+        TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ( this->domain_id_);
 
         OpenDDS::DCPS::AttachStatus status
           = sub_servant->attach_transport(impl.in());

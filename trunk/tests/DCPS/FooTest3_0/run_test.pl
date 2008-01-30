@@ -100,7 +100,7 @@ unlink $pubdriver_ior;
 
 
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_conf -o $dcpsrepo_ior"
+                                  "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
                                   . " -d $domains_file");
 print $DCPSREPO->CommandLine(), "\n";
 

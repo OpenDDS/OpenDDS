@@ -47,10 +47,13 @@ elsif ($ARGV[0] ne '') {
     exit 1;
 }
 
+$repo_svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+                 : "-ORBSvcConf ../../tcp.conf";
+
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 $info_prst_file = PerlACE::LocalFile ("info.pr");
-$repo_bit_opt = "-NOBITS";
+$repo_bit_opt = "$repo_svc_config -NOBITS";
 $app_bit_opt = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior;

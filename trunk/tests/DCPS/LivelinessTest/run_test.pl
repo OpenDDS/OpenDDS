@@ -66,7 +66,8 @@ unlink $dcpsrepo_ior;
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior");
+                           . "-o $dcpsrepo_ior "
+                           . "-d $domains_file ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

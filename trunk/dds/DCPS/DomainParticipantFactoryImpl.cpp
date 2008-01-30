@@ -53,7 +53,15 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      DCPSInfo_var repo = TheServiceParticipant->get_repository ();
+      DCPSInfo_var repo = TheServiceParticipant->get_repository ( domainId);
+      if ( CORBA::is_nil( repo.in())) 
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                      ACE_TEXT("no repository found for domainId: %d.\n"), domainId));
+          return ::DDS::DomainParticipant::_nil();
+        }
 
       RepoId dp_id = 0;
 
@@ -274,7 +282,7 @@ namespace OpenDDS
             } //xxx now obj rc = 4
         }//xxx now obj rc = 3
 
-      DCPSInfo_var repo = TheServiceParticipant->get_repository();
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( domain_id);
 
       try
         {

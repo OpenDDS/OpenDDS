@@ -210,7 +210,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     orb_->object_to_string (info_repo.in ());
 
   TheServiceParticipant->set_ORB(orb_.in());
-  TheServiceParticipant->set_repo_ior(ACE_TEXT_CHAR_TO_TCHAR(objref_str.in()));
 
   // Initialize the DomainParticipantFactory
   ::DDS::DomainParticipantFactory_var dpf
@@ -237,6 +236,13 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
                            false);
         }
     }
+
+  // This needs to be done after initialization since we create the reference
+  // to ourselves in the service here.
+  TheServiceParticipant->set_repo_ior(
+    ACE_TEXT_CHAR_TO_TCHAR(objref_str.in()),
+    OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+  );
 
   // Load the domains _after_ initializing the participant factory and initializing
   // the transport

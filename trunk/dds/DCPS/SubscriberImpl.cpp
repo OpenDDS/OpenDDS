@@ -50,7 +50,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     fast_listener_ (0),
     participant_(participant),
     participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
-    repository_ (TheServiceParticipant->get_repository ())
+    repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id()))
 {
   participant_->_add_ref ();
 

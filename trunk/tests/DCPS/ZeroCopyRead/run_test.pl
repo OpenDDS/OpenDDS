@@ -14,15 +14,15 @@ $status = 0;
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
+$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    : "-ORBSvcConf ../../tcp.conf";
+
 unlink $dcpsrepo_ior;
 
 # -ORBDebugLevel 1 -NOBITS
 $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  " -o $dcpsrepo_ior"
+                                  "$svc_config -o $dcpsrepo_ior"
                                   . " -d $domains_file -NOBITS");
-
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf";
 
 # -b
 $parameters = "-DcpsBit 0 $svc_config ";
