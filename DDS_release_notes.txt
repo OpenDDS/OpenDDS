@@ -2,7 +2,14 @@ Version 1.01 (??) of OpenDDS.
 
 New to this version are the following changes:
 
-- First release note goes here
+- Add the ability to attach to multiple DCPSInfoRepo processes.
+
+  Applications which communicate using DDS are no longer restricted to
+  communicating using domains controlled by a single DCPSInfoRepo
+  process.  Individual domain publications and subscriptions within a
+  process can be attached to a designated repository.  Each domain is
+  controlled by a single repository and this association may not be
+  changed for the lifetime of the repository or the application.
 
 
 =========================================================================

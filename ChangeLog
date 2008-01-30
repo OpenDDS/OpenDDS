@@ -1,10 +1,18 @@
-Tue Jan 29 21:53:13 UTC 2008  Mike Martinez  <martinez_m@>
+Wed Jan 30 00:19:21 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * docs/DomainRepoConfig.html:
+        * docs/design/multirepo.txt:
+	  Added some documentation describing the changes and how they
+	  can be configured.
+
+Tue Jan 29 21:53:13 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/ZeroCopyRead/run_test.pl:
-	  Made this script executable so that the test will execute on
-	  *nix systems.
+          Made this script executable so that the test will execute on
+          *nix systems.
 
-Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@>
+Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
@@ -19,7 +27,7 @@ Tue Jan 29 21:11:41 UTC 2008  Mike Martinez  <martinez_m@>
         * tests/DCPS/ZeroCopyRead/run_test.pl:
           Use service configurator when needed.
 
-Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@>
+Tue Jan 29 18:52:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.inl:
