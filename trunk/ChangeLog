@@ -1,3 +1,15 @@
+Thu Jan 31 20:15:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Always run Perl scripts as "perl scriptname.pl", since that works on
+          all platforms.
+          Check return values against != 0 instead of > 0.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Changed bit_transport_impl signature to match header file.
+
 Thu Jan 31 17:31:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.cpp:
@@ -19,7 +31,8 @@ Wed Jan 30 19:51:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/MultiRepoTest/monitor.cpp:
         * tests/DCPS/MultiRepoTest/system.cpp:
 
-          The third arg to main (envp) is not supported by ACE on all platforms
+          The third arg to main (envp) is not supported by ACE on all
+          platforms.
 
 Wed Jan 30 15:56:10 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

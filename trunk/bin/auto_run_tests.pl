@@ -105,8 +105,8 @@ foreach my $test_lst (@file_list) {
         }
 
         $cmd = '';
+        $program = "perl $program" if ($progNoArgs =~ /\.pl$/);
         if ($opt_s) {
-            $program = "perl $program" if ($progNoArgs =~ /\.pl$/);
             $cmd = "$opt_s \"$program $inherited_options\"";
         }
         else {
@@ -124,7 +124,7 @@ foreach my $test_lst (@file_list) {
             $result = system ($cmd);
             $time = time() - $start_time;
 
-            if ($result > 0) {
+            if ($result != 0) {
                 print "Error: $test returned with status $result\n";
             }
 
