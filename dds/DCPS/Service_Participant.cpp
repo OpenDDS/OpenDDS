@@ -720,7 +720,7 @@ namespace OpenDDS
     }
 
     TransportImpl_rch
-    Service_Participant::bit_transport_impl( const ::DDS::DomainId_t domain)
+    Service_Participant::bit_transport_impl(::DDS::DomainId_t domain)
     {
       RepoKey repo = DEFAULT_REPO;
       DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
