@@ -1,3 +1,10 @@
+Thu Jan 31 20:22:48 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+
+          Prefixed anonymous-namespace constant names with TC_ (Test Config)
+          since DEFAULT_TYPE was conflicting with a macro on gcc 3.3/solaris.
+
 Thu Jan 31 20:15:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
@@ -8,15 +15,15 @@ Thu Jan 31 20:15:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Changed bit_transport_impl signature to match header file.
+          Changed bit_transport_impl signature to match header file.
 
 Thu Jan 31 17:31:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.cpp:
-	  Explicit include for ACE_OS::atoi().
+          Explicit include for ACE_OS::atoi().
 
         * tests/DCPS/MultiRepoTest/run_test.pl:
-	  Removed extraneous command line option.
+          Removed extraneous command line option.
 
 Wed Jan 30 19:51:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
