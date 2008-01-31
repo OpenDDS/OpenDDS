@@ -1,3 +1,11 @@
+Thu Jan 31 17:31:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+	  Explicit include for ACE_OS::atoi().
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+	  Removed extraneous command line option.
+
 Wed Jan 30 19:51:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:

@@ -2,6 +2,7 @@
 #include "TestConfig.h"
 #include "TestException.h"
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_stdlib.h"
 // #include "ace/Log_Msg.h"
 
 namespace { // anonymous namespace for file scope.
