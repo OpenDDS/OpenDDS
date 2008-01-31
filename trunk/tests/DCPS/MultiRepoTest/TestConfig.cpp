@@ -9,9 +9,9 @@ namespace { // anonymous namespace for file scope.
   //
   // Default values.
   //
-  const bool  DEFAULT_VERBOSE = false;
-  enum {      DEFAULT_SAMPLES = 10};
-  const char* DEFAULT_TYPE    = "Foo";
+  const bool  TC_DEFAULT_VERBOSE = false;
+  enum {      TC_DEFAULT_SAMPLES = 10};
+  const char* TC_DEFAULT_TYPE    = "Foo";
 
 } // end of anonymous namespace.
 
@@ -20,9 +20,9 @@ TestConfig::~TestConfig()
 }
 
 TestConfig::TestConfig( int argc, char** argv, char** envp)
- : verbose_( DEFAULT_VERBOSE),
-   samples_( DEFAULT_SAMPLES),
-   typeName_( DEFAULT_TYPE)
+ : verbose_( TC_DEFAULT_VERBOSE),
+   samples_( TC_DEFAULT_SAMPLES),
+   typeName_( TC_DEFAULT_TYPE)
 {
   ACE_UNUSED_ARG(envp);
 
