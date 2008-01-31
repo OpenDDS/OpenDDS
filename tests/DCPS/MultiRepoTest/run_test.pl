@@ -97,7 +97,7 @@ unlink $dcpsrepo3_ior;
 # Configure the repositories.
 
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -v -ORBSvcConf ../../tcp.conf ";
+    : "-ORBSvcConf ../../tcp.conf ";
 
 my $DCPSREPO1 = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$svc_config -o $dcpsrepo1_ior"
