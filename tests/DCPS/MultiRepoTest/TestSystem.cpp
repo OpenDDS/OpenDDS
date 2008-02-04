@@ -457,7 +457,7 @@ TestSystem::~TestSystem()
     }
   }
 
-  if( this->subscriberParticipant_ != this->publisherParticipant_) {
+  if( this->subscriberParticipant_.in() != this->publisherParticipant_.in()) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing separate subscription apparatus.\n")));
 
     // Tear down the receiving apparatus.
