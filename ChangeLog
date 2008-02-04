@@ -1,13 +1,23 @@
+Mon Feb  4 23:31:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/deadline.txt:
+        * docs/design/durability.txt:
+        * docs/design/federation.txt:
+        * docs/design/lifespan.txt:
+
+	  Adding design documentation for features we will be adding on
+	  this branch.
+
 Mon Feb  4 20:24:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Explicitly do not use an argument when not implementing
-	  BuiltinTopics.
+          Explicitly do not use an argument when not implementing
+          BuiltinTopics.
 
         * tests/DCPS/MultiRepoTest/TestSystem.cpp:
 
-	  Comparisons between _var.in() rather than _var.
+          Comparisons between _var.in() rather than _var.
 
 Thu Jan 31 20:22:48 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
