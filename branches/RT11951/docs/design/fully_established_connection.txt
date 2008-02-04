@@ -1,0 +1,16 @@
+Last updated: 1/17/2006
+
+The user is allowed to "write" before all existing associations are fully established.
+  - data is dropped.
+  - Is part of why BIT is flaky.
+  - need to add "ready" feedback so association is know to be fully 
+    established before returning from creating a writer.
+	- this could cause problems - slow, ?deadlock
+	- what if the connection cannot be established?
+  -- from "projects\AdvancedAcousticConcepts/doc/open_issues.txt"
+  create_datawriter() does not wait for full association esablishment* so
+  a write shortly after creating the datawriter may be dropped on the publisher
+  side because add_associations() has not completed on the publisher side.
+  The sample may also be dropped on the subscriber side because the connection
+  exists between the publisher and subscriber but the associations have not
+  been mapped on the subscriber side.

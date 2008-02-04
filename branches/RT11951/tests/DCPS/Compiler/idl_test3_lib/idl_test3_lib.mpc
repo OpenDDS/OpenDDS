@@ -1,0 +1,16 @@
+project : dcps {
+  sharedname = idl_test3_lib
+  libout       = .
+
+  // -St reduced lines of code from 77,000 to 17,000 in FooDefC.cpp
+  idlflags    += -St -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags = FOOLIB_BUILD_DLL
+  pch_header   =
+  pch_source   =
+
+  IDL_Files {
+    FooDef.idl
+  }
+}
+
+

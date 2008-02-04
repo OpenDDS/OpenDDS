@@ -1,0 +1,785 @@
+This document contains various notes about DDS.
+The DDS section of the TAO Developer's Guide is a better source
+of information on DDS.
+WARNING: these note may become obsolete and may not be updated.
+         USE AT YOUR OWN RISK!!!
+
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 5/17/07
+DDS version: 0.12 (but it applies to older versions)
+How to run the InfoRepo without using a file for its IOR.
+
+DCPSInfoRepo.EXE -d domain_ids -ORBEndpoint iiop://RepoHostName:12345
+
+./subscriber -DCPSInfoRepo corbaloc:iiop:RepoHostName:12345/DCPSInfoRepo
+
+./publisher -DCPSInfoRepo corbaloc:iiop:RepoHostName:12345/DCPSInfoRepo
+
+-----------------------------------------------------------------------------
+Date: 5/9/07 
+DDS version: 0.12
+The following error message means that the SimpleTcp transport has not been
+built or is not in the library path.
+
+ACE (1932|3468) LN::open_dll - Failed to open SimpleTcp: Error: check log for details.
+ACE (1932|3468) Unable to create service object for DCPS_SimpleTcpLoader
+
+-----------------------------------------------------------------------------
+Date: 3/24/06
+DDS version: 0.7/0.8
+Chunks are related to using cached allocators to improve performance
+by reducing allocations on the heap.
+
+The "extra information on the supported QoS" section of the
+DDS_release_notes.txt explains the relationship between the QoS
+and chunks.
+
+I have added more info about caching and Chunks to DDS_info.txt.
+It is attached.
+
+> How big is a Chunk?
+
+A chunk is the size of a marshaled value (see note) +
+    sizeof(DataSampleListElement) +
+    ChunkAssociationMutltiplier * size_of(ACE_Message_Block) +
+    sizeof(ACE_Data_Block).
+
+Note: if _tao_is_bounded_size(value) returns true
+      then the "size of a marshaled value" is
+      _dcps_max_marshaled_size(value) otherwise
+      the cached allocator is not used and the heap
+      is used (with _dcps_find_size(value) bytes).
+
+> When I set the Chunks and
+> ChunksAssociationMultiplier values, how much memory does that allocate?
+
+The that is a multiplier for the size_of(ACE_Message_Block). See above.
+The multiplier is used because when writing to multiple associations
+there is an ACE_Message_Block per association.
+
+> Is that allocation global, or is it in a per-data reader/writer basis?
+
+The chunk allocation and ChunkAssociationMutltiplier are both per
+datawriter.
+
+
+> And what do the data reader/writer use the chunks for?
+
+size of the cached allocators.
+
+>
+> On a write, how many times is the data copied before it gets sent across
+> the wire?
+
+Once - when it is marshaled.
+
+All of the other times it is shallow copied using the magic of
+ACE_Message_Block.
+The transport uses sendv (with iovec) to avoid a copy while sending multiple
+message blocks.
+
+Note: Tim gave you a Transport centric response to the questions and my
+responses (see other email) were primarily from a DCPS level.
+
+Note: the ACE_Message_Blocks are used at both the Transport and DCPS level.
+
+<snip>
+
+>
+> >
+> > Are the backpressure queues kept on a per-connection basis?  Do the
+> > queue* transport options configure the queue size and growth for each
+> > connection?
+> >
+> Yes, a backpressure queue is associated with each connection.
+
+Yes, there are also queues per connection at the Transport level that are
+shared by multiple datawriters and their instances.
+
+There are also queues per value/sample instance at the DCPS level
+(publisher/datawriter).
+
+The interaction between the publisher and the transport is that publisher
+"sends" a sample
+to the transport for delivery and the transport will send it out on a
+link/connection and then call data_delivered on the datawriter so it knows
+the sample can be destroyed/recycled.  The publisher/datawriter may force
+the transport to give up  its ownership of a sample by calling
+TransportInterface::remove_sample().  The most common usage of
+remove_sample() is when the history.kind=KEEP_LATEST and the transport
+already has (is trying to send) history.depth samples.  In this case the
+publisher tells the transport to remove_sample() on the oldest sample and
+then sends another sample.
+
+
+> And, yes,
+> the transport options configure the queue size and growth for each
+> connection.
+
+For HISTORY.kind = KEEP_LAST the HISTORY.depth controls the size of the
+queue associate with each instance.
+For HISTORY.kind = KEEP_ALL  the RESOURCE_LIMITS.max_samples_per_instance
+controls the size of the queue associate with each instance.
+See the DDS_release_notes.txt for more information about HISTORY values.
+
+The transport queue* options control queues that are shared by multiple
+datawriters and their instances.
+
+> One part that I forgot to mention earlier is that a
+> DataLink objects is associated with a single TransportImpl object.  The
+> TransportImpl object acts as DataLink factory, in essence.  When a new
+> DataLink is created, the TransportImpl supplies its configuration to the
+> DataLink object so that the DataLink object can obtain those
+> configuration attributes which are applicable to the DataLink and its
+> associated objects (the TransportSendStrategy and the
+> TransportReceiveStrategy, for example).
+>
+> > When I set the BITDurationLookupMsec to some value, what would cause
+> > me to see the effect of that?
+>
+> I dunno.
+
+Note: "BITDurationLookupMsec" is "DCPSBitLookupDurationMsec" in OpenDDS 0.8.
+
+Simple answer:
+	don't ask - you do not want to know and it should not impact you.
+
+The long answer:
+
+This value controls how long the DCPS framework will wait for BIT
+information to arrive before giving up on it.
+This might impact a user when they call
+DataReader::get_matched_publication_data() or
+DataWriter::get_matched_subscription_data() after getting a
+on_publication/subscription_matched on a listener.
+
+The problem is that the association matching notification and the built-in
+topic publication are sent asynchronously on different connections and so it
+is possible for the an add_associations() call to be processed before its
+corresponding BIT information is available at the participant so the
+framework code will wait up to DCPSBitLookupDurationMsec milliseconds to
+receive the BIT information so it can set the handles in the status provided
+to on_publication_matched() and on_subscription_matched() listener
+callbacks.
+
+If add_associations() does not get the values in DCPSBitLookupDurationMsec
+milliseconds, it will assign bogus handles to the on_*matched() status and
+thus call to DataReader::get_matched_publication_data() or
+DataWriter::get_matched_subscription_data() will fail.
+
+The default two seconds is way longer than it should ever need to wait so it
+should never fail.
+
+Note: the bogus values are the Info Repo entity Ids which can be
+distinguished from handles because they are < a large number (let's say
+54321 - because Info Repo entity ids start at 1 and increment up but handles
+are memory addresses  -- wow - too much information).
+
+WARNING: the OpenDDS implementers reserve the right to change the definition
+of a handle at any time.  It may not be an address in the future.  Use
+handles as defined in the specification.  Do not misuse them by casting them
+to the internal types they represent.
+
+Note: when OpenDDS is changed to use BIT information to establish
+associations (as implied by RTSP), the need for DCPSBitLookupDurationMsec
+will disappear.
+
+Scott
+
+--- Tim's responses to the first few questions - Transport centric view --
+
+> How big is a Chunk? When I set the Chunks and 
+> ChunksAssociationMultiplier values, how much memory does that 
+> allocate?  Is that allocation global, or is it in a per-data 
+> reader/writer basis?  And what do the data reader/writer use the 
+> chunks for?
+
+I dunno about those chunks.  There is a concept of "chunks" used in the 
+Cached_Allocator_With_Overflow<T> and the 
+Dynamic_Cached_Allocator_With_Overflow<T> template classes.  If I recall 
+correctly, these are allocators that attempt to grow bigger when they 
+run out of memory.  These are created by supplying the ctor with a 
+number of initial chunks and the size of one chunk.  Whenever the 
+allocation attempts to grow bigger, it attempts to grow by one chunk.
+
+I just don't know where the Chunks and ChunksAssociationMultiplier 
+(config settings?) get used to tell you which allocator it configures.  
+And it may be a different "chunk" concept altogether.
+
+>
+> On a write, how many times is the data copied before it gets sent 
+> across the wire?
+
+I'm not sure about what happens before the data is sent to the DDS 
+transport layer (via a TransportInterface::send() or send_control() 
+call), but as far as I recall, it never gets copied within the 
+transport.  Instead, the reference counting on the ACE_Message_Block is 
+used, as well as some other mechanics that implement the concept of the 
+data being "loaned" to the transport.  Once a transport is done with a 
+piece of data (a sample), it returns the loan.  Also, if the loanee 
+tells the transport layer that the loan needs to be returned ASAP (via a 
+TransportInterface::remove_sample() call), the transport will take the 
+appropriate measures to return the loan pronto.  It is during this 
+particular use-case (when the remove_sample() method is called) that the 
+data may, in fact, be copied by the transport.  It really depends on 
+where the data sample currently is "stuck" within the transport.  If a 
+backpressure situation is in effect for the connection, then the data 
+sample may be in the backpressure queue.  If so, then no copy is 
+neccessary as we simply remove the sample from the backpressure queue 
+and return the loan.  However, if the data sample is part of a packet 
+that hasn't been completely sent, then other measures are taken in order 
+to be able to return the loan.  This may include copying the data sample 
+in some cases, and in other cases it may include copying "filler" bytes 
+in place of the data sample.  Which one depends on whether or not any of 
+the data sample in question has been partially sent.  If the data sample 
+has been partially sent, then we need to copy the unsent bytes of the 
+data sample into the packet before we can return the loan.  Otherwise, 
+when none of the data sample's bytes have been sent, we copy filler data 
+into the packet in place of the data sample, and then return the loan.  
+It's something like that anyways.  :-)
+
+>
+> Do the transport queues only live on the sending side, or do they live 
+> on the receiving side as well?
+
+Within the transport, each connection is represented by a DataLink 
+object.  A DataLink object is always set up for both sending and 
+receiving over the connection.  This is accomplished in the code by 
+having each (connected) DataLink object be associated with its own 
+TransportSendStrategy object and TransportReceiveStrategy object.  The 
+TransportSendStrategy object manages a backpressure queue, for times 
+when there is backpressure encountered while attempting to send over the 
+DataLink's connection.
+
+Thus, if I understand your question, the answer is that they "live" on 
+both the sending side and receiving side, but only come into play on the 
+sending side.  Of course, roles could reverse over this particular 
+connection, where the sending side becomes the receiving side, and 
+vice-versa.  It depends on if the connection is used for both sending 
+and receiving, or just one or the other.
+
+
+
+
+
+
+-----------------------------------------------------------------------------
+Date: 3/22/06
+DDS version: 0.7/0.8
+
+> Hi, Some questions from the DDS class at Progeny:
+>
+> What if I don't define a key field in IDL?
+
+That is OK.  There will be just one instance of that value type.
+If a value type has a key (or keys) it can have more than one instance.
+A value is assigned to an instance based on the key(s) values(s).
+
+>
+> Can I define more than one key field?
+
+Yes.  Just provide multiple #pragma DCPS_DATA_KEY lines.
+For example
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo theType"
+#pragma DCPS_DATA_KEY "Xyz::Foo id"
+  // Example user defined "Foo" structure
+  struct Foo {
+    long  theType;
+    long  id;
+    float x;
+    float y;
+  };
+};
+
+All values with both the same theType value and id value would be in the
+same instance.
+See page 2-8 and 2-9 of the DDS specification for a definition of an
+instance.
+
+>
+> What if I don't register an instance on the publisher? Is everything
+> considered to be part of the same instance?
+
+No, if you don't register and instance it is automatically registered for
+you when you write the value.
+The registration method is available for optimization.  An implementation of
+DDS may have less latency if you register instances before writing them (see
+2.1.2.4.2.5 register_instance). It also allows you to get the instance
+handle that may also improve performance.
+
+>
+> On the subscriber, can I do something analogous to registering an
+> instance, so I only receive samples of a particular instance? Or do I
+> always receive samples from all published instances?
+
+You always receive all published instances but you may use
+read_instance/take_instance to get values for one a particular instance.
+See 2.1.2.5.3.14 read_instance.
+
+>
+> How many threads does DDS spin off on the publisher and subscriber sides?
+
+I think it is something like:
+-- publisher side --
+1 for the ORB.
+1 per transport
+1 per connection (per association to a transport on the other side not
+already connected).
+
+-- subscriber side --
+1 for the ORB
+1 per transport
+
+
+If I have time, I will verify the above.
+
+>
+> Can you explain the following slide from the DDC AAC proposal? I'm a
+> little unclear on exactly what's happening under the covers:
+>
+> ----------
+>
+> Here is an example data writer with some QoS policies set
+>
+> DDS::DataWriterQos dw_qos;
+> pub->get_default_datawriter_qos (dw_qos);
+> dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+> dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+> dw_qos.reliability.max_blocking_time.sec = 10;
+> dw_qos.reliability.max_blocking_time.nanosec = 0;
+> dw_qos.resource_limits.max_samples_per_instance = 100;
+> DDS::DataWriter_var dw = pub->create_datawriter(topic.in
+> (),dw_qos,DDS::DataWriterListener::_nil());
+>
+> This data writer has the following behaviors:
+> Can queue up to 100 samples that are pending delivery to one or more
+> subscribers
+> If 100 samples are pending, then the write call blocks for up to 10
+> seconds waiting for an
+> opening in the queue
+> » An opening occurs when a previously written sample is delivered to all
+> subscribers
+>
+
+A FooDataWriter::write call will attempt to directly write the value to all
+associations.
+If a link/connection for an association is in backpressure then the value is
+just queued.
+A thread per link/connection will process the queue when the connection is
+available for output.
+Until the instance queue is full, FooDataWriter::write calls will just queue
+the message even if the write cannot be accomplished without blocking (in
+backpressure).
+
+For KEEP_ALL_HISTORY when the instance queue is full the
+FooDataWriter::write call will block for upto the max_blocking_time.
+
+If it was history.kind = KEEP_LATEST then when the queue is full the oldest
+value in the queue will be lost (discarded) and the new value will be added
+to the queue.  For KEEP_LATEST the FooDataWriter::write call will never
+block.
+
+
+-----------------------------------------------------------------------------
+Date: 3/21/06
+DDS version: 0.7/0.8
+
+> I'm still testing DCPS Info Repository server and I'm getting the
+> Run-time error below:
+>
+> .......
+> (20710|3086940768)  13:15:29.787132 Repo main
+> (20710|3086940768) EXCEPTION, ERROR: Exception caught in
+> DCPS_IR_Subscription::add_associated_publication:
+> system exception, ID 'IDL:omg.org/CORBA/TRANSIENT:1.0'
+> OMG minor code (2), described as 'No usable profile in IOR.', completed
+> = NO
+>
+> ERROR: DCPS_IR_Domain::remove_dead_participants () Removing dead
+> participant 8E99B70 id 1
+> .......
+>
+> It happens everytime I restart Publisher and Subscriber processes.
+> Do you have any idea what's going on?
+
+Yes, you are not properly shutting down the publisher or subscriber so the
+Info Repo still has a reference it.
+
+When a new datareader or datawriter is added that matches the old
+datawriter/datareader proxy in the Info Repo that was improperly shutdown
+the Info Repo tries to inform the old datareader/datawriter of the match.
+At that point the Info Repo notices that the old datareader/datawriter is
+gone and removes its obsolete proxy entities in the Info Repo.
+
+The TRANSIENT exception log is from Info Repo trying to tell the old
+datareader/datawriter about a new match.
+The remove_dead_participants log is an informative message saying that proxy
+entities have been recognized as dead and have been removed.
+
+>
+> If I restart DCPS Info repository server along with Publisher and
+> Subscriber
+> processes, this doesn't happen.  Should I restart DCPS Info Repository
+> server everytime I start Publisher and Subscriber processes?
+
+That is not necessary.
+
+
+-----------------------------------------------------------------------------
+Date: 2/8/06
+DDS version: 0.7
+
+> When building DDS I get warnings reporting that the environment variable 
+> OPENDDS_DCPS_TS_FLAGS wasn't found.  I searched the dev guide and saw no 
+> reference to it there.  What's it for and what should it be set to (, or 
+> should I just ignore it)?
+
+You can safely ignore this.
+
+
+-----------------------------------------------------------------------------
+Date: 9/22/05
+DDS version: 0.6
+
+> > > Cached allocators are used for bounded data types and supporting data
+> > > structures.
+> > > The IDL compiler creates the following methods for each data type:
+> > >   _tao_is_bounded_size (type);
+> > >   _tao_max_marshaled_size (type);
+> > >   _tao_find_size (type);
+> >
+> > When you say bounded data types, do you mean more than
+> > just bounded sequences?  (I'm guessing arrays to but
+> > not sure.)
+>
+> Bounded types:
+>  - scalars - long, float, enum, ...
+>  - arrays constraining a bounded type
+>  - bounded sequences containing a bounded type
+>  - bounded strings
+>  - structures contain all bounded types
+>
+> Unbounded types:
+>  - unbounded sequences
+>  - unbounded strings
+>  - arrays, sequences, structures containing unbounded types
+>  - unions (even if they contain all bounded types are treated as unbounded
+>       because the _tao_max_marshaled_size is performed on an uninitialized
+> value
+>       and would crash for unions with a bad discriminent).
+>
+> >
+> > > If the type is bounded in size, _tao_is_bounded_size (type)
+> > will return true
+> > > and DDS will use a cached allocator for the value's data of the size
+> > > returned by _tao_max_marshaled_size (type).
+> >
+> > By DDS here you mean the DDS demarshaling code?
+>
+> Good question - this made me think.
+> The _tao_max_marshaled_size() calculation is appropriate for the marshaled
+> value (as used on the FooDataWriter) but  its use in the FooDataReader to
+> allocate memory for the demarshaled data.  This is where the
+> problem is.  If
+> you had a data value of:
+>
+> stuct myData {
+>   long id;
+>   float x;
+>   float y;
+>   sequence <long,10> data;
+> };
+>
+> then the allocator would allocate 4+4+4+ 4+4*10 byte chunks (4
+> for id, 4 for
+> x, 4 for y, 4 for seq len, 4*10 for seq data) but the id, x,y, and data
+> pointer and length would just take 4+4+4 + 4+4 bytes and the 4*10
+> bytes for
+> the sequence data would be on the heap.
+>
+> The size calculation is appropriate for the
+> marshaled data but not for the demarshaled data.
+>
+>
+> I remember that the marshaled data on the datareader side is handled by
+> large buffers in the transport and I believe we mistakenly used
+> an allocator
+> for the demarshaled value with a size appropriate for marshaled data.
+>
+> >
+> > > If the type is an unbounded size (or even bounded but
+> contains a union),
+> > > _tao_is_bounded_size (type) will return false and
+> > _tao_find_size (type) will
+> > > be used to determine the memory allocation size for the DDS
+> > value and the
+> > > heap will be used.
+> >
+> > OK.
+> >
+> > > Since the implementation for CORBA data types containing arrays and
+> > > sequences allocates them on the heap and refers to them by a
+> > pointer, the
+> > > DDS data type does not use the contiguous memory that is
+> > allocated.  Hence
+> > > DDS wastes the memory allocated for contained arrays and sequences.
+> >
+> > Because we are supplying our own allocated memory?
+>
+> no - because the we allocate room for the marshaled data but are using it
+> for demarshaled data.  If the demarshaled data contains an array
+> or sequence
+> then the array or sequence data is allocated on the heap and
+> hence the that
+> room in the cached allocations is wasted.
+>
+> > Do we know what
+> > we gain by allocating our own memory?
+>
+> Performance.  Allocating from the heap is slow.
+>
+> I am now scratching my head to remember why we did not think that cost of
+> sending/receiving the data values would so greatly outweigh the allocation
+> costs that it would not be worth using an allocator.  hmmm.
+>
+> >
+> > > This waste could easily be fixed by changing the generated size
+> > functions to
+> > > return the size of the buffer pointer for an array or pointer
+> > and length for
+> > > a sequence.  Currently the generated size functions allocate
+> > enough space
+> > > for  the full array/sequence.
+> >
+> > This is where you lose me.  I may need to look at the code.
+> > I assume you mean "the size of the buffer" and not "the size
+> > of the buffer pointer".
+>
+> hopefully what I have said above makes it clear.
+>
+> >
+> > > A much more involved solution would be to support a cached
+> > allocator for the
+> > > contained arrays and sequences.  TAO is not written to support
+> > allocators
+> > > for contained arrays and sequences.
+> >
+> > I would not make it a big priority in the domain of DDS things we
+> > could do.  Unless you convince me otherwise.
+>
+> I do not think it is a priority.
+>
+> -----------
+>
+> We may want to turn off the data allocator functionality all
+> together.  I am
+> questioning if it had a significant performance impact.  I am
+> hoping it does
+> because we sure spent a lot of time making it work.
+>
+
+-----------------------------------------------------------------------------
+Date:  5/20/05
+DDS version: 0.0
+About DCPS debug logging and Cached Allocators:
+
+DDS has a debugging level similar to the one TAO has.
+See orbsvcs/orbsvcs/DDS/DCPS/debug.h for definition of the levels:
+
+    /// Logging verbosity level.
+    /// set by Service_Participant
+    /// value guidelines:
+    /// 1 - logs that should happen once per process or are warnings
+    /// 2 - logs that should happen once per DDS entity
+    /// 4 - logs that are related to administrative interfaces
+    /// 6 - logs that should happen every Nth sample write/read
+    /// 8 - logs that should happen once per sample write/read
+    /// 10 - logs that may happen more than once per sample write/read
+    extern TAO_DdsDcps_Export unsigned int DCPS_debug_level;
+
+Any non-LM_ERROR log should be guarded like:
+  if (DCPS_debug_level >= 6)
+    if (allocs_from_heap_ % 500 == 0)
+      ACE_DEBUG((LM_DEBUG,
+          "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
+               " %d heap allocs with %d outstanding\n",
+               this, this->allocs_from_heap_,
+               this->allocs_from_heap_ - this->frees_to_heap_));
+
+The debug level can be set as a command line option:
+  -DCPSDebugLevel 6
+
+
+Example of its use (on the performance test -- sub side only)
+With -DCPSDebugLevel 2 it will produce information about the size of the
+cached allocators and tell if the cached allocator becomes empty and uses
+the heap (just the first time).
+  This should have almost no impact on the performance test results.
+
+
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\DCPS\SimpleE2E
+Test>perl run_test.pl
+..\..\..\..\DDS\.\DCPSInfoRepo.EXE -NOBITS -o
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\DC
+PS\SimpleE2ETest\repo.ior -d
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\DCPS\SimpleE2E
+Test\
+domain_ids
+.\.\subscriber.EXE -p 1 -DCPSDebugLevel 2 -n 5000 -d 7 -msi 5000 -mxs 5000
+.\.\publisher.EXE -p 1 -n 5000 -d 7 -msi 1000 -mxs 1000
+(3108|3732)  15:57:17.269000 Repo main
+ 2192|1096  15:57:18.321000 publisher main
+ 2632|3884  15:57:18.361000 subscriber main
+ 2192|1096 Writer::start
+ 2192|3656 Writer::svc begins samples with 128 floats.
+Pt128DataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow
+1009188 with 5000 chunks
+(2632|3884) DataReaderImpl::enable Cached_Allocator_With_Overflow 10091f0
+with 5000 chunks
+(2632|608) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow
+103d2b8 with 1000 chunks
+(2632|608) TransportReceiveStrategy-db Cached_Allocator_With_Overflow
+103d2f0 with 100 chunks
+(2632|608) TransportReceiveStrategy-data Cached_Allocator_With_Overflow
+103d328 with 100 chunks
+ Reader::svc begins
+ 15:57:20.494000 (2192|3656) Writer::svc starting to write.
+samples = 5000 reads = 66 zero_reads =0 samples per read = 75
+ Reader::svc finished.
+(2632|3884) Results: [1:5000:5000:5000:7:128:520:6939980.000000:1387.996000]
+(2632|1432) Peer has disconnected.
+ 2192|3656 Writer::svc finished.
+INFO: ../../../../DDS/DCPSInfoRepo being killed.
+
+
+--------------------------------
+With -DCPSDebugLevel 6 it will tell every 500th time malloc or free are
+called.
+  This should have a minimal impact the performance test results.
+
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\DCPS\SimpleE2E
+Test>perl run_test.pl
+..\..\..\..\DDS\.\DCPSInfoRepo.EXE -NOBITS -o
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\D
+PS\SimpleE2ETest\repo.ior -d
+R:\AAC-DDS_14a\ACE_wrappers\TAO\orbsvcs\performance-tests\DDS\DCPS\SimpleE2E
+Test
+domain_ids
+.\.\subscriber.EXE -p 1 -DCPSDebugLevel 6 -n 5000 -d 7 -msi 5000 -mxs 5000
+.\.\publisher.EXE -p 1 -n 5000 -d 7 -msi 1000 -mxs 1000
+(3552|3188)  15:56:19.106000 Repo main
+ 3612|3344  15:56:21.128000 publisher main
+ 768|1712  15:56:21.148000 subscriber main
+ 3612|3344 Writer::start
+Pt128DataReaderImpl::enable_specific-data Cached_Allocator_With_Overflow
+1009120 with 5000 chunks
+(768|1712) DataReaderImpl::enable Cached_Allocator_With_Overflow 1009188
+with 5000 chunks
+(768|2680) TransportReceiveStrategy-mb Cached_Allocator_With_Overflow
+103d350 with 1000 chunks
+(768|2680) TransportReceiveStrategy-db Cached_Allocator_With_Overflow
+103d388 with 100 chunks
+(768|2680) TransportReceiveStrategy-data Cached_Allocator_With_Overflow
+103d3c0 with 100 chunks
+(768|1712) SubscriberImpl::reader_enabled, datareader(topic_name=PerfTest)
+enabled
+ Reader::svc begins
+ 3612|3492 Writer::svc begins samples with 128 floats.
+ 15:56:23.382000 (3612|3492) Writer::svc starting to write.
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 1 pool allocs with
+5000 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 500 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 500 pool allocs
+with 4501 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 500 pool allocs
+with 4500 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 1000 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 1000 pool allocs
+with 4001 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 1000 pool allocs
+with 4000 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 1500 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 1500 pool allocs
+with 3501 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 1500 pool allocs
+with 3500 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 2000 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 2000 pool allocs
+with 3001 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 2000 pool allocs
+with 3000 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 2500 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 2500 pool allocs
+with 2501 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 2500 pool allocs
+with 2500 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 3000 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 3000 pool allocs
+with 2001 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 3000 pool allocs
+with 2000 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 3500 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 3500 pool allocs
+with 1501 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 3500 pool allocs
+with 1500 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 4000 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 4000 pool allocs
+with 1001 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 4000 pool allocs
+with 1000 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 4500 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 4500 pool allocs
+with 501 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 4500 pool allocs
+with 500 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 103d350 5000 pool allocs
+with 997 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009120 5000 pool allocs
+with 1 available
+(768|2516) Cached_Allocator_With_Overflow::malloc 1009188 5000 pool allocs
+with 0 available
+samples = 5000 reads = 65 zero_reads =0 samples per read = 76
+ Reader::svc finished.
+(768|1712) Results: [1:5000:5000:5000:7:128:520:6939979.000000:1387.995800]
+(768|2516) Peer has disconnected.
+ 3612|3492 Writer::svc finished.
+INFO: ../../../../DDS/DCPSInfoRepo being killed.
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
+-----------------------------------------------------------------------------
+Date: 
+DDS version: 
+
