@@ -1,3 +1,14 @@
+Mon Feb  4 20:24:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Explicitly do not use an argument when not implementing
+	  BuiltinTopics.
+
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+	  Comparisons between _var.in() rather than _var.
+
 Thu Jan 31 20:22:48 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.cpp:

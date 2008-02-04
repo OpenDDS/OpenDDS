@@ -715,6 +715,7 @@ namespace OpenDDS
           return 0;
         }
 #else
+      ACE_UNUSED_ARG(repo);
       return -1;
 #endif // DDS_HAS_MINIMUM_BIT
     }
