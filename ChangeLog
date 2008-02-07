@@ -1,13 +1,47 @@
+Thu Feb  7 19:10:42 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * docs/design/UML:
+        * docs/design/UML/DDS.uml:
+        * docs/design/UML/Analysis.unt:
+        * docs/design/UML/InDepthOverview.unt:
+        * docs/design/UML/Overview.unt:
+
+          Added UML model files generated from StarUML.  Provides
+          a simple and more in depth Use Case view of Pub-Sub
+          operations.
+
+        * docs/design/UML/Create_DataReader_Detail.jpg:
+        * docs/design/UML/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/Register_Sample_Detail.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/Send_Remote_Detail.jpg:
+        * docs/design/UML/Write_Data_Detail.jpg:
+
+          Jpgs generated from the more in depth Use Case view.
+
+        * docs/design/UML/Create_DataReader_Simple.jpg:
+        * docs/design/UML/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/Register_Sample_Simple.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/Send_Remote_Simple.jpg:
+        * docs/design/UML/Write_Data_Simple.jpg:
+
+          Jpgs generated from the simple Use Case view.
+
+        * docs/design/UML/readme.txt:
+
+          Description of what these files are and to use StarUML.
+
 Mon Feb  4 20:24:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Explicitly do not use an argument when not implementing
-	  BuiltinTopics.
+          Explicitly do not use an argument when not implementing
+          BuiltinTopics.
 
         * tests/DCPS/MultiRepoTest/TestSystem.cpp:
 
-	  Comparisons between _var.in() rather than _var.
+          Comparisons between _var.in() rather than _var.
 
 Thu Jan 31 20:22:48 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
