@@ -1113,6 +1113,28 @@ namespace OpenDDS
           }
 
           this->set_repo_ior( repoIor.c_str(), repoKey);
+
+          ACE_TString bitIp;
+          this->cf_.get_string_value( sectionKey, ACE_TEXT("DCPSBitTransportIPAddress"), bitIp);
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DCPSBitTransportIPAddress == %s\n"),
+              sectionName.c_str(), bitIp.c_str()
+            ));
+          }
+          this->bitTransportIpMap_[ repoKey]   = bitIp;
+
+          ACE_TString portString;
+          this->cf_.get_string_value( sectionKey, ACE_TEXT("DCPSBitTransportPort"), portString);
+
+          int bitPort = ACE_OS::atoi(portString.c_str());
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DCPSBitTransportPort == %d\n"),
+              sectionName.c_str(), bitPort
+            ));
+          }
+          this->bitTransportPortMap_[ repoKey] = bitPort;
         }
       }
 

@@ -241,8 +241,10 @@ RepoUpdater interface
   the features required to synchronize the data within the federated
   repositories.  This interface has methods for each entity type to be
   updated as well as an ownership passing mechanism.  This interface
-  needs to be implemented by the existing DCPSInfoRepo objects in order
-  for them to participate in federated repository operation.
+  needs to be implemented by the existing DCPSInfo objects in order
+  for them to participate in federated repository operation.  It is also
+  implemented by the Federator objects which allows the DCPSInfo objects
+  to pass local updates to the federation.
 
   Update interfaces exist for Topic, DomainParticipant, Publication and
   Subscription service entities.  Parameters to these calls include the
@@ -369,7 +371,7 @@ DataWriter and DataReader interface extensions
 
 Repository objects
 
-  Federated repositories extend the DCPSInfoRepo servant into a
+  Federated repositories extend the DCPSInfo servant into a
   FederatedRepo servant.  This is done to add the new RepoUpdate interface
   methods that are called by the Federator servant.  The Federator servant
   contains all logic required to allow multiple repositories to become

@@ -1,3 +1,13 @@
+Tue Feb 12 23:05:29 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+	  Added DCPSBitTransportIPAddress and DCPSBitTransportPort key
+	  specifications to the [repostory] sections.
+
+        * docs/DomainRepoConfig.html:
+        * docs/design/federation.txt:
+	  Updated documentation.
+
 Mon Feb  4 23:31:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/design/deadline.txt:
@@ -5,8 +15,8 @@ Mon Feb  4 23:31:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * docs/design/federation.txt:
         * docs/design/lifespan.txt:
 
-	  Adding design documentation for features we will be adding on
-	  this branch.
+          Adding design documentation for features we will be adding on
+          this branch.
 
 Mon Feb  4 20:24:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
