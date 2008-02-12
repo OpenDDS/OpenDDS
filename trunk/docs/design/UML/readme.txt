@@ -16,3 +16,7 @@ diagrams.
 XXX_Detail.jpg
 A set of images created from the above described UML model of the "In Depth 
 Overview" diagrams.
+
+DDS.xmi
+XMI version 1.1 exchange model of DDS.UML. (StarUML unfortunately uses 1.1,
+which coincides with UML1.3, so some of the model information is lost)
