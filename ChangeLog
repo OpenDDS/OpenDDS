@@ -1,3 +1,8 @@
+Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Util.h:
+          Added a typedef to compile the code with BCB and GCC.
+
 Mon Feb 18 14:29:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Util.h:
