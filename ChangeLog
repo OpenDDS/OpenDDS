@@ -1,3 +1,9 @@
+Mon Feb 18 14:13:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.h:
+          Added missing include of iterator that is needed to get
+          std::back_inserter
+
 Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * docs/design/UML/DDS.xmi:
