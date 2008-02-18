@@ -1,3 +1,9 @@
+Mon Feb 18 14:29:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Util.h:
+          Removed not needed typename which is causing problems with BCB.
+          Thanks to Adam Mitz for noticing this typename
+
 Mon Feb 18 14:13:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.h:
