@@ -1,3 +1,8 @@
+Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+	  Eliminated a warning from gcc in asserts.
+
 Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Util.h:
