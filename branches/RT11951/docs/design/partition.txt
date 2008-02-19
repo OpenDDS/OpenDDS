@@ -49,6 +49,18 @@ Implementation notes:
     a mismatched Qos (incompatible_qos) counter on either side of the
     (non) association.
 
+    Note that the fnmatch() call can be used to determine if a value
+    string is a pattern to be expanded or not (since the spec requires
+    that 2 patterns _not_ be matched):
+
+      #include "ace/os_include/os_fnmatch.h"
+
+      if( 0 == ::fnmatch( value.c_str(), "[[*?]")) {
+        // value _is_ a wildcard pattern.
+      } else {
+        // value is _not_ a wildcard pattern.
+      }
+
     I would highly recommend that we push this entire utility file into
     a DCPS::Utilities namespace at the time this is implemented as well.
 

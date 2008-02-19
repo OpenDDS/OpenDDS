@@ -1,8 +1,13 @@
+Tue Feb 19 17:17:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/partition.txt:
+	  Added some explicit information about fnmatch().
+
 Tue Feb 19 16:05:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/design/partition.txt:
-	  Added documentation about the PARTITION Qos policy
-	  implementation.
+          Added documentation about the PARTITION Qos policy
+          implementation.
 
 Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 965:974 out to branch.
