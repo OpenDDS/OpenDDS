@@ -1,80 +1,86 @@
+Tue Feb 19 16:05:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/partition.txt:
+	  Added documentation about the PARTITION Qos policy
+	  implementation.
+
 Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
-	Merging trunk changes 965:974 out to branch.  
-	Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Merging trunk changes 965:974 out to branch.
+        Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-	  * dds/DCPS/ZeroCopyAllocator_T.cpp:
-	    Eliminated a warning from gcc in asserts.
+          * dds/DCPS/ZeroCopyAllocator_T.cpp:
+            Eliminated a warning from gcc in asserts.
 
-	Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+        Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
-	  * dds/DCPS/Util.h:
-	    Added a typedef to compile the code with BCB and GCC.
+          * dds/DCPS/Util.h:
+            Added a typedef to compile the code with BCB and GCC.
 
-	Mon Feb 18 14:29:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+        Mon Feb 18 14:29:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
-	  * dds/DCPS/Util.h:
-	    Removed not needed typename which is causing problems with BCB.
-	    Thanks to Adam Mitz for noticing this typename
+          * dds/DCPS/Util.h:
+            Removed not needed typename which is causing problems with BCB.
+            Thanks to Adam Mitz for noticing this typename
 
-	Mon Feb 18 14:13:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
+        Mon Feb 18 14:13:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 
-	  * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.h:
-	    Added missing include of iterator that is needed to get
-	    std::back_inserter
+          * dds/DCPS/transport/ReliableMulticast/detail/NackGenerator.h:
+            Added missing include of iterator that is needed to get
+            std::back_inserter
 
-	Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+        Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
-	  * docs/design/UML/DDS.xmi:
+          * docs/design/UML/DDS.xmi:
 
-	    XMI version 1.1 file of the model DDS.uml.
+            XMI version 1.1 file of the model DDS.uml.
 
-	  * docs/design/UML/readme.txt:
+          * docs/design/UML/readme.txt:
 
-	    Added note about this new file.
+            Added note about this new file.
 
-	Thu Feb  7 19:10:42 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+        Thu Feb  7 19:10:42 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
-	  * docs/design/UML:
-	  * docs/design/UML/DDS.uml:
-	  * docs/design/UML/Analysis.unt:
-	  * docs/design/UML/InDepthOverview.unt:
-	  * docs/design/UML/Overview.unt:
+          * docs/design/UML:
+          * docs/design/UML/DDS.uml:
+          * docs/design/UML/Analysis.unt:
+          * docs/design/UML/InDepthOverview.unt:
+          * docs/design/UML/Overview.unt:
 
-	    Added UML model files generated from StarUML.  Provides
-	    a simple and more in depth Use Case view of Pub-Sub
-	    operations.
+            Added UML model files generated from StarUML.  Provides
+            a simple and more in depth Use Case view of Pub-Sub
+            operations.
 
-	  * docs/design/UML/Create_DataReader_Detail.jpg:
-	  * docs/design/UML/Create_DataWriter_Detail.jpg:
-	  * docs/design/UML/Register_Sample_Detail.jpg:
-	  * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
-	  * docs/design/UML/Send_Remote_Detail.jpg:
-	  * docs/design/UML/Write_Data_Detail.jpg:
+          * docs/design/UML/Create_DataReader_Detail.jpg:
+          * docs/design/UML/Create_DataWriter_Detail.jpg:
+          * docs/design/UML/Register_Sample_Detail.jpg:
+          * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
+          * docs/design/UML/Send_Remote_Detail.jpg:
+          * docs/design/UML/Write_Data_Detail.jpg:
 
-	    Jpgs generated from the more in depth Use Case view.
+            Jpgs generated from the more in depth Use Case view.
 
-	  * docs/design/UML/Create_DataReader_Simple.jpg:
-	  * docs/design/UML/Create_DataWriter_Simple.jpg:
-	  * docs/design/UML/Register_Sample_Simple.jpg:
-	  * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
-	  * docs/design/UML/Send_Remote_Simple.jpg:
-	  * docs/design/UML/Write_Data_Simple.jpg:
+          * docs/design/UML/Create_DataReader_Simple.jpg:
+          * docs/design/UML/Create_DataWriter_Simple.jpg:
+          * docs/design/UML/Register_Sample_Simple.jpg:
+          * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
+          * docs/design/UML/Send_Remote_Simple.jpg:
+          * docs/design/UML/Write_Data_Simple.jpg:
 
-	    Jpgs generated from the simple Use Case view.
+            Jpgs generated from the simple Use Case view.
 
-	  * docs/design/UML/readme.txt:
+          * docs/design/UML/readme.txt:
 
-	    Description of what these files are and to use StarUML.
+            Description of what these files are and to use StarUML.
 
 Tue Feb 12 23:05:29 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
-	  Added DCPSBitTransportIPAddress and DCPSBitTransportPort key
-	  specifications to the [repostory] sections.
+          Added DCPSBitTransportIPAddress and DCPSBitTransportPort key
+          specifications to the [repostory] sections.
 
         * docs/DomainRepoConfig.html:
         * docs/design/federation.txt:
-	  Updated documentation.
+          Updated documentation.
 
 Mon Feb  4 23:31:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
