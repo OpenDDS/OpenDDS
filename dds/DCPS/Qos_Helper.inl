@@ -281,13 +281,10 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::PartitionQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_PartitionQosPolicy())
-      {
-        return true;
-      }
-      return false;
-    }  
-      
+      ACE_UNUSED_ARG(qos);
+      return true;
+    }
+
     ACE_INLINE 
     bool Qos_Helper::valid (const ::DDS::ReliabilityQosPolicy& qos) 
     {

@@ -1,7 +1,12 @@
+Wed Feb 20 22:47:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+	  PARTITION QoS is now valid.
+
 Tue Feb 19 17:17:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * docs/design/partition.txt:
-	  Added some explicit information about fnmatch().
+          Added some explicit information about fnmatch().
 
 Tue Feb 19 16:05:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
