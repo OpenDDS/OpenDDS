@@ -1,7 +1,26 @@
+Wed Feb 20 22:50:41 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added Messenger_Imr test to nightly builds.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Changed _narrow of info repo object to an _unchecked_narrow
+          since in the case where we are using an Imr, the call goes
+          to the Imr and back to us, which is wasteful and was currently
+          causing an exception since the POA wasn't yet activated.
+
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+
+          Made a change to the location that the tcp.conf file is 
+          expected at.  Also added passing in the conf file to the
+          Info repo.
+
 Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/ZeroCopyAllocator_T.cpp:
-	  Eliminated a warning from gcc in asserts.
+          Eliminated a warning from gcc in asserts.
 
 Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 

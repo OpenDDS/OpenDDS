@@ -203,8 +203,11 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   info_poa_->activate_object_with_id (oid.in (),
                                       info_.get());
   obj = info_poa_->id_to_reference(oid.in());
+  // the object is created locally, so it is safe to do an 
+  // _unchecked_narrow, this was needed to prevent an exception
+  // when dealing with ImR-ified objects
   OpenDDS::DCPS::DCPSInfo_var info_repo
-    = OpenDDS::DCPS::DCPSInfo::_narrow (obj.in ());
+    = OpenDDS::DCPS::DCPSInfo::_unchecked_narrow (obj.in ());
 
   CORBA::String_var objref_str =
     orb_->object_to_string (info_repo.in ());

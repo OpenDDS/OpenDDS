@@ -17,7 +17,7 @@ if ($ARGV[0] eq 'noImr') {
 
 my $status = 0;
 
-my $opts =  "-ORBSvcConf ../../tcp.conf";
+my $opts =  "-ORBSvcConf ../../../tests/tcp.conf";
 my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
 my $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
@@ -31,7 +31,7 @@ my $imr_init_ref = "-ORBInitRef ImplRepoService=file://$implrepo_ior";
 my $implrepo_server = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImplRepo_Service";
 my $imr_activator = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImR_Activator";
 my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
-my $RepoOpts = "-NOBITS -o $dcpsrepo_ior -d $domains_file $OBJ_REF_STYLE";
+my $RepoOpts = "$opts -NOBITS -o $dcpsrepo_ior -d $domains_file $OBJ_REF_STYLE";
 if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";
 }
