@@ -9,7 +9,7 @@ Wed Feb 20 22:50:41 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
           Changed _narrow of info repo object to an _unchecked_narrow
           since in the case where we are using an Imr, the call goes
           to the Imr and back to us, which is wasteful and was currently
-          causing an exception since the POA wasn't yet activated.
+          causing an exception since the POAManager wasn't yet activated.
 
         * examples/DCPS/Messenger_Imr/run_test.pl:
 
