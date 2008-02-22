@@ -1,3 +1,9 @@
+Fri Feb 22 15:36:05 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * bin/dcps_tests.lst:
+
+          Changed test to only run for certain builds.
+
 Wed Feb 20 22:50:41 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -13,7 +19,7 @@ Wed Feb 20 22:50:41 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * examples/DCPS/Messenger_Imr/run_test.pl:
 
-          Made a change to the location that the tcp.conf file is 
+          Made a change to the location that the tcp.conf file is
           expected at.  Also added passing in the conf file to the
           Info repo.
 
