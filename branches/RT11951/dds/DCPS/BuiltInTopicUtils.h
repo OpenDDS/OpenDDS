@@ -46,6 +46,20 @@ namespace OpenDDS {
 
     class DomainParticipantImpl;
 
+    /**
+     * Functor for ordering BuiltinKey_t.
+     *
+     * Use this like this:
+     *   std::map< ::DDS::BuiltinTopicKey_t, int, OpenDDS::DCPS::BuiltinTopicKeyLess> MapType;
+     */
+    class BuiltinTopicKeyLess {
+      public:
+        bool operator()(
+               const ::DDS::BuiltinTopicKey_t& lhs,
+               const ::DDS::BuiltinTopicKey_t& rhs
+             );
+    };
+
     // changed from member function template to class template
     // to avoid VC++ v6 build problem.
     /*
@@ -317,6 +331,22 @@ namespace OpenDDS {
         }
 
     };
+
+    inline
+    bool
+    BuiltinTopicKeyLess::operator()(
+      const ::DDS::BuiltinTopicKey_t& lhs,
+      const ::DDS::BuiltinTopicKey_t& rhs
+    ) {
+      // N.B.  This assumes that the MS index is 2 and the LS index is 0.
+      return (lhs[2] < rhs[2])? true:
+             (lhs[2] > rhs[2])? false:
+             (lhs[1] < rhs[1])? true:
+             (lhs[1] > rhs[1])? false:
+             (lhs[0] < rhs[0])? true:
+                                false;
+
+    }
 
   } // End of namespace DCPS
 } // End of namespace OpenDDS
