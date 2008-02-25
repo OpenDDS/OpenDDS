@@ -16,8 +16,9 @@ if ($ARGV[0] eq 'noImr') {
 }
 
 my $status = 0;
+my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-my $opts =  "-ORBSvcConf ../../../tests/tcp.conf";
+my $opts = $use_svc_config ? "-ORBSvcConf ../../../tests/tcp.conf" : '';
 my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
 my $sub_opts = "$opts -DCPSConfigFile sub.ini";
 

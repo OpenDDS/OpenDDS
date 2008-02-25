@@ -1,3 +1,24 @@
+Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * bin/dcps_tests.lst:
+
+          Added restrictions to not run ImR test on CORBA_E_COMPACT and CORBA_E_MICRO.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added dependency on imr_client.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Added #include line for STATIC include of imr_client.
+
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+
+          Changes to be able to run a static build.
+
 Fri Feb 22 19:45:32 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * bin/dcps_tests.lst:
