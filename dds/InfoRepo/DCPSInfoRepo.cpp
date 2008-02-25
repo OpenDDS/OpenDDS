@@ -12,6 +12,9 @@
 
 #include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include "tao/ImR_Client/ImR_Client.h"
+#endif
 
 #include "ace/Get_Opt.h"
 #include "ace/Arg_Shifter.h"
