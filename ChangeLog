@@ -1,3 +1,9 @@
+Tue Feb 26 15:17:41 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Added #if to prevent non-existent TAO1.4a file from being included.
+
 Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * bin/dcps_tests.lst:
