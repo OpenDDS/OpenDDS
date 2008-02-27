@@ -1,8 +1,16 @@
+Wed Feb 27 00:12:39 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+	  Starting to implement the federation interfaces.
+
 Fri Feb 22 22:44:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:
-	  Added BuiltinTopicKeyLess functor to simplify using
-	  BuiltinTopicKey_t values as map keys.
+          Added BuiltinTopicKeyLess functor to simplify using
+          BuiltinTopicKey_t values as map keys.
 
 Wed Feb 20 22:47:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
