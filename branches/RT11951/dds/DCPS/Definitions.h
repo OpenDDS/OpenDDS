@@ -32,6 +32,14 @@ namespace OpenDDS
       /// Default constructor starts negative.
       SequenceNumber() { value_ = SHRT_MIN ; }
 
+      /// Construct with a value.
+      SequenceNumber( const ACE_INT16 value) : value_( value) { }
+
+      // N.B: Default copy constructor is sufficient.
+
+      /// Allow assignments.
+      SequenceNumber& operator=( const SequenceNumber& rhs) { value_ = rhs.value_; return *this; }
+
       /// Pre-increment.
       SequenceNumber operator++() {
         this->increment() ;
@@ -45,12 +53,24 @@ namespace OpenDDS
         return value ;
       }
 
-      bool operator==( const SequenceNumber& rvalue) { return value_ == rvalue.value_ ; }
-      bool operator!=( const SequenceNumber& rvalue) { return value_ != rvalue.value_ ; }
-      bool operator<(  const SequenceNumber& rvalue) { return value_  < rvalue.value_ ; }
-      bool operator>(  const SequenceNumber& rvalue) { return value_  > rvalue.value_ ; }
-      bool operator>=( const SequenceNumber& rvalue) { return value_ >= rvalue.value_ ; }
-      bool operator<=( const SequenceNumber& rvalue) { return value_ <= rvalue.value_ ; }
+      /// This is the magic of the lollipop.
+      /// N.B. This comparison is only good until the distance reaches
+      ///      half of the lollipop size (SHRT_MAX/2).
+      bool operator<(  const SequenceNumber& rvalue) const {
+             return (value_ < 0)?              (value_ < rvalue.value_):
+                    (value_ == rvalue.value_)? false:
+                    (value_ <  rvalue.value_)? (((rvalue.value_ - value_) < (SHRT_MAX/2))?
+                                                true: false):
+                                               (((value_ - rvalue.value_) < (SHRT_MAX/2))?
+                                                false: true);
+           }
+
+      bool operator==( const SequenceNumber& rvalue) const { return value_ == rvalue.value_ ; }
+      bool operator!=( const SequenceNumber& rvalue) const { return value_ != rvalue.value_ ; }
+      bool operator>=( const SequenceNumber& rvalue) const { return   rvalue < *this;  }
+      bool operator<=( const SequenceNumber& rvalue) const { return !(rvalue < *this); }
+      bool operator>(  const SequenceNumber& rvalue) const { return  (rvalue < *this)
+                                                                  && (*this != rvalue);  }
 
       ACE_INT16 value_ ;
 
