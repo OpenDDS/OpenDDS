@@ -1,4 +1,61 @@
-project : dcpsexe, iortable, DCPSInfoRepo_bits {
+
+project(*Federator): dcps {
+  sharedname = Federator
+  libout     = $(DDS_ROOT)/lib
+  includes  += $(DDS_ROOT)
+
+  TypeSupport_Files {
+    Federator.idl >> LinkStateTypeSupport.idl LinkStateTypeSupportImpl.h LinkStateTypeSupportImpl.cpp TopicUpdateTypeSupport.idl TopicUpdateTypeSupportImpl.h TopicUpdateTypeSupportImpl.cpp ParticipantUpdateTypeSupport.idl ParticipantUpdateTypeSupportImpl.h ParticipantUpdateTypeSupportImpl.cpp PublicationUpdateTypeSupport.idl PublicationUpdateTypeSupportImpl.h PublicationUpdateTypeSupportImpl.cpp SubscriptionUpdateTypeSupport.idl SubscriptionUpdateTypeSupportImpl.h SubscriptionUpdateTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    Federator.idl
+    LinkStateTypeSupport.idl
+    TopicUpdateTypeSupport.idl
+    ParticipantUpdateTypeSupport.idl
+    PublicationUpdateTypeSupport.idl
+    SubscriptionUpdateTypeSupport.idl
+  }
+
+  Source_Files {
+    LinkStateManager.cpp
+    LinkStateTypeSupportImpl.cpp
+    TopicUpdateTypeSupportImpl.cpp
+    ParticipantUpdateTypeSupportImpl.cpp
+    PublicationUpdateTypeSupportImpl.cpp
+    SubscriptionUpdateTypeSupportImpl.cpp
+  }
+
+}
+
+project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
+
+  libpaths += $(DDS_ROOT)/lib
+  libs     += Federator
+  after    += *Federator
+
+  IDL_Files {
+  }
+
+  Source_Files {
+    DCPS_Entity_Id_Generator.cpp
+    DCPSInfo_i.cpp
+    DcpsInfo_pch.cpp
+    DCPSInfoRepo.cpp
+    DCPS_IR_Domain.cpp
+    DCPS_IR_Participant.cpp
+    DCPS_IR_Publication.cpp
+    DCPS_IR_Subscription.cpp
+    DCPS_IR_Topic.cpp
+    DCPS_IR_Topic_Description.cpp
+    DCPS_Utils.cpp
+    DomainParticipantListener_i.cpp
+    PersistenceUpdater.cpp
+    UpdateManager.cpp
+    Updater.cpp
+  }
+
 }
+

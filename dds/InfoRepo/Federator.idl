@@ -1,0 +1,185 @@
+// -*- C++ -*-
+// $Id$
+#ifndef TAO_DDS_FEDERATOR_IDL
+#define TAO_DDS_FEDERATOR_IDL
+
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsTopic.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
+#include "dds/DdsDcpsInfoUtils.idl"
+
+module OpenDDS { module Federator {
+    //
+    // Costs associated with a link.  Here we only allow ON (zero cost)
+    // and OFF (infinite cost) links to be advertised.  This can be
+    // changed if more advanced routing algorithms are to be used.
+    //
+    enum LinkCost {
+      LINK_OFF, // Link can not be used.
+      LINK_ON   // Link can be used.
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Contents of the Link State Packets (LSPs).
+    //
+    // This is the data type published to distribute topology information
+    // for repository federation.
+    //
+
+// This pragma is TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::LinkState"
+    struct LinkState {
+      OpenDDS::DCPS::RepoId source;      // Source of the advertised link.
+      OpenDDS::DCPS::RepoId destination; // Destination of the advertised link.
+      LinkCost              cost;        // Cost to use the advertised link.
+      long                  packet;      // The sequence number of the instant sample.
+    };
+
+    // Unique identifier for a repository.
+    typedef long RepoKey;
+
+    // Unique identifier for all entities within federation.
+    struct FederationId {
+      RepoKey                repository;
+      OpenDDS::DCPS::RepoId  handle;
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Topic data updates
+    //
+
+// This pragma is TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::TopicUpdate"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate id.repository"
+    struct TopicUpdate {
+      FederationId    id;
+      FederationId    participant;
+      DDS::DomainId_t domain;
+      string          topic;
+      string          datatype;
+      DDS::TopicQos   qos;
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Participant data updates
+    //
+
+// This pragma is TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::ParticipantUpdate"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate id.repository"
+    struct ParticipantUpdate {
+      FederationId              id;
+      DDS::DomainId_t           domain;
+      DDS::DomainParticipantQos qos;
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Publication data updates
+    //
+
+// This pragma is TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::PublicationUpdate"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate id.repository"
+    struct PublicationUpdate {
+      FederationId                          id;
+      FederationId                          topic;
+      FederationId                          participant;
+      DDS::DomainId_t                       domain;
+      DDS::PublisherQos                     publisher_qos;
+      DDS::DataWriterQos                    datawriter_qos;
+
+      // The following are the components of
+      // OpenDDS::DCPS::TransportInterfaceInfo
+      // which do not have TypeSupport created for them.
+
+      // The transport type (.e.g SimpleTCP or SimpleUDP)
+      OpenDDS::DCPS::TransportInterfaceId   transport_id;
+
+      // Informationn about the transport instance that is opaque to all but
+      // code specific to that transport implementation.
+      sequence<octet>                       transport_blob;
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Subscription data updates
+    //
+
+// This pragma is TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::SubscriptionUpdate"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate id.repository"
+    struct SubscriptionUpdate {
+      FederationId                          id;
+      FederationId                          topic;
+      FederationId                          participant;
+      DDS::DomainId_t                       domain;
+      DDS::SubscriberQos                    subscriber_qos;
+      DDS::DataReaderQos                    datareader_qos;
+
+      // The following are the components of
+      // OpenDDS::DCPS::TransportInterfaceInfo
+      // which do not have TypeSupport created for them.
+
+      // The transport type (.e.g SimpleTCP or SimpleUDP)
+      OpenDDS::DCPS::TransportInterfaceId   transport_id;
+
+      // Informationn about the transport instance that is opaque to all but
+      // code specific to that transport implementation.
+      sequence<octet>                       transport_blob;
+    };
+
+    //
+    // Exceptions.
+    //
+
+    // Attempt to federate with an unavailable repository.
+    exception Unavailable {};
+
+    // Unable to remove a connection.
+    exception ConnectionBusy {};
+
+    //
+    // Execution status.
+    //
+    enum Status {
+      Federated,
+      Already_Federated,
+      Unfederated
+    };
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // Federation manager interface.
+    //
+    interface Manager {
+      //
+      // Become federated with a repository at the given endpoint.
+      //
+      // This method will attempt to obtain a remote reference to the
+      // DCPSInfoRepo and Federator::Manager objects using the IORTable
+      // at the endpoint and perform federation initialization using them.
+      //
+      Status join_federation( in string  endpoint ) raises ( Unavailable);
+
+      //
+      // Remove a connection with a remote repository.
+      //
+      // This method will attempt to remove a connection to a remote
+      // repository, including dropping the references to the
+      // DCPSInfoRepo and Federator::Manager objects.  If portions of the
+      // federation become unreachable as a result, then they are removed
+      // from the federation.
+      //
+      Status remove_connection( in RepoKey remoteId) raises ( ConnectionBusy);
+
+    };
+
+}; }; // End of OpenDDS::Federator
+
+#endif /* TAO_DDS_FEDERATOR_IDL */
+
