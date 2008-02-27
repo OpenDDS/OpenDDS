@@ -1,10 +1,17 @@
+Wed Feb 27 02:16:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+	  More stubs for federation implementation.
+
 Wed Feb 27 00:12:39 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
         * dds/InfoRepo/Federator.idl:
         * dds/InfoRepo/LinkStateManager.h:
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Starting to implement the federation interfaces.
+          Starting to implement the federation interfaces.
 
 Fri Feb 22 22:44:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

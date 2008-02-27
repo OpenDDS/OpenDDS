@@ -18,6 +18,7 @@ project(*Federator): dcps {
   }
 
   Source_Files {
+    FederatorManager.cpp
     LinkStateManager.cpp
     LinkStateTypeSupportImpl.cpp
     TopicUpdateTypeSupportImpl.cpp
