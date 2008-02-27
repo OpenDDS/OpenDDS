@@ -27,14 +27,18 @@ FederatorManager::~FederatorManager()
 
 ::OpenDDS::Federator::Status
 FederatorManager::join_federation (
-  const char * endpoint
+  ::OpenDDS::Federator::RepoKey federationId,
+  const char * repoIor,
+  const char * federatorIor
 )
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
   ::OpenDDS::Federator::Unavailable
 ))
 {
-  ACE_UNUSED_ARG(endpoint);
+  ACE_UNUSED_ARG(federationId);
+  ACE_UNUSED_ARG(repoIor);
+  ACE_UNUSED_ARG(federatorIor);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("%T (%P|%t) INFO: FederatorManager::join_federation()\n")
   ));

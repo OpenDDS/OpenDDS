@@ -164,7 +164,12 @@ module OpenDDS { module Federator {
       // DCPSInfoRepo and Federator::Manager objects using the IORTable
       // at the endpoint and perform federation initialization using them.
       //
-      Status join_federation( in string  endpoint ) raises ( Unavailable);
+      Status join_federation(
+               in RepoKey federationId,
+               in string  repoIor,
+               in string  federatorIor
+
+             ) raises ( Unavailable);
 
       //
       // Remove a connection with a remote repository.
