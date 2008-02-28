@@ -41,8 +41,15 @@ class LinkStateManager {
     /// Default constructor
     LinkStateManager();
 
+    /// Construct with an identity
+    LinkStateManager( RepoKey repoId);
+
     /// Virtual destructor
     virtual ~LinkStateManager();
+
+    /// Accessor/Modifier for the repoId.
+    RepoKey  repoId() const;
+    RepoKey& repoId();
 
     /**
      * @brief Update link state.
@@ -51,12 +58,17 @@ class LinkStateManager {
      * @param removedFromMst - links removed from the MST
      * @param addedToMst     - links added to the MST
      *
-     * @return bool flag indicating that the MST was modified.
+     * @return bool flag indicating that the update was processed as valid.
      *
      * This method updates the topology information, held in a sparse
      * adjacency matrix, then determines a (new) Minimum Spanning Tree (MST)
      * and generates a list of links removed from and added to the MST
      * when the link state information was updated.
+     *
+     * The inbound LinkState data is checked for validity before
+     * processing, and if the sequence number is not deemed to be new the
+     * data is rejected and no processing will be performed.  The return
+     * value indicates whether the LinkState data was valid.
      *
      */
     bool update(
@@ -65,7 +77,7 @@ class LinkStateManager {
            LinkList&        addedToMst
          );
 
-  private:
+  protected:
     /*
      * Types
      */
@@ -93,13 +105,18 @@ class LinkStateManager {
      * Methods
      */
 
-    /// Implement Prim's algorithm to extract a Minimal Spanning Tree
-    /// (MST) from the topology.
-    LinkSet prim();
+    /// Generate a new Minimal Spanning Tree (MST) using the current topology.
+    virtual void generateMst( LinkSet& mst);
+
+    /// Implement Prim's algorithm to extract an MST.
+    void prim( LinkSet& mst);
 
     /*
      * Members
      */
+
+    /// Unique repository identifier for the instant repository.
+    RepoKey repoId_;
 
     /// Topology storage.
     AdjacencyRow adjacencies_;

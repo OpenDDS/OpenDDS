@@ -1,19 +1,26 @@
+Thu Feb 28 19:56:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+	  Initial implementation of Prim's algorithm.  The
+	  LinkStateManager is now complete.
+
 Wed Feb 27 22:26:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Definitions.h:
-	  Made the ordering operations correct with respect to the
-	  lollipop "candy" portion.  N.B. The ordering will fail if the
-	  distance reaches or exceeds 1/2 of the "candy" size.
+          Made the ordering operations correct with respect to the
+          lollipop "candy" portion.  N.B. The ordering will fail if the
+          distance reaches or exceeds 1/2 of the "candy" size.
 
         * dds/InfoRepo/Federator.idl:
         * dds/InfoRepo/FederatorManager.h:
         * dds/InfoRepo/FederatorManager.cpp:
-	  Added additional parameters to the join_federation() method.
+          Added additional parameters to the join_federation() method.
 
         * dds/InfoRepo/LinkStateManager.h:
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Implemented structures and processing other than Prim's
-	  algorithm.
+          Implemented structures and processing other than Prim's
+          algorithm.
 
 Wed Feb 27 02:16:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
