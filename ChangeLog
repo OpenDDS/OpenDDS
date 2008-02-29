@@ -1,8 +1,13 @@
+Fri Feb 29 23:20:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LinkState/TestRouter.cpp:
+	  Removed some silliness in the test loops.
+
 Fri Feb 29 01:37:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/LinkState/DiagnosticManager.cpp:
         * tests/DCPS/LinkState/TestRouter.cpp:
-	  Simplify the output formatting a bit.
+          Simplify the output formatting a bit.
 
 Fri Feb 29 00:14:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -71,7 +71,14 @@ TestRouter::run()
               << ")" << std::endl;
     std::cout.fill(prev);
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // This is the call that is actually being tested here.
+    //
     bool result = this->manager_.update( testData[ index], removed, added);
+    //
+    ////////////////////////////////////////////////////////////////////
+
     if( result == true) {
       std::cout << "Update WAS processed." << std::endl;
     } else {
@@ -80,42 +87,38 @@ TestRouter::run()
     std::cout << this->manager_;
 
     std::cout << std::endl << std::dec << removed.size() << " LINKS REMOVED FROM MST:" << std::endl;
-    for( unsigned int index = 0; index < removed.size(); ++index) {
-      int col = 0;
-      char prev = std::cout.fill('0');
-      for( OpenDDS::Federator::LinkStateManager::LinkList::const_iterator location = removed.begin();
-           location != removed.end();
-           ++location) {
-        std::cout << "(0x" << std::hex << std::setw(8) << location->first;
-        std::cout << ",0x" << std::hex << std::setw(8) << location->second;
-        std::cout << ") ";
-        col += 24;
-        if( col > 80) {
-          std::cout << std::endl;
-          col = 0;
-        }
+    int col = 0;
+    prev = std::cout.fill('0');
+    for( OpenDDS::Federator::LinkStateManager::LinkList::const_iterator location = removed.begin();
+         location != removed.end();
+         ++location) {
+      std::cout << "(0x" << std::hex << std::setw(8) << location->first;
+      std::cout << ",0x" << std::hex << std::setw(8) << location->second;
+      std::cout << ") ";
+      col += 24;
+      if( col > 80) {
+        std::cout << std::endl;
+        col = 0;
       }
-      std::cout.fill(prev);
     }
+    std::cout.fill(prev);
 
     std::cout << std::endl << std::dec << added.size() << " LINKS ADDED TO MST:" << std::endl;
-    for( unsigned int index = 0; index < added.size(); ++index) {
-      int col = 0;
-      char prev = std::cout.fill('0');
-      for( OpenDDS::Federator::LinkStateManager::LinkList::const_iterator location = added.begin();
-           location != added.end();
-           ++location) {
-        std::cout << "(0x" << std::hex << std::setw(8) << location->first;
-        std::cout << ",0x" << std::hex << std::setw(8) << location->second;
-        std::cout << ") ";
-        col += 24;
-        if( col > 80) {
-          std::cout << std::endl;
-          col = 0;
-        }
+    col = 0;
+    prev = std::cout.fill('0');
+    for( OpenDDS::Federator::LinkStateManager::LinkList::const_iterator location = added.begin();
+         location != added.end();
+         ++location) {
+      std::cout << "(0x" << std::hex << std::setw(8) << location->first;
+      std::cout << ",0x" << std::hex << std::setw(8) << location->second;
+      std::cout << ") ";
+      col += 24;
+      if( col > 80) {
+        std::cout << std::endl;
+        col = 0;
       }
-      std::cout.fill(prev);
     }
+    std::cout.fill(prev);
 
   }
   std::cout << std::endl;
