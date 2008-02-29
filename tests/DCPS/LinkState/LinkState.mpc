@@ -1,0 +1,12 @@
+project(*Router): dcpsexe_with_tcp {
+  exename   = router
+  libs     +=  Federator
+
+  Source_Files {
+    router.cpp
+    DiagnosticManager.cpp
+    TestRouter.cpp
+    TestConfig.cpp
+  }
+}
+

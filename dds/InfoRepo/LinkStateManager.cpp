@@ -37,24 +37,30 @@ namespace OpenDDS { namespace Federator {
 LinkStateManager::LinkStateManager()
  : repoId_( 0xc0edbeef)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
+    ));
+  }
 }
 
 LinkStateManager::LinkStateManager( RepoKey repoId)
  : repoId_( repoId)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
+    ));
+  }
 }
 
 LinkStateManager::~LinkStateManager (void)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) LinkStateManager::~LinkStateManager\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::~LinkStateManager\n")
+    ));
+  }
 }
 
 RepoKey
@@ -83,9 +89,11 @@ LinkStateManager::update(
   LinkList&        addedToMst
 )
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) LinkStateManager::update\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::update\n")
+    ));
+  }
 
   // See if this link has been observed before.
   AdjacencyColumn::const_iterator location
@@ -119,12 +127,26 @@ LinkStateManager::update(
                              removedFromMst.begin(), LinkLess());
   removedFromMst.resize( end - removedFromMst.begin());
 
+  if( OpenDDS::DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::update - removing %d edges from MST\n"),
+      (end - removedFromMst.begin())
+    ));
+  }
+
   // Current MST MINUS previous MST (additions).
   addedToMst.resize( currentMst.size());
   end = std::set_difference( currentMst.begin(), currentMst.end(),
                              this->mst_.begin(), this->mst_.end(),
                              addedToMst.begin(), LinkLess());
   addedToMst.resize( end - addedToMst.begin());
+
+  if( OpenDDS::DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::update - adding %d edges to MST\n"),
+      (end - addedToMst.begin())
+    ));
+  }
 
   // Now copy the new MST into the instance.
   this->mst_.erase( this->mst_.begin(), this->mst_.end());
@@ -212,6 +234,43 @@ LinkStateManager::prim( LinkSet& mst)
     }
   }
 
+  if( OpenDDS::DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - nodes:\n >>> ")
+    ));
+    int col = 6;
+    for( NodeSet::const_iterator diagNodeLocation = unattached.begin();
+         (diagNodeLocation != unattached.end());
+         ++diagNodeLocation) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(0x%08.8x) "), *diagNodeLocation));
+      col += 11;
+      if( col > 80) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+        col = 6;
+      }
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - edges:\n >>> ")
+    ));
+    col = 6;
+    for( LinkList::const_iterator diagEdgeLocation = edges.begin();
+         (diagEdgeLocation != edges.end());
+         ++diagEdgeLocation) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(0x%08.8x,0x%08.8x) "),
+        diagEdgeLocation->first, diagEdgeLocation->second
+      ));
+      col += 24;
+      if( col > 80) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+        col = 6;
+      }
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+  }
+
   // Keep generating MSTs until we find one that contains the current
   // node or we run out of nodes to include.
   while( unattached.size() > 0) {
@@ -279,6 +338,59 @@ LinkStateManager::prim( LinkSet& mst)
     // Collect edges until no more can be added without creating a cycle.
     } while( edgeFound);
 
+    if( OpenDDS::DCPS::DCPS_debug_level > 8) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - unattached nodes after MST generated:\n >>> ")
+      ));
+      int col = 6;
+      for( NodeSet::const_iterator diagNodeLocation = unattached.begin();
+           (diagNodeLocation != unattached.end());
+           ++diagNodeLocation) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(0x%08.8x) "), *diagNodeLocation));
+        col += 11;
+        if( col > 80) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+          col = 6;
+        }
+      }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - nodes in MST after MST generated:\n >>> ")
+      ));
+      col = 6;
+      for( NodeSet::const_iterator diagNodeLocation = currentNodes.begin();
+           (diagNodeLocation != currentNodes.end());
+           ++diagNodeLocation) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%08.8x) "), *diagNodeLocation));
+        col += 11;
+        if( col > 80) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+          col = 6;
+        }
+      }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - generated MST:\n >>> ")
+      ));
+      col = 6;
+      for( LinkSet::const_iterator mstLocation = mst.begin();
+           (mstLocation != mst.end());
+           ++mstLocation) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%08.8x,%08.8x) "),
+          mstLocation->first, mstLocation->second
+        ));
+        col += 24;
+        if( col > 80) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+          col = 6;
+        }
+      }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+    }
+
     // If the current node is _not_ in the current set, we found the MST
     // for an unreachable island of nodes.  Use the remaining unattached
     // nodes to find the next MST.
@@ -293,6 +405,28 @@ LinkStateManager::prim( LinkSet& mst)
       break;
     }
   }
+
+  if( OpenDDS::DCPS::DCPS_debug_level > 8) {
+    int col = 6;
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - MST being returned:\n >>> ")
+    ));
+    for( LinkSet::const_iterator mstLocation = mst.begin();
+         (mstLocation != mst.end());
+         ++mstLocation) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%08.8x,%08.8x) "),
+        mstLocation->first, mstLocation->second
+      ));
+      col += 24;
+      if( col > 80) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n >>> ")));
+        col = 6;
+      }
+    }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
+  }
+
 }
 
 }} // End of namespace OpenDDS::Federator

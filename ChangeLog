@@ -1,9 +1,32 @@
+Fri Feb 29 00:14:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+	  Updating the weak strict ordering operations.  Again.
+
+        * dds/InfoRepo/LinkStateManager.cpp:
+	  Added diagnostic messages.
+
+        * tests/DCPS/LinkState:
+        * tests/DCPS/LinkState/DiagnosticManager.h:
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/LinkState.mpc:
+        * tests/DCPS/LinkState/README:
+        * tests/DCPS/LinkState/TestConfig.h:
+        * tests/DCPS/LinkState/TestConfig.cpp:
+        * tests/DCPS/LinkState/TestException.h:
+        * tests/DCPS/LinkState/TestRouter.h:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+        * tests/DCPS/LinkState/router.cpp:
+        * tests/DCPS/LinkState/run_test.pl:
+        * bin/dcps_tests.lst:
+	  Added rudimentary LinkStateManager unit test.
+
 Thu Feb 28 19:56:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/LinkStateManager.h:
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Initial implementation of Prim's algorithm.  The
-	  LinkStateManager is now complete.
+          Initial implementation of Prim's algorithm.  The
+          LinkStateManager is now complete.
 
 Wed Feb 27 22:26:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
