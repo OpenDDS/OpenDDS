@@ -67,7 +67,7 @@ namespace OpenDDS
 
       bool operator==( const SequenceNumber& rvalue) const { return value_ == rvalue.value_ ; }
       bool operator!=( const SequenceNumber& rvalue) const { return value_ != rvalue.value_ ; }
-      bool operator>=( const SequenceNumber& rvalue) const { return   rvalue < *this;  }
+      bool operator>=( const SequenceNumber& rvalue) const { return !(*this  < rvalue);  }
       bool operator<=( const SequenceNumber& rvalue) const { return !(rvalue < *this); }
       bool operator>(  const SequenceNumber& rvalue) const { return  (rvalue < *this)
                                                                   && (*this != rvalue);  }
