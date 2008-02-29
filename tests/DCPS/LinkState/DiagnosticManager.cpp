@@ -55,8 +55,8 @@ DiagnosticManager::dumpAdjacencies( std::ostream& str) const
          ++currentColumn) {
       str << "(0x" << std::hex << std::setw(8) << currentRow->first;
       str << ",0x" << std::hex << std::setw(8) << currentColumn->first;
-      str << ",0x" << std::hex << std::setw(8) << currentColumn->second.first;
-      str << ",0x" << std::hex << std::setw(8) << currentColumn->second.second;
+      str << "," << std::dec << currentColumn->second.first;
+      str << ",0x" << std::hex << std::setw(4) << currentColumn->second.second;
       str << ") ";
       col += 46;
       if( col > COLS) {

@@ -1,10 +1,16 @@
+Fri Feb 29 01:37:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+	  Simplify the output formatting a bit.
+
 Fri Feb 29 00:14:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Definitions.h:
-	  Updating the weak strict ordering operations.  Again.
+          Updating the weak strict ordering operations.  Again.
 
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Added diagnostic messages.
+          Added diagnostic messages.
 
         * tests/DCPS/LinkState:
         * tests/DCPS/LinkState/DiagnosticManager.h:
@@ -19,7 +25,7 @@ Fri Feb 29 00:14:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/LinkState/router.cpp:
         * tests/DCPS/LinkState/run_test.pl:
         * bin/dcps_tests.lst:
-	  Added rudimentary LinkStateManager unit test.
+          Added rudimentary LinkStateManager unit test.
 
 Thu Feb 28 19:56:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

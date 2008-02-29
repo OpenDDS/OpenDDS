@@ -66,8 +66,8 @@ TestRouter::run()
     std::cout << "Updating with new LinkState "
               << "(0x" << std::hex << std::setw(8) << testData[index].source
               << ",0x" << std::hex << std::setw(8) << testData[index].destination
-              << ",0x" << std::hex << std::setw(8) << testData[index].cost
-              << ",0x" << std::hex << std::setw(8) << testData[index].packet
+              << "," << std::dec << testData[index].cost
+              << ",0x" << std::hex << std::setw(4) << testData[index].packet
               << ")" << std::endl;
     std::cout.fill(prev);
 
