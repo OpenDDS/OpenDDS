@@ -1,7 +1,12 @@
+Tue Mar  4 02:47:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+	  Added topic and type name constants for convenience.
+
 Fri Feb 29 23:20:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/LinkState/TestRouter.cpp:
-	  Removed some silliness in the test loops.
+          Removed some silliness in the test loops.
 
 Fri Feb 29 01:37:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
