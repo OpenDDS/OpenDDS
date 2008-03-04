@@ -213,6 +213,11 @@ namespace OpenDDS
           return bit_enabled_;
         }
 
+      void set_BIT(bool b)
+        {
+          bit_enabled_ = b;
+        }
+
       /** Create the TransportImpl for all builtin topics.
        */
       int init_bit_transport_impl ( RepoKey repo = DEFAULT_REPO);
