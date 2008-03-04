@@ -249,6 +249,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
                            false);
         }
     }
+  else
+    {
+      TheServiceParticipant->set_BIT(false);
+    }
 
   // This needs to be done after initialization since we create the reference
   // to ourselves in the service here.

@@ -1,3 +1,23 @@
+Tue Mar  4 23:41:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * bin/dcps_tests.lst:
+
+          Added a new test configuration ("nobits") that verifies that built-in
+          topics can be disabled at runtime.  See the FAQ on opendds.org.
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Restored the ability to turn off BITs at runtime by passing -NOBITS
+          on the DCPSInfoRepo command line.  This seems to have been lost in
+          the recent (post-1.0) commits.
+
+        * docs/INSTALL:
+
+          Fixed some formatting.
+
 Tue Feb 26 15:17:41 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
