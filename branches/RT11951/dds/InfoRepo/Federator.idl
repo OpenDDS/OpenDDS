@@ -46,6 +46,10 @@ module OpenDDS { module Federator {
       OpenDDS::DCPS::RepoId  handle;
     };
 
+    // Constant values.
+    const string LINKSTATETOPICNAME = "LinkState";
+    const string LINKSTATETYPENAME  = "LinkState";
+
     ////////////////////////////////////////////////////////////////////
     //
     // Topic data updates
