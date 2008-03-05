@@ -38,7 +38,7 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
       DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Topic::~DCPS_IR_Topic () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic () ")
                  ACE_TEXT("id %d\n"),
                  id_ ));
 
@@ -47,7 +47,7 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
           pub = *iter;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: Publication id %d still held!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: Publication id %d still held!\n"),
                      pub->get_id()
                      ));
         }
@@ -81,12 +81,12 @@ int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic::add_publication_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::add_publication_reference ")
         ACE_TEXT("Attempted to add existing publication reference %X\n"),
         publication));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic::add_publication_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::add_publication_reference ")
         ACE_TEXT("Unknown error while adding publication reference %X\n"),
         publication));
     };
@@ -109,7 +109,7 @@ int DCPS_IR_Topic::remove_publication_reference (DCPS_IR_Publication* publicatio
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic::remove_publication_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::remove_publication_reference ")
         ACE_TEXT("Unable to remove publication reference %X\n"),
         publication));
     }
