@@ -1,3 +1,11 @@
+Wed Mar  5 19:15:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Added a const_cast required by Borland (and the C++ spec, but none of
+          the other compilers complained).  Thanks to Johnny Willemsen for
+          testing OpenDDS with the Borland compiler.
+
 Tue Mar  4 23:41:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_test.pl:
