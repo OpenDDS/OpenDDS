@@ -34,16 +34,30 @@ if ($#ARGV >= 0)
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-     , " $svc_config -o $dcpsrepo_ior"
-     . " -d $domains_file -ORBSvcConf repo.conf");
-$Subscriber = new PerlACE::Process
-    ("subscriber"
-     , " -v $svc_config -DCPSConfigFile sub.ini".$common_opts);
-$Publisher = new PerlACE::Process
-    ("publisher"
-     , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX
+      ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
+       , " $svc_config -o $dcpsrepo_ior"
+       . " -d $domains_file -ORBSvcConf repo.conf");
+  $Subscriber = new PerlACE::ProcessVX
+      ("subscriber"
+       , " -v $svc_config -DCPSConfigFile sub.ini".$common_opts);
+  $Publisher = new PerlACE::ProcessVX
+      ("publisher"
+       , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
+}
+else {
+  $DCPSREPO = new PerlACE::Process
+      ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
+       , " $svc_config -o $dcpsrepo_ior"
+       . " -d $domains_file -ORBSvcConf repo.conf");
+  $Subscriber = new PerlACE::Process
+      ("subscriber"
+       , " -v $svc_config -DCPSConfigFile sub.ini".$common_opts);
+  $Publisher = new PerlACE::Process
+      ("publisher"
+       , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
+}
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

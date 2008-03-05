@@ -86,23 +86,38 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior");
-
-
-print $DCPSREPO->CommandLine(), "\n";
 # test multiple cases
 $sub_parameters = "-t all" ;
-
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
-
 $pub_parameters = " -t all " ;
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                 "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
+                               . "-o $dcpsrepo_ior");
 
+
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                               "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
+                             . "-o $dcpsrepo_ior");
+
+
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
 
 $DCPSREPO->Spawn ();
 

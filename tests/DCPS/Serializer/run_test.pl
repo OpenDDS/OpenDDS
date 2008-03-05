@@ -10,7 +10,13 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 
 my $args = "--test" ;
-my $test = new PerlACE::Process( "./SerializerTest", $args) ;
+
+if (PerlACE::is_vxworks_test()) {
+  my $test = new PerlACE::ProcessVX( "./SerializerTest", $args) ;
+}
+else {
+  my $test = new PerlACE::Process( "./SerializerTest", $args) ;
+}
 
 my $status = $test->SpawnWaitKill( 60);
 print STDERR "ERROR: client returned $status\n" if $status ;

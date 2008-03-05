@@ -13,7 +13,12 @@ $status = 0;
 
 PerlACE::add_lib_path('../idl_test3_lib');
 
-$TESTDVR = new PerlACE::Process ("idl_test3");
+if (PerlACE::is_vxworks_test()) {
+  $TESTDVR = new PerlACE::ProcessVX ("idl_test3");
+}
+else {
+  $TESTDVR = new PerlACE::Process ("idl_test3");
+}
 
 $status = $TESTDVR->SpawnWaitKill (300);
 

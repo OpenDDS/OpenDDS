@@ -20,14 +20,25 @@ unlink $dcpsrepo_ior;
 
 PerlACE::add_lib_path('../FooType');
 
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                              "$bit_conf  -o $dcpsrepo_ior"
+                              . " -d $domains_file");
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                            "$bit_conf  -o $dcpsrepo_ior"
-                            . " -d $domains_file");
+
+  $Topic = new PerlACE::ProcessVX ("topic_test",
+                                 "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                              "$bit_conf  -o $dcpsrepo_ior"
+                              . " -d $domains_file");
 
 
-$Topic = new PerlACE::Process ("topic_test",
-                               "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
+  $Topic = new PerlACE::Process ("topic_test",
+                                 "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
+}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {

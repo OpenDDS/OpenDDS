@@ -16,14 +16,25 @@ PerlACE::add_lib_path('../FooType');
 $domains_file = PerlACE::LocalFile ("domain_ids");
 $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
 
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("../../../../DDS/DCPSInfoRepo",
+                                "-o $dcpsrepo_ior"
+                                . " -d $domains_file -ORBDebugLevel 1");
 
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                            "-o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBDebugLevel 1");
+
+  $FooTest = new PerlACE::ProcessVX ("SimpleFooTest",
+                                "-DCPSInfoRepo file://$dcpsrepo_ior");
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
+                              "-o $dcpsrepo_ior"
+                              . " -d $domains_file -ORBDebugLevel 1");
 
 
-$FooTest = new PerlACE::Process ("SimpleFooTest",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior");
+  $FooTest = new PerlACE::Process ("SimpleFooTest",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior");
+}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {

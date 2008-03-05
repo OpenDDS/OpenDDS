@@ -73,24 +73,47 @@ unlink $pubdriver_ior;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file $svc_config");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$repo_bit_conf -o $dcpsrepo_ior"
+                                       . " -d $domains_file $svc_config");
 
-$publisher = new PerlACE::Process ("FooTest3NoKey_publisher"
-				   , "$svc_config"
-                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
-                                   . " -m $multiple_instance -i $num_writes_per_thread "
-                                   . " -n $max_samples_per_instance -d $history_depth"
-                                   . " -y $has_key -b $blocking_write -v $pubdriver_ior");
+  $publisher = new PerlACE::ProcessVX ("FooTest3NoKey_publisher"
+                                       , "$svc_config"
+                                       . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                       . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+                                       . " -m $multiple_instance -i $num_writes_per_thread "
+                                       . " -n $max_samples_per_instance -d $history_depth"
+                                       . " -y $has_key -b $blocking_write -v $pubdriver_ior");
 
-print $publisher->CommandLine(), "\n";
+  print $publisher->CommandLine(), "\n";
 
-$subscriber = new PerlACE::Process ("FooTest3NoKey_subscriber"
-				    , "$svc_config"
-                                    . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                    . "-n $num_writes -v file://$pubdriver_ior");
+  $subscriber = new PerlACE::ProcessVX ("FooTest3NoKey_subscriber"
+                                        , "$svc_config"
+                                        . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                        . "-n $num_writes -v file://$pubdriver_ior");
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_conf -o $dcpsrepo_ior"
+                                     . " -d $domains_file $svc_config");
+
+  $publisher = new PerlACE::Process ("FooTest3NoKey_publisher"
+                                     , "$svc_config"
+                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                     . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+                                     . " -m $multiple_instance -i $num_writes_per_thread "
+                                     . " -n $max_samples_per_instance -d $history_depth"
+                                     . " -y $has_key -b $blocking_write -v $pubdriver_ior");
+
+  print $publisher->CommandLine(), "\n";
+
+  $subscriber = new PerlACE::Process ("FooTest3NoKey_subscriber"
+                                      , "$svc_config"
+                                      . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                      . "-n $num_writes -v file://$pubdriver_ior");
+}
 
 print $subscriber->CommandLine(), "\n";
 

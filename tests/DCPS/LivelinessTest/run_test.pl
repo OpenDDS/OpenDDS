@@ -78,12 +78,21 @@ $common_parameters = "-u $use_udp $app_bit_conf"
 # test multiple cases
 $sub_parameters = "$svc_conf $common_parameters -s $sub_addr -t $use_take ";
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
-
 $pub_parameters = "$svc_conf $common_parameters -p $pub_addr" ;
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+if (PerlACE::is_vxworks_test()) {
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
+
+}
+else {
+  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+}
 print $Publisher->CommandLine(), "\n";
 
 

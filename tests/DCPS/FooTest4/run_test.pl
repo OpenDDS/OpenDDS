@@ -62,14 +62,29 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$svc_config -o $dcpsrepo_ior"
-                             . " -d $domains_file");
-
 # test multiple cases
 $parameters = "$svc_config -r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
-$FooTest4 = new PerlACE::Process ("FooTest4", $parameters);
+
+
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$svc_config -o $dcpsrepo_ior"
+                                       . " -d $domains_file");
+
+
+  $FooTest4 = new PerlACE::ProcessVX ("FooTest4", $parameters);
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior"
+                                    . " -d $domains_file");
+
+
+  $FooTest4 = new PerlACE::Process ("FooTest4", $parameters);
+}
+
 print $FooTest4->CommandLine(), "\n";
 
 

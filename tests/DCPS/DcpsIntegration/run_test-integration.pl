@@ -21,14 +21,26 @@ unlink $dcpsrepo_ior;
 
 PerlACE::add_lib_path('../FooType');
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                            "$bit_conf -o $dcpsrepo_ior"
-                            . " -d $domains_file -ORBDebugLevel 1");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                              "$bit_conf -o $dcpsrepo_ior"
+                              . " -d $domains_file -ORBDebugLevel 1");
 
 
-$Test = new PerlACE::Process ("infrastructure_test",
-                              "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior " .
-                              "-ORBLogFile $testoutputfilename");
+  $Test = new PerlACE::ProcessVX ("infrastructure_test",
+                                "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior " .
+                                "-ORBLogFile $testoutputfilename");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                              "$bit_conf -o $dcpsrepo_ior"
+                              . " -d $domains_file -ORBDebugLevel 1");
+
+
+  $Test = new PerlACE::Process ("infrastructure_test",
+                                "$bit_conf -DCPSInfoRepo file://$dcpsrepo_ior " .
+                                "-ORBLogFile $testoutputfilename");
+}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
