@@ -86,19 +86,38 @@ my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
 
 unlink $dcpsrepo_ior;
 
-$Subscriber = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
-     "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
-$Publisher = new PerlACE::Process
-    ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
-     "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
+if (PerlACE::is_vxworks_test()) {
+  $Subscriber = new PerlACE::ProcessVX
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
+       "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
+  $Publisher = new PerlACE::ProcessVX
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
+       "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
+
+}
+else {
+  $Subscriber = new PerlACE::Process
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
+       "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
+  $Publisher = new PerlACE::Process
+      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
+       "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
+}
 
 if ($role == CrossSync::SERVER) {
     unlink $dcpsrepo_ior;
-    $DCPSREPO = new PerlACE::Process
-	("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-	 "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-	 . "-ORBEndpoint iiop://:$port1");
+    if (PerlACE::is_vxworks_test()) {
+      $DCPSREPO = new PerlACE::ProcessVX
+          ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+           "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+           . "-ORBEndpoint iiop://:$port1");
+    }
+    else {    
+      $DCPSREPO = new PerlACE::Process
+          ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+           "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+           . "-ORBEndpoint iiop://:$port1");
+    }
 
     print $DCPSREPO->CommandLine(). "\n";
     $DCPSREPO->Spawn ();

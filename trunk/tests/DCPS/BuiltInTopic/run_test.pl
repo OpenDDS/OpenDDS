@@ -42,11 +42,20 @@ $client_orb = "";
 $dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
-$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "-o $iorfile -d domain_ids $dynamic_tcp");
-#                              . " -ORBDebugLevel 1");
-$CL = new PerlACE::Process ("bit", "-DCPSInfoRepo file://$iorfile " .
-                            "$dynamic_tcp -i $ignore_kind");
+if (PerlACE::is_vxworks_test()) {
+  $REPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                  "-o $iorfile -d domain_ids $dynamic_tcp");
+  #                                . " -ORBDebugLevel 1");
+  $CL = new PerlACE::ProcessVX ("bit", "-DCPSInfoRepo file://$iorfile " .
+                                "$dynamic_tcp -i $ignore_kind");
+}
+else {
+  $REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                "-o $iorfile -d domain_ids $dynamic_tcp");
+  #                              . " -ORBDebugLevel 1");
+  $CL = new PerlACE::Process ("bit", "-DCPSInfoRepo file://$iorfile " .
+                              "$dynamic_tcp -i $ignore_kind");
+}
 
 $REPO->Spawn ();
 

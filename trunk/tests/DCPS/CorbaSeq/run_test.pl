@@ -27,10 +27,18 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$svc_conf -NOBITS -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
-$Publisher = new PerlACE::Process ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_conf -NOBITS -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
+  $Publisher = new PerlACE::ProcessVX ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_conf -NOBITS -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::Process ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
+  $Publisher = new PerlACE::Process ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
+}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

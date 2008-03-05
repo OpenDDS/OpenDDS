@@ -59,14 +59,27 @@ $app_bit_opt = "-DCPSBit 0";
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
 
-# If InfoRepo is running in persistent mode, use a
-#  static endpoint (instead of transient)
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-				  . "-ORBSvcConf mySvc.conf "
-				  . "-orbendpoint iiop://:12345");
-$Subscriber = new PerlACE::Process ("subscriber", "$app_bit_opt $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", "$app_bit_opt $pub_opts");
+if (PerlACE::is_vxworks_test()) {
+  # If InfoRepo is running in persistent mode, use a
+  #  static endpoint (instead of transient)
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+                                      . "-ORBSvcConf mySvc.conf "
+                                      . "-orbendpoint iiop://:12345");
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", "$app_bit_opt $sub_opts");
+  $Publisher = new PerlACE::ProcessVX ("publisher", "$app_bit_opt $pub_opts");
+
+}
+else {
+  # If InfoRepo is running in persistent mode, use a
+  #  static endpoint (instead of transient)
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+                                    . "-ORBSvcConf mySvc.conf "
+                                    . "-orbendpoint iiop://:12345");
+  $Subscriber = new PerlACE::Process ("subscriber", "$app_bit_opt $sub_opts");
+  $Publisher = new PerlACE::Process ("publisher", "$app_bit_opt $pub_opts");
+}
 
 print "Spawning first DCPSInfoRepo.\n";
 print $DCPSREPO->CommandLine() . "\n";

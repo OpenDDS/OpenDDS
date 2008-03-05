@@ -25,12 +25,22 @@ if ($ARGV[0] eq "-client_orb") {
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
-$REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-			      , "-o $iorfile -d domain_ids $svc_config");
+if (PerlACE::is_vxworks_test()) {
+  $REPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
+                                , "-o $iorfile -d domain_ids $svc_config");
 
-$CL = new PerlACE::Process ("DdsDcps_UnitTest",
-                            "-DCPSInfoRepo file://$iorfile $svc_config " .
-                            "-c $client_orb -ORBLogFile $testoutputfilename");
+  $CL = new PerlACE::ProcessVX ("DdsDcps_UnitTest",
+                              "-DCPSInfoRepo file://$iorfile $svc_config " .
+                              "-c $client_orb -ORBLogFile $testoutputfilename");
+}
+else {
+  $REPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
+                              , "-o $iorfile -d domain_ids $svc_config");
+
+  $CL = new PerlACE::Process ("DdsDcps_UnitTest",
+                              "-DCPSInfoRepo file://$iorfile $svc_config " .
+                              "-c $client_orb -ORBLogFile $testoutputfilename");
+}
 
 print $REPO->CommandLine() . "\n" if $debug ;
 $REPO->Spawn ();
