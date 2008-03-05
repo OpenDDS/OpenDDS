@@ -254,8 +254,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  DCPS_IR_Topic* topic;
-  if (partPtr->find_topic_reference(topicId, topic) != 0)
+  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
     }
@@ -333,11 +333,10 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
       return false;
     }
 
-  DCPS_IR_Topic* topic;
-  if (partPtr->find_topic_reference(topicId, topic) != 0)
+  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  if( topic == 0)
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid topic Id: %d\n"), topicId));
-      return false;
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
   domainPtr->set_base_publication_id (pubId + 1);
@@ -450,8 +449,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  DCPS_IR_Topic* topic;
-  if (partPtr->find_topic_reference(topicId, topic) != 0)
+  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
     }
@@ -532,11 +531,10 @@ TAO_DDS_DCPSInfo_i::add_subscription (
       return false;
     }
 
-  DCPS_IR_Topic* topic;
-  if (partPtr->find_topic_reference(topicId, topic) != 0)
+  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  if( topic == 0)
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid topic Id: %d\n"), topicId));
-      return false;
+      throw OpenDDS::DCPS::Invalid_Topic();
     }
 
   domainPtr->set_base_subscription_id (subId + 1);

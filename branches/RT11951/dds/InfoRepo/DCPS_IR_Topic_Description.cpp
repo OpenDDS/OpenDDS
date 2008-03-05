@@ -30,7 +30,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
       DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
                  ACE_TEXT("name %s  data type name %s\n"),
                  name_.c_str(), dataTypeName_.c_str() ));
 
@@ -39,7 +39,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
           subscription = *iter;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: Subscription id %d still references this description!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: Subscription id %d still references this description!\n"),
                      subscription->get_id()
                      ));
         }
@@ -52,7 +52,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
       DCPS_IR_Topic_Set::ITERATOR end = topics_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description () ")
                  ACE_TEXT("name %s  data type name %s\n"),
                  name_.c_str(), dataTypeName_.c_str() ));
 
@@ -61,7 +61,7 @@ DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description ()
           topic = *iter;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: MEMORY LEAK: Topic id %d still held by this description!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: MEMORY LEAK: Topic id %d still held by this description!\n"),
                      topic->get_id()
                      ));
         }
@@ -96,12 +96,12 @@ int DCPS_IR_Topic_Description::add_subscription_reference (DCPS_IR_Subscription*
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::add_subscription_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::add_subscription_reference ")
         ACE_TEXT("Attempted to add existing subscription %X\n"),
         subscription));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::add_subscription_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::add_subscription_reference ")
         ACE_TEXT("Unknown error while adding subscription %X\n"),
         subscription));
     };
@@ -124,7 +124,7 @@ int DCPS_IR_Topic_Description::remove_subscription_reference (DCPS_IR_Subscripti
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::remove_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::remove_subscription ")
         ACE_TEXT("Unable to remove subscription %X\n"),
         subscription));
     } // if (0 == status)
@@ -148,12 +148,12 @@ int DCPS_IR_Topic_Description::add_topic (DCPS_IR_Topic* topic)
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::add_topic ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::add_topic ")
         ACE_TEXT("Attempted to add existing topic %X\n"),
         topic));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::add_topic ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::add_topic ")
         ACE_TEXT("Unknown error while adding topic %X\n"),
         topic));
     };
@@ -176,7 +176,7 @@ int DCPS_IR_Topic_Description::remove_topic (DCPS_IR_Topic* topic)
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Topic_Description::remove_topic ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::remove_topic ")
         ACE_TEXT("Unable to remove topic %X\n"),
         topic));
     }

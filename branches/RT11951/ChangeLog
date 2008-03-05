@@ -1,7 +1,24 @@
+Wed Mar  5 19:29:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+	  Changed to obtain Topic from Domain for add_publication() and
+	  add_subscription() methods.
+
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+	  Added storage and a method to grab a Topic by RepoId value.
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+	  Added Process and Thread identifiers to ERROR messages.
+
 Tue Mar  4 02:47:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
-	  Added topic and type name constants for convenience.
+          Added topic and type name constants for convenience.
 
 Fri Feb 29 23:20:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

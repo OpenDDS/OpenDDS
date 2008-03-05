@@ -87,12 +87,12 @@ int DCPS_IR_Publication::add_associated_subscription (DCPS_IR_Subscription* sub)
       }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Publication::add_associated_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Publication::add_associated_subscription ")
         ACE_TEXT("Attempted to add existing subscription %X\n"),
         sub));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Publication::add_associated_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Publication::add_associated_subscription ")
         ACE_TEXT("Unknown error while adding subscription %X\n"),
         sub));
     };
@@ -144,7 +144,7 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Publication::remove_associated_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Publication::remove_associated_subscription ")
         ACE_TEXT("Unable to remove subscription %X\n"),
         sub));
     } // if (0 == status)

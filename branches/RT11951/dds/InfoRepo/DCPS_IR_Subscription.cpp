@@ -88,12 +88,12 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
       }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Subscription::add_associated_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication ")
         ACE_TEXT("Attempted to add existing publication %X\n"),
         pub));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Subscription::add_associated_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::add_associated_publication ")
         ACE_TEXT("Unknown error while adding publication %X\n"),
         pub));
     };
@@ -145,7 +145,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Subscription::remove_associated_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Subscription::remove_associated_publication ")
         ACE_TEXT("Unable to remove publication %X\n"),
         pub));
     } // if (0 == status)
