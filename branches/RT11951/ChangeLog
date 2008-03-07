@@ -1,19 +1,160 @@
+Fri Mar  7 16:33:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 975:998 out to branch.
+
+        Wed Mar  5 20:30:55 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
+
+          * tests/DCPS/BuiltInTopic/run_test.pl:
+          * tests/DCPS/BuiltInTopicTest/run_test.pl:
+          * tests/DCPS/Compiler/idl_test1_main/run_test.pl:
+          * tests/DCPS/Compiler/idl_test3_main/run_test.pl:
+          * tests/DCPS/CorbaSeq/run_test.pl:
+          * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+          * tests/DCPS/DCPSInfoRepo/run_test.pl:
+          * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+          * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+          * tests/DCPS/FooTest2/obsolete_test.pl:
+          * tests/DCPS/FooTest3/special_build_test.pl:
+          * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+          * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+          * tests/DCPS/FooTest3_0/run_test.pl:
+          * tests/DCPS/FooTest3_1/run_test.pl:
+          * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+          * tests/DCPS/FooTest3_2/run_test.pl:
+          * tests/DCPS/FooTest4/run_test.pl:
+          * tests/DCPS/FooTest4_0/run_test.pl:
+          * tests/DCPS/FooTest5/run_test.pl:
+          * tests/DCPS/FooTest5_0/run_test.pl:
+          * tests/DCPS/LivelinessTest/run_test.pl:
+          * tests/DCPS/MultiDPTest/run_test.pl:
+          * tests/DCPS/MultiRepoTest/run_test.pl:
+          * tests/DCPS/MultiTopicTest/run_test.pl:
+          * tests/DCPS/MultiTopicTest/run_test1.pl:
+          * tests/DCPS/MultiTopicTest/run_test2.pl:
+          * tests/DCPS/MultiTopicTest/run_test3.pl:
+          * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+          * tests/DCPS/Reconnect/run_test.pl:
+          * tests/DCPS/Serializer/run_test.pl:
+          * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+          * tests/DCPS/TransientLocalTest/run_test.pl:
+          * tests/DCPS/ViewState/run_test.pl:
+          * tests/DCPS/ZeroCopyRead/run_test.pl:
+          * tests/DCPS/sub_init_loop/run_test.pl:
+          * tests/DCPS/unit/run_test.pl:
+          * tests/transport/mcast_simple/run_test.pl:
+          * tests/transport/mcast_simple_n/run_test.pl:
+          * tests/transport/simple/run_test.pl:
+          * tests/transport/simple_bp/run_test.pl:
+          * tests/transport/simple_bp_rm/run_test.pl:
+          * tests/transport/simple_n/run_test.pl:
+          * tests/transport/udp_simple/run_test.pl:
+          * tests/transport/udp_simple_n/run_test.pl:
+
+            Initial attempt at making OpenDDS tests run under VxWorks. More
+            works needs to be done.
+
+        Wed Mar  5 19:15:31 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+          * dds/DCPS/ZeroCopySeq_T.cpp:
+
+            Added a const_cast required by Borland (and the C++ spec, but none of
+            the other compilers complained).  Thanks to Johnny Willemsen for
+            testing OpenDDS with the Borland compiler.
+
+        Tue Mar  4 23:41:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+          * DevGuideExamples/DCPS/Messenger/run_test.pl:
+          * bin/dcps_tests.lst:
+
+            Added a new test configuration ("nobits") that verifies that built-in
+            topics can be disabled at runtime.  See the FAQ on opendds.org.
+
+          * dds/DCPS/Service_Participant.h:
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+            Restored the ability to turn off BITs at runtime by passing -NOBITS
+            on the DCPSInfoRepo command line.  This seems to have been lost in
+            the recent (post-1.0) commits.
+
+          * docs/INSTALL:
+
+            Fixed some formatting.
+
+        Tue Feb 26 15:17:41 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+          * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+            Added #if to prevent non-existent TAO1.4a file from being included.
+
+        Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+          * bin/dcps_tests.lst:
+
+            Added restrictions to not run ImR test on CORBA_E_COMPACT and CORBA_E_MICRO.
+
+          * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+            Added dependency on imr_client.
+
+          * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+            Added #include line for STATIC include of imr_client.
+
+          * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+          * examples/DCPS/Messenger_Imr/publisher.cpp:
+          * examples/DCPS/Messenger_Imr/run_test.pl:
+          * examples/DCPS/Messenger_Imr/subscriber.cpp:
+
+            Changes to be able to run a static build.
+
+        Fri Feb 22 19:45:32 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+          * bin/dcps_tests.lst:
+
+            Removed static limitation on Imr test.
+
+        Fri Feb 22 15:36:05 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+          * bin/dcps_tests.lst:
+
+            Changed test to only run for certain builds.
+
+        Wed Feb 20 22:50:41 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+          * bin/dcps_tests.lst:
+
+            Added Messenger_Imr test to nightly builds.
+
+          * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+            Changed _narrow of info repo object to an _unchecked_narrow
+            since in the case where we are using an Imr, the call goes
+            to the Imr and back to us, which is wasteful and was currently
+            causing an exception since the POAManager wasn't yet activated.
+
+          * examples/DCPS/Messenger_Imr/run_test.pl:
+
+            Made a change to the location that the tcp.conf file is
+            expected at.  Also added passing in the conf file to the
+            Info repo.
+
 Wed Mar  5 19:29:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
-	  Changed to obtain Topic from Domain for add_publication() and
-	  add_subscription() methods.
+          Changed to obtain Topic from Domain for add_publication() and
+          add_subscription() methods.
 
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
-	  Added storage and a method to grab a Topic by RepoId value.
+          Added storage and a method to grab a Topic by RepoId value.
 
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
         * dds/InfoRepo/DCPS_IR_Topic.cpp:
         * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
-	  Added Process and Thread identifiers to ERROR messages.
+          Added Process and Thread identifiers to ERROR messages.
 
 Tue Mar  4 02:47:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
@@ -119,8 +260,8 @@ Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 965:974 out to branch.
         Mon Feb 18 16:28:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-          * dds/DCPS/ZeroCopyAllocator_T.cpp:
-            Eliminated a warning from gcc in asserts.
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+          Eliminated a warning from gcc in asserts.
 
         Mon Feb 18 14:41:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
 

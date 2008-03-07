@@ -13,6 +13,16 @@
 #include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <tao/Version.h>
+#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION == 4
+// no ImR_Client, and we are already including it statically since we are
+// statically linking to TAO_PortableServer
+#else
+#include "tao/ImR_Client/ImR_Client.h"
+#endif
+#endif
+
 #include "ace/Get_Opt.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Service_Config.h"
@@ -203,8 +213,11 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   info_poa_->activate_object_with_id (oid.in (),
                                       info_.get());
   obj = info_poa_->id_to_reference(oid.in());
+  // the object is created locally, so it is safe to do an 
+  // _unchecked_narrow, this was needed to prevent an exception
+  // when dealing with ImR-ified objects
   OpenDDS::DCPS::DCPSInfo_var info_repo
-    = OpenDDS::DCPS::DCPSInfo::_narrow (obj.in ());
+    = OpenDDS::DCPS::DCPSInfo::_unchecked_narrow (obj.in ());
 
   CORBA::String_var objref_str =
     orb_->object_to_string (info_repo.in ());
@@ -235,6 +248,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
                             ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
                            false);
         }
+    }
+  else
+    {
+      TheServiceParticipant->set_BIT(false);
     }
 
   // This needs to be done after initialization since we create the reference

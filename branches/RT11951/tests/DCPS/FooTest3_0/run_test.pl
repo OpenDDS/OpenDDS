@@ -98,27 +98,53 @@ unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
 
-
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
-                                  . " -d $domains_file");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
+                                      . " -d $domains_file");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
+                                    . " -d $domains_file");
+}
 print $DCPSREPO->CommandLine(), "\n";
 
-$publisher = new PerlACE::Process ("FooTest3_publisher",
-				   "$svc_config "
-                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
-                                   . "-s $sub_id:localhost:$sub_port "
-                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
-                                   . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
+if (PerlACE::is_vxworks_test()) {
+  $publisher = new PerlACE::ProcessVX ("FooTest3_publisher",
+                                       "$svc_config "
+                                       . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
+                                       . "-s $sub_id:localhost:$sub_port "
+                                       . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
+                                       . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
+}
+else {
+  $publisher = new PerlACE::Process ("FooTest3_publisher",
+                                     "$svc_config "
+                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
+                                     . "-s $sub_id:localhost:$sub_port "
+                                     . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
+                                     . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
+}
 
 print $publisher->CommandLine(), "\n";
 
-$subscriber = new PerlACE::Process ("FooTest3_subscriber",
-				    "$svc_config "
-				    . "-p $pub_id_fname:localhost:$pub_port "
-                                    . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
-                                    . "-v file://$pubdriver_ior -x $shutdown_pub "
-                                    . "-a $add_new_subscription -d $shutdown_delay_secs");
+if (PerlACE::is_vxworks_test()) {
+  $subscriber = new PerlACE::ProcessVX ("FooTest3_subscriber",
+                                      "$svc_config "
+                                      . "-p $pub_id_fname:localhost:$pub_port "
+                                      . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
+                                      . "-v file://$pubdriver_ior -x $shutdown_pub "
+                                      . "-a $add_new_subscription -d $shutdown_delay_secs");
+}
+else {
+  $subscriber = new PerlACE::Process ("FooTest3_subscriber",
+                                      "$svc_config "
+                                      . "-p $pub_id_fname:localhost:$pub_port "
+                                      . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
+                                      . "-v file://$pubdriver_ior -x $shutdown_pub "
+                                      . "-a $add_new_subscription -d $shutdown_delay_secs");
+}
 
 
 print $subscriber->CommandLine(), "\n";
@@ -147,12 +173,23 @@ if ($num_subscribers == 2)
     $add_new_subscription = 1;
     $num_writes = 2; # 2 writes
 
-    $subscriber2 = new PerlACE::Process ("FooTest3_subscriber",
-					 "$svc_config "
-					 . "-p $pub_id_fname:localhost:$pub_port "
-					 . "-s $sub_id:localhost:$sub_port -n $num_writes "
-					 . "-v file://$pubdriver_ior -x 1 -a 1 "
-					 . "-d $shutdown_delay_secs");
+    if (PerlACE::is_vxworks_test()) {
+      $subscriber2 = new PerlACE::ProcessVX ("FooTest3_subscriber",
+                                             "$svc_config "
+                                             . "-p $pub_id_fname:localhost:$pub_port "
+                                             . "-s $sub_id:localhost:$sub_port -n $num_writes "
+                                             . "-v file://$pubdriver_ior -x 1 -a 1 "
+                                             . "-d $shutdown_delay_secs");
+
+    }
+    else {
+      $subscriber2 = new PerlACE::Process ("FooTest3_subscriber",
+                                           "$svc_config "
+                                           . "-p $pub_id_fname:localhost:$pub_port "
+                                           . "-s $sub_id:localhost:$sub_port -n $num_writes "
+                                           . "-v file://$pubdriver_ior -x 1 -a 1 "
+                                           . "-d $shutdown_delay_secs");
+    }
 
     print $subscriber2->CommandLine(), "\n";
 

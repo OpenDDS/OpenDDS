@@ -116,5 +116,8 @@ DevGuideExamples/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN
+
+examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO

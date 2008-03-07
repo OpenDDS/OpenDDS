@@ -1,4 +1,3 @@
-
 project(*Federator): dcps {
   sharedname = Federator
   libout     = $(DDS_ROOT)/lib
@@ -29,7 +28,7 @@ project(*Federator): dcps {
 
 }
 
-project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits {
+project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
 

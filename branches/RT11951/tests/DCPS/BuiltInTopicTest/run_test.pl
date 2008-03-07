@@ -23,12 +23,23 @@ $repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
-$Monitor1 = new PerlACE::Process ("monitor", " $opts -l 7");
-$Monitor2 = new PerlACE::Process ("monitor", " $opts");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", " $sub_opts");
+  $Publisher = new PerlACE::ProcessVX ("publisher", " $pub_opts");
+  $Monitor1 = new PerlACE::ProcessVX ("monitor", " $opts -l 7");
+  $Monitor2 = new PerlACE::ProcessVX ("monitor", " $opts");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
+  $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
+  $Monitor1 = new PerlACE::Process ("monitor", " $opts -l 7");
+  $Monitor2 = new PerlACE::Process ("monitor", " $opts");
+}
+
 $data_file = PerlACE::LocalFile ("test_run.data");
 unlink $data_file;
 

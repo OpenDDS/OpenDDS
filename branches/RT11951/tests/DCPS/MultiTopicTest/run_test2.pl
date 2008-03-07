@@ -86,31 +86,52 @@ $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior");
-
-
-print $DCPSREPO->CommandLine(), "\n";
 # test multiple cases
 $sub1_parameters = "-t 1" ;
 $sub2_parameters = "-t 2" ;
 $sub3_parameters = "-t 3" ;
-
-$Subscriber1 = new PerlACE::Process ("subscriber", $sub1_parameters);
-print $Subscriber1->CommandLine(), "\n";
-
-$Subscriber2 = new PerlACE::Process ("subscriber", $sub2_parameters);
-print $Subscriber2->CommandLine(), "\n";
-
-$Subscriber3 = new PerlACE::Process ("subscriber", $sub3_parameters);
-print $Subscriber3->CommandLine(), "\n";
-
 $pub_parameters = " -t all " ;
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                 "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
+                               . "-o $dcpsrepo_ior");
 
+
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber1 = new PerlACE::ProcessVX ("subscriber", $sub1_parameters);
+  print $Subscriber1->CommandLine(), "\n";
+
+  $Subscriber2 = new PerlACE::ProcessVX ("subscriber", $sub2_parameters);
+  print $Subscriber2->CommandLine(), "\n";
+
+  $Subscriber3 = new PerlACE::ProcessVX ("subscriber", $sub3_parameters);
+  print $Subscriber3->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                               "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
+                             . "-o $dcpsrepo_ior");
+
+
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber1 = new PerlACE::Process ("subscriber", $sub1_parameters);
+  print $Subscriber1->CommandLine(), "\n";
+
+  $Subscriber2 = new PerlACE::Process ("subscriber", $sub2_parameters);
+  print $Subscriber2->CommandLine(), "\n";
+
+  $Subscriber3 = new PerlACE::Process ("subscriber", $sub3_parameters);
+  print $Subscriber3->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
 
 $DCPSREPO->Spawn ();
 

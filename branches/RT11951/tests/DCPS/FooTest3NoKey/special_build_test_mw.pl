@@ -29,22 +29,42 @@ $dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("../../../../DDS/DCPSInfoRepo",
+                                 "-o $dcpsrepo_ior"
+                                 . " -d $domains_file");
 
-#Test with multiple write threads and non blocking write.
-$FooTest_1 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior "
-                            . "-t $num_threads_to_write -i $num_writes_per_thread "
-                            . "-w $num_writers");
+  #Test with multiple write threads and non blocking write.
+  $FooTest_1 = new PerlACE::ProcessVX ("FooTest3NoKey",
+                                "-DCPSInfoRepo file://$dcpsrepo_ior "
+                                . "-t $num_threads_to_write -i $num_writes_per_thread "
+                                . "-w $num_writers");
 
-#Test write block waiting for available space with RELIABLE and 
-#KEEP_ALL qos.
-$FooTest_2 = new PerlACE::Process ("FooTest3NoKey",
-                            "-DCPSInfoRepo file://$dcpsrepo_ior "
-                            . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
-                            . "-w $num_writers");
+  #Test write block waiting for available space with RELIABLE and 
+  #KEEP_ALL qos.
+  $FooTest_2 = new PerlACE::ProcessVX ("FooTest3NoKey",
+                                "-DCPSInfoRepo file://$dcpsrepo_ior "
+                                . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
+                                . "-w $num_writers");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
+                               "-o $dcpsrepo_ior"
+                               . " -d $domains_file");
+
+  #Test with multiple write threads and non blocking write.
+  $FooTest_1 = new PerlACE::Process ("FooTest3NoKey",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior "
+                              . "-t $num_threads_to_write -i $num_writes_per_thread "
+                              . "-w $num_writers");
+
+  #Test write block waiting for available space with RELIABLE and 
+  #KEEP_ALL qos.
+  $FooTest_2 = new PerlACE::Process ("FooTest3NoKey",
+                              "-DCPSInfoRepo file://$dcpsrepo_ior "
+                              . "-b 1 -t $num_threads_to_write -i $num_writes_per_thread "
+                              . "-w $num_writers");
+}
 
 $DCPSREPO->Spawn ();
 

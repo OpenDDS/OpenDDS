@@ -25,11 +25,20 @@ unlink $dcpsrepo_ior;
 $data_file = PerlACE::LocalFile ("test_run.data");
 unlink $data_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", "$sub_opts");
-$Publisher = new PerlACE::Process ("publisher", "$pub_opts " .
-                                   "-ORBLogFile $data_file");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", "$sub_opts");
+  $Publisher = new PerlACE::ProcessVX ("publisher", "$pub_opts " .
+                                     "-ORBLogFile $data_file");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+  $Subscriber = new PerlACE::Process ("subscriber", "$sub_opts");
+  $Publisher = new PerlACE::Process ("publisher", "$pub_opts " .
+                                     "-ORBLogFile $data_file");
+}
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";

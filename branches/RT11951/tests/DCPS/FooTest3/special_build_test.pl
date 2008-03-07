@@ -89,17 +89,26 @@ $sub_id = 1;
 unlink $dcpsrepo_ior; 
 unlink $pub_id_file;
 
-$DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                             "-o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBDebugLevel 1");
-
-
-
 # test multiple cases
 $parameters = " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
               . " -m $multiple_instance -i $num_writes_per_thread "
               . " -n $max_samples_per_instance -d $history_depth -b $blocking_write";
-$FooTest3 = new PerlACE::Process ("FooTest3", $parameters);
+
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("../../../../DDS/DCPSInfoRepo",
+                               "-o $dcpsrepo_ior"
+                               . " -d $domains_file -ORBDebugLevel 1");
+
+  $FooTest3 = new PerlACE::ProcessVX ("FooTest3", $parameters);
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
+                               "-o $dcpsrepo_ior"
+                               . " -d $domains_file -ORBDebugLevel 1");
+
+  $FooTest3 = new PerlACE::Process ("FooTest3", $parameters);
+}
 
 print STDERR "FooTest3 $parameters\n";
 
