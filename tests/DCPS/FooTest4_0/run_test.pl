@@ -31,14 +31,27 @@ unlink $pub_id_file;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$svc_config -o $dcpsrepo_ior"
-                             #. " -ORBDebugLevel 1 "
-                             . " -d $domains_file");
-
 # test multiple cases
 $parameters = "$svc_config -z " ;
-$FooTest4 = new PerlACE::Process ("FooTest4_0", $parameters);
+
+
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$svc_config -o $dcpsrepo_ior"
+                                       #. " -ORBDebugLevel 1 "
+                                       . " -d $domains_file");
+
+  $FooTest4 = new PerlACE::ProcessVX ("FooTest4_0", $parameters);
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior"
+                                     #. " -ORBDebugLevel 1 "
+                                     . " -d $domains_file");
+
+  $FooTest4 = new PerlACE::Process ("FooTest4_0", $parameters);
+}
 print $FooTest4->CommandLine(), "\n";
 
 

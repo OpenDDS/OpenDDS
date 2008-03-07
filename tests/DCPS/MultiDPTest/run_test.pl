@@ -40,26 +40,40 @@ unlink $publisher_ready;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$svc_config -o $dcpsrepo_ior"
-#                             . " -ORBDebugLevel 1"
-                             . " -d $domains_file");
-print $DCPSREPO->CommandLine(), "\n";
-
-
 # test multiple cases
 $sub_parameters = "$svc_config -s $sub_addr1 -s $sub_addr2 "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
-
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
 
 $pub_parameters = "$svc_config -p $pub_addr "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
 
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$svc_config -o $dcpsrepo_ior"
+  #                                   . " -ORBDebugLevel 1"
+                                      . " -d $domains_file");
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior"
+  #                                 . " -ORBDebugLevel 1"
+                                    . " -d $domains_file");
+  print $DCPSREPO->CommandLine(), "\n";
+
+  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+  print $Publisher->CommandLine(), "\n";
+}
 
 
 $DCPSREPO->Spawn ();

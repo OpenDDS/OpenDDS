@@ -121,9 +121,17 @@ unlink $publisher_ready;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $tcp_svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$tcp_svc_config -o $dcpsrepo_ior"
-                                  . " -d $domains_file");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$tcp_svc_config -o $dcpsrepo_ior"
+                                      . " -d $domains_file");
+
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$tcp_svc_config -o $dcpsrepo_ior"
+                                    . " -d $domains_file");
+}
 print $DCPSREPO->CommandLine(), "\n";
 
 $bit_off_conf = "-DCPSBit 0";
@@ -152,9 +160,6 @@ $sub_parameters = "$svc_config -u $use_udp -c $use_mcast -s $sub_addr -p $pub_ad
               . " -k $no_key -y $read_interval_ms -f $mixed_trans"
               . " -a $use_reliable_multicast";
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
-
 $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_writers "
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
 	      . " -n $max_samples_per_instance -z $sequence_length"
@@ -162,8 +167,21 @@ $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_wr
               . " -f $mixed_trans"
               . " -a $use_reliable_multicast";
 
+if (PerlACE::is_vxworks_test()) {
+  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+  
+  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
+}
+else {
+  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+  print $Subscriber->CommandLine(), "\n";
+
+  
+  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+}
+
 print $Publisher->CommandLine(), "\n";
 
 

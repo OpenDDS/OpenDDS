@@ -99,25 +99,48 @@ unlink $pubdriver_ior;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-$DCPSREPO=new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file $svc_config");
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO=new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_conf -o $dcpsrepo_ior"
+                                    . " -d $domains_file $svc_config");
 
-$publisher=new PerlACE::Process ("FooTest3_publisher"
-				 , "$svc_config"
-                                 . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                 . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
-                                 . " -m $multiple_instance -i $num_writes_per_thread "
-                                 . " -n $max_samples_per_instance -d $history_depth"
-                                 . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
-                                 . " -b $blocking_write ");
+  $publisher=new PerlACE::ProcessVX ("FooTest3_publisher"
+                                     , "$svc_config"
+                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                     . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+                                     . " -m $multiple_instance -i $num_writes_per_thread "
+                                     . " -n $max_samples_per_instance -d $history_depth"
+                                     . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
+                                     . " -b $blocking_write ");
 
-print $publisher->CommandLine(), "\n";
+  print $publisher->CommandLine(), "\n";
 
-$subscriber=new PerlACE::Process ("FooTest3_subscriber",
-				  , "$svc_config"
-                                  . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-				  . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec");
+  $subscriber=new PerlACE::ProcessVX ("FooTest3_subscriber",
+                                      , "$svc_config"
+                                      . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                      . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec");
+}
+else {
+  $DCPSREPO=new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                  "$repo_bit_conf -o $dcpsrepo_ior"
+                                  . " -d $domains_file $svc_config");
+
+  $publisher=new PerlACE::Process ("FooTest3_publisher"
+                                   , "$svc_config"
+                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
+                                   . " -m $multiple_instance -i $num_writes_per_thread "
+                                   . " -n $max_samples_per_instance -d $history_depth"
+                                   . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
+                                   . " -b $blocking_write ");
+
+  print $publisher->CommandLine(), "\n";
+
+  $subscriber=new PerlACE::Process ("FooTest3_subscriber",
+                                    , "$svc_config"
+                                    . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
+                                    . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec");
+}
 
 print $subscriber->CommandLine(), "\n";
 

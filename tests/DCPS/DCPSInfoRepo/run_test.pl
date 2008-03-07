@@ -20,15 +20,26 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 unlink $dcpsrepo_ior;
 
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
+  $PUBLISHER = new PerlACE::ProcessVX ("publisher",
+                              "-k file://$dcpsrepo_ior -q");
 
-$PUBLISHER = new PerlACE::Process ("publisher",
-                            "-k file://$dcpsrepo_ior -q");
+  $SUBSCRIBER = new PerlACE::ProcessVX ("subscriber",
+                              "-k file://$dcpsrepo_ior");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
 
-$SUBSCRIBER = new PerlACE::Process ("subscriber",
-                            "-k file://$dcpsrepo_ior");
+  $PUBLISHER = new PerlACE::Process ("publisher",
+                              "-k file://$dcpsrepo_ior -q");
+
+  $SUBSCRIBER = new PerlACE::Process ("subscriber",
+                              "-k file://$dcpsrepo_ior");
+}
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();

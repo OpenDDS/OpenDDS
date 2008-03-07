@@ -19,11 +19,6 @@ unlink $dcpsrepo_ior;
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
-# -ORBDebugLevel 1 -NOBITS
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$svc_config -o $dcpsrepo_ior"
-                                  . " -d $domains_file -NOBITS");
-
 # -b
 $parameters = "-DcpsBit 0 $svc_config ";
 # or could have
@@ -33,7 +28,24 @@ if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-$ZCTest = new PerlACE::Process ("main", $parameters);
+
+if (PerlACE::is_vxworks_test()) {
+  # -ORBDebugLevel 1 -NOBITS
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior"
+                                    . " -d $domains_file -NOBITS");
+
+  $ZCTest = new PerlACE::ProcessVX ("main", $parameters);
+
+}
+else {
+  # -ORBDebugLevel 1 -NOBITS
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$svc_config -o $dcpsrepo_ior"
+                                    . " -d $domains_file -NOBITS");
+
+  $ZCTest = new PerlACE::Process ("main", $parameters);
+}
 
 print $DCPSREPO->CommandLine(), "\n";
 if ($DCPSREPO->Spawn () != 0) {

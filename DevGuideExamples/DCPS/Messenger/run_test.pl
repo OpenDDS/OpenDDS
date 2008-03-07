@@ -49,6 +49,11 @@ elsif ($ARGV[0] eq 'default_mcast') {
     $pub_opts = "$opts -t default_mcast_pub";
     $sub_opts = "$opts -t default_mcast_sub";
 }
+elsif ($ARGV[0] eq 'nobits') {
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= ' -DCPSBit 0';
+    $sub_opts .= ' -DCPSBit 0';
+}
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;

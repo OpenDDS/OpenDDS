@@ -579,7 +579,7 @@ namespace OpenDDS
 
       // Create and install the Built In Topic transport for this
       // repository.
-      this->init_bit_transport_impl( repo);
+      if (this->bit_enabled_) this->init_bit_transport_impl( repo);
     }
 
     void

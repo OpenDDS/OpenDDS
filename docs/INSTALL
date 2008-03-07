@@ -36,7 +36,7 @@ BUILDING OpenDDS
 
   4 Build
 
-    On linux or Solaris:
+    On Linux or Solaris:
     make
 
     On Windows:
@@ -60,7 +60,7 @@ BUILDING OpenDDS
  generate makefiles or Visual Studio project files first.
  Make sure your environment variables are set, including MPC_ROOT.
 
-     On linux or Solaris:
+     On Linux or Solaris:
       cd $DDS_ROOT
       perl $ACE_ROOT/bin/mwc.pl -type gnuace DDS.mwc
 

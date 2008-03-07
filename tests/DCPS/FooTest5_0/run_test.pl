@@ -29,9 +29,17 @@ unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+
+if (PerlACE::is_vxworks_test()) {
+  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$repo_bit_conf -o $dcpsrepo_ior"
+                                      . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+}
+else {
+  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                    "$repo_bit_conf -o $dcpsrepo_ior"
+                                    . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+}
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 # -b
@@ -48,7 +56,12 @@ elsif ($ARGV[0] eq 'diff_trans') {
   $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";
 }
 
-$FooTest5 = new PerlACE::Process ("main", $parameters);
+if (PerlACE::is_vxworks_test()) {
+  $FooTest5 = new PerlACE::ProcessVX ("main", $parameters);
+}
+else {
+  $FooTest5 = new PerlACE::Process ("main", $parameters);
+}
 
 
 print $DCPSREPO->CommandLine(), "\n";
