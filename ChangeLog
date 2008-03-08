@@ -1,3 +1,15 @@
+Sat Mar  8 02:17:54 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+
+          Fixed "undefined value" issue that was caused by the commit below.
+
 Wed Mar  5 20:30:55 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
 
         * tests/DCPS/BuiltInTopic/run_test.pl:
