@@ -488,24 +488,49 @@ DataWriterImpl::set_qos (
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
+      if (qos_ == qos)
+        return ::DDS::RETCODE_OK;
+
       if (enabled_.value())
-        {
-          if (! Qos_Helper::changeable (qos_, qos))
       {
-        return ::DDS::RETCODE_IMMUTABLE_POLICY;
-      }
+        if (! Qos_Helper::changeable (qos_, qos))
+        {
+          return ::DDS::RETCODE_IMMUTABLE_POLICY;
         }
-      if (! (qos_ == qos))
-  {
-    qos_ = qos;
-    // TBD - when there are changable QoS supported
-    //       this code may need to do something
-    //       with the changed values.
-    // TBD - when there are changable QoS then we
-    //       need to tell the DCPSInfo/repo about
-    //       the changes in Qos.
-    // repo->set_qos(qos_);
-  }
+        else
+        {
+          qos_ = qos;
+
+          try
+          {
+            DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+            ::DDS::PublisherQos publisherQos;
+            this->publisher_servant_->get_qos(publisherQos);
+            repo->update_publication_qos(this->participant_servant_->get_domain_id(), 
+                                         this->participant_servant_->get_id(), 
+                                         this->publication_id_, 
+                                         this->qos_,
+                                         publisherQos);
+          }
+          catch (const CORBA::SystemException& sysex)
+          {
+            sysex._tao_print_exception (
+              "ERROR: System Exception"
+              " in DataWriterImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          catch (const CORBA::UserException& userex)
+          {
+            userex._tao_print_exception (
+              "ERROR:  Exception"
+              " in DataWriterImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+        }
+      }
+      else
+        qos_ = qos;
+
       return ::DDS::RETCODE_OK;
     }
   else

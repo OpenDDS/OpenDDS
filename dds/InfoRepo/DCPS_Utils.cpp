@@ -2,14 +2,6 @@
 #include /**/ "DCPS_Utils.h"
 
 
-
-int operator== (::DDS::Duration_t op1,
-                ::DDS::Duration_t op2)
-{
-  return ( (op1.sec == op2.sec) && (op1.nanosec == op2.nanosec));
-}
-
-
 void increment_incompatibility_count (OpenDDS::DCPS::IncompatibleQosStatus* status,
                                       ::DDS::QosPolicyId_t incompatible_policy)
 {

@@ -535,24 +535,78 @@ SubscriberImpl::set_qos (
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
     {
+      if (qos_ == qos)
+        return ::DDS::RETCODE_OK;
+
       if (enabled_ == true)
+      {
+        if (! Qos_Helper::changeable (qos_, qos))
         {
-          if (! Qos_Helper::changeable (qos_, qos))
-	    {
-	      return ::DDS::RETCODE_IMMUTABLE_POLICY;
-	    }
+          return ::DDS::RETCODE_IMMUTABLE_POLICY;
         }
-      if (! (qos_ == qos)) // no != operator ?
+        else
         {
           qos_ = qos;
-          // TBD - when there are changable QoS supported
-          //       this code may need to do something
-          //       with the changed values.
-          // TBD - when there are changable QoS then we
-          //       need to tell the DCPSInfo/repo about
-          //       the changes in Qos.
-          // repo->set_qos(qos_);
+
+          DrIdToQosMap idToQosMap;
+          {
+            ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+              guard,
+              this->si_lock_,
+              ::DDS::RETCODE_ERROR);
+            for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
+              iter != datareader_set_.end() ; ++iter)
+            {
+              ::DDS::DataReaderQos qos;
+              (*iter)->get_qos(qos); 
+              RepoId id = (*iter)->get_subscription_id();
+              std::pair<DrIdToQosMap::iterator, bool> pair
+                = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
+              if (pair.second == false)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) "
+                  "SubscriberImpl::set_qos, ")
+                  ACE_TEXT("insert id(%d) to DrIdToQosMap failed. \n"), 
+                  id),
+                  ::DDS::RETCODE_ERROR);
+              }
+            }
+          }
+
+          std::map<RepoId, ::DDS::DataReaderQos>::iterator iter = idToQosMap.begin ();
+          while (iter != idToQosMap.end())
+          {
+            try
+            {
+              this->repository_->update_subscription_qos (participant_->get_domain_id(), 
+                                                          participant_->get_id (), 
+                                                          iter->first,
+                                                          iter->second,
+                                                          this->qos_);
+            }
+            catch (const CORBA::SystemException& sysex)
+            {
+              sysex._tao_print_exception (
+                "ERROR: System Exception"
+                " in SubscriberImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+            catch (const CORBA::UserException& userex)
+            {
+              userex._tao_print_exception (
+                "ERROR:  Exception"
+                " in SubscriberImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+
+            ++iter;
+          } 
         }
+      }
+      else
+        qos_ = qos;
+        
       return ::DDS::RETCODE_OK;
     }
   else

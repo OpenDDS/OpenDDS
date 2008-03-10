@@ -481,6 +481,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     }
   else if (description->add_subscription_reference(subPtr) != 0)
     {
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
+                  "topic list.\n"));
       // No associations were made so remove and fail.
       partPtr->remove_subscription(subId);
       subId = 0;
@@ -570,7 +572,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     }
   else if (description->add_subscription_reference(subPtr, false) != 0)
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
                   "topic list.\n"));
 
       // No associations were made so remove and fail.
@@ -856,6 +858,144 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
 
   domainPtr->remove_dead_participants();
 }
+
+
+void TAO_DDS_DCPSInfo_i::update_publication_qos (
+  ::DDS::DomainId_t domainId,
+  OpenDDS::DCPS::RepoId partId,
+  OpenDDS::DCPS::RepoId dwId,
+  const ::DDS::DataWriterQos & qos,
+  const ::DDS::PublisherQos & publisherQos
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Publication
+  ))
+{
+  DCPS_IR_Domain* domainPtr;
+  if (domains_.find(domainId, domainPtr) != 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Domain();
+    }
+
+  DCPS_IR_Participant* partPtr;
+  if (domainPtr->find_participant(partId, partPtr) != 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Participant();
+    }
+
+  DCPS_IR_Publication* pub;
+  if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Publication();
+    }
+ 
+  pub->set_qos (qos, publisherQos);
+}
+
+void TAO_DDS_DCPSInfo_i::update_subscription_qos (
+  ::DDS::DomainId_t domainId,
+  OpenDDS::DCPS::RepoId partId,
+  OpenDDS::DCPS::RepoId drId,
+  const ::DDS::DataReaderQos & qos,
+  const ::DDS::SubscriberQos & subscriberQos
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Subscription
+  ))
+{
+  DCPS_IR_Domain* domainPtr;
+  if (domains_.find(domainId, domainPtr) != 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Domain();
+    }
+
+  DCPS_IR_Participant* partPtr;
+  if (domainPtr->find_participant(partId, partPtr) != 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Participant();
+    }
+
+  DCPS_IR_Subscription* sub;
+  if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Subscription();
+    }
+ 
+  sub->set_qos (qos, subscriberQos);
+}
+
+
+void TAO_DDS_DCPSInfo_i::update_topic_qos (
+  OpenDDS::DCPS::RepoId topicId,
+  ::DDS::DomainId_t domainId,
+  OpenDDS::DCPS::RepoId participantId,
+  const ::DDS::TopicQos & qos
+  )
+  ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
+  ))
+{
+  DCPS_IR_Domain* domainPtr;
+  if (domains_.find(domainId, domainPtr) != 0)
+    {
+      // bad domain id
+      throw OpenDDS::DCPS::Invalid_Domain();
+    }
+
+  DCPS_IR_Participant* partPtr;
+  if (domainPtr->find_participant(participantId,partPtr) != 0)
+    {
+      // bad participant id
+      throw OpenDDS::DCPS::Invalid_Participant();
+    }
+
+  DCPS_IR_Topic* topic;
+  if (partPtr->find_topic_reference(topicId, topic) != 0)
+    {
+      throw OpenDDS::DCPS::Invalid_Topic();
+    }
+
+  topic->set_topic_qos (qos);
+}
+ 
+
+void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
+    ::DDS::DomainId_t domainId,
+    ::OpenDDS::DCPS::RepoId participantId,
+    const ::DDS::DomainParticipantQos & qos
+  )
+  ACE_THROW_SPEC ((
+    ::CORBA::SystemException,
+    ::OpenDDS::DCPS::Invalid_Domain,
+    ::OpenDDS::DCPS::Invalid_Participant
+  ))
+{
+  DCPS_IR_Domain* domainPtr;
+  if (domains_.find(domainId, domainPtr) != 0)
+    {
+      // bad domain id
+      throw OpenDDS::DCPS::Invalid_Domain();
+    }
+
+  DCPS_IR_Participant* partPtr;
+  if (domainPtr->find_participant(participantId,partPtr) != 0)
+    {
+      // bad participant id
+      throw OpenDDS::DCPS::Invalid_Participant();
+    }
+
+  partPtr->set_qos (qos);
+}
+
 
 
 int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,

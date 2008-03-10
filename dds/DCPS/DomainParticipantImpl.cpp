@@ -920,31 +920,52 @@ namespace OpenDDS
       ))
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
-        {
-          if (enabled_.value())
-            {
-              if (! Qos_Helper::changeable (qos_, qos))
-                {
-                  return ::DDS::RETCODE_IMMUTABLE_POLICY;
-                }
-            }
-          qos_ = qos;
-          // TBD - when there are changable QoS supported
-          //       this code may need to do something
-          //       with the changed values.
-          // TBD - when there are changable QoS then we
-          //       need to tell the DCPSInfo/repository_ about
-          //       the changes in Qos.
-
-          // repository_->update_domain_participant_qos(domain_id_,
-          //                                     participant_id_,
-          //                                     qos);
+      {
+        if (qos_ == qos)
           return ::DDS::RETCODE_OK;
-        }
-      else
+
+        if (enabled_.value())
         {
-          return ::DDS::RETCODE_INCONSISTENT_POLICY;
+          if (! Qos_Helper::changeable (qos_, qos))
+          {
+            return ::DDS::RETCODE_IMMUTABLE_POLICY;
+          }
+          else
+          {
+            qos_ = qos;
+
+            try
+            {
+              DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+              repository_->update_domain_participant_qos(domain_id_,
+                                                         dp_id_,
+                                                         qos_);            
+            }
+            catch (const CORBA::SystemException& sysex)
+            {
+              sysex._tao_print_exception (
+                "ERROR: System Exception"
+                " in DomainParticipantImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+            catch (const CORBA::UserException& userex)
+            {
+              userex._tao_print_exception (
+                "ERROR:  Exception"
+                " in DomainParticipantImpl::set_qos");
+              return ::DDS::RETCODE_ERROR;
+            }
+          }
         }
+        else
+          qos_ = qos;
+
+        return ::DDS::RETCODE_OK;
+      }
+      else
+      {
+        return ::DDS::RETCODE_INCONSISTENT_POLICY;
+      }
     }
 
 

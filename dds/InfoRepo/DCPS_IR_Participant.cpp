@@ -130,6 +130,30 @@ int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
 }
 
 
+int DCPS_IR_Participant::find_publication_reference (OpenDDS::DCPS::RepoId pubId,
+                                                     DCPS_IR_Publication* & pub)
+{
+  int status = publications_.find (pubId, pub);
+  if (0 == status)
+  {
+    if (TAO_debug_level > 0)
+    {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Participant::find_publication_reference ")
+        ACE_TEXT("Found datawriter reference %X id: %d\n"),
+        pub, pubId));
+    }
+  }
+  else
+  {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::find_publication_reference ")
+      ACE_TEXT("Error finding datawriter reference %X id: %d\n"),
+      pub, pubId));
+  } // if (0 == status)
+
+  return status;
+}
+
+
 int DCPS_IR_Participant::remove_publication (long pubId)
 {
   DCPS_IR_Publication* pub = 0;
@@ -205,6 +229,29 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
 }
 
 
+ int DCPS_IR_Participant::find_subscription_reference (OpenDDS::DCPS::RepoId subId,
+                                                       DCPS_IR_Subscription*& sub)
+{
+  int status = subscriptions_.find (subId, sub);
+  if (0 == status)
+  {
+    if (TAO_debug_level > 0)
+    {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Participant::find_subscription_reference ")
+        ACE_TEXT("Found datareader reference %X id: %d\n"),
+        sub, subId));
+    }
+  }
+  else
+  {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::find_subscription_reference ")
+      ACE_TEXT("Error finding datareader reference %X id: %d\n"),
+      sub, subId));
+  } // if (0 == status)
+
+  return status;
+}
+
 int DCPS_IR_Participant::remove_subscription (long subId)
 {
   DCPS_IR_Subscription* sub = 0;
@@ -215,7 +262,7 @@ int DCPS_IR_Participant::remove_subscription (long subId)
     {
       DCPS_IR_Topic_Description* desc = sub->get_topic_description ();
       desc->remove_subscription_reference(sub);
-
+       
       CORBA::Boolean dont_notify_lost = 0;
       status = sub->remove_associations(dont_notify_lost);
       if (0 != status)
@@ -364,6 +411,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
 
       subDesc = sub->get_topic_description ();
       subDesc->remove_subscription_reference(sub);
+
       if (0 != sub->remove_associations(notify_lost))
         {
           return;
@@ -623,6 +671,13 @@ const ::DDS::DomainParticipantQos* DCPS_IR_Participant::get_qos ()
 }
 
 
+void DCPS_IR_Participant::set_qos (const ::DDS::DomainParticipantQos & qos)
+{
+  qos_ = qos;
+  this->domain_->publish_participant_bit (this);
+}
+
+
 CORBA::Boolean DCPS_IR_Participant::is_bit ()
 {
   return isBIT_;
@@ -634,6 +689,11 @@ void DCPS_IR_Participant::set_bit_status (CORBA::Boolean isBIT)
   isBIT_ = isBIT;
 }
 
+
+DCPS_IR_Domain* DCPS_IR_Participant::get_domain_reference () const
+{
+  return domain_;
+}
 
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

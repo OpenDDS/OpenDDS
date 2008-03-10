@@ -1,3 +1,56 @@
+Mon Mar 10 19:35:19 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Added qos propagation feature (see RT 11023)
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+        Added changeable () methods for all supported and non-supported qos. 
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+        Updated set_qos () to check if qos is changeable and pass updated
+        qos to DCPSInfoRepo.
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+        Added methods to update qos.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+        Added methods to support qos propogation.
+
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+        Removed Duration_t operator== overload function which 
+	is defined in Qos_Helper.h.
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+        Added qos propagation test cases.
+
 Sat Mar  8 02:17:54 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
 
         * tests/DCPS/MultiRepoTest/run_test.pl:

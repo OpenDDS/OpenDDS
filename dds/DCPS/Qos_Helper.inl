@@ -123,18 +123,6 @@ namespace OpenDDS
       return true;
     }
 
-
-    ACE_INLINE
-    bool Qos_Helper::valid (const ::DDS::UserDataQosPolicy& qos) 
-    {
-      if (qos.value == TheServiceParticipant->initial_UserDataQosPolicy().value)
-      {
-        return true;
-      }
-      return false;
-    }
-     
-
     // Note: Since in the first implmenation of DSS in TAO 
     //       a limited number of QoS values are allowed to be
     //       modified, the validity tests are simplified to mostly
@@ -143,24 +131,29 @@ namespace OpenDDS
     //       SO INVALID ALSO INCLUDES UNSUPPORTED QoS.
     // TBD - when QoS become support the valid checks should check
     //       the ranges of the values of the QoS.
+
+    // The spec does not have specification about the content of  
+    // UserDataQosPolicy,TopicDataQosPolicy and GroupDataQosPolicy
+    // so they are valid with any value.
+    ACE_INLINE
+    bool Qos_Helper::valid (const ::DDS::UserDataQosPolicy& qos) 
+    {
+      ACE_UNUSED_ARG (qos);
+      return true;
+    }
+     
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::TopicDataQosPolicy & qos) 
     {
-      if (qos == TheServiceParticipant->initial_TopicDataQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ACE_UNUSED_ARG (qos);
+      return true;
     }
 
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::GroupDataQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_GroupDataQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ACE_UNUSED_ARG (qos);
+      return true;
     }
 
     ACE_INLINE
@@ -479,112 +472,307 @@ namespace OpenDDS
     }          
 
     ACE_INLINE
-    bool
-    Qos_Helper::changeable (const ::DDS::DomainParticipantQos& qos1,
-                            const ::DDS::DomainParticipantQos& qos2)
+    bool Qos_Helper::changeable (const ::DDS::UserDataQosPolicy& qos1, 
+				                         const ::DDS::UserDataQosPolicy& qos2) 
     {
-      ACE_UNUSED_ARG(qos1);
-      ACE_UNUSED_ARG(qos2);
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+     
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::TopicDataQosPolicy & qos1,
+                                 const ::DDS::TopicDataQosPolicy & qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::GroupDataQosPolicy& qos1,
+				                         const ::DDS::GroupDataQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::TransportPriorityQosPolicy& qos1,
+                                 const ::DDS::TransportPriorityQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::LifespanQosPolicy& qos1,
+                                 const ::DDS::LifespanQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::DurabilityQosPolicy& qos1,
+                                 const ::DDS::DurabilityQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }
+
+        
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::PresentationQosPolicy& qos1,
+                                 const ::DDS::PresentationQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }
+
+/*******TBD: These qos are not supported currently, they are changeable, but   ****
+ ******     need check compatiable between publisher and subscriber ends when  ****
+ *******    changing the qos.                                                  ****/
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::DeadlineQosPolicy& qos1,
+                                 const ::DDS::DeadlineQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+      
+    ACE_INLINE 
+    bool Qos_Helper::changeable (const ::DDS::LatencyBudgetQosPolicy& qos1,
+                                 const ::DDS::LatencyBudgetQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+
+    ACE_INLINE       
+    bool Qos_Helper::changeable (const ::DDS::OwnershipQosPolicy& qos1,
+                                 const ::DDS::OwnershipQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+//**********************************************************************************
+         
+
+    ACE_INLINE      
+    bool Qos_Helper::changeable (const ::DDS::OwnershipStrengthQosPolicy& qos1,
+                                 const ::DDS::OwnershipStrengthQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::LivelinessQosPolicy& qos1,
+                                 const ::DDS::LivelinessQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }
+
+
+    ACE_INLINE       
+    bool Qos_Helper::changeable (const ::DDS::TimeBasedFilterQosPolicy& qos1,
+                                 const ::DDS::TimeBasedFilterQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::PartitionQosPolicy& qos1,
+                                 const ::DDS::PartitionQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }  
+      
+    ACE_INLINE 
+    bool Qos_Helper::changeable (const ::DDS::ReliabilityQosPolicy& qos1,
+                                 const ::DDS::ReliabilityQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }  
+      
+    ACE_INLINE 
+    bool Qos_Helper::changeable (const ::DDS::DestinationOrderQosPolicy& qos1,
+                                 const ::DDS::DestinationOrderQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }  
+          
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::HistoryQosPolicy& qos1,
+                                 const ::DDS::HistoryQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }  
+         
+    ACE_INLINE    
+    bool Qos_Helper::changeable (const ::DDS::ResourceLimitsQosPolicy& qos1,
+                                 const ::DDS::ResourceLimitsQosPolicy& qos2) 
+    {
+      if (qos1 == qos2)
+         return true; 
+      else
+         return false;
+    }  
+        
+      
+    ACE_INLINE 
+    bool Qos_Helper::changeable (const ::DDS::EntityFactoryQosPolicy& qos1,
+                                 const ::DDS::EntityFactoryQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }  
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
+                                 const ::DDS::WriterDataLifecycleQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }  
+       
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
+                                 const ::DDS::ReaderDataLifecycleQosPolicy& qos2) 
+    {
+      ACE_UNUSED_ARG (qos1);
+      ACE_UNUSED_ARG (qos2);
+      return true;
+    }  
+
+
+    ACE_INLINE
+    bool Qos_Helper::changeable (const ::DDS::DomainParticipantQos& qos1,
+                                 const ::DDS::DomainParticipantQos& qos2) 
+    {
+      if (changeable(qos1.user_data, qos2.user_data) 
+          && changeable(qos1.entity_factory, qos2.entity_factory))
+      {
+        return true;
+      }
       return false;
-    }
+    }  
 
 
     ACE_INLINE
-    bool 
-    Qos_Helper::changeable (const ::DDS::TopicQos            & qos1,
-                            const ::DDS::TopicQos            & qos2) 
+    bool Qos_Helper::changeable (const ::DDS::TopicQos& qos1,
+                                 const ::DDS::TopicQos& qos2) 
     {
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
-      // The qos currently supported 
-      // (RELIABILITY/HISTORY/RESOURCE_LIMITS) are not changeable.
-      if (qos1 == qos2)
-        {
-          return true;
-        }
-      else
-        {
-          return false;
-        }
-    }
+      if (changeable(qos1.topic_data, qos2.topic_data) 
+        && changeable(qos1.durability, qos2.durability)
+        && changeable(qos1.deadline, qos2.deadline)
+        && changeable(qos1.latency_budget, qos2.latency_budget)
+        && changeable(qos1.liveliness, qos2.liveliness)
+        && changeable(qos1.destination_order, qos2.destination_order)
+        && changeable(qos1.history, qos2.history)
+        && changeable(qos1.resource_limits, qos2.resource_limits)
+        && changeable(qos1.transport_priority, qos2.transport_priority)
+        && changeable(qos1.lifespan, qos2.lifespan)
+        && changeable(qos1.ownership, qos2.ownership))
+      {
+        return true;
+      }
+      return false;
+    }  
 
 
     ACE_INLINE
-    bool 
-    Qos_Helper::changeable (const ::DDS::DataWriterQos       & qos1,
-                            const ::DDS::DataWriterQos       & qos2) 
+    bool Qos_Helper::changeable (const ::DDS::DataWriterQos& qos1,
+                                 const ::DDS::DataWriterQos& qos2)
     {
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
-      // The qos currently supported 
-      // (RELIABILITY/HISTORY/RESOURCE_LIMITS) are not changeable.
-      if (qos1 == qos2)
-        {
-          return true;
-        }
-      else
-        {
-          return false;
-        }
-    }
-
+      return changeable(qos1.durability, qos2.durability)
+        && changeable(qos1.deadline, qos2.deadline)
+        && changeable(qos1.latency_budget, qos2.latency_budget)
+        && changeable(qos1.liveliness, qos2.liveliness)
+        && changeable(qos1.destination_order, qos2.destination_order)
+        && changeable(qos1.history, qos2.history)
+        && changeable(qos1.resource_limits, qos2.resource_limits)
+        && changeable(qos1.transport_priority, qos2.transport_priority)
+        && changeable(qos1.lifespan, qos2.lifespan)
+        && changeable(qos1.user_data, qos2.user_data)
+        && changeable(qos1.ownership_strength, qos2.ownership_strength)
+        && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle);
+    }      
 
     ACE_INLINE
-    bool 
-    Qos_Helper::changeable (const ::DDS::PublisherQos        & qos1,
-                            const ::DDS::PublisherQos        & qos2) 
+    bool Qos_Helper::changeable (const ::DDS::PublisherQos& qos1,
+                                 const ::DDS::PublisherQos& qos2) 
     {
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
-      if (qos1 == qos2)
-        {
-          return true;
-        }
-      else
-        {
-          return false;
-        }
-    }
-
+      return changeable(qos1.presentation, qos2.presentation)
+        && changeable(qos1.partition, qos2.partition)
+        && changeable(qos1.group_data, qos2.group_data)
+        && changeable(qos1.entity_factory, qos2.entity_factory);
+    }          
+        
 
     ACE_INLINE
-    bool 
-    Qos_Helper::changeable (const ::DDS::DataReaderQos       & qos1,
-                            const ::DDS::DataReaderQos       & qos2) 
+    bool Qos_Helper::changeable (const ::DDS::DataReaderQos& qos1,
+                                 const ::DDS::DataReaderQos& qos2) 
     {
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
-      // The qos currently supported 
-      // (RELIABILITY/HISTORY/RESOURCE_LIMITS) are not changeable.
-      if (qos1 == qos2)
-        {
-          return true;
-        }
-      else
-        {
-          return false;
-        }
-    }
-
+      return changeable(qos1.durability, qos2.durability)
+        && changeable(qos1.deadline, qos2.deadline)
+        && changeable(qos1.latency_budget, qos2.latency_budget)
+        && changeable(qos1.liveliness, qos2.liveliness)
+        && changeable(qos1.reliability, qos2.reliability)
+        && changeable(qos1.destination_order, qos2.destination_order)
+        && changeable(qos1.history, qos2.history)
+        && changeable(qos1.resource_limits, qos2.resource_limits)
+        && changeable(qos1.user_data, qos2.user_data)
+        && changeable(qos1.time_based_filter, qos2.time_based_filter)
+        && changeable(qos1.reader_data_lifecycle, qos2.reader_data_lifecycle);
+    }      
 
     ACE_INLINE
-    bool 
-    Qos_Helper::changeable (const ::DDS::SubscriberQos       & qos1,
-                            const ::DDS::SubscriberQos       & qos2) 
+    bool Qos_Helper::changeable (const ::DDS::SubscriberQos& qos1,
+                                 const ::DDS::SubscriberQos& qos2) 
     {
-      // TBD - check changed values are changeable
-      //       per QoS table in ::DDS spec.
-      if (qos1 == qos2)
-        {
-          return true;
-        }
-      else
-        {
-          return false;
-        }
-    }
+      return changeable(qos1.presentation, qos2.presentation)
+        && changeable(qos1.partition, qos2.partition)
+        && changeable(qos1.group_data, qos2.group_data)
+        && changeable(qos1.entity_factory, qos2.entity_factory);
+    }          
+
 
   } // namespace ::DDS
 } // namespace OpenDDS

@@ -9,6 +9,7 @@
 #include /**/ "DCPS_IR_Topic_Description.h"
 
 #include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
 
@@ -132,6 +133,33 @@ OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_participant_id () const
 ::DDS::TopicQos * DCPS_IR_Topic::get_topic_qos ()
 {
   return &qos_;
+}
+
+
+void DCPS_IR_Topic::set_topic_qos (const ::DDS::TopicQos& qos)
+{
+  bool pub_to_rd_wr = ! (qos.topic_data == qos_.topic_data);
+
+  qos_ = qos;
+  domain_->publish_topic_bit (this);
+ 
+  // Only need publish to datareader/datawriter BIT when the 
+  // topic_data qos is changed. 
+  if (! pub_to_rd_wr)
+    return;
+
+  // Update qos in datawriter BIT for associated datawriters.
+
+  DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
+  DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
+
+  while (iter != end)
+  {
+    domain_->publish_publication_bit (*iter);
+    ++iter;
+  }
+
+  this->description_->publish_subscription_bit (this);
 }
 
 
