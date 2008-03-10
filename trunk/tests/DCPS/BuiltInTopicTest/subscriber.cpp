@@ -23,6 +23,15 @@
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
 
+char PART_USER_DATA[] = "Initial DomainParticipant UserData";
+char DR_USER_DATA[] = "Initial DataReader UserData";
+char TOPIC_DATA[] = "Initial Topic TopicData";
+char GROUP_DATA[] = "Initial GroupData";
+char UPDATED_PART_USER_DATA[] = "Updated DomainParticipant UserData";
+char UPDATED_DR_USER_DATA[] = "Updated DataReader UserData";
+char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
+char UPDATED_GROUP_DATA[] = "Updated GroupData";
+
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int main (int argc, char *argv[])
@@ -34,8 +43,20 @@ int main (int argc, char *argv[])
       DDS::DomainParticipant_var participant;
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+      DDS::DomainParticipantQos partQos;
+      dpf->get_default_participant_qos(partQos);
+
+      // set up user data in DP qos
+      CORBA::ULong part_user_data_len 
+        = static_cast<CORBA::ULong>(ACE_OS::strlen (PART_USER_DATA));
+      partQos.user_data.value.length (part_user_data_len);
+      partQos.user_data.value.replace (part_user_data_len, 
+                                       part_user_data_len, 
+                                       reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
+
       participant = dpf->create_participant(411,
-                                            PARTICIPANT_QOS_DEFAULT,
+                                            partQos,
                                             DDS::DomainParticipantListener::_nil());
       if (CORBA::is_nil (participant.in ())) {
         cerr << "create_participant failed." << endl;
@@ -53,6 +74,12 @@ int main (int argc, char *argv[])
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
+
+      // set up topic data in topic qos
+      CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
+      topic_qos.topic_data.value.length (topic_data_len);
+      topic_qos.topic_data.value.replace (topic_data_len, topic_data_len, reinterpret_cast<CORBA::Octet*>(TOPIC_DATA));
+
       DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
                                                         type_name.in (),
                                                         topic_qos,
@@ -69,8 +96,17 @@ int main (int argc, char *argv[])
 
       // Create the subscriber and attach to the corresponding
       // transport.
+
+      DDS::SubscriberQos sub_qos;
+      participant->get_default_subscriber_qos (sub_qos);
+
+      // set up group data in subscriber qos
+      CORBA::ULong group_data_len = static_cast<CORBA::ULong> (ACE_OS::strlen (GROUP_DATA));
+      sub_qos.group_data.value.length (group_data_len);
+      sub_qos.group_data.value.replace (group_data_len, group_data_len, reinterpret_cast<CORBA::Octet*>(GROUP_DATA));
+
       DDS::Subscriber_var sub =
-        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+        participant->create_subscriber(sub_qos,
                                        DDS::SubscriberListener::_nil());
       if (CORBA::is_nil (sub.in ())) {
         cerr << "Failed to create_subscriber." << endl;
@@ -121,6 +157,14 @@ int main (int argc, char *argv[])
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
+
+      // set up user data in DR qos
+      CORBA::ULong dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
+      dr_qos.user_data.value.length (dr_user_data_len);
+      dr_qos.user_data.value.replace (dr_user_data_len, 
+                                      dr_user_data_len, 
+                                      reinterpret_cast<CORBA::Octet*>(DR_USER_DATA));
+
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
                                                       dr_qos,
                                                       listener.in ());
@@ -128,6 +172,38 @@ int main (int argc, char *argv[])
         cerr << "create_datareader failed." << endl;
         exit(1);
       }
+
+      // Sleep 10 seconds to wait for first monitor retrive the bit data.
+      ACE_OS::sleep (10);
+
+      // Now change the changeable qos. The second monitor should get the updated qos from BIT.
+      part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_PART_USER_DATA));
+      partQos.user_data.value.length (part_user_data_len);
+      partQos.user_data.value.replace (part_user_data_len, 
+                                       part_user_data_len, 
+                                       reinterpret_cast<CORBA::Octet*>(UPDATED_PART_USER_DATA));
+      participant->set_qos (partQos);
+
+      dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_DR_USER_DATA));
+      dr_qos.user_data.value.length (dr_user_data_len);
+      dr_qos.user_data.value.replace (dr_user_data_len, 
+                                      dr_user_data_len, 
+                                      reinterpret_cast<CORBA::Octet*>(UPDATED_DR_USER_DATA));
+      dr->set_qos (dr_qos);
+
+      group_data_len = static_cast<CORBA::ULong> (ACE_OS::strlen (UPDATED_GROUP_DATA));
+      sub_qos.group_data.value.length (group_data_len);
+      sub_qos.group_data.value.replace (group_data_len, 
+                                        group_data_len, 
+                                        reinterpret_cast<CORBA::Octet*>(UPDATED_GROUP_DATA));
+      sub->set_qos (sub_qos);
+
+      topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_TOPIC_DATA));
+      topic_qos.topic_data.value.length (topic_data_len);
+      topic_qos.topic_data.value.replace (topic_data_len, 
+                                          topic_data_len, 
+                                          reinterpret_cast<CORBA::Octet*>(UPDATED_TOPIC_DATA));
+      topic->set_qos (topic_qos);
 
       int expected = 10;
       while ( listener_servant.num_reads() < expected) {

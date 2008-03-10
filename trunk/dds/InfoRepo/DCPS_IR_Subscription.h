@@ -106,6 +106,12 @@ public:
   /// Subscription retains ownership
   const ::DDS::SubscriberQos* get_subscriber_qos ();
 
+    
+  /// Update the DataReader or Subscriber qos and also publish the qos 
+  /// changes to datereader BIT.
+  void set_qos (const ::DDS::DataReaderQos & qos,
+                const ::DDS::SubscriberQos & subscriberQos);
+
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
 

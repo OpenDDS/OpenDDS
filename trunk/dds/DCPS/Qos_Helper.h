@@ -143,6 +143,69 @@ namespace OpenDDS
 
       static bool valid (const ::DDS::SubscriberQos& qos);
 
+      static bool changeable (const ::DDS::UserDataQosPolicy& qos1, 
+                              const ::DDS::UserDataQosPolicy& qos2);
+     
+      static bool changeable (const ::DDS::TopicDataQosPolicy & qos1,
+                              const ::DDS::TopicDataQosPolicy & qos2);
+
+      static bool changeable (const ::DDS::GroupDataQosPolicy& qos1,
+				                      const ::DDS::GroupDataQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::TransportPriorityQosPolicy& qos1,
+                              const ::DDS::TransportPriorityQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::LifespanQosPolicy& qos1,
+                              const ::DDS::LifespanQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::DurabilityQosPolicy& qos1,
+                              const ::DDS::DurabilityQosPolicy& qos2);
+        
+      static bool changeable (const ::DDS::PresentationQosPolicy& qos1,
+                              const ::DDS::PresentationQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::DeadlineQosPolicy& qos1,
+                              const ::DDS::DeadlineQosPolicy& qos2);
+      
+      static bool changeable (const ::DDS::LatencyBudgetQosPolicy& qos1,
+                              const ::DDS::LatencyBudgetQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::OwnershipQosPolicy& qos1,
+                              const ::DDS::OwnershipQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::OwnershipStrengthQosPolicy& qos1,
+                              const ::DDS::OwnershipStrengthQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::LivelinessQosPolicy& qos1,
+                              const ::DDS::LivelinessQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::TimeBasedFilterQosPolicy& qos1,
+                              const ::DDS::TimeBasedFilterQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::PartitionQosPolicy& qos1,
+                              const ::DDS::PartitionQosPolicy& qos2);
+      
+      static bool changeable (const ::DDS::ReliabilityQosPolicy& qos1,
+                                 const ::DDS::ReliabilityQosPolicy& qos2);
+      
+      static bool changeable (const ::DDS::DestinationOrderQosPolicy& qos1,
+                              const ::DDS::DestinationOrderQosPolicy& qos2);
+          
+      static bool changeable (const ::DDS::HistoryQosPolicy& qos1,
+                              const ::DDS::HistoryQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::ResourceLimitsQosPolicy& qos1,
+                              const ::DDS::ResourceLimitsQosPolicy& qos2);
+            
+      static bool changeable (const ::DDS::EntityFactoryQosPolicy& qos1,
+                              const ::DDS::EntityFactoryQosPolicy& qos2) ;
+
+      static bool changeable (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
+                              const ::DDS::WriterDataLifecycleQosPolicy& qos2);
+
+      static bool changeable (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
+                              const ::DDS::ReaderDataLifecycleQosPolicy& qos2);
+
       static bool changeable (const ::DDS::DomainParticipantQos& qos1,
                               const ::DDS::DomainParticipantQos& qos2);
       

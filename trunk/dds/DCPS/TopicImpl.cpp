@@ -6,6 +6,7 @@
 #include "Qos_Helper.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
+#include "DomainParticipantImpl.h"
 
 
 namespace OpenDDS
@@ -54,21 +55,44 @@ namespace OpenDDS
     {
       if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
         {
+          if (qos_ == qos)
+            return ::DDS::RETCODE_OK;
+
           if (enabled_.value())
             {
               if (! Qos_Helper::changeable (qos_, qos))
                 {
                   return ::DDS::RETCODE_IMMUTABLE_POLICY;
                 }
+              else 
+                {
+                  qos_ = qos;
+                  DomainParticipantImpl* part = reference_to_servant<DomainParticipantImpl> (this->participant_);
+
+                  try
+                  {
+                    DCPSInfo_var repo = TheServiceParticipant->get_repository(part->get_domain_id());
+                    repo->update_topic_qos(this->id_, part->get_domain_id(), part->get_id(), qos_);
+                  }
+                  catch (const CORBA::SystemException& sysex)
+                  {
+                    sysex._tao_print_exception (
+                      "ERROR: System Exception"
+                      " in TopicImpl::set_qos");
+                    return ::DDS::RETCODE_ERROR;
+                  }
+                  catch (const CORBA::UserException& userex)
+                  {
+                    userex._tao_print_exception (
+                      "ERROR:  Exception"
+                      " in TopicImpl::set_qos");
+                    return ::DDS::RETCODE_ERROR;
+                  }
+                }
             }
-          if (! (qos_ == qos))
-            {
-              qos_ = qos;
-              // TBD - when there are changable QoS then we
-              //       need to tell the DCPSInfo/repo about
-              //       the changes in Qos.
-              // repo->set_qos(qos_);
-            }
+          else 
+            qos_ = qos;
+
           return ::DDS::RETCODE_OK;
         }
       else

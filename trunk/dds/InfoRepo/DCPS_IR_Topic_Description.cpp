@@ -352,6 +352,24 @@ void DCPS_IR_Topic_Description::associate (DCPS_IR_Publication* publication,
 }
 
 
+void DCPS_IR_Topic_Description::publish_subscription_bit (const DCPS_IR_Topic* topic)
+{
+  DCPS_IR_Subscription* subscription = 0;
+  DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+
+  while (iter != end)
+    {
+      subscription = *iter;
+      ++iter;
+      if (subscription->get_topic () == topic)
+      {
+        this->domain_->publish_subscription_bit (subscription);
+      }
+    }
+}
+
+
 const char* DCPS_IR_Topic_Description::get_name () const
 {
   return name_.c_str();
