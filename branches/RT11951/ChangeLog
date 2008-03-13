@@ -1,3 +1,10 @@
+Thu Mar 13 22:37:04 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (time_t_to_long):
+
+          Declare this convenience function as inline.  Addresses multiple
+          definition link-time errors in inline-enabled builds.
+
 Thu Mar 13 19:05:54 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

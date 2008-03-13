@@ -20,7 +20,7 @@ namespace OpenDDS
   {
     // Convenience function to avoid introducing preprocessor
     // conditionals in more than one place.
-    CORBA::Long
+    ACE_INLINE CORBA::Long
     time_t_to_long (time_t t)
     {
 #if defined (ACE_MAJOR_VERSION)
