@@ -125,7 +125,8 @@ Thu Mar 13 04:17:31 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/SubscriberImpl.cpp:
 
-          Improved exception-safety by taking of ACE_Auto_Array_Ptr<>.
+          Improved exception-safety by taking advantage of
+          ACE_Auto_Array_Ptr<>.
 
         * dds/DCPS/WriteDataContainer.cpp:
 
