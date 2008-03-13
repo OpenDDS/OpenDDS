@@ -40,7 +40,7 @@ sub contents { return <<'!EOT'
 <%NAMESPACESTART%>
 /** Servant for TypeSuport interface of <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  *
  */
@@ -57,18 +57,19 @@ public:
 
   virtual
   DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr participant,
-                                   const char * type_name);
+                                   const char * type_name)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual char * get_type_name ();
+  virtual char * get_type_name () ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  ::DDS::DataWriter_ptr create_datawriter ();
+  virtual ::DDS::DataWriter_ptr create_datawriter ()
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  ::DDS::DataReader_ptr create_datareader ();
+  virtual ::DDS::DataReader_ptr create_datareader ()
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  private:
-    CORBA::String_var type_name_;
+private:
+  CORBA::String_var type_name_;
 };
 <%NAMESPACEEND%>
 
@@ -76,7 +77,7 @@ public:
 
 /** Servant for DataWriter interface of the <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
 class <%EXPORT%> <%TYPE%>DataWriterImpl
@@ -95,68 +96,59 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataWriterImpl (void);
 
-  virtual
-  DDS::InstanceHandle_t _cxx_register (
-      const ::<%SCOPE%><%TYPE%> & instance_data
-    );
+  virtual DDS::InstanceHandle_t _cxx_register (
+      const ::<%SCOPE%><%TYPE%> & instance_data)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::InstanceHandle_t register_w_timestamp (
+  virtual DDS::InstanceHandle_t register_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp
-    );
+      const ::DDS::Time_t & source_timestamp)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t unregister (
+  virtual DDS::ReturnCode_t unregister (
       const ::<%SCOPE%><%TYPE%> & instance_data,
-      ::DDS::InstanceHandle_t handle
-    );
+      ::DDS::InstanceHandle_t handle)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t unregister_w_timestamp (
+  virtual DDS::ReturnCode_t unregister_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp
-    );
+      const ::DDS::Time_t & source_timestamp)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual
-  DDS::ReturnCode_t write (
+  virtual DDS::ReturnCode_t write (
       const ::<%SCOPE%><%TYPE%> & instance_data,
-      ::DDS::InstanceHandle_t handle
-    );
+      ::DDS::InstanceHandle_t handle)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual
-  DDS::ReturnCode_t write_w_timestamp (
+  virtual DDS::ReturnCode_t write_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp
-    );
+      const ::DDS::Time_t & source_timestamp)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t dispose (
+  virtual DDS::ReturnCode_t dispose (
       const ::<%SCOPE%><%TYPE%> & instance_data,
-      ::DDS::InstanceHandle_t instance_handle
-    );
+      ::DDS::InstanceHandle_t instance_handle)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t dispose_w_timestamp (
+  virtual DDS::ReturnCode_t dispose_w_timestamp (
       const ::<%SCOPE%><%TYPE%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
-      const ::DDS::Time_t & source_timestamp
-    );
+      const ::DDS::Time_t & source_timestamp)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t get_key_value (
+  virtual DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
-      ::DDS::InstanceHandle_t handle
-    );
+      ::DDS::InstanceHandle_t handle)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
 
   /**
@@ -240,7 +232,7 @@ private:
 <%NAMESPACESTART%>
 /** Servant for DataReader interface of <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  *
  */
@@ -260,8 +252,7 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataReaderImpl (void);
 
-  virtual
-  DDS::ReturnCode_t delete_contained_entities ()
+  virtual DDS::ReturnCode_t delete_contained_entities ()
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   /**
@@ -288,96 +279,85 @@ public:
   virtual ::DDS::ReturnCode_t enable_specific ()
     ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t read (
+  virtual DDS::ReturnCode_t read (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t take (
+  virtual DDS::ReturnCode_t take (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t read_next_sample (
+  virtual DDS::ReturnCode_t read_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
-      ::DDS::SampleInfo & sample_info
-    );
+      ::DDS::SampleInfo & sample_info)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t take_next_sample (
+  virtual DDS::ReturnCode_t take_next_sample (
       ::<%SCOPE%><%TYPE%> & received_data,
-      ::DDS::SampleInfo & sample_info
-    );
+      ::DDS::SampleInfo & sample_info)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t read_instance (
+  virtual DDS::ReturnCode_t read_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t take_instance (
+  virtual DDS::ReturnCode_t take_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t read_next_instance (
+  virtual DDS::ReturnCode_t read_next_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t take_next_instance (
+  virtual DDS::ReturnCode_t take_next_instance (
       ::<%MODULE%><%TYPE%>Seq & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states
-    );
+      ::DDS::InstanceStateMask instance_states)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t return_loan (
+  virtual DDS::ReturnCode_t return_loan (
       ::<%MODULE%><%TYPE%>Seq & received_data,
-      ::DDS::SampleInfoSeq & info_seq
-    );
+      ::DDS::SampleInfoSeq & info_seq)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t get_key_value (
+  virtual DDS::ReturnCode_t get_key_value (
       ::<%SCOPE%><%TYPE%> & key_holder,
-      ::DDS::InstanceHandle_t handle
-    );
+      ::DDS::InstanceHandle_t handle)
+    ACE_THROW_SPEC ((CORBA::SystemException));
 
-  virtual
-  DDS::ReturnCode_t auto_return_loan(void* seq);
+  virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 
   void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
 

@@ -1,3 +1,24 @@
+Thu Mar 13 19:05:54 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Reintroduced exception specifications that were removed in my
+          earlier commit.  TAO 1.5a does not include the upstream TAO_IDL
+          changes that remove C++ exception specifications from
+          IDL-defined operations.
+
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+
+          Reverted OMG DDS specification document number update.  OpenDDS
+          more closely conforms to the earlier spec.
+
+        * dds/DCPS/QoS_Helper.inl:
+
+          Make use of ACE_Utils::truncate_cast<> conditional on the
+          version of ACE that supports it.
+
 Thu Mar 13 04:17:31 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * AUTHORS:
