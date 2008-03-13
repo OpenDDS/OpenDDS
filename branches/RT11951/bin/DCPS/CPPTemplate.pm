@@ -85,8 +85,8 @@ typedef OpenDDS::DCPS::DataReaderImpl OPENDDS_DCPS_DataReaderImpl;
 DDS::ReturnCode_t
 <%TYPE%>TypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
-    const char * type_name
-  )
+    const char * type_name)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (type_name == 0 || type_name[0] == '\0')
      this->type_name_ = this->get_type_name();
@@ -102,8 +102,8 @@ DDS::ReturnCode_t
 
 
 char *
-<%TYPE%>TypeSupportImpl::get_type_name (
-  )
+<%TYPE%>TypeSupportImpl::get_type_name ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (this->type_name_ == NULL)
     return CORBA::string_dup (this->_interface_repository_id());
@@ -114,6 +114,7 @@ char *
 
 ::DDS::DataWriter_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   <%TYPE%>DataWriterImpl* writer_impl;
   ACE_NEW_RETURN(writer_impl,
@@ -125,6 +126,7 @@ char *
 
 ::DDS::DataReader_ptr
 <%TYPE%>TypeSupportImpl::create_datareader ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   <%TYPE%>DataReaderImpl* reader_impl = 0;
   ACE_NEW_RETURN(reader_impl,
@@ -159,8 +161,8 @@ char *
 
 DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::_cxx_register (
-    const ::<%SCOPE%><%TYPE%> & instance_data
-  )
+    const ::<%SCOPE%><%TYPE%> & instance_data)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -173,8 +175,8 @@ DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_w_timestamp (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t /* handle */,
-    const ::DDS::Time_t & source_timestamp
-  )
+    const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::InstanceHandle_t registered_handle;
 
@@ -203,8 +205,8 @@ DDS::InstanceHandle_t
 DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister (
     const ::<%SCOPE%><%TYPE%> & instance_data,
-    ::DDS::InstanceHandle_t handle
-  )
+    ::DDS::InstanceHandle_t handle)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -218,8 +220,8 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister_w_timestamp (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle,
-    const ::DDS::Time_t & source_timestamp
-  )
+    const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -262,8 +264,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write (
     const ::<%SCOPE%><%TYPE%> & instance_data,
-    ::DDS::InstanceHandle_t handle
-  )
+    ::DDS::InstanceHandle_t handle)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -276,8 +278,8 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write_w_timestamp (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t handle,
-    const ::DDS::Time_t & source_timestamp
-  )
+    const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   //  A lock is obtained on entering this method to serialize access to
   //  the contained data storage and interfaces.  This lock protects the
@@ -323,8 +325,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose (
     const ::<%SCOPE%><%TYPE%> & instance_data,
-    ::DDS::InstanceHandle_t instance_handle
-  )
+    ::DDS::InstanceHandle_t instance_handle)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -337,8 +339,8 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose_w_timestamp (
     const ::<%SCOPE%><%TYPE%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle,
-    const ::DDS::Time_t & source_timestamp
-  )
+    const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -366,8 +368,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::get_key_value (
     ::<%SCOPE%><%TYPE%> & key_holder,
-    ::DDS::InstanceHandle_t handle
-  )
+    ::DDS::InstanceHandle_t handle)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -712,8 +714,8 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read", received_data, info_seq, max_samples);
@@ -828,8 +830,8 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take", received_data, info_seq, max_samples);
@@ -958,8 +960,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_sample (
     ::<%SCOPE%><%TYPE%> & received_data,
-    ::DDS::SampleInfo & sample_info
-  )
+    ::DDS::SampleInfo & sample_info)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
 
   bool found_data = false;
@@ -1027,8 +1029,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_sample (
     ::<%SCOPE%><%TYPE%> & received_data,
-    ::DDS::SampleInfo & sample_info
-  )
+    ::DDS::SampleInfo & sample_info)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   bool found_data = false;
 
@@ -1130,8 +1132,8 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read_instance", received_data, info_seq, max_samples);
@@ -1224,8 +1226,8 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take_instance", received_data, info_seq, max_samples);
@@ -1344,8 +1346,8 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
 
@@ -1402,8 +1404,8 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
-  )
+    ::DDS::InstanceStateMask instance_states)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
  ::DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
 
@@ -1485,8 +1487,8 @@ void
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
     ::<%MODULE%><%TYPE%>Seq & received_data,
-    ::DDS::SampleInfoSeq & info_seq
-  )
+    ::DDS::SampleInfoSeq & info_seq)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   // Some incomplete tests to see that the data and info are from the
   // same read.
@@ -1511,8 +1513,8 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::get_key_value (
     ::<%SCOPE%><%TYPE%> & key_holder,
-    ::DDS::InstanceHandle_t handle
-  )
+    ::DDS::InstanceHandle_t handle)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,

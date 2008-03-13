@@ -38,7 +38,7 @@ native <%TYPE%>Seq;
 
 /** Support topic registartion for <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
@@ -49,7 +49,7 @@ local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
 
 /** DataWriter interface for <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
 local interface <%TYPE%>DataWriter : DDS::DataWriter {
@@ -101,7 +101,7 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
 
 /** DataReader interface for <%TYPE%> data type.
  *
- * See the DDS specification, OMG formal/07-01-01, for a description of
+ * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
 local interface <%TYPE%>DataReader : DDS::DataReader {
