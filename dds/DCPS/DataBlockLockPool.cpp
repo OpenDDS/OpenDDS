@@ -30,9 +30,8 @@ DataBlockLockPool::get_lock ()
 
 
 void
-DataBlockLockPool::return_lock (DataBlockLockPool::DataBlockLock * lock)
+DataBlockLockPool::return_lock (DataBlockLockPool::DataBlockLock * /* lock */)
 {
-  ACE_UNUSED_ARG(lock);
   // Do Nothing.
 }
 

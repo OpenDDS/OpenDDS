@@ -138,23 +138,18 @@ namespace OpenDDS
       * that it's less or equal to sizeof T, and is otherwise ignored since
       * calloc() always returns a pointer to an item of sizeof (T).
       */
-      virtual void *calloc (size_t nbytes,
-                            char initial_value = '\0')
+      virtual void *calloc (size_t /* nbytes */,
+                            char /* initial_value */ = '\0')
       {
-        ACE_UNUSED_ARG(nbytes);
-        ACE_UNUSED_ARG(initial_value);
         ACE_NOTSUP_RETURN (0);
       }
 
       /// This method is a no-op and just returns 0 since the free list
       /// only works with fixed sized entities.
-      virtual void *calloc (size_t n_elem,
-                            size_t elem_size,
-                            char initial_value = '\0')
+      virtual void *calloc (size_t /* n_elem */,
+			    size_t /* elem_size */,
+			    char /* initial_value */ = '\0')
       {
-        ACE_UNUSED_ARG(n_elem);
-        ACE_UNUSED_ARG(elem_size);
-        ACE_UNUSED_ARG(initial_value);
         ACE_NOTSUP_RETURN (0);
       }
 

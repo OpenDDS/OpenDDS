@@ -27,18 +27,15 @@ FederatorManager::~FederatorManager()
 
 ::OpenDDS::Federator::Status
 FederatorManager::join_federation (
-  ::OpenDDS::Federator::RepoKey federationId,
-  const char * repoIor,
-  const char * federatorIor
+  ::OpenDDS::Federator::RepoKey /* federationId */,
+  const char * /* repoIor */,
+  const char * /* federatorIor */
 )
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
   ::OpenDDS::Federator::Unavailable
 ))
 {
-  ACE_UNUSED_ARG(federationId);
-  ACE_UNUSED_ARG(repoIor);
-  ACE_UNUSED_ARG(federatorIor);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("%T (%P|%t) INFO: FederatorManager::join_federation()\n")
   ));
@@ -47,14 +44,13 @@ ACE_THROW_SPEC ((
 
 ::OpenDDS::Federator::Status
 FederatorManager::remove_connection (
-  ::OpenDDS::Federator::RepoKey remoteId
+  ::OpenDDS::Federator::RepoKey /* remoteId */
 )
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
   ::OpenDDS::Federator::ConnectionBusy
 ))
 {
-  ACE_UNUSED_ARG(remoteId);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("%T (%P|%t) INFO: FederatorManager::remove_connection()\n")
   ));
