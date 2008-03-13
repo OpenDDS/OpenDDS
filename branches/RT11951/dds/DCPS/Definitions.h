@@ -33,7 +33,7 @@ namespace OpenDDS
       SequenceNumber() { value_ = SHRT_MIN ; }
 
       /// Construct with a value.
-      SequenceNumber( const ACE_INT16 value) : value_( value) { }
+      SequenceNumber( ACE_INT16 value) : value_( value) { }
 
       // N.B: Default copy constructor is sufficient.
 
@@ -48,8 +48,8 @@ namespace OpenDDS
 
       /// Post-increment.
       SequenceNumber operator++(int) {
-        SequenceNumber value = *this ;
-        this->increment() ;
+	SequenceNumber value (*this);
+	++*this;
         return value ;
       }
 
@@ -88,8 +88,8 @@ namespace OpenDDS
     typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Null_Mutex>  
       DataBlockAllocator;
     
-    #define DUP true
-    #define NO_DUP false
+#define DUP true
+#define NO_DUP false
 
 
     /// This struct holds both object reference and the corresponding servant.

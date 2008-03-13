@@ -77,17 +77,17 @@ namespace OpenDDS
     {
     public:
 
-      static bool consistent (const ::DDS::DomainParticipantQos& qos) ;
+      static bool consistent (const ::DDS::DomainParticipantQos& qos);
 
-      static bool consistent (const ::DDS::TopicQos            & qos) ;
+      static bool consistent (const ::DDS::TopicQos            & qos);
 
-      static bool consistent (const ::DDS::DataWriterQos       & qos) ;
+      static bool consistent (const ::DDS::DataWriterQos       & qos);
 
-      static bool consistent (const ::DDS::PublisherQos        & qos) ;
+      static bool consistent (const ::DDS::PublisherQos        & qos);
 
-      static bool consistent (const ::DDS::DataReaderQos       & qos) ;
+      static bool consistent (const ::DDS::DataReaderQos       & qos);
 
-      static bool consistent (const ::DDS::SubscriberQos       & qos) ;
+      static bool consistent (const ::DDS::SubscriberQos       & qos);
 
       static bool valid (const ::DDS::UserDataQosPolicy& qos);
 
@@ -168,11 +168,11 @@ namespace OpenDDS
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export 
 bool operator== (const ::DDS::Duration_t& t1, 
-                const ::DDS::Duration_t& t2);
+		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator < (const ::DDS::Duration_t& t1, 
-                  const ::DDS::Duration_t& t2);
+		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator <= (const ::DDS::Duration_t& t1, 

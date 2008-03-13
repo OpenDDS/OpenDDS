@@ -1,3 +1,153 @@
+Thu Mar 12 04:17:31 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * AUTHORS:
+
+          Added myself to the list of authors.
+
+        * DDS_TAO.mwc:
+
+          Added TAO ImR_Client.mpc to MPC workspace.  The DCPSInfoRepo
+          project depends on it.
+
+        * LICENSE:
+
+          Cosmetic clean-up.  Wrapped text at canonical column 74.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Favor standard C++ method for marking an argument as unused
+          instead of using the ACE_UNUSED_ARG macro.
+
+          Favor pre-increment over post-increment, particularly for STL
+          map iterators.  Better performance.
+
+          Obtain a copy of the "end()" map iterator once before running a
+          loop rather than during each loop iteration.  Better
+          performance.
+
+          Removed a number of exception specifications.  Most C++ gurus
+          believe them to be a misfeature of C++, and should in general
+          not be used.
+
+          Added missing initialization of data_allocator_ member in
+          DataReaderImpl constructor.
+
+          Const-correctness improvements.
+
+          Made code indentation consistent with dominant OpenDDS
+          indentation style.
+
+          Code clean-up.
+
+        * bin/DCPS/HTemplate.pm:
+
+          Removed a number of exception specifications.  See above for
+          rationale.
+
+          Made code indentation consistent with dominant OpenDDS
+          indentation style.
+
+          Updated OMG DDS specification document number in documentation.
+          s/04-12-02/07-01-01/g
+
+          Code clean-up.
+
+        * bin/DCPS/IDLTemplate.pm:
+
+          Updated OMG DDS specification document number in documentation.
+          s/04-12-02/07-01-01/g
+
+          Nuked trailing whitespace.
+
+        * dds/DCPS/BuiltInTopicUtils.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Const-correctness improvements.
+
+          Favor pre-increment over post-increment.
+
+          Code clean-up and cosmetic improvements.
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataBlockLockPool.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/InfoRepo/FederatorManager.cpp:
+
+          Favor standard C++ method for marking an argument as unused
+          instead of using the ACE_UNUSED_ARG macro.
+
+        * dds/DCPS/Definitions.h (SequenceNumber):
+
+          Removed const qualifer from constructor parameter of built-in
+          type that was passed in by value.  There is no need for a const
+          qualifier in this case.
+
+          (operator++):
+
+          Implement post-increment operator in terms of pre-increment
+          operator.  It's good style to do so.
+
+
+        * dds/DCPS/Marked_Default_Qos.cpp (INVALID_ENUM_VALUE):
+
+          Declare this variable as a constant.
+
+        * dds/DCPS/Qos_Helper.h:
+
+          Coding style consistency update.  Removed white space before
+          trailing semi-colons.
+
+        * dds/DCPS/Qos_Helper.inl (time_value_to_time):
+          (time_value_to_duration):
+
+          Replaced static_cast<> of time_t type to a CORBA::Long with an
+          ACE_Utils::truncate_cast<>.  The latter is safer in the case
+          where the ACE_Time_Value seconds field (time_t) is larger than a
+          CORBA::Long.
+
+          (valid, consistent, operator==):
+
+          Removed redundant and unnecessary "if" statements.
+
+          Replaced use of ACE_UNUSED_ARG macro in favor of standard C++
+          method of marking an argument as unused (comment out the
+          argument name).
+
+        * dds/DCPS/RcHandle_T.h (operator=):
+
+          Improved exception-safety by using canonical copy/swap idiom.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Improved exception-safety by taking of ACE_Auto_Array_Ptr<>.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Improved const-correctness.
+
+          (register_instance):
+
+          Improved exception safety by taking advantage of an auto_ptr<>.
+
+        * dds/DCPS/WriteDataContainer.h:
+
+          Documentation clean-up.
+
+        * dds/InfoRepo/ArrDelAdapter.h:
+
+          No need to include <memory>.
+
+        * tests/DCPS/README:
+
+          New simple/placeholder file containing description of DCPS
+          tests.
+
 Fri Mar  7 16:33:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 975:998 out to branch.

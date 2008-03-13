@@ -22,17 +22,17 @@
 namespace OpenDDS {
   namespace DCPS {
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
     enum BuiltInTopicTransportTypeId
     {
@@ -280,18 +280,21 @@ namespace OpenDDS {
 
               CORBA::ULong count = 0;
 
-              for (CORBA::ULong i = 0; i < repoid_len; i++)
+              for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
-                  for (CORBA::ULong j = 0; j < data_len; j++)
+                  for (CORBA::ULong j = 0; j < data_len; ++j)
                     {
                       if (DCPS_debug_level >= 10)
-                        ACE_DEBUG((LM_DEBUG,"%s BIT has [%d, %d, %d]\n",
-                          bit_name, data[j].key[0], data[j].key[1],
-                          data[j].key[2] ));
+                        ACE_DEBUG((LM_DEBUG,
+				   "%s BIT has [%d, %d, %d]\n",
+				   bit_name,
+				   data[j].key[0],
+				   data[j].key[1],
+				   data[j].key[2] ));
                       if (data[j].key[key_pos] == repoids[i])
                         {
                           handles[i] = infos[j].instance_handle;
-                          count ++;
+                          ++count;
                           break;
                         }
                     }

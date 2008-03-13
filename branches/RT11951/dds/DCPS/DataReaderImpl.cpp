@@ -116,8 +116,7 @@ DataReaderImpl::cleanup ()
 
   if (liveliness_timer_id_ != -1)
     {
-      int num_handlers = reactor_->cancel_timer (this);
-      ACE_UNUSED_ARG (num_handlers);
+      (void) reactor_->cancel_timer (this);
     }
   }
 
@@ -752,13 +751,11 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::wait_for_historical_data (
-							      const ::DDS::Duration_t & max_wait
-							      )
+    const ::DDS::Duration_t & /* max_wait */ )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
 		   ))
 {
-  ACE_UNUSED_ARG( max_wait) ;
   // Add your implementation here
   return 0;
 }
@@ -1220,10 +1217,8 @@ CORBA::Long DataReaderImpl::total_samples() const
 
 int
 DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
-				const void *arg)
+				const void * arg)
 {
-  ACE_UNUSED_ARG(arg);
-
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
     this->sample_lock_,
@@ -1380,9 +1375,8 @@ OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
 
 void
 DataReaderImpl::writer_became_alive (PublicationId   writer_id,
-				     const ACE_Time_Value& when)
+				     const ACE_Time_Value& /* when */)
 {
-  ACE_UNUSED_ARG(when) ;
   if (DCPS_debug_level >= 5)
     ACE_DEBUG((LM_DEBUG,
 	       "(%P|%t) DataReaderImpl::writer_became_alive writer %d to reader %d\n",
@@ -1542,9 +1536,8 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 
-void DataReaderImpl::dispose(const ReceivedDataSample& sample)
+void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
 {
-  ACE_UNUSED_ARG(sample) ;
 }
 
 

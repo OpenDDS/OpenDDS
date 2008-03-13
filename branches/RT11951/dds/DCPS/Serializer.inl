@@ -776,83 +776,70 @@ operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_wstring x)
 
 //----------------------------------------------------------------------------
 // predefined type _dcps_max_marshaled_size methods
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Short& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Short& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Short);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::UShort& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::UShort& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::UShort);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Long& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Long& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Long);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::ULong& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::ULong& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::ULong);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::LongLong& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::LongLong& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::LongLong);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::ULongLong& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::ULongLong& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::ULongLong);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::LongDouble& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::LongDouble& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::LongDouble);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Float& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Float& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Float);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Double& x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_CDR::Double& /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Double);
 }
 
 
 // predefined type _dcps_max_marshaled_size method disambiguators.
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_boolean x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_boolean /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Char);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_char x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_char /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Char);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_wchar x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_wchar /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::WChar);
 }
 
-ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_octet x)
+ACE_INLINE size_t _dcps_max_marshaled_size (const ACE_OutputCDR::from_octet /* x */)
 {
-  ACE_UNUSED_ARG (x);
   return sizeof (ACE_CDR::Char);
 }
 

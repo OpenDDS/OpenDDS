@@ -137,9 +137,8 @@ OpenDDS::DCPS::InstanceState::data_was_received()
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::lively(PublicationId         writer_id)
+OpenDDS::DCPS::InstanceState::lively(PublicationId         /* writer_id */)
 {
-  ACE_UNUSED_ARG(writer_id);
   //
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.

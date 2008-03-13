@@ -10,7 +10,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    int INVALID_ENUM_VALUE = 999;
+    int const INVALID_ENUM_VALUE = 999;
 
     ::DDS::DomainParticipantQos
     Marked_Default_Qos::marked_default_DomainParticipantQos ()

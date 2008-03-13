@@ -23,6 +23,8 @@
 
 #include "tao/debug.h"
 
+#include "ace/Auto_Ptr.h"
+
 
 namespace OpenDDS
 {
@@ -166,8 +168,8 @@ SubscriberImpl::create_datareader (
 
   DataReaderRemoteImpl* reader_remote_impl = 0;
   ACE_NEW_RETURN(reader_remote_impl,
-                    DataReaderRemoteImpl(dr_servant),
-                    ::DDS::DataReader::_nil());
+		 DataReaderRemoteImpl(dr_servant),
+		 ::DDS::DataReader::_nil());
 
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
@@ -182,7 +184,7 @@ SubscriberImpl::create_datareader (
 		    this,
 		    subscriber_objref_.in (),
 		    dr_obj.in (),
-            dr_remote_obj.in ());
+		    dr_remote_obj.in ());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -767,10 +769,10 @@ SubscriberImpl::data_received(DataReaderImpl *reader)
 
 void
 SubscriberImpl::add_associations (
-				  const WriterAssociationSeq & writers,
-				  DataReaderImpl* reader,
-				  const ::DDS::DataReaderQos reader_qos
-				  )
+  const WriterAssociationSeq & writers,
+  DataReaderImpl* reader,
+  const ::DDS::DataReaderQos /* reader_qos */
+  )
 {
   if (entity_deleted_ == true)
     {
@@ -781,10 +783,13 @@ SubscriberImpl::add_associations (
       return;
     }
 
-  size_t length = writers.length ();
+  size_t const length = writers.length ();
   AssociationData* associations = new AssociationData [length];
 
-  for (size_t i = 0; i < length; i++)
+  // TransportInterface does not take ownership
+  ACE_Auto_Array_Ptr<AssociationData> safe_associations (associations);
+
+  for (size_t i = 0; i < length; ++i)
     {
       associations[i].remote_id_ = writers[i].writerId;
       associations[i].remote_data_ = writers[i].writerTransInfo;
@@ -802,14 +807,10 @@ SubscriberImpl::add_associations (
 
  
   this->add_publications(reader->get_subscription_id(),
-			                   reader,
-			                   writers[0].writerQos.transport_priority.value,
-			                   length,
-			                   associations);
-
-  ACE_UNUSED_ARG(reader_qos) ;  // for now...
-
-  delete []associations; // TransportInterface does not take ownership
+			 reader,
+			 writers[0].writerQos.transport_priority.value,
+			 length,
+			 associations);
 }
 
 void

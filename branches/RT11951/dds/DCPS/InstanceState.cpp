@@ -48,18 +48,16 @@ OpenDDS::DCPS::InstanceState::dispose_was_received()
 }
 
 void 
-OpenDDS::DCPS::InstanceState::writer_became_dead (PublicationId         writer_id,
-                                   int                   num_alive_writers,
-                                   const ACE_Time_Value& when)
+OpenDDS::DCPS::InstanceState::writer_became_dead (
+  PublicationId         /* writer_id */,
+  int                   num_alive_writers,
+  const ACE_Time_Value& /* when */)
 {
   //TBD keep track of which writer has written to this instance
   // and only set to NOT_ALIVE if no other writers are writing to
   // this instance.
   // the CURRENT implementation just assumes that all writers are
   // writing to all instances.
-  ACE_UNUSED_ARG(writer_id);
-  ACE_UNUSED_ARG(when);
-
 
   if(num_alive_writers == 0 && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
     {
