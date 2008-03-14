@@ -1538,6 +1538,7 @@ DataReaderImpl::set_sample_rejected_status(
 
 void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
 {
+  ACE_DEBUG ((LM_DEBUG, "(%P|%T)BIT dispose\n"));
 }
 
 

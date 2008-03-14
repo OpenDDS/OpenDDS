@@ -164,11 +164,19 @@ Reader::read (const SampleInfoMap& si_map,
       {
         for (CORBA::ULong i = 0 ; i < si.length() ; i++)
         {
+          // skip the dispose notification sample.
+          if (si[i].valid_data == 0)
+          {
+            ACE_OS::printf ("(%P|%t) got dispose sample for %d\n", foo[i].key);
+            continue;
+          }
+          
           ACE_OS::printf ("foo[%d] - %c : x = %f y = %f, key = %d\n",
-                          i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
+            i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
           PrintSampleInfo(si[i]) ;
 
           SampleInfoMap::const_iterator it = si_map.find(foo[i].c);
+
           if (it == si_map.end())
           {
             ACE_OS::printf ("read - Error: %c not returned\n", foo[i].c) ;

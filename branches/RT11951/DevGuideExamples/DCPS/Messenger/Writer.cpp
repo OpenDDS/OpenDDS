@@ -90,6 +90,10 @@ Writer::svc ()
       }
       message.count++;
     }
+
+    ACE_OS::sleep (2);
+    message_dw->dispose (message, handle);
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
 	 << e << endl;
