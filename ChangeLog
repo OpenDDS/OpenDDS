@@ -1,3 +1,24 @@
+Fri Mar 14 00:26:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+	  Patched in Yan's implementation to correct the dispose()
+	  behavior.  Issues remain with some tests that will need to
+	  be resolved before merging back with the trunk.
+	  NOTE! This moves the SampleInfo IDL definition from the
+	  specfication version 1.0 to specification version 1.2
+	  structure.  It also requires that applications check to
+	  determine if a sample has been made available of if only
+	  a state change is being reported by an invocation of
+	  on_data_available().
+
 Thu Mar 13 22:37:04 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (time_t_to_long):
