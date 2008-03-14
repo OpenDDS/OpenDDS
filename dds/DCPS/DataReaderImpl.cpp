@@ -1313,8 +1313,9 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   {
     ACE_Time_Value relative;
     ACE_Time_Value now = ACE_OS::gettimeofday ();
-    if (now < next_absolute)
-      relative = next_absolute - now;
+    // compare the time now with the earliest(smallest) deadline we found
+    if (now < smallest)
+      relative = smallest - now;
     else
       relative = ACE_Time_Value(0,1); // ASAP
 
