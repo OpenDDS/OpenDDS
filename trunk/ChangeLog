@@ -1,3 +1,32 @@
+Fri Mar 14 19:07:28 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * bin/dcps_tests.lst:
+
+          Added LivelinessTimeout test.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed error where we were using the last deadline for all publishers
+          instead of the next (smallest) deadline we would encounter.
+
+        * tests/DCPS/LivelinessTimeout:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/LivelinessTimeout/README:
+        * tests/DCPS/LivelinessTimeout/Writer.h:
+        * tests/DCPS/LivelinessTimeout/Writer.cpp:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/common.cpp:
+        * tests/DCPS/LivelinessTimeout/domain_ids:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Test to epose and then verify the DataReaderImpl.cpp error.
+
 Tue Mar 11 15:32:03 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
 
         * dds/DdsDcpsDomain.idl:
