@@ -49,7 +49,6 @@ void OpenDDS::DCPS::InstanceState::sample_info(::DDS::SampleInfo& si,
   si.no_writers_generation_count = no_writers_generation_count_ ;
   si.source_timestamp = de->source_timestamp_ ;
   si.instance_handle = handle_ ;
-  si.valid_data = de->registered_data_ != 0;
 /*
  * These are actually calculated later...
  */

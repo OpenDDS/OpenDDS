@@ -24,6 +24,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
   num_reads_ ++;
+
   try {
     ::Messenger::MessageDataReader_var message_dr =
         ::Messenger::MessageDataReader::_narrow(reader);
@@ -41,21 +42,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
+      cout << "Message: subject    = " << message.subject.in() << endl
+           << "         subject_id = " << message.subject_id   << endl
+           << "         from       = " << message.from.in()    << endl
+           << "         count      = " << message.count        << endl
+           << "         text       = " << message.text.in()    << endl;
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
-      if (si.valid_data == 1)
-      {
-        cout << "Message: subject    = " << message.subject.in() << endl
-          << "         subject_id = " << message.subject_id   << endl
-          << "         from       = " << message.from.in()    << endl
-          << "         count      = " << message.count        << endl
-          << "         text       = " << message.text.in()    << endl;
-      }
-      else
-      {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderListenerImpl::on_data_available:"
-                             " received DISPOSE_INSTANCE message.\n"));
-      }
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {

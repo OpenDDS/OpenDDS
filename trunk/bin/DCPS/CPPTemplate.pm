@@ -788,16 +788,8 @@ DDS::ReturnCode_t
           received_data_p.internal_set_length (count + 1);
           if (received_data.maximum() != 0)
           {
-            if (item->registered_data_ == 0)
-            {
-              ::<%SCOPE%><%TYPE%> dummy;
-              received_data_p.assign_sample(count, dummy) ;
-            }
-            else
-            {
-              received_data_p.assign_sample(count, 
-                  *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-            }
+            received_data_p.assign_sample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
           else 
           {
@@ -913,16 +905,8 @@ DDS::ReturnCode_t
               received_data_p.internal_set_length (count + 1);
               if (received_data.maximum() != 0)
               {
-                if (item->registered_data_ == 0)
-                {
-                  ::<%SCOPE%><%TYPE%> dummy;
-                  received_data_p.assign_sample(count, dummy);
-                }
-                else
-                {
-                  received_data_p.assign_sample(count,
-                      *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-                }
+                received_data_p.assign_sample(count,
+                    *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
               }
               else
               {
@@ -1040,11 +1024,8 @@ DDS::ReturnCode_t
       {
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
-          if (item->registered_data_ != 0)
-          {
-            received_data =
-                *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-          }
+          received_data =
+              *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           ptr->instance_state_.sample_info(sample_info, item) ;
 
           item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1125,12 +1106,8 @@ DDS::ReturnCode_t
         {
           if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
             {
-              if (item->registered_data_ != 0)
-              {
-                received_data =
-                    *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-              }
-              
+              received_data =
+                  *((::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
               ptr->instance_state_.sample_info(sample_info, item) ;
 
               item->sample_state_ = ::DDS::READ_SAMPLE_STATE ;
@@ -1247,16 +1224,8 @@ DDS::ReturnCode_t
           received_data_p.internal_set_length (count + 1);
           if (received_data.maximum() != 0)
           {
-            if (item->registered_data_ == 0)
-            {
-              ::<%SCOPE%><%TYPE%> dummy;
-              received_data_p.assign_sample(count, dummy) ;
-            }
-            else
-            {
-              received_data_p.assign_sample(count, 
-                  *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-            }
+            received_data_p.assign_sample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
           else 
           {
@@ -1353,16 +1322,8 @@ DDS::ReturnCode_t
           received_data_p.internal_set_length (count + 1);
           if (received_data.maximum() != 0)
           {
-            if (item->registered_data_ == 0)
-            {
-              ::<%SCOPE%><%TYPE%> dummy;
-              received_data_p.assign_sample(count, dummy);
-            }
-            else
-            {
-              received_data_p.assign_sample(count, 
-                  *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
-            }
+            received_data_p.assign_sample(count, 
+                *(::<%SCOPE%><%TYPE%> *)item->registered_data_) ;
           }
           else 
           {
@@ -1568,13 +1529,11 @@ void
 {
   if (0 == item->dec_ref())
     {
-      if (item->registered_data_ != 0)
-      {
-        ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
-        ACE_DES_FREE (ptr,
-                      data_allocator_->free,
-                      <%TYPE%> );
-      }
+      ::<%SCOPE%><%TYPE%>* ptr = static_cast< ::<%SCOPE%><%TYPE%>* >(item->registered_data_);
+      ACE_DES_FREE (ptr,
+                    data_allocator_->free,
+                    <%TYPE%> );
+
       ACE_DES_FREE (item,
                     rd_allocator_->free,
                     ReceivedDataElement);
@@ -1661,8 +1620,6 @@ void
     ::<%SCOPE%><%TYPE%> *instance_data,
     const OpenDDS::DCPS::DataSampleHeader& header )
 {
-  bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
-
   DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   //!!! caller should already have the sample_lock_
@@ -1718,13 +1675,8 @@ void
        (instance_ptr->rcvd_sample_.size_ >=
         this->qos_.resource_limits.max_samples_per_instance))
     {
-
-        // If it's dispose control message, we do not want to reject it.
-        // It just simply removes the oldest sample no matter what the 
-        // view state is.
-        if  (! is_dispose_msg
-          && instance_ptr->rcvd_sample_.head_->sample_state_
-          == ::DDS::NOT_READ_SAMPLE_STATE)
+      if  (instance_ptr->rcvd_sample_.head_->sample_state_
+            == ::DDS::NOT_READ_SAMPLE_STATE)
         {
         // for now the implemented QoS means that if the head sample
         // is NOT_READ then none are read.
@@ -1761,14 +1713,6 @@ void
       }
     }
 
-    if (is_dispose_msg)
-    {
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    <%TYPE%> );
-      instance_data = 0;
-    }
-
     OpenDDS::DCPS::ReceivedDataElement *ptr /* = new OpenDDS::DCPS::ReceivedDataElement(data) */ ;
     ACE_NEW_MALLOC_RETURN (ptr,
                            static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
@@ -1777,15 +1721,8 @@ void
                            OpenDDS::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
-    if (is_dispose_msg)
-    {
-      instance_ptr->instance_state_.dispose_was_received() ;
-    }
-    else
-    {
-      instance_ptr->instance_state_.data_was_received() ;
-    }
-    
+    instance_ptr->instance_state_.data_was_received() ;
+
     ptr->source_timestamp_.sec = header.source_timestamp_sec_ ;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_ ;
     ptr->disposed_generation_count_ =
@@ -1860,12 +1797,39 @@ void
 <%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   //!!! caller should already have the sample_lock_
-  
-  // The data sample in this dispose message does not contain any valid data.
-  // What it needs here is the key value to identify the instance to dispose.
-  // The demarshal push this "sample" to received sample list so the user 
-  // can be notified the dispose event.
-  this->dds_demarshal (sample);
+
+  ::<%SCOPE%><%TYPE%> *data /* = new ::<%SCOPE%><%TYPE%>(instance_data) */ ;
+  ACE_NEW_MALLOC_NORETURN (data,
+                         static_cast< ::<%SCOPE%><%TYPE%> *> (
+                         data_allocator_->malloc (
+                              sizeof (::<%SCOPE%><%TYPE%>))),
+                         ::<%SCOPE%><%TYPE%>) ;
+
+  TAO::DCPS::Serializer ser(sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER) ;
+  ser >> *data ;
+
+  DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
+
+  InstanceMap::const_iterator it = instance_map_.find(*data);
+
+  if (it != instance_map_.end())
+  {
+    handle = it->second;
+    OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
+          this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle) ;
+    instance_ptr->instance_state_.dispose_was_received() ;
+  }
+  else if (! this->is_bit ())
+  {
+    ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ")
+              ACE_TEXT("<%TYPE%>DataReaderImpl::disposed, ")
+              ACE_TEXT("The instance is not registered.\n")));
+  }
+
+  ACE_DES_FREE (data,
+                data_allocator_->free,
+                <%TYPE%> );
 }
 
 DDS::ReturnCode_t 

@@ -587,18 +587,12 @@ int main (int argc, char *argv[])
             , ::DDS::ANY_VIEW_STATE
             , ::DDS::ANY_INSTANCE_STATE );
 
-          check_read_status(status, data4, 4, "read samples from most recent generation");
 
-          if (info4[2].valid_data == 1)
-          {
-             ACE_ERROR ((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: expected an invalid data sample (dispose notification).\n") ));
-             test_failed = 1;
-          }
+          check_read_status(status, data4, 3, "read samples from most recent generation");
 
           if (info4[0].view_state != ::DDS::NEW_VIEW_STATE 
             || info4[1].view_state != ::DDS::NEW_VIEW_STATE
-            || info4[3].view_state != ::DDS::NEW_VIEW_STATE)
+            || info4[2].view_state != ::DDS::NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: expected NEW view state.\n") ));
@@ -606,7 +600,7 @@ int main (int argc, char *argv[])
           }
 
           if (data4[0].count != foo1.count || data4[1].count != foo2.count 
-            || data4[3].count != foo3.count)
+            || data4[2].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: read samples from most recent generation"
@@ -628,11 +622,11 @@ int main (int argc, char *argv[])
             , ::DDS::ANY_INSTANCE_STATE );
 
 
-          check_read_status(status, data5, 4, "read after read most recent generation samples");
+          check_read_status(status, data5, 3, "read after read most recent generation samples");
 
           if (info5[0].view_state != ::DDS::NOT_NEW_VIEW_STATE 
             || info5[1].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info5[3].view_state != ::DDS::NOT_NEW_VIEW_STATE)
+            || info5[2].view_state != ::DDS::NOT_NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: expected NOT NEW view state.\n") ));
@@ -640,7 +634,7 @@ int main (int argc, char *argv[])
           }
 
           if (data5[0].count != foo1.count || data5[1].count != foo2.count
-            || data5[3].count != foo3.count)
+            || data5[2].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: read after read most recent generation samples "
@@ -681,12 +675,12 @@ int main (int argc, char *argv[])
             , ::DDS::ANY_INSTANCE_STATE );
 
 
-          check_read_status(status, data6, 5, "first read");
+          check_read_status(status, data6, 4, "first read");
 
           if (info6[0].view_state != ::DDS::NOT_NEW_VIEW_STATE
             || info6[1].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info6[3].view_state != ::DDS::NOT_NEW_VIEW_STATE
-            || info6[4].view_state != ::DDS::NEW_VIEW_STATE)
+            || info6[2].view_state != ::DDS::NOT_NEW_VIEW_STATE
+            || info6[3].view_state != ::DDS::NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: un expected view state.\n") ));
@@ -694,7 +688,7 @@ int main (int argc, char *argv[])
           }
 
           if (data6[0].count != foo1.count || data6[1].count != foo2.count
-            || data6[3].count != foo3.count || data6[4].count != xfoo.count)
+            || data6[2].count != foo3.count || data6[3].count != xfoo.count)
           {
             // test to see the accessing the "lost" (because of history.depth)
             // but still held by zero-copy sequence value works.
