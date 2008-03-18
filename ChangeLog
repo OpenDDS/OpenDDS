@@ -1,3 +1,55 @@
+Wed Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        
+        * bin/DCPS/CPPTemplate.pm:
+
+          Implemented datareader dispose notification. The datareader 
+          adds an entry for dispose message to the instance 
+          ReceivedDataElementList. The ReceivedDataElement has the 
+          registered_data_ member set to be 0 and the corresponding 
+          SampleInfo is marked with valid_data false. The subscriber
+          checks the valid_data flag in SampleInfo before looking the 
+          data.
+          
+        * dds/DCPS/InstanceState.inl:
+        
+          Setup SampleInfo valid_data flag in sample_info() function.
+          
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added publication_handle and valid_data to the SampleInfo 
+          according to the DDS spec 1.2.
+          
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Added explicit dispose () call on publisher side and valid_data
+          flag check on subscriber side. These are used to test dispose 
+          notification via on_data_available() callback.
+          
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+
+          Accommodated to the changes of dispose notification support.
+          The sample_rank and expected samples were changed to count 
+          the dispose notification as well. 
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Used the datareader_map_ instead of datareader_set_ to get 
+          the list of datareaders for subscriber qos propagation. 
+          This would fix the timing issue that subscriber qos does
+          not propagate when the subscriber set_qos is called before 
+          datareaders receive any messages.
+          
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          Removed "my" declarations for process variables to resolve
+          the "an undefined value" error.
+          
 Fri Mar 14 19:07:28 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * bin/dcps_tests.lst:
