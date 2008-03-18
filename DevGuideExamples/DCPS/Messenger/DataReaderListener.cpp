@@ -41,6 +41,10 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     //DDS::ReturnCode_t status = dr_servant->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
+
+      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
+
       if (si.valid_data == 1)
       {
         cout << "Message: subject    = " << message.subject.in() << endl
@@ -48,7 +52,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           << "         from       = " << message.from.in()    << endl
           << "         count      = " << message.count        << endl
           << "         text       = " << message.text.in()    << endl;
-        cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
       }
       else
       {

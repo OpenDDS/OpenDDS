@@ -1,3 +1,23 @@
+Tue Mar 18 20:41:14 UTC 2008   Yan Dai  <dai_y@ociweb.com> 
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+
+          Added debug logging for the instance state.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          - Moved instance state update for dispose before listener callback
+            instead after so the dispose notification SampleInfo has the
+            correct instance state - NOT_ALIVE_DISPOSED_INSTANCE_STATE.
+          - Fixed a bug that cause samples rejected mistakenly.
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ViewState/Reader.cpp
+
+          Accommodated to the changes of dispose notification support.
+          The sample_rank is changed to count the dispose sample as well.
+
 Fri Mar 14 00:26:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
@@ -9,15 +29,15 @@ Fri Mar 14 00:26:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DdsDcpsInfrastructure.idl:
         * tests/DCPS/FooTest4_0/Reader.cpp:
         * tests/DCPS/FooTest4_0/main.cpp:
-	  Patched in Yan's implementation to correct the dispose()
-	  behavior.  Issues remain with some tests that will need to
-	  be resolved before merging back with the trunk.
-	  NOTE! This moves the SampleInfo IDL definition from the
-	  specfication version 1.0 to specification version 1.2
-	  structure.  It also requires that applications check to
-	  determine if a sample has been made available of if only
-	  a state change is being reported by an invocation of
-	  on_data_available().
+          Patched in Yan's implementation to correct the dispose()
+          behavior.  Issues remain with some tests that will need to
+          be resolved before merging back with the trunk.
+          NOTE! This moves the SampleInfo IDL definition from the
+          specfication version 1.0 to specification version 1.2
+          structure.  It also requires that applications check to
+          determine if a sample has been made available of if only
+          a state change is being reported by an invocation of
+          on_data_available().
 
 Thu Mar 13 22:37:04 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 

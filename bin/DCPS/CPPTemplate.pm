@@ -1658,7 +1658,8 @@ void
         // It just simply removes the oldest sample no matter what the 
         // view state is.
         if  (! is_dispose_msg
-          && instance_ptr->rcvd_sample_.head_->sample_state_)
+          && instance_ptr->rcvd_sample_.head_->sample_state_
+          == ::DDS::NOT_READ_SAMPLE_STATE)
         {
         // for now the implemented QoS means that if the head sample
         // is NOT_READ then none are read.
@@ -1712,7 +1713,14 @@ void
                            OpenDDS::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
-    instance_ptr->instance_state_.data_was_received();
+    if (is_dispose_msg)
+    {
+      instance_ptr->instance_state_.dispose_was_received() ;
+    }
+    else
+    {
+      instance_ptr->instance_state_.data_was_received() ;
+    }
 
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
