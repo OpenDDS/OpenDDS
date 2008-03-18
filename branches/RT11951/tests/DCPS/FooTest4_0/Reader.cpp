@@ -167,10 +167,10 @@ Reader::read (const SampleInfoMap& si_map,
           // skip the dispose notification sample.
           if (si[i].valid_data == 0)
           {
-            ACE_OS::printf ("(%P|%t) got dispose sample for %d\n", foo[i].key);
+            ACE_OS::printf ("got SampleInfo[%d] dispose sample\n", i);
             continue;
           }
-          
+ 
           ACE_OS::printf ("foo[%d] - %c : x = %f y = %f, key = %d\n",
             i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
           PrintSampleInfo(si[i]) ;
