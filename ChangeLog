@@ -1,15 +1,30 @@
+Tue Mar 18 18:46:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+
+          Rolled back the last two commits for dispose notification feature.
+          These changes were moved to RT11951 branch. 
+          
 Tue Mar 18 17:24:37 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
-        
+
           Moved instance state update for dispose before listener callback
           instead after so the dispose notification SampleInfo has the
           correct instance state - NOT_ALIVE_DISPOSED_INSTANCE_STATE.
-          
+
         * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
-          
+
           Added debug logging for the instance state.
-          
+
 Wed Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:

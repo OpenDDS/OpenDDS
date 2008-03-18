@@ -181,9 +181,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = 10;
-      // The dispose message is also expected so add one to
-      // number of expected messages.
-      while ( listener_servant.num_reads() < expected + 1) { 
+      while ( listener_servant.num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 
