@@ -1777,8 +1777,15 @@ void
                            OpenDDS::DCPS::ReceivedDataElement(instance_data),
                            ::DDS::RETCODE_ERROR);
 
-    instance_ptr->instance_state_.data_was_received() ;
-
+    if (is_dispose_msg)
+    {
+      instance_ptr->instance_state_.dispose_was_received() ;
+    }
+    else
+    {
+      instance_ptr->instance_state_.data_was_received() ;
+    }
+    
     ptr->source_timestamp_.sec = header.source_timestamp_sec_ ;
     ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_ ;
     ptr->disposed_generation_count_ =
@@ -1834,11 +1841,6 @@ void
         ::DDS::DataReader_var dr = get_dr_obj_ref();
         listener->on_data_available(dr.in ());
       }
-    }
-    
-    if (is_dispose_msg)
-    {
-      instance_ptr->instance_state_.dispose_was_received() ;
     }
   }
   else
