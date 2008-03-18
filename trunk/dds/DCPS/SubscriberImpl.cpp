@@ -292,6 +292,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     dr_info = it->second;
       
     datareader_map_.erase(it) ;
+
     datareader_set_.erase(dr_servant) ;
   }
 
@@ -554,12 +555,14 @@ SubscriberImpl::set_qos (
               guard,
               this->si_lock_,
               ::DDS::RETCODE_ERROR);
-            for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
-              iter != datareader_set_.end() ; ++iter)
+            DataReaderMap::const_iterator endIter = datareader_map_.end(); 
+            for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
+              iter != endIter ; ++iter)
             {
+              DataReaderImpl* reader = iter->second->local_reader_impl_; 
               ::DDS::DataReaderQos qos;
-              (*iter)->get_qos(qos); 
-              RepoId id = (*iter)->get_subscription_id();
+              reader->get_qos(qos); 
+              RepoId id = reader->get_subscription_id();
               std::pair<DrIdToQosMap::iterator, bool> pair
                 = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
               if (pair.second == false)
@@ -579,6 +582,7 @@ SubscriberImpl::set_qos (
           {
             try
             {
+              ACE_DEBUG ((LM_DEBUG, "(%P|%t)update_subscription_qos \n"));
               this->repository_->update_subscription_qos (participant_->get_domain_id(), 
                                                           participant_->get_id (), 
                                                           iter->first,
@@ -807,7 +811,6 @@ SubscriberImpl::data_received(DataReaderImpl *reader)
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
 	     guard,
 	     this->si_lock_);
-
   datareader_set_.insert(reader) ;
 }
 

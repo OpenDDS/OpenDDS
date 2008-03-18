@@ -589,6 +589,8 @@ module DDS {
 		long sample_rank;
 		long generation_rank;
 		long absolute_generation_rank;
+    InstanceHandle_t publication_handle;
+    boolean valid_data;
 		};
 
     native SampleInfoSeq; // support zero-copy read
