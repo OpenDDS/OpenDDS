@@ -27,9 +27,7 @@ FederatorManager::~FederatorManager()
 
 ::OpenDDS::Federator::Status
 FederatorManager::join_federation (
-  ::OpenDDS::Federator::RepoKey /* federationId */,
-  const char * /* repoIor */,
-  const char * /* federatorIor */
+  const char * /* endpoint */
 )
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
@@ -55,6 +53,18 @@ ACE_THROW_SPEC ((
     ACE_TEXT("%T (%P|%t) INFO: FederatorManager::remove_connection()\n")
   ));
   return Unfederated;
+}
+
+::OpenDDS::Federator::RepoKey
+FederatorManager::federationId()
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException
+))
+{
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("%T (%P|%t) INFO: FederatorManager::federationId()\n")
+  ));
+  return 0;
 }
 
 }} // End namespace OpenDDS::Federator
