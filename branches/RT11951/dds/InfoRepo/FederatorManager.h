@@ -5,6 +5,7 @@
 #define FEDERATORMANAGER_H
 
 #include "FederatorS.h"
+#include "LinkStateManager.h"
 
 namespace OpenDDS { namespace Federator {
 
@@ -39,10 +40,38 @@ class FederatorManager : public virtual POA_OpenDDS::Federator::Manager {
       ::CORBA::SystemException
     ));
 
+    // Servant methods
+
+    /// Accessors for the federation Id value.
+    RepoKey& id();
+    RepoKey  id() const;
+
 
   private:
+    /// Simple recursion avoidance during the join operations.
+    bool joining_;
+
+    /// The repositories federation Id value within any federation.
+    RepoKey federationId_;
+
+    /// LinkState manager for distributing update data.
+    LinkStateManager manager_;
 
 };
+
+inline
+RepoKey&
+FederatorManager::id()
+{
+  return this->federationId_;
+}
+
+inline
+RepoKey
+FederatorManager::id() const
+{
+  return this->federationId_;
+}
 
 }} // End namespace OpenDDS::Federator
 

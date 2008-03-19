@@ -1,5 +1,6 @@
 #include "DcpsInfo_pch.h"
 #include "DCPSInfo_i.h"
+#include "FederatorManager.h"
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -64,6 +65,10 @@ private:
   int listen_address_given_;
   bool use_bits_;
   bool resurrect_;
+
+  /// Repository Federation behaviors
+  OpenDDS::Federator::FederatorManager federator_;
+  ACE_TString federation_endpoint_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
@@ -104,6 +109,8 @@ InfoRepo::usage (const ACE_TCHAR * cmd)
               ACE_TEXT ("    -a <address> listening address for Built-In Topics\n")
               ACE_TEXT ("    -o <file> write ior to file\n")
               ACE_TEXT ("    -d <file> load domain ids from file\n")
+              ACE_TEXT ("    -f <number> run with given federation Id value\n")
+              ACE_TEXT ("    -j <endpoint> federate initially with repository at endpoint\n")
               ACE_TEXT ("    -NOBITS disable the Built-In Topics\n")
               ACE_TEXT ("    -z turn on verbose Transport logging\n")
               ACE_TEXT ("    -r Resurrect from persistent file\n")
@@ -126,6 +133,16 @@ InfoRepo::parse_args (int argc,
         {
           listen_address_str_ = current_arg;
           listen_address_given_ = 1;
+          arg_shifter.consume_arg();
+        }
+      else if ( (current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+        {
+          federator_.id() = ACE_OS::atoi( current_arg);
+          arg_shifter.consume_arg();
+        }
+      else if ( (current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-j"))) != 0)
+        {
+          federation_endpoint_ = current_arg;
           arg_shifter.consume_arg();
         }
       else if ((current_arg = arg_shifter.get_the_parameter
@@ -268,6 +285,18 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
       //ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: Failed to load any domains!\n")), -1);
     }
 
+  // Fire up the federator.
+  oid = PortableServer::string_to_ObjectId ("Federator");
+  info_poa_->activate_object_with_id (oid.in (),
+                                      &federator_);
+  obj = info_poa_->id_to_reference(oid.in());
+  OpenDDS::Federator::Manager_var federator
+    = OpenDDS::Federator::Manager::_narrow (obj.in ());
+
+  CORBA::String_var federator_ior
+    = orb_->object_to_string (federator.in ());
+
+  // Grab the IOR table.
   CORBA::Object_var table_object =
     orb_->resolve_initial_references ("IORTable");
 
@@ -278,6 +307,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   }
   else {
     adapter->bind ("DCPSInfoRepo", objref_str.in ());
+    adapter->bind ("Federator", federator_ior.in ());
   }
 
   FILE *output_file= ACE_OS::fopen (ior_file_.c_str (), ACE_TEXT("w"));
@@ -289,6 +319,11 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   ACE_OS::fprintf (output_file, "%s", objref_str.in ());
   ACE_OS::fclose (output_file);
+
+  // Initial federation join if specified on command line.
+  if( false == federation_endpoint_.empty()) {
+    (void)federator_.join_federation( federation_endpoint_.c_str());
+  }
 
   return true;
 }

@@ -1,13 +1,26 @@
+Wed Mar 19 22:35:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+	  Added federator to repository process.  Added to IORTable as
+	  well.
+
+        * dds/InfoRepo/Federator.idl:
+	  Added additional status to use during join operations.
+
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+	  Starting to implement federation.
+
 Wed Mar 19 18:59:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
         * dds/InfoRepo/FederatorManager.h:
         * dds/InfoRepo/FederatorManager.cpp:
-	  Simplified join_federation() signature and added federationId()
-	  accessor.
+          Simplified join_federation() signature and added federationId()
+          accessor.
 
         * docs/design/federation.txt:
-	  Updated with Use Cases and Scenarios.
+          Updated with Use Cases and Scenarios.
 
 Tue Mar 18 20:41:14 UTC 2008   Yan Dai  <dai_y@ociweb.com>
 
