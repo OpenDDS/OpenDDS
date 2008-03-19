@@ -395,3 +395,317 @@ Application objects
   for each repository, a separate map for each attached repository is
   required.
 
+************************************************************************
+*** Use Cases:
+
+A) Repository starts operation
+
+   This is essentially the previous mode of operation for the repository.
+   In addition, the Federator::Manager object is incarnated and its IOR
+   stored to the IORTable along with the DCPSInfoRepo interface IOR.
+
+   *********************************************************************
+   Scenario A.1) Standalone startup
+
+   This scenario consists of a repository starting up and initializing
+   its DCPSInfoRepo and Federator components so that federation can be
+   supported by the executing process.
+
+   *********************************************************************
+   Scenario A.2) Startup and federate
+
+   This scenario extends the previous one (A.1) by including the initial
+   federation with another repository.  The federation information is
+   provided on the command line and the federation process is the same as
+   that described in use case (B).  The command line argument consists of
+   an endpoint to reach the external repository to federate with.
+
+B) Repository joins a federation of (one or more) other repositories
+
+   This is the initial join operation where a repository receives
+   federation information and provides its internal information back to
+   the federation in return.  At the end of this processing, each
+   repository of the federation will contain the same information in
+   slightly different format.  Each repository will retain a mapping from
+   the federation scope identification of service Entities to its own
+   internal representation of these Entities.
+
+   *********************************************************************
+   Scenario B.1) Repository has no prior information from federation
+
+   This is the initial federation operation, where a repository that has
+   been operating standalone is given the endpoint of another repository
+   with which to federate.  It finds the DCPSInfoRepo and Federator
+   objects (in the IORTable) at that endpoint.
+
+   The external repository provides updates for information that it
+   contains and the federating repository provides its internal
+   information to the external repository.
+
+   *********************************************************************
+   Scenario B.2) Repository has prior information from federation
+
+   This is where a repository had participated in a federation of
+   repositories, left the federation and in this scenario is rejoining
+   the federation.  This includes validating that the residual
+   information from the previous participation in the federation does not
+   conflict with the current values.  It also includes updating new
+   information that was added to the repository as well as internal to
+   the federation while the repository was not participating in the
+   federation.
+
+   *********************************************************************
+   Scenario B.3) Repository is already member of federation
+
+   This is where an additional connection is added to a repository that
+   is already participating in the federation.  No new information is
+   exchanged when this connection is added.  The topology and possibly
+   the minimal spanning tree used to distribute updates within the
+   federation may be updated.  Sample numbers are used to prevent
+   updating repository information more than once.
+
+C) Repository removes a redundant connection
+
+   This is where a connection between repositories in the federation is
+   removed.  In this case, the connection is redundant in the sense that
+   the repositories at the ends of the connection still have a path over
+   which they can communicate, which means that the federation
+   information does not change.  The topology and the mechanisms to
+   transmit data updates will change according to the details of the
+   connection that was removed.
+
+   *********************************************************************
+   Scenario C.1) Topology minimum spanning tree unaffected
+
+   This scenario simply updates the topolgy information and removes
+   the connection from internal tables.  No change to the federation
+   information or its distribution is made.
+
+   *********************************************************************
+   Scenario C.2) Topology minumum spanning tree changed
+
+   This scenario extends the previous one (C.1) and results in a
+   change in the way updates are distributed within the federation.
+   Subscriptions to update information is changed from the previosu
+   minimum spanning tree links to the new ones.
+
+D) Repository removes an irredundant connection
+
+   This is where a connection between repositories in the federation is
+   removed.  In this case, the connection is the only path between the
+   repositories at its ends.  This results in the federation being split
+   into two separate sub-federations, where each of these may contain one
+   or more repositories of the original federation.  The federation
+   information within each new, separate, federation is affected as well
+   as changes to the topology.  Other than not being able to send updates
+   to over the removed connection, update data is trasmitted over the
+   same paths as before the connection was removed, since it was by
+   definition on the minumum spanning tree and its removal will not
+   affect the two sub-trees that are the minimal spanning trees of the
+   resulting sub-federations.
+
+   *********************************************************************
+   Scenario D.1) Repository becomes isolated from entire federation
+
+   This scenario is where a repository leaves a federation of
+   repositories.  The connection is removed as in scenario (C.1).  Since
+   the remaining repository federation will not have a change to the
+   minimum spanning tree, no other distribution changes are required.
+   The leaving repository will remove all internal references to service
+   Entities _other_ _than_ _Topics_ that are owned by other repositories.
+   The federation will remove references to all non-Topic Entity
+   references owned by the leaving repository.
+
+   *********************************************************************
+   Scenario D.2) Repository becomes isolated from portion of federation
+
+   This scenario is similar to the previous one (D.1) with the additional
+   behavior that both new groups of repositories that remain connected
+   are what is described for the remaining federated repositories in that
+   scenario.
+
+************************************************************************
+*** Scenarios:
+
+   *********************************************************************
+   Scenario A.1) Standalone startup
+
+   main():
+   1) DCPSInfoRepo instantiated, activated and IOR bound to IORTable.
+
+      [design: this is existing code]
+
+   2) Federator::Manager instantiated, activated and IOR bound to IORTAble.
+
+      a) Obtain federation Id value from command line
+
+   *********************************************************************
+   Scenario A.2) Startup and federate
+
+   main():
+   1) Initiate processing of scenario (A.1).
+
+   2) Initiate processing of (B.1) using endpoint supplied from command
+      line.
+
+   *********************************************************************
+   Scenario B.1) Repository has no prior information from federation
+
+   Federator::Manager::join_federation( endpoint):
+   1) resolve remote federator at corbaloc:iiop:endpoint/Federator
+
+   2) call remote Federator::Manager federatorId() and generate a new
+      <remote> domain value for this connection as its federation Id value
+
+      [rationale: a separate domain is required in order to attach two
+       separate repositories within the same Service_Participant.  This
+       is an artifact of the way multiple repositories are handled within
+       the Service_Participant]
+
+   3) call remote Federator::Manager join_federation( endpoint)
+
+      [rationale: this lets the federated repository add ourselves to
+       its federation]
+
+      [design: we need to mark ourselves as in process so that we can
+       return immediately when we are called back from the remote side
+       while still processing]
+
+      [dependency: this can be done at any point between here and where
+       we return.]
+
+   4) resolve remote repository at corbaloc:iiop:endpoint/DCPSInfoRepo
+
+   5) add remote repository to Service_Participant bound to <remote>
+      domain
+
+   6) add publication for update topics on <self> domain in
+      "<self>-<remote>" partition with DURABILITY==TRANSIENT_LOCAL
+
+   7) publish all internal Entities to new publication
+
+      [caveat: this may need to be delayed if DURABILITY does not hold
+       the data until a subscriber is associated]
+
+      [note: the choice to examine the internal storage or create a
+       separate storage for updates is yet to be made]
+
+   8) add publication for LinkState data on <remote> domain in
+      "<self>-<remote>" partition
+
+   9) publish (<self>,<remote>,ON,<sequence>) on all link state
+      publications in federator
+
+  10) subscribe to LinkState data on <remote> domain in "<remote>-<self>"
+      partition
+
+      [rationale: separate partitions are required in order to allow
+       different physical links or otherwise restricted connections to be
+       used within the same domains]
+
+  11) on_data_available( LinkState): update topology and determine new
+      minimum spanning tree
+
+      a) for each link removed from MST, unsubscribe from update topics
+         on that domain
+
+      b) for each link added to MST, subscribe to update topics on
+         that domain
+
+      c) for each repository that becomes unreachable, remove all
+         references to non-Topic Entities from that repository
+
+         [rationale: the Topic Entity references are left intact since
+          they may still be in use]
+
+         [design: calling delete on the publication and subscription
+          entities should result in the remove_associations being
+          forwarded to the Service_Participants involved]
+
+  12) on_data_available( Udpate*):
+
+      a) Find the set of <remote> repositories on the MST that does not
+         include the source of this sample and forward the sample to them
+
+      b) If this is an update for a new (to this repository) Entity:
+
+         i) Create new entity and obtain its <localId>
+
+        ii) Add mapping from (<remote>,<id>) to <localId>
+
+       iii) If the mapping is for a publication, call the
+            DataReaderRemote and DataWriterRemote add_mapping() method
+            on attached readers and writers
+
+            [design: this is simpler than adding an IDL interface to
+             each participant and calling just once per participant.
+             It is only necessary to add the mapping to each distinct
+             Service_Participant that is attached to the repository]
+
+      c) If this is an update for an existing Entity:
+
+         i) obtain <localId> for (<remote>,<id>) value
+
+        ii) update data for <localId>
+
+   *********************************************************************
+   Scenario B.2) Repository has prior information from federation
+
+   The processing for this scenario is identical to that of the previous
+   (B.1) scenario.  The difference is that when receiving data updates
+   for Topics, they will be handled as existing entities.  The update
+   processing for Topic data will therefore need to ensure validity of
+   the update.
+
+   *********************************************************************
+   Scenario B.3) Repository is already member of federation
+
+   The processing for this scenario is identical to the earlier (B.1)
+   scenario.  The difference is that no additional update topic data
+   will be distributed.  If some historical data is distributed, then it
+   will be ignored since it will already have been received and
+   processed.
+
+   *********************************************************************
+   Scenario C.1) Topology minimum spanning tree unaffected
+
+   Federator::Manager::remove_connection( remote):
+   1) delete subscriptions to update and link state topics in <remote>
+      domain
+
+   2) delete publications of update and link state topics in <self>
+      domain, "<self>-<remote>" partition
+
+   3) publish (<self>,<remote>,OFF,<sequence>) on all link state
+      publications in federator
+
+   *********************************************************************
+   Scenario C.2) Topology minumum spanning tree changed
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.
+
+   *********************************************************************
+   Scenario D.1) Repository becomes isolated from entire federation
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.  As
+   repositories become isolated, references to their owned entities are
+   removed from the repositories that can no longer reach the isolated
+   repository
+
+   *********************************************************************
+   Scenario D.2) Repository becomes isolated from portion of federation
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.  As
+   repositories become isolated, references to their owned entities are
+   removed from the repositories that can no longer reach the isolated
+   repository
+

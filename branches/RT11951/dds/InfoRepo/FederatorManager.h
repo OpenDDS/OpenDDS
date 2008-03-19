@@ -19,9 +19,7 @@ class FederatorManager : public virtual POA_OpenDDS::Federator::Manager {
     // IDL methods.
 
     virtual ::OpenDDS::Federator::Status join_federation (
-      ::OpenDDS::Federator::RepoKey federationId,
-      const char * repoIor,
-      const char * federatorIor
+      const char * endpoint
     )
     ACE_THROW_SPEC ((
       ::CORBA::SystemException,
@@ -35,6 +33,12 @@ class FederatorManager : public virtual POA_OpenDDS::Federator::Manager {
       ::CORBA::SystemException,
       ::OpenDDS::Federator::ConnectionBusy
     ));
+
+    virtual ::OpenDDS::Federator::RepoKey federationId()
+    ACE_THROW_SPEC ((
+      ::CORBA::SystemException
+    ));
+
 
   private:
 

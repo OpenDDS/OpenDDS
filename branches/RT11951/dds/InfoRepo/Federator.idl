@@ -104,7 +104,7 @@ module OpenDDS { module Federator {
       // The transport type (.e.g SimpleTCP or SimpleUDP)
       OpenDDS::DCPS::TransportInterfaceId   transport_id;
 
-      // Informationn about the transport instance that is opaque to all but
+      // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
       sequence<octet>                       transport_blob;
     };
@@ -132,7 +132,7 @@ module OpenDDS { module Federator {
       // The transport type (.e.g SimpleTCP or SimpleUDP)
       OpenDDS::DCPS::TransportInterfaceId   transport_id;
 
-      // Informationn about the transport instance that is opaque to all but
+      // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
       sequence<octet>                       transport_blob;
     };
@@ -168,12 +168,12 @@ module OpenDDS { module Federator {
       // DCPSInfoRepo and Federator::Manager objects using the IORTable
       // at the endpoint and perform federation initialization using them.
       //
-      Status join_federation(
-               in RepoKey federationId,
-               in string  repoIor,
-               in string  federatorIor
-
-             ) raises ( Unavailable);
+      // It will search for the objects at:
+      //
+      //  corbaloc:iiop:$(endpoint)/DCPSInfoRepo
+      //  corbaloc:iiop:$(endpoint)/Federator
+      //
+      Status join_federation( in string  endpoint ) raises ( Unavailable);
 
       //
       // Remove a connection with a remote repository.
@@ -185,6 +185,11 @@ module OpenDDS { module Federator {
       // from the federation.
       //
       Status remove_connection( in RepoKey remoteId) raises ( ConnectionBusy);
+
+      //
+      // Obtain the value of federation Id for this instance.
+      //
+      RepoKey federationId();
 
     };
 
