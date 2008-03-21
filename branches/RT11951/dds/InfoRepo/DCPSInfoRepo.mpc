@@ -3,6 +3,13 @@ project(*Federator): dcps {
   libout     = $(DDS_ROOT)/lib
   includes  += $(DDS_ROOT)
 
+  idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
+  dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
+  dcps_ts_flags += --export=OpenDDS_Federator_Export --pch DcpsInfo_pch.h
+
+  pch_header   = DcpsInfo_pch.h
+  pch_source   = DcpsInfo_pch.cpp
+
   TypeSupport_Files {
     Federator.idl >> LinkStateTypeSupport.idl LinkStateTypeSupportImpl.h LinkStateTypeSupportImpl.cpp TopicUpdateTypeSupport.idl TopicUpdateTypeSupportImpl.h TopicUpdateTypeSupportImpl.cpp ParticipantUpdateTypeSupport.idl ParticipantUpdateTypeSupportImpl.h ParticipantUpdateTypeSupportImpl.cpp PublicationUpdateTypeSupport.idl PublicationUpdateTypeSupportImpl.h PublicationUpdateTypeSupportImpl.cpp SubscriptionUpdateTypeSupport.idl SubscriptionUpdateTypeSupportImpl.h SubscriptionUpdateTypeSupportImpl.cpp
   }

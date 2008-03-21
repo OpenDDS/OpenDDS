@@ -2,6 +2,7 @@
 //
 // $Id$
 
+#include "DcpsInfo_pch.h"
 #include "FederatorManager.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"

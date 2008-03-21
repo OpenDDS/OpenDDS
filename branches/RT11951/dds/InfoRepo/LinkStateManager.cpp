@@ -1,6 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
+#include "DcpsInfo_pch.h"
 #include "LinkStateManager.h"
 #include "dds/DCPS/Definitions.h"
 #include "ace/Log_Priority.h"
