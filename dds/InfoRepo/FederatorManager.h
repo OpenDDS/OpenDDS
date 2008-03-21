@@ -4,12 +4,14 @@
 #ifndef FEDERATORMANAGER_H
 #define FEDERATORMANAGER_H
 
+#include "federator_export.h"
 #include "FederatorS.h"
 #include "LinkStateManager.h"
 
 namespace OpenDDS { namespace Federator {
 
-class FederatorManager : public virtual POA_OpenDDS::Federator::Manager {
+class OpenDDS_Federator_Export FederatorManager 
+  : public virtual POA_OpenDDS::Federator::Manager {
   public:
     /// Default constructor.
     FederatorManager();

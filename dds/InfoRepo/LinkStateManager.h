@@ -8,6 +8,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "federator_export.h"
 #include "dds/InfoRepo/FederatorC.h"
 
 #include <vector>
@@ -30,7 +31,7 @@ namespace OpenDDS { namespace Federator {
  * provided as a result of the update call.  The topology and MST are
  * also available separately.
  */
-class LinkStateManager {
+class OpenDDS_Federator_Export LinkStateManager {
   public:
     /// Links in the topology and MST.
     typedef std::pair< RepoKey, RepoKey> Link;
