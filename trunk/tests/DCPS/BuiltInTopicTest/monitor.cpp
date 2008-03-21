@@ -74,7 +74,6 @@ parse_args (int argc, char *argv[])
       DR_USER_DATA = UPDATED_DR_USER_DATA;
       TOPIC_DATA = UPDATED_TOPIC_DATA;
       GROUP_DATA = UPDATED_GROUP_DATA;
-      num_parts = 4;
       break;
     case '?':
     default:
@@ -100,6 +99,8 @@ int main (int argc, char *argv[])
 {
   try
     {
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) monitor main\n"));
+
       DDS::DomainParticipantFactory_var dpf;
       DDS::DomainParticipant_var participant;
 
@@ -335,6 +336,10 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t)DataWriter: key = %d, %d, %d. \n",
             pubdata[i].key[0], pubdata[i].key[1], pubdata[i].key[2]));
 
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DW user data %s \n", pubdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DW topic data %s \n", pubdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DW group data %s \n", pubdata[i].group_data.value.get_buffer()));
+
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DW_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
         CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (GROUP_DATA));
@@ -411,6 +416,10 @@ int main (int argc, char *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t)DataReader: key = %d, %d, %d \n",
           subdata[i].key[0], subdata[i].key[1], subdata[i].key[2]));
       
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR user data %s \n", subdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %s \n", subdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR group data %s \n", subdata[i].group_data.value.get_buffer()));
+
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
         CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (GROUP_DATA));
@@ -439,7 +448,7 @@ int main (int argc, char *argv[])
           1);
       }
 
-      ACE_OS::sleep (15);
+      dpf->delete_participant(participant.in ());
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
     }

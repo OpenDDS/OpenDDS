@@ -7,7 +7,7 @@
 #include <ace/streams.h>
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
+extern int num_messages;
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),

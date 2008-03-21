@@ -330,6 +330,9 @@ private:
 
   bool init_persistence (void);
 
+  template <typename QosType, typename Qos>
+  void get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq);
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;

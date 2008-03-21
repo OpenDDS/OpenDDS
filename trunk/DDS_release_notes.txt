@@ -11,7 +11,24 @@ New to this version are the following changes:
   controlled by a single repository and this association may not be
   changed for the lifetime of the repository or the application.
 
-
+- Add the qos propagation.
+  
+  The client applications can change the qos of DCPS entity via 
+  set_qos() call. The qos updates are propagated to DCPSInfoRepo which
+  publishes the updated qos to corresponding BIT datawriter and also
+  save it to persistent repository.
+  
+- Fixed a few bugs in persistent DCPSInfoRepo support.
+  
+  Fixed incorrect actor type and qos type for subscriber/datareader
+  problem in UpdateManager::add(const UA& actor). This bug causes the 
+  reloading from persistent file maps the subscriber/datareader as 
+  publisher/datawriter.
+  
+  Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
+  fully copied to buffer when the qos contains sequence data. The 
+  TAO_OutputCDR stream needs be cosolidated before memcpy.  
+  
 =========================================================================
 
 Version 1.0 of OpenDDS.

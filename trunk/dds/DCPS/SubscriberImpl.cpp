@@ -582,7 +582,6 @@ SubscriberImpl::set_qos (
           {
             try
             {
-              ACE_DEBUG ((LM_DEBUG, "(%P|%t)update_subscription_qos \n"));
               this->repository_->update_subscription_qos (participant_->get_domain_id(), 
                                                           participant_->get_id (), 
                                                           iter->first,

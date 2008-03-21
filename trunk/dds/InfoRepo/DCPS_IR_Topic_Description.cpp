@@ -78,11 +78,11 @@ int DCPS_IR_Topic_Description::add_subscription_reference (DCPS_IR_Subscription*
     {
     case 0:
 
+      // Publish the BIT information
+      domain_->publish_subscription_bit(subscription);
+
       if (associate)
         {
-          // Publish the BIT information
-          domain_->publish_subscription_bit(subscription);
-
           try_associate_subscription(subscription);
           // Do not check incompatible qos here.  The check is done
           // in the DCPS_IR_Topic_Description::try_associate_subscription method

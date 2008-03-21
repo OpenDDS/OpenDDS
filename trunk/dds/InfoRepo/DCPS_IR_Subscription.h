@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_SUBSCRIPTION_H
 #define DCPS_IR_SUBSCRIPTION_H
 
+#include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsSubscriptionC.h"
 #include /**/ "dds/DdsDcpsInfoC.h"
@@ -109,8 +110,8 @@ public:
     
   /// Update the DataReader or Subscriber qos and also publish the qos 
   /// changes to datereader BIT.
-  void set_qos (const ::DDS::DataReaderQos & qos,
-                const ::DDS::SubscriberQos & subscriberQos);
+  SpecificQos set_qos (const ::DDS::DataReaderQos & qos,
+                       const ::DDS::SubscriberQos & subscriberQos);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
