@@ -296,6 +296,7 @@ UpdateManager::add (const UTopic& topic)
     return;
   }
 
+  outCdr.consolidate ();
   ACE_OS::memcpy (buf, outCdr.buffer(), len);
   BinSeq qos_bin (len, buf);
 
@@ -331,6 +332,7 @@ UpdateManager::add(const UParticipant& participant)
     return;
   }
 
+  outCdr.consolidate ();
   ACE_OS::memcpy (buf, outCdr.buffer(), len);
   BinSeq qos_bin (len, buf);
 
@@ -368,6 +370,7 @@ UpdateManager::updateQos(const ItemType& itemType, const IdType& id
     (*iter)->updateQos (itemType, id, qos);
   }
 }
+
 
 void
 UpdateManager::add (const DTopic& topic)

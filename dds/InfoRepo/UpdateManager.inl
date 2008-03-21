@@ -3,9 +3,15 @@
 
 #include <memory>
 
-template <typename UA> void
-UpdateManager::add(const UA& actor)
+template <typename ActorType, typename UA> void
+UpdateManager::add(const ActorType& actorType, const UA& actor)
 {
+  if (actorType != DataWriter && actorType != DataReader)
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: UpdateManager::add invalid actor type %d\n", actorType));
+    return;
+  }
+
   if (updaters_.empty()) {
     return;
   }
@@ -20,10 +26,25 @@ UpdateManager::add(const UA& actor)
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
+
+  outCdr.consolidate ();
   ACE_OS::memcpy (buf, outCdr.buffer(), len);
 
-  BinSeq pub_qos_bin (len, buf);
-  QosSeq pub_qos (PublisherQos, pub_qos_bin);
+  SpecificQos pubsubQosType;
+  SpecificQos dwdrQosType;
+  if (actorType == DataWriter)
+  {
+    pubsubQosType = PublisherQos;
+    dwdrQosType = DataWriterQos;
+  }
+  else
+  {
+    pubsubQosType = SubscriberQos;
+    dwdrQosType = DataReaderQos;
+  }
+
+  BinSeq pubsub_qos_bin (len, buf);
+  QosSeq pubsub_qos (pubsubQosType, pubsub_qos_bin);
 
 
 
@@ -31,16 +52,17 @@ UpdateManager::add(const UA& actor)
   outCdr << actor.drdwQos;
   len = outCdr.total_length();
   char *buf2 = new char[len];
+
   ArrDelAdapter<char> guard2 (buf2);
   if (buf2 == 0) {
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
+  outCdr.consolidate ();
   ACE_OS::memcpy (buf2, outCdr.buffer(), len);
 
-  BinSeq dw_qos_bin (len, buf2);
-  QosSeq dw_qos (DataWriterQos, dw_qos_bin);
-
+  BinSeq dwdr_qos_bin (len, buf2);
+  QosSeq dwdr_qos (dwdrQosType, dwdr_qos_bin);
 
 
   outCdr.reset ();
@@ -52,21 +74,21 @@ UpdateManager::add(const UA& actor)
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
+  outCdr.consolidate ();
   ACE_OS::memcpy (buf3, outCdr.buffer(), len);
 
   BinSeq tr_bin (len, buf3);
 
 
-
   DActor actor_data (actor.domainId, actor.actorId, actor.topicId
                      , actor.participantId
-                     , DataWriter, actor.callback.c_str(), pub_qos
-                     , dw_qos, tr_bin);
+                     , actorType, actor.callback.c_str(), pubsub_qos
+                     , dwdr_qos, tr_bin);
 
   // Invoke add on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-	this->add (*iter, actor_data);
-  }
+    iter != updaters_.end();
+    iter++) {
+      this->add (*iter, actor_data);
+    }
 }

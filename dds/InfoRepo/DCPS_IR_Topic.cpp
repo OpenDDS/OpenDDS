@@ -64,16 +64,15 @@ int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
     {
     case 0:
 
+      // Publish the BIT information
+      domain_->publish_publication_bit (publication);
+
       if (associate)
         {
-          // Publish the BIT information
-          domain_->publish_publication_bit (publication);
-
           description_->try_associate_publication(publication);
           // Do not check incompatible qos here.  The check is done
           // in the DCPS_IR_Topic_Description::try_associate_publication method
         }
-
       if (TAO_debug_level > 0)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Topic::add_publication_reference ")

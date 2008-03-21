@@ -300,11 +300,10 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add (actor);
+      um_->add (DataWriter, actor);
     }
 
   domainPtr->remove_dead_participants();
-
   return pubId;
 }
 
@@ -499,7 +498,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add (actor);
+      um_->add (DataReader, actor);
     }
 
   domainPtr->remove_dead_participants();
@@ -891,8 +890,24 @@ void TAO_DDS_DCPSInfo_i::update_publication_qos (
     {
       throw OpenDDS::DCPS::Invalid_Publication();
     }
- 
-  pub->set_qos (qos, publisherQos);
+    
+  SpecificQos qosType = pub->set_qos (qos, publisherQos);
+
+  if (um_)
+    {
+      if (qosType == DataWriterQos)
+      {
+        QosSeq dw_qos;
+        this->get_qos_seq (qosType, qos, dw_qos);
+        um_->updateQos (Actor, dwId, dw_qos);
+      }
+      else
+      {
+        QosSeq pub_qos;
+        this->get_qos_seq (qosType, publisherQos, pub_qos);
+        um_->updateQos (Actor, dwId, pub_qos);
+      }
+    }
 }
 
 void TAO_DDS_DCPSInfo_i::update_subscription_qos (
@@ -927,7 +942,23 @@ void TAO_DDS_DCPSInfo_i::update_subscription_qos (
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
  
-  sub->set_qos (qos, subscriberQos);
+  SpecificQos qosType = sub->set_qos (qos, subscriberQos);
+
+  if (um_)
+  {
+    if (qosType == DataReaderQos)
+    {
+      QosSeq dr_qos;
+      this->get_qos_seq (qosType, qos, dr_qos);
+      um_->updateQos (Actor, drId, dr_qos);
+    }
+    else
+    {
+      QosSeq sub_qos;
+      this->get_qos_seq (qosType, subscriberQos, sub_qos);
+      um_->updateQos (Actor, drId, sub_qos);
+    }
+  }
 }
 
 
@@ -965,6 +996,13 @@ void TAO_DDS_DCPSInfo_i::update_topic_qos (
     }
 
   topic->set_topic_qos (qos);
+
+  if (um_)
+    {
+       QosSeq topic_qos;
+       this->get_qos_seq (TopicQos, qos, topic_qos);
+       um_->updateQos (Topic, topicId, topic_qos);
+    }
 }
  
 
@@ -994,6 +1032,12 @@ void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     }
 
   partPtr->set_qos (qos);
+  if (um_)
+    {
+      QosSeq part_qos;
+      this->get_qos_seq (ParticipantQos, qos, part_qos);
+      um_->updateQos (Participant, participantId, part_qos);
+    }
 }
 
 
@@ -1206,6 +1250,29 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
 
   return true;
 }
+
+
+template <typename QosType, typename Qos>
+void 
+TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq)
+{
+  TAO_OutputCDR outCdr;
+  outCdr << qos;
+  size_t len = outCdr.total_length();
+  char *buf = new char[len];
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)TAO_DDS_DCPSInfo_i::get_qos_seq "
+      "Allocation failed.\n"));
+    exit (1);
+  }
+
+  outCdr.consolidate ();
+  ACE_OS::memcpy (buf, outCdr.buffer(), len);
+
+  qosSeq.first = qosType;
+  qosSeq.second = BinSeq (len, buf);
+}
+
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Map_Entry<::DDS::DomainId_t,DCPS_IR_Domain*>;

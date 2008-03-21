@@ -10,6 +10,7 @@
 #ifndef DCPS_IR_PUBLICATION_H
 #define DCPS_IR_PUBLICATION_H
 
+#include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
 #include /**/ "dds/DdsDcpsInfoC.h"
@@ -106,10 +107,10 @@ public:
   /// Publication retains ownership
   ::DDS::PublisherQos* get_publisher_qos ();
 
-  /// Update the DataWriter or Publisher qos and also publish the qos changes 
+  /// Update the DataWriter or Publisher qos and also publish the qos changes
   /// to datawriter BIT.
-  void set_qos (const ::DDS::DataWriterQos & qos,
-                const ::DDS::PublisherQos & publisherQos);
+  SpecificQos set_qos (const ::DDS::DataWriterQos & qos,
+                       const ::DDS::PublisherQos & publisherQos);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;

@@ -90,8 +90,8 @@ class UpdateManager : public ACE_Service_Object
   void add (const UTopic& topic);
   void add (const UParticipant& participant);
 
-  template <typename UA>
-  void add (const UA& actor);
+  template <typename ActorType, typename UA>
+  void add (const ActorType& actorType, const UA& actor);
 
   /// Upstream request to remove entries
   // Remove an entity (but not children) from persistence.

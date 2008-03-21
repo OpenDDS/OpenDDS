@@ -33,6 +33,34 @@ char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
 char UPDATED_GROUP_DATA[] = "Updated GroupData";
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
+int num_messages = 10;
+
+int
+parse_args (int argc, char *argv[])
+{
+  ACE_Get_Opt get_opts (argc, argv, "n:");
+  int c;
+
+  while ((c = get_opts ()) != -1)
+  {
+    switch (c)
+    {
+    case 'n':
+      num_messages = ACE_OS::atoi (get_opts.opt_arg ());
+      break;
+    case '?':
+    default:
+      ACE_ERROR_RETURN ((LM_ERROR,
+        "usage:  %s "
+        "-n <num of messages> "
+        "\n",
+        argv [0]),
+        -1);
+    }
+  }
+  // Indicates sucessful parsing of the command line
+  return 0;
+}
 
 int main (int argc, char *argv[])
 {
@@ -43,6 +71,10 @@ int main (int argc, char *argv[])
       DDS::DomainParticipant_var participant;
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+      if (parse_args (argc, argv) == -1) {
+        return -1;
+      }
 
       DDS::DomainParticipantQos partQos;
       dpf->get_default_participant_qos(partQos);
@@ -205,8 +237,7 @@ int main (int argc, char *argv[])
                                           reinterpret_cast<CORBA::Octet*>(UPDATED_TOPIC_DATA));
       topic->set_qos (topic_qos);
 
-      int expected = 10;
-      while ( listener_servant.num_reads() < expected) {
+      while ( listener_servant.num_reads() < num_messages) {
         ACE_OS::sleep (1);
       }
 
