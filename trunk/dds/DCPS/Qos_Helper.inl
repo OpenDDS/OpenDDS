@@ -12,7 +12,7 @@ namespace OpenDDS
     ACE_INLINE 
     ACE_Time_Value time_to_time_value (const ::DDS::Time_t& t)
     {
-      ACE_Time_Value tv (t.sec, t.nanosec * 1000);
+      ACE_Time_Value tv (t.sec, t.nanosec / 1000);
       return tv;
     }
 
@@ -28,7 +28,7 @@ namespace OpenDDS
     ACE_INLINE 
     ACE_Time_Value duration_to_time_value (const ::DDS::Duration_t& t)
     {
-      ACE_Time_Value tv (t.sec, t.nanosec * 1000);
+      ACE_Time_Value tv (t.sec, t.nanosec / 1000);
       return tv;
     }
 

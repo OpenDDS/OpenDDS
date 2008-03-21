@@ -1,13 +1,20 @@
+Fri Mar 21 17:42:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fixed bugs in duration_to_time_value() and time_to_time_value()
+          that incorrectly convert nanoseconds to microseconds.
+          
 Fri Mar 21 17:06:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Added qos propagation to persistent repository test.
-        
+
         * DDS_release_notes.txt:
 
           Added qos propagation changes.
-                    
+
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
         * dds/InfoRepo/DCPS_IR_Publication.h:
@@ -21,28 +28,28 @@ Fri Mar 21 17:06:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/UpdateManager.h:
         * dds/InfoRepo/UpdateManager.inl:
         * dds/InfoRepo/UpdateManager.cpp:
-        
+
           - Implemented feature to update qos to persistent repository.
-          
+
           - Fixed incorrect actor type and qos type for subscriber/datareader
-            problem in UpdateManager::add(const UA& actor). This bug causes the 
-            reloading from persistent file maps the subscriber/datareader as 
+            problem in UpdateManager::add(const UA& actor). This bug causes the
+            reloading from persistent file maps the subscriber/datareader as
             publisher/datawriter.
-            
+
           - Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
-            fully copied to buffer when the qos contains sequence data. The 
-            TAO_OutputCDR stream needs be cosolidated before memcpy.  
-          
+            fully copied to buffer when the qos contains sequence data. The
+            TAO_OutputCDR stream needs be cosolidated before memcpy.
+
         * dds/DCPS/SubscriberImpl.cpp:
 
           Removed a debug logging.
-          
+
         * tests/DCPS/BuiltInTopicTest/Writer.cpp:
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
         * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
         * tests/DCPS/BuiltInTopicTest/publisher.cpp:
         * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
-        
+
           Added test for qos propagation to persistent repository.
 
 Tue Mar 18 18:46:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
