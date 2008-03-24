@@ -30,16 +30,22 @@ unsigned int num_pubs = 1;
 const char* topic_name = "Movie Discussion List";
 const char* topic_type_name = "Messenger";
 
-char* PART_USER_DATA = "Initial DomainParticipant UserData";
-char* DW_USER_DATA = "Initial DataWriter UserData";
-char* DR_USER_DATA = "Initial DataReader UserData";
-char* TOPIC_DATA = "Initial Topic TopicData";
-char* GROUP_DATA = "Initial GroupData";
-char* UPDATED_PART_USER_DATA = "Updated DomainParticipant UserData";
-char* UPDATED_DW_USER_DATA = "Updated DataWriter UserData";
-char* UPDATED_DR_USER_DATA = "Updated DataReader UserData";
-char* UPDATED_TOPIC_DATA = "Updated Topic TopicData";
-char* UPDATED_GROUP_DATA = "Updated GroupData";
+char PART_USER_DATA[] = "Initial DomainParticipant UserData";
+char DW_USER_DATA[] = "Initial DataWriter UserData";
+char DR_USER_DATA[] = "Initial DataReader UserData";
+char TOPIC_DATA[] = "Initial Topic TopicData";
+char GROUP_DATA[] = "Initial GroupData";
+char UPDATED_PART_USER_DATA[] = "Updated DomainParticipant UserData";
+char UPDATED_DW_USER_DATA[] = "Updated DataWriter UserData";
+char UPDATED_DR_USER_DATA[] = "Updated DataReader UserData";
+char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
+char UPDATED_GROUP_DATA[] = "Updated GroupData";
+
+char* CUR_PART_USER_DATA = PART_USER_DATA; 
+char* CUR_DW_USER_DATA = DW_USER_DATA;
+char* CUR_DR_USER_DATA = DR_USER_DATA;
+char* CUR_TOPIC_DATA = TOPIC_DATA;
+char* CUR_GROUP_DATA = GROUP_DATA;
 
 unsigned int dps_with_user_data = 2;
 
@@ -69,11 +75,11 @@ parse_args (int argc, char *argv[])
       num_pubs = ACE_OS::atoi (get_opts.opt_arg ());
       break;
     case 'u': // Check with reset qos data.
-      PART_USER_DATA = UPDATED_PART_USER_DATA;
-      DW_USER_DATA = UPDATED_DW_USER_DATA;
-      DR_USER_DATA = UPDATED_DR_USER_DATA;
-      TOPIC_DATA = UPDATED_TOPIC_DATA;
-      GROUP_DATA = UPDATED_GROUP_DATA;
+      CUR_PART_USER_DATA = UPDATED_PART_USER_DATA;
+      CUR_DW_USER_DATA = UPDATED_DW_USER_DATA;
+      CUR_DR_USER_DATA = UPDATED_DR_USER_DATA;
+      CUR_TOPIC_DATA = UPDATED_TOPIC_DATA;
+      CUR_GROUP_DATA = UPDATED_GROUP_DATA;
       break;
     case '?':
     default:
@@ -191,7 +197,7 @@ int main (int argc, char *argv[])
 
 
       CORBA::ULong cur_dps_with_user_data = 0;
-      CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (PART_USER_DATA));
+      CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
       for (CORBA::ULong i = 0; i < len; ++i)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t)Participant: key = %d, %d, %d \n",
@@ -201,7 +207,7 @@ int main (int argc, char *argv[])
         
         if ((cur_len == user_data_len) 
           && (ACE_OS::strncmp (reinterpret_cast <char*> (partdata[i].user_data.value.get_buffer()), 
-                                                         PART_USER_DATA, 
+                                                         CUR_PART_USER_DATA, 
                                                          user_data_len) == 0))
           {
             ++cur_dps_with_user_data;
@@ -267,11 +273,11 @@ int main (int argc, char *argv[])
           topicdata[i].key[0], topicdata[i].key[1], topicdata[i].key[2],
           topicdata[i].name.in (), topicdata[i].type_name.in ()));
 
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
 
         if ((topicdata[i].topic_data.value.length () == topic_data_len)
           && (ACE_OS::strncmp (reinterpret_cast <char*> (topicdata[i].topic_data.value.get_buffer()), 
-                               TOPIC_DATA, 
+                               CUR_TOPIC_DATA, 
                                topic_data_len) == 0))
           {
             ++ num_topics_with_data;
@@ -340,17 +346,17 @@ int main (int argc, char *argv[])
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DW topic data %s \n", pubdata[i].topic_data.value.get_buffer()));
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DW group data %s \n", pubdata[i].group_data.value.get_buffer()));
 
-        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DW_USER_DATA));
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
-        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (GROUP_DATA));
+        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
+        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
 
         if (pubdata[i].user_data.value.length () == user_data_len
           && pubdata[i].topic_data.value.length () == topic_data_len
           && pubdata[i].group_data.value.length () == group_data_len)
         {
-          if (ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()), DW_USER_DATA, user_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].topic_data.value.get_buffer()), TOPIC_DATA, topic_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].group_data.value.get_buffer()), GROUP_DATA, group_data_len) == 0)
+          if (ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()), CUR_DW_USER_DATA, user_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
           {
             ++ num_dws_with_data;
           }
@@ -420,17 +426,17 @@ int main (int argc, char *argv[])
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %s \n", subdata[i].topic_data.value.get_buffer()));
         //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR group data %s \n", subdata[i].group_data.value.get_buffer()));
 
-        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (TOPIC_DATA));
-        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (GROUP_DATA));
+        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
+        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
 
         if (subdata[i].user_data.value.length () == user_data_len
           && subdata[i].topic_data.value.length () == topic_data_len
           && subdata[i].group_data.value.length () == group_data_len)
         {
-          if (ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].user_data.value.get_buffer()), DR_USER_DATA, user_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].topic_data.value.get_buffer()), TOPIC_DATA, topic_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].group_data.value.get_buffer()), GROUP_DATA, group_data_len) == 0)
+          if (ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].user_data.value.get_buffer()), CUR_DR_USER_DATA, user_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
           {
             ++ num_drs_with_data;
           }
