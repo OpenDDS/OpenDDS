@@ -1,10 +1,24 @@
+Mon Mar 24 19:53:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          Replaced the ACE_OutputCDR::consolidate() with ACE_CDR::consolidate() 
+          to fix compilation errors on 1.4a due to consolidate() not defined
+          in ACE_OutputCDR.
+          
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+        
+          Added file missed in previous commit.
+          
 Fri Mar 21 17:42:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
 
           Fixed bugs in duration_to_time_value() and time_to_time_value()
           that incorrectly convert nanoseconds to microseconds.
-          
+
 Fri Mar 21 17:06:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:

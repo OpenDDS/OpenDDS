@@ -27,8 +27,9 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
     return;
   }
 
-  outCdr.consolidate ();
-  ACE_OS::memcpy (buf, outCdr.buffer(), len);
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf, dst.base(), len);
 
   SpecificQos pubsubQosType;
   SpecificQos dwdrQosType;
@@ -58,8 +59,9 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
-  outCdr.consolidate ();
-  ACE_OS::memcpy (buf2, outCdr.buffer(), len);
+
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf2, dst.base(), len);
 
   BinSeq dwdr_qos_bin (len, buf2);
   QosSeq dwdr_qos (dwdrQosType, dwdr_qos_bin);
@@ -74,8 +76,9 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
-  outCdr.consolidate ();
-  ACE_OS::memcpy (buf3, outCdr.buffer(), len);
+
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf3, dst.base(), len);
 
   BinSeq tr_bin (len, buf3);
 
