@@ -1,17 +1,27 @@
+Mon Mar 24 22:14:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        
+          Fixed "String literal converted to char* in initialization" warnings.
+          
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+
+          Minor change - remove info.pr after test finishes. 
+          
 Mon Mar 24 19:53:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
         * dds/InfoRepo/UpdateManager.inl:
         * dds/InfoRepo/UpdateManager.cpp:
 
-          Replaced the ACE_OutputCDR::consolidate() with ACE_CDR::consolidate() 
+          Replaced the ACE_OutputCDR::consolidate() with ACE_CDR::consolidate()
           to fix compilation errors on 1.4a due to consolidate() not defined
           in ACE_OutputCDR.
-          
+
         * tests/DCPS/BuiltInTopicTest/mySvc.conf:
-        
+
           Added file missed in previous commit.
-          
+
 Fri Mar 21 17:42:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:

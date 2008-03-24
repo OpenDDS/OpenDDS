@@ -98,9 +98,6 @@ if ($ir != 0) {
 }
 unlink $dcpsrepo_ior;
  
-#sleep (10000);
-
-
 print "Spawning second DCPSInfoRepo.\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
@@ -113,7 +110,6 @@ sleep (15);
 
 print "Spawning second monitor.\n";
 
-#sleep (10000);
 $Monitor2->Spawn ();
 
 $MonitorResult = $Monitor1->WaitKill (20);
@@ -153,7 +149,7 @@ open (STDERR, ">&OLDERR");
 
 unlink $dcpsrepo_ior;
 #unlink $data_file;
-#unlink $info_prst_file;
+unlink $info_prst_file;
 
 if ($status == 0) {
   print "test PASSED.\n";
