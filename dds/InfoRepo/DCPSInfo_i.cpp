@@ -1266,8 +1266,9 @@ TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq&
     exit (1);
   }
 
-  outCdr.consolidate ();
-  ACE_OS::memcpy (buf, outCdr.buffer(), len);
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf, dst.base(), len);
 
   qosSeq.first = qosType;
   qosSeq.second = BinSeq (len, buf);
