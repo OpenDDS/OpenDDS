@@ -1,7 +1,19 @@
+Wed Mar 26 18:09:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+	  Implemented configuration file processing and argument vector
+	  management.  Incorporated into repository process and
+	  federation manager.
+
 Wed Mar 26 15:16:48 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.inl:
-	  Forgot to add this file.
+          Forgot to add this file.
 
 Wed Mar 26 15:00:48 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

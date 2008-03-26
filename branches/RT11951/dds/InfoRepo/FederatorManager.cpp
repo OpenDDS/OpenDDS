@@ -4,6 +4,7 @@
 
 #include "DcpsInfo_pch.h"
 #include "FederatorManager.h"
+#include "FederatorConfig.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 
@@ -11,8 +12,8 @@
 
 namespace OpenDDS { namespace Federator {
 
-FederatorManager::FederatorManager()
- : federationId_( -1)
+FederatorManager::FederatorManager( Config& config)
+ : config_( config)
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) INFO: FederatorManager::FederatorManager()\n")
@@ -40,7 +41,7 @@ ACE_THROW_SPEC ((
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) INFO: FederatorManager::federationId()\n")
   ));
-  return this->federationId_;
+  return this->config_.federationId();
 }
 
 ::OpenDDS::Federator::Status
