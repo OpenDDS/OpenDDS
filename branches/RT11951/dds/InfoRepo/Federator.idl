@@ -47,8 +47,9 @@ module OpenDDS { module Federator {
     };
 
     // Constant values.
-    const string LINKSTATETOPICNAME = "LinkState";
-    const string LINKSTATETYPENAME  = "LinkState";
+    const RepoKey NIL_REPOSITORY     = 0; // Reserved repository Id value.
+    const string  LINKSTATETOPICNAME = "LinkState";
+    const string  LINKSTATETYPENAME  = "LinkState";
 
     ////////////////////////////////////////////////////////////////////
     //
@@ -154,7 +155,8 @@ module OpenDDS { module Federator {
       Federated,
       Already_Federated,
       Unfederated,
-      Joining
+      Joining,
+      Error_While_Federating
     };
 
     ////////////////////////////////////////////////////////////////////

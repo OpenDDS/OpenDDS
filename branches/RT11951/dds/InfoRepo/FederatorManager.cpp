@@ -7,6 +7,8 @@
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 
+#include <string>
+
 namespace OpenDDS { namespace Federator {
 
 FederatorManager::FederatorManager()
@@ -23,6 +25,8 @@ FederatorManager::~FederatorManager()
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) INFO: FederatorManager::~FederatorManager()\n")
   ));
+
+  /// @TODO: remove connections with any remote repositories in connected_.
 }
 
 // IDL methods.
@@ -50,20 +54,54 @@ ACE_THROW_SPEC ((
     ACE_TEXT("(%P|%t) INFO: FederatorManager::join_federation()\n")
   ));
 
-  // Avoid recursion.
-  if( this->joining_) {
-    // Be optimistic.
-    return Joining;
+  const std::string iorPrefix = "corbaloc:";
+  const std::string iorSuffix = "/Federator";
 
-  } else {
-    this->joining_ = true;
-  }
+  std::string remoteIor = iorPrefix + endpoint + iorSuffix;
 
   // Resolve remote federator
 
   // Obtain the remote repository federator Id value.
+  RepoKey joiner = NIL_REPOSITORY;
 
-  // Call remote repository join_federation() for symmetry.
+  // Check that we are not recursing via a callback from that node.
+  if( joiner == this->joining_) {
+    // Do not block on recursion.  This is an expected path and will
+    // result in deadlock if we block here.
+    return Joining;
+  }
+
+  // This is the start of the critical section processing.  Only a single
+  // remote repository can be in the process of federating at any time.
+  //
+  // N.B. This lock will be held through the synchronous call back to the
+  //      remote endpoint to have it perform its federation processing.
+  //      This may take a looooong time.
+  //
+  ACE_GUARD_RETURN( ACE_SYNCH_MUTEX, guard, this->lock_, Error_While_Federating);
+
+  // Double checked lock synchronization pattern.
+  if( joiner == this->joining_) {
+    return Joining;
+  }
+
+  // Once we are in the critical path, check that we have not already
+  // joined with this remote repository.
+  std::set< RepoKey>::const_iterator location
+    = this->connected_.find( joiner);
+  if( location != this->connected_.end()) {
+    // We have already established a connection with this remote node,
+    // no further processing required.
+    return Already_Federated;
+
+  } else {
+    // Mark our current processing partner.
+    this->joining_ = joiner;
+  }
+
+  // Call remote repository join_federation() for symmetry.  This is the
+  // source of the recursion that we are guarding against at the
+  // beginning of this method.
 
   // Resolve remote repository DCPSInfoRepo
 
@@ -84,7 +122,8 @@ ACE_THROW_SPEC ((
   // partition.
 
   // Federation is complete.
-  this->joining_ = false;
+  (void)this->connected_.insert( this->joining_);
+  this->joining_ = NIL_REPOSITORY;
 
   return Federated;
 }
