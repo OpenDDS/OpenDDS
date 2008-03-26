@@ -13,11 +13,13 @@
 
 namespace OpenDDS { namespace Federator {
 
+class Config;
+
 class OpenDDS_Federator_Export FederatorManager 
   : public virtual POA_OpenDDS::Federator::Manager {
   public:
     /// Default constructor.
-    FederatorManager();
+    FederatorManager( Config& config);
 
     /// Virtual destructor.
     virtual ~FederatorManager();
@@ -61,6 +63,9 @@ class OpenDDS_Federator_Export FederatorManager
 
     /// The repositories federation Id value within any federation.
     RepoKey federationId_;
+
+    /// The configuration information for this manager.
+    Config& config_;
 
     /// LinkState manager for distributing update data.
     LinkStateManager manager_;

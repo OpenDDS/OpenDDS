@@ -79,6 +79,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , listen_address_given_ (0)
     , use_bits_ (true)
     , resurrect_ (true)
+    , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
   listen_address_str_ = ACE_LOCALHOST;
