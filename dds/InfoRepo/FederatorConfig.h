@@ -42,6 +42,14 @@ class OpenDDS_Federator_Export Config  {
     RepoKey& federationId();
     RepoKey  federationId() const;
 
+    /// Federation Port value.
+    short& federationPort();
+    short  federationPort() const;
+
+    /// Default route value.
+    std::string& defaultRoute();
+    std::string  defaultRoute() const;
+
     /**
      * Access the routing information.
      *
@@ -49,6 +57,9 @@ class OpenDDS_Federator_Export Config  {
      *      Only const_iterators will be available.
      */
     const HostToRouteMap& route() const;
+
+    /// Common use case for obtaining a route.
+    std::string route( const std::string& remote) const;
 
   private:
     /// Process a configuration file
@@ -76,6 +87,12 @@ class OpenDDS_Federator_Export Config  {
 
     /// Configured Federation Id value.
     RepoKey federationId_;
+
+    /// Configured Federation Port value.
+    short federationPort_;
+
+    /// Default route if none specified.
+    std::string defaultRoute_;
 
     /// Routing information.
     HostToRouteMap route_;

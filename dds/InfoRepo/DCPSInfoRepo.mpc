@@ -25,6 +25,7 @@ project(*Federator): dcps {
 
   Source_Files {
     FederatorConfig.cpp
+    FederatorRemoteData.cpp
     FederatorManager.cpp
     LinkStateManager.cpp
     LinkStateTypeSupportImpl.cpp

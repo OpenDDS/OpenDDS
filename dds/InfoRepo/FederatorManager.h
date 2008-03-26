@@ -7,6 +7,9 @@
 #include "federator_export.h"
 #include "FederatorS.h"
 #include "LinkStateManager.h"
+#include "FederatorRemoteData.h"
+#include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsPublicationC.h"
 #include "ace/Condition_T.h"
 
 #include <set>
@@ -53,8 +56,13 @@ class OpenDDS_Federator_Export FederatorManager
     RepoKey& id();
     RepoKey  id() const;
 
-
   private:
+    /**
+     * Type mapping remote repository federation Id values to
+     * information about those repositories.
+     */
+    typedef std::map< RepoKey, RemoteData> RemoteDataMap;
+
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
 
@@ -72,6 +80,15 @@ class OpenDDS_Federator_Export FederatorManager
 
     /// Set of directly connected repositories.
     std::set< RepoKey> connected_;
+
+    /// Retained information about remote repositories.
+    RemoteDataMap remoteData_;
+
+    /// local DomainParticipant
+    ::DDS::DomainParticipant_var participant_;
+
+    /// local Publisher
+    ::DDS::Publisher_var publisher_;
 
 };
 
