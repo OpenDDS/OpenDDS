@@ -31,22 +31,50 @@ OpenDDS::Federator::Config::argv() const
 }
 
 ACE_INLINE
-::OpenDDS::Federator::RepoKey&
-::OpenDDS::Federator::Config::federationId()
+OpenDDS::Federator::RepoKey&
+OpenDDS::Federator::Config::federationId()
 {
   return this->federationId_;
 }
 
 ACE_INLINE
-::OpenDDS::Federator::RepoKey
-::OpenDDS::Federator::Config::federationId() const
+OpenDDS::Federator::RepoKey
+OpenDDS::Federator::Config::federationId() const
 {
   return this->federationId_;
 }
 
 ACE_INLINE
-const ::OpenDDS::Federator::Config::HostToRouteMap&
-::OpenDDS::Federator::Config::route() const
+short&
+OpenDDS::Federator::Config::federationPort()
+{
+  return this->federationPort_;
+}
+
+ACE_INLINE
+short
+OpenDDS::Federator::Config::federationPort() const
+{
+  return this->federationPort_;
+}
+
+ACE_INLINE
+std::string&
+OpenDDS::Federator::Config::defaultRoute()
+{
+  return this->defaultRoute_;
+}
+
+ACE_INLINE
+std::string
+OpenDDS::Federator::Config::defaultRoute() const
+{
+  return this->defaultRoute_;
+}
+
+ACE_INLINE
+const OpenDDS::Federator::Config::HostToRouteMap&
+OpenDDS::Federator::Config::route() const
 {
   return this->route_;
 }

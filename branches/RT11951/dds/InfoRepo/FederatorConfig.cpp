@@ -5,6 +5,7 @@
 #include "DcpsInfo_pch.h"
 #include "dds/DCPS/debug.h"
 #include "FederatorConfig.h"
+#include "FederatorC.h"
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Log_Priority.h"
@@ -15,6 +16,10 @@
 #endif /* ! __ACE_INLINE__ */
 
 // Define the following in some way to do what it says.  Default is not to.
+// Leaving this undefined allows the default route to be used to reach
+// hosts that were not specified in the interface definitions - a good
+// thing(tm) in general.
+//
 // #define ENFORCE_PREFERRED_INTERFACES
 
 namespace { // Anonymous namespace for file scope
@@ -24,6 +29,12 @@ namespace { // Anonymous namespace for file scope
 
   // FederationId key value.
   const ACE_TCHAR FEDERATION_ID_KEY[] = ACE_TEXT("FederationId");
+
+  // FederationId key value.
+  const ACE_TCHAR FEDERATION_PORT_KEY[] = ACE_TEXT("FederationPort");
+
+  // Default Route key value.
+  const ACE_TCHAR DEFAULT_ROUTE_KEY[] = ACE_TEXT("DefaultRoute");
 
   // [interface] Hostname key value.
   const ACE_TCHAR HOSTNAME_KEY[] = ACE_TEXT("Hostname");
@@ -94,7 +105,8 @@ const std::string
 Config::FEDERATOR_CONFIG_OPTION( "-FederatorConfig");
 
 Config::Config( int argc, char** argv)
- : federationId_( 0)
+ : federationId_( NIL_REPOSITORY),
+   federationPort_( -1)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -171,6 +183,18 @@ Config::~Config()
   delete [] this->argv_;
 }
 
+std::string
+Config::route( const std::string& remote) const
+{
+  HostToRouteMap::const_iterator location = this->route_.find( remote);
+  if( location == this->route_.end()) {
+    return this->defaultRoute_;
+
+  } else {
+    return location->second;
+  }
+}
+
 void
 Config::processFile()
 {
@@ -207,7 +231,9 @@ Config::processFile()
 
   // Configuration file format:
   //
-  //   FederationId = <number>                         (REQUIRED)
+  //   FederationId   = <number>                       (REQUIRED)
+  //   FederationPort = <number>                       (REQUIRED)
+  //   DefaultRoute   = <string>                       (REQUIRED)
   //
   //   [interface/<name>]                              (0 or MORE)
   //   Hostname = <remote hostname or dotted decimal>  (REQUIRED)
@@ -230,6 +256,8 @@ Config::processFile()
 
   } else {
     // Grab the common configuration settings.
+
+    // Federation Id value - REQUIRED
     ACE_TString federationIdString;
     if( 0 != heap.get_string_value( root, FEDERATION_ID_KEY, federationIdString)) {
       ACE_ERROR(( LM_ERROR,
@@ -239,11 +267,50 @@ Config::processFile()
       return;
     }
 
+    // Convert to numeric repository key value.
     this->federationId_ = ACE_OS::atoi( federationIdString.c_str());
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t)   FederationId == %d\n"),
         this->federationId_
+      ));
+    }
+
+    // Federation port value - REQUIRED
+    ACE_TString federationPortString;
+    if( 0 != heap.get_string_value( root, FEDERATION_PORT_KEY, federationPortString)) {
+      ACE_ERROR(( LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
+        ACE_TEXT("Unable to obtain value for FederationPort in root section\n")
+      ));
+      return;
+    }
+
+    // Convert to numeric repository key value.
+    this->federationPort_ = ACE_OS::atoi( federationPortString.c_str());
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t)   FederationPort == %d\n"),
+        this->federationPort_
+      ));
+    }
+
+    // Default route value - REQUIRED
+    ACE_TString defaultRouteString;
+    if( 0 != heap.get_string_value( root, DEFAULT_ROUTE_KEY, defaultRouteString)) {
+      ACE_ERROR(( LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
+        ACE_TEXT("Unable to obtain value for DefaultRoute in root section\n")
+      ));
+      return;
+    }
+
+    // Convert to standard string representation through a C-string.
+    this->defaultRoute_ = defaultRouteString.c_str();
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t)   DefaultRoute == %d\n"),
+        this->defaultRoute_.c_str()
       ));
     }
 
