@@ -7,6 +7,9 @@
 #include "federator_export.h"
 #include "FederatorS.h"
 #include "LinkStateManager.h"
+#include "ace/Condition_T.h"
+
+#include <set>
 
 namespace OpenDDS { namespace Federator {
 
@@ -50,14 +53,20 @@ class OpenDDS_Federator_Export FederatorManager
 
 
   private:
+    /// Critical section MUTEX.
+    ACE_SYNCH_MUTEX lock_;
+
     /// Simple recursion avoidance during the join operations.
-    bool joining_;
+    RepoKey joining_;
 
     /// The repositories federation Id value within any federation.
     RepoKey federationId_;
 
     /// LinkState manager for distributing update data.
     LinkStateManager manager_;
+
+    /// Set of directly connected repositories.
+    std::set< RepoKey> connected_;
 
 };
 

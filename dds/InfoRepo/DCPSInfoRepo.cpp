@@ -1,5 +1,6 @@
 #include "DcpsInfo_pch.h"
 #include "DCPSInfo_i.h"
+#include "FederatorConfig.h"
 #include "FederatorManager.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -32,6 +33,49 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+
+namespace { // Anonymous namespace for file scope.
+
+  // Define an argument processor for the Federator.
+  class FederatorArgProcessor {
+    public:
+      /// Consruct with a config file processor.
+      FederatorArgProcessor( ::OpenDDS::Federator::Config& config);
+
+      /// Function operator for Functor.
+      void operator()( char* arg);
+
+    private:
+      /// Ugly arg position switch.
+      bool fileArg_;
+
+      /// Local reference of the config file processor.
+      ::OpenDDS::Federator::Config config_;
+
+  };
+
+  FederatorArgProcessor::FederatorArgProcessor( ::OpenDDS::Federator::Config& config)
+   : fileArg_( false),
+     config_( config)
+  {
+  }
+
+  void
+  FederatorArgProcessor::operator()( char* arg)
+  {
+    if( fileArg_ == true) {
+      // This is a Federator configuration file, process it.
+      this->config_.configFile( arg);
+      this->fileArg_ = false;
+    }
+
+    if( ::OpenDDS::Federator::Config::FEDERATOR_CONFIG_OPTION == arg) {
+      // Next argument is a Federator configuration file.
+      this->fileArg_ = true;
+    }
+  }
+
+} // End of anonymous namespace
 
 class InfoRepo
 {
@@ -68,7 +112,8 @@ private:
 
   /// Repository Federation behaviors
   OpenDDS::Federator::FederatorManager federator_;
-  ACE_TString federation_endpoint_;
+  OpenDDS::Federator::Config           federatorConfig_;
+  ACE_TString                          federation_endpoint_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
@@ -77,6 +122,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , listen_address_given_ (0)
     , use_bits_ (true)
     , resurrect_ (true)
+    , federatorConfig_( argc, argv)
 {
   listen_address_str_ = ACE_LOCALHOST;
   listen_address_str_ += ACE_TEXT(":2839");
@@ -114,6 +160,7 @@ InfoRepo::usage (const ACE_TCHAR * cmd)
               ACE_TEXT ("    -NOBITS disable the Built-In Topics\n")
               ACE_TEXT ("    -z turn on verbose Transport logging\n")
               ACE_TEXT ("    -r Resurrect from persistent file\n")
+              ACE_TEXT ("    -FederationConfig <file> configure federation from <file>\n")
               ACE_TEXT ("    -?\n")
               ACE_TEXT ("\n"),
               cmd));
@@ -196,7 +243,16 @@ InfoRepo::parse_args (int argc,
 bool
 InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 {
-  ACE_Argv_Type_Converter cvt (argc, argv);
+  // Peek at and process the Federation arguments.  If there is a
+  // configuration file, process it and replace the argument vector with
+  // the enhanced vector that may include some additional ORB arguments.
+  FederatorArgProcessor federatorArgProcessor( this->federatorConfig_);
+  std::for_each( &argv[0], &argv[ argc], federatorArgProcessor);
+
+  ACE_Argv_Type_Converter cvt(
+                            this->federatorConfig_.argc(),
+                            this->federatorConfig_.argv()
+                          );
 
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
   info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
