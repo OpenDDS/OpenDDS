@@ -4,6 +4,10 @@
 #ifndef FEDERATORCONFIG_H
 #define FEDERATORCONFIG_H
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "federator_export.h"
 
 #include <string>
@@ -12,7 +16,7 @@ namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export Config  {
   public:
-    /// Value of the command line option for the configuration file.
+    /// Command line option specifying the configuration file.
     static const std::string FEDERATOR_CONFIG_OPTION;
 
     /// Default constructor.
@@ -20,9 +24,6 @@ class OpenDDS_Federator_Export Config  {
 
     /// Virtual destructor.
     virtual ~Config();
-
-    /// Process a configuration file
-    void configFile( const std::string arg);
 
     /// Access the enhanced argv.
     int& argc();
@@ -33,17 +34,24 @@ class OpenDDS_Federator_Export Config  {
     char**  argv() const;
 
   private:
+    /// Process a configuration file
+    void process();
+
     /// Enhanced argc.
     int argc_;
 
     /// Enhanced argv.
     char** argv_;
 
-    /// Actual storage size for argument pointers.
-    int argvSize_;
+    /// Configuration filename, if any.
+    std::string configFile_;
 };
 
 }} // End namespace OpenDDS::Federator
+
+#if defined (__ACE_INLINE__)
+# include "FederatorConfig.inl"
+#endif  /* __ACE_INLINE__ */
 
 #endif // FEDERATORCONFIG_H
 
