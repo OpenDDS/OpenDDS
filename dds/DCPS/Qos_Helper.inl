@@ -5,47 +5,10 @@
 // TMB - I had to add the following line
 #include "Service_Participant.h"
 
-#if defined (ACE_MAJOR_VERSION)                                 \
-  && (ACE_MAJOR_VERSION > 5                                     \
-      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
-      || (ACE_MAJOR_VERSION == 5                                \
-          && ACE_MINOR_VERSION == 5                             \
-          && ACE_BETA_VERSION > 3))
-# include "ace/Truncate.h"
-#endif  /* ACE >= 5.5.4 */
-
 namespace OpenDDS
 {
   namespace DCPS
   {
-    // Convenience function to avoid introducing preprocessor
-    // conditionals in more than one place.
-    ACE_INLINE CORBA::Long
-    time_t_to_long (time_t t)
-    {
-#if defined (ACE_MAJOR_VERSION)
-# if (ACE_MAJOR_VERSION > 5                                     \
-      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
-      || (ACE_MAJOR_VERSION == 5                                \
-          && ACE_MINOR_VERSION == 5                             \
-          && ACE_BETA_VERSION > 6))
-      // ACE_Utils::truncate_cast<> is only supported in ACE 5.5.7 or
-      // better.
-      return ACE_Utils::truncate_cast<CORBA::Long> (t);
-# elif (ACE_MAJOR_VERSION == 5     \
-        && ACE_MINOR_VERSION == 5  \
-        && ACE_BETA_VERSION > 3)
-      // ACE_Utils::Truncate<> is only supported between ACE 5.5.4 and
-      // 5.5.6.
-      return ACE_Utils::Truncate<CORBA::Long> (t);
-# else
-      return static_cast<CORBA::Long> (t);
-# endif
-#else
-      return static_cast<CORBA::Long> (t);
-#endif
-    }
-
     ACE_INLINE
     ACE_Time_Value time_to_time_value (const ::DDS::Time_t& t)
     {
@@ -57,7 +20,7 @@ namespace OpenDDS
     ::DDS::Time_t time_value_to_time (const ACE_Time_Value& tv)
     {
       ::DDS::Time_t t;
-      t.sec = OpenDDS::DCPS::time_t_to_long (tv.sec ());
+      t.sec = OpenDDS::DCPS::truncate_cast<CORBA::Long> (tv.sec ());
       t.nanosec = tv.usec () * 1000;
       return t;
     }
@@ -74,7 +37,7 @@ namespace OpenDDS
     {
       ::DDS::Duration_t t;
 
-      t.sec = OpenDDS::DCPS::time_t_to_long (tv.sec ());
+      t.sec = OpenDDS::DCPS::truncate_cast<CORBA::Long> (tv.sec ());
 
       t.nanosec = tv.usec () * 1000;
       return t;
