@@ -60,7 +60,7 @@ module DDS {
     const InstanceHandle_t HANDLE_NIL = HANDLE_NIL_NATIVE;
     const long LENGTH_UNLIMITED = -1;
     const long DURATION_INFINITY_SEC = 0x7ffffff;
-    const unsigned long DURATION_INFINITY_NSEC = 0xffffffff;
+    const unsigned long DURATION_INFINITY_NSEC = 0x7ffffff;
     const long DURATION_ZERO_SEC = 0;
     const unsigned long DURATION_ZERO_NSEC = 0;
     const long TIMESTAMP_INVALID_SEC = -1;
