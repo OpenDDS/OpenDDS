@@ -10,6 +10,9 @@
 #include "dds/DdsDcpsInfoUtils.idl"
 
 module OpenDDS { module Federator {
+
+    typedef sequence<octet> OctetSeq;
+
     //
     // Costs associated with a link.  Here we only allow ON (zero cost)
     // and OFF (infinite cost) links to be advertised.  This can be
@@ -107,7 +110,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      sequence<octet>                       transport_blob;
+      OctetSeq                       transport_blob;
     };
 
     ////////////////////////////////////////////////////////////////////
@@ -135,7 +138,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      sequence<octet>                       transport_blob;
+      OctetSeq                       transport_blob;
     };
 
     //

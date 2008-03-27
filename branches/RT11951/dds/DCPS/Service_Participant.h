@@ -350,11 +350,11 @@ namespace OpenDDS
       ACE_Configuration_Heap cf_;
     };
 
-    #define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()
+#   define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()
 
-    #define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
+#   define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
 
-    #define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
+#   define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
 
     /// Get a servant pointer given an object reference.
     /// @throws PortableServer::POA::OjbectNotActive,

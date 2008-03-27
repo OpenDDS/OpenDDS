@@ -1,3 +1,42 @@
+Thu Mar 27 09:43:22 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl (DURATION_INFINITY_NSEC):
+
+          Corrected value (s/0x7ffffff/0xffffffff/).  The
+          DDS::Duration_t::nanosec field is a 32 bit unsigned integer.
+          The previous "infinity" value appeared to be a typo that was
+          based on a signed 32 bit integer.
+
+        * dds/DCPS/Qos_Helper.h (truncate_cast):
+        * dds/DCPS/Qos_Helper.inl (time_t_to_long, truncate_cast):
+
+          Generalized time_t_to_long convenience function to a truncating
+          cast function.
+
+        * dds/DCPS/Service_Participant.h:
+
+          Preprocessor directives should start in column 1 (at least the
+          '#' should).
+
+        * dds/InfoRepo/DCPS_Utils.h (operator==, compatibleQOS):
+
+          Return bool instead of int to better reflect the type of value
+          being returned.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Likewise.
+
+          (matching_partitions, compatibleQOS):
+
+          Added simple PARTITION publisher/subscriber QoS implementation.
+          Updates to established associations upon change of the PARTITION
+          will be added at a later date.
+
+        * dds/InfoRepo/Federator.idl:
+
+          Corrected use of deprecated anonymous sequences.
+
 Wed Mar 26 23:10:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
@@ -6,7 +45,7 @@ Wed Mar 26 23:10:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorConfig.cpp:
         * dds/InfoRepo/FederatorManager.h:
         * dds/InfoRepo/FederatorManager.cpp:
-	  Continued implementation of federation.
+          Continued implementation of federation.
 
 Wed Mar 26 18:09:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
