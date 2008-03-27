@@ -1,3 +1,10 @@
+Thu Mar 27 13:25:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.inl:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+	  Forgot to add these files.
+
 Thu Mar 27 09:43:22 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl (DURATION_INFINITY_NSEC):
