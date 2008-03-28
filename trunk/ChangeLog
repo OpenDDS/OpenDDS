@@ -1,12 +1,21 @@
+Fri Mar 28 13:39:29 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/README:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Added directory for simple Unit Tests.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Added code to test out new Qos_Helper function.
+
 Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
-
-        * bin/dcps_tests.lst:
-
-          Added a UnitTests and CompatibilityTest to the nightly build.
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-          In add_associations(...) I moved the call to 
+          In add_associations(...) I moved the call to
           subscriber_servant_->add_associations before the timeout timer
           is started.
 
@@ -40,9 +49,6 @@ Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
         * tests/DCPS/CompatibilityTest/run_test.pl:
         * tests/DCPS/CompatibilityTest/subscriber.cpp:
 
-          Added test to verify that compatibleQOS correctly implemented 
-          the DDS spec.
-
         * tests/DCPS/FooTest4_0/Writer.cpp:
         * tests/DCPS/FooTest4_0/run_test.pl:
 
@@ -58,17 +64,6 @@ Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Cleaned up excess debug statements and changed test to use the liveliness factor
           to cause the liveliness timeout.
-
-        * tests/DCPS/UnitTests:
-        * tests/DCPS/UnitTests/README:
-        * tests/DCPS/UnitTests/UnitTests.mpc:
-        * tests/DCPS/UnitTests/run_test.pl:
-
-          Added directory for simple Unit Tests.
-
-        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
-
-          Added code to test out new Qos_Helper function.
 
 Mon Mar 24 22:14:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
