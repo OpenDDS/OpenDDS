@@ -1,3 +1,13 @@
+Fri Mar 28 02:58:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+	  Continue to implement federation.
+
 Thu Mar 27 16:35:37 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl (DURATION_INFINITY_NSEC):
@@ -10,7 +20,7 @@ Thu Mar 27 13:25:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorRemoteData.h:
         * dds/InfoRepo/FederatorRemoteData.inl:
         * dds/InfoRepo/FederatorRemoteData.cpp:
-	  Forgot to add these files.
+          Forgot to add these files.
 
 Thu Mar 27 09:43:22 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
