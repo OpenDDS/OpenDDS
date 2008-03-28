@@ -50,12 +50,12 @@ FederatorManager::~FederatorManager()
   }
 
   // Remove links with any remote repositories.
-  for( RemoteDataMap::iterator current = this->remoteData_.begin();
-       current != this->remoteData_.end();
+  for( RemoteLinkMap::iterator current = this->remoteLink_.begin();
+       current != this->remoteLink_.end();
        ++current) {
     delete current->second;
   }
-  this->remoteData_.erase( this->remoteData_.begin(), this->remoteData_.end());
+  this->remoteLink_.erase( this->remoteLink_.begin(), this->remoteLink_.end());
 
   // Remove our local participant and contained entities.
   if( 0 == CORBA::is_nil( this->participant_)) {
@@ -100,7 +100,7 @@ FederatorManager::initialize()
       );
   if( CORBA::is_nil( this->participant_.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: create_participant failed for RemoteData ")
+      ACE_TEXT("(%P|%t) ERROR: create_participant failed for RemoteLink ")
       ACE_TEXT( "domain %d.\n"),
       this->config_.federationId()
     ));
@@ -290,10 +290,10 @@ ACE_THROW_SPEC ((
 
   // Once we are in the critical path, check that we have not already
   // joined with this remote repository.  We do this inside the lock so
-  // that we avoid collisions accessing the remoteData_ container.
-  RemoteDataMap::const_iterator location
-    = this->remoteData_.find( remote);
-  if( location != this->remoteData_.end()) {
+  // that we avoid collisions accessing the remoteLink_ container.
+  RemoteLinkMap::const_iterator location
+    = this->remoteLink_.find( remote);
+  if( location != this->remoteLink_.end()) {
     // We have already established a connection with this remote
     // repository, no further processing required.
     return ::OpenDDS::Federator::Already_Federated;
@@ -331,14 +331,15 @@ ACE_THROW_SPEC ((
   TheServiceParticipant->set_repo_ior( remoteIor.c_str(), remote);
 
   // Store information and initialize interaction with the <remote> repository.
-  RemoteData* link
-    = new RemoteData(
+  RemoteLink* link
+    = new RemoteLink(
         this->config_.federationId(),     // Self
         remote,                           // Remote
-        this->config_.route( remoteHost)  // Local endpoint NIC
+        this->config_.route( remoteHost), // Local endpoint NIC
+        this                              // Callback
       );
-  (void)this->remoteData_.insert(
-    RemoteDataMap::value_type( remote, link)
+  (void)this->remoteLink_.insert(
+    RemoteLinkMap::value_type( remote, link)
   );
 
   // Add publication for update topics in <self> domain for the new
@@ -351,12 +352,6 @@ ACE_THROW_SPEC ((
 
   // Publish (<self>,<remote>,ON,<sequence>) on all LinkState
   // publications.
-
-  // Subscribe to LinkState data on <remote> domain in "<remote>-<self>"
-  // partition.
-
-  // Subscribe to update data on <remote> domain in "<remote>-<self>"
-  // partition.
 
   // Federation is complete.
   this->joining_ = ::OpenDDS::Federator::NIL_REPOSITORY;
@@ -377,6 +372,15 @@ ACE_THROW_SPEC ((
     ));
   }
   return ::OpenDDS::Federator::Unfederated;
+}
+
+void
+FederatorManager::updateLinkState(
+  ::OpenDDS::Federator::LinkState /* sample */,
+  ::DDS::SampleInfo /* info */
+)
+{
+  /// @TODO: Implement this
 }
 
 }} // End namespace OpenDDS::Federator
