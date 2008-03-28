@@ -38,8 +38,6 @@ $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                            . "-d $domains_file ");
 
 
-print $DCPSREPO->CommandLine(), "\n";
-              
 # test multiple cases
 $numPubs = 5;
 $level = 0;
@@ -50,11 +48,10 @@ $pub_time = $sub_time + 20;
 $pub_lease_time = 1;  # in msec
 $sub_lease_time = $pub_lease_time * 2;
 # this is the threshold number of publishers we would expect to fail the liveliness tests with a 70% fudge factor
-$threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.7;
+$threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.6;
 $sub_parameters = "$svc_conf -s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time -ORBDebugLevel $level";
 
 $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
 
 $pub_parameters = "$svc_conf $common_parameters" ;
 
@@ -63,13 +60,14 @@ for($i = 0; $i < $numPubs; ++$i)
   $thisPort = $port + $i;
   $thisPubTime = $pub_time - ($i * $delay);
   $thisPubLeaseTime = $pub_lease_time;
+  $liveliness_factor = " ";
   if($i == 0) {
     # one publisher will have a bad lease time
-    $thisPubLeaseTime = $sub_lease_time * 1.5;
+    $factor = ($sub_lease_time / $pub_lease_time) * 1.5 * 100; # 100%
+    $liveliness_factor = "-DCPSLivelinessFactor $factor ";
   }
-  $thePublisher = new PerlACE::Process ("publisher", "$pub_parameters -l $thisPubLeaseTime -x $thisPubTime -ORBDebugLevel $level -p $pub_addr$thisPort");
+  $thePublisher = new PerlACE::Process ("publisher", "$pub_parameters -l $thisPubLeaseTime -x $thisPubTime -ORBDebugLevel $level -p $pub_addr$thisPort $liveliness_factor");
   push @Publisher, $thePublisher;
-  print $thePublisher->CommandLine(), "\n";
 }
 
 $DCPSREPO->Spawn ();

@@ -265,6 +265,10 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
     }
 
+    // add associations to the transport before using
+    // Built-In Topic support and telling the listener.
+    this->subscriber_servant_->add_associations(writers, this, qos_) ;
+
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
     {
       // this call will start the timer if it is not already set
@@ -277,10 +281,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    this->subscriber_servant_->add_associations(writers, this, qos_) ;
   }
 
   if (! is_bit_)

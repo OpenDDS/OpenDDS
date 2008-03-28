@@ -1,13 +1,85 @@
+Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * bin/dcps_tests.lst:
+
+          Added a UnitTests and CompatibilityTest to the nightly build.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          In add_associations(...) I moved the call to 
+          subscriber_servant_->add_associations before the timeout timer
+          is started.
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added function to identify if a liveliness lease duration is
+          greater than another, to be used for determining compatibility.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Added compatibility checks for durability.kind, liveliness.kind,
+          and liveliness.lease_duration.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+
+        * tests/DCPS/CompatibilityTest:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/CompatibilityTest/README:
+        * tests/DCPS/CompatibilityTest/Writer.h:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+        * tests/DCPS/CompatibilityTest/domain_ids:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+
+          Added test to verify that compatibleQOS correctly implemented 
+          the DDS spec.
+
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+
+          Changed test to have the same QOS liveliness lease_duration for pub and sub
+          and used the liveliness factor to make the liveliness timeout.
+
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/README:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Cleaned up excess debug statements and changed test to use the liveliness factor
+          to cause the liveliness timeout.
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/README:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Added directory for simple Unit Tests.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Added code to test out new Qos_Helper function.
+
 Mon Mar 24 22:14:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:
-        
+
           Fixed "String literal converted to char* in initialization" warnings.
-          
+
         * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
 
-          Minor change - remove info.pr after test finishes. 
-          
+          Minor change - remove info.pr after test finishes.
+
 Mon Mar 24 19:53:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:

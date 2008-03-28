@@ -774,6 +774,25 @@ namespace OpenDDS
     }          
 
 
+    ACE_INLINE
+    bool Qos_Helper::lease_greater_than (const ::DDS::LivelinessQosPolicy& qos1,
+                                         const ::DDS::LivelinessQosPolicy& qos2) 
+    {
+      // kind is ignored
+      if (((qos2.lease_duration.sec     != ::DDS::DURATION_INFINITY_SEC) ||
+           (qos2.lease_duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)  )    &&
+          (((qos1.lease_duration.sec     == ::DDS::DURATION_INFINITY_SEC) &&
+            (qos1.lease_duration.nanosec == ::DDS::DURATION_INFINITY_NSEC)  ) ||
+           ((qos1.lease_duration.sec   >  qos2.lease_duration.sec)       ||
+            ((qos1.lease_duration.sec  == qos2.lease_duration.sec) &&
+             (qos1.lease_duration.nanosec > qos2.lease_duration.nanosec)) )    )  )
+      {
+        return true;
+      }
+      return false;
+    }
+
+
   } // namespace ::DDS
 } // namespace OpenDDS
 
@@ -1193,5 +1212,4 @@ bool operator == (const ::DDS::SubscriberQos& qos1,
   }
   return false;
 }          
-
 
