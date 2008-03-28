@@ -314,8 +314,8 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     ACE_ERROR ((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
   }
   else {
-    adapter->bind ("DCPSInfoRepo", objref_str.in ());
-    adapter->bind ("Federator", federator_ior.in ());
+    adapter->bind (::OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str.in ());
+    adapter->bind (::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY,  federator_ior.in ());
   }
 
   FILE *output_file= ACE_OS::fopen (ior_file_.c_str (), ACE_TEXT("w"));
@@ -327,6 +327,12 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   ACE_OS::fprintf (output_file, "%s", objref_str.in ());
   ACE_OS::fclose (output_file);
+
+  // It should be safe to initialize the federation mechanism at this
+  // point.  What we really needed to wait for is the initialization of
+  // the service components - like the DomainParticipantFactory and the
+  // repository bindings.
+  this->federator_.initialize();
 
   // Initial federation join if specified on command line.
   if( false == federation_endpoint_.empty()) {

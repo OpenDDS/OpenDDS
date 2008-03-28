@@ -9,7 +9,7 @@
 #include "LinkStateManager.h"
 #include "FederatorRemoteData.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsPublicationC.h"
+#include "dds/DCPS/PublisherImpl.h"
 #include "ace/Condition_T.h"
 
 #include <set>
@@ -52,6 +52,11 @@ class OpenDDS_Federator_Export FederatorManager
 
     // Servant methods
 
+    /// Late initialization.
+    // N.B. - We need to defer intialization until after the service is
+    //        initialized, which will occur long after we are constructed.
+    void initialize();
+
     /// Accessors for the federation Id value.
     RepoKey& id();
     RepoKey  id() const;
@@ -59,9 +64,11 @@ class OpenDDS_Federator_Export FederatorManager
   private:
     /**
      * Type mapping remote repository federation Id values to
-     * information about those repositories.
+     * information about those repositories.  Store a pointer to avoid
+     * unnecessary copies in and out of the container.  Ownership is held
+     * by the container.
      */
-    typedef std::map< RepoKey, RemoteData> RemoteDataMap;
+    typedef std::map< RepoKey, RemoteData*> RemoteDataMap;
 
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
@@ -78,17 +85,20 @@ class OpenDDS_Federator_Export FederatorManager
     /// LinkState manager for distributing update data.
     LinkStateManager manager_;
 
-    /// Set of directly connected repositories.
-    std::set< RepoKey> connected_;
-
     /// Retained information about remote repositories.
     RemoteDataMap remoteData_;
+
+    /// Internal transport for <self> domain
+    OpenDDS::DCPS::TransportImpl_rch transport_;
 
     /// local DomainParticipant
     ::DDS::DomainParticipant_var participant_;
 
     /// local Publisher
     ::DDS::Publisher_var publisher_;
+
+    /// local LinkState listener.
+    ::DDS::DataReader_var linkReader_;
 
 };
 

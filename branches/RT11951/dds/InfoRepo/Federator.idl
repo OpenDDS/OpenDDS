@@ -71,6 +71,10 @@ module OpenDDS { module Federator {
       DDS::TopicQos   qos;
     };
 
+    // Constant values.
+    const string  TOPICUPDATETOPICNAME = "TopicUpdate";
+    const string  TOPICUPDATETYPENAME  = "TopicUpdate";
+
     ////////////////////////////////////////////////////////////////////
     //
     // Participant data updates
@@ -84,6 +88,10 @@ module OpenDDS { module Federator {
       DDS::DomainId_t           domain;
       DDS::DomainParticipantQos qos;
     };
+
+    // Constant values.
+    const string  PARTICIPANTUPDATETOPICNAME = "ParticipantUpdate";
+    const string  PARTICIPANTUPDATETYPENAME  = "ParticipantUpdate";
 
     ////////////////////////////////////////////////////////////////////
     //
@@ -113,6 +121,10 @@ module OpenDDS { module Federator {
       OctetSeq                       transport_blob;
     };
 
+    // Constant values.
+    const string  PUBLICATIONUPDATETOPICNAME = "PublicationUpdate";
+    const string  PUBLICATIONUPDATETYPENAME  = "PublicationUpdate";
+
     ////////////////////////////////////////////////////////////////////
     //
     // Subscription data updates
@@ -140,6 +152,10 @@ module OpenDDS { module Federator {
       // code specific to that transport implementation.
       OctetSeq                       transport_blob;
     };
+
+    // Constant values.
+    const string  SUBSCRIPTIONUPDATETOPICNAME = "SubscriptionUpdate";
+    const string  SUBSCRIPTIONUPDATETYPENAME  = "SubscriptionUpdate";
 
     //
     // Exceptions.
@@ -198,6 +214,10 @@ module OpenDDS { module Federator {
       RepoKey federationId();
 
     };
+
+    // Constant values.
+    const string  REPOSITORY_IORTABLE_KEY = "DCPSInfoRepo";
+    const string  FEDERATOR_IORTABLE_KEY  = "Federator";
 
 }; }; // End of OpenDDS::Federator
 
