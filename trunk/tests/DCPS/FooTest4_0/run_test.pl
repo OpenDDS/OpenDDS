@@ -32,7 +32,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
 # test multiple cases
-$parameters = "$svc_config -z " ;
+$parameters = "$svc_config -DCPSLivelinessFactor 300 -z " ;
 
 
 if (PerlACE::is_vxworks_test()) {

@@ -42,7 +42,7 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
 
   ACE_ERROR ((LM_ERROR,
          ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos "
-         "All QOS should be compatible for this test, check to see if RT#12054 has been fixed\n")));
+         "All QOS should be compatible for this test\n")));
 }
 
 void DataWriterListenerImpl::on_liveliness_lost (

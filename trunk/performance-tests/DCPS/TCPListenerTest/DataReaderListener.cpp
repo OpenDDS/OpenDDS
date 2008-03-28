@@ -158,6 +158,9 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos policyId=%d\n"),
+      status.last_policy_id));
   }
 
 

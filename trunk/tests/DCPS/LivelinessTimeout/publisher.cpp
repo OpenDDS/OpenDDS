@@ -224,10 +224,6 @@ int main (int argc, char *argv[])
                             1);
         }
 
-      ACE_DEBUG((LM_DEBUG,"(%P|%t) main publisher "
-        " LEASE_DURATION_SEC=%d  test_duration=%d\n",
-           LEASE_DURATION_SEC, test_duration));
-
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -256,13 +252,7 @@ int main (int argc, char *argv[])
 
 //      ACE_Time_Value duration(10);
 //      writer.run_test(duration);
-      ACE_DEBUG((LM_DEBUG,"(%P|%t) main "
-        " publisher sleep test_duration=%d\n",
-           test_duration));
       ACE_OS::sleep(test_duration);
-      ACE_DEBUG((LM_DEBUG,"(%P|%t) main "
-        " publisher slept test_duration=%d\n",
-           test_duration));
 
       // Clean up publisher objects
       pub->delete_contained_entities() ;
@@ -279,8 +269,7 @@ int main (int argc, char *argv[])
       if(!dwl_servant.valid())
       {
         ACE_ERROR ((LM_ERROR,
-                   ACE_TEXT("(%P|%t) publisher didn't connect with subscriber."
-                   "  This test will no longer work after RT#12054 is fixed. test_duration=%d\n"),
+                   ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. test_duration=%d\n"),
                    test_duration));
         return 1 ;
       }

@@ -312,6 +312,9 @@ int main (int argc, char *argv[])
       pub->get_default_datawriter_qos (dw_qos);
       pub->copy_from_topic_qos (dw_qos, topic_qos);
 
+      dw_qos.liveliness.lease_duration.sec = 2 ;
+      dw_qos.liveliness.lease_duration.nanosec = 0 ;
+
       ::DDS::DataWriter_var * dws = new ::DDS::DataWriter_var[num_datawriters];
 
       // Create one or multiple datawriters belonging to the same

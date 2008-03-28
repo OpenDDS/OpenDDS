@@ -156,10 +156,6 @@ void DataReaderListenerImpl::on_subscription_match (
       {
         for (CORBA::ULong i = 0 ; i < si.length() ; i++)
         {
-          ACE_DEBUG((LM_DEBUG,
-              "%T %s foo[%d]: x = %f y = %f, key = %d\n",
-              "read", i, foo[i].x, foo[i].y, foo[i].key));
-          PrintSampleInfo(si[i]) ;
           last_si_ = si[i] ;
         }
       }
@@ -184,8 +180,6 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(reader) ;
     ACE_UNUSED_ARG(status) ;
 
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost \n")));
   }
 
   void DataReaderListenerImpl::on_subscription_disconnected (
@@ -199,8 +193,6 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(reader) ;
     ACE_UNUSED_ARG(status) ;
 
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected \n")));
   }
 
   void DataReaderListenerImpl::on_subscription_reconnected (
@@ -214,8 +206,6 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(reader) ;
     ACE_UNUSED_ARG(status) ;
 
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected \n")));
   }
 
   void DataReaderListenerImpl::on_subscription_lost (
@@ -229,8 +219,6 @@ void DataReaderListenerImpl::on_subscription_match (
     ACE_UNUSED_ARG(reader) ;
     ACE_UNUSED_ARG(status) ;
 
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost \n")));
   }
 
   void DataReaderListenerImpl::on_connection_deleted (
@@ -240,6 +228,5 @@ void DataReaderListenerImpl::on_subscription_match (
     ::CORBA::SystemException
     ))
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
   }
 

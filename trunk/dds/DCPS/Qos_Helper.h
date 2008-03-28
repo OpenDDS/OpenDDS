@@ -223,6 +223,12 @@ namespace OpenDDS
       
       static bool changeable (const ::DDS::SubscriberQos       & qos1,
                               const ::DDS::SubscriberQos       & qos2);
+
+      // this only uses the duration portion of liveliness, not kind, to determine
+      // if qos1 is greater than qos2
+      static bool lease_greater_than (const ::DDS::LivelinessQosPolicy& qos1,
+                                      const ::DDS::LivelinessQosPolicy& qos2);
+
     };
 
   } // namespace DCPS
@@ -348,7 +354,6 @@ bool operator == (const ::DDS::DataReaderQos& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::SubscriberQos& qos1,
                   const ::DDS::SubscriberQos& qos2);
-
 
 #if defined(__ACE_INLINE__)
 #include "Qos_Helper.inl"

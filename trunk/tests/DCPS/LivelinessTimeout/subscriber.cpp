@@ -230,9 +230,6 @@ int main (int argc, char *argv[])
         }
 
 
-      ACE_DEBUG((LM_DEBUG,"(%P|%t) main subscriber "
-        " LEASE_DURATION_SEC=%d  test_duration=%d  threshold_liveliness_lost=%d\n",
-           LEASE_DURATION_SEC, test_duration, threshold_liveliness_lost));
       // Create the Datareaders
       ::DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
@@ -266,12 +263,13 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      ACE_DEBUG((LM_DEBUG,"(%P|%t) main Subscriber exiting liveliness missed count=%d\n",
-           drl_servant.deadline_missed()));
       if (drl_servant.deadline_missed() < threshold_liveliness_lost)
       {
         ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) The liviness deadline wasn't missed (which it should have).\n")));
+                    ACE_TEXT("(%P|%t) The liviness deadline wasn't missed as many times as it should have."
+                    "threashold=%d, num missed=%d\n"),
+                    threshold_liveliness_lost,
+                    drl_servant.deadline_missed()));
           return 1;
       }
       else if (drl_servant.test_failed())
