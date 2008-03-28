@@ -1,3 +1,14 @@
+Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * tests/DCPS/CompatibilityTest/README.txt:
+
+          Added description for the test.
+
+        * tests/DCPS/UnitTests/README.txt:
+
+          Added description for the test.
+
+
 Fri Mar 28 13:45:53 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * bin/dcps_tests.lst:
