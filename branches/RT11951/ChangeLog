@@ -1,3 +1,23 @@
+Fri Mar 28 22:15:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.inl:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+          Continue to implement federation.
+
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.inl:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+          Renamed these files to FederatorRemoteLink.
+
 Fri Mar 28 02:58:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
@@ -6,7 +26,7 @@ Fri Mar 28 02:58:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorManager.cpp:
         * dds/InfoRepo/FederatorRemoteData.h:
         * dds/InfoRepo/FederatorRemoteData.cpp:
-	  Continue to implement federation.
+          Continue to implement federation.
 
 Thu Mar 27 16:35:37 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 

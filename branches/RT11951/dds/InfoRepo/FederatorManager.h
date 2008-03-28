@@ -7,7 +7,7 @@
 #include "federator_export.h"
 #include "FederatorS.h"
 #include "LinkStateManager.h"
-#include "FederatorRemoteData.h"
+#include "FederatorRemoteLink.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "ace/Condition_T.h"
@@ -57,6 +57,12 @@ class OpenDDS_Federator_Export FederatorManager
     //        initialized, which will occur long after we are constructed.
     void initialize();
 
+    /// Callback with new routing information.
+    void updateLinkState(
+      ::OpenDDS::Federator::LinkState sample,
+      ::DDS::SampleInfo info
+    );
+
     /// Accessors for the federation Id value.
     RepoKey& id();
     RepoKey  id() const;
@@ -68,7 +74,7 @@ class OpenDDS_Federator_Export FederatorManager
      * unnecessary copies in and out of the container.  Ownership is held
      * by the container.
      */
-    typedef std::map< RepoKey, RemoteData*> RemoteDataMap;
+    typedef std::map< RepoKey, RemoteLink*> RemoteLinkMap;
 
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
@@ -86,7 +92,7 @@ class OpenDDS_Federator_Export FederatorManager
     LinkStateManager manager_;
 
     /// Retained information about remote repositories.
-    RemoteDataMap remoteData_;
+    RemoteLinkMap remoteLink_;
 
     /// Internal transport for <self> domain
     OpenDDS::DCPS::TransportImpl_rch transport_;
