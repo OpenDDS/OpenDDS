@@ -1,3 +1,16 @@
+Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * tests/DCPS/CompatibilityTest/README:
+        * tests/DCPS/UnitTests/README:
+
+          Change from .txt.
+
+        * tests/DCPS/CompatibilityTest/README.txt:
+
+        * tests/DCPS/UnitTests/README.txt:
+
+          Removed these files.
+
 Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * tests/DCPS/CompatibilityTest/README.txt:
