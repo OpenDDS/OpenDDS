@@ -13,8 +13,6 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
-#include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
-
 #include "ace/SString.h"
 
 #define MY_DOMAIN 411
