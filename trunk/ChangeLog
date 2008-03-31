@@ -1,4 +1,16 @@
-Mon Mar 31 15:44:17 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Mon Mar 31 15:59:22 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Added Brian Johnson of OCI.
+
+        * DDS_TAO.mwc:
+
+          Updated to work with recent changes to the DCPSInfoRepo -- it now uses
+          the TAO ImR (optionally).  Thanks to Jonathan Pollack for reporting
+          this problem.
+
+Mon Mar 31 15:44:17 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
         * tests/DCPS/CompatibilityTest/common.h:
@@ -6,13 +18,13 @@ Mon Mar 31 15:44:17 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Cleanup quick mistake and remove a warning.
 
-Mon Mar 31 14:51:48 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Mon Mar 31 14:51:48 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
 
           Fixing problem with static builds.
 
-Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/README:
         * tests/DCPS/UnitTests/README:
@@ -25,7 +37,7 @@ Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Removed these files.
 
-Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/README.txt:
 
@@ -35,8 +47,7 @@ Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Added description for the test.
 
-
-Fri Mar 28 13:45:53 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 28 13:45:53 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
@@ -60,7 +71,7 @@ Fri Mar 28 13:45:53 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
           Added test to verify that compatibleQOS correctly implemented
           the DDS spec.
 
-Fri Mar 28 13:39:29 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 28 13:39:29 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests:
         * tests/DCPS/UnitTests/UnitTests.mpc:
@@ -72,7 +83,7 @@ Fri Mar 28 13:39:29 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Added code to test out new Qos_Helper function.
 
-Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
@@ -113,8 +124,8 @@ Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
         * tests/DCPS/FooTest4_0/Writer.cpp:
         * tests/DCPS/FooTest4_0/run_test.pl:
 
-          Changed test to have the same QOS liveliness lease_duration for pub and sub
-          and used the liveliness factor to make the liveliness timeout.
+          Changed test to have the same QOS liveliness lease_duration for pub
+          and sub and used the liveliness factor to make the liveliness timeout.
 
         * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
         * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
@@ -123,8 +134,8 @@ Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
         * tests/DCPS/LivelinessTimeout/run_test.pl:
         * tests/DCPS/LivelinessTimeout/subscriber.cpp:
 
-          Cleaned up excess debug statements and changed test to use the liveliness factor
-          to cause the liveliness timeout.
+          Cleaned up excess debug statements and changed test to use the
+          liveliness factor to cause the liveliness timeout.
 
 Mon Mar 24 22:14:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
@@ -190,7 +201,7 @@ Fri Mar 21 17:06:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           - Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
             fully copied to buffer when the qos contains sequence data. The
-            TAO_OutputCDR stream needs be cosolidated before memcpy.
+            TAO_OutputCDR stream needs be consolidated before memcpy.
 
         * dds/DCPS/SubscriberImpl.cpp:
 
@@ -231,7 +242,7 @@ Tue Mar 18 17:24:37 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           Added debug logging for the instance state.
 
-Wed Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+Tue Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
 
@@ -283,7 +294,7 @@ Wed Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           Removed "my" declarations for process variables to resolve
           the "an undefined value" error.
 
-Fri Mar 14 19:07:28 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Mar 14 19:07:28 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
@@ -462,13 +473,13 @@ Tue Mar  4 23:41:52 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           Fixed some formatting.
 
-Tue Feb 26 15:17:41 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Tue Feb 26 15:17:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
           Added #if to prevent non-existent TAO1.4a file from being included.
 
-Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
@@ -489,13 +500,13 @@ Mon Feb 25 20:29:36 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Changes to be able to run a static build.
 
-Fri Feb 22 19:45:32 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Feb 22 19:45:32 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Removed static limitation on Imr test.
 
-Fri Feb 22 15:36:05 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Fri Feb 22 15:36:05 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
@@ -542,7 +553,7 @@ Mon Feb 18 14:13:52 UTC 2008  Johnny Willemsen  <jwillemsen@remedy.nl>
           Added missing include of iterator that is needed to get
           std::back_inserter
 
-Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * docs/design/UML/DDS.xmi:
 
@@ -552,7 +563,7 @@ Tue Feb 12 19:10:52 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
           Added note about this new file.
 
-Thu Feb  7 19:10:42 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+Thu Feb  7 19:10:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * docs/design/UML:
         * docs/design/UML/DDS.uml:
