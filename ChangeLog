@@ -1,3 +1,9 @@
+Mon Mar 31 14:51:48 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+
+          Fixing problem with static builds.
+
 Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * tests/DCPS/CompatibilityTest/README:
