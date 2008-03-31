@@ -1,3 +1,11 @@
+Mon Mar 31 15:44:17 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+
+          Cleanup quick mistake and remove a warning.
+
 Mon Mar 31 14:51:48 UTC 2008  Brian Johnson  <johnsonb@stladvantage.com>
 
         * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
