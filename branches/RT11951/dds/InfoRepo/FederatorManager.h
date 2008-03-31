@@ -8,6 +8,7 @@
 #include "FederatorS.h"
 #include "LinkStateManager.h"
 #include "FederatorRemoteLink.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "ace/Condition_T.h"
@@ -57,15 +58,19 @@ class OpenDDS_Federator_Export FederatorManager
     //        initialized, which will occur long after we are constructed.
     void initialize();
 
+    /// Accessors for the federation Id value.
+    RepoKey& id();
+    RepoKey  id() const;
+
     /// Callback with new routing information.
     void updateLinkState(
       ::OpenDDS::Federator::LinkState sample,
       ::DDS::SampleInfo info
     );
 
-    /// Accessors for the federation Id value.
-    RepoKey& id();
-    RepoKey  id() const;
+    /// Callback with new repository information.
+    template< class SampleType>
+    void update( SampleType& sample, ::DDS::SampleInfo& info);
 
   private:
     /**

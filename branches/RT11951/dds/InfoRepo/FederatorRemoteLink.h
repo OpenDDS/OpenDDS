@@ -18,6 +18,41 @@
 
 namespace OpenDDS { namespace Federator {
 
+/**
+ * @class RemoteLink
+ *
+ * @brief Encapsulate the information and entities for a remote connection.
+ *
+ * This class encapsulates all of the information about a connection with
+ * a remote (other) repository with which we are federated.  This
+ * includes the remote repositories federation Id value, the partitions
+ * where we receive data (inbound) and where we publish data (external)
+ * as well as the subscriptions and publications with this remote
+ * repository.
+ *
+ * A note about partitions and their names.  For generality, there are
+ * four separate partitions known within this repository.  They include:
+ *
+ *   inbound  - a partition on which we receive data from the remote
+ *              repository.
+ *              Its value is: "<remote>-<self>"
+ *
+ *   external - a partition on which we send data to the remote
+ *              repository.
+ *              Its value is: "<remote>-<self>"
+ *
+ *   The next two partitions are not used for federation since the
+ *   Federator and DCPSInfoRepo objects are collocated within the same
+ *   executable process.
+ *
+ *   outbound - a partition on which we receive data from the repository
+ *              with which we are associated.
+ *              Its value is: "<self>-0"
+ *
+ *   internal - a partition on which we send data to the repository with
+ *              which we are associated.
+ *              Its value is: "<self>-<self>"
+ */
 class OpenDDS_Federator_Export RemoteLink  {
   public:
     /**
