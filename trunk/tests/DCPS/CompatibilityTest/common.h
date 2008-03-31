@@ -31,8 +31,7 @@ static ACE_TString sub_finished_filename = ACE_TEXT("subscriber_finished.txt");
 
 enum TransportTypeId
 {
-  SIMPLE_TCP,
-  SIMPLE_UDP
+  SIMPLE_TCP
 };
 
 

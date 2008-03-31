@@ -1,4 +1,4 @@
-project(LivelinessTimeoutPublisher): dcpsexe_with_tcp, dcps_unreliable_dgram {
+project(*Publisher): dcpsexe_with_tcp, dcps_unreliable_dgram {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
@@ -14,7 +14,7 @@ project(LivelinessTimeoutPublisher): dcpsexe_with_tcp, dcps_unreliable_dgram {
 }
 
 
-project(LivelinessTimeoutSubscriber): dcpsexe_with_tcp, dcps_unreliable_dgram {
+project(*Subscriber): dcpsexe_with_tcp, dcps_unreliable_dgram {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common
