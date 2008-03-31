@@ -41,6 +41,6 @@ ACE_INLINE
 void
 OpenDDS::Federator::RemoteLink::removeFromMst()
 {
-  this->subscriptions_.unsubscribeFromUpdates( this->participant_.in());
+  this->subscriptions_.unsubscribeFromUpdates();
 }
 

@@ -325,7 +325,7 @@ ACE_THROW_SPEC ((
   }
 
   // Build remote repository DCPSInfoRepo IOR
-  remoteIor = iorPrefix + endpoint + REPOSITORY_IORTABLE_KEY;
+  remoteIor = iorPrefix + endpoint + "/" + REPOSITORY_IORTABLE_KEY;
 
   // Add remote repository to Service_Participant in the <remote> domain
   TheServiceParticipant->set_repo_ior( remoteIor.c_str(), remote);
@@ -344,6 +344,12 @@ ACE_THROW_SPEC ((
 
   // Add publication for update topics in <self> domain for the new
   // "<self>-<remote>" partition.
+  //
+  // N.B. Even if we could add this partition to an existing publisher,
+  //      we would still need to create a new one since today our
+  //      transports will only connect via a single interface.  The local
+  //      endpoints for the different partitions need to be allowed to be
+  //      bound to different interfaces.
 
   // Publish the local Entities on the new partition.
 

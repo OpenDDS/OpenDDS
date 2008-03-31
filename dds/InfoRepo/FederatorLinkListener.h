@@ -14,15 +14,15 @@ namespace OpenDDS { namespace Federator {
 
 class FederatorManager;
 
-class FederatorLinkListener
+class LinkListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
   public:
     /// Default constructor
-    FederatorLinkListener( FederatorManager& manager);
+    LinkListener( FederatorManager& manager);
 
     /// Virtual destructor
-    virtual ~FederatorLinkListener();
+    virtual ~LinkListener();
 
     virtual void on_requested_deadline_missed (
       ::DDS::DataReader_ptr reader,

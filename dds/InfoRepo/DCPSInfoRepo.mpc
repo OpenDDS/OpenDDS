@@ -28,6 +28,7 @@ project(*Federator): dcps {
     FederatorRemoteLink.cpp
     FederatorSubscriptions.cpp
     FederatorManager.cpp
+    FederatorManager_T_Impl.cpp
     FederatorLinkListener.cpp
     LinkStateManager.cpp
     LinkStateTypeSupportImpl.cpp
@@ -35,6 +36,16 @@ project(*Federator): dcps {
     ParticipantUpdateTypeSupportImpl.cpp
     PublicationUpdateTypeSupportImpl.cpp
     SubscriptionUpdateTypeSupportImpl.cpp
+  }
+
+  Header_Files {
+    UpdateListener_T.h
+    FederatorManager.h
+  }
+
+  Template_Files {
+    UpdateListener_T.cpp
+    FederatorManager_T.cpp
   }
 
 }

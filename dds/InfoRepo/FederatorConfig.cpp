@@ -240,7 +240,66 @@ Config::processFile()
   //   Route    = <interface>                          (REQUIRED)
   //
 
+  // Grab the common configuration settings.
   const ACE_Configuration_Section_Key &root = heap.root_section();
+
+  // Federation Id value - REQUIRED
+  ACE_TString federationIdString;
+  if( 0 != heap.get_string_value( root, FEDERATION_ID_KEY, federationIdString)) {
+    ACE_ERROR(( LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
+      ACE_TEXT("Unable to obtain value for FederationId in root section\n")
+    ));
+    return;
+  }
+
+  // Convert to numeric repository key value.
+  this->federationId_ = ACE_OS::atoi( federationIdString.c_str());
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t)   FederationId == %d\n"),
+      this->federationId_
+    ));
+  }
+
+  // Federation port value - REQUIRED
+  ACE_TString federationPortString;
+  if( 0 != heap.get_string_value( root, FEDERATION_PORT_KEY, federationPortString)) {
+    ACE_ERROR(( LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
+      ACE_TEXT("Unable to obtain value for FederationPort in root section\n")
+    ));
+    return;
+  }
+
+  // Convert to numeric repository key value.
+  this->federationPort_ = ACE_OS::atoi( federationPortString.c_str());
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t)   FederationPort == %d\n"),
+      this->federationPort_
+    ));
+  }
+
+  // Default route value - REQUIRED
+  ACE_TString defaultRouteString;
+  if( 0 != heap.get_string_value( root, DEFAULT_ROUTE_KEY, defaultRouteString)) {
+    ACE_ERROR(( LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
+      ACE_TEXT("Unable to obtain value for DefaultRoute in root section\n")
+    ));
+    return;
+  }
+
+  // Convert to standard string representation through a C-string.
+  this->defaultRoute_ = defaultRouteString.c_str();
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t)   DefaultRoute == %d\n"),
+      this->defaultRoute_.c_str()
+    ));
+  }
+
   ACE_Configuration_Section_Key interfaceKey;
   if( heap.open_section (root, INTERFACE_SECTION_NAME, 0, interfaceKey) != 0) {
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -255,66 +314,7 @@ Config::processFile()
     return;
 
   } else {
-    // Grab the common configuration settings.
-
-    // Federation Id value - REQUIRED
-    ACE_TString federationIdString;
-    if( 0 != heap.get_string_value( root, FEDERATION_ID_KEY, federationIdString)) {
-      ACE_ERROR(( LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
-        ACE_TEXT("Unable to obtain value for FederationId in root section\n")
-      ));
-      return;
-    }
-
-    // Convert to numeric repository key value.
-    this->federationId_ = ACE_OS::atoi( federationIdString.c_str());
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)   FederationId == %d\n"),
-        this->federationId_
-      ));
-    }
-
-    // Federation port value - REQUIRED
-    ACE_TString federationPortString;
-    if( 0 != heap.get_string_value( root, FEDERATION_PORT_KEY, federationPortString)) {
-      ACE_ERROR(( LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
-        ACE_TEXT("Unable to obtain value for FederationPort in root section\n")
-      ));
-      return;
-    }
-
-    // Convert to numeric repository key value.
-    this->federationPort_ = ACE_OS::atoi( federationPortString.c_str());
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)   FederationPort == %d\n"),
-        this->federationPort_
-      ));
-    }
-
-    // Default route value - REQUIRED
-    ACE_TString defaultRouteString;
-    if( 0 != heap.get_string_value( root, DEFAULT_ROUTE_KEY, defaultRouteString)) {
-      ACE_ERROR(( LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Federator::Config::process - ")
-        ACE_TEXT("Unable to obtain value for DefaultRoute in root section\n")
-      ));
-      return;
-    }
-
-    // Convert to standard string representation through a C-string.
-    this->defaultRoute_ = defaultRouteString.c_str();
-    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)   DefaultRoute == %d\n"),
-        this->defaultRoute_.c_str()
-      ));
-    }
-
-    // Now iterate through the [interface] sections and process them.
+    // Iterate through the [interface] sections and process them.
     ACE_TString sectionName;
     for( int index = 0;
          (0 == heap.enumerate_sections( interfaceKey, index, sectionName));

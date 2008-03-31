@@ -16,6 +16,8 @@
 namespace OpenDDS { namespace Federator {
 
 class FederatorManager;
+class LinkListener;
+class UpdateMarker;
 
 /**
  * @class Subscriptions
@@ -70,7 +72,7 @@ class OpenDDS_Federator_Export Subscriptions  {
     void subscribeToUpdates( ::DDS::DomainParticipant_ptr participant);
 
     /// Unsubscribe from the Update Topics from the remote repository.
-    void unsubscribeFromUpdates( ::DDS::DomainParticipant_ptr participant);
+    void unsubscribeFromUpdates();
 
   private:
     /// Federator::Manager to callback on events.
@@ -94,6 +96,17 @@ class OpenDDS_Federator_Export Subscriptions  {
 
     /// Readers in the remote repository/domain.
     std::vector< ::DDS::DataReader_var> readers_;
+
+    // Servants:
+    //   We need to keep these in order to be able to delete them
+    //   after the RemoteLink destructor has already called
+    //   delete_contained_entities - and deleted the readers.
+
+    /// LinkState servant.
+    LinkListener* linkListener_;
+
+    /// Update servants.
+    std::vector< UpdateMarker*> listeners_;
 
 };
 
