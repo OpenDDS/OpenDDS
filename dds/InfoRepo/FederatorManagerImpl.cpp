@@ -28,10 +28,18 @@
 
 #include <string>
 
+namespace { // Anonymous namespace for file scope.
+
+  // Starting key value for transport keys to use.
+  enum { BASE_TRANSPORT_KEY_VALUE = 30};
+
+} // End of anonymous namespace
+
 namespace OpenDDS { namespace Federator {
 
 ManagerImpl::ManagerImpl( Config& config)
- : config_( config)
+ : config_( config),
+   transportKeyValue_( BASE_TRANSPORT_KEY_VALUE)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -104,28 +112,7 @@ ManagerImpl::initialize()
       ACE_TEXT( "domain %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
-  }
-
-  // Create, configure and install the transport within this repository
-  this->transport_
-    = TheTransportFactory->create_transport_impl(
-        this->config_.federationId(), "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG
-      );
-
-  OpenDDS::DCPS::TransportConfiguration_rch transportConfig
-    = TheTransportFactory->create_configuration( this->config_.federationId(), "SimpleTcp");
-
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcpConfig
-    = static_cast< OpenDDS::DCPS::SimpleTcpConfiguration*>( transportConfig.in());
-
-  if( this->transport_->configure( tcpConfig) != 0) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Federator::Manager on %d ")
-      ACE_TEXT("failed to initialize transport.\n"),
-      this->config_.federationId()
-    ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Add type support for update topics
@@ -140,7 +127,7 @@ ManagerImpl::initialize()
       ACE_TEXT("TopicUpdate type support for repository %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
@@ -154,7 +141,7 @@ ManagerImpl::initialize()
       ACE_TEXT("ParticipantUpdate type support for repository %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   PublicationUpdateTypeSupportImpl* publicationUpdate = new PublicationUpdateTypeSupportImpl();
@@ -168,7 +155,7 @@ ManagerImpl::initialize()
       ACE_TEXT("PublicationUpdate type support for repository %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   SubscriptionUpdateTypeSupportImpl* subscriptionUpdate = new SubscriptionUpdateTypeSupportImpl();
@@ -182,7 +169,7 @@ ManagerImpl::initialize()
       ACE_TEXT("SubscriptionUpdate type support for repository %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Add type support for link state topics
@@ -196,7 +183,7 @@ ManagerImpl::initialize()
       ACE_TEXT("(%P|%t) ERROR: Unable to install LinkState type support for repository %d.\n"),
       this->config_.federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Subscribe to LinkState data on <self> domain in any partition
@@ -207,7 +194,7 @@ ManagerImpl::initialize()
 
 // IDL methods.
 
-::OpenDDS::Federator::RepoKey
+RepoKey
 ManagerImpl::federationId()
 ACE_THROW_SPEC ((
   ::CORBA::SystemException
@@ -221,11 +208,11 @@ ACE_THROW_SPEC ((
   return this->config_.federationId();
 }
 
-::OpenDDS::Federator::Status
+Status
 ManagerImpl::join_federation( const char * endpoint)
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
-  ::OpenDDS::Federator::Unavailable
+  Unavailable
 ))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -245,10 +232,10 @@ ACE_THROW_SPEC ((
       ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
       ACE_TEXT("unable to resolve remote federator.\n")
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
-  // Narrow the IOR to a Messenger object reference.
+  // Narrow the IOR to a Manager object reference.
   ::OpenDDS::Federator::Manager_var remoteFederator
     = ::OpenDDS::Federator::Manager::_narrow( obj.in());
   if( CORBA::is_nil( remoteFederator.in() ) ) {
@@ -256,17 +243,17 @@ ACE_THROW_SPEC ((
       ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
       ACE_TEXT("unable to narrow remote federator.\n")
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Obtain the remote repository federator Id value.
-  ::OpenDDS::Federator::RepoKey remote = remoteFederator->federationId();
+  RepoKey remote = remoteFederator->federationId();
 
   // Check that we are not recursing via a callback from that repository.
   if( remote == this->joining_) {
     // Do not block on recursion.  This is an expected path and will
     // result in deadlock if we block here.
-    return ::OpenDDS::Federator::Joining;
+    return Joining;
   }
 
   // This is the start of the critical section processing.  Only a single
@@ -280,12 +267,12 @@ ACE_THROW_SPEC ((
     ACE_SYNCH_MUTEX,
     guard,
     this->lock_,
-    ::OpenDDS::Federator::Error_While_Federating
+    Error_While_Federating
   );
 
   // Double checked lock synchronization pattern.
   if( remote == this->joining_) {
-    return ::OpenDDS::Federator::Joining;
+    return Joining;
   }
 
   // Once we are in the critical path, check that we have not already
@@ -296,7 +283,7 @@ ACE_THROW_SPEC ((
   if( location != this->remoteLink_.end()) {
     // We have already established a connection with this remote
     // repository, no further processing required.
-    return ::OpenDDS::Federator::Already_Federated;
+    return Already_Federated;
 
   } else {
     // Mark our current processing partner and store its information.
@@ -321,7 +308,7 @@ ACE_THROW_SPEC ((
 
   } catch( const CORBA::Exception& ex) {
     ex._tao_print_exception( "ERROR: Unable to join remote repository: ");
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Build remote repository DCPSInfoRepo IOR
@@ -336,11 +323,16 @@ ACE_THROW_SPEC ((
         this->config_.federationId(),     // Self
         remote,                           // Remote
         this->config_.route( remoteHost), // Local endpoint NIC
-        this                              // Callback
+        this->transportKeyValue_,         // Transport key to use
+        this,                             // Callback
+        this->participant_.in()           // Local participant
       );
   (void)this->remoteLink_.insert(
     RemoteLinkMap::value_type( remote, link)
   );
+
+  // The link will consume two transport keys.
+  this->transportKeyValue_ += 2;
 
   // Add publication for update topics in <self> domain for the new
   // "<self>-<remote>" partition.
@@ -353,6 +345,8 @@ ACE_THROW_SPEC ((
 
   // Publish the local Entities on the new partition.
 
+  /// @TODO: Implement this.
+
   // Add publication for LinkState data on <remote> domain in
   // "<self>-<remote>" partition.
 
@@ -360,16 +354,16 @@ ACE_THROW_SPEC ((
   // publications.
 
   // Federation is complete.
-  this->joining_ = ::OpenDDS::Federator::NIL_REPOSITORY;
+  this->joining_ = NIL_REPOSITORY;
 
-  return ::OpenDDS::Federator::Federated;
+  return Federated;
 }
 
-::OpenDDS::Federator::Status
-ManagerImpl::remove_connection ( RepoKey /* remoteId */)
+Status
+ManagerImpl::remove_connection ( RepoKey remoteId)
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
-  ::OpenDDS::Federator::ConnectionBusy
+  ConnectionBusy
 ))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -378,15 +372,41 @@ ACE_THROW_SPEC ((
     ));
   }
 
-  /// @TODO: Implement this
+  RemoteLinkMap::iterator location
+    = this->remoteLink_.find( remoteId);
+  if( location != this->remoteLink_.end()) {
+    /// Release the resources associated with the remote repository.
+    delete location->second;
 
-  return ::OpenDDS::Federator::Unfederated;
+    // Remove the remote repository from our map.
+    this->remoteLink_.erase( location);
+
+  } else {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::remove_connection() ")
+      ACE_TEXT("on repository %d - ")
+      ACE_TEXT("attempt to remove non-MST repository %d from MST list.\n"),
+      this->id(),
+      remoteId
+    ));
+    throw ConnectionBusy();
+  }
+
+  if( 0 == this->remoteLink_.size()) {
+    // We no longer are connected to any remote repository, so we need to
+    // clean up all of our internal mappings to remove ourselves from the
+    // federation.  We cannot participate in the federation without being
+    // connected to at least one other repository within the federation.
+    this->unfederate();
+  }
+
+  return Unfederated;
 }
 
 void
 ManagerImpl::updateLinkState(
-  ::OpenDDS::Federator::LinkState sample,
-  ::DDS::SampleInfo               /* info */
+  LinkState         sample,
+  ::DDS::SampleInfo /* info */
 )
 {
   ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
@@ -419,8 +439,8 @@ ManagerImpl::updateLinkState(
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
-          ACE_TEXT("on node %d - ")
-          ACE_TEXT("attempt to remove non-MST node %d from MST list.\n"),
+          ACE_TEXT("on repository %d - ")
+          ACE_TEXT("attempt to remove non-MST repository %d from MST list.\n"),
           this->id(),
           remote
         ));
@@ -430,9 +450,33 @@ ManagerImpl::updateLinkState(
         continue;
       }
 
-      // At this point, remote is the Id value of a remote node that we
-      // are directly connected to that is no longer on the MST.
-      this->remoteLink_[ remote]->removeFromMst();
+      //
+      // Since we require the same lock that is held during the
+      // join_federation() call, that call _must_ have completed before
+      // we can receive any LinkState updates that contain this
+      // connection.  Which means that the internal state has been
+      // corrupted if we cannot find the remote link in our maps.
+      //
+      RemoteLinkMap::const_iterator linkLocation
+        = this->remoteLink_.find( remote);
+      if( linkLocation != this->remoteLink_.end()) {
+        // At this point, remote is the Id value of a remote repository
+        // that we are directly connected to that is no longer on the MST.
+        linkLocation->second->removeFromMst();
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
+          ACE_TEXT("on repository %d - ")
+          ACE_TEXT("unable to unsubscribe from remote repository %d.\n"),
+          this->id(),
+          remote
+        ));
+
+        // Since our internal state has become noticably corrupt, should
+        // we throw here?
+        continue;
+      }
     }
   }
 
@@ -452,11 +496,43 @@ ManagerImpl::updateLinkState(
       // Maintain our set of MST connections.
       this->mstNodes_.insert( remote);
 
-      // At this point, remote is the Id value of a remote node that we
-      // are directly connected to that is now on the MST.
-      this->remoteLink_[ remote]->addToMst();
+      //
+      // Since we require the same lock that is held during the
+      // join_federation() call, that call _must_ have completed before
+      // we can receive any LinkState updates that contain this
+      // connection.  Which means that the internal state has been
+      // corrupted if we cannot find the remote link in our maps.
+      //
+      RemoteLinkMap::const_iterator linkLocation
+        = this->remoteLink_.find( remote);
+      if( linkLocation != this->remoteLink_.end()) {
+        // At this point, remote is the Id value of a remote repository
+        // that we are directly connected to that is now on the MST.
+        linkLocation->second->addToMst();
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
+          ACE_TEXT("on repository %d - ")
+          ACE_TEXT("unable to subscribe to remote repository %d.\n"),
+          this->id(),
+          remote
+        ));
+
+        // Since our internal state has become noticably corrupt, should
+        // we throw here?
+        continue;
+      }
     }
   }
+}
+
+void
+ManagerImpl::unfederate()
+{
+  // ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
+
+  /// @TODO: Implement this.
 }
 
 }} // End namespace OpenDDS::Federator

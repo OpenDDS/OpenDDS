@@ -11,6 +11,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "ace/Condition_T.h"
 
 #include <set>
@@ -30,23 +31,19 @@ class OpenDDS_Federator_Export ManagerImpl
 
     // IDL methods.
 
-    virtual ::OpenDDS::Federator::Status join_federation (
-      const char * endpoint
-    )
+    virtual Status join_federation ( const char * endpoint)
     ACE_THROW_SPEC ((
       ::CORBA::SystemException,
-      ::OpenDDS::Federator::Unavailable
+      Unavailable
     ));
 
-    virtual ::OpenDDS::Federator::Status remove_connection (
-      ::OpenDDS::Federator::RepoKey remoteId
-    )
+    virtual Status remove_connection ( RepoKey remoteId)
     ACE_THROW_SPEC ((
       ::CORBA::SystemException,
-      ::OpenDDS::Federator::ConnectionBusy
+      ConnectionBusy
     ));
 
-    virtual ::OpenDDS::Federator::RepoKey federationId()
+    virtual RepoKey federationId()
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
@@ -64,7 +61,7 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Callback with new routing information.
     void updateLinkState(
-      ::OpenDDS::Federator::LinkState sample,
+      LinkState         sample,
       ::DDS::SampleInfo info
     );
 
@@ -80,6 +77,9 @@ class OpenDDS_Federator_Export ManagerImpl
      * by the container.
      */
     typedef std::map< RepoKey, RemoteLink*> RemoteLinkMap;
+
+    /// Remove all remote repository information from out tables.
+    void unfederate();
 
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
@@ -102,8 +102,8 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Retained information about remote repositories.
     RemoteLinkMap remoteLink_;
 
-    /// Internal transport for <self> domain
-    OpenDDS::DCPS::TransportImpl_rch transport_;
+    /// Next unused transport key value.
+    ::OpenDDS::DCPS::TransportIdType transportKeyValue_;
 
     /// local DomainParticipant
     ::DDS::DomainParticipant_var participant_;

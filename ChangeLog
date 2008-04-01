@@ -1,15 +1,26 @@
+Tue Apr  1 19:40:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+	  Implemented remote repository publications.
+
 Tue Apr  1 14:57:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
-	  Implemented minimum spanning tree maintenance.
+          Implemented minimum spanning tree maintenance.
 
         * dds/InfoRepo/FederatorManager_T.cpp:
         * dds/InfoRepo/FederatorManager_T_Impl.cpp:
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
-	  Added some files that should have been added with yesterdays
-	  work.
+          Added some files that should have been added with yesterdays
+          work.
 
 Tue Apr  1 14:32:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -37,11 +37,14 @@ namespace { // Anonymous namespace for file scope.
 namespace OpenDDS { namespace Federator {
 
 RemoteLink::RemoteLink(
-  RepoKey            self,
-  RepoKey            remote,
-  const std::string& nic,
-  ManagerImpl*       manager
-) : federationId_( remote)
+  RepoKey                          self,
+  RepoKey                          remote,
+  const std::string&               nic,
+  ::OpenDDS::DCPS::TransportIdType transportKey,
+  ManagerImpl*                     manager,
+  ::DDS::DomainParticipant_var     participant
+) : federationId_( remote),
+    transportKey_( transportKey)
 {
   char buffer[PARTITIONNAME_SIZE];
 
@@ -64,7 +67,7 @@ RemoteLink::RemoteLink(
       ACE_TEXT( "RemoteLink domain %d.\n"),
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Add type support for update topics
@@ -80,7 +83,7 @@ RemoteLink::RemoteLink(
       self,
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
@@ -95,7 +98,7 @@ RemoteLink::RemoteLink(
       self,
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   PublicationUpdateTypeSupportImpl* publicationUpdate = new PublicationUpdateTypeSupportImpl();
@@ -110,7 +113,7 @@ RemoteLink::RemoteLink(
       self,
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   SubscriptionUpdateTypeSupportImpl* subscriptionUpdate = new SubscriptionUpdateTypeSupportImpl();
@@ -125,7 +128,7 @@ RemoteLink::RemoteLink(
       self,
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // Add type support for link state topics
@@ -141,7 +144,7 @@ RemoteLink::RemoteLink(
       self,
       this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -155,24 +158,24 @@ RemoteLink::RemoteLink(
   }
 
   // Create, configure and install the transport on this connection.
-  this->transport_
+  ::OpenDDS::DCPS::TransportImpl_rch transport
     = TheTransportFactory->create_transport_impl(
-        this->federationId(), "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG
+        this->transportKey_, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG
       );
 
   OpenDDS::DCPS::TransportConfiguration_rch transportConfig
-    = TheTransportFactory->create_configuration( this->federationId(), "SimpleTcp");
+    = TheTransportFactory->create_configuration( this->transportKey_, "SimpleTcp");
 
   OpenDDS::DCPS::SimpleTcpConfiguration* tcpConfig
     = static_cast< OpenDDS::DCPS::SimpleTcpConfiguration*>( transportConfig.in());
 
-  ACE_INET_Addr writer_address( nic.c_str());
-  tcpConfig->local_address_ = writer_address;
+  ACE_INET_Addr reader_address( nic.c_str());
+  tcpConfig->local_address_ = reader_address;
 
-  if( this->transport_->configure( tcpConfig) != 0) {
+  if( transport->configure( tcpConfig) != 0) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: RemoteLink on %d failed to initialize transport ")
-      ACE_TEXT("with NIC %s in partition %s to repository %d failed.\n"),
+      ACE_TEXT("(%P|%t) ERROR: RemoteLink on %d failed to initialize inbound ")
+      ACE_TEXT("transport with NIC %s in partition %s to repository %d failed.\n"),
       this->federationId(),
       nic.c_str(),
       this->external().c_str(),
@@ -201,25 +204,25 @@ RemoteLink::RemoteLink(
       this->inbound_.c_str(),
       self
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
   // And attach the transport to it.
-  OpenDDS::DCPS::SubscriberImpl* servant
+  OpenDDS::DCPS::SubscriberImpl* subscriberServant
     = OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl>(
         subscriber.in()
       );
-  if( 0 == servant) {
+  if( 0 == subscriberServant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: failed to extract servant for ")
-      ACE_TEXT("subscriber on node %d for repository %d.\n"),
-      this->federationId(),
-      self
+      ACE_TEXT("subscriber on repository %d from repository %d.\n"),
+      self,
+      this->federationId()
     ));
-    throw ::OpenDDS::Federator::Unavailable();
+    throw Unavailable();
   }
 
-  switch( servant->attach_transport( this->transport_.in())) {
+  switch( subscriberServant->attach_transport( transport.in())) {
     case OpenDDS::DCPS::ATTACH_OK:
          break;
 
@@ -229,11 +232,11 @@ RemoteLink::RemoteLink(
     default:
          ACE_ERROR((LM_ERROR,
            ACE_TEXT("(%P|%t) INFO: failed to attach transport to ")
-           ACE_TEXT("subscriber on node %d for repository %d.\n"),
-           this->federationId(),
-           self
+           ACE_TEXT("subscriber on repository %d from repository %d.\n"),
+           self,
+           this->federationId()
          ));
-         throw ::OpenDDS::Federator::Unavailable();
+         throw Unavailable();
   }
 
   // Initialize the subscriptions
@@ -248,6 +251,96 @@ RemoteLink::RemoteLink(
       self
     ));
   }
+
+  //
+  // Now for the publications.
+  //
+
+  // Create, configure and install the transport for the publications.
+  transport = TheTransportFactory->create_transport_impl(
+                this->transportKey_ + 1,
+                "SimpleTcp",
+                OpenDDS::DCPS::DONT_AUTO_CONFIG
+              );
+
+  transportConfig
+    = TheTransportFactory->create_configuration( this->transportKey_ + 1, "SimpleTcp");
+
+  tcpConfig
+    = static_cast< OpenDDS::DCPS::SimpleTcpConfiguration*>( transportConfig.in());
+
+  ACE_INET_Addr writer_address( nic.c_str());
+  tcpConfig->local_address_ = writer_address;
+
+  if( transport->configure( tcpConfig) != 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: RemoteLink on %d failed to initialize outbound ")
+      ACE_TEXT("transport with NIC %s in partition %s to repository %d failed.\n"),
+      this->federationId(),
+      nic.c_str(),
+      this->external().c_str(),
+      self
+    ));
+    throw ::OpenDDS::Federator::Unavailable();
+  }
+
+  // The publications are for the external partition only.
+  ::DDS::PublisherQos publisherQos;
+  this->participant_->get_default_publisher_qos( publisherQos);
+
+  publisherQos.partition.name.length( 1);
+  publisherQos.partition.name[0] = ACE_OS::strdup( this->external_.c_str());
+
+  // Create the data publisher.
+  ::DDS::Publisher_var publisher
+    = this->participant_->create_publisher(
+        publisherQos, ::DDS::PublisherListener::_nil()
+      );
+  if( CORBA::is_nil( publisher.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: RemoteLink on %d create publisher ")
+      ACE_TEXT("in partition %s to repository %d failed.\n"),
+      this->federationId(),
+      this->external_.c_str(),
+      self
+    ));
+    throw Unavailable();
+  }
+
+  // And attach the transport to it.
+  OpenDDS::DCPS::PublisherImpl* publisherServant
+    = OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl>(
+        publisher.in()
+      );
+  if( 0 == publisherServant) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) INFO: failed to extract servant for ")
+      ACE_TEXT("publisher on repository %d to repository %d.\n"),
+      self,
+      this->federationId()
+    ));
+    throw Unavailable();
+  }
+
+  switch( publisherServant->attach_transport( transport.in())) {
+    case OpenDDS::DCPS::ATTACH_OK:
+         break;
+
+    case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
+    case OpenDDS::DCPS::ATTACH_ERROR:
+    case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
+    default:
+         ACE_ERROR((LM_ERROR,
+           ACE_TEXT("(%P|%t) INFO: failed to attach transport to ")
+           ACE_TEXT("publisher on repository %d to repository %d.\n"),
+           self,
+           this->federationId()
+         ));
+         throw Unavailable();
+  }
+
+  // Now we can initialize the publications.
+  this->publications_.initialize( participant.in(), publisher.in());
 }
 
 RemoteLink::~RemoteLink()
@@ -270,7 +363,10 @@ RemoteLink::~RemoteLink()
     }
   }
 
-  TheTransportFactory->release( this->federationId());
+  TheTransportFactory->release( this->transportKey_);
+  TheTransportFactory->release( this->transportKey_ + 1);
+  /// @TODO: Check that this release will not interfere with the
+  ///        aggregated Publications destructor operations.
 }
 
 }} // End namespace OpenDDS::Federator
