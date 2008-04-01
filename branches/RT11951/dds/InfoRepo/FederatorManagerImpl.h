@@ -94,7 +94,10 @@ class OpenDDS_Federator_Export ManagerImpl
     Config& config_;
 
     /// LinkState manager for distributing update data.
-    LinkStateManager manager_;
+    LinkStateManager linkStateManager_;
+
+    /// Remote repositories that are part of the Minimum Spanning Tree.
+    std::set< RepoKey> mstNodes_;
 
     /// Retained information about remote repositories.
     RemoteLinkMap remoteLink_;
