@@ -1,3 +1,10 @@
+Tue Apr  1 19:48:17 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorPublications.h:
+        * dds/InfoRepo/FederatorPublications.inl:
+        * dds/InfoRepo/FederatorPublications.cpp:
+	  And more forgotten files added.
+
 Tue Apr  1 19:40:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
@@ -7,7 +14,7 @@ Tue Apr  1 19:40:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorRemoteLink.h:
         * dds/InfoRepo/FederatorRemoteLink.cpp:
         * dds/InfoRepo/FederatorSubscriptions.h:
-	  Implemented remote repository publications.
+          Implemented remote repository publications.
 
 Tue Apr  1 14:57:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
