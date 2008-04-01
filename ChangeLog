@@ -1,3 +1,13 @@
+Tue Apr  1 23:06:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+	  Continued federation implementation.
+
 Tue Apr  1 21:05:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 999:1046 out to branch.
 

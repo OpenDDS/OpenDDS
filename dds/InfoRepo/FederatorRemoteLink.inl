@@ -17,6 +17,20 @@ OpenDDS::Federator::RemoteLink::federationId() const
 }
 
 ACE_INLINE
+::OpenDDS::DCPS::SequenceNumber&
+OpenDDS::Federator::RemoteLink::lastSeen()
+{
+  return this->lastSeen_;
+}
+
+ACE_INLINE
+::OpenDDS::DCPS::SequenceNumber
+OpenDDS::Federator::RemoteLink::lastSeen() const
+{
+  return this->lastSeen_;
+}
+
+ACE_INLINE
 const std::string&
 OpenDDS::Federator::RemoteLink::inbound() const
 {

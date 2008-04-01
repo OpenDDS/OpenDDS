@@ -94,6 +94,10 @@ class OpenDDS_Federator_Export RemoteLink  {
     RepoKey& federationId();
     RepoKey  federationId() const;
 
+    /// Last processed sequence number from this repository.
+    ::OpenDDS::DCPS::SequenceNumber& lastSeen();
+    ::OpenDDS::DCPS::SequenceNumber  lastSeen() const;
+
     /// Access the value of the inbound partition.
     const std::string& inbound() const;
 
@@ -112,6 +116,9 @@ class OpenDDS_Federator_Export RemoteLink  {
 
     /// Base value of transport keys used by this remote repository.
     ::OpenDDS::DCPS::TransportIdType transportKey_;
+
+    /// Last processed sequence number from this repository.
+    ::OpenDDS::DCPS::SequenceNumber lastSeen_;
 
     /// Inbound partition.
     std::string inbound_;

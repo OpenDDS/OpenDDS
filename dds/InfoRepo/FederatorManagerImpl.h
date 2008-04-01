@@ -10,6 +10,7 @@
 #include "FederatorRemoteLink.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "ace/Condition_T.h"
@@ -78,8 +79,17 @@ class OpenDDS_Federator_Export ManagerImpl
      */
     typedef std::map< RepoKey, RemoteLink*> RemoteLinkMap;
 
+    /// Map remote Id value to a local Id value.
+    typedef std::map< ::OpenDDS::DCPS::RepoId, ::OpenDDS::DCPS::RepoId> RemoteToLocalMap;
+
+    /// Map a repository federation Id value to its Id mappings.
+    typedef std::map< RepoKey, RemoteToLocalMap> RepoToIdMap;
+
+    /// Inverse mappings - Local Id value to Federation Id value.
+    typedef std::map< ::OpenDDS::DCPS::RepoId, FederationId> LocalToFederationMap;
+
     /// Remove all remote repository information from out tables.
-    void unfederate();
+    void unfederate( RepoKey remote);
 
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
@@ -89,6 +99,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// The repositories federation Id value within any federation.
     RepoKey federationId_;
+
+    /// The packet sequence number for data that we publish.
+    ::OpenDDS::DCPS::SequenceNumber sequence_;
 
     /// The configuration information for this manager.
     Config& config_;
@@ -113,6 +126,12 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// local LinkState listener.
     ::DDS::DataReader_var linkReader_;
+
+    /// Federation Id to local Id mappings.
+    RepoToIdMap inboundMap_;
+
+    /// Local Id value to Federation Id mappings.
+    LocalToFederationMap outboundMap_;
 
 };
 
