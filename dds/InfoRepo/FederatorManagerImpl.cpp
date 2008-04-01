@@ -377,16 +377,86 @@ ACE_THROW_SPEC ((
       ACE_TEXT("(%P|%t) INFO: ManagerImpl::remove_connection()\n")
     ));
   }
+
+  /// @TODO: Implement this
+
   return ::OpenDDS::Federator::Unfederated;
 }
 
 void
 ManagerImpl::updateLinkState(
-  ::OpenDDS::Federator::LinkState /* sample */,
-  ::DDS::SampleInfo /* info */
+  ::OpenDDS::Federator::LinkState sample,
+  ::DDS::SampleInfo               /* info */
 )
 {
-  /// @TODO: Implement this
+  ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
+
+  // Lists of repositories removed from and added to the MST.
+  LinkStateManager::LinkList added;
+  LinkStateManager::LinkList removed;
+
+  // Update the topology and current MST.
+  this->linkStateManager_.update( sample, removed, added);
+
+  // Process removals first to avoid flooding historical data over
+  // connections that will be removed during the same processing.
+  for( int index = 0; index < int( removed.size()); ++index) {
+    // This is ugly.
+    RepoKey remote = this->id();
+    if( remote == removed[ index].first) {
+      remote = removed[ index].second;
+
+    } else if( remote == removed[ index].second) {
+      remote = removed[ index].first;
+    }
+
+    if( remote != this->id()) {
+      // Maintain our set of MST connections.
+      std::set< RepoKey>::iterator location = this->mstNodes_.find( remote);
+      if( location != this->mstNodes_.end()) {
+        this->mstNodes_.erase( location);
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
+          ACE_TEXT("on node %d - ")
+          ACE_TEXT("attempt to remove non-MST node %d from MST list.\n"),
+          this->id(),
+          remote
+        ));
+
+        // Since our internal state has become noticably corrupt, should
+        // we throw here?
+        continue;
+      }
+
+      // At this point, remote is the Id value of a remote node that we
+      // are directly connected to that is no longer on the MST.
+      this->remoteLink_[ remote]->removeFromMst();
+    }
+  }
+
+  // Process additions second to avoid flooding historical data over
+  // connections that have been removed during the same processing.
+  for( int index = 0; index < int( added.size()); ++index) {
+    // This is ugly.
+    RepoKey remote = this->id();
+    if( remote == added[ index].first) {
+      remote = added[ index].second;
+
+    } else if( remote == added[ index].second) {
+      remote = added[ index].first;
+    }
+
+    if( remote != this->id()) {
+      // Maintain our set of MST connections.
+      this->mstNodes_.insert( remote);
+
+      // At this point, remote is the Id value of a remote node that we
+      // are directly connected to that is now on the MST.
+      this->remoteLink_[ remote]->addToMst();
+    }
+  }
 }
 
 }} // End namespace OpenDDS::Federator

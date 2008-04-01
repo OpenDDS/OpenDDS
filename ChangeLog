@@ -1,3 +1,16 @@
+Tue Apr  1 14:57:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+	  Implemented minimum spanning tree maintenance.
+
+        * dds/InfoRepo/FederatorManager_T.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+	  Added some files that should have been added with yesterdays
+	  work.
+
 Tue Apr  1 14:32:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
@@ -9,8 +22,8 @@ Tue Apr  1 14:32:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorRemoteLink.cpp:
         * dds/InfoRepo/FederatorSubscriptions.h:
         * dds/InfoRepo/FederatorSubscriptions.cpp:
-	  Changed FederatorManager to ManagerImpl to remove gratuitous
-	  redundancy.
+          Changed FederatorManager to ManagerImpl to remove gratuitous
+          redundancy.
 
         * dds/InfoRepo/FederatorManager.h:
         * dds/InfoRepo/FederatorManager.cpp:
