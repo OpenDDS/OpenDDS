@@ -40,7 +40,7 @@ RemoteLink::RemoteLink(
   RepoKey            self,
   RepoKey            remote,
   const std::string& nic,
-  FederatorManager*  manager
+  ManagerImpl*       manager
 ) : federationId_( remote)
 {
   char buffer[PARTITIONNAME_SIZE];

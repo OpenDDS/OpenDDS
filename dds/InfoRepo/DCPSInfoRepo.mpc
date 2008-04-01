@@ -27,7 +27,7 @@ project(*Federator): dcps {
     FederatorConfig.cpp
     FederatorRemoteLink.cpp
     FederatorSubscriptions.cpp
-    FederatorManager.cpp
+    FederatorManagerImpl.cpp
     FederatorManager_T_Impl.cpp
     FederatorLinkListener.cpp
     LinkStateManager.cpp
@@ -40,7 +40,7 @@ project(*Federator): dcps {
 
   Header_Files {
     UpdateListener_T.h
-    FederatorManager.h
+    FederatorManagerImpl.h
   }
 
   Template_Files {

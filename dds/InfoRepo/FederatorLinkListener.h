@@ -12,14 +12,14 @@
 
 namespace OpenDDS { namespace Federator {
 
-class FederatorManager;
+class ManagerImpl;
 
 class LinkListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
   public:
     /// Default constructor
-    LinkListener( FederatorManager& manager);
+    LinkListener( ManagerImpl& manager);
 
     /// Virtual destructor
     virtual ~LinkListener();
@@ -81,7 +81,7 @@ class LinkListener
 
   private:
     /// Manager object to delegate sample processing to.
-    FederatorManager& manager_;
+    ManagerImpl& manager_;
 
 };
 
