@@ -18,7 +18,7 @@ namespace OpenDDS { namespace Federator {
 template<>
 void
 ManagerImpl::update< ParticipantUpdate>(
-  ParticipantUpdate& /* sample */,
+  ParticipantUpdate& sample,
   ::DDS::SampleInfo& /* info */
 )
 {
@@ -31,7 +31,15 @@ ManagerImpl::update< ParticipantUpdate>(
   
   /// @TODO: Implement this
 
-  // Check the source and sequence to determine if we should update.
+  // First determine if this is new data.
+  if( this->remoteLink_[ sample.id.repository]->lastSeen()
+      >= sample.packet
+    ) {
+    return;
+  }
+
+  // Indicate that we have procesed this sequence datum.
+  this->remoteLink_[ sample.id.repository]->lastSeen() = sample.packet;
 
   // Update the repository
 
@@ -43,7 +51,7 @@ ManagerImpl::update< ParticipantUpdate>(
 template<>
 void
 ManagerImpl::update< TopicUpdate>(
-  TopicUpdate&       /* sample */,
+  TopicUpdate&       sample,
   ::DDS::SampleInfo& /* info */
 )
 {
@@ -56,12 +64,27 @@ ManagerImpl::update< TopicUpdate>(
   
   /// @TODO: Implement this
 
+  // First determine if this is new data.
+  if( this->remoteLink_[ sample.id.repository]->lastSeen()
+      >= sample.packet
+    ) {
+    return;
+  }
+
+  // Indicate that we have procesed this sequence datum.
+  this->remoteLink_[ sample.id.repository]->lastSeen() = sample.packet;
+
+  // Update the repository
+
+  // Update the mappings
+
+  // Update the source and sequence data
 }
 
 template<>
 void
 ManagerImpl::update< SubscriptionUpdate>(
-  SubscriptionUpdate& /* sample */,
+  SubscriptionUpdate& sample,
   ::DDS::SampleInfo&  /* info */
 )
 {
@@ -74,12 +97,27 @@ ManagerImpl::update< SubscriptionUpdate>(
   
   /// @TODO: Implement this
 
+  // First determine if this is new data.
+  if( this->remoteLink_[ sample.id.repository]->lastSeen()
+      >= sample.packet
+    ) {
+    return;
+  }
+
+  // Indicate that we have procesed this sequence datum.
+  this->remoteLink_[ sample.id.repository]->lastSeen() = sample.packet;
+
+  // Update the repository
+
+  // Update the mappings
+
+  // Update the source and sequence data
 }
 
 template<>
 void
 ManagerImpl::update< PublicationUpdate>(
-  PublicationUpdate& /* sample */,
+  PublicationUpdate& sample,
   ::DDS::SampleInfo& /* info */
 )
 {
@@ -92,6 +130,21 @@ ManagerImpl::update< PublicationUpdate>(
   
   /// @TODO: Implement this
 
+  // First determine if this is new data.
+  if( this->remoteLink_[ sample.id.repository]->lastSeen()
+      >= sample.packet
+    ) {
+    return;
+  }
+
+  // Indicate that we have procesed this sequence datum.
+  this->remoteLink_[ sample.id.repository]->lastSeen() = sample.packet;
+
+  // Update the repository
+
+  // Update the mappings
+
+  // Update the source and sequence data
 }
 
 }} // End of OpenDDS::Federator

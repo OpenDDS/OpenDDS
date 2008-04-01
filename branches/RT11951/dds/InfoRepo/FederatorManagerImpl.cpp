@@ -85,9 +85,6 @@ ManagerImpl::~ManagerImpl()
         this->config_.federationId()));
     }
   }
-
-  // Release our internal transport.
-  TheTransportFactory->release( this->config_.federationId());
 }
 
 void
@@ -98,6 +95,9 @@ ManagerImpl::initialize()
       ACE_TEXT("(%P|%t) INFO: ManagerImpl::initialize()\n")
     ));
   }
+
+  // N.B. The <self> domain participant uses the default repository which
+  //      is the local repository.
 
   // Add participant for <self> domain
   this->participant_
@@ -116,20 +116,6 @@ ManagerImpl::initialize()
   }
 
   // Add type support for update topics
-  TopicUpdateTypeSupportImpl* topicUpdate = new TopicUpdateTypeSupportImpl();
-  if( ::DDS::RETCODE_OK != topicUpdate->register_type(
-                             this->participant_,
-                             TOPICUPDATETYPENAME
-                           )
-    ) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to install ")
-      ACE_TEXT("TopicUpdate type support for repository %d.\n"),
-      this->config_.federationId()
-    ));
-    throw Unavailable();
-  }
-
   ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != participantUpdate->register_type(
                              this->participant_,
@@ -139,6 +125,20 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Unable to install ")
       ACE_TEXT("ParticipantUpdate type support for repository %d.\n"),
+      this->config_.federationId()
+    ));
+    throw Unavailable();
+  }
+
+  TopicUpdateTypeSupportImpl* topicUpdate = new TopicUpdateTypeSupportImpl();
+  if( ::DDS::RETCODE_OK != topicUpdate->register_type(
+                             this->participant_,
+                             TOPICUPDATETYPENAME
+                           )
+    ) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Unable to install ")
+      ACE_TEXT("TopicUpdate type support for repository %d.\n"),
       this->config_.federationId()
     ));
     throw Unavailable();
@@ -185,11 +185,6 @@ ManagerImpl::initialize()
     ));
     throw Unavailable();
   }
-
-  // Subscribe to LinkState data on <self> domain in any partition
-
-  // Add publication for LinkState data on <self> domain in any partition
-
 }
 
 // IDL methods.
@@ -297,8 +292,10 @@ ACE_THROW_SPEC ((
   std::string remoteHost = remoteEndpoint.substr( start, end - start);
 
   // Form our local endpoint information to send to the remote end.
-  std::string localEndpoint( this->config_.route( remoteHost));
-  localEndpoint += ':' + this->config_.federationPort();
+  /// @TODO: Make the protocol selectable - at least from the config.
+  std::string localEndpoint( "iiop:");
+  localEndpoint += this->config_.route( remoteHost) +  ":";
+  localEndpoint += this->config_.federationPort();
 
   try {
     // Call remote repository join_federation() for symmetry.  This is the
@@ -332,26 +329,14 @@ ACE_THROW_SPEC ((
   );
 
   // The link will consume two transport keys.
+  /// @TODO: Put a mechanism in place to reuse keys when a remote link is
+  ///        disconnected.
   this->transportKeyValue_ += 2;
-
-  // Add publication for update topics in <self> domain for the new
-  // "<self>-<remote>" partition.
-  //
-  // N.B. Even if we could add this partition to an existing publisher,
-  //      we would still need to create a new one since today our
-  //      transports will only connect via a single interface.  The local
-  //      endpoints for the different partitions need to be allowed to be
-  //      bound to different interfaces.
-
-  // Publish the local Entities on the new partition.
-
-  /// @TODO: Implement this.
-
-  // Add publication for LinkState data on <remote> domain in
-  // "<self>-<remote>" partition.
 
   // Publish (<self>,<remote>,ON,<sequence>) on all LinkState
   // publications.
+
+  /// @TODO: Implement this.
 
   // Federation is complete.
   this->joining_ = NIL_REPOSITORY;
@@ -372,10 +357,13 @@ ACE_THROW_SPEC ((
     ));
   }
 
+  // Obtain the lock while we mess about with the structures.
+  ACE_GUARD_THROW_EX( ACE_SYNCH_MUTEX, guard, this->lock_, ConnectionBusy());
+
   RemoteLinkMap::iterator location
     = this->remoteLink_.find( remoteId);
   if( location != this->remoteLink_.end()) {
-    /// Release the resources associated with the remote repository.
+    // Release the resources associated with the remote repository.
     delete location->second;
 
     // Remove the remote repository from our map.
@@ -392,13 +380,25 @@ ACE_THROW_SPEC ((
     throw ConnectionBusy();
   }
 
+  /// @TODO: Figure out how to determine if we can reach the remote
+  ///        repository and unfederate() it if we cant.
+
   if( 0 == this->remoteLink_.size()) {
     // We no longer are connected to any remote repository, so we need to
     // clean up all of our internal mappings to remove ourselves from the
     // federation.  We cannot participate in the federation without being
     // connected to at least one other repository within the federation.
-    this->unfederate();
+    for( RepoToIdMap::const_iterator current = this->inboundMap_.find( remoteId);
+         current != this->inboundMap_.end();
+         ++current) {
+      this->unfederate( current->first);
+    }
   }
+
+  // Publish (<self>,<remote>,OFF,<sequence>) on all LinkState
+  // publications.
+
+  /// @TODO: Implement this.
 
   return Unfederated;
 }
@@ -410,6 +410,16 @@ ManagerImpl::updateLinkState(
 )
 {
   ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
+
+  // First determine if this is new data.
+  if( this->remoteLink_[ sample.source]->lastSeen()
+      >= sample.packet
+    ) {
+    return;
+  }
+
+  // Indicate that we have procesed this sequence datum.
+  this->remoteLink_[ sample.source]->lastSeen() = sample.packet;
 
   // Lists of repositories removed from and added to the MST.
   LinkStateManager::LinkList added;
@@ -510,6 +520,17 @@ ManagerImpl::updateLinkState(
         // that we are directly connected to that is now on the MST.
         linkLocation->second->addToMst();
 
+        // Check if we have this repository in our mappings already.
+        RepoToIdMap::const_iterator inboundLocation
+          = this->inboundMap_.find( remote);
+        if( inboundLocation == this->inboundMap_.end()) {
+          // If we do not already have this repository in our mappings,
+          // publish all of our data to it, since it is a new repository
+          // to the federation.
+
+          /// @TODO: Implement this.
+        }
+
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
@@ -528,11 +549,42 @@ ManagerImpl::updateLinkState(
 }
 
 void
-ManagerImpl::unfederate()
+ManagerImpl::unfederate( RepoKey remote)
 {
-  // ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
+  // N.B. The caller of this method _must_ hold the Manager object lock
+  //      during this call.
 
-  /// @TODO: Implement this.
+  RepoToIdMap::iterator inboundLocation = this->inboundMap_.find( remote);
+  if( inboundLocation != this->inboundMap_.end()) {
+    // Remove the inbound mappings and destroy the entities.
+    for( RemoteToLocalMap::iterator current = inboundLocation->second.begin();
+         current != inboundLocation->second.end();
+         ++current) {
+
+      /// @TODO: Delete the entities here.
+      //::OpenDDS::DCPS::RepoId localId = current->second;
+
+      // Remove from the outbound mappings as well.
+      LocalToFederationMap::iterator outboundLocation
+        = this->outboundMap_.find( current->second);
+      if( outboundLocation != this->outboundMap_.end()) {
+        this->outboundMap_.erase( outboundLocation);
+
+      } else {
+        // This is an error, right?
+      }
+    }
+
+    // Empty the inbound remote to local mappings.
+    inboundLocation->second.erase(
+      inboundLocation->second.begin(),
+      inboundLocation->second.end()
+    );
+  }
+
+  // Finally remove the inbound mappings completely.
+  this->inboundMap_.erase( inboundLocation);
+
 }
 
 }} // End namespace OpenDDS::Federator
