@@ -1,3 +1,21 @@
+Tue Apr  1 14:32:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+	  Changed FederatorManager to ManagerImpl to remove gratuitous
+	  redundancy.
+
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Renamed these files.
+
 Mon Mar 31 22:24:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:

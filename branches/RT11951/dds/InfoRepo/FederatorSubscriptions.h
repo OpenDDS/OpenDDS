@@ -15,7 +15,7 @@
 
 namespace OpenDDS { namespace Federator {
 
-class FederatorManager;
+class ManagerImpl;
 class LinkListener;
 class UpdateMarker;
 
@@ -65,7 +65,7 @@ class OpenDDS_Federator_Export Subscriptions  {
     void initialize(
       ::DDS::Subscriber_ptr        subscriber,
       ::DDS::DomainParticipant_ptr participant,
-      FederatorManager*            manager
+      ManagerImpl*                 manager
     );
 
     /// Subscribe to the Update Topics from the remote repository.
@@ -76,7 +76,7 @@ class OpenDDS_Federator_Export Subscriptions  {
 
   private:
     /// Federator::Manager to callback on events.
-    FederatorManager* manager_;
+    ManagerImpl* manager_;
 
     /// Subscriber in the remote repository/domain.
     ::DDS::Subscriber_var subscriber_;

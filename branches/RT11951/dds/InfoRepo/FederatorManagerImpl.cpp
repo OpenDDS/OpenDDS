@@ -3,7 +3,7 @@
 // $Id$
 
 #include "DcpsInfo_pch.h"
-#include "FederatorManager.h"
+#include "FederatorManagerImpl.h"
 #include "FederatorConfig.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -30,22 +30,22 @@
 
 namespace OpenDDS { namespace Federator {
 
-FederatorManager::FederatorManager( Config& config)
+ManagerImpl::ManagerImpl( Config& config)
  : config_( config)
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::FederatorManager()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::ManagerImpl()\n")
     ));
   }
   // Initialization is deferred until the service has been initialized.
 }
 
-FederatorManager::~FederatorManager()
+ManagerImpl::~ManagerImpl()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::~FederatorManager()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::~ManagerImpl()\n")
     ));
   }
 
@@ -83,11 +83,11 @@ FederatorManager::~FederatorManager()
 }
 
 void
-FederatorManager::initialize()
+ManagerImpl::initialize()
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::initialize()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::initialize()\n")
     ));
   }
 
@@ -208,21 +208,21 @@ FederatorManager::initialize()
 // IDL methods.
 
 ::OpenDDS::Federator::RepoKey
-FederatorManager::federationId()
+ManagerImpl::federationId()
 ACE_THROW_SPEC ((
   ::CORBA::SystemException
 ))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::federationId()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::federationId()\n")
     ));
   }
   return this->config_.federationId();
 }
 
 ::OpenDDS::Federator::Status
-FederatorManager::join_federation( const char * endpoint)
+ManagerImpl::join_federation( const char * endpoint)
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
   ::OpenDDS::Federator::Unavailable
@@ -230,7 +230,7 @@ ACE_THROW_SPEC ((
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::join_federation()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation()\n")
     ));
   }
 
@@ -242,7 +242,7 @@ ACE_THROW_SPEC ((
     = this->_this()->_get_orb()->string_to_object( remoteIor.c_str());
   if( CORBA::is_nil( obj.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: FederatorManager::join_federation - ")
+      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
       ACE_TEXT("unable to resolve remote federator.\n")
     ));
     throw ::OpenDDS::Federator::Unavailable();
@@ -253,7 +253,7 @@ ACE_THROW_SPEC ((
     = ::OpenDDS::Federator::Manager::_narrow( obj.in());
   if( CORBA::is_nil( remoteFederator.in() ) ) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: FederatorManager::join_federation - ")
+      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
       ACE_TEXT("unable to narrow remote federator.\n")
     ));
     throw ::OpenDDS::Federator::Unavailable();
@@ -366,7 +366,7 @@ ACE_THROW_SPEC ((
 }
 
 ::OpenDDS::Federator::Status
-FederatorManager::remove_connection ( RepoKey /* remoteId */)
+ManagerImpl::remove_connection ( RepoKey /* remoteId */)
 ACE_THROW_SPEC ((
   ::CORBA::SystemException,
   ::OpenDDS::Federator::ConnectionBusy
@@ -374,14 +374,14 @@ ACE_THROW_SPEC ((
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: FederatorManager::remove_connection()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::remove_connection()\n")
     ));
   }
   return ::OpenDDS::Federator::Unfederated;
 }
 
 void
-FederatorManager::updateLinkState(
+ManagerImpl::updateLinkState(
   ::OpenDDS::Federator::LinkState /* sample */,
   ::DDS::SampleInfo /* info */
 )

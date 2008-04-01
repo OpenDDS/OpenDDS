@@ -49,7 +49,7 @@ void
 Subscriptions::initialize(
   ::DDS::Subscriber_ptr        subscriber,
   ::DDS::DomainParticipant_ptr participant,
-  FederatorManager*            manager
+  ManagerImpl*                 manager
 )
 {
   this->subscriber_ = subscriber;
@@ -199,6 +199,12 @@ Subscriptions::unsubscribeFromUpdates()
       OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK
     );
     this->subscriber_->delete_datareader( this->readers_[ index].in());
+  }
+
+  // Lose the actual listener servants.
+  for( unsigned int index = 0; index < this->listeners_.size(); ++index) {
+    delete this->listeners_[ index];
+    this->listeners_[ index] = 0;
   }
 
   // Delete the updateReaders.

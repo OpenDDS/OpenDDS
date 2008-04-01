@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef FEDERATORMANAGER_H
-#define FEDERATORMANAGER_H
+#ifndef FEDERATORMANAGERIMPL_H
+#define FEDERATORMANAGERIMPL_H
 
 #include "federator_export.h"
 #include "FederatorS.h"
@@ -19,14 +19,14 @@ namespace OpenDDS { namespace Federator {
 
 class Config;
 
-class OpenDDS_Federator_Export FederatorManager 
+class OpenDDS_Federator_Export ManagerImpl 
   : public virtual POA_OpenDDS::Federator::Manager {
   public:
     /// Default constructor.
-    FederatorManager( Config& config);
+    ManagerImpl( Config& config);
 
     /// Virtual destructor.
-    virtual ~FederatorManager();
+    virtual ~ManagerImpl();
 
     // IDL methods.
 
@@ -115,19 +115,28 @@ class OpenDDS_Federator_Export FederatorManager
 
 inline
 RepoKey&
-FederatorManager::id()
+ManagerImpl::id()
 {
   return this->federationId_;
 }
 
 inline
 RepoKey
-FederatorManager::id() const
+ManagerImpl::id() const
 {
   return this->federationId_;
 }
 
 }} // End namespace OpenDDS::Federator
 
-#endif // FEDERATORMANAGER_H
+#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
+#include "FederatorManager_T.cpp"
+#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
+
+#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
+#pragma message ("FederatorManager_T.cpp template inst")
+#pragma implementation ("FederatorManager_T.cpp")
+#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
+
+#endif // FEDERATORMANAGERIMPL_H
 

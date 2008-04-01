@@ -2,12 +2,12 @@
 //
 // $Id$
 #include "FederatorLinkListener.h"
-#include "FederatorManager.h"
+#include "FederatorManagerImpl.h"
 #include "LinkStateTypeSupportImpl.h"
 
 namespace OpenDDS { namespace Federator {
 
-LinkListener::LinkListener( FederatorManager& manager)
+LinkListener::LinkListener( ManagerImpl& manager)
  : manager_( manager)
 {
   ACE_DEBUG((LM_DEBUG,

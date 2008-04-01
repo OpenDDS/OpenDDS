@@ -67,7 +67,7 @@ class OpenDDS_Federator_Export RemoteLink  {
       RepoKey            self,
       RepoKey            remote,
       const std::string& nic,
-      FederatorManager*  manager
+      ManagerImpl*       manager
     );
 
     /// Virtual destructor.
