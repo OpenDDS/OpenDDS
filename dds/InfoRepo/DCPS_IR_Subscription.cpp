@@ -5,6 +5,8 @@
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Participant.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
+#include /**/ "DCPS_IR_Domain.h"
+#include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
 
@@ -421,10 +423,24 @@ const ::DDS::DataReaderQos* DCPS_IR_Subscription::get_datareader_qos ()
   return &qos_;
 }
 
-
 const ::DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos ()
 {
   return &subscriberQos_;
+}
+
+
+SpecificQos DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
+                                   const ::DDS::SubscriberQos & subscriberQos)
+{
+  bool u_dr_qos = ! (qos_ == qos);
+  bool u_sub_qos = ! (subscriberQos_ == subscriberQos);
+  if (u_dr_qos)
+    qos_ = qos;
+  if (u_sub_qos)
+    subscriberQos_ = subscriberQos;
+  
+  participant_->get_domain_reference()->publish_subscription_bit (this);
+  return  u_dr_qos ? DataReaderQos : SubscriberQos;
 }
 
 

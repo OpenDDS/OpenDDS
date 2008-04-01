@@ -264,6 +264,10 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
     }
 
+    // add associations to the transport before using
+    // Built-In Topic support and telling the listener.
+    this->subscriber_servant_->add_associations(writers, this, qos_) ;
+
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
     {
       // this call will start the timer if it is not already set
@@ -276,10 +280,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       this->handle_timeout (now, this);
     }
     // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    this->subscriber_servant_->add_associations(writers, this, qos_) ;
   }
 
   if (! is_bit_)
@@ -573,31 +573,56 @@ void DataReaderImpl::update_incompatible_qos (
 		   ))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos))
-    {
-      if (enabled_.value())
-	{
-	  if (! Qos_Helper::changeable (qos_, qos))
-            {
-              return ::DDS::RETCODE_IMMUTABLE_POLICY;
-            }
-	}
-      if (! (qos_ == qos))
-	{
-	  qos_ = qos;
-	  // TBD - when there are changable QoS supported
-	  //       this code may need to do something
-	  //       with the changed values.
-	  // TBD - when there are changable QoS then we
-	  //       need to tell the DCPSInfo/repo about
-	  //       the changes in Qos.
-	  // repo->set_qos(qos_);
-	}
+  {
+    if (qos_ == qos)
       return ::DDS::RETCODE_OK;
-    }
-  else
+
+    if (enabled_.value())
     {
-      return ::DDS::RETCODE_INCONSISTENT_POLICY;
+      if (! Qos_Helper::changeable (qos_, qos))
+      {
+        return ::DDS::RETCODE_IMMUTABLE_POLICY;
+      }
+      else
+      {
+        qos_ = qos;
+        try
+        {
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          ::DDS::SubscriberQos subscriberQos;
+          this->subscriber_servant_->get_qos(subscriberQos);
+          repo->update_subscription_qos(this->participant_servant_->get_domain_id(), 
+                                        this->participant_servant_->get_id(), 
+                                        this->subscription_id_, 
+                                        this->qos_,
+                                        subscriberQos);
+        }
+        catch (const CORBA::SystemException& sysex)
+        {
+          sysex._tao_print_exception (
+            "ERROR: System Exception"
+            " in DataReaderImpl::set_qos");
+          return ::DDS::RETCODE_ERROR;
+        }
+        catch (const CORBA::UserException& userex)
+        {
+          userex._tao_print_exception (
+            "ERROR:  Exception"
+            " in DataReaderImpl::set_qos");
+          return ::DDS::RETCODE_ERROR;
+        }
+      }
     }
+    else
+    {
+      qos_ = qos;
+    }
+    return ::DDS::RETCODE_OK;
+  }
+  else
+  {
+    return ::DDS::RETCODE_INCONSISTENT_POLICY;
+  }
 }
 
 void DataReaderImpl::get_qos (
@@ -1283,8 +1308,9 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
   {
     ACE_Time_Value relative;
     ACE_Time_Value now = ACE_OS::gettimeofday ();
-    if (now < next_absolute)
-      relative = next_absolute - now;
+    // compare the time now with the earliest(smallest) deadline we found
+    if (now < smallest)
+      relative = smallest - now;
     else
       relative = ACE_Time_Value(0,1); // ASAP
 

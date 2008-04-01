@@ -76,6 +76,10 @@ public:
   /// Topic retains ownership
   ::DDS::TopicQos * get_topic_qos ();
 
+  /// Reset topic qos and also propogate the qos change to related BITs
+  /// that has the qos copy.
+  void set_topic_qos (const ::DDS::TopicQos& qos);
+
   ::DDS::InstanceHandle_t get_handle();
   void set_handle(::DDS::InstanceHandle_t handle);
 
@@ -92,7 +96,6 @@ private:
   CORBA::Boolean isBIT_;
 
   DCPS_IR_Publication_Set publicationRefs_;
-
 };
 
 #endif /* DCPS_IR_TOPIC_H */

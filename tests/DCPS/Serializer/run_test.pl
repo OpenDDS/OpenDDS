@@ -12,10 +12,10 @@ use PerlACE::Run_Test;
 my $args = "--test" ;
 
 if (PerlACE::is_vxworks_test()) {
-  my $test = new PerlACE::ProcessVX( "./SerializerTest", $args) ;
+  $test = new PerlACE::ProcessVX( "./SerializerTest", $args) ;
 }
 else {
-  my $test = new PerlACE::Process( "./SerializerTest", $args) ;
+  $test = new PerlACE::Process( "./SerializerTest", $args) ;
 }
 
 my $status = $test->SpawnWaitKill( 60);

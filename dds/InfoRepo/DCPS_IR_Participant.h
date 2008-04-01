@@ -58,6 +58,10 @@ public:
   /// This takes ownership of the memory pointed to by pub
   /// Returns 0 if added, 1 if already exists, -1 other failure
   int add_publication (DCPS_IR_Publication* pub);
+  
+  /// Return the publication object.
+  int find_publication_reference (OpenDDS::DCPS::RepoId pubId,
+                                  DCPS_IR_Publication*& pub);
 
   /// Removes the publication with the id
   /// Deletes the publication object if returns successful
@@ -68,6 +72,10 @@ public:
   /// This takes ownership of the memory pointed to by aub
   /// Returns 0 if added, 1 if already exists, -1 other failure
   int add_subscription (DCPS_IR_Subscription* sub);
+
+  /// Return the subscription object.
+  int find_subscription_reference (OpenDDS::DCPS::RepoId subId,
+                                   DCPS_IR_Subscription*& sub);
 
   /// Removes the subscription with the id
   /// Deletes the subscription object if returns successful
@@ -120,6 +128,9 @@ public:
   /// Participant retains ownership
   const ::DDS::DomainParticipantQos* get_qos ();
 
+  /// Update qos.
+  void set_qos (const ::DDS::DomainParticipantQos & qos);
+
   CORBA::Boolean is_participant_ignored (OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_topic_ignored (OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_publication_ignored (OpenDDS::DCPS::RepoId id);
@@ -130,6 +141,8 @@ public:
 
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
+
+  DCPS_IR_Domain* get_domain_reference () const;
 
 private:
   OpenDDS::DCPS::RepoId id_;

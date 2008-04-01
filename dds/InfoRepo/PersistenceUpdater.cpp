@@ -582,11 +582,118 @@ PersistenceUpdater::remove (ItemType type, const IdType& idType)
 }
 
 void
-PersistenceUpdater::updateQos(const ItemType& , const IdType&
-                                      , const ::QosSeq& )
+PersistenceUpdater::updateQos(const ItemType& itemType, 
+                              const IdType& id,
+                              const ::QosSeq& qos)
 {
-  // TBD
+  // Since the QosSeq passed in to this function is allocated via new operator, it
+  // would cause bad pointer when reloading from persistent file. The QOS data 
+  // should be allocated by the persistence updater allocator.
+
+  // The guard frees the QOS data memory allocated via new after exit 
+  // from this function. 
+  ArrDelAdapter<char> guard (qos.second.second);
+
+  IdType_ExtId ext(id);
+  if (itemType == Actor)
+  {
+    PersistenceUpdater::RWActor* actor_data = 0;
+
+    if (actor_index_->find (ext, actor_data, allocator_) ==  0)
+    {
+      if (qos.first == PublisherQos || qos.first == SubscriberQos) 
+      {
+        //safety check
+        if (qos.first != actor_data->pubsubQos.first)
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos inconsistent pubsub qos type "
+            "(update %d map %d)\n", qos.first, actor_data->pubsubQos.first));
+        }
+
+        get_bin_seq (qos, actor_data->pubsubQos.second);
+      }
+      else if (qos.first == DataWriterQos || qos.first == DataReaderQos) 
+      {
+        //safety check
+        if (qos.first != actor_data->drdwQos.first)
+        {
+          ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos inconsistent dwdr qos type "
+            "(update %d map %d)\n", qos.first, actor_data->drdwQos.first));
+        }
+
+        get_bin_seq (qos, actor_data->drdwQos.second);
+      }
+      else 
+        ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos "
+        "invalid qos type %d\n", qos.first));
+    }
+    else
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos actor %d not found\n", 
+        id));
+    }
+  }
+  else if (itemType == ::Topic)
+  {
+    PersistenceUpdater::Topic* topic_data = 0;
+
+    if (topic_index_->find (ext, topic_data, allocator_) ==  0)
+    {
+      if (qos.first != topic_data->topicQos.first)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos inconsistent topic qos type "
+          "(update %d map %d)\n", qos.first, topic_data->topicQos.first));
+      }
+      
+      get_bin_seq (qos, topic_data->topicQos.second);
+    }
+    else
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos topic %d not found\n", 
+        id));
+    }
+  } 
+  else if (itemType == ::Participant)
+  {
+    PersistenceUpdater::Participant* part_data = 0;
+
+    if (participant_index_->find (ext, part_data, allocator_) ==  0)
+    {
+      if (qos.first != part_data->participantQos.first)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos inconsistent participant qos type "
+          "(update %d map %d)\n", qos.first, part_data->participantQos.first));
+      }
+
+      get_bin_seq (qos, part_data->participantQos.second);
+    }
+    else
+    {
+      ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos participant %d not found\n", 
+        id));
+    }
+  } 
+  else
+  {
+    ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos invalid type %d \n", 
+      itemType));
+  }
 }
+
+
+
+void
+PersistenceUpdater::get_bin_seq (const ::QosSeq& qos, BinSeq & binSeq)
+{
+  //Re-allocate qos memory by the allocator.
+  void* out_buf;
+  ACE_ALLOCATOR (out_buf, allocator_->malloc (qos.second.first));
+  ACE_OS::memcpy (out_buf, qos.second.second, qos.second.first);
+
+  binSeq.first = qos.second.first;
+  binSeq.second = static_cast<char*>(out_buf);
+}
+
 
 // from the "ACE Programmers Guide (P. 424)
 

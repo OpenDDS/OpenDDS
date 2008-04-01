@@ -67,13 +67,13 @@ my $publisherArgs = "-ORBSvcConf udp.conf -p $publisherId:$publisherHost:$publis
 # Create the test objects.
 #
 if (PerlACE::is_vxworks_test()) {
-  my $subscriber = new PerlACE::ProcessVX( $subscriberCmd, $subscriberArgs) ;
-  my $publisher  = new PerlACE::ProcessVX( $publisherCmd,  $publisherArgs) ;
+  $subscriber = new PerlACE::ProcessVX( $subscriberCmd, $subscriberArgs) ;
+  $publisher  = new PerlACE::ProcessVX( $publisherCmd,  $publisherArgs) ;
 
 }
 else {
-  my $subscriber = new PerlACE::Process( $subscriberCmd, $subscriberArgs) ;
-  my $publisher  = new PerlACE::Process( $publisherCmd,  $publisherArgs) ;
+  $subscriber = new PerlACE::Process( $subscriberCmd, $subscriberArgs) ;
+  $publisher  = new PerlACE::Process( $publisherCmd,  $publisherArgs) ;
 }
 
 #

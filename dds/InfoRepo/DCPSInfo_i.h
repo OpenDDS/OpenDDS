@@ -256,6 +256,63 @@ public:
       , OpenDDS::DCPS::Invalid_Publication
     ));
 
+
+  virtual void update_publication_qos (
+      ::DDS::DomainId_t domainId,
+      OpenDDS::DCPS::RepoId partId,
+      OpenDDS::DCPS::RepoId dwId,
+      const ::DDS::DataWriterQos & qos,
+      const ::DDS::PublisherQos & publisherQos
+    )
+    ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Publication
+    ));
+
+
+  virtual void update_subscription_qos (
+      ::DDS::DomainId_t domainId,
+      OpenDDS::DCPS::RepoId partId,
+      OpenDDS::DCPS::RepoId drId,
+      const ::DDS::DataReaderQos & qos,
+      const ::DDS::SubscriberQos & subscriberQos
+    )
+    ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Subscription
+    ));
+
+
+  virtual void update_topic_qos (
+      OpenDDS::DCPS::RepoId topicId,
+      ::DDS::DomainId_t domainId,
+      OpenDDS::DCPS::RepoId participantId,
+      const ::DDS::TopicQos & qos
+    )
+    ACE_THROW_SPEC ((
+    CORBA::SystemException
+    , OpenDDS::DCPS::Invalid_Domain
+    , OpenDDS::DCPS::Invalid_Participant
+    , OpenDDS::DCPS::Invalid_Topic
+    ));
+
+
+  virtual void update_domain_participant_qos (
+    ::DDS::DomainId_t domain,
+    ::OpenDDS::DCPS::RepoId participantId,
+    const ::DDS::DomainParticipantQos & qos
+  )
+  ACE_THROW_SPEC ((
+    ::CORBA::SystemException,
+    ::OpenDDS::DCPS::Invalid_Domain,
+    ::OpenDDS::DCPS::Invalid_Participant
+  ));
+ 
+
   /// Called to load the domains
   /// returns the number of domains that were loaded.
   /// Currently after loading domains, it
@@ -272,6 +329,9 @@ public:
 private:
 
   bool init_persistence (void);
+
+  template <typename QosType, typename Qos>
+  void get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq);
 
 private:
   DCPS_IR_Domain_Map domains_;

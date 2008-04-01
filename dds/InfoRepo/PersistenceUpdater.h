@@ -90,6 +90,7 @@ public:
 
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
+  void get_bin_seq (const ::QosSeq& qos, BinSeq & binSeq);
 
   ACE_TString persistence_file_;
   bool reset_;

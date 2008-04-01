@@ -296,7 +296,10 @@ UpdateManager::add (const UTopic& topic)
     return;
   }
 
-  ACE_OS::memcpy (buf, outCdr.buffer(), len);
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf, dst.base(), len);
+
   BinSeq qos_bin (len, buf);
 
   QosSeq p (TopicQos, qos_bin);
@@ -331,7 +334,10 @@ UpdateManager::add(const UParticipant& participant)
     return;
   }
 
-  ACE_OS::memcpy (buf, outCdr.buffer(), len);
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+  ACE_OS::memcpy (buf, dst.base(), len);
+
   BinSeq qos_bin (len, buf);
 
   QosSeq p (ParticipantQos, qos_bin);
@@ -368,6 +374,7 @@ UpdateManager::updateQos(const ItemType& itemType, const IdType& id
     (*iter)->updateQos (itemType, id, qos);
   }
 }
+
 
 void
 UpdateManager::add (const DTopic& topic)

@@ -4,6 +4,8 @@
 #include /**/ "DCPS_IR_Participant.h"
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Subscription.h"
+#include /**/ "DCPS_IR_Domain.h"
+#include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
 
@@ -405,6 +407,19 @@ CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (OpenDDS::DCPS::Repo
   return &qos_;
 }
 
+SpecificQos DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
+                                          const ::DDS::PublisherQos & publisherQos)
+{
+  bool u_dw_qos = ! (qos_ == qos);
+  bool u_pub_qos = ! (publisherQos_ == publisherQos);
+  if (u_dw_qos)
+    qos_ = qos;
+  if (u_pub_qos)
+    publisherQos_ = publisherQos;
+    
+  participant_->get_domain_reference()->publish_publication_bit (this);
+  return  u_dw_qos ? DataWriterQos : PublisherQos;
+}
 
 ::DDS::PublisherQos* DCPS_IR_Publication::get_publisher_qos ()
 {

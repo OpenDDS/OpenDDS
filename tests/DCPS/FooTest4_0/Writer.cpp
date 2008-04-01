@@ -60,6 +60,9 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
   dw_qos.history.depth = history_depth  ;
   dw_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
+  dw_qos.liveliness.lease_duration.sec =
+	  static_cast<CORBA::Long> (max_blocking_time.sec ());
+  dw_qos.liveliness.lease_duration.nanosec = 0 ;
 
   dw_ = pub_->create_datawriter(topic,
                                 dw_qos,
