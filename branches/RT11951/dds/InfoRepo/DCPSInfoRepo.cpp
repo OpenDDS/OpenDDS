@@ -1,7 +1,7 @@
 #include "DcpsInfo_pch.h"
 #include "DCPSInfo_i.h"
 #include "FederatorConfig.h"
-#include "FederatorManager.h"
+#include "FederatorManagerImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -68,9 +68,9 @@ private:
   bool resurrect_;
 
   /// Repository Federation behaviors
-  OpenDDS::Federator::FederatorManager federator_;
-  OpenDDS::Federator::Config           federatorConfig_;
-  ACE_TString                          federation_endpoint_;
+  OpenDDS::Federator::ManagerImpl federator_;
+  OpenDDS::Federator::Config      federatorConfig_;
+  ACE_TString                     federation_endpoint_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)

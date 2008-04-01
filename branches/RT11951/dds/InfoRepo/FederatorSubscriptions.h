@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef FEDERATORSUSCRIPTIONS_H
-#define FEDERATORSUSCRIPTIONS_H
+#ifndef FEDERATORSUBSCRIPTIONS_H
+#define FEDERATORSUBSCRIPTIONS_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -116,5 +116,5 @@ class OpenDDS_Federator_Export Subscriptions  {
 # include "FederatorSubscriptions.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif // FEDERATORSUSCRIPTIONS_H
+#endif // FEDERATORSUBSCRIPTIONS_H
 

@@ -27,6 +27,7 @@ project(*Federator): dcps {
     FederatorConfig.cpp
     FederatorRemoteLink.cpp
     FederatorSubscriptions.cpp
+    FederatorPublications.cpp
     FederatorManagerImpl.cpp
     FederatorManager_T_Impl.cpp
     FederatorLinkListener.cpp

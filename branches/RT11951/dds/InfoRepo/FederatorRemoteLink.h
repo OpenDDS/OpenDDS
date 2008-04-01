@@ -11,8 +11,9 @@
 #include "federator_export.h"
 #include "FederatorC.h"
 #include "FederatorSubscriptions.h"
-#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "FederatorPublications.h"
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include <string>
 
@@ -52,22 +53,38 @@ namespace OpenDDS { namespace Federator {
  *   internal - a partition on which we send data to the repository with
  *              which we are associated.
  *              Its value is: "<self>-<self>"
+ *
+ * A separate transport implementation is created for the inbound and
+ * outbound data.  This is required since the inbound data is part of the
+ * remote repository domain and the outbound data is part of the local
+ * repository domain.  Since the publications and subscriptions reside
+ * within different repositories, separate transport implementations are
+ * required.  A transport may not be shared between repositories.
+ *
+ * In order to do this, the transports are keyed in the transport factory
+ * using the supplied transport key and the next sequential key.  The
+ * code which instantiates on object of this type is reponsible for
+ * ensuring that these two contiguous key values are available in the
+ * transport implementation factory.
  */
 class OpenDDS_Federator_Export RemoteLink  {
   public:
     /**
      * @brief Construct with the information for the remote repository.
      *
-     * @param self    - our own repository federation Id value
-     * @param remote  - remote repository federation Id value
-     * @param nic     - network interface on which to send to this repository
-     * @param manager - called back when subscriptions receive data
+     * @param self         - our own repository federation Id value
+     * @param remote       - remote repository federation Id value
+     * @param transportKey - the transport key value to use
+     * @param nic          - local network interface on which to send
+     * @param manager      - called back when subscriptions receive data
      */
     RemoteLink(
-      RepoKey            self,
-      RepoKey            remote,
-      const std::string& nic,
-      ManagerImpl*       manager
+      RepoKey                          self,
+      RepoKey                          remote,
+      const std::string&               nic,
+      ::OpenDDS::DCPS::TransportIdType transportKey,
+      ManagerImpl*                     manager,
+      ::DDS::DomainParticipant_var     participant
     );
 
     /// Virtual destructor.
@@ -93,20 +110,23 @@ class OpenDDS_Federator_Export RemoteLink  {
     /// Configured Federation Id value.
     RepoKey federationId_;
 
+    /// Base value of transport keys used by this remote repository.
+    ::OpenDDS::DCPS::TransportIdType transportKey_;
+
     /// Inbound partition.
     std::string inbound_;
 
     /// External partition.
     std::string external_;
 
-    /// Internal transport for <remote> domain
-    OpenDDS::DCPS::TransportImpl_rch transport_;
-
     /// DomainParticipant in remote repository for <remote> domain.
     ::DDS::DomainParticipant_var participant_;
 
     /// Encapsulated Update and LinkState subscriptions for this repository.
     Subscriptions subscriptions_;
+
+    /// Encapsulated Update and LinkState publications for this repository.
+    Publications publications_;
 
     /// DomainParticipant in remote repository for <remote> domain.
     ::OpenDDS::Federator::Manager_var manager_;
