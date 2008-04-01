@@ -21,9 +21,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-/// Equality check for ::DDS::Duration_t time values
-bool operator== (::DDS::Duration_t op1, ::DDS::Duration_t op2);
-
 /// Increments the count of occurances of the incompatible policy
 ///  for the status
 void

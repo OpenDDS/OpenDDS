@@ -50,6 +50,9 @@ namespace OpenDDS
     typedef std::map<PublicationId, PublisherDataWriterInfo*>
         PublicationMap ;
 
+    // DataWriter id to qos map.
+    typedef std::map<RepoId, ::DDS::DataWriterQos> DwIdToQosMap;
+
 
     /**
     * @class PublisherImpl

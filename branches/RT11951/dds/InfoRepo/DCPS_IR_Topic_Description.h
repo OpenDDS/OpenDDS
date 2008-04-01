@@ -88,6 +88,8 @@ public:
   void associate (DCPS_IR_Publication* publication,
                   DCPS_IR_Subscription* subscription);
 
+  void publish_subscription_bit (const DCPS_IR_Topic* topic);
+
   const char* get_name () const ;
   const char* get_dataTypeName () const;
 

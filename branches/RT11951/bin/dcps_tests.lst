@@ -85,6 +85,7 @@ tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN
 tests/DCPS/ViewState/run_test.pl: !DCPS_MIN
@@ -121,3 +122,8 @@ DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO
+
+tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
+tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
+tests/DCPS/UnitTests/run_test.pl LivelinessCompatibility: !DCPS_MIN
+tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN

@@ -1,9 +1,424 @@
+Tue Apr  1 21:05:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Merging trunk changes 999:1046 out to branch.
+
+        Mon Mar 31 18:12:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+
+          Cleaning up unneeded dependency on UDP.
+
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Cleaning up unneeded dependency on UDP.
+
+        Mon Mar 31 15:59:22 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Added Brian Johnson of OCI.
+
+        * DDS_TAO.mwc:
+
+          Updated to work with recent changes to the DCPSInfoRepo -- it now uses
+          the TAO ImR (optionally).  Thanks to Jonathan Pollack for reporting
+          this problem.
+
+        Mon Mar 31 15:44:17 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+
+          Cleanup quick mistake and remove a warning.
+
+        Mon Mar 31 14:51:48 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+
+          Fixing problem with static builds.
+
+        Fri Mar 28 14:07:13 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/README:
+        * tests/DCPS/UnitTests/README:
+
+          Change from .txt.
+
+        * tests/DCPS/CompatibilityTest/README.txt:
+
+        * tests/DCPS/UnitTests/README.txt:
+
+          Removed these files.
+
+        Fri Mar 28 14:02:55 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/README.txt:
+
+          Added description for the test.
+
+        * tests/DCPS/UnitTests/README.txt:
+
+          Added description for the test.
+
+        Fri Mar 28 13:45:53 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added a UnitTests and CompatibilityTest to the nightly build.
+
+        * tests/DCPS/CompatibilityTest:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/CompatibilityTest/Writer.h:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+        * tests/DCPS/CompatibilityTest/domain_ids:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+
+          Added test to verify that compatibleQOS correctly implemented
+          the DDS spec.
+
+        Fri Mar 28 13:39:29 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Added directory for simple Unit Tests.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Added code to test out new Qos_Helper function.
+
+        Fri Mar 28 13:12:01 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          In add_associations(...) I moved the call to
+          subscriber_servant_->add_associations before the timeout timer
+          is started.
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added function to identify if a liveliness lease duration is
+          greater than another, to be used for determining compatibility.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Added compatibility checks for durability.kind, liveliness.kind,
+          and liveliness.lease_duration.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+
+        * tests/DCPS/CompatibilityTest:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/CompatibilityTest/README:
+        * tests/DCPS/CompatibilityTest/Writer.h:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+        * tests/DCPS/CompatibilityTest/domain_ids:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+
+          Changed test to have the same QOS liveliness lease_duration for pub
+          and sub and used the liveliness factor to make the liveliness timeout.
+
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/README:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Cleaned up excess debug statements and changed test to use the
+          liveliness factor to cause the liveliness timeout.
+
+        Mon Mar 24 22:14:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Fixed "String literal converted to char* in initialization" warnings.
+
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+
+          Minor change - remove info.pr after test finishes.
+
+        Mon Mar 24 19:53:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          Replaced the ACE_OutputCDR::consolidate() with ACE_CDR::consolidate()
+          to fix compilation errors on 1.4a due to consolidate() not defined
+          in ACE_OutputCDR.
+
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+
+          Added file missed in previous commit.
+
+        Fri Mar 21 17:42:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fixed bugs in duration_to_time_value() and time_to_time_value()
+          that incorrectly convert nanoseconds to microseconds.
+
+        Fri Mar 21 17:06:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added qos propagation to persistent repository test.
+
+        * DDS_release_notes.txt:
+
+          Added qos propagation changes.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          - Implemented feature to update qos to persistent repository.
+
+          - Fixed incorrect actor type and qos type for subscriber/datareader
+            problem in UpdateManager::add(const UA& actor). This bug causes the
+            reloading from persistent file maps the subscriber/datareader as
+            publisher/datawriter.
+
+          - Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
+            fully copied to buffer when the qos contains sequence data. The
+            TAO_OutputCDR stream needs be consolidated before memcpy.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed a debug logging.
+
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Added test for qos propagation to persistent repository.
+
+        Tue Mar 18 18:46:36 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+
+          Rolled back the last two commits for dispose notification feature.
+          These changes were moved to RT11951 branch.
+
+        Tue Mar 18 17:24:37 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Moved instance state update for dispose before listener callback
+          instead after so the dispose notification SampleInfo has the
+          correct instance state - NOT_ALIVE_DISPOSED_INSTANCE_STATE.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+
+          Added debug logging for the instance state.
+
+        Tue Mar 18 07:21:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Implemented datareader dispose notification. The datareader
+          adds an entry for dispose message to the instance
+          ReceivedDataElementList. The ReceivedDataElement has the
+          registered_data_ member set to be 0 and the corresponding
+          SampleInfo is marked with valid_data false. The subscriber
+          checks the valid_data flag in SampleInfo before looking the
+          data.
+
+        * dds/DCPS/InstanceState.inl:
+
+          Setup SampleInfo valid_data flag in sample_info() function.
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added publication_handle and valid_data to the SampleInfo
+          according to the DDS spec 1.2.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Added explicit dispose () call on publisher side and valid_data
+          flag check on subscriber side. These are used to test dispose
+          notification via on_data_available() callback.
+
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+
+          Accommodated to the changes of dispose notification support.
+          The sample_rank and expected samples were changed to count
+          the dispose notification as well.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Used the datareader_map_ instead of datareader_set_ to get
+          the list of datareaders for subscriber qos propagation.
+          This would fix the timing issue that subscriber qos does
+          not propagate when the subscriber set_qos is called before
+          datareaders receive any messages.
+
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          Removed "my" declarations for process variables to resolve
+          the "an undefined value" error.
+
+        Fri Mar 14 19:07:28 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added LivelinessTimeout test.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed error where we were using the last deadline for all publishers
+          instead of the next (smallest) deadline we would encounter.
+
+        * tests/DCPS/LivelinessTimeout:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/LivelinessTimeout/README:
+        * tests/DCPS/LivelinessTimeout/Writer.h:
+        * tests/DCPS/LivelinessTimeout/Writer.cpp:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/common.cpp:
+        * tests/DCPS/LivelinessTimeout/domain_ids:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Test to epose and then verify the DataReaderImpl.cpp error.
+
+        Tue Mar 11 15:32:03 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
+
+        * dds/DdsDcpsDomain.idl:
+
+          Improved formatting of this file and removed tabs.
+
+        Mon Mar 10 19:35:19 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Added qos propagation feature (see RT 11023)
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+        Added changeable () methods for all supported and non-supported qos.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+        Updated set_qos () to check if qos is changeable and pass updated
+        qos to DCPSInfoRepo.
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+        Added methods to update qos.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+        Added methods to support qos propogation.
+
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+        Removed Duration_t operator== overload function which
+        is defined in Qos_Helper.h.
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+        Added qos propagation test cases.
+
+        Sat Mar  8 02:17:54 UTC 2008  Abdullah Sowayan  <abdullah.sowayan@lmco.com>
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+
+          Fixed "undefined value" issue that was caused by the commit below.
+
 Tue Apr  1 19:48:17 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorPublications.h:
         * dds/InfoRepo/FederatorPublications.inl:
         * dds/InfoRepo/FederatorPublications.cpp:
-	  And more forgotten files added.
+          And more forgotten files added.
 
 Tue Apr  1 19:40:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

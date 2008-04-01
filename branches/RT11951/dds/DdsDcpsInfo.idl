@@ -161,7 +161,6 @@ module OpenDDS {
                 Invalid_Participant,
                 Invalid_Publication);
 
-
       //=======================================================
       // Update the QoS of an enitity to support Built-in Topics
       // and updating the other side of assocations.
@@ -170,41 +169,37 @@ module OpenDDS {
       // The repo will break any assocations that become
       // incompatible.
       //
-      // Note: these methods are not required for the first implemenation
-      // of OpenDDS because the supported topics are not changeable
-      // per the QoS table in the DDS spec.
+      void update_domain_participant_qos (in ::DDS::DomainId_t domain,
+                                          in RepoId participantId,
+                                          in ::DDS::DomainParticipantQos qos)
+        raises (Invalid_Domain,
+                Invalid_Participant);
 
-//      void update_domain_participant_qos (in ::DDS::DomainId_t domain,
-//                                          in RepoId participantId,
-//                                         in ::DDS::DomainParticipantQos qos)
-//        raises (Invalid_Domain);
-//                Invalid_Participant);
-//
-//      void update_topic_qos (in RepoId topicId,
-//                                    in ::DDS::DomainId_t domainId,
-//                                    in RepoId  participantId,
-//                                    in ::DDS::TopicQos   qos)
-//        raises (Invalid_Domain,
-//                Invalid_Participant,
-//                Invalid_Topic);
+      void update_topic_qos (in RepoId topicId,
+                             in ::DDS::DomainId_t domainId,
+                             in RepoId  participantId,
+                             in ::DDS::TopicQos   qos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
 
-//      void update_publication_qos (in ::DDS::DomainId_t domainId,
-//                                   in RepoId participantId,
-//                                   in RepoId publicationId,
-//                                   in ::DDS::DataWriterQos qos,
-//                                   in ::DDS::PublisherQos publisherQos)
-//        raises (Invalid_Domain,
-//                Invalid_Participant,
-//                Invalid_Publication);
+      void update_publication_qos (in ::DDS::DomainId_t domainId,
+                                   in RepoId participantId,
+                                   in RepoId publicationId,
+                                   in ::DDS::DataWriterQos qos,
+                                   in ::DDS::PublisherQos publisherQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Publication);
 
-//      void update_subscription_qos (in ::DDS::DomainId_t domainId,
-//                                    in RepoId participantId,
-//                                    in RepoId subscriptionId,
-//                                    in ::DDS::DataReaderQos qos,
-//                                    in ::DDS::SubscriberQos subscriberQos)
-//        raises (Invalid_Domain,
-//                Invalid_Participant,
-//                Invalid_Subscription);
+      void update_subscription_qos (in ::DDS::DomainId_t domainId,
+                                    in RepoId participantId,
+                                    in RepoId subscriptionId,
+                                    in ::DDS::DataReaderQos qos,
+                                    in ::DDS::SubscriberQos subscriberQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
 
 
       //====== support built-in Topics

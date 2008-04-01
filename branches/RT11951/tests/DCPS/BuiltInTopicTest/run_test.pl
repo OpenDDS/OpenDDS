@@ -29,7 +29,7 @@ if (PerlACE::is_vxworks_test()) {
   $Subscriber = new PerlACE::ProcessVX ("subscriber", " $sub_opts");
   $Publisher = new PerlACE::ProcessVX ("publisher", " $pub_opts");
   $Monitor1 = new PerlACE::ProcessVX ("monitor", " $opts -l 7");
-  $Monitor2 = new PerlACE::ProcessVX ("monitor", " $opts");
+  $Monitor2 = new PerlACE::ProcessVX ("monitor", " $opts -u");
 }
 else {
   $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
@@ -37,7 +37,7 @@ else {
   $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
   $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
   $Monitor1 = new PerlACE::Process ("monitor", " $opts -l 7");
-  $Monitor2 = new PerlACE::Process ("monitor", " $opts");
+  $Monitor2 = new PerlACE::Process ("monitor", " $opts -u");
 }
 
 $data_file = PerlACE::LocalFile ("test_run.data");
@@ -67,7 +67,7 @@ $Monitor1->Spawn ();
 $Publisher->Spawn ();
 $Subscriber->Spawn ();
  
-sleep (5);
+sleep (15);
 
 $Monitor2->Spawn ();
 

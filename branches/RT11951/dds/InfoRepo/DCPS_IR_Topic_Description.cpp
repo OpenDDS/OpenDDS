@@ -78,11 +78,11 @@ int DCPS_IR_Topic_Description::add_subscription_reference (DCPS_IR_Subscription*
     {
     case 0:
 
+      // Publish the BIT information
+      domain_->publish_subscription_bit(subscription);
+
       if (associate)
         {
-          // Publish the BIT information
-          domain_->publish_subscription_bit(subscription);
-
           try_associate_subscription(subscription);
           // Do not check incompatible qos here.  The check is done
           // in the DCPS_IR_Topic_Description::try_associate_subscription method
@@ -349,6 +349,24 @@ void DCPS_IR_Topic_Description::associate (DCPS_IR_Publication* publication,
   //      associations were added.  This way the publication(s) and
   //      subscription(s) could recieve a list of assocations instead
   //      of multiple one at a time associations.
+}
+
+
+void DCPS_IR_Topic_Description::publish_subscription_bit (const DCPS_IR_Topic* topic)
+{
+  DCPS_IR_Subscription* subscription = 0;
+  DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+
+  while (iter != end)
+    {
+      subscription = *iter;
+      ++iter;
+      if (subscription->get_topic () == topic)
+      {
+        this->domain_->publish_subscription_bit (subscription);
+      }
+    }
 }
 
 

@@ -1,5 +1,6 @@
 #include "DcpsInfo_pch.h"
 #include /**/ "DCPS_Utils.h"
+#include "dds/DCPS/Qos_Helper.h"
 
 #include "ace/os_include/os_fnmatch.h"
 
@@ -54,12 +55,6 @@ namespace
 
     return match;
   }
-}
-
-bool
-operator== (::DDS::Duration_t op1, ::DDS::Duration_t op2)
-{
-  return ((op1.sec == op2.sec) && (op1.nanosec == op2.nanosec));
 }
 
 void
@@ -143,6 +138,31 @@ compatibleQOS (DCPS_IR_Publication * publication,
     //
     // Don't increment the incompatibity count.
   }
+
+  // Check the DURABILITY_QOS_POLICY_ID
+  if ( writerQos->durability.kind < readerQos->durability.kind )
+    {
+      compatible = 0;
+
+      increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+                                      ::DDS::DURABILITY_QOS_POLICY_ID);
+      increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+                                      ::DDS::DURABILITY_QOS_POLICY_ID);
+    }
+
+  // Check the LIVELINESS_QOS_POLICY_ID
+  // invalid if offered kind is less than requested kind OR
+  //         if offered liveliness duration greater than requested liveliness duration
+  if (( writerQos->liveliness.kind < readerQos->liveliness.kind ) ||
+      ( ::OpenDDS::DCPS::Qos_Helper::lease_greater_than(writerQos->liveliness,readerQos->liveliness)))
+    {
+      compatible = 0;
+
+      increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+                                      ::DDS::LIVELINESS_QOS_POLICY_ID);
+      increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+                                      ::DDS::LIVELINESS_QOS_POLICY_ID);
+    }
 
   return compatible;
 }

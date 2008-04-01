@@ -486,10 +486,50 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
   {
     if (enabled_.value())
     {
-      if (! Qos_Helper::changeable (qos_, qos))
+      if (qos_ == qos)
+        return ::DDS::RETCODE_OK;
+
+      if (enabled_.value())
       {
-        return ::DDS::RETCODE_IMMUTABLE_POLICY;
+        if (! Qos_Helper::changeable (qos_, qos))
+        {
+          return ::DDS::RETCODE_IMMUTABLE_POLICY;
+        }
+        else
+        {
+          qos_ = qos;
+
+          try
+          {
+            DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+            ::DDS::PublisherQos publisherQos;
+            this->publisher_servant_->get_qos(publisherQos);
+            repo->update_publication_qos(this->participant_servant_->get_domain_id(), 
+                                         this->participant_servant_->get_id(), 
+                                         this->publication_id_, 
+                                         this->qos_,
+                                         publisherQos);
+          }
+          catch (const CORBA::SystemException& sysex)
+          {
+            sysex._tao_print_exception (
+              "ERROR: System Exception"
+              " in DataWriterImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+          catch (const CORBA::UserException& userex)
+          {
+            userex._tao_print_exception (
+              "ERROR:  Exception"
+              " in DataWriterImpl::set_qos");
+            return ::DDS::RETCODE_ERROR;
+          }
+        }
       }
+      else
+        qos_ = qos;
+
+      return ::DDS::RETCODE_OK;
     }
     if (! (qos_ == qos))
     {
