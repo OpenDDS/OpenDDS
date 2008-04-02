@@ -384,9 +384,6 @@ ACE_THROW_SPEC ((
     throw ConnectionBusy();
   }
 
-  /// @TODO: Figure out how to determine if we can reach the remote
-  ///        repository and unfederate() it if we cant.
-
   if( 0 == this->remoteLink_.size()) {
     // We no longer are connected to any remote repository, so we need to
     // clean up all of our internal mappings to remove ourselves from the
@@ -397,6 +394,10 @@ ACE_THROW_SPEC ((
          ++current) {
       this->unfederate( current->first);
     }
+
+  } else {
+    /// @TODO: Figure out how to determine if we can reach the remote
+    ///        repository and unfederate() it if we cant.
   }
 
   // Publish (<self>,<remote>,OFF,<sequence>) on all LinkState

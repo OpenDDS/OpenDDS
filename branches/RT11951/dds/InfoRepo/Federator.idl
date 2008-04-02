@@ -196,8 +196,22 @@ module OpenDDS { module Federator {
       //
       // It will search for the objects at:
       //
-      //  corbaloc:iiop:$(endpoint)/DCPSInfoRepo
-      //  corbaloc:iiop:$(endpoint)/Federator
+      //  corbaloc:$(endpoint)/DCPSInfoRepo
+      //  corbaloc:$(endpoint)/Federator
+      //
+      // 'endpoint' is expected to contain a (possibly default) protocol,
+      // a host (as either a resolvable name or in dotted decimal format)
+      // and an optional port specification.  As a regular expression,
+      // this is:
+      //
+      //                [^:]*:[^:]+(:[0-9]+)?
+      //
+      // Some examples include:
+      //
+      //                iiop:bob:1999
+      //                ssliop:198.162.1.1
+      //                :ted:2112
+      //                :carol
       //
       Status join_federation( in string  endpoint ) raises ( Unavailable);
 

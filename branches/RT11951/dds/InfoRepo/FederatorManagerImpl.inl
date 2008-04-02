@@ -6,14 +6,14 @@ ACE_INLINE
 ::OpenDDS::Federator::RepoKey&
 ::OpenDDS::Federator::ManagerImpl::id()
 {
-  return this->federationId_;
+  return this->config_.federationId();
 }
 
 ACE_INLINE
 ::OpenDDS::Federator::RepoKey
 ::OpenDDS::Federator::ManagerImpl::id() const
 {
-  return this->federationId_;
+  return this->config_.federationId();
 }
 
 ACE_INLINE
