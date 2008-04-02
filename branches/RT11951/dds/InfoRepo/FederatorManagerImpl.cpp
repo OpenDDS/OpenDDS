@@ -28,6 +28,10 @@
 
 #include <string>
 
+#if !defined (__ACE_INLINE__)
+# include "FederatorManagerImpl.inl"
+#endif /* ! __ACE_INLINE__ */
+
 namespace { // Anonymous namespace for file scope.
 
   // Starting key value for transport keys to use.
@@ -221,7 +225,7 @@ ACE_THROW_SPEC ((
 
   // Resolve remote federator
   CORBA::Object_var obj
-    = this->_this()->_get_orb()->string_to_object( remoteIor.c_str());
+    = this->orb_->string_to_object( remoteIor.c_str());
   if( CORBA::is_nil( obj.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
