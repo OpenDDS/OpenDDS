@@ -6,6 +6,7 @@
 
 #include "federator_export.h"
 #include "FederatorS.h"
+#include "FederatorConfig.h"
 #include "LinkStateManager.h"
 #include "FederatorRemoteLink.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -18,8 +19,6 @@
 #include <set>
 
 namespace OpenDDS { namespace Federator {
-
-class Config;
 
 class OpenDDS_Federator_Export ManagerImpl 
   : public virtual POA_OpenDDS::Federator::Manager {
@@ -100,9 +99,6 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Simple recursion avoidance during the join operations.
     RepoKey joining_;
-
-    /// The repositories federation Id value within any federation.
-    RepoKey federationId_;
 
     /// The packet sequence number for data that we publish.
     ::OpenDDS::DCPS::SequenceNumber sequence_;

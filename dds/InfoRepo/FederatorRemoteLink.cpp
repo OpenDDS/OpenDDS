@@ -53,7 +53,10 @@ RemoteLink::RemoteLink(
   ACE_OS::sprintf( &buffer[0], "%08.8x-%08.8x", self, this->federationId());
   this->external_ = &buffer[0];
 
-  // Grab a participant for publishing locally.
+  // Grab a participant for subscribing to the remote repository.
+  // N.B. The DomainParticipant used for the subscriptions is created in
+  //      the remote repository in the remote domain.
+  //
   this->participant_
     = TheParticipantFactory->create_participant(
         this->federationId(),
@@ -253,6 +256,10 @@ RemoteLink::RemoteLink(
 
   //
   // Now for the publications.
+  // N.B. The DomainParticipant used for the publications is the one
+  //      passed as an argument; which is the participant in the local
+  //      repository in the local domain.  Type support has already been
+  //      added to this participant by the calling code.
   //
 
   // Create, configure and install the transport for the publications.
@@ -285,14 +292,14 @@ RemoteLink::RemoteLink(
 
   // The publications are for the external partition only.
   ::DDS::PublisherQos publisherQos;
-  this->participant_->get_default_publisher_qos( publisherQos);
+  participant->get_default_publisher_qos( publisherQos);
 
   publisherQos.partition.name.length( 1);
   publisherQos.partition.name[0] = ACE_OS::strdup( this->external_.c_str());
 
   // Create the data publisher.
   ::DDS::Publisher_var publisher
-    = this->participant_->create_publisher(
+    = participant->create_publisher(
         publisherQos, ::DDS::PublisherListener::_nil()
       );
   if( CORBA::is_nil( publisher.in())) {

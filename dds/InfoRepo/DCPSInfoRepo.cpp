@@ -294,24 +294,26 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     }
 
   // Fire up the federator.
-  oid = PortableServer::string_to_ObjectId ("Federator");
-  info_poa_->activate_object_with_id (oid.in (),
-                                      &federator_);
-  obj = info_poa_->id_to_reference(oid.in());
-  OpenDDS::Federator::Manager_var federator
-    = OpenDDS::Federator::Manager::_narrow (obj.in ());
+  CORBA::String_var federator_ior;
+  if( federator_.id() > 0) {
+    oid = PortableServer::string_to_ObjectId ("Federator");
+    info_poa_->activate_object_with_id (oid.in (),
+                                        &federator_);
+    obj = info_poa_->id_to_reference(oid.in());
+    OpenDDS::Federator::Manager_var federator
+      = OpenDDS::Federator::Manager::_narrow (obj.in ());
 
-  CORBA::String_var federator_ior
-    = orb_->object_to_string (federator.in ());
+    federator_ior = orb_->object_to_string (federator.in ());
 
-  // It should be safe to initialize the federation mechanism at this
-  // point.  What we really needed to wait for is the initialization of
-  // the service components - like the DomainParticipantFactory and the
-  // repository bindings.
-  // N.B. This is done *before* being added to the IOR table to avoid any
-  //      races with an eager client.
-  this->federator_.orb( orb_.in());
-  this->federator_.initialize();
+    // It should be safe to initialize the federation mechanism at this
+    // point.  What we really needed to wait for is the initialization of
+    // the service components - like the DomainParticipantFactory and the
+    // repository bindings.
+    // N.B. This is done *before* being added to the IOR table to avoid any
+    //      races with an eager client.
+    this->federator_.orb( orb_.in());
+    this->federator_.initialize();
+  }
 
   // Grab the IOR table.
   CORBA::Object_var table_object =
@@ -321,10 +323,13 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     IORTable::Table::_narrow (table_object.in ());
   if (CORBA::is_nil (adapter.in ())) {
     ACE_ERROR ((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
-  }
-  else {
+
+  } else {
     adapter->bind (::OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str.in ());
-    adapter->bind (::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY,  federator_ior.in ());
+
+    if( federator_.id() > 0) {
+      adapter->bind (::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY,  federator_ior.in ());
+    }
   }
 
   FILE *output_file= ACE_OS::fopen (ior_file_.c_str (), ACE_TEXT("w"));
@@ -338,7 +343,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   ACE_OS::fclose (output_file);
 
   // Initial federation join if specified on command line.
-  if( false == federation_endpoint_.empty()) {
+  if( (federator_.id() > 0) && (false == federation_endpoint_.empty())) {
     (void)federator_.join_federation( federation_endpoint_.c_str());
   }
 
