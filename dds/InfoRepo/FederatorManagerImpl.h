@@ -60,6 +60,10 @@ class OpenDDS_Federator_Export ManagerImpl
     RepoKey& id();
     RepoKey  id() const;
 
+    /// Accessors for the ORB.
+    CORBA::ORB_ptr orb();
+    void orb( CORBA::ORB_ptr value);
+
     /// Callback with new routing information.
     void updateLinkState(
       LinkState         sample,
@@ -106,6 +110,9 @@ class OpenDDS_Federator_Export ManagerImpl
     /// The configuration information for this manager.
     Config& config_;
 
+    /// The ORB in which we are activated.
+    CORBA::ORB_var orb_;
+
     /// LinkState manager for distributing update data.
     LinkStateManager linkStateManager_;
 
@@ -135,21 +142,11 @@ class OpenDDS_Federator_Export ManagerImpl
 
 };
 
-inline
-RepoKey&
-ManagerImpl::id()
-{
-  return this->federationId_;
-}
-
-inline
-RepoKey
-ManagerImpl::id() const
-{
-  return this->federationId_;
-}
-
 }} // End namespace OpenDDS::Federator
+
+#if defined (__ACE_INLINE__)
+# include "FederatorManagerImpl.inl"
+#endif  /* __ACE_INLINE__ */
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "FederatorManager_T.cpp"

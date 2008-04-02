@@ -304,6 +304,15 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   CORBA::String_var federator_ior
     = orb_->object_to_string (federator.in ());
 
+  // It should be safe to initialize the federation mechanism at this
+  // point.  What we really needed to wait for is the initialization of
+  // the service components - like the DomainParticipantFactory and the
+  // repository bindings.
+  // N.B. This is done *before* being added to the IOR table to avoid any
+  //      races with an eager client.
+  this->federator_.orb( orb_.in());
+  this->federator_.initialize();
+
   // Grab the IOR table.
   CORBA::Object_var table_object =
     orb_->resolve_initial_references ("IORTable");
@@ -327,12 +336,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   ACE_OS::fprintf (output_file, "%s", objref_str.in ());
   ACE_OS::fclose (output_file);
-
-  // It should be safe to initialize the federation mechanism at this
-  // point.  What we really needed to wait for is the initialization of
-  // the service components - like the DomainParticipantFactory and the
-  // repository bindings.
-  this->federator_.initialize();
 
   // Initial federation join if specified on command line.
   if( false == federation_endpoint_.empty()) {

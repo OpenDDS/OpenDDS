@@ -1,3 +1,14 @@
+Wed Apr  2 14:49:02 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+	  Changed to require the ORB to be explicitly passed in during
+	  configuration.  This removes the use of a more modern
+	  mechanism for accessing the ORB from the servant.
+
 Tue Apr  1 23:06:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
@@ -6,7 +17,7 @@ Tue Apr  1 23:06:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorManager_T_Impl.cpp:
         * dds/InfoRepo/FederatorRemoteLink.h:
         * dds/InfoRepo/FederatorRemoteLink.inl:
-	  Continued federation implementation.
+          Continued federation implementation.
 
 Tue Apr  1 21:05:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 999:1046 out to branch.

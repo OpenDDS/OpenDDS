@@ -22,7 +22,6 @@
 #include "TopicUpdateTypeSupportC.h"
 #include "TopicUpdateTypeSupportImpl.h"
 
-
 #if !defined (__ACE_INLINE__)
 # include "FederatorRemoteLink.inl"
 #endif /* ! __ACE_INLINE__ */
