@@ -7,8 +7,8 @@ project(*Federator): dcps {
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
   dcps_ts_flags += --export=OpenDDS_Federator_Export --pch DcpsInfo_pch.h
 
-  pch_header   = DcpsInfo_pch.h
-  pch_source   = DcpsInfo_pch.cpp
+  pch_header   =
+  pch_source   =
 
   TypeSupport_Files {
     Federator.idl >> LinkStateTypeSupport.idl LinkStateTypeSupportImpl.h LinkStateTypeSupportImpl.cpp TopicUpdateTypeSupport.idl TopicUpdateTypeSupportImpl.h TopicUpdateTypeSupportImpl.cpp ParticipantUpdateTypeSupport.idl ParticipantUpdateTypeSupportImpl.h ParticipantUpdateTypeSupportImpl.cpp PublicationUpdateTypeSupport.idl PublicationUpdateTypeSupportImpl.h PublicationUpdateTypeSupportImpl.cpp SubscriptionUpdateTypeSupport.idl SubscriptionUpdateTypeSupportImpl.h SubscriptionUpdateTypeSupportImpl.cpp
@@ -29,7 +29,6 @@ project(*Federator): dcps {
     FederatorSubscriptions.cpp
     FederatorPublications.cpp
     FederatorManagerImpl.cpp
-    FederatorManager_T_Impl.cpp
     FederatorLinkListener.cpp
     LinkStateManager.cpp
     LinkStateTypeSupportImpl.cpp
@@ -47,6 +46,7 @@ project(*Federator): dcps {
   Template_Files {
     UpdateListener_T.cpp
     FederatorManager_T.cpp
+    FederatorManager_T_Impl.cpp
   }
 
 }
