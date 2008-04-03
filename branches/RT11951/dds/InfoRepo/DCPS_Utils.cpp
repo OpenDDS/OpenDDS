@@ -127,7 +127,10 @@ compatibleQOS (DCPS_IR_Publication * publication,
       subscription->get_subscriber_qos ();
 
   // Verify publisher and subscriber are in a matching partition.
-  compatible = matching_partitions (pubQos->partition, subQos->partition);
+  compatible =
+    compatible && matching_partitions (pubQos->partition,
+                                       subQos->partition);
+
     // According to the DDS spec:
     //
     //   Failure to match partitions is not considered an incompatible

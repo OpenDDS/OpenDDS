@@ -1,3 +1,11 @@
+Thu Apr  3 06:22:21 UTC 2008  Ossama Othman  <othman_o@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp (compatibleQOS):
+
+          Prevent PARTITION matching result from overriding previously
+          established QoS incompatibilities.  Thanks to Mike for the
+          patch.
+
 Wed Apr  2 20:26:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
