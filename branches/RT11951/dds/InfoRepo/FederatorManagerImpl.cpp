@@ -4,7 +4,6 @@
 
 #include "DcpsInfo_pch.h"
 #include "FederatorManagerImpl.h"
-#include "FederatorConfig.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
@@ -332,7 +331,10 @@ ACE_THROW_SPEC ((
     RemoteLinkMap::value_type( remote, link)
   );
 
-  // The link will consume two transport keys.
+  // The link will consume two transport keys: one for attaching to
+  // Subscribers within our own repository and the other for attaching
+  // to Publishers in the remote repository.
+  //
   /// @TODO: Put a mechanism in place to reuse keys when a remote link is
   ///        disconnected.
   this->transportKeyValue_ += 2;
@@ -534,6 +536,12 @@ ManagerImpl::updateLinkState(
           // to the federation.
 
           /// @TODO: Implement this.
+
+          // Add the remote repository to our mappings so that we do not
+          // publish to it again.  Unless it departs and rejoins, of course.
+          (void)this->inboundMap_.insert(
+            RepoToIdMap::value_type(remote, RepoToIdMap::mapped_type())
+          );
         }
 
       } else {
@@ -576,7 +584,16 @@ ManagerImpl::unfederate( RepoKey remote)
         this->outboundMap_.erase( outboundLocation);
 
       } else {
-        // This is an error, right?
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::unfederate() ")
+          ACE_TEXT("on repository %d - ")
+          ACE_TEXT("unable to locate corresponding outbound mapping ")
+          ACE_TEXT("to remote(%d,%d) == local(%d).\n"),
+          this->id(),
+          remote,
+          current->first,
+          current->second
+        ));
       }
     }
 

@@ -59,7 +59,7 @@ RemoteLink::RemoteLink(
   //
   this->participant_
     = TheParticipantFactory->create_participant(
-        this->federationId(),
+        remote,
         PARTICIPANT_QOS_DEFAULT,
         ::DDS::DomainParticipantListener::_nil()
       );
