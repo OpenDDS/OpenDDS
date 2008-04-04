@@ -173,7 +173,12 @@ namespace OpenDDS
       /**
        * Load DCPSInfoRepo IORs.
        */
-      void set_repo_ior( const ACE_TCHAR* ior, const RepoKey repo = DEFAULT_REPO);
+      void set_repo_ior( const ACE_TCHAR* ior, const RepoKey key = DEFAULT_REPO);
+
+      /**
+       * Load DCPSInfoRepo reference directly.
+       */
+      void set_repo( DCPSInfo_ptr repo, const RepoKey key = DEFAULT_REPO);
 
       /**
        * Bind DCPSInfoRepo IORs to domains.
