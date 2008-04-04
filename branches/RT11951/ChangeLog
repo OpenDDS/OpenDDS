@@ -1,8 +1,15 @@
+Fri Apr  4 19:15:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+	  Added set_repo() method to allow installation of repositories
+	  directly by reference.
+
 Fri Apr  4 14:24:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/FederatorRemoteLink.cpp:
-	  Some minor cleanup.
+          Some minor cleanup.
 
 Thu Apr  3 06:22:21 UTC 2008  Ossama Othman  <othman_o@ociweb.com>
 
