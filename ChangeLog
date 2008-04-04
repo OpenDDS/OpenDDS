@@ -1,3 +1,9 @@
+Fri Apr  4 14:24:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+	  Some minor cleanup.
+
 Thu Apr  3 06:22:21 UTC 2008  Ossama Othman  <othman_o@ociweb.com>
 
         * dds/InfoRepo/DCPS_Utils.cpp (compatibleQOS):
@@ -14,12 +20,12 @@ Wed Apr  2 20:26:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/FederatorManagerImpl.inl:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/FederatorRemoteLink.cpp:
-	  Disable intialization of the federation mechanisms if not
-	  federation Id value is supplied.
+          Disable intialization of the federation mechanisms if not
+          federation Id value is supplied.
 
         * dds/InfoRepo/DCPS_Utils.cpp:
-	  Changed the sense of compatibility for PARTITION QoS policy
-	  matching.
+          Changed the sense of compatibility for PARTITION QoS policy
+          matching.
 
 Wed Apr  2 15:25:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
