@@ -1,3 +1,42 @@
+Sat Apr  5 08:11:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * DCPS/DataDurabilityCache.cpp:
+        * DCPS/DataDurabilityCache.h:
+        * DCPS/TransientDataDurabilityCache.cpp:
+        * DCPS/TransientDataDurabilityCache.h:
+
+          New DURABILITY QoS related source files.  Support for publisher
+          side LIFESPAN QoS is also implemented in these files.
+
+        * DCPS/DataWriterImpl.cpp:
+        * DCPS/DataWriterImpl.h (create_sample_data_message):
+
+          Made this method public.
+
+          (get_type_name):
+
+          Added new method to retrieve topic type name.
+
+        * DCPS/Service_Participant.cpp:
+        * DCPS/Service_Participant.h:
+
+          Added data cache members for TRANSIENT and PERSISTENT DURABILITY
+          QoS.  PERSISTENT support is temporarily disabled.
+
+        * DCPS/WriteDataContainer.cpp:
+        * DCPS/WriteDataContainer.h:
+
+          Added support for TRANSIENT and PERSISTENT DURABILITY QoS.
+          The changes strive to keep WriteDataContainer interaction with
+          the underlying durability cache through an abstract interface
+          and factory method to minimize knowledge of the cache
+          internals.
+
+        * tests/DCPS/TransientTest:
+
+          Initial test for TRANSIENT DURABILITY QoS based entirely on the
+          TransientLocalTest.
+
 Fri Apr  4 19:15:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
