@@ -138,6 +138,7 @@ DataWriterImpl::init (
   topic_servant_->add_entity_ref ();
   topic_name_    = topic_servant_->get_name ();
   topic_id_      = topic_servant_->get_id ();
+  type_name_     = topic_servant_->get_type_name ();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   is_bit_ = ACE_OS::strcmp (topic_name_.in (), BUILT_IN_PARTICIPANT_TOPIC) == 0
@@ -325,8 +326,16 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     this->data_container_->reenqueue_all (rd_ids);
     this->publisher_servant_->data_available(this, true);
   }
+  else if (this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
+           /*|| this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS*/)
+  {
+    this->data_container_->send_durable_data (this->get_topic_name (),
+                                              this->get_type_name (),
+                                              this,
+                                              this->qos_.lifespan);
+    this->publisher_servant_->data_available (this, true);
+  }
 }
-
 
 
 void
@@ -786,10 +795,13 @@ DataWriterImpl::enable ()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = new WriteDataContainer (depth,
+  data_container_ = new WriteDataContainer (this->get_topic_name (),
+                                            this->get_type_name (),
+                                            depth,
                                             should_block,
                                             max_blocking_time,
-                                            n_chunks_);
+                                            n_chunks_,
+                                            qos_.durability);
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -1023,6 +1035,25 @@ DataWriterImpl::write ( DataSample* data,
                       ret);
   }
 
+  // ---------------------------------------------------------
+  // Place in appropriate data durability cache, if necessary.
+  // ---------------------------------------------------------
+  ret = this->data_container_->durable_enqueue (this->get_topic_name (),
+                                                this->get_type_name (),
+                                                data,
+                                                source_timestamp);
+
+  if (ret != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("DataWriterImpl::write, ")
+                       ACE_TEXT("durable enqueue failed.\n")),
+                      ret);
+  }
+  // ---------------------------------------------------------
+
+
   last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
   return this->publisher_servant_->data_available(this);
 }
@@ -1133,6 +1164,12 @@ const char*
 DataWriterImpl::get_topic_name ()
 {
   return topic_name_.in ();
+}
+
+char const *
+DataWriterImpl::get_type_name () const
+{
+  return type_name_.in ();
 }
 
 ACE_Message_Block*
@@ -1591,6 +1628,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
 
   return ret;
 }
+
 
 
 } // namespace DCPS

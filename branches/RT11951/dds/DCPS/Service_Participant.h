@@ -33,6 +33,8 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class DataDurabilityCache;
+
     /**
     * @class Service_Participant
     *
@@ -68,6 +70,9 @@ namespace OpenDDS
 
       /** Constructor **/
       Service_Participant ();
+
+      /// Destructor.
+      ~Service_Participant ();
 
       /// Return a singleton instance of this class.
       static Service_Participant * instance (void);
@@ -227,6 +232,14 @@ namespace OpenDDS
        */
       int init_bit_transport_impl ( RepoKey repo = DEFAULT_REPO);
 
+      /// Make a data durability cache corresponding to the given
+      /// DurabilityQosPolicy and sample list depth.
+      DataDurabilityCache * make_data_durability_cache (
+        char const * topic_name,
+        char const * type_name,
+        ::DDS::DurabilityQosPolicy const & durability,
+        ::CORBA::Long depth);
+
     private:
 
       /** Initalize default qos **/
@@ -256,6 +269,8 @@ namespace OpenDDS
       /** Load the repository configuration to the Service_Participant singleton.
        */
       int load_repo_configuration ();
+
+    public:
 
       /// The orb object reference which can be provided by client or initialized
       /// by this sigleton.
@@ -353,6 +368,14 @@ namespace OpenDDS
 
       /// The configuration object that imports the configuration file.
       ACE_Configuration_Heap cf_;
+
+    private:
+
+      /// The @c TRANSIENT data durability cache.
+      DataDurabilityCache * transient_data_cache_;
+
+      /// The @c PERSISTENT data durability cache.
+      DataDurabilityCache * persistent_data_cache_;
     };
 
 #   define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()

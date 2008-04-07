@@ -24,6 +24,7 @@ namespace OpenDDS
   namespace DCPS
   {
     class DataWriterImpl;
+    class DataDurabilityCache;
 
     typedef std::map< ::DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
@@ -102,6 +103,8 @@ namespace OpenDDS
        * No default constructor, must be initialized.
        */
       WriteDataContainer(
+        char const * topic_name, // Topic name.
+        char const * type_name,  // Topic type name.
         /// Depth of the instance sample queue.
         CORBA::Long    depth,
         /// Should the write wait for available space?
@@ -110,7 +113,10 @@ namespace OpenDDS
         ACE_Time_Value max_blocking_time,
         /// The number of chunks that the DataSampleListElementAllocator
         /// needs allocate.
-        size_t         n_chunks
+        size_t         n_chunks,
+        /// The data durability policy to be used when publishing
+        /// samples.
+        ::DDS::DurabilityQosPolicy const & durability
         );
 
       /**
@@ -127,6 +133,17 @@ namespace OpenDDS
         enqueue (
           DataSampleListElement* sample,
           ::DDS::InstanceHandle_t instance);
+
+      /**
+       * Durably enqueue the data sample so that it outlives the
+       * DataWriter.  This is no-op if the DURABILITY QoS is not set
+       * to TRANSIENT or PERSISTENT.
+       */
+      ::DDS::ReturnCode_t
+      durable_enqueue (char const * topic_name,
+                       char const * type_name,
+                       DataSample * sample,
+                       ::DDS::Time_t const & source_timestamp);
 
       /**
        * Create a resend list with the copies of all current "sending"
@@ -308,6 +325,14 @@ namespace OpenDDS
        */
       ::DDS::InstanceHandle_t get_next_handle ();
 
+      /// Flush data durability cache.
+      bool send_durable_data (char const * topic_name,
+                              char const * type_name,
+                              DataWriterImpl * data_writer,
+                              ::DDS::LifespanQosPolicy const & lifespan);
+
+    private:
+
       /// List of data that has not been sent yet.
       DataSampleList   unsent_data_ ;
 
@@ -390,6 +415,14 @@ namespace OpenDDS
 
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t next_handle_;
+
+      /// Pointer to the data durability cache.
+      /**
+       * This a pointer to the data durability cache owned by the
+       * Service Participant singleton, which means this cache is also
+       * a singleton.
+       */
+      DataDurabilityCache * const durability_cache_;
     } ;
 
   } /// namespace OpenDDS
