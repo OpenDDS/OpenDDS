@@ -1,3 +1,12 @@
+Wed Apr  9 18:57:38 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+
+          Changes to make coverage the local process and all 
+          others remote.
+	
 Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
@@ -8,7 +17,7 @@ Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * bin/ProcessFactory.pm:
 
           Split out Process and ProcessFactory.  Process inherits from PerlACE::Process
-          ProcessFactory handles creating the correct Process (PerlACE::Process, 
+          ProcessFactory handles creating the correct Process (PerlACE::Process,
           PerlACE:ProcessVX, or PerlDDS::Process)  RT#12130
 
         * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
