@@ -7,9 +7,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use Sys::Hostname;
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use Run_Test;
 use FileHandle;
 use Cwd;
 
@@ -29,10 +31,10 @@ sub run_unit_tests {
   my $unixTestExe = "^UnitTests[^\.]*\$";
   my $windowsTestExe = "^UnitTests.*\.exe\$";
   if($single_test ne '') {
-    $TST = new PerlACE::Process("$single_test", "");
+    $TST = PerlDDS::Process::create("$single_test", "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
-    my $retcode = $TST->SpawnWaitKill(60);
+    my $retcode = PerlDDS::Process::SpawnWaitKill($TST, 60);
     if ($retcode != 0) {
       $status = 1;
     }
@@ -41,19 +43,19 @@ sub run_unit_tests {
     foreach my $file (readdir($fh)) {
       my $TST;
       if ($file =~ /$unixTestExe/o) {
-        $TST = new PerlACE::Process("$file", "");
+        $TST = PerlDDS::Process::create("$file", "");
       }
       elsif ($file =~ /$windowsTestExe/o) {
         $exename = "$file";
         $exename =~ s/\.exe$//i;
-        $TST = new PerlACE::Process("$exename", "");
+        $TST = PerlDDS::Process::create("$exename", "");
       }
       else {
         next;
       }
       $something_ran = 1;
       print STDOUT "Running $file\n";
-      my $retcode = $TST->SpawnWaitKill(60);
+      my $retcode = PerlDDS::Process::SpawnWaitKill($TST, 60);
       if ($retcode != 0) {
         ++$status;
       }

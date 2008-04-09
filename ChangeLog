@@ -1,3 +1,20 @@
+Wed Apr  9 14:27:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/Process.pm:
+        * bin/Run_Test.pm:
+
+          Added perl modules to DDS to handle starting remote processes for VxWorks
+          and Test Coverage.  RT#12130
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Cleaned up test.
+
+        * tests/DCPS/UnitTests/run_test_coverage.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Examples of how tests will change to encorporate new perl modules.
+
 Mon Mar 31 18:12:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
