@@ -10,52 +10,53 @@ use ProcessFactory;
 package PerlDDS;
 
 # load gcov helpers in case this is a coverage build
-$PerlDDS::Coverage_Test = $PerlACE::TestConfig->check_config("Coverage");
+my $config = new PerlACE::ConfigList;
+$PerlDDS::Coverage_Test = $config->check_config("Coverage");
 
-$PerlDDS::Remote_InfoRepo = $PerlACE::TestConfig->check_config("Remote_InfoRepo");
+$PerlDDS::Special_InfoRepo = $config->check_config("Special_InfoRepo");
 
-$PerlDDS::Remote_Sub = $PerlACE::TestConfig->check_config("Remote_Sub");
+$PerlDDS::Special_Sub = $config->check_config("Special_Sub");
 
-$PerlDDS::Remote_Pub = $PerlACE::TestConfig->check_config("Remote_Pub");
+$PerlDDS::Special_Pub = $config->check_config("Special_Pub");
 
-$PerlDDS::Remote_Other = $PerlACE::TestConfig->check_config("Remote_Other");
+$PerlDDS::Special_Other = $config->check_config("Special_Other");
 
 # used to prevent multiple processes from running remotely
-$PerlDDS::Remote_Process_Created = 0;
+$PerlDDS::Coverage_Process_Created = 0;
 
 sub is_coverage_test()
 {
   return $PerlDDS::Coverage_Test;
 }
 
-sub is_remote_sub_test()
+sub is_coverage_sub_test()
 {
-  return $PerlDDS::Remote_Sub;
+  return $PerlDDS::Special_Sub;
 }
 
-sub is_remote_pub_test()
+sub is_coverage_pub_test()
 {
-  return $PerlDDS::Remote_pub;
+  return $PerlDDS::Special_Pub;
 }
 
-sub is_remote_InfoRepo_test()
+sub is_coverage_InfoRepo_test()
 {
-  return $PerlDDS::Remote_InfoRepo;
+  return $PerlDDS::Special_InfoRepo;
 }
 
-sub is_remote_other_test()
+sub is_coverage_other_test()
 {
-  return $PerlDDS::Remote_other;
+  return $PerlDDS::Special_Other;
 }
 
-sub is_remote_process_created()
+sub is_special_process_created()
 {
-  return $PerlDDS::Remote_Process_Created;
+  return $PerlDDS::Special_Process_Created;
 }
 
-sub remote_process_created()
+sub special_process_created()
 {
-  $PerlDDS::Remote_Process_Created = 1;
+  $PerlDDS::Special_Process_Created = 1;
 }
 
 sub remove_path {
