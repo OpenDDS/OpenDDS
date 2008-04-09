@@ -1,3 +1,24 @@
+Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+
+          Changed name and added ProcessFactory.
+
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+
+          Split out Process and ProcessFactory.  Process inherits from PerlACE::Process
+          ProcessFactory handles creating the correct Process (PerlACE::Process, 
+          PerlACE:ProcessVX, or PerlDDS::Process)  RT#12130
+
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Changed for refactoring.
+
+        * bin/Run_Test.pm:
+
+          Removed this file.
+
 Wed Apr  9 14:27:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/Process.pm:

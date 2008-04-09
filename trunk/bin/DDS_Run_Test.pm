@@ -5,6 +5,7 @@
 
 use PerlACE::Run_Test;
 use Process;
+use ProcessFactory;
 
 package PerlDDS;
 

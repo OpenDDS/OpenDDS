@@ -9,8 +9,7 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-# use PerlDDS Run_Test
-use Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -31,14 +30,14 @@ if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-$DCPSREPO = PerlDDS::Process::create ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::ProcessFactory::create ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "$svc_config -o $dcpsrepo_ior"
                                       . " -d $domains_file -NOBITS");
 
-$ZCTest = PerlDDS::Process::create ("main", $parameters);
+$ZCTest = PerlDDS::ProcessFactory::create ("main", $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
-if (PerlDDS::Process::Spawn($DCPSREPO) != 0) {
+if ($DCPSREPO->Spawn () != 0) {
     print STDERR "ERROR: Couldn't spawn InfoRepo\ntest FAILED.\n";
     return 1;
 }
@@ -50,7 +49,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 print $ZCTest->CommandLine(), "\n";
-if (PerlDDS::Process::Spawn($ZCTest) != 0) {
+if ($ZCTest->Spawn () != 0) {
     print STDERR "ERROR: Couldn't spawn main\ntest FAILED.\n";
     return 1;
 }
