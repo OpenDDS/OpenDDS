@@ -1,36 +1,38 @@
 # $Id$
 
-package PerlDDS::ProcessFactory;
+package PerlDDS;
 
-use ProcessFactory;
 use strict;
 use English;
 use POSIX qw(:time_h);
 use Cwd;
 
-sub create {
+sub create_process {
   my $executable = shift;
   my $arguments = shift;
   my $created;
 
   if ((PerlACE::is_vxworks_test()) &&
       (is_process_special($executable))) {
+    # until we figure out how we want to handle rtp, only
+    # allow one process to be on VxWorks
+    PerlDDS::special_process_created();
     $created = new PerlACE::ProcessVX($executable, $arguments);
   }
   elsif ((!PerlDDS::is_coverage_test()) ||
          (is_process_special($executable))){
     print STDOUT "Local Process \n";
+    if(PerlDDS::is_coverage_test())
+    {
+      PerlDDS::special_process_created();
+    }
     $created = new PerlACE::Process($executable, $arguments);
   }
-  elsif ((PerlDDS::is_coverage_test()) &&
-         (is_process_special($executable))) {
+  elsif (PerlDDS::is_coverage_test()) {
     print STDOUT "Remote Process \n";
     my $cov_executable = $executable;
     my $local_dir = $ENV{"DDS_ROOT"};
     my $cov_dir = $ENV{"COV_DDS_ROOT"};
-    PerlDDS::special_process_created();
-    print STDOUT "local=$local_dir \n";
-    print STDOUT "cov=$cov_dir \n";
     # try and substitute the coverage dir for the local dir
     if($cov_executable !~ /$local_dir/)
     {
@@ -54,21 +56,14 @@ sub create {
 sub is_process_special {
   my $executable = shift;
   
-  print STDOUT "is_process_special \n";
-
   # skip all this if we already have a special process
   # NOTE: may want to move this and log a message if we are trying to start 2
-  if((!PerlDDS::is_special_process_created())
+  if(!PerlDDS::is_special_process_created())
   {
-    print STDOUT "no special process created yet \n";
     my $inforepo = PerlDDS::is_special_InfoRepo_test();
     my $pub = PerlDDS::is_special_pub_test();
     my $sub = PerlDDS::is_special_sub_test();
     my $other = PerlDDS::is_special_other_test();
-    print STDOUT "special InfoRepo=$inforepo \n";
-    print STDOUT "special pub=$pub \n";
-    print STDOUT "special sub=$sub \n";
-    print STDOUT "special other=$other \n";
     if(PerlDDS::is_special_InfoRepo_test()) {
       if(match($executable, "DCPSInfoRepo")) {
         return 1;
@@ -92,6 +87,7 @@ sub is_process_special {
       }
     }
   }
+  return 0;
 }
 
 sub match {

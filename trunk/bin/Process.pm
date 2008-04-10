@@ -21,18 +21,18 @@ sub new {
 
 sub Spawn {
   my $self = shift;
-  PerlACE::add_lib_path('$ENV{"COV_DDS_ROOT"}/lib');
+  PerlDDS::swap_lib_path("$ENV{'COV_DDS_ROOT'}", "$ENV{'DDS_ROOT'}");
   my $ret_value = $self->SUPER::Spawn();
-  PerlDDS::remove_lib_path('$ENV{"COV_DDS_ROOT"}/lib');
+  PerlDDS::swap_lib_path("$ENV{'DDS_ROOT'}", "$ENV{'COV_DDS_ROOT'}");
   return $ret_value;
 }
 
 sub SpawnWaitKill {
   my $self = shift;
   my $seconds = shift;
-  PerlACE::add_lib_path('$ENV{"COV_DDS_ROOT"}/lib');
+  PerlDDS::swap_lib_path("$ENV{'COV_DDS_ROOT'}", "$ENV{'DDS_ROOT'}");
   my $ret_value = $self->SUPER::SpawnWaitKill($seconds);
-  PerlDDS::remove_lib_path('$ENV{"COV_DDS_ROOT"}/lib');
+  PerlDDS::swap_lib_path("$ENV{'DDS_ROOT'}", "$ENV{'COV_DDS_ROOT'}");
   return $ret_value;
 }
 

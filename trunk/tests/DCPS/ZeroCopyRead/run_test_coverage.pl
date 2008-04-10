@@ -30,11 +30,11 @@ if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-$DCPSREPO = PerlDDS::ProcessFactory::create ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "$svc_config -o $dcpsrepo_ior"
                                       . " -d $domains_file -NOBITS");
 
-$ZCTest = PerlDDS::ProcessFactory::create ("main", $parameters);
+$ZCTest = PerlDDS::create_process ("main", $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
 if ($DCPSREPO->Spawn () != 0) {

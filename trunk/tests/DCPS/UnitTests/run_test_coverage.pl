@@ -11,7 +11,7 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use Run_Test;
+use DDS_Run_Test;
 use FileHandle;
 use Cwd;
 
@@ -31,10 +31,10 @@ sub run_unit_tests {
   my $unixTestExe = "^UnitTests[^\.]*\$";
   my $windowsTestExe = "^UnitTests.*\.exe\$";
   if($single_test ne '') {
-    $TST = PerlDDS::Process::create("$single_test", "");
+    $TST = PerlDDS::create_process("$single_test", "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
-    my $retcode = PerlDDS::Process::SpawnWaitKill($TST, 60);
+    my $retcode = $TST->SpawnWaitKill(60);
     if ($retcode != 0) {
       $status = 1;
     }
@@ -43,19 +43,19 @@ sub run_unit_tests {
     foreach my $file (readdir($fh)) {
       my $TST;
       if ($file =~ /$unixTestExe/o) {
-        $TST = PerlDDS::Process::create("$file", "");
+        $TST = PerlDDS::create_process("$file", "");
       }
       elsif ($file =~ /$windowsTestExe/o) {
         $exename = "$file";
         $exename =~ s/\.exe$//i;
-        $TST = PerlDDS::Process::create("$exename", "");
+        $TST = PerlDDS::create_process("$exename", "");
       }
       else {
         next;
       }
       $something_ran = 1;
       print STDOUT "Running $file\n";
-      my $retcode = PerlDDS::Process::SpawnWaitKill($TST, 60);
+      my $retcode = $TST->SpawnWaitKill(60);
       if ($retcode != 0) {
         ++$status;
       }

@@ -6,6 +6,7 @@
 use PerlACE::Run_Test;
 use Process;
 use ProcessFactory;
+use Cwd;
 
 package PerlDDS;
 
@@ -29,22 +30,22 @@ sub is_coverage_test()
   return $PerlDDS::Coverage_Test;
 }
 
-sub is_coverage_sub_test()
+sub is_special_sub_test()
 {
   return $PerlDDS::Special_Sub;
 }
 
-sub is_coverage_pub_test()
+sub is_special_pub_test()
 {
   return $PerlDDS::Special_Pub;
 }
 
-sub is_coverage_InfoRepo_test()
+sub is_special_InfoRepo_test()
 {
   return $PerlDDS::Special_InfoRepo;
 }
 
-sub is_coverage_other_test()
+sub is_special_other_test()
 {
   return $PerlDDS::Special_Other;
 }
@@ -59,29 +60,37 @@ sub special_process_created()
   $PerlDDS::Special_Process_Created = 1;
 }
 
-sub remove_path {
-  my $name   = shift;
-  my $value  = shift;
-  my $separator = ($^O eq 'MSWin32' ? ';' : ':');
-  if (defined $ENV{$name}) {
-    if(($ENV{$name} != s/$separator$value//) &&
-       ($ENV{$name} != s/^$value$separator//) &&
-       ($ENV{$name} != s/^$value$//))
-    {
-	  print STDERR "remove_path failed!\n";
-    }
-  }
+sub swap_path {
+    my $name   = shift;
+    my $new_value  = shift;
+    my $orig_value  = shift;
+    my $environment = $ENV{$name};
+    $environment =~ s/$orig_value/$new_value/g;
+    $ENV{$name} = $environment;
 }
 
-sub remove_lib_path {
-  my($value) = shift;
+sub swap_lib_path {
+    my($new_value) = shift;
+    my($orig_value) = shift;
 
   # Set the library path supporting various platforms.
-  remove_path('PATH', $value);
-  remove_path('LD_LIBRARY_PATH', $value);
-  remove_path('LIBPATH', $value);
-  remove_path('SHLIB_PATH', $value);
+    swap_path('PATH', $new_value, $orig_value);
+    swap_path('LD_LIBRARY_PATH', $new_value, $orig_value);
+    swap_path('LIBPATH', $new_value, $orig_value);
+    swap_path('SHLIB_PATH', $new_value, $orig_value);
 
+}
+
+sub add_lib_path {
+  my($dir) = shift;
+
+  # add the cwd to the directory if it is relative
+  if(($dir =~ /$\.\//)||
+     ($dir =~ /$\.\.\//)) {
+      $dir = Cwd::getcwd() . "/$dir";
+  }
+
+  PerlACE::add_lib_path($dir);
 }
 
 $sleeptime = 5;
