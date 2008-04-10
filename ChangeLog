@@ -1,12 +1,22 @@
+Thu Apr 10 21:45:04 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+        * tests/DCPS/UnitTests/run_test_coverage.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Further changes for coverage testing.
+
 Wed Apr  9 18:57:38 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
         * bin/Process.pm:
         * bin/ProcessFactory.pm:
 
-          Changes to make coverage the local process and all 
+          Changes to make coverage the local process and all
           others remote.
-	
+
 Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
