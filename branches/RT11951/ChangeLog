@@ -1,8 +1,14 @@
+Fri Apr 11 18:42:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+	  Use the previously processed command line arguments when
+	  parsing the local options.
+
 Fri Apr 11 16:42:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Disambiguate some comparisons after adding type conversion.
+          Disambiguate some comparisons after adding type conversion.
 
 Fri Apr 11 16:12:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

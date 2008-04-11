@@ -257,7 +257,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   // command line options.
 
   // Check the non-ORB arguments.
-  this->parse_args (argc, argv);
+  this->parse_args(
+    this->federatorConfig_.argc(),
+    this->federatorConfig_.argv()
+  );
 
   // Activate the POA manager before initialize built-in-topics
   // so invocations can be processed.
