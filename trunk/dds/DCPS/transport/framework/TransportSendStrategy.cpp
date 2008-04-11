@@ -59,7 +59,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     graceful_disconnecting_ (false),
     link_released_ (true)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
   config->_add_ref ();
   this->config_ = config;
@@ -72,7 +72,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   // don't want to keep asking for it over and over.
   this->max_header_size_ = this->header_.max_marshaled_size();
 
-  if (DCPS_debug_level >= 2)
+  if (::OpenDDS::DCPS::Transport_debug_level >= 2)
     {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t)TransportSendStrategy header_db_allocator %x with 1 chunks\n",
 		  &header_db_allocator_));
@@ -106,7 +106,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
 
 OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
   // We created the header_block_ in our ctor, so we should release() it.
   //MJM: blech.
@@ -141,7 +141,7 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
 OpenDDS::DCPS::TransportSendStrategy::WorkOutcome
 OpenDDS::DCPS::TransportSendStrategy::perform_work()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","perform_work",6);
 
   SendPacketOutcome outcome;
 
@@ -385,7 +385,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 (ssize_t num_bytes_sent,
  UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
 	"Adjusting the current packet because %d bytes of the packet "
@@ -718,7 +718,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 void
 OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
   TransportQueueElement* sample = NULL;
   SendMode mode = MODE_NOT_SET;
@@ -795,7 +795,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications()
 void
 OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnecting)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",6);
 
   bool reset_flag = true;
 
@@ -803,7 +803,7 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnectin
     GuardType guard(this->lock_);
 
     // If the terminate_send call due to a non-graceful disconnection before
-    // a datalink shutdown then we will not try to send the graceful disconnect 
+    // a datalink shutdown then we will not try to send the graceful disconnect
     // message.
     if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
       && ! this->graceful_disconnecting_)
@@ -830,7 +830,7 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send (bool graceful_disconnectin
 void
 OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","clear",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
   QueueType* elems = 0;
   QueueType* queue = 0;
@@ -889,7 +889,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 void
 OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send",6);
 
   {
     GuardType guard(this->lock_);
@@ -1149,7 +1149,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 void
 OpenDDS::DCPS::TransportSendStrategy::send_stop()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_stop",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
     GuardType guard(this->lock_);
 
@@ -1250,7 +1250,7 @@ int
 OpenDDS::DCPS::TransportSendStrategy::remove_sample_i (QueueRemoveVisitor& simple_rem_vis,
 						   PacketRemoveVisitor& pac_rem_vis)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",6);
 
   //GuardType guard(this->lock_);
 
@@ -1369,7 +1369,7 @@ int
 OpenDDS::DCPS::TransportSendStrategy::remove_sample
 (const DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t)  Removing sample: %@", sample),5);
 
@@ -1389,7 +1389,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample
 void
 OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_control_msgs",6);
 
   GuardType guard(this->lock_);
 
@@ -1406,7 +1406,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_control_msgs(RepoId pub_id)
 void
 OpenDDS::DCPS::TransportSendStrategy::direct_send( bool relink )
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
 	"Prepare the current packet for a direct send attempt.\n"));
@@ -1529,7 +1529,7 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send( bool relink )
 void
 OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",6);
 
   TransportQueueElement* element = this->queue_->peek();
 
@@ -1601,7 +1601,7 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
 void
 OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",6);
   /*
   // Shift elements from not_yet_pac_q_ to queue_
   // This is where the intermediary elements finally become
@@ -1661,7 +1661,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
 OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
 OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",5);
+  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
 	    "Populate the iovec array using the pkt_chain_.\n"), 5);

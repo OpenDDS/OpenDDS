@@ -12,5 +12,5 @@
 
 OpenDDS::DCPS::ThreadSynchStrategy::~ThreadSynchStrategy()
 {
-  DBG_ENTRY_LVL("ThreadSynchStrategy","~ThreadSynchStrategy",5);
+  DBG_ENTRY_LVL("ThreadSynchStrategy","~ThreadSynchStrategy",6);
 }

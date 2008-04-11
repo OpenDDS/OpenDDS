@@ -14,7 +14,7 @@ OpenDDS::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
     passive_reconnect_duration_(2000),
     passive_connect_duration_ (10000)
 {
-  DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",5);
+  DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",6);
 
   transport_type_ = ACE_TEXT("SimpleTcp");
 

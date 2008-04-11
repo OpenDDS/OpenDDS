@@ -8,14 +8,14 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportImplFactory::TransportImplFactory()
 {
-  DBG_ENTRY_LVL("TransportImplFactory","TransportImplFactory",5);
+  DBG_ENTRY_LVL("TransportImplFactory","TransportImplFactory",6);
 }
 
 
 ACE_INLINE OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::TransportImplFactory::create_impl()
 {
-  DBG_SUB_ENTRY("TransportImplFactory","create_impl",1);
+  DBG_ENTRY_LVL("TransportImplFactory","create_impl",6);
   // This one is easy.  Simply delegate to the concrete subclass.
   return this->create();
 }
@@ -25,7 +25,7 @@ ACE_INLINE OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::TransportImplFactory::create_impl
                                        (TransportReactorTask* reactor_task)
 {
-  DBG_SUB_ENTRY("TransportImplFactory","create_impl",2);
+  DBG_ENTRY_LVL("TransportImplFactory","create_impl",6);
   // Ask the concrete subclass to create the transport impl object.
   TransportImpl_rch impl = this->create();
 
@@ -50,8 +50,3 @@ OpenDDS::DCPS::TransportImplFactory::create_impl
 
   return impl._retn ();
 }
-
-
-
-
-

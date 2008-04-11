@@ -26,7 +26,7 @@ OpenDDS::DCPS::TransportConfiguration::TransportConfiguration()
     thread_per_connection_ (0),
     keep_link_ (0)
 {
-  DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",5);
+  DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",6);
   this->send_thread_strategy_ =  new PerConnectionSynchStrategy();
   this->adjust_config_value ();
 }
@@ -39,7 +39,7 @@ void
 OpenDDS::DCPS::TransportConfiguration::send_thread_strategy
                                          (ThreadSynchStrategy* strategy)
 {
-  DBG_SUB_ENTRY("TransportConfiguration","send_thread_strategy",1);
+  DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
 
   if (this->send_thread_strategy_ != 0)
     {
@@ -54,7 +54,7 @@ ACE_INLINE
 OpenDDS::DCPS::ThreadSynchStrategy*
 OpenDDS::DCPS::TransportConfiguration::send_thread_strategy()
 {
-  DBG_SUB_ENTRY("TransportConfiguration","send_thread_strategy",2);
+  DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
   return this->send_thread_strategy_;
 }
 

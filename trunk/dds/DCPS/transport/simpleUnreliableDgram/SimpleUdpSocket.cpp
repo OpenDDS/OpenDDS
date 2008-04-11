@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleUdpSocket::~SimpleUdpSocket()
 {
-  DBG_ENTRY_LVL("SimpleUdpSocket","~SimpleUdpSocket",5);
+  DBG_ENTRY_LVL("SimpleUdpSocket","~SimpleUdpSocket",6);
 }
 
 

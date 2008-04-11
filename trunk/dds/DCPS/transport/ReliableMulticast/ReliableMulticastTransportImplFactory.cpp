@@ -12,12 +12,12 @@
 
 OpenDDS::DCPS::ReliableMulticastTransportImplFactory::~ReliableMulticastTransportImplFactory()
 {
-  DBG_ENTRY_LVL("ReliableMulticastTransportImplFactory","~ReliableMulticastTransportImplFactory",5);
+  DBG_ENTRY_LVL("ReliableMulticastTransportImplFactory","~ReliableMulticastTransportImplFactory",6);
 }
 
 OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::ReliableMulticastTransportImplFactory::create()
 {
-  DBG_ENTRY_LVL("ReliableMulticastTransportImplFactory","create",5);
+  DBG_ENTRY_LVL("ReliableMulticastTransportImplFactory","create",6);
   return new ReliableMulticastTransportImpl();
 }

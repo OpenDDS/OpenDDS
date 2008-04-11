@@ -15,7 +15,7 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask()
   : state_ (STATE_NOT_RUNNING),
     condition_(this->lock_)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",5);
+  DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
   // Set our reactor pointer to a new reactor object.
   this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
 }
@@ -23,7 +23,7 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask()
 
 OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",5);
+  DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",6);
   delete this->reactor_;
 }
 
@@ -31,7 +31,7 @@ OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 int
 OpenDDS::DCPS::TransportReactorTask::open(void*)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","open",5);
+  DBG_ENTRY_LVL("TransportReactorTask","open",6);
 
   GuardType guard(this->lock_);
 
@@ -71,7 +71,7 @@ OpenDDS::DCPS::TransportReactorTask::open(void*)
 int
 OpenDDS::DCPS::TransportReactorTask::svc()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","svc",5);
+  DBG_ENTRY_LVL("TransportReactorTask","svc",6);
 
   // First off - We need to obtain our own reference to ourselves such
   // that we don't get deleted while still running in our own thread.
@@ -126,7 +126,7 @@ OpenDDS::DCPS::TransportReactorTask::svc()
 int
 OpenDDS::DCPS::TransportReactorTask::close(u_long flags)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","close",5);
+  DBG_ENTRY_LVL("TransportReactorTask","close",6);
   ACE_UNUSED_ARG (flags);
   // This is called after the reactor threads exit.
   // We should not set state here since we are not
@@ -147,7 +147,7 @@ OpenDDS::DCPS::TransportReactorTask::close(u_long flags)
 void
 OpenDDS::DCPS::TransportReactorTask::stop()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","stop",5);
+  DBG_ENTRY_LVL("TransportReactorTask","stop",6);
   {
     GuardType guard(this->lock_);
     if (this->state_ == STATE_NOT_RUNNING)

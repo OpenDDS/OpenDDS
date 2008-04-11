@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleMcastConfiguration::~SimpleMcastConfiguration()
 {
-  DBG_ENTRY_LVL("SimpleMcastConfiguration","~SimpleMcastConfiguration",5);
+  DBG_ENTRY_LVL("SimpleMcastConfiguration","~SimpleMcastConfiguration",6);
 }
 
 int

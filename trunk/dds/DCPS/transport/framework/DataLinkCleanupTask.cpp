@@ -13,12 +13,12 @@
 OpenDDS::DCPS::DataLinkCleanupTask::DataLinkCleanupTask (TransportImpl* transportImpl)
   : transportImpl_ (transportImpl)
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "DataLinkCleanupTask", 5);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "DataLinkCleanupTask",6);
 }
 
 OpenDDS::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "~DataLinkCleanupTask", 5);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "~DataLinkCleanupTask",6);
 
   this->transportImpl_ = 0;
 }
@@ -26,7 +26,7 @@ OpenDDS::DCPS::DataLinkCleanupTask::~DataLinkCleanupTask ()
 void
 OpenDDS::DCPS::DataLinkCleanupTask::execute (DataLink_rch& dl)
 {
-  DBG_ENTRY_LVL("DataLinkCleanupTask", "execute", 5);
+  DBG_ENTRY_LVL("DataLinkCleanupTask", "execute",6);
 
   // Assumes that the DataLink is safe for now.
   // ciju: I don't believe there are any thread issues here. If any

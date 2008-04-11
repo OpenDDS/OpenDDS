@@ -94,7 +94,7 @@ DataReaderImpl::DataReaderImpl (void) :
 // the servant.
 DataReaderImpl::~DataReaderImpl (void)
 {
-  DBG_ENTRY_LVL ("DataReaderImpl","~DataReaderImpl", 5);
+  DBG_ENTRY_LVL ("DataReaderImpl","~DataReaderImpl",6);
 
   if (initialized_)
     {
@@ -182,7 +182,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 				       const OpenDDS::DCPS::WriterAssociationSeq & writers)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("DataReaderImpl","add_associations",5);
+  DBG_ENTRY_LVL("DataReaderImpl","add_associations",6);
 
   if (DCPS_debug_level >= 1)
   {
@@ -350,7 +350,7 @@ void DataReaderImpl::remove_associations (
 		   CORBA::SystemException
 		   ))
 {
-  DBG_ENTRY_LVL("DataReaderImpl","remove_associations",5);
+  DBG_ENTRY_LVL("DataReaderImpl","remove_associations",6);
 
   if (DCPS_debug_level >= 1)
   {
@@ -482,7 +482,7 @@ void DataReaderImpl::remove_associations (
 
 void DataReaderImpl::remove_all_associations ()
 {
-  DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",5);
+  DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
 
   OpenDDS::DCPS::WriterIdSeq writers;
 
@@ -960,7 +960,7 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
 
 void DataReaderImpl::data_received(const ReceivedDataSample& sample)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","data_received",5);
+  DBG_ENTRY_LVL("DataReaderImpl","data_received",6);
 
   // ensure some other thread is not changing the sample container
   // or statuses related to samples.
@@ -1601,7 +1601,7 @@ DataReaderImpl::get_next_handle ()
 void
 DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",5);
+  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_disconnected",6);
   if (! this->is_bit_)
     {
       // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
@@ -1625,7 +1625,7 @@ DataReaderImpl::notify_subscription_disconnected (const WriterIdSeq& pubids)
 void
 DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_reconnected",5);
+  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_reconnected",6);
 
   if (! this->is_bit_)
   {
@@ -1654,7 +1654,7 @@ DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
 void
 DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",5);
+  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",6);
 
   if (! this->is_bit_)
   {
@@ -1679,7 +1679,7 @@ DataReaderImpl::notify_subscription_lost (const WriterIdSeq& pubids)
 void
 DataReaderImpl::notify_connection_deleted ()
 {
-  DBG_ENTRY_LVL("DataReaderImpl","notify_connection_deleted",5);
+  DBG_ENTRY_LVL("DataReaderImpl","notify_connection_deleted",6);
 
   // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
   // is given to this DataWriter then narrow() fails.
