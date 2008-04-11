@@ -8,7 +8,7 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::SimpleUnreliableDgramTransport()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","SimpleUnreliableDgramTransport",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","SimpleUnreliableDgramTransport",6);
 }
 
 
@@ -17,7 +17,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(remote_address);

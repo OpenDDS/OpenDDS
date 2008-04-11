@@ -26,9 +26,9 @@
 OpenDDS::DCPS::DataLinkSet::DataLinkSet()
   : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
 {
-  DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",5);
+  DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
 
-  if (DCPS_debug_level >= 2)
+  if (::OpenDDS::DCPS::Transport_debug_level >= 2)
     {
       ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataLinkSet send_control_element_allocator %x with %d chunks\n",
       &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
@@ -38,14 +38,14 @@ OpenDDS::DCPS::DataLinkSet::DataLinkSet()
 
 OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 {
-  DBG_ENTRY_LVL("DataLinkSet","~DataLinkSet",5);
+  DBG_ENTRY_LVL("DataLinkSet","~DataLinkSet",6);
 }
 
 
 int
 OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 {
-  DBG_ENTRY_LVL("DataLinkSet","insert_link",5);
+  DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
   link->_add_ref();
   DataLink_rch mylink = link;
 
@@ -60,7 +60,7 @@ OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 ssize_t
 OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_links",5);
+  DBG_ENTRY_LVL("DataLinkSet","remove_links",6);
 
   GuardType guard1(this->lock_);
   GuardType guard2(released_set->lock_);
@@ -94,7 +94,7 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
 //OpenDDS::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
 //                                            DataLinkSetMap& released_locals)
 //{
-//  DBG_ENTRY_LVL("DataLinkSet","release_reservations",5);
+//  DBG_ENTRY_LVL("DataLinkSet","release_reservations",6);
 //  // Simply iterate over our set of DataLinks, and ask each one to perform
 //  // the release_reservations operation upon itself.
 //  MapType::ENTRY* entry;
@@ -116,7 +116,7 @@ OpenDDS::DCPS::DataLinkSet*
 OpenDDS::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
                                       const CORBA::ULong num_targets)
 {
-  DBG_ENTRY_LVL("DataLinkSet","select_links",5);
+  DBG_ENTRY_LVL("DataLinkSet","select_links",6);
 
   DataLinkSet_rch selected_links = new DataLinkSet ();
 
@@ -143,10 +143,10 @@ OpenDDS::DCPS::DataLinkSet::select_links (const RepoId* remoteIds,
 
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
-                                     const RepoId localId, 
+                                     const RepoId localId,
                                      const bool   pub_side)
 {
-  DBG_ENTRY_LVL("DataLinkSet","find_link",5);
+  DBG_ENTRY_LVL("DataLinkSet","find_link",6);
 
   { // guard scope
     GuardType guard(this->lock_);
@@ -177,7 +177,7 @@ OpenDDS::DCPS::DataLinkSet::find_link(const RepoId remoteId,
 }
 
 
-bool 
+bool
 OpenDDS::DCPS::DataLinkSet::empty ()
 {
   GuardType guard(this->lock_);

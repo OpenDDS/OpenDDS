@@ -12,7 +12,7 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 {
-  DBG_ENTRY_LVL("SimpleUdpTransport","SimpleUdpTransport",5);
+  DBG_ENTRY_LVL("SimpleUdpTransport","SimpleUdpTransport",6);
   this->socket_ = new SimpleUdpSocket();
   this->socket_->_add_ref() ;
 }
@@ -23,7 +23,7 @@ OpenDDS::DCPS::SimpleUdpTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUdpTransport","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleUdpTransport","deliver_sample",6);
 
   SimpleUnreliableDgramDataLink_rch link;
 

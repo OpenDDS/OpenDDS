@@ -295,7 +295,7 @@ WriteDataContainer::num_samples (
 DataSampleList
 WriteDataContainer::get_unsent_data()
 {
-  DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",5);
+  DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
 
   //
   // The samples in unsent_data are added to the sending_data
@@ -323,7 +323,7 @@ WriteDataContainer::get_unsent_data()
 DataSampleList
 WriteDataContainer::get_resend_data()
 {
-  DBG_ENTRY_LVL("WriteDataContainer","get_resend_data",5);
+  DBG_ENTRY_LVL("WriteDataContainer","get_resend_data",6);
 
   //
   // The samples in unsent_data are added to the sending_data
@@ -366,7 +366,7 @@ WriteDataContainer::get_sent_data()
 void
 WriteDataContainer::data_delivered (DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("WriteDataContainer","data_delivered",5);
+  DBG_ENTRY_LVL("WriteDataContainer","data_delivered",6);
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
     guard,
@@ -456,7 +456,7 @@ WriteDataContainer::data_delivered (DataSampleListElement* sample)
 void
 WriteDataContainer::data_dropped (DataSampleListElement* sample, bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("WriteDataContainer","data_dropped",5);
+  DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
 
   // If the transport initiates the data dropping, we need do same thing
   // as data_delivered. e.g. remove the sample from the internal list
@@ -761,7 +761,7 @@ WriteDataContainer::release_buffer (DataSampleListElement* element)
 void
 WriteDataContainer::unregister_all (DataWriterImpl* writer)
 {
-  DBG_ENTRY_LVL("WriteDataContainer","unregister_all",5);
+  DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
 
   shutdown_ = true;
 

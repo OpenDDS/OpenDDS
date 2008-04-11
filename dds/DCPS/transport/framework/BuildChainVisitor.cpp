@@ -12,14 +12,14 @@
 
 OpenDDS::DCPS::BuildChainVisitor::~BuildChainVisitor()
 {
-  DBG_ENTRY_LVL("BuildChainVisitor","~BuildChainVisitor",5);
+  DBG_ENTRY_LVL("BuildChainVisitor","~BuildChainVisitor",6);
 }
 
 
 int
 OpenDDS::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
 {
-  DBG_ENTRY_LVL("BuildChainVisitor","visit_element",5);
+  DBG_ENTRY_LVL("BuildChainVisitor","visit_element",6);
 
   if (this->head_ == 0)
     {

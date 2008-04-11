@@ -14,7 +14,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchRes
                                              const int& max_output_pause_period_ms)
   : ThreadSynchResource (socket->get_handle())
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSynchResource","SimpleUnreliableDgramSynchResource",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSynchResource","SimpleUnreliableDgramSynchResource",6);
 
   if (max_output_pause_period_ms >= 0)
     {
@@ -31,7 +31,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::SimpleUnreliableDgramSynchRes
 
 OpenDDS::DCPS::SimpleUnreliableDgramSynchResource::~SimpleUnreliableDgramSynchResource()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSynchResource","~SimpleUnreliableDgramSynchResource",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSynchResource","~SimpleUnreliableDgramSynchResource",6);
 }
 
 

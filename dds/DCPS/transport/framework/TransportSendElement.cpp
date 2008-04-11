@@ -13,14 +13,14 @@
 
 OpenDDS::DCPS::TransportSendElement::~TransportSendElement()
 {
-  DBG_ENTRY_LVL("TransportSendElement","~TransportSendElement",5);
+  DBG_ENTRY_LVL("TransportSendElement","~TransportSendElement",6);
 }
 
 
 void
 OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportSendElement","release_element",5);
+  DBG_ENTRY_LVL("TransportSendElement","release_element",6);
 
   if (this->was_dropped())
     {
@@ -41,7 +41,7 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 OpenDDS::DCPS::RepoId
 OpenDDS::DCPS::TransportSendElement::publication_id() const
 {
-  DBG_ENTRY_LVL("TransportSendElement","publication_id",5);
+  DBG_ENTRY_LVL("TransportSendElement","publication_id",6);
   return this->element_->publication_id_;
 }
 
@@ -49,7 +49,7 @@ OpenDDS::DCPS::TransportSendElement::publication_id() const
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportSendElement::msg() const
 {
-  DBG_ENTRY_LVL("TransportSendElement","msg",5);
+  DBG_ENTRY_LVL("TransportSendElement","msg",6);
   return this->element_->sample_;
 }
 

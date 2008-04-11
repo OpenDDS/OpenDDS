@@ -13,13 +13,13 @@ ACE_INLINE
 OpenDDS::DCPS::TransportImpl::TransportImpl()
   : dl_clean_task_ (this)
 {
-  DBG_ENTRY_LVL("TransportImpl","TransportImpl",5);
+  DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
 }
 
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 {
-  DBG_ENTRY_LVL("TransportImpl","configure",5);
+  DBG_ENTRY_LVL("TransportImpl","configure",6);
 
   GuardType guard(this->lock_);
 
@@ -77,7 +77,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 ACE_INLINE OpenDDS::DCPS::TransportReactorTask*
 OpenDDS::DCPS::TransportImpl::reactor_task()
 {
-  DBG_ENTRY_LVL("TransportImpl","reactor_task",5);
+  DBG_ENTRY_LVL("TransportImpl","reactor_task",6);
   TransportReactorTask_rch task = this->reactor_task_;
   return task._retn();
 }
@@ -86,7 +86,7 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 {
-  DBG_ENTRY_LVL("TransportImpl","set_reactor",5);
+  DBG_ENTRY_LVL("TransportImpl","set_reactor",6);
 
   GuardType guard(this->lock_);
 
@@ -112,7 +112,7 @@ OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
 ACE_INLINE void
 OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link)
 {
-  DBG_ENTRY_LVL("TransportImpl","release_datalink",5);
+  DBG_ENTRY_LVL("TransportImpl","release_datalink",6);
 
   // Delegate to our subclass.
   this->release_datalink_i(link);
@@ -125,7 +125,7 @@ OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link)
 ACE_INLINE void
 OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
 {
-  DBG_ENTRY_LVL("TransportImpl","detach_interface",5);
+  DBG_ENTRY_LVL("TransportImpl","detach_interface",6);
 
   GuardType guard(this->lock_);
 
@@ -139,7 +139,7 @@ OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* interface)
 ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&
 OpenDDS::DCPS::TransportImpl::reservation_lock()
 {
-  DBG_SUB_ENTRY("TransportImpl","reservation_lock",1);
+  DBG_ENTRY_LVL("TransportImpl","reservation_lock",6);
   return this->reservation_lock_;
 }
 
@@ -147,7 +147,7 @@ OpenDDS::DCPS::TransportImpl::reservation_lock()
 ACE_INLINE const OpenDDS::DCPS::TransportImpl::ReservationLockType&
 OpenDDS::DCPS::TransportImpl::reservation_lock() const
 {
-  DBG_SUB_ENTRY("TransportImpl","reservation_lock",2);
+  DBG_ENTRY_LVL("TransportImpl","reservation_lock",6);
   return this->reservation_lock_;
 }
 
@@ -158,7 +158,7 @@ ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::connection_info
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY_LVL("TransportImpl","connection_info",5);
+  DBG_ENTRY_LVL("TransportImpl","connection_info",6);
 
   GuardType guard(this->lock_);
 
@@ -181,7 +181,7 @@ OpenDDS::DCPS::TransportImpl::connection_info
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::swap_bytes() const
 {
-  DBG_ENTRY_LVL("TransportImpl","swap_bytes",5);
+  DBG_ENTRY_LVL("TransportImpl","swap_bytes",6);
 
   GuardType guard(this->lock_);
 

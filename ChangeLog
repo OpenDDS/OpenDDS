@@ -1,3 +1,144 @@
+Fri Apr 11 21:45:54 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/Service_Participant.cpp:
+          New command-line option "-TransportDebugLevel" for specifying
+          Transport debug level.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+          Add 6th log level exclusively for trace messages.
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Simplified Transport Debug logging and changed default log build
+          level to 5.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.inl:
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/NullSynch.inl:
+        * dds/DCPS/transport/framework/NullSynch.cpp:
+        * dds/DCPS/transport/framework/NullSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PoolSynch.inl:
+        * dds/DCPS/transport/framework/PoolSynch.cpp:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImplFactory.inl:
+        * dds/DCPS/transport/framework/TransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSynchResource.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+          Set trace messages log level to 6. By default this gets compiled out.
+
 Fri Apr 11 16:09:28 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:

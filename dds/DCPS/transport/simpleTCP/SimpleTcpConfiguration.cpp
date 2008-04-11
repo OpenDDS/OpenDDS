@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleTcpConfiguration::~SimpleTcpConfiguration()
 {
-  DBG_ENTRY_LVL("SimpleTcpConfiguration","~SimpleTcpConfiguration",5);
+  DBG_ENTRY_LVL("SimpleTcpConfiguration","~SimpleTcpConfiguration",6);
 }
 
 int

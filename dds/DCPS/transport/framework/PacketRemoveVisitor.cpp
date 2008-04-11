@@ -27,7 +27,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     previous_block_(0),
     replaced_element_allocator_(allocator)
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",5);
+  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",6);
 }
 
 
@@ -45,13 +45,13 @@ OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
     previous_block_(0),
     replaced_element_allocator_(allocator)
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",5);
+  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",6);
 }
 
 
 OpenDDS::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","~PacketRemoveVisitor",5);
+  DBG_ENTRY_LVL("PacketRemoveVisitor","~PacketRemoveVisitor",6);
 }
 
 
@@ -59,7 +59,7 @@ int
 OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
                                             (TransportQueueElement*& element)
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","visit_element_ref",5);
+  DBG_ENTRY_LVL("PacketRemoveVisitor","visit_element_ref",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Obtain the element_blocks using element->msg()\n"));

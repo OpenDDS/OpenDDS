@@ -14,7 +14,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramReceiveStrategy::SimpleUnreliableDgramReceiv
                                          SimpleUnreliableDgramSocket* socket,
                                          TransportReactorTask* task)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","SimpleUnreliableDgramReceiveStrategy",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramReceiveStrategy","SimpleUnreliableDgramReceiveStrategy",6);
 
   // Keep copies of the references for ourselves
   transport->_add_ref();

@@ -8,7 +8,7 @@
 ACE_INLINE int
 OpenDDS::DCPS::TransportReceiveStrategy::start()
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","start",5);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","start",6);
   return this->start_i();
 }
 
@@ -16,7 +16,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::start()
 ACE_INLINE void
 OpenDDS::DCPS::TransportReceiveStrategy::stop()
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","stop",5);
+  DBG_ENTRY_LVL("TransportReceiveStrategy","stop",6);
   this->stop_i();
 }
 

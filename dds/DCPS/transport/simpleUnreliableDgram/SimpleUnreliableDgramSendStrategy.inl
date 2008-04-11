@@ -16,7 +16,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::SimpleUnreliableDgramSendStrat
   : TransportSendStrategy(config, synch_resource),
     remote_address_(remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","SimpleUnreliableDgramSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","SimpleUnreliableDgramSendStrategy",6);
 
   // Keep a "copy" of the reference to the SimpleUdpSocket object
   // for ourselves.
@@ -29,7 +29,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::SimpleUnreliableDgramSendStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSendStrategy","stop_i",6);
   //TODO: noop
 }
 

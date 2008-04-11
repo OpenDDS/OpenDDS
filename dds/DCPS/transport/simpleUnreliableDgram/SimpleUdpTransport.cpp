@@ -15,14 +15,14 @@
 
 OpenDDS::DCPS::SimpleUdpTransport::~SimpleUdpTransport()
 {
-  DBG_ENTRY_LVL("SimpleUdpTransport","~SimpleUdpTransport",5);
+  DBG_ENTRY_LVL("SimpleUdpTransport","~SimpleUdpTransport",6);
 }
 
 
 int
 OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* config)
 {
-  DBG_ENTRY_LVL("SimpleUdpTransport","configure_i",5);
+  DBG_ENTRY_LVL("SimpleUdpTransport","configure_i",6);
 
   // Downcast the config argument to a SimpleUdpConfiguration*
   SimpleUdpConfiguration* udp_config = ACE_static_cast(SimpleUdpConfiguration*,
@@ -75,7 +75,7 @@ int
 OpenDDS::DCPS::SimpleUdpTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY_LVL("SimpleUdpTransport","connection_info_i",5);
+  DBG_ENTRY_LVL("SimpleUdpTransport","connection_info_i",6);
 
   ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleUdpTransport::connection_info_i %s:%d\n", 
     this->local_address_.get_host_addr (), 

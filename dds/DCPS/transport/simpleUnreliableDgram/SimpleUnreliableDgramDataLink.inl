@@ -13,14 +13,14 @@ OpenDDS::DCPS::SimpleUnreliableDgramDataLink::SimpleUnreliableDgramDataLink
   : DataLink(transport_impl),
     remote_address_(remote_address)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","SimpleUnreliableDgramDataLink",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","SimpleUnreliableDgramDataLink",6);
 }
 
 
 ACE_INLINE const ACE_INET_Addr&
 OpenDDS::DCPS::SimpleUnreliableDgramDataLink::remote_address() const
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","remote_address",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","remote_address",6);
   return this->remote_address_;
 }
 
@@ -28,7 +28,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramDataLink::remote_address() const
 ACE_INLINE int
 OpenDDS::DCPS::SimpleUnreliableDgramDataLink::connect(TransportSendStrategy* send_strategy)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","connect",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramDataLink","connect",6);
   return this->start(send_strategy,0);
 }
 

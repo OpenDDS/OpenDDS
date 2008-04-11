@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::ThreadSynchResource::~ThreadSynchResource()
 {
-  DBG_ENTRY_LVL("ThreadSynchResource","~ThreadSynchResource",5);
+  DBG_ENTRY_LVL("ThreadSynchResource","~ThreadSynchResource",6);
   delete this->timeout_;
 }
 

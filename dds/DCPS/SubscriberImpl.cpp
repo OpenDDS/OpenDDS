@@ -231,7 +231,7 @@ SubscriberImpl::create_datareader (
 SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",5);
+  DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",6);
 
   ACE_TRACE(ACE_TEXT("SubscriberImpl::delete_datareader"));
   if (enabled_ == false)

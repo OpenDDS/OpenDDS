@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::ReceiveListenerSet::~ReceiveListenerSet()
 {
-  DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",5);
+  DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",6);
 }
 
 

@@ -19,7 +19,7 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
                                       TransportReactorTask* task)
   : TransportSendStrategy(config, synch_resource)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","SimpleTcpSendStrategy",6);
 
   // Keep a "copy" of the connection reference for ourselves
   connection->_add_ref();
@@ -41,13 +41,13 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::SimpleTcpSendStrategy
 
 OpenDDS::DCPS::SimpleTcpSendStrategy::~SimpleTcpSendStrategy()
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","~SimpleTcpSendStrategy",6);
 }
 
 int
 OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","reset",6);
 
   // Sanity check - this connection is passed in from the constructor and
   // it should not be nil.
@@ -112,7 +112,7 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::reset(SimpleTcpConnection* connection)
 ssize_t
 OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","send_bytes",6);
 
   return this->non_blocking_send (iov, n, bp);
 }
@@ -141,14 +141,14 @@ OpenDDS::DCPS::SimpleTcpSendStrategy::send_bytes_i (const iovec iov[], int n)
 void
 OpenDDS::DCPS::SimpleTcpSendStrategy::relink (bool do_suspend)
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","relink",6);
   this->connection_->relink (do_suspend);
 }
 
 void
 OpenDDS::DCPS::SimpleTcpSendStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleTcpSendStrategy","stop_i",6);
 
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.

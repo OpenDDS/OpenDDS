@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::ThreadSynch::~ThreadSynch()
 {
-  DBG_ENTRY_LVL("ThreadSynch","~ThreadSynch",5);
+  DBG_ENTRY_LVL("ThreadSynch","~ThreadSynch",6);
   delete this->resource_;
 }
 
@@ -20,7 +20,7 @@ OpenDDS::DCPS::ThreadSynch::~ThreadSynch()
 int
 OpenDDS::DCPS::ThreadSynch::register_worker_i()
 {
-  DBG_ENTRY_LVL("ThreadSynch","register_worker_i",5);
+  DBG_ENTRY_LVL("ThreadSynch","register_worker_i",6);
   // Default implementation is to do nothing here.  Subclass may override.
   return 0;
 }
@@ -29,7 +29,7 @@ OpenDDS::DCPS::ThreadSynch::register_worker_i()
 void
 OpenDDS::DCPS::ThreadSynch::unregister_worker_i()
 {
-  DBG_ENTRY_LVL("ThreadSynch","unregister_worker_i",5);
+  DBG_ENTRY_LVL("ThreadSynch","unregister_worker_i",6);
   // Default implementation is to do nothing here.  Subclass may override.
 }
 

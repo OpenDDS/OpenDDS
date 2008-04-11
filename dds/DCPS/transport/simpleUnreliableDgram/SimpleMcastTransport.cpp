@@ -14,7 +14,7 @@
 
 OpenDDS::DCPS::SimpleMcastTransport::~SimpleMcastTransport()
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","~SimpleMcastTransport",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","~SimpleMcastTransport",6);
 }
 
 
@@ -22,7 +22,7 @@ OpenDDS::DCPS::SimpleMcastTransport::~SimpleMcastTransport()
 int
 OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* config)
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","configure_socket",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","configure_socket",6);
 
   // Downcast the config argument to a SimpleMcastConfiguration*
   SimpleMcastConfiguration* mcast_config = ACE_static_cast(SimpleMcastConfiguration*,
@@ -78,7 +78,7 @@ int
 OpenDDS::DCPS::SimpleMcastTransport::connection_info_i
                                    (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","connection_info_i",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","connection_info_i",6);
 
   ACE_DEBUG ((LM_DEBUG, "(%P|%t)SimpleMcastTransport::connection_info_i %s:%d\n", 
     this->multicast_group_address_.get_host_addr (), 

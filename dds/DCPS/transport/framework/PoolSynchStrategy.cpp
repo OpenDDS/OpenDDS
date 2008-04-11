@@ -13,7 +13,7 @@
 
 OpenDDS::DCPS::PoolSynchStrategy::~PoolSynchStrategy()
 {
-  DBG_ENTRY_LVL("PoolSynchStrategy","~PoolSynchStrategy",5);
+  DBG_ENTRY_LVL("PoolSynchStrategy","~PoolSynchStrategy",6);
 }
 
 
@@ -21,7 +21,7 @@ OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::PoolSynchStrategy::create_synch_object
                                       (ThreadSynchResource* synch_resource)
 {
-  DBG_ENTRY_LVL("PoolSynchStrategy","create_synch_object",5);
+  DBG_ENTRY_LVL("PoolSynchStrategy","create_synch_object",6);
   PoolSynch* synch_object = new PoolSynch(this,synch_resource);
 
   // TBD - We need to remember the synch_object here, because if this
@@ -37,7 +37,7 @@ OpenDDS::DCPS::PoolSynchStrategy::create_synch_object
 int
 OpenDDS::DCPS::PoolSynchStrategy::open(void*)
 {
-  DBG_ENTRY_LVL("PoolSynchStrategy","open",5);
+  DBG_ENTRY_LVL("PoolSynchStrategy","open",6);
   // TBD
   return 0;
 }
@@ -46,7 +46,7 @@ OpenDDS::DCPS::PoolSynchStrategy::open(void*)
 int
 OpenDDS::DCPS::PoolSynchStrategy::svc()
 {
-  DBG_ENTRY_LVL("PoolSynchStrategy","svc",5);
+  DBG_ENTRY_LVL("PoolSynchStrategy","svc",6);
   // TBD
   return 0;
 }
@@ -55,7 +55,7 @@ OpenDDS::DCPS::PoolSynchStrategy::svc()
 int
 OpenDDS::DCPS::PoolSynchStrategy::close(u_long)
 {
-  DBG_ENTRY_LVL("PoolSynchStrategy","close",5);
+  DBG_ENTRY_LVL("PoolSynchStrategy","close",6);
   // TBD
   return 0;
 }

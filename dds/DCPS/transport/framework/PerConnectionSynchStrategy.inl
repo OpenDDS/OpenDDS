@@ -7,6 +7,6 @@
 ACE_INLINE
 OpenDDS::DCPS::PerConnectionSynchStrategy::PerConnectionSynchStrategy()
 {
-  DBG_ENTRY_LVL("PerConnectionSynchStrategy","PerConnectionSynchStrategy",5);
+  DBG_ENTRY_LVL("PerConnectionSynchStrategy","PerConnectionSynchStrategy",6);
 }
 

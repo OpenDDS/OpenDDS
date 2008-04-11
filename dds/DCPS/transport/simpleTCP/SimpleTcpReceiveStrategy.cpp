@@ -18,7 +18,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
                                          SimpleTcpConnection*  connection,
                                          TransportReactorTask* task)
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","SimpleTcpReceiveStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","SimpleTcpReceiveStrategy",6);
 
   // Keep a "copy" of the reference to the DataLink for ourselves.
   link->_add_ref();
@@ -36,7 +36,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::SimpleTcpReceiveStrategy
 
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::~SimpleTcpReceiveStrategy()
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","~SimpleTcpReceiveStrategy",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","~SimpleTcpReceiveStrategy",6);
 }
 
 
@@ -46,7 +46,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::receive_bytes
                                               int   n,
                                               ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","receive_bytes",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","receive_bytes",6);
 
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
@@ -66,7 +66,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::deliver_sample
                                  (ReceivedDataSample&  sample,
                                   const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","deliver_sample",6);
 
   // We don't do anything to the remote_address for the SimpleTcp case.
   ACE_UNUSED_ARG(remote_address);
@@ -91,7 +91,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::deliver_sample
 int
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","start_i",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","start_i",6);
 
   // Tell the SimpleTcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
@@ -124,7 +124,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::start_i()
 int
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","reset",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","reset",6);
 
   // Sanity check - this connection is passed in from the constructor and
   // it should not be nil.
@@ -189,7 +189,7 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::reset(SimpleTcpConnection* connection)
 void
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","stop_i",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","stop_i",6);
 
   this->reactor_task_->get_reactor()->remove_handler
                                              (this->connection_.in(),
@@ -208,6 +208,6 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::stop_i()
 void
 OpenDDS::DCPS::SimpleTcpReceiveStrategy::relink (bool do_suspend)
 {
-  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","relink",5);
+  DBG_ENTRY_LVL("SimpleTcpReceiveStrategy","relink",6);
   this->connection_->relink (do_suspend);
 }

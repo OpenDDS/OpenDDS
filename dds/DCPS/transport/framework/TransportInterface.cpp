@@ -13,13 +13,13 @@
 
 OpenDDS::DCPS::TransportInterface::~TransportInterface()
 {
-  DBG_ENTRY_LVL("TransportInterface","~TransportInterface",5);
+  DBG_ENTRY_LVL("TransportInterface","~TransportInterface",6);
 }
 
 void
 OpenDDS::DCPS::TransportInterface::transport_detached_i()
 {
-  DBG_ENTRY_LVL("TransportInterface","transport_detached_i",5);
+  DBG_ENTRY_LVL("TransportInterface","transport_detached_i",6);
   // Subclass should override if interested in the "transport detached event".
 }
 
@@ -29,7 +29,7 @@ OpenDDS::DCPS::TransportInterface::transport_detached_i()
 OpenDDS::DCPS::AttachStatus
 OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 {
-  DBG_ENTRY_LVL("TransportInterface","attach_transport",5);
+  DBG_ENTRY_LVL("TransportInterface","attach_transport",6);
 
   { // guard scope
     GuardType guard(this->lock_);
@@ -88,7 +88,7 @@ OpenDDS::DCPS::TransportInterface::attach_transport(TransportImpl* impl)
 void
 OpenDDS::DCPS::TransportInterface::detach_transport()
 {
-  DBG_ENTRY_LVL("TransportInterface","detach_transport",5);
+  DBG_ENTRY_LVL("TransportInterface","detach_transport",6);
   TransportImpl_rch impl;
 
   {
@@ -143,7 +143,7 @@ OpenDDS::DCPS::TransportInterface::add_associations
                           const AssociationData*    remote_associations,
                           TransportReceiveListener* receive_listener)
 {
-  DBG_ENTRY_LVL("TransportInterface","add_associations",5);
+  DBG_ENTRY_LVL("TransportInterface","add_associations",6);
 
   if (this->impl_.is_nil())
     {
@@ -311,7 +311,7 @@ OpenDDS::DCPS::TransportInterface::remove_associations(ssize_t       size,
                                                    const RepoId  local_id,
                                                    const bool pub_side)
 {
-  DBG_ENTRY_LVL("TransportInterface","remove_associations",5);
+  DBG_ENTRY_LVL("TransportInterface","remove_associations",6);
 
   DataLinkSetMap released_locals;
 
@@ -338,7 +338,7 @@ OpenDDS::DCPS::TransportInterface::remove_associations(ssize_t       size,
 void
 OpenDDS::DCPS::TransportInterface::transport_detached()
 {
-  DBG_ENTRY_LVL("TransportInterface","transport_detached",5);
+  DBG_ENTRY_LVL("TransportInterface","transport_detached",6);
   {
     GuardType guard(this->lock_);
 
