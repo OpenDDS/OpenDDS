@@ -4,6 +4,7 @@
 
 // TMB - I had to add the following line
 #include "Service_Participant.h"
+#include "ace/OS_NS_string.h" // for strcmp() in partition operator==()
 
 namespace OpenDDS
 {
@@ -274,11 +275,8 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::PartitionQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_PartitionQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ACE_UNUSED_ARG (qos);
+      return true;
     }  
       
     ACE_INLINE 
@@ -1003,7 +1001,7 @@ bool operator == (const ::DDS::PartitionQosPolicy& qos1,
   {
     for(CORBA::ULong i = 0; i < qos1.name.length(); i++)
     {
-      if (qos1.name[i] != qos2.name[i])
+      if ( 0 != ACE_OS::strcmp( qos1.name[i], qos2.name[i]) )
       {
         return false;
       }

@@ -1,8 +1,15 @@
+Fri Apr 11 20:10:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+	  Updated to allow PARTITION QoS policies to have values.
+	  Changed operator==() for these policy values to actually
+	  compare the strings rather than the pointers.
+
 Fri Apr 11 18:42:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
-	  Use the previously processed command line arguments when
-	  parsing the local options.
+          Use the previously processed command line arguments when
+          parsing the local options.
 
 Fri Apr 11 16:42:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
