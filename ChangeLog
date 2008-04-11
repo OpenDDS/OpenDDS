@@ -1,3 +1,8 @@
+Fri Apr 11 21:58:15 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+          Add entry for command-line option "-TransportDebugLevel".
+
 Fri Apr 11 21:45:54 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/Service_Participant.cpp:
