@@ -13,6 +13,8 @@
 #include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
 
+#include <orbsvcs/Shutdown_Utilities.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <tao/Version.h>
 #if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION == 4
@@ -45,6 +47,7 @@ public:
   InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError);
   ~InfoRepo (void);
   bool run (void);
+  void shutdown (void);
 
 private:
   bool init (int argc, ACE_TCHAR *argv[]) throw (InitError);
@@ -93,6 +96,12 @@ InfoRepo::run (void)
   orb_->run ();
 
   return true;
+}
+
+void
+InfoRepo::shutdown (void)
+{
+  orb_->shutdown (0);
 }
 
 void
@@ -293,6 +302,29 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   return true;
 }
 
+class InfoRepo_Shutdown : public Shutdown_Functor
+{
+public:
+  InfoRepo_Shutdown(InfoRepo& ir);
+
+  void operator() (int which_signal);
+private:
+  InfoRepo& ir_;
+};
+
+InfoRepo_Shutdown::InfoRepo_Shutdown (InfoRepo &ir)
+  : ir_(ir)
+{
+}
+
+void
+InfoRepo_Shutdown::operator() (int which_signal)
+{
+  ACE_DEBUG ((LM_DEBUG,
+              "InfoRepo_Shutdown: shutting down on signal %d\n",
+              which_signal));
+  ir_.shutdown ();
+}
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
@@ -301,6 +333,9 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   try
     {
       InfoRepo infoRepo (argc, argv);
+
+      InfoRepo_Shutdown ir_shutdown (infoRepo);
+      Service_Shutdown service_shutdown(ir_shutdown);
 
       infoRepo.run ();
     }
