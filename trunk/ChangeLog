@@ -1,3 +1,9 @@
+Fri Apr 11 14:53:58 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Fixing test for auto test errors on particular platforms.
+
 Thu Apr 10 21:45:04 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/DDS_Run_Test.pm:

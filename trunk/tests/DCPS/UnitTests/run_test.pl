@@ -24,10 +24,6 @@ if(defined $ARGV[0])
 my $something_ran = 0;
 
 sub run_unit_tests {
-  my $dir = getcwd();
-  my $fh = new FileHandle();
-  my $unixTestExe = "^UnitTests[^\.]*\$";
-  my $windowsTestExe = "^UnitTests.*\.exe\$";
   if($single_test ne '') {
     $TST = new PerlACE::Process("$single_test", "");
     $something_ran = 1;
@@ -37,25 +33,26 @@ sub run_unit_tests {
       $status = 1;
     }
   }
-  elsif (opendir($fh, $dir)) {
-    foreach my $file (readdir($fh)) {
-      my $TST;
-      if ($file =~ /$unixTestExe/o) {
-        $TST = new PerlACE::Process("$file", "");
-      }
-      elsif ($file =~ /$windowsTestExe/o) {
-        $exename = "$file";
-        $exename =~ s/\.exe$//i;
-        $TST = new PerlACE::Process("$exename", "");
-      }
-      else {
-        next;
-      }
-      $something_ran = 1;
-      print STDOUT "Running $file\n";
-      my $retcode = $TST->SpawnWaitKill(60);
-      if ($retcode != 0) {
-        ++$status;
+  else {
+    my $dir = getcwd() . "/$PerlACE::Process::ExeSubDir";
+    my $fh = new FileHandle();
+    my $testExe = "^(UnitTests_[^\.]*?)(:?\.exe)?\$";
+    if (opendir($fh, $dir)) {
+      foreach my $file (readdir($fh)) {
+        my $TST;
+        if ($file =~ /$testExe/o) {
+          my $executable = $1;
+          $TST = new PerlACE::Process("$executable", "");
+        }
+        else {
+          next;
+        }
+        $something_ran = 1;
+        print STDOUT "Running $file\n";
+        my $retcode = $TST->SpawnWaitKill(60);
+        if ($retcode != 0) {
+          ++$status;
+        }
       }
     }
     closedir($fh);
