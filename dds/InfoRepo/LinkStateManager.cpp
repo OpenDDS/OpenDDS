@@ -103,7 +103,7 @@ LinkStateManager::update(
     // This link has been previously observed, compare the sequence numbers.
     OpenDDS::DCPS::SequenceNumber previous
       = this->adjacencies_[ linkState.source][ linkState.destination].second;
-    if( previous >= linkState.packet) {
+    if( previous >= ::OpenDDS::DCPS::SequenceNumber( linkState.packet)) {
       // Do not process if the incoming sequence value is not greater than
       // the currently held sequence value for this link.
       return false;
