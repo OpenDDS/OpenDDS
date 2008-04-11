@@ -419,8 +419,8 @@ ManagerImpl::updateLinkState(
   ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
 
   // First determine if this is new data.
-  if( this->remoteLink_[ sample.source]->lastSeen()
-      >= sample.packet
+  if( ::OpenDDS::DCPS::SequenceNumber( sample.packet)
+       > this->remoteLink_[ sample.source]->lastSeen()
     ) {
     return;
   }

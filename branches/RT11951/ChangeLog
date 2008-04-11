@@ -1,7 +1,13 @@
+Fri Apr 11 16:42:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/LinkStateManager.cpp:
+	  Disambiguate some comparisons after adding type conversion.
+
 Fri Apr 11 16:12:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Definitions.h:
-	  Added conversion to integer type for SequenceNumber.
+          Added conversion to integer type for SequenceNumber.
 
 Sat Apr  5 08:11:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
