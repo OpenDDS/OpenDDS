@@ -53,6 +53,9 @@ namespace OpenDDS
         return value ;
       }
 
+      /// Convert to integer type.
+      operator ACE_INT16() { return this->value_; }
+
       /// This is the magic of the lollipop.
       /// N.B. This comparison is only good until the distance reaches
       ///      half of the lollipop size (SHRT_MAX/2).

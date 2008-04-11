@@ -1,3 +1,8 @@
+Fri Apr 11 16:12:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+	  Added conversion to integer type for SequenceNumber.
+
 Sat Apr  5 08:11:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * DCPS/DataDurabilityCache.cpp:
@@ -41,8 +46,8 @@ Fri Apr  4 19:15:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.cpp:
-	  Added set_repo() method to allow installation of repositories
-	  directly by reference.
+          Added set_repo() method to allow installation of repositories
+          directly by reference.
 
 Fri Apr  4 14:24:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
