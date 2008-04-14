@@ -1,3 +1,13 @@
+Mon Apr 14 14:30:46 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+          Set trace messages log level to 6. By default this gets compiled out.
+
 Fri Apr 11 21:58:15 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:

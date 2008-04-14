@@ -29,7 +29,7 @@ PubDriver::~PubDriver()
 void
 PubDriver::run(int& argc, char* argv[])
 {
-  DBG_SUB_ENTRY("PubDriver","run",1);
+  DBG_ENTRY_LVL("PubDriver","run",6);
 
   this->parse_args(argc, argv);
   this->init();
@@ -232,7 +232,7 @@ PubDriver::init()
 void
 PubDriver::run()
 {
-  DBG_SUB_ENTRY("PubDriver","run",2);
+  DBG_ENTRY_LVL("PubDriver","run",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create the 'subscriptions' (array of AssociationData).\n"));
