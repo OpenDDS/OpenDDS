@@ -33,7 +33,7 @@ SubDriver::~SubDriver()
 void
 SubDriver::run(int& argc, char* argv[])
 {
-  DBG_SUB_ENTRY("SubDriver","run",1);
+  DBG_ENTRY_LVL("SubDriver","run",6);
 
   // Need call the ORB_init to dynamically load the SimpleUdp library via
   // service configurator.
@@ -196,7 +196,7 @@ SubDriver::init()
 void
 SubDriver::run()
 {
-  DBG_SUB_ENTRY("SubDriver","run",2);
+  DBG_ENTRY_LVL("SubDriver","run",6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create the 'publications' (array of AssociationData).\n"));
