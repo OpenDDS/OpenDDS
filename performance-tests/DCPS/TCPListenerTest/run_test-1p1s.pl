@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../TypeNoKeyBounded');
+PerlDDS::add_lib_path('../TypeNoKeyBounded');
 
 
 # single reader with single instances test
@@ -56,12 +58,12 @@ else {
 # (possibly allocated by not yet queue by the transport because of greedy read).
 $num_samples=$num_msgs_btwn_rec + 20;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
@@ -80,7 +82,7 @@ $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p $num_writers"
 #use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
 
@@ -91,7 +93,7 @@ $pub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p 1 -i $pub_writer_id
               . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000";
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 print $Publisher->CommandLine(), "\n";
 
 
