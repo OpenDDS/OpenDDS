@@ -5,19 +5,21 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
+$subscriber_completed = "subscriber_finished.txt";
+$subscriber_ready = "subscriber_ready.txt";
+$publisher_completed = "publisher_finished.txt";
+$publisher_ready = "publisher_ready.txt";
 
 unlink $subscriber_completed; 
 unlink $subscriber_ready; 
@@ -57,13 +59,13 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
                            . "-o $dcpsrepo_ior "
@@ -80,19 +82,10 @@ $sub_parameters = "$svc_conf $common_parameters -s $sub_addr -t $use_take ";
 
 $pub_parameters = "$svc_conf $common_parameters -p $pub_addr" ;
 
-if (PerlACE::is_vxworks_test()) {
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+print $Subscriber->CommandLine(), "\n";
 
-  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
-
-}
-else {
-  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
-
-  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-}
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 print $Publisher->CommandLine(), "\n";
 
 
