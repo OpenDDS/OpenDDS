@@ -13,14 +13,14 @@
 
 OpenDDS::DCPS::TransportSendControlElement::~TransportSendControlElement()
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","~TransportSendControlElement",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","~TransportSendControlElement",6);
 }
 
 
 bool
 OpenDDS::DCPS::TransportSendControlElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","requires_exclusive_packet",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","requires_exclusive_packet",6);
   return true;
 }
 
@@ -30,7 +30,7 @@ OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_tran
 {
   ACE_UNUSED_ARG (dropped_by_transport);
 
-  DBG_ENTRY_LVL("TransportSendControlElement","release_element",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","release_element",6);
 
   if (this->was_dropped())
     {
@@ -51,7 +51,7 @@ OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_tran
 OpenDDS::DCPS::RepoId
 OpenDDS::DCPS::TransportSendControlElement::publication_id() const
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","publication_id",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","publication_id",6);
   return this->publisher_id_;
 }
 
@@ -59,7 +59,7 @@ OpenDDS::DCPS::TransportSendControlElement::publication_id() const
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportSendControlElement::msg() const
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","msg",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","msg",6);
   return this->msg_;
 }
 

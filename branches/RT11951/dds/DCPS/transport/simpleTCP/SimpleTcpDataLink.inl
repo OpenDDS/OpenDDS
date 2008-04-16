@@ -11,7 +11,7 @@
 ACE_INLINE const ACE_INET_Addr&
 OpenDDS::DCPS::SimpleTcpDataLink::remote_address() const
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","remote_address",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","remote_address",6);
   return this->remote_address_;
 }
 

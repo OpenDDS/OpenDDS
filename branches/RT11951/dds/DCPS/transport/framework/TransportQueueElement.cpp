@@ -11,14 +11,14 @@
 
 OpenDDS::DCPS::TransportQueueElement::~TransportQueueElement()
 {
-  DBG_ENTRY_LVL("TransportQueueElement","~TransportQueueElement",5);
+  DBG_ENTRY_LVL("TransportQueueElement","~TransportQueueElement",6);
 }
 
 
 bool
 OpenDDS::DCPS::TransportQueueElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY_LVL("TransportQueueElement","requires_exclusive_packet",5);
+  DBG_ENTRY_LVL("TransportQueueElement","requires_exclusive_packet",6);
   return false;
 }
 
@@ -26,7 +26,7 @@ OpenDDS::DCPS::TransportQueueElement::requires_exclusive_packet() const
 bool
 OpenDDS::DCPS::TransportQueueElement::is_control(RepoId pub_id) const
 {
-  DBG_ENTRY_LVL("TransportQueueElement","is_control",5);
+  DBG_ENTRY_LVL("TransportQueueElement","is_control",6);
   ACE_UNUSED_ARG(pub_id);
   return false;
 }

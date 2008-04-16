@@ -10,20 +10,20 @@ OpenDDS::DCPS::TransportControlElement::TransportControlElement(ACE_Message_Bloc
 : TransportQueueElement(1),
   msg_ (msg_block)
 {
-  DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",5);
+  DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);
 }
 
 
 OpenDDS::DCPS::TransportControlElement::~TransportControlElement()
 {
-  DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",5);
+  DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",6);
 }
 
 
 bool
 OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY_LVL("TransportControlElement","requires_exclusive_packet",5);
+  DBG_ENTRY_LVL("TransportControlElement","requires_exclusive_packet",6);
   return true;
 }
 
@@ -46,7 +46,7 @@ OpenDDS::DCPS::TransportControlElement::release_element(bool dropped_by_transpor
 void
 OpenDDS::DCPS::TransportControlElement::data_delivered()
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",5);
+  DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",6);
 }
 
 

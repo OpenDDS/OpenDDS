@@ -15,7 +15,7 @@
 
 OpenDDS::DCPS::QueueRemoveVisitor::~QueueRemoveVisitor()
 {
-  DBG_ENTRY_LVL("QueueRemoveVisitor","~QueueRemoveVisitor",5);
+  DBG_ENTRY_LVL("QueueRemoveVisitor","~QueueRemoveVisitor",6);
 }
 
 
@@ -23,7 +23,7 @@ int
 OpenDDS::DCPS::QueueRemoveVisitor::visit_element(TransportQueueElement* element,
                                              int&                   remove)
 {
-  DBG_ENTRY_LVL("QueueRemoveVisitor","visit_element",5);
+  DBG_ENTRY_LVL("QueueRemoveVisitor","visit_element",6);
 
   if (((this->sample_ != 0) && (*element == this->sample_)) ||
       ((this->sample_ == 0) && (element->is_control(this->pub_id_))))

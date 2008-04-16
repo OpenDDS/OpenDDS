@@ -88,7 +88,7 @@ DataWriterImpl::DataWriterImpl (void)
 // the servant.
 DataWriterImpl::~DataWriterImpl (void)
 {
-  DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl", 5);
+  DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl",6);
 
   if (initialized_)
   {
@@ -131,7 +131,7 @@ DataWriterImpl::init (
  OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL ("DataWriterImpl","init", 5);
+  DBG_ENTRY_LVL ("DataWriterImpl","init",6);
   topic_objref_ = ::DDS::Topic::_duplicate (topic);
   topic_servant_ = topic_servant;
   topic_servant_->_add_ref ();
@@ -174,7 +174,7 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
                                    const ReaderAssociationSeq & readers )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL ("DataWriterImpl","add_associations", 5);
+  DBG_ENTRY_LVL ("DataWriterImpl","add_associations",6);
 
   if (DCPS_debug_level >= 1)
   {
@@ -215,7 +215,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
                                    size_t num_remote_associations,
                                    const AssociationData* remote_associations)
 {
-  DBG_ENTRY_LVL ("DataWriterImpl","fully_associated", 5);
+  DBG_ENTRY_LVL ("DataWriterImpl","fully_associated",6);
 
   if (DCPS_debug_level >= 1)
   {
@@ -879,7 +879,7 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
                                    const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("DataWriterImpl", "register_instance", 5);
+  DBG_ENTRY_LVL("DataWriterImpl","register_instance",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
@@ -932,7 +932,7 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
                              const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("DataWriterImpl","unregister",5);
+  DBG_ENTRY_LVL("DataWriterImpl","unregister",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
@@ -989,7 +989,7 @@ DataWriterImpl::write ( DataSample* data,
                         const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("DataWriterImpl","write",5);
+  DBG_ENTRY_LVL("DataWriterImpl","write",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
@@ -1063,7 +1063,7 @@ DataWriterImpl::dispose ( ::DDS::InstanceHandle_t handle,
                           const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  DBG_ENTRY_LVL("DataWriterImpl","dispose",5);
+  DBG_ENTRY_LVL("DataWriterImpl","dispose",6);
   if (enabled_ == false)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
@@ -1273,7 +1273,7 @@ DataWriterImpl::create_sample_data_message ( DataSample* data,
 void
 DataWriterImpl::data_delivered (DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","data_delivered",5);
+  DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
   if (sample->publication_id_ != this->publication_id_)
   {
     ACE_ERROR ((LM_ERROR,
@@ -1293,7 +1293,7 @@ DataWriterImpl::data_delivered (DataSampleListElement* sample)
 void
 DataWriterImpl::control_delivered(ACE_Message_Block* sample)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","control_delivered",5);
+  DBG_ENTRY_LVL("DataWriterImpl","control_delivered",6);
   ++control_delivered_count_;
   sample->release ();
 }
@@ -1308,7 +1308,7 @@ void
 DataWriterImpl::remove_sample (DataSampleListElement* element,
                                bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","remove_sample",5);
+  DBG_ENTRY_LVL("DataWriterImpl","remove_sample",6);
   publisher_servant_->remove_sample (element, dropped_by_transport);
 }
 
@@ -1316,7 +1316,7 @@ void
 DataWriterImpl::data_dropped (DataSampleListElement* element,
                               bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","data_dropped",5);
+  DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);
   this->data_container_->data_dropped (element, dropped_by_transport);
 
   ++data_dropped_count_;
@@ -1326,7 +1326,7 @@ void
 DataWriterImpl::control_dropped (ACE_Message_Block* sample,
                                  bool /* dropped_by_transport */)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","control_dropped",5);
+  DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
   ++control_dropped_count_;
   sample->release ();
 }
@@ -1334,7 +1334,7 @@ DataWriterImpl::control_dropped (ACE_Message_Block* sample,
 int
 DataWriterImpl::remove_all_control_msgs()
 {
-  DBG_ENTRY_LVL("DataWriterImpl","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("DataWriterImpl","remove_all_control_msgs",6);
   return
     publisher_servant_->remove_all_control_msgs (this->publication_id_);
 }
@@ -1458,7 +1458,7 @@ DataWriterImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
 void
 DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_disconnected",5);
+  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_disconnected",6);
 
   if (! is_bit_)
   {
@@ -1486,7 +1486,7 @@ DataWriterImpl::notify_publication_disconnected (const ReaderIdSeq& subids)
 void
 DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_reconnected",5);
+  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_reconnected",6);
 
   if (! is_bit_)
   {
@@ -1521,7 +1521,7 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
 void
 DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",5);
+  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",6);
   if (! is_bit_)
   {
     // Narrow to DDS::DCPS::DataWriterListener. If a
@@ -1548,7 +1548,7 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
 void
 DataWriterImpl::notify_connection_deleted ()
 {
-  DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",5);
+  DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",6);
 
   // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
   // is given to this DataWriter then narrow() fails.

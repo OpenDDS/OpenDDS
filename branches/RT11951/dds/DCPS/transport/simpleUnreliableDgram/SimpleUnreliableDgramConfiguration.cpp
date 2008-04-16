@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleUnreliableDgramConfiguration::~SimpleUnreliableDgramConfiguration()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","~SimpleUnreliableDgramConfiguration",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","~SimpleUnreliableDgramConfiguration",6);
 }
 
 

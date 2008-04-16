@@ -13,20 +13,20 @@ OpenDDS::DCPS::SimpleTcpReconnectTask::SimpleTcpReconnectTask(
   OpenDDS::DCPS::SimpleTcpConnection* connection)
   : connection_ (connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpReconnectTask","SimpleTcpReconnectTask",5);
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","SimpleTcpReconnectTask",6);
 }
 
 
 OpenDDS::DCPS::SimpleTcpReconnectTask::~SimpleTcpReconnectTask()
 {
-  DBG_ENTRY_LVL("SimpleTcpReconnectTask","~SimpleTcpReconnectTask",5);
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","~SimpleTcpReconnectTask",6);
 }
 
 
 
 void OpenDDS::DCPS::SimpleTcpReconnectTask::execute (ReconnectOpType& op)
 {
-  DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",5);
+  DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",6);
 
   if (op == DO_RECONNECT)
     {

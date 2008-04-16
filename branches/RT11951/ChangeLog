@@ -1,9 +1,357 @@
+Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Merging trunk changes 1047:1073 out to branch.
+
+	Wed Apr 16 14:40:16 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * MPC/config/coverage_optional.mpb:
+
+          Added to turn on coverage feature.  RT#12130
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Added inheritance of coverage_optional.mpb.
+
+	Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * bin/auto_run_tests.pl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/split_pub.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1xn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nx1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nxn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/Compiler/idl_test3_main/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          Changed tests to use the DDS_Run_Test.pm, (DDS) Process.pm, and ProcessFactory.pm to
+          allow the capturing of Coverage data (and running all test components on VxWorks).
+          RT#12130
+
+	Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/Compiler/idl_test1_main/run_test.pl:
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Changed sampling of tests to change to use the new PerlDDS perl module functions
+          for handling coverage.
+
+          NOTE: this Changelog entry was for revision 1070
+
+	Mon Apr 14 14:30:46 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+          Set trace messages log level to 6. By default this gets compiled out.
+
+	Fri Apr 11 21:58:15 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * DDS_release_notes.txt:
+          Add entry for command-line option "-TransportDebugLevel".
+
+	Fri Apr 11 21:45:54 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/Service_Participant.cpp:
+          New command-line option "-TransportDebugLevel" for specifying
+          Transport debug level.
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+          Add 6th log level exclusively for trace messages.
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+          Simplified Transport Debug logging and changed default log build
+          level to 5.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.inl:
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/NullSynch.inl:
+        * dds/DCPS/transport/framework/NullSynch.cpp:
+        * dds/DCPS/transport/framework/NullSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/PoolSynch.inl:
+        * dds/DCPS/transport/framework/PoolSynch.cpp:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.inl:
+        * dds/DCPS/transport/framework/PoolSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/ThreadSynchResource.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImplFactory.inl:
+        * dds/DCPS/transport/framework/TransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpFactory.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpLoader.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastFactory.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpFactory.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSynchResource.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+          Set trace messages log level to 6. By default this gets compiled out.
+
+	Fri Apr 11 16:09:28 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Added a signal handler for clean shutdown.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added dependency on svc_util.
+
+	Fri Apr 11 14:53:58 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Fixing test for auto test errors on particular platforms.
+
+	Thu Apr 10 21:45:04 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+        * tests/DCPS/UnitTests/run_test_coverage.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Further changes for coverage testing.
+
+	Wed Apr  9 18:57:38 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+
+          Changes to make coverage the local process and all
+          others remote.
+
+	Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/DDS_Run_Test.pm:
+
+          Changed name and added ProcessFactory.
+
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+
+          Split out Process and ProcessFactory.  Process inherits from PerlACE::Process
+          ProcessFactory handles creating the correct Process (PerlACE::Process,
+          PerlACE:ProcessVX, or PerlDDS::Process)  RT#12130
+
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Changed for refactoring.
+
+        * bin/Run_Test.pm:
+
+          Removed this file.
+
+	Wed Apr  9 14:27:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/Process.pm:
+        * bin/Run_Test.pm:
+
+          Added perl modules to DDS to handle starting remote processes for VxWorks
+          and Test Coverage.  RT#12130
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Cleaned up test.
+
+        * tests/DCPS/UnitTests/run_test_coverage.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+
+          Examples of how tests will change to encorporate new perl modules.
+
+
 Fri Apr 11 20:10:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
-	  Updated to allow PARTITION QoS policies to have values.
-	  Changed operator==() for these policy values to actually
-	  compare the strings rather than the pointers.
+          Updated to allow PARTITION QoS policies to have values.
+          Changed operator==() for these policy values to actually
+          compare the strings rather than the pointers.
 
 Fri Apr 11 18:42:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -40,7 +40,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
   last_reconnect_attempted_ (ACE_Time_Value::zero),
   shutdown_ (false)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","SimpleTcpConnection",6);
 
   // Open the reconnect task
   if (this->reconnect_task_.open ())
@@ -53,7 +53,7 @@ OpenDDS::DCPS::SimpleTcpConnection::SimpleTcpConnection()
 
 OpenDDS::DCPS::SimpleTcpConnection::~SimpleTcpConnection()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","~SimpleTcpConnection",6);
 
   // Remove the reference of the old connection object
   // or the reference of new connection object.
@@ -77,7 +77,7 @@ void
 OpenDDS::DCPS::SimpleTcpConnection::set_receive_strategy
                                  (TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_receive_strategy",6);
 
   // Make a "copy" for ourselves
   receive_strategy->_add_ref();
@@ -89,7 +89,7 @@ void
 OpenDDS::DCPS::SimpleTcpConnection::set_send_strategy
                                  (SimpleTcpSendStrategy* send_strategy)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","set_send_strategy",6);
 
   // Make a "copy" for ourselves
   send_strategy->_add_ref();
@@ -100,7 +100,7 @@ OpenDDS::DCPS::SimpleTcpConnection::set_send_strategy
 int
 OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","open",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","open",6);
 
   // A safety check - This should not happen since the is_connector_
   // defaults to true and open() is called after the ACE_Aceptor
@@ -207,7 +207,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 int
 OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_input",6);
 
   TransportReceiveStrategy_rch rs = this->receive_strategy_;
 
@@ -223,7 +223,7 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_input(ACE_HANDLE)
 int
 OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","close",6);
 
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
@@ -237,7 +237,7 @@ OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 int
 OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",6);
 
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
@@ -305,7 +305,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
                                      const ACE_INET_Addr& local_address,
                                      SimpleTcpConfiguration_rch tcp_config)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_establishment",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_establishment",6);
 
   // Cache these values for reconnecting.
   this->remote_address_ = remote_address;
@@ -380,7 +380,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
 int
 OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",6);
 
   if (on_new_association)
     return this->active_reconnect_on_new_association ();
@@ -398,7 +398,7 @@ OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_on_new_association",6);
   GuardType guard (this->reconnect_lock_);
 
   if (this->connected_ == true)
@@ -421,7 +421,7 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
 int
 OpenDDS::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","passive_reconnect_i",6);
   GuardType guard (this->reconnect_lock_);
 
   // The passive_reconnect_timer_id_ is used as flag to allow the timer scheduled just once.
@@ -477,7 +477,7 @@ OpenDDS::DCPS::SimpleTcpConnection::passive_reconnect_i ()
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_reconnect_i",6);
 
   GuardType guard (this->reconnect_lock_);
   int ret = -1;
@@ -578,7 +578,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
                                                 const void *)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","handle_timeout",6);
 
   this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
   GuardType guard (this->reconnect_lock_);
@@ -624,7 +624,7 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_timeout (const ACE_Time_Value &,
 void
 OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","transfer",6);
 
   GuardType guard (this->reconnect_lock_);
 
@@ -719,7 +719,7 @@ OpenDDS::DCPS::SimpleTcpConnection::transfer (SimpleTcpConnection* connection)
 void
 OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","notify_lost_on_backpressure_timeout",6);
   bool notify_lost = false;
   {
     GuardType guard (this->reconnect_lock_);
@@ -746,7 +746,7 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
 void
 OpenDDS::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","relink",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","relink",6);
 
   if (do_suspend && ! this->send_strategy_.is_nil ())
     this->send_strategy_->suspend_send ();
@@ -758,7 +758,7 @@ OpenDDS::DCPS::SimpleTcpConnection::relink (bool do_suspend)
 bool
 OpenDDS::DCPS::SimpleTcpConnection::tear_link ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","tear_link",6);
 
   return this->link_->release_resources ();
 }
@@ -766,7 +766,7 @@ OpenDDS::DCPS::SimpleTcpConnection::tear_link ()
 void
 OpenDDS::DCPS::SimpleTcpConnection::shutdown ()
 {
-  DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",5);
+  DBG_ENTRY_LVL("SimpleTcpConnection","shutdown",6);
   this->shutdown_ = true;
 
   this->reconnect_task_.close (1);

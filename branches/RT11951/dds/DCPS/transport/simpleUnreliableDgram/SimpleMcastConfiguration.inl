@@ -8,6 +8,6 @@ OpenDDS::DCPS::SimpleMcastConfiguration::SimpleMcastConfiguration()
   : multicast_group_address_(ACE_DEFAULT_MULTICAST_PORT, ACE_DEFAULT_MULTICAST_ADDR),
     receiver_(false)
 {
-  DBG_ENTRY_LVL("SimpleMcastConfiguration","SimpleMcastConfiguration",5);
+  DBG_ENTRY_LVL("SimpleMcastConfiguration","SimpleMcastConfiguration",6);
   this->transport_type_ = ACE_TEXT("SimpleMcast");
 }

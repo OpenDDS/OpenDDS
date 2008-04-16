@@ -10,7 +10,7 @@ OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
   : TransportQueueElement(1),
     allocator_(allocator)
 {
-  DBG_ENTRY_LVL("TransportReplacedElement","TransportReplacedElement",5);
+  DBG_ENTRY_LVL("TransportReplacedElement","TransportReplacedElement",6);
 
   // Obtain the publisher id.
   this->publisher_id_ = orig_elem->publication_id();

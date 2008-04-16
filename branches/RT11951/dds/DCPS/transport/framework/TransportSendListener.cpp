@@ -12,13 +12,13 @@
 
 OpenDDS::DCPS::TransportSendListener::TransportSendListener()
 {
-  DBG_ENTRY_LVL("TransportSendListener","TransportSendListener",5);
+  DBG_ENTRY_LVL("TransportSendListener","TransportSendListener",6);
 }
 
 
 OpenDDS::DCPS::TransportSendListener::~TransportSendListener()
 {
-  DBG_ENTRY_LVL("TransportSendListener","~TransportSendListener",5);
+  DBG_ENTRY_LVL("TransportSendListener","~TransportSendListener",6);
 }
 
 

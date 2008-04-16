@@ -7,7 +7,7 @@ ACE_INLINE
 OpenDDS::DCPS::SimpleUnreliableDgramConfiguration::SimpleUnreliableDgramConfiguration()
 : max_output_pause_period_ (-1)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","SimpleUnreliableDgramConfiguration",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramConfiguration","SimpleUnreliableDgramConfiguration",6);
   this->max_packet_size_ = 62501;
 }
 

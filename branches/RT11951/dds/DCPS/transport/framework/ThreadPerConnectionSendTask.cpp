@@ -20,13 +20,13 @@ OpenDDS::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
     opened_ (false),
     link_ (link)
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","ThreadPerConnectionSendTask",5);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","ThreadPerConnectionSendTask",6);
 }
 
 
 OpenDDS::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",5);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",6);
 }
 
 
@@ -96,7 +96,7 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
 
 int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc", 5);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc",6);
 
   this->thr_id_ = ACE_OS::thr_self ();
 
@@ -178,7 +178,7 @@ OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample ( const DataSampleList
 
 void OpenDDS::DCPS::ThreadPerConnectionSendTask::execute (SendRequest& req)
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","execute",5);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","execute",6);
 
   switch (req.op_)
   {

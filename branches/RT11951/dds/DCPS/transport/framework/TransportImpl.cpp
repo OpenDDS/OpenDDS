@@ -31,7 +31,7 @@ namespace
 
 OpenDDS::DCPS::TransportImpl::~TransportImpl()
 {
-  DBG_ENTRY_LVL("TransportImpl","~TransportImpl",5);
+  DBG_ENTRY_LVL("TransportImpl","~TransportImpl",6);
   clear(dw_map_);
   clear(dr_map_);
 
@@ -45,12 +45,12 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 void
 OpenDDS::DCPS::TransportImpl::shutdown()
 {
-  DBG_ENTRY_LVL("TransportImpl","shutdown",5);
- 
+  DBG_ENTRY_LVL("TransportImpl","shutdown",6);
+
   if (! this->reactor_task_.is_nil ())
   {
     this->reactor_task_->stop ();
-    this->reactor_task_ = 0;  
+    this->reactor_task_ = 0;
   }
 
   this->pre_shutdown_i();
@@ -97,7 +97,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                        RepoId                        publisher_id,
                        CORBA::Long                   priority)
 {
-  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",5);
+  DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
   // Not used right now - not sure how it would apply either.
   ACE_UNUSED_ARG(priority);
@@ -136,7 +136,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
                        TransportReceiveListener*     receive_listener,
                        CORBA::Long                   priority)
 {
-  DBG_SUB_ENTRY("TransportImpl","reserve_datalink",5);
+  DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
 
   // Not used right now - not sure how it would apply either.
   ACE_UNUSED_ARG(priority);
@@ -182,7 +182,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink
 OpenDDS::DCPS::AttachStatus
 OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* interface)
 {
-  DBG_ENTRY_LVL("TransportImpl","attach_interface",5);
+  DBG_ENTRY_LVL("TransportImpl","attach_interface",6);
 
   GuardType guard(this->lock_);
 
@@ -217,7 +217,7 @@ int
 OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id,
                                                 OpenDDS::DCPS::DataWriterImpl* dw)
 {
-  DBG_ENTRY_LVL("TransportImpl","register_publication",5);
+  DBG_ENTRY_LVL("TransportImpl","register_publication",6);
   GuardType guard(this->lock_);
 
   int ret =
@@ -238,7 +238,7 @@ OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id
   if (! pending_subs.is_nil () && this->acked (pub_id))
     this->fully_associated (pub_id);
 
-  if (TAO_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 4)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x added publication %d.\n"),
@@ -253,7 +253,7 @@ OpenDDS::DCPS::TransportImpl::register_publication (OpenDDS::DCPS::RepoId pub_id
 int
 OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportImpl","unregister_publication",5);
+  DBG_ENTRY_LVL("TransportImpl","unregister_publication",6);
   GuardType guard(this->lock_);
   PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
   int ret = -1;
@@ -265,7 +265,7 @@ OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_
     dw_map_.erase(iter);
   }
 
-  if (TAO_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 4)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x released publication %d.\n"),
@@ -280,12 +280,12 @@ OpenDDS::DCPS::TransportImpl::unregister_publication (OpenDDS::DCPS::RepoId pub_
 OpenDDS::DCPS::DataWriterImpl*
 OpenDDS::DCPS::TransportImpl::find_publication (OpenDDS::DCPS::RepoId pub_id, bool safe_cpy)
 {
-  DBG_ENTRY_LVL("TransportImpl","find_publication",5);
+  DBG_ENTRY_LVL("TransportImpl","find_publication",6);
   GuardType guard(this->lock_);
   PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
   if (iter == dw_map_.end())
     {
-      if (TAO_debug_level > 0)
+      if (::OpenDDS::DCPS::Transport_debug_level > 0)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_publication   pub(%d) "
             "not found\n", pub_id));
@@ -304,7 +304,7 @@ int
 OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_id,
                                                  OpenDDS::DCPS::DataReaderImpl* dr)
 {
-  DBG_ENTRY_LVL("TransportImpl","register_subscription",5);
+  DBG_ENTRY_LVL("TransportImpl","register_subscription",6);
   GuardType guard(this->lock_);
 
   int ret =
@@ -315,7 +315,7 @@ OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_i
     dr->_add_ref ();
   }
 
-  if (TAO_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 4)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x added subscription %d.\n"),
@@ -330,7 +330,7 @@ OpenDDS::DCPS::TransportImpl::register_subscription (OpenDDS::DCPS::RepoId sub_i
 int
 OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub_id)
 {
-  DBG_ENTRY_LVL("TransportImpl","unregister_subscription",5);
+  DBG_ENTRY_LVL("TransportImpl","unregister_subscription",6);
   GuardType guard(this->lock_);
 
   SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
@@ -348,7 +348,7 @@ OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub
     ));
   }
 
-  if (TAO_debug_level > 4)
+  if (::OpenDDS::DCPS::Transport_debug_level > 4)
     {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) transport %x released subscription %d.\n"),
@@ -365,12 +365,12 @@ OpenDDS::DCPS::TransportImpl::unregister_subscription (OpenDDS::DCPS::RepoId sub
 OpenDDS::DCPS::DataReaderImpl*
 OpenDDS::DCPS::TransportImpl::find_subscription (OpenDDS::DCPS::RepoId sub_id, bool safe_cpy)
 {
-  DBG_ENTRY_LVL("TransportImpl","find_subscription",5);
+  DBG_ENTRY_LVL("TransportImpl","find_subscription",6);
   GuardType guard(this->lock_);
   SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
   if (iter == dr_map_.end())
     {
-      if (TAO_debug_level > 0)
+      if (::OpenDDS::DCPS::Transport_debug_level > 0)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportImpl::find_subscription   sub(%d) "
             "not found\n", sub_id));
@@ -390,7 +390,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
                                                    size_t                  num_remote_associations,
                                                    const AssociationData*  remote_associations)
 {
-  DBG_ENTRY_LVL("TransportImpl","add_pending_association",5);
+  DBG_ENTRY_LVL("TransportImpl","add_pending_association",6);
 
   GuardType guard(this->lock_);
 
@@ -434,7 +434,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 int
 OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
 {
-  DBG_ENTRY_LVL("TransportImpl","demarshal",5);
+  DBG_ENTRY_LVL("TransportImpl","demarshal",6);
 
   int status = this->acked_sub_map_.demarshal (acks, byte_order);
   if (status == -1)
@@ -467,7 +467,7 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte
 void
 OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
 {
-  DBG_ENTRY_LVL("TransportImpl","fully_associated",5);
+  DBG_ENTRY_LVL("TransportImpl","fully_associated",6);
 
   PublicationObjectMap::iterator pubiter = dw_map_.find(pub_id);
 
@@ -510,7 +510,7 @@ OpenDDS::DCPS::TransportImpl::acked (RepoId pub_id)
 bool
 OpenDDS::DCPS::TransportImpl::release_link_resources (DataLink* link)
 {
-  DBG_ENTRY_LVL("TransportImpl", "release_link_resources", 5);
+  DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
   // Create a smart pointer without ownership (bumps up ref count)
   DataLink_rch dl (link, false);

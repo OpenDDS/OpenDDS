@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 
 if ($ARGV[0] eq '') {
   #default test - single datareader single instance.
@@ -22,8 +24,8 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
@@ -35,23 +37,12 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $parameters = "$svc_config -DCPSLivelinessFactor 300 -z " ;
 
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$svc_config -o $dcpsrepo_ior"
-                                       #. " -ORBDebugLevel 1 "
-                                       . " -d $domains_file");
-
-  $FooTest4 = new PerlACE::ProcessVX ("FooTest4_0", $parameters);
-
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$svc_config -o $dcpsrepo_ior"
                                      #. " -ORBDebugLevel 1 "
                                      . " -d $domains_file");
 
-  $FooTest4 = new PerlACE::Process ("FooTest4_0", $parameters);
-}
+$FooTest4 = PerlDDS::create_process ("FooTest4_0", $parameters);
 print $FooTest4->CommandLine(), "\n";
 
 

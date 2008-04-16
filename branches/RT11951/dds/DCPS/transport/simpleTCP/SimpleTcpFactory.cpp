@@ -15,14 +15,14 @@
 
 OpenDDS::DCPS::SimpleTcpFactory::~SimpleTcpFactory()
 {
-  DBG_ENTRY_LVL("SimpleTcpFactory","~SimpleTcpFactory",5);
+  DBG_ENTRY_LVL("SimpleTcpFactory","~SimpleTcpFactory",6);
 }
 
 
 int
 OpenDDS::DCPS::SimpleTcpFactory::requires_reactor() const
 {
-  DBG_ENTRY_LVL("SimpleTcpFactory","requires_reactor",5);
+  DBG_ENTRY_LVL("SimpleTcpFactory","requires_reactor",6);
   // return "true"
   return 1;
 }
@@ -31,7 +31,7 @@ OpenDDS::DCPS::SimpleTcpFactory::requires_reactor() const
 OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::SimpleTcpFactory::create()
 {
-  DBG_ENTRY_LVL("SimpleTcpFactory","create",5);
+  DBG_ENTRY_LVL("SimpleTcpFactory","create",6);
   return new SimpleTcpTransport();
 }
 

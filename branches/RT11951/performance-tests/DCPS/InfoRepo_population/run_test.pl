@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -17,20 +19,20 @@ $opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0 -t5 -n5 -p5 -s5";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$sync_status_file = PerlACE::LocalFile ("sync_status");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
+$sync_status_file = "sync_status";
 $repo_bit_opt = "$opts -NOBITS";
 
 unlink $dcpsrepo_ior;
 unlink $sync_status_file;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-$Publisher = new PerlACE::Process ("publisher", " $pub_opts");
-$Publisher2 = new PerlACE::Process ("publisher", " $pub_opts"." -i2");
-$SyncServer = new PerlACE::Process ("syncServer"
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");
+$SyncServer = PerlDDS::create_process ("syncServer"
 				    , "-p2 -s1 -o$sync_status_file");
 
 print $DCPSREPO->CommandLine() . "\n";

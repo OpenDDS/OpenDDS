@@ -14,13 +14,13 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportFactory::TransportFactory()
 {
-  DBG_ENTRY_LVL("TransportFactory","TransportFactory",5);
+  DBG_ENTRY_LVL("TransportFactory","TransportFactory",6);
 }
 
 ACE_INLINE
 OpenDDS::DCPS::TransportFactory::~TransportFactory()
 {
-  DBG_ENTRY_LVL("TransportFactory","~TransportFactory",5);
+  DBG_ENTRY_LVL("TransportFactory","~TransportFactory",6);
   // Since our maps hold smart pointers, we don't have to iterate over them
   // and release references.  The map destructors will cause the smart
   // pointers to destruct, and that will release the references for us.

@@ -12,7 +12,7 @@ OpenDDS::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
                                              const int& max_output_pause_period_ms)
   : ThreadSynchResource (connection->peer().get_handle())
 {
-  DBG_ENTRY_LVL("SimpleTcpSynchResource","SimpleTcpSynchResource",5);
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","SimpleTcpSynchResource",6);
 
   if (max_output_pause_period_ms >= 0)
   {
@@ -28,14 +28,14 @@ OpenDDS::DCPS::SimpleTcpSynchResource::SimpleTcpSynchResource
 
 OpenDDS::DCPS::SimpleTcpSynchResource::~SimpleTcpSynchResource()
 {
-  DBG_ENTRY_LVL("SimpleTcpSynchResource","~SimpleTcpSynchResource",5);
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","~SimpleTcpSynchResource",6);
 }
 
 
 void
 OpenDDS::DCPS::SimpleTcpSynchResource::notify_lost_on_backpressure_timeout ()
 {
-  DBG_ENTRY_LVL("SimpleTcpSynchResource","notify_lost_on_backpressure_timeout",5);
+  DBG_ENTRY_LVL("SimpleTcpSynchResource","notify_lost_on_backpressure_timeout",6);
 
   this->connection_->notify_lost_on_backpressure_timeout ();
 }

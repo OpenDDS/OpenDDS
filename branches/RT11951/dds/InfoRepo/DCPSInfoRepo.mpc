@@ -51,7 +51,7 @@ project(*Federator): dcps {
 
 }
 
-project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client {
+project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
 

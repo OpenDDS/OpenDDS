@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::ReceiveListenerSetMap::~ReceiveListenerSetMap()
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","~ReceiveListenerSetMap",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","~ReceiveListenerSetMap",6);
 }
 
 
@@ -22,7 +22,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
                                  RepoId                    subscriber_id,
                                  TransportReceiveListener* receive_listener)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",6);
   ReceiveListenerSet_rch listener_set = this->find_or_create(publisher_id);
 
   if (listener_set.is_nil())
@@ -85,7 +85,7 @@ int
 OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
                                          RepoId subscriber_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",6);
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)
@@ -132,7 +132,7 @@ int
 OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
                                                      RepoId subscriber_id)
 {
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",5);
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",6);
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0)

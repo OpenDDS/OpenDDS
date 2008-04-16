@@ -11,7 +11,7 @@
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_start()
 {
-  DBG_ENTRY_LVL("DataLink","send_start",5);
+  DBG_ENTRY_LVL("DataLink","send_start",6);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -25,7 +25,7 @@ OpenDDS::DCPS::DataLink::send_start()
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_start_i()
 {
-  DBG_ENTRY_LVL("DataLink","send_start_i",5);
+  DBG_ENTRY_LVL("DataLink","send_start_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
@@ -47,7 +47,7 @@ OpenDDS::DCPS::DataLink::send_start_i()
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 {
-  DBG_ENTRY_LVL("DataLink","send",5);
+  DBG_ENTRY_LVL("DataLink","send",6);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -61,7 +61,7 @@ OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 {
-  DBG_ENTRY_LVL("DataLink","send_i",5);
+  DBG_ENTRY_LVL("DataLink","send_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
@@ -81,7 +81,7 @@ OpenDDS::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_stop()
 {
-  DBG_ENTRY_LVL("DataLink","send_stop",5);
+  DBG_ENTRY_LVL("DataLink","send_stop",6);
 
   if (this->thr_per_con_send_task_ != 0)
   {
@@ -95,7 +95,7 @@ OpenDDS::DCPS::DataLink::send_stop()
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::send_stop_i()
 {
-  DBG_ENTRY_LVL("DataLink","send_stop_i",5);
+  DBG_ENTRY_LVL("DataLink","send_stop_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
@@ -116,7 +116,7 @@ ACE_INLINE int
 OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
                                    bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("DataLink","remove_sample",5);
+  DBG_ENTRY_LVL("DataLink","remove_sample",6);
   ACE_UNUSED_ARG (dropped_by_transport);
 
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -153,7 +153,7 @@ OpenDDS::DCPS::DataLink::remove_sample(const DataSampleListElement* sample,
 ACE_INLINE void
 OpenDDS::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLink","remove_all_control_msgs",5);
+  DBG_ENTRY_LVL("DataLink","remove_all_control_msgs",6);
 
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
@@ -179,7 +179,7 @@ OpenDDS::DCPS::DataLink::remove_all_control_msgs(RepoId pub_id)
 ACE_INLINE OpenDDS::DCPS::DataLinkIdType
 OpenDDS::DCPS::DataLink::id() const
 {
-  DBG_ENTRY_LVL("DataLink","id",5);
+  DBG_ENTRY_LVL("DataLink","id",6);
   return id_;
 }
 
@@ -188,7 +188,7 @@ ACE_INLINE int
 OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
                            TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY_LVL("DataLink","start",5);
+  DBG_ENTRY_LVL("DataLink","start",6);
 
   // We assume that the send_strategy is not NULL, but the receive_strategy
   // is allowed to be NULL.

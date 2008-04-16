@@ -22,14 +22,14 @@ OpenDDS::DCPS::SimpleTcpTransport::SimpleTcpTransport()
     connections_updated_(this->connections_lock_),
     con_checker_ (new SimpleTcpConnectionReplaceTask(this))
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","SimpleTcpTransport",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","SimpleTcpTransport",6);
 }
 
 
 
 OpenDDS::DCPS::SimpleTcpTransport::~SimpleTcpTransport()
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","~SimpleTcpTransport",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","~SimpleTcpTransport",6);
   delete acceptor_;
 
   con_checker_->close (1); // This could potentially fix a race condition
@@ -55,7 +55,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 (const TransportInterfaceInfo& remote_info,
  int                           connect_as_publisher)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
 
   // Get the remote address from the "blob" in the remote_info struct.
   NetworkAddress* network_order_address =
@@ -173,7 +173,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
 int
 OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","configure_i",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","configure_i",6);
 
   // Downcast the config argument to a SimpleTcpConfiguration*
   SimpleTcpConfiguration* tcp_config = ACE_static_cast(SimpleTcpConfiguration*,
@@ -290,7 +290,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 void
 OpenDDS::DCPS::SimpleTcpTransport::pre_shutdown_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","pre_shutdown_i",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","pre_shutdown_i",6);
 
   GuardType guard(this->links_lock_);
 
@@ -308,7 +308,7 @@ OpenDDS::DCPS::SimpleTcpTransport::pre_shutdown_i()
 void
 OpenDDS::DCPS::SimpleTcpTransport::shutdown_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","shutdown_i",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","shutdown_i",6);
 
   // Don't accept any more connections.
   this->acceptor_->close();
@@ -363,7 +363,7 @@ int
 OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",6);
   VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s:%d\n",
              this->tcp_config_->local_address_.get_host_addr (),
              this->tcp_config_->local_address_.get_port_number ()), 2);
@@ -384,7 +384,7 @@ OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 void
 OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",6);
 
   SimpleTcpDataLink* tcp_link = ACE_static_cast(SimpleTcpDataLink*,link);
 
@@ -432,7 +432,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","passive_connection",6);
   // Take ownership of the passed-in connection pointer.
   SimpleTcpConnection_rch connection_obj = connection;
 
@@ -471,7 +471,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","make_active_connection",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_active_connection",6);
 
   // Create the connection object here.
   SimpleTcpConnection_rch connection = new SimpleTcpConnection();
@@ -493,7 +493,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 (const ACE_INET_Addr& remote_address,
  SimpleTcpDataLink*   link)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","make_passive_connection",6);
 
   SimpleTcpConnection_rch connection;
 
@@ -554,7 +554,7 @@ OpenDDS::DCPS::SimpleTcpTransport::connect_datalink
 (SimpleTcpDataLink*   link,
  SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","connect_datalink",6);
 
   TransportSendStrategy_rch send_strategy =
     new SimpleTcpSendStrategy(link,
@@ -587,7 +587,7 @@ int
 OpenDDS::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_address,
                                            SimpleTcpConnection_rch connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpTransport","fresh_link",5);
+  DBG_ENTRY_LVL("SimpleTcpTransport","fresh_link",6);
 
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);

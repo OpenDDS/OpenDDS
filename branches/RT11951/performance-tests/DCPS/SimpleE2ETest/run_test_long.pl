@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../TypeNoKeyBounded');
+PerlDDS::add_lib_path('../TypeNoKeyBounded');
 
 
 # this "long" test pushes the reader to the point where
@@ -23,15 +25,15 @@ $data_size=7;
 $num_writers=1;
 $num_readers=1;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
@@ -46,7 +48,7 @@ $sub_parameters = "$app_bit_conf -p $num_writers"
 #use -mxs $num_messages to avoid using the heap 
 #   (could be less than $num_messages but I am not sure of the limit).
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
 $pub_parameters = "$app_bit_conf -p $num_writers"
@@ -54,7 +56,7 @@ $pub_parameters = "$app_bit_conf -p $num_writers"
               . " -n $num_messages -d $data_size" 
               . " -msi $num_messages -mxs $num_messages";
 
-$Publisher = new PerlACE::Process ("publisher", $pub_parameters);
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 print $Publisher->CommandLine(), "\n";
 
 

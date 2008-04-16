@@ -12,14 +12,14 @@
 
 OpenDDS::DCPS::RepoIdSetMap::~RepoIdSetMap()
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","~RepoIdSetMap",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","~RepoIdSetMap",6);
 }
 
 
 int
 OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","insert",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","insert",6);
   RepoIdSet_rch id_set = this->find_or_create(key);
 
   if (id_set.is_nil())
@@ -73,7 +73,7 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 int
 OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","remove",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","remove",6);
   RepoIdSet_rch id_set;
 
   int result = OpenDDS::DCPS::find(map_, key, id_set);
@@ -108,7 +108,7 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 OpenDDS::DCPS::RepoIdSet*
 OpenDDS::DCPS::RepoIdSetMap::remove_set(RepoId key)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","remove_set",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","remove_set",6);
   RepoIdSet_rch value;
 
   if (unbind(map_, key, value) != 0)
@@ -125,7 +125,7 @@ int
 OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
                                            RepoId publisher_id)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","release_publisher",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","release_publisher",6);
   RepoIdSet_rch id_set;
 
   if (OpenDDS::DCPS::find(map_, subscriber_id, id_set) != 0)
@@ -172,7 +172,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
 ACE_Message_Block*
 OpenDDS::DCPS::RepoIdSetMap::marshal (bool byte_order)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","marshal",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","marshal",6);
   ACE_Message_Block* data = 0;
 
   ACE_NEW_RETURN (data,
@@ -209,7 +209,7 @@ OpenDDS::DCPS::RepoIdSetMap::marshal (bool byte_order)
 bool
 OpenDDS::DCPS::RepoIdSetMap::is_subset (RepoIdSetMap& map, RepoId id)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","is_subset",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","is_subset",6);
 
   RepoIdSet_rch given_id_set = map.find (id);
   RepoIdSet_rch this_id_set = this->find (id);
@@ -226,7 +226,7 @@ OpenDDS::DCPS::RepoIdSetMap::is_subset (RepoIdSetMap& map, RepoId id)
 int
 OpenDDS::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","demarshal",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","demarshal",6);
 
   TAO::DCPS::Serializer reader( acks, byte_order);
 
@@ -261,7 +261,7 @@ OpenDDS::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order
 void
 OpenDDS::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
 {
-  DBG_ENTRY_LVL("RepoIdSetMap","get_keys",5);
+  DBG_ENTRY_LVL("RepoIdSetMap","get_keys",6);
 
   for (MapType::iterator itr = map_.begin();
     itr != map_.end();
