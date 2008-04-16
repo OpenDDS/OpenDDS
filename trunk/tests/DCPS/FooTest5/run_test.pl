@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType5');
+PerlDDS::add_lib_path('../FooType5');
 
 # single reader with single instances test
 
@@ -104,13 +106,13 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
+$subscriber_completed = "subscriber_finished.txt";
+$subscriber_ready = "subscriber_ready.txt";
+$publisher_completed = "publisher_finished.txt";
+$publisher_ready = "publisher_ready.txt";
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
@@ -121,17 +123,9 @@ unlink $publisher_ready;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $tcp_svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$tcp_svc_config -o $dcpsrepo_ior"
-                                      . " -d $domains_file");
-
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$tcp_svc_config -o $dcpsrepo_ior"
                                     . " -d $domains_file");
-}
 print $DCPSREPO->CommandLine(), "\n";
 
 $bit_off_conf = "-DCPSBit 0";
@@ -167,20 +161,10 @@ $pub_parameters = "$svc_config -u $use_udp -c $use_mcast -p $pub_addr -w $num_wr
               . " -f $mixed_trans"
               . " -a $use_reliable_multicast";
 
-if (PerlACE::is_vxworks_test()) {
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
-
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+print $Subscriber->CommandLine(), "\n";
   
-  $Publisher = new PerlACE::ProcessVX ("publisher", $pub_parameters);
-}
-else {
-  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
-
-  
-  $Publisher = new PerlACE::Process ("publisher", $pub_parameters);
-}
+$Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 
 print $Publisher->CommandLine(), "\n";
 

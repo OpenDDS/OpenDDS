@@ -7,11 +7,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use Sys::Hostname;
 
-use Env (ACE_ROOT);
-use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
+use Env (ACE_ROOT);
+use lib "$ACE_ROOT/bin";
+use DDS_Run_Test;
 use CrossSyncDDS;
 
 $| = 1;
@@ -74,7 +74,7 @@ if ($role == -1) {
 @ports = $CS->boot_ports ();
 my($port1) = 10001 + @ports[0];
 my $domains_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/domain_ids";
-my $dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
 if ($role == CrossSync::SERVER) {
     $repo_host = $CS->self();
@@ -86,38 +86,19 @@ my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
 
 unlink $dcpsrepo_ior;
 
-if (PerlACE::is_vxworks_test()) {
-  $Subscriber = new PerlACE::ProcessVX
+$Subscriber = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
        "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
-  $Publisher = new PerlACE::ProcessVX
+$Publisher = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
        "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
-
-}
-else {
-  $Subscriber = new PerlACE::Process
-      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/subscriber",
-       "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
-  $Publisher = new PerlACE::Process
-      ("$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/publisher",
-       "-DCPSConfigFile $pub_config_file $common_args $pub_opts");
-}
 
 if ($role == CrossSync::SERVER) {
     unlink $dcpsrepo_ior;
-    if (PerlACE::is_vxworks_test()) {
-      $DCPSREPO = new PerlACE::ProcessVX
+    $DCPSREPO = PerlDDS::create_process
           ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
            "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
            . "-ORBEndpoint iiop://:$port1");
-    }
-    else {    
-      $DCPSREPO = new PerlACE::Process
-          ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-           "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-           . "-ORBEndpoint iiop://:$port1");
-    }
 
     print $DCPSREPO->CommandLine(). "\n";
     $DCPSREPO->Spawn ();

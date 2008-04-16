@@ -7,12 +7,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # This file is for running the run_test.pl scripts listed in
 # auto_run_tests.lst.
 
+use Env (DDS_ROOT);
 use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 if (defined $ENV{srcdir}) {
   use lib "$ENV{srcdir}/bin";
 }
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 use English;
 use Getopt::Std;

@@ -1,3 +1,90 @@
+Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * bin/auto_run_tests.pl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/split_pub.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1x1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_1xn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nx1.pl:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/run_test_nxn.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/Compiler/idl_test3_main/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+          Changed tests to use the DDS_Run_Test.pm, (DDS) Process.pm, and ProcessFactory.pm to
+          allow the capturing of Coverage data (and running all test components on VxWorks).
+
 Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/BuiltInTopic/run_test.pl:

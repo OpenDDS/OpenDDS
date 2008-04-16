@@ -7,9 +7,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use Sys::Hostname;
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 use FileHandle;
 use Cwd;
 
@@ -25,7 +27,7 @@ my $something_ran = 0;
 
 sub run_unit_tests {
   if($single_test ne '') {
-    $TST = new PerlACE::Process("$single_test", "");
+    $TST = PerlDDS::create_process("$single_test", "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
     my $retcode = $TST->SpawnWaitKill(60);
@@ -42,7 +44,7 @@ sub run_unit_tests {
         my $TST;
         if ($file =~ /$testExe/o) {
           my $executable = $1;
-          $TST = new PerlACE::Process("$executable", "");
+          $TST = PerlDDS::create_process("$executable", "");
         }
         else {
           next;

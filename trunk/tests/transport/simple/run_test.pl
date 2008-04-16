@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 #
 # Test parameters.
@@ -48,14 +50,8 @@ my $publisherArgs = "$svc_config -p $publisherId:$publisherHost:$publisherPort "
 #
 # Create the test objects.
 #
-if (PerlACE::is_vxworks_test()) {
-  $subscriber = new PerlACE::ProcessVX( $subscriberCmd, $subscriberArgs) ;
-  $publisher  = new PerlACE::ProcessVX( $publisherCmd,  $publisherArgs) ;
-}
-else {
-  $subscriber = new PerlACE::Process( $subscriberCmd, $subscriberArgs) ;
-  $publisher  = new PerlACE::Process( $publisherCmd,  $publisherArgs) ;
-}
+$subscriber = PerlDDS::create_process( $subscriberCmd, $subscriberArgs) ;
+$publisher  = PerlDDS::create_process( $publisherCmd,  $publisherArgs) ;
 
 
 #

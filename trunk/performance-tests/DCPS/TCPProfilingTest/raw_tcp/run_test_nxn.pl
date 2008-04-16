@@ -2,26 +2,28 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      & eval 'exec perl -S $0 $argv:q'
      if 0;
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use lib "$ENV{ACE_ROOT}/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
-$SUB_1 = new PerlACE::Process("raw_tcp_subscriber",
+$SUB_1 = PerlDDS::create_process("raw_tcp_subscriber",
                               "-p 3 -n 2000 -d 8 -s 5555");
-$SUB_2 = new PerlACE::Process("raw_tcp_subscriber",
+$SUB_2 = PerlDDS::create_process("raw_tcp_subscriber",
                               "-p 3 -n 2000 -d 8 -s 6555");
-$SUB_3 = new PerlACE::Process("raw_tcp_subscriber",
+$SUB_3 = PerlDDS::create_process("raw_tcp_subscriber",
                               "-p 3 -n 2000 -d 8 -s 7555");
-$PUB_1 = new PerlACE::Process("raw_tcp_publisher",
+$PUB_1 = PerlDDS::create_process("raw_tcp_publisher",
                               "-p 1 -n 2000 -d 8 " .
                               "-s localhost:5555 " .
                               "-s localhost:6555 " .
                               "-s localhost:7555");
-$PUB_2 = new PerlACE::Process("raw_tcp_publisher",
+$PUB_2 = PerlDDS::create_process("raw_tcp_publisher",
                               "-p 2 -n 2000 -d 8 " .
                               "-s localhost:5555 " .
                               "-s localhost:6555 " .
                               "-s localhost:7555");
-$PUB_3 = new PerlACE::Process("raw_tcp_publisher",
+$PUB_3 = PerlDDS::create_process("raw_tcp_publisher",
                               "-p 3 -n 2000 -d 8 " .
                               "-s localhost:5555 " .
                               "-s localhost:6555 " .

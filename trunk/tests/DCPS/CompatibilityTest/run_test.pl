@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 # single reader with single instances test
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:";
@@ -20,8 +22,8 @@ $port=29804;
 $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 $svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior; 
@@ -44,11 +46,11 @@ sub run_compatibility_tests {
   $pub_time = $sub_time;
   $sub_parameters = "$svc_conf -s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -ORBDebugLevel $level";
 
-  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+  $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 
   $pub_parameters = "$svc_conf -c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level -p $pub_addr$port" ;
 
-  $Publisher = new PerlACE::Process ("publisher", "$pub_parameters");
+  $Publisher = PerlDDS::create_process ("publisher", "$pub_parameters");
 
   $SubscriberResult = $Subscriber->Spawn();
 
@@ -75,7 +77,7 @@ sub run_compatibility_tests {
 
 }
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 							 "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
 						   . "-o $dcpsrepo_ior "
