@@ -1,3 +1,19 @@
+Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/Compiler/idl_test1_main/run_test.pl:
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Changed sampling of tests to change to use the new PerlDDS perl module functions
+          for handling coverage.
+
+          NOTE: this Changelog entry was for revision 1070
+
 Mon Apr 14 14:30:46 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/transport/mcast_simple/PubDriver.cpp:
