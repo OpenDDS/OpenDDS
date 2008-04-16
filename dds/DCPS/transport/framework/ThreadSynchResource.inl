@@ -10,13 +10,13 @@ OpenDDS::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
   : handle_ (handle),
     timeout_ (0)
 {
-  DBG_ENTRY_LVL("ThreadSynchResource","ThreadSynchResource",5);
+  DBG_ENTRY_LVL("ThreadSynchResource","ThreadSynchResource",6);
 }
 
 ACE_INLINE int
 OpenDDS::DCPS::ThreadSynchResource::wait_to_unclog()
 {
-  DBG_ENTRY_LVL("ThreadSynchResource","wait_to_unclog",5);
+  DBG_ENTRY_LVL("ThreadSynchResource","wait_to_unclog",6);
 
   if (ACE::handle_write_ready(this->handle_, this->timeout_) == -1)
     {

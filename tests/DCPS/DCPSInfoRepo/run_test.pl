@@ -5,41 +5,31 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 my $debug = 0 ;
 
-$domains_file = PerlACE::LocalFile ("domainids.txt");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$domains_file = "domainids.txt";
+$dcpsrepo_ior = "dcps_ir.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
 
-  $PUBLISHER = new PerlACE::ProcessVX ("publisher",
+$PUBLISHER = PerlDDS::create_process ("publisher",
                               "-k file://$dcpsrepo_ior -q");
 
-  $SUBSCRIBER = new PerlACE::ProcessVX ("subscriber",
+$SUBSCRIBER = PerlDDS::create_process ("subscriber",
                               "-k file://$dcpsrepo_ior");
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
-
-  $PUBLISHER = new PerlACE::Process ("publisher",
-                              "-k file://$dcpsrepo_ior -q");
-
-  $SUBSCRIBER = new PerlACE::Process ("subscriber",
-                              "-k file://$dcpsrepo_ior");
-}
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();

@@ -14,7 +14,7 @@
 
 OpenDDS::DCPS::PoolSynch::~PoolSynch()
 {
-  DBG_ENTRY_LVL("PoolSynch","~PoolSynch",5);
+  DBG_ENTRY_LVL("PoolSynch","~PoolSynch",6);
   // TBD
 }
 
@@ -22,7 +22,7 @@ OpenDDS::DCPS::PoolSynch::~PoolSynch()
 void
 OpenDDS::DCPS::PoolSynch::work_available()
 {
-  DBG_ENTRY_LVL("PoolSynch","work_available",5);
+  DBG_ENTRY_LVL("PoolSynch","work_available",6);
   // TBD
 }
 
@@ -30,6 +30,6 @@ OpenDDS::DCPS::PoolSynch::work_available()
 void
 OpenDDS::DCPS::PoolSynch::unregister_worker_i()
 {
-  DBG_ENTRY_LVL("PoolSynch","unregister_worker_i",5);
+  DBG_ENTRY_LVL("PoolSynch","unregister_worker_i",6);
   // TBD
 }

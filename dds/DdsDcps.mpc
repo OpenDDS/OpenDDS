@@ -1,4 +1,4 @@
-project: taolib, portableserver, core, dcps_bits {
+project: taolib, portableserver, core, dcps_bits, coverage_optional {
 
   requires    += exceptions
 

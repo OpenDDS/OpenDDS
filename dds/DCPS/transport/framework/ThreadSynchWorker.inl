@@ -7,6 +7,6 @@
 ACE_INLINE
 OpenDDS::DCPS::ThreadSynchWorker::ThreadSynchWorker()
 {
-  DBG_ENTRY_LVL("ThreadSynchWorker","ThreadSynchWorker",5);
+  DBG_ENTRY_LVL("ThreadSynchWorker","ThreadSynchWorker",6);
 }
 

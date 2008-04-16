@@ -12,6 +12,6 @@ OpenDDS::DCPS::PerConnectionSynch::PerConnectionSynch
     work_available_(0),
     shutdown_(0)
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","PerConnectionSynch",5);
+  DBG_ENTRY_LVL("PerConnectionSynch","PerConnectionSynch",6);
 }
 

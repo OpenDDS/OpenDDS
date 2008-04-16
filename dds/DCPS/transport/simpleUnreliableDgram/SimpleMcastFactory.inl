@@ -7,6 +7,6 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleMcastFactory::SimpleMcastFactory()
 {
-  DBG_ENTRY_LVL("SimpleMcastFactory","SimpleMcastFactory",5);
+  DBG_ENTRY_LVL("SimpleMcastFactory","SimpleMcastFactory",6);
 }
 

@@ -14,14 +14,14 @@
 
 OpenDDS::DCPS::SimpleUdpFactory::~SimpleUdpFactory()
 {
-  DBG_ENTRY_LVL("SimpleUdpFactory","~SimpleUdpFactory",5);
+  DBG_ENTRY_LVL("SimpleUdpFactory","~SimpleUdpFactory",6);
 }
 
 
 int
 OpenDDS::DCPS::SimpleUdpFactory::requires_reactor() const
 {
-  DBG_ENTRY_LVL("SimpleUdpFactory","requires_reactor",5);
+  DBG_ENTRY_LVL("SimpleUdpFactory","requires_reactor",6);
   // return "true"
   return 1;
 }
@@ -30,6 +30,6 @@ OpenDDS::DCPS::SimpleUdpFactory::requires_reactor() const
 OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::SimpleUdpFactory::create()
 {
-  DBG_ENTRY_LVL("SimpleUdpFactory","create",5);
+  DBG_ENTRY_LVL("SimpleUdpFactory","create",6);
   return new SimpleUdpTransport();
 }

@@ -414,6 +414,11 @@ namespace OpenDDS
               arg_shifter.consume_arg ();
               got_bit_flag = true;
             }
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-TransportDebugLevel"))) != 0)
+            {
+              ::OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi (currentArg);
+              arg_shifter.consume_arg ();
+            }
           else
             {
               arg_shifter.ignore_arg ();
@@ -620,7 +625,7 @@ namespace OpenDDS
       }
     }
 
-    DCPSInfo_ptr 
+    DCPSInfo_ptr
     Service_Participant::get_repository( const ::DDS::DomainId_t domain)
     {
       RepoKey repo = DEFAULT_REPO;

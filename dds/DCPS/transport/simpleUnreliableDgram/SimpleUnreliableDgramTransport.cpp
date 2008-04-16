@@ -20,7 +20,7 @@
 
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::~SimpleUnreliableDgramTransport()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","~SimpleUnreliableDgramTransport",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","~SimpleUnreliableDgramTransport",6);
 }
 
 
@@ -29,7 +29,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
                          (const TransportInterfaceInfo& remote_info,
                           int                           connect_as_publisher)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","find_or_create_datalink",6);
 
   // For MCAST, we don't care why we are connecting.
   ACE_UNUSED_ARG(connect_as_publisher);
@@ -98,7 +98,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
 int
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::configure_i(TransportConfiguration* config)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","configure_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","configure_i",6);
 
   // Ask our base class for a "copy" of the reference to the reactor task.
   this->reactor_task_ = reactor_task();
@@ -165,7 +165,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::configure_i(TransportConfiguratio
 void
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","shutdown_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","shutdown_i",6);
 
   // Stop the receive strategy
   this->receive_strategy_->stop();
@@ -207,7 +207,7 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
 void
 OpenDDS::DCPS::SimpleUnreliableDgramTransport::release_datalink_i(DataLink* link)
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","release_datalink_i",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramTransport","release_datalink_i",6);
 
   SimpleUnreliableDgramDataLink* dgram_link = ACE_static_cast(SimpleUnreliableDgramDataLink*,link);
 

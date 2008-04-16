@@ -7,7 +7,7 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleUnreliableDgramSocket::SimpleUnreliableDgramSocket()
 {
-  DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","SimpleUnreliableDgramSocket",5);
+  DBG_ENTRY_LVL("SimpleUnreliableDgramSocket","SimpleUnreliableDgramSocket",6);
 }
 
 

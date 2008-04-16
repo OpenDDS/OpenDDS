@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -50,36 +52,23 @@ elsif ($ARGV[0] ne '') {
 $repo_svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
                  : "-ORBSvcConf ../../tcp.conf";
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$info_prst_file = PerlACE::LocalFile ("info.pr");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
+$info_prst_file = "info.pr";
 $repo_bit_opt = "$repo_svc_config -NOBITS";
 $app_bit_opt = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
 
-if (PerlACE::is_vxworks_test()) {
-  # If InfoRepo is running in persistent mode, use a
-  #  static endpoint (instead of transient)
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-                                      . "-ORBSvcConf mySvc.conf "
-                                      . "-orbendpoint iiop://:12345");
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", "$app_bit_opt $sub_opts");
-  $Publisher = new PerlACE::ProcessVX ("publisher", "$app_bit_opt $pub_opts");
-
-}
-else {
-  # If InfoRepo is running in persistent mode, use a
-  #  static endpoint (instead of transient)
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+# If InfoRepo is running in persistent mode, use a
+#  static endpoint (instead of transient)
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:12345");
-  $Subscriber = new PerlACE::Process ("subscriber", "$app_bit_opt $sub_opts");
-  $Publisher = new PerlACE::Process ("publisher", "$app_bit_opt $pub_opts");
-}
+$Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_opt $sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", "$app_bit_opt $pub_opts");
 
 print "Spawning first DCPSInfoRepo.\n";
 print $DCPSREPO->CommandLine() . "\n";

@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -16,29 +18,20 @@ $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
-$data_file = PerlACE::LocalFile ("test_run.data");
+$data_file = "test_run.data";
 unlink $data_file;
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", "$sub_opts");
-  $Publisher = new PerlACE::ProcessVX ("publisher", "$pub_opts " .
+$Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", "$pub_opts " .
                                      "-ORBLogFile $data_file");
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-  $Subscriber = new PerlACE::Process ("subscriber", "$sub_opts");
-  $Publisher = new PerlACE::Process ("publisher", "$pub_opts " .
-                                     "-ORBLogFile $data_file");
-}
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";

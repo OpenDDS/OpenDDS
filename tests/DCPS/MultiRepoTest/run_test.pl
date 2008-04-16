@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 my $status = 0;
 my $failed = 0;
 
-PerlACE::add_lib_path('../FooType5');
+PerlDDS::add_lib_path('../FooType5');
 
 # Name the pieces.
 
@@ -35,18 +37,18 @@ my $sys3_pub_topic  = "Left";
 my $sys3_sub_topic  = "Right";
 my $monitor_addr = "localhost:29803";
 
-my $domains1_file = PerlACE::LocalFile ("domain1_ids");
-my $domains2_file = PerlACE::LocalFile ("domain2_ids");
-my $domains3_file = PerlACE::LocalFile ("domain3_ids");
+my $domains1_file = "domain1_ids";
+my $domains2_file = "domain2_ids";
+my $domains3_file = "domain3_ids";
 
-my $dcpsrepo1_ior = PerlACE::LocalFile ("repo1.ior");
-my $dcpsrepo2_ior = PerlACE::LocalFile ("repo2.ior");
-my $dcpsrepo3_ior = PerlACE::LocalFile ("repo3.ior");
+my $dcpsrepo1_ior = "repo1.ior";
+my $dcpsrepo2_ior = "repo2.ior";
+my $dcpsrepo3_ior = "repo3.ior";
 
-my $system1_ini   = PerlACE::LocalFile ("system1.ini");
-my $system2_ini   = PerlACE::LocalFile ("system2.ini");
-my $system3_ini   = PerlACE::LocalFile ("system3.ini");
-my $monitor_ini   = PerlACE::LocalFile ("monitor.ini");
+my $system1_ini   = "system1.ini";
+my $system2_ini   = "system2.ini";
+my $system3_ini   = "system3.ini";
+my $monitor_ini   = "monitor.ini";
 
 # Change how test is configured according to which test we are.
 
@@ -140,72 +142,36 @@ $monitor_parameters = "$svc_config -Samples $samples $monitor_config "
                     . "-Address $monitor_addr ";
 
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO1 = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$svc_config -o $dcpsrepo1_ior"
-  #                                    . " -ORBDebugLevel 1"
-                                       . " -d $domains1_file");
-  print $DCPSREPO1->CommandLine(), "\n";
-
-  $DCPSREPO2 = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$svc_config -o $dcpsrepo2_ior"
-  #                                    . " -ORBDebugLevel 1"
-                                       . " -d $domains2_file");
-  print $DCPSREPO2->CommandLine(), "\n";
-
-  $DCPSREPO3 = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$svc_config -o $dcpsrepo3_ior"
-  #                                    . " -ORBDebugLevel 1"
-                                       . " -d $domains3_file");
-  print $DCPSREPO3->CommandLine(), "\n";
-
-
-  $System1 = new PerlACE::ProcessVX ("system", $sys1_parameters);
-  print $System1->CommandLine(), "\n";
-
-  $System2 = new PerlACE::ProcessVX ("system", $sys2_parameters);
-  print $System2->CommandLine(), "\n";
-
-  $System3 = new PerlACE::ProcessVX ("system", $sys3_parameters);
-  print $System3->CommandLine(), "\n";
-
-
-  $Monitor = new PerlACE::ProcessVX ("monitor", $monitor_parameters);
-  print $Monitor->CommandLine(), "\n";
-}
-else {
-  $DCPSREPO1 = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO1 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo1_ior"
   #                                  . " -ORBDebugLevel 1"
                                      . " -d $domains1_file");
-  print $DCPSREPO1->CommandLine(), "\n";
+print $DCPSREPO1->CommandLine(), "\n";
 
-  $DCPSREPO2 = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo2_ior"
   #                                  . " -ORBDebugLevel 1"
                                      . " -d $domains2_file");
-  print $DCPSREPO2->CommandLine(), "\n";
+print $DCPSREPO2->CommandLine(), "\n";
 
-  $DCPSREPO3 = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO3 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo3_ior"
   #                                  . " -ORBDebugLevel 1"
                                      . " -d $domains3_file");
-  print $DCPSREPO3->CommandLine(), "\n";
+print $DCPSREPO3->CommandLine(), "\n";
+
+$System1 = PerlDDS::create_process ("system", $sys1_parameters);
+print $System1->CommandLine(), "\n";
+
+$System2 = PerlDDS::create_process ("system", $sys2_parameters);
+print $System2->CommandLine(), "\n";
+
+$System3 = PerlDDS::create_process ("system", $sys3_parameters);
+print $System3->CommandLine(), "\n";
 
 
-  $System1 = new PerlACE::Process ("system", $sys1_parameters);
-  print $System1->CommandLine(), "\n";
-
-  $System2 = new PerlACE::Process ("system", $sys2_parameters);
-  print $System2->CommandLine(), "\n";
-
-  $System3 = new PerlACE::Process ("system", $sys3_parameters);
-  print $System3->CommandLine(), "\n";
-
-
-  $Monitor = new PerlACE::Process ("monitor", $monitor_parameters);
-  print $Monitor->CommandLine(), "\n";
-}
+$Monitor = PerlDDS::create_process ("monitor", $monitor_parameters);
+print $Monitor->CommandLine(), "\n";
 
 # Fire up the repositories.
 

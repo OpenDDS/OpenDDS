@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 
 # single reader with single instances test
 $use_take = 0;
@@ -25,13 +27,13 @@ $svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $arg_idx = 0;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf "
 #                           . "-ORBDebugLevel 1 "
                            . "-o $dcpsrepo_ior "
@@ -51,7 +53,7 @@ $sub_lease_time = $pub_lease_time * 2;
 $threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.6;
 $sub_parameters = "$svc_conf -s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time -ORBDebugLevel $level";
 
-$Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 
 $pub_parameters = "$svc_conf $common_parameters" ;
 
@@ -66,7 +68,7 @@ for($i = 0; $i < $numPubs; ++$i)
     $factor = ($sub_lease_time / $pub_lease_time) * 1.5 * 100; # 100%
     $liveliness_factor = "-DCPSLivelinessFactor $factor ";
   }
-  $thePublisher = new PerlACE::Process ("publisher", "$pub_parameters -l $thisPubLeaseTime -x $thisPubTime -ORBDebugLevel $level -p $pub_addr$thisPort $liveliness_factor");
+  $thePublisher = PerlDDS::create_process ("publisher", "$pub_parameters -l $thisPubLeaseTime -x $thisPubTime -ORBDebugLevel $level -p $pub_addr$thisPort $liveliness_factor");
   push @Publisher, $thePublisher;
 }
 

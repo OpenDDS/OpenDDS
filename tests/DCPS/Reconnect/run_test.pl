@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -72,13 +74,13 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
-$subscriber_completed = PerlACE::LocalFile ("subscriber_finished.txt");
-$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher_completed = PerlACE::LocalFile ("publisher_finished.txt");
-$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
-$testoutputfilename = PerlACE::LocalFile ("test.log");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
+$subscriber_completed = "subscriber_finished.txt";
+$subscriber_ready = "subscriber_ready.txt";
+$publisher_completed = "publisher_finished.txt";
+$publisher_ready = "publisher_ready.txt";
+$testoutputfilename = "test.log";
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
@@ -94,36 +96,19 @@ open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX
+$DCPSREPO = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
        , "$svc_config -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
-  $Subscriber = new PerlACE::ProcessVX
+$Subscriber = PerlDDS::create_process
       ("subscriber"
        , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
        . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
        . " -c $verify_lost_sub_notification -e $end_with_publisher");
-  $Publisher = new PerlACE::ProcessVX
+$Publisher = PerlDDS::create_process
       ("publisher"
        , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
        . " -d $expected_deleted_connections");
-}
-else {
-  $DCPSREPO = new PerlACE::Process
-      ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-       , "$svc_config -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
-  $Subscriber = new PerlACE::Process
-      ("subscriber"
-       , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
-       . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
-       . " -c $verify_lost_sub_notification -e $end_with_publisher");
-  $Publisher = new PerlACE::Process
-      ("publisher"
-       , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
-       . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
-       . " -d $expected_deleted_connections");
-}
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -157,18 +142,10 @@ if ($num_reads_before_crash > 0)
   # different status on windows and linux.
   print "Subscriber crashed and returned $SubscriberResult. \n";
 
-  if (PerlACE::is_vxworks_test()) {
-    $Subscriber = new PerlACE::ProcessVX
+  $Subscriber = PerlDDS::create_process
         ("subscriber"
          , " $svc_config -DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub"
          . " -r $num_reads_deviation");
-  }
-  else {
-    $Subscriber = new PerlACE::Process
-        ("subscriber"
-         , " $svc_config -DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub"
-         . " -r $num_reads_deviation");
-  }
 
   sleep($restart_delay);
 
@@ -185,16 +162,9 @@ if ($num_writes_before_crash > 0) {
   # different status on windows and linux.
   print "Publisher crashed and returned $PublisherResult. \n";
 
-  if (PerlACE::is_vxworks_test()) {
-    $Publisher = new PerlACE::ProcessVX
+  $Publisher = PerlDDS::create_process
         ("publisher"
          , " $svc_config -DCPSConfigFile pub.ini -n $num_writes");
-  }
-  else {
-    $Publisher = new PerlACE::Process
-        ("publisher"
-         , " $svc_config -DCPSConfigFile pub.ini -n $num_writes");
-  }
 
   sleep($restart_delay);
 

@@ -5,25 +5,27 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
 
-$Subscriber = new PerlACE::Process ("dds_sub", "$app_bit_conf");
+$Subscriber = PerlDDS::create_process ("dds_sub", "$app_bit_conf");
 
-$Publisher = new PerlACE::Process ("dds_pub", "$app_bit_conf -s 200 -c 10000");
+$Publisher = PerlDDS::create_process ("dds_pub", "$app_bit_conf -s 200 -c 10000");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

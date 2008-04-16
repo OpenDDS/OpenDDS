@@ -7,6 +7,6 @@
 ACE_INLINE
 OpenDDS::DCPS::SimpleTcpFactory::SimpleTcpFactory()
 {
-  DBG_ENTRY_LVL("SimpleTcpFactory","SimpleTcpFactory",5);
+  DBG_ENTRY_LVL("SimpleTcpFactory","SimpleTcpFactory",6);
 }
 

@@ -7,9 +7,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #!!!!!!! Must build with SPECIAL DEFINES - see README !!!!
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 #Clean the Foo.txt file which is used as a storage of the 
 #data written.
@@ -76,8 +78,8 @@ else {
 
 $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "dcps_ir.ior";
 # The pub_id_fname can not be a full path because the 
 # pub_id_fname will be part of the parameter of the -p option 
 # which will be parsed using ':' delimiter.
@@ -94,21 +96,11 @@ $parameters = " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $
               . " -m $multiple_instance -i $num_writes_per_thread "
               . " -n $max_samples_per_instance -d $history_depth -b $blocking_write";
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("../../../../DDS/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
                                "-o $dcpsrepo_ior"
                                . " -d $domains_file -ORBDebugLevel 1");
 
-  $FooTest3 = new PerlACE::ProcessVX ("FooTest3", $parameters);
-
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
-                               "-o $dcpsrepo_ior"
-                               . " -d $domains_file -ORBDebugLevel 1");
-
-  $FooTest3 = new PerlACE::Process ("FooTest3", $parameters);
-}
+$FooTest3 = PerlDDS::create_process ("FooTest3", $parameters);
 
 print STDERR "FooTest3 $parameters\n";
 

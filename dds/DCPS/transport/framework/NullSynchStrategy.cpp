@@ -10,13 +10,13 @@
 
 OpenDDS::DCPS::NullSynchStrategy::NullSynchStrategy()
 {
-  DBG_ENTRY_LVL("NullSynchStrategy","NullSynchStrategy",5);
+  DBG_ENTRY_LVL("NullSynchStrategy","NullSynchStrategy",6);
 }
 
 
 OpenDDS::DCPS::NullSynchStrategy::~NullSynchStrategy()
 {
-  DBG_ENTRY_LVL("NullSynchStrategy","~NullSynchStrategy",5);
+  DBG_ENTRY_LVL("NullSynchStrategy","~NullSynchStrategy",6);
 }
 
 
@@ -24,7 +24,7 @@ OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::NullSynchStrategy::create_synch_object
                                        (ThreadSynchResource* synch_resource)
 {
-  DBG_ENTRY_LVL("NullSynchStrategy","create_synch_object",5);
+  DBG_ENTRY_LVL("NullSynchStrategy","create_synch_object",6);
 
   if (synch_resource != 0)
     {

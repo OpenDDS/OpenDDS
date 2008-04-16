@@ -23,7 +23,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","SimpleTcpDataLink",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","SimpleTcpDataLink",6);
   transport_impl->_add_ref ();
   this->transport_ = transport_impl;
 }
@@ -31,7 +31,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink
 
 OpenDDS::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","~SimpleTcpDataLink",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","~SimpleTcpDataLink",6);
 }
 
 
@@ -44,7 +44,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::~SimpleTcpDataLink()
 void
 OpenDDS::DCPS::SimpleTcpDataLink::stop_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","stop_i",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","stop_i",6);
 
   if (!this->connection_.is_nil())
     {
@@ -60,7 +60,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::stop_i()
 void
 OpenDDS::DCPS::SimpleTcpDataLink::pre_stop_i()
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","pre_stop_i",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","pre_stop_i",6);
 
   DataLink::pre_stop_i();
 
@@ -97,7 +97,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::connect
                                   TransportSendStrategy*    send_strategy,
                                   TransportReceiveStrategy* receive_strategy)
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","connect",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","connect",6);
 
   // Sanity check - cannot connect() if we are already connected.
   if (!this->connection_.is_nil())
@@ -139,7 +139,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::connect
 int
 OpenDDS::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","reconnect",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","reconnect",6);
 
   // Sanity check - the connection should exist already since we are reconnecting.
   if (this->connection_.is_nil())
@@ -208,7 +208,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::reconnect (SimpleTcpConnection* connection)
 void
 OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","send_graceful_disconnect_message",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","send_graceful_disconnect_message",6);
 
   // Will clear all queued messages but still let the disconnect message
   // sent.
@@ -286,7 +286,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message ()
 void
 OpenDDS::DCPS::SimpleTcpDataLink::fully_associated ()
 {
-  DBG_ENTRY_LVL("SimpleTcpDataLink","fully_associated",5);
+  DBG_ENTRY_LVL("SimpleTcpDataLink","fully_associated",6);
 
   while ( ! this->connection_->is_connected ())
   {

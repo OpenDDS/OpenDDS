@@ -12,7 +12,7 @@
 
 OpenDDS::DCPS::SimpleUdpConfiguration::~SimpleUdpConfiguration()
 {
-  DBG_ENTRY_LVL("SimpleUdpConfiguration","~SimpleUdpConfiguration",5);
+  DBG_ENTRY_LVL("SimpleUdpConfiguration","~SimpleUdpConfiguration",6);
 }
 
 int

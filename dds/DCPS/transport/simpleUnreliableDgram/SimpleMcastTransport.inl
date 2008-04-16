@@ -10,7 +10,7 @@ ACE_INLINE
 OpenDDS::DCPS::SimpleMcastTransport::SimpleMcastTransport()
   : receiver_(false)
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","SimpleMcastTransport",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","SimpleMcastTransport",6);
   this->socket_ = new SimpleMcastSocket();
   this->socket_->_add_ref() ;
 }
@@ -21,7 +21,7 @@ OpenDDS::DCPS::SimpleMcastTransport::deliver_sample
                                      (ReceivedDataSample&  sample,
                                       const ACE_INET_Addr& remote_address)
 {
-  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",5);
+  DBG_ENTRY_LVL("SimpleMcastTransport","deliver_sample",6);
 
   ACE_UNUSED_ARG(remote_address);
 

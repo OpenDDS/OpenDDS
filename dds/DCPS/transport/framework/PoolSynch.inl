@@ -10,7 +10,7 @@ OpenDDS::DCPS::PoolSynch::PoolSynch(PoolSynchStrategy* strategy,
   : ThreadSynch(synch_resource),
     strategy_(strategy)
 {
-  DBG_ENTRY_LVL("PoolSynch","PoolSynch",5);
+  DBG_ENTRY_LVL("PoolSynch","PoolSynch",6);
   // TBD
 }
 

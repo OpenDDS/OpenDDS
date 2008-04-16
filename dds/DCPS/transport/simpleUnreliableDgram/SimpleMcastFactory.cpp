@@ -14,14 +14,14 @@
 
 OpenDDS::DCPS::SimpleMcastFactory::~SimpleMcastFactory()
 {
-  DBG_ENTRY_LVL("SimpleMcastFactory","~SimpleMcastFactory",5);
+  DBG_ENTRY_LVL("SimpleMcastFactory","~SimpleMcastFactory",6);
 }
 
 
 int
 OpenDDS::DCPS::SimpleMcastFactory::requires_reactor() const
 {
-  DBG_ENTRY_LVL("SimpleMcastFactory","requires_reactor",5);
+  DBG_ENTRY_LVL("SimpleMcastFactory","requires_reactor",6);
   // return "true"
   return 1;
 }
@@ -30,6 +30,6 @@ OpenDDS::DCPS::SimpleMcastFactory::requires_reactor() const
 OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::SimpleMcastFactory::create()
 {
-  DBG_ENTRY_LVL("SimpleMcastFactory","create",5);
+  DBG_ENTRY_LVL("SimpleMcastFactory","create",6);
   return new SimpleMcastTransport();
 }
