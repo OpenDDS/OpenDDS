@@ -5,13 +5,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../FooType4');
 
 # single reader with single instances test
 $multiple_instance=0;
@@ -21,8 +23,8 @@ $use_take=0;
 $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
@@ -30,16 +32,9 @@ unlink $pub_id_file;
 
 # -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$repo_bit_conf -o $dcpsrepo_ior"
-                                      . " -d $domains_file -ORBSvcConf ../../tcp.conf");
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_conf -o $dcpsrepo_ior"
                                     . " -d $domains_file -ORBSvcConf ../../tcp.conf");
-}
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 # -b
@@ -56,13 +51,7 @@ elsif ($ARGV[0] eq 'diff_trans') {
   $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";
 }
 
-if (PerlACE::is_vxworks_test()) {
-  $FooTest5 = new PerlACE::ProcessVX ("main", $parameters);
-}
-else {
-  $FooTest5 = new PerlACE::Process ("main", $parameters);
-}
-
+$FooTest5 = PerlDDS::create_process ("main", $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
 $DCPSREPO->Spawn ();

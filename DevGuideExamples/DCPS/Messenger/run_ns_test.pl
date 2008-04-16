@@ -5,9 +5,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
@@ -24,23 +26,23 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
 }
 
 my($port1) = 10001 + PerlACE::uniqueid() ;
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$ns_ior = PerlACE::LocalFile ("ns.ior");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$ns_ior = "ns.ior";
+$dcpsrepo_ior = "repo.ior";
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
 $common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;
 
-$NS = new PerlACE::Process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
+$NS = PerlDDS::create_process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
                             "-o $ns_ior");
-$DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                 . "-ORBEndpoint iiop://localhost:$port1");
-$Subscriber = new PerlACE::Process ("subscriber",
+$Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");
-$Publisher = new PerlACE::Process ("publisher",
+$Publisher = PerlDDS::create_process ("publisher",
                                    "-DCPSConfigFile pub.ini $common_args");
 
 #print $NS->CommandLine() . "\n";
@@ -60,7 +62,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-$NSADD = new PerlACE::Process("$ENV{ACE_ROOT}/bin/nsadd",
+$NSADD = PerlDDS::create_process("$ENV{ACE_ROOT}/bin/nsadd",
                               "$arg_ns_ref --name InfoRepo --ior file://$dcpsrepo_ior");
 $NSADD->IgnoreExeSubDir(1);
 $NSADD->SpawnWaitKill(5);

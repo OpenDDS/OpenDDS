@@ -5,23 +5,25 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../MultiTopicTypes');
-PerlACE::add_lib_path('../common');
+PerlDDS::add_lib_path('../MultiTopicTypes');
+PerlDDS::add_lib_path('../common');
 
-$subscriber1_completed = PerlACE::LocalFile ("T1_subscriber_finished.txt");
-$subscriber2_completed = PerlACE::LocalFile ("T2_subscriber_finished.txt");
-$subscriber3_completed = PerlACE::LocalFile ("T3_subscriber_finished.txt");
-#$subscriber_ready = PerlACE::LocalFile ("subscriber_ready.txt");
-$publisher1_completed = PerlACE::LocalFile ("T1_publisher_finished.txt");
-$publisher2_completed = PerlACE::LocalFile ("T2_publisher_finished.txt");
-$publisher3_completed = PerlACE::LocalFile ("T3_publisher_finished.txt");
-#$publisher_ready = PerlACE::LocalFile ("publisher_ready.txt");
+$subscriber1_completed = "T1_subscriber_finished.txt";
+$subscriber2_completed = "T2_subscriber_finished.txt";
+$subscriber3_completed = "T3_subscriber_finished.txt";
+#$subscriber_ready = "subscriber_ready.txt";
+$publisher1_completed = "T1_publisher_finished.txt";
+$publisher2_completed = "T2_publisher_finished.txt";
+$publisher3_completed = "T3_publisher_finished.txt";
+#$publisher_ready = "publisher_ready.txt";
 
 unlink $subscriber1_completed; 
 unlink $subscriber2_completed; 
@@ -80,8 +82,8 @@ else {
   exit 1;
 }
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior; 
 
@@ -90,53 +92,27 @@ $pub1_parameters = " -t 1 " ;
 $pub2_parameters = " -t 2 " ;
 $pub3_parameters = " -t 3 " ;
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                 "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
-                               . "-o $dcpsrepo_ior");
-
-
-  print $DCPSREPO->CommandLine(), "\n";
-  # test multiple cases
-
-
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
-
-
-  $Publisher1 = new PerlACE::ProcessVX ("publisher", $pub1_parameters);
-  print $Publisher1->CommandLine(), "\n";
-
-  $Publisher2 = new PerlACE::ProcessVX ("publisher", $pub2_parameters);
-  print $Publisher2->CommandLine(), "\n";
-
-  $Publisher3 = new PerlACE::ProcessVX ("publisher", $pub3_parameters);
-  print $Publisher3->CommandLine(), "\n";
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
                              . "-o $dcpsrepo_ior");
 
 
-  print $DCPSREPO->CommandLine(), "\n";
-  # test multiple cases
+print $DCPSREPO->CommandLine(), "\n";
+# test multiple cases
 
 
-  $Subscriber = new PerlACE::Process ("subscriber", $sub_parameters);
-  print $Subscriber->CommandLine(), "\n";
+$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+print $Subscriber->CommandLine(), "\n";
 
 
-  $Publisher1 = new PerlACE::Process ("publisher", $pub1_parameters);
-  print $Publisher1->CommandLine(), "\n";
+$Publisher1 = PerlDDS::create_process ("publisher", $pub1_parameters);
+print $Publisher1->CommandLine(), "\n";
 
-  $Publisher2 = new PerlACE::Process ("publisher", $pub2_parameters);
-  print $Publisher2->CommandLine(), "\n";
+$Publisher2 = PerlDDS::create_process ("publisher", $pub2_parameters);
+print $Publisher2->CommandLine(), "\n";
 
-  $Publisher3 = new PerlACE::Process ("publisher", $pub3_parameters);
-  print $Publisher3->CommandLine(), "\n";
-}
-
+$Publisher3 = PerlDDS::create_process ("publisher", $pub3_parameters);
+print $Publisher3->CommandLine(), "\n";
 
 $DCPSREPO->Spawn ();
 

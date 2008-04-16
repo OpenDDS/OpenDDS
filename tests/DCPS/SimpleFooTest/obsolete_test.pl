@@ -5,36 +5,26 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-PerlACE::add_lib_path('../FooType');
+PerlDDS::add_lib_path('../FooType');
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "dcps_ir.ior";
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("../../../../DDS/DCPSInfoRepo",
-                                "-o $dcpsrepo_ior"
-                                . " -d $domains_file -ORBDebugLevel 1");
-
-
-  $FooTest = new PerlACE::ProcessVX ("SimpleFooTest",
-                                "-DCPSInfoRepo file://$dcpsrepo_ior");
-
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("../../../../DDS/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
                               "-o $dcpsrepo_ior"
                               . " -d $domains_file -ORBDebugLevel 1");
 
 
-  $FooTest = new PerlACE::Process ("SimpleFooTest",
+$FooTest = PerlDDS::create_process ("SimpleFooTest",
                               "-DCPSInfoRepo file://$dcpsrepo_ior");
-}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {

@@ -5,19 +5,21 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
-$info_prst_file = PerlACE::LocalFile ("info.pr");
+$info_prst_file = "info.pr";
 $num_messages = 60;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
@@ -25,33 +27,19 @@ $sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
 
-if (PerlACE::is_vxworks_test()) {
-  # If InfoRepo is running in persistent mode, use a
-  #  static endpoint (instead of transient)
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
-                                      . "-ORBSvcConf mySvc.conf "
-                                      . "-orbendpoint iiop://:12345");
-  $Subscriber = new PerlACE::ProcessVX ("subscriber", " $sub_opts");
-  $Publisher = new PerlACE::ProcessVX ("publisher", " $pub_opts");
-  $Monitor1 = new PerlACE::ProcessVX ("monitor", " $opts -l 7");
-  $Monitor2 = new PerlACE::ProcessVX ("monitor", " $opts -u");
-}
-else {
-  # If InfoRepo is running in persistent mode, use a
-  #  static endpoint (instead of transient)
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+# If InfoRepo is running in persistent mode, use a
+#  static endpoint (instead of transient)
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                     #. "-ORBDebugLevel 10 "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:12345");
-  $Subscriber = new PerlACE::Process ("subscriber", " $sub_opts");
-  $Publisher = new PerlACE::Process ("publisher", " $pub_opts");
-  $Monitor1 = new PerlACE::Process ("monitor", " $opts -l 7");
-  $Monitor2 = new PerlACE::Process ("monitor", " $opts -u");
-}
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");
+$Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
 
-$data_file = PerlACE::LocalFile ("test_run_prst.data");
+$data_file = "test_run_prst.data";
 unlink $data_file;
 
 print $DCPSREPO->CommandLine() . "\n";

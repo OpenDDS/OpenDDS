@@ -5,14 +5,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("repo.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "repo.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
@@ -28,23 +30,12 @@ if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-if (PerlACE::is_vxworks_test()) {
-  # -ORBDebugLevel 1 -NOBITS
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "$svc_config -o $dcpsrepo_ior"
-                                      . " -d $domains_file -NOBITS");
-
-  $ZCTest = new PerlACE::ProcessVX ("main", $parameters);
-
-}
-else {
-  # -ORBDebugLevel 1 -NOBITS
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+# -ORBDebugLevel 1 -NOBITS
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$svc_config -o $dcpsrepo_ior"
                                     . " -d $domains_file -NOBITS");
 
-  $ZCTest = new PerlACE::Process ("main", $parameters);
-}
+$ZCTest = PerlDDS::create_process ("main", $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
 if ($DCPSREPO->Spawn () != 0) {

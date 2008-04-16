@@ -5,40 +5,30 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = PerlACE::LocalFile ("domain_ids");
-$dcpsrepo_ior = PerlACE::LocalFile ("dcps_ir.ior");
+$domains_file = "domain_ids";
+$dcpsrepo_ior = "dcps_ir.ior";
 $bit_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
-PerlACE::add_lib_path('../FooType');
+PerlDDS::add_lib_path('../FooType');
 
-if (PerlACE::is_vxworks_test()) {
-  $DCPSREPO = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                               "$bit_conf  -o $dcpsrepo_ior"
                               . " -d $domains_file");
 
 
-  $Topic = new PerlACE::ProcessVX ("topic_test",
+$Topic = PerlDDS::create_process ("topic_test",
                                  "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
-
-}
-else {
-  $DCPSREPO = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "$bit_conf  -o $dcpsrepo_ior"
-                              . " -d $domains_file");
-
-
-  $Topic = new PerlACE::Process ("topic_test",
-                                 "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
-}
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
