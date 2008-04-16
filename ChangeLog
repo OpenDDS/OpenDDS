@@ -1,3 +1,14 @@
+Wed Apr 16 14:40:16 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * MPC/config/coverage_optional.mpb:
+
+          Added to turn on coverage feature.  RT#12130
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Added inheritance of coverage_optional.mpb.
+
 Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
@@ -84,6 +95,7 @@ Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
           Changed tests to use the DDS_Run_Test.pm, (DDS) Process.pm, and ProcessFactory.pm to
           allow the capturing of Coverage data (and running all test components on VxWorks).
+          RT#12130
 
 Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
