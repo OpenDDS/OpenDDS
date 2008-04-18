@@ -2,6 +2,7 @@
 
 package PerlDDS;
 
+use Env (DDS_ROOT);
 use strict;
 use English;
 use POSIX qw(:time_h);
@@ -20,6 +21,7 @@ sub create_process {
     $created = new PerlACE::ProcessVX($executable, $arguments);
   }
   elsif ((!PerlDDS::is_coverage_test()) ||
+         (non_dds_test($executable)) ||
          (is_process_special($executable))){
     print STDOUT "Local Process \n";
     if(PerlDDS::is_coverage_test())
@@ -94,6 +96,17 @@ sub match {
   my $executable = lc(shift);
   my $to_match = lc(shift);
   return ($executable =~ /$to_match[^\\\/]*$/);
+}
+
+sub non_dds_test {
+  my $executable = shift;
+  my $fp_executable = Cwd::abs_path($executable);
+  if($fp_executable !~ /$DDS_ROOT/)
+  {
+    print STDOUT "non DDS process, $executable\n";
+    return 1;
+  }
+  return 0;
 }
 
 1;
