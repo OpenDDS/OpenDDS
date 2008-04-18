@@ -1,3 +1,13 @@
+Fri Apr 18 16:42:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/ProcessFactory.pm:
+
+          Fixed coverage portion to run non-DDS applications correctly.
+
+        * tests/transport/reliable_multicast/reliable_multicast.mpc:
+
+          Added dependency on coverage_optional.mpb feature.
+
 Wed Apr 16 14:40:16 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * MPC/config/coverage_optional.mpb:

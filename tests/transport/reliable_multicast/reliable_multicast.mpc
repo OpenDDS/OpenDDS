@@ -2,7 +2,7 @@
 //
 // $Id$
 
-project : aceexe {
+project : aceexe, coverage_optional {
   exename = unittest
   libs  += ReliableMulticast
   after += ReliableMulticast
