@@ -1,3 +1,14 @@
+Mon Apr 21 18:19:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+
+          Fixed a comment that was wrong due to search-and-replace.
+
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.h:
+
+	  Added an #include to pick up the defintion of size_t.  Thanks to
+          "RTP Techie" <rtp dot techie at gmail dot com> for pointing this out.
+
 Fri Apr 18 16:42:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/ProcessFactory.pm:
