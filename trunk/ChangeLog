@@ -1,3 +1,9 @@
+Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+          Remove duplicate identical service configurator options. Causes
+          test failure in DOC builds.
+
 Tue Apr 22 16:26:41 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/CompatibilityTest/subscriber.cpp:
