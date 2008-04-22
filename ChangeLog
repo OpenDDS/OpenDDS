@@ -1,3 +1,10 @@
+Tue Apr 22 16:26:41 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+          Fix scoreboard warnings. Get rid of unused vars.
+
 Mon Apr 21 18:19:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/LocalObject.h:

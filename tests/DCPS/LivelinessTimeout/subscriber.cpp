@@ -29,9 +29,6 @@
 
 #include "common.h"
 
-static const char * reader_address_str = "";
-static int reader_address_given = 0;
-
 static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transport_impl)
 {
   int status = 0;
@@ -43,9 +40,6 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
-
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -250,7 +244,7 @@ int main (int argc, char *argv[])
       ACE_OS::sleep(test_duration);
 
       // clean up subscriber objects
-      
+
 
       sub->delete_contained_entities() ;
 
