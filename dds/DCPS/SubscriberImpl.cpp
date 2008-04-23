@@ -182,7 +182,7 @@ SubscriberImpl::create_datareader (
 		    this,
 		    subscriber_objref_.in (),
 		    dr_obj.in (),
-            dr_remote_obj.in ());
+        dr_remote_obj.in ());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -356,6 +356,8 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // from the datareader map.
 
   dr_servant->_remove_ref ();
+  dr_servant = 0;
+  subscriber_objref_.out();
 
   return ::DDS::RETCODE_OK;
 }

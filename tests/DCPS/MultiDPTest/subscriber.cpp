@@ -252,9 +252,7 @@ void init_listener()
 {
   for (int i = 0; i < 2; ++i)
   {
-    DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
-
-    listener[i] = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+    listener[i] = new DataReaderListenerImpl();
 
     if (CORBA::is_nil (listener[i].in ()))
       {

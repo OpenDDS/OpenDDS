@@ -226,26 +226,17 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T1)
         {
-          ::T1::Foo1TypeSupportImpl *fts_servant =
-              new ::T1::Foo1TypeSupportImpl();
-
-          fts1 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts1 = new ::T1::Foo1TypeSupportImpl;
         }
 
       if (topics & TOPIC_T2)
         {
-          ::T2::Foo2TypeSupportImpl *fts_servant =
-              new ::T2::Foo2TypeSupportImpl();
-
-          fts2 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts2 = new ::T2::Foo2TypeSupportImpl;
         }
 
       if (topics & TOPIC_T3)
         {
-          ::T3::Foo3TypeSupportImpl *fts_servant =
-              new ::T3::Foo3TypeSupportImpl();
-
-          fts3 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts3 = new ::T3::Foo3TypeSupportImpl;
         }
 
       ::DDS::DomainParticipant_var dp =
@@ -456,39 +447,28 @@ int main (int argc, char *argv[])
       ::DDS::DataReader_var dr2 ;
       ::DDS::DataReader_var dr3 ;
 
-      DataReaderListenerImpl1 drl_servant1 ;
-      DataReaderListenerImpl2 drl_servant2 ;
-      DataReaderListenerImpl3 drl_servant3 ;
-
-
+      ::DDS::DataReaderListener_var drl1 (new DataReaderListenerImpl1);
+      ::DDS::DataReaderListener_var drl2 (new DataReaderListenerImpl2);
+      ::DDS::DataReaderListener_var drl3 (new DataReaderListenerImpl3);
       if (topics & TOPIC_T1)
         {
-          ::DDS::DataReaderListener_var drl
-            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant1);
-
           dr1 = sub->create_datareader(description1.in (),
                                   dr_qos,
-                                  drl.in ());
+                                  drl1.in ());
         }
 
       if (topics & TOPIC_T2)
         {
-          ::DDS::DataReaderListener_var drl
-            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant2);
-
           dr2 = sub->create_datareader(description2.in (),
                                   dr_qos,
-                                  drl.in ());
+                                  drl2.in ());
         }
 
       if (topics & TOPIC_T3)
         {
-          ::DDS::DataReaderListener_var drl
-            = ::OpenDDS::DCPS::servant_to_reference(&drl_servant3);
-
           dr3 = sub->create_datareader(description3.in (),
                                   dr_qos,
-                                  drl.in ());
+                                  drl3.in ());
         }
 /*
       // Indicate that the subscriber is ready
@@ -599,40 +579,46 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T1)
         {
+          DataReaderListenerImpl1* drl_servant1 =
+            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl1,DDS::DataReaderListener_ptr>(drl1.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC1,
-                        drl_servant1.num_samples()) ;
-          if (drl_servant1.num_samples() != num_ops_per_thread)
+                        drl_servant1->num_samples()) ;
+          if (drl_servant1->num_samples() != num_ops_per_thread)
             {
               ACE_OS::fprintf(stderr,
                               "%s: Expected %d samples, got %d samples.\n",
                               MY_TOPIC1,
-                              num_ops_per_thread, drl_servant1.num_samples());
+                              num_ops_per_thread, drl_servant1->num_samples());
               return 1;
             }
         }
       if (topics & TOPIC_T2)
         {
+          DataReaderListenerImpl2* drl_servant2 =
+            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl2,DDS::DataReaderListener_ptr>(drl2.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC2,
-                        drl_servant2.num_samples()) ;
-          if (drl_servant2.num_samples() != num_ops_per_thread)
+                        drl_servant2->num_samples()) ;
+          if (drl_servant2->num_samples() != num_ops_per_thread)
             {
               ACE_OS::fprintf(stderr,
                               "%s: Expected %d samples, got %d samples.\n",
                               MY_TOPIC2,
-                              num_ops_per_thread, drl_servant2.num_samples());
+                              num_ops_per_thread, drl_servant2->num_samples());
               return 1;
             }
         }
       if (topics & TOPIC_T3)
         {
+          DataReaderListenerImpl3* drl_servant3 =
+            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl3,DDS::DataReaderListener_ptr>(drl3.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC3,
-                        drl_servant3.num_samples()) ;
-          if (drl_servant3.num_samples() != num_ops_per_thread)
+                        drl_servant3->num_samples()) ;
+          if (drl_servant3->num_samples() != num_ops_per_thread)
             {
               ACE_OS::fprintf(stderr,
                               "%s: Expected %d samples, got %d samples.\n",
                               MY_TOPIC3,
-                              num_ops_per_thread, drl_servant3.num_samples());
+                              num_ops_per_thread, drl_servant3->num_samples());
               return 1;
             }
         }

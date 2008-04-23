@@ -241,12 +241,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts(new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,

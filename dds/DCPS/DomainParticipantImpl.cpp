@@ -135,6 +135,7 @@ namespace OpenDDS
                         this->publishers_protector_,
                         ::DDS::Publisher::_nil());
 
+      // this object will also act as the guard for leaking Publisher Impl
       Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
       if (OpenDDS::DCPS::insert(publishers_, pair) == -1)
@@ -146,9 +147,7 @@ namespace OpenDDS
           return ::DDS::Publisher::_nil();
         }
 
-      // Increase ref count when the servant is added to
-      // publisher set.
-      pub->_add_ref ();
+
 
       return ::DDS::Publisher::_duplicate (pub_obj);
     }
@@ -201,9 +200,7 @@ namespace OpenDDS
         }
       else
         {
-          // Remove ref count after the servant is removed
-          // from publisher set.
-          the_servant->_remove_ref ();
+
 
           deactivate_object < ::DDS::Publisher_ptr > (p);
 
@@ -284,10 +281,6 @@ namespace OpenDDS
           return ::DDS::Subscriber::_nil();
         }
 
-      // Increase ref count when the servant is added to
-      // subscriber set.
-      sub->_add_ref ();
-
       return ::DDS::Subscriber::_duplicate (sub_obj);
     }
 
@@ -351,10 +344,6 @@ namespace OpenDDS
         }
       else
         {
-          // Decrease ref count after the servant is removed
-          // from subscriber set.
-          the_servant->_remove_ref ();
-
           deactivate_object < ::DDS::Subscriber_ptr > (s);
           return ::DDS::RETCODE_OK;
         }
@@ -609,10 +598,6 @@ namespace OpenDDS
                                     ACE_TEXT("remove_topic failed\n")),
                                     ::DDS::RETCODE_ERROR);
                 }
-
-              // Decrease ref count after the servant is removed
-              // from the topic map.
-              the_topic_servant->_remove_ref ();
 
               deactivate_object < ::DDS::Topic_ptr > (a_topic);
 
@@ -906,6 +891,8 @@ namespace OpenDDS
 
       // the participant can now start creating new contained entities
       set_deleted (false);
+
+      OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
 
       return ret;
     }
@@ -1484,6 +1471,8 @@ namespace OpenDDS
 
       ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
 
+
+      // this object will also act as a guard against leaking the new TopicImpl
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
       if (bind(topics_, topic_name, refCounted_topic) == -1)
@@ -1495,9 +1484,6 @@ namespace OpenDDS
           return ::DDS::Topic::_nil();
         }
 
-      // Increase ref count when the servant is added to
-      // topic map.
-      topic_servant->_add_ref ();
 
       // the topics_ map has one reference and we duplicate to give
       // the caller another reference.

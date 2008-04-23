@@ -181,9 +181,7 @@ int main (int argc, char *argv[])
     }
 
     // activate the listener
-    DataReaderListenerImpl listener_servant;
-    DDS::DataReaderListener_var listener =
-      ::OpenDDS::DCPS::servant_to_reference (&listener_servant);
+    DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
@@ -223,37 +221,41 @@ int main (int argc, char *argv[])
 
     FILE* writers_completed = 0;
     int timeout_writes = 0;
-    while ( listener_servant.num_reads() < num_expected_reads) {
-      // Get the number of the timed out writes from publisher so we
-      // can re-calculate the number of expected messages. Otherwise,
-      // the blocking timeout test will never exit from this loop.
-      if (writers_completed == 0) {
-        writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-        if (writers_completed != 0) {
-          if (end_with_publisher)
-          {
-            // Since we are in the "bp_timeout" test case that publisher
-            // close connection when backpressure last longer than
-            // max_output_pause_period, the publisher ends as it finishes
-            // sending. As the subscriber sees the publisher is done, it
-            // changes the read_delay_ms to 0 so it can read all received
-            // messages and them announce it completed.
+    {
+      DataReaderListenerImpl* listener_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in())
+      while ( listener_servant->num_reads() < num_expected_reads) {
+        // Get the number of the timed out writes from publisher so we
+        // can re-calculate the number of expected messages. Otherwise,
+        // the blocking timeout test will never exit from this loop.
+        if (writers_completed == 0) {
+          writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
+          if (writers_completed != 0) {
+            if (end_with_publisher)
+            {
+              // Since we are in the "bp_timeout" test case that publisher
+              // close connection when backpressure last longer than
+              // max_output_pause_period, the publisher ends as it finishes
+              // sending. As the subscriber sees the publisher is done, it
+              // changes the read_delay_ms to 0 so it can read all received
+              // messages and them announce it completed.
 
-            int old_read_delay_ms = read_delay_ms;
-            read_delay_ms = 0;
-            // Give time to finish reading.
-            ACE_OS::sleep (old_read_delay_ms/1000 * 2);
-            break;
+              int old_read_delay_ms = read_delay_ms;
+              read_delay_ms = 0;
+              // Give time to finish reading.
+              ACE_OS::sleep (old_read_delay_ms/1000 * 2);
+              break;
+            }
+
+            //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
+            fscanf (writers_completed, "%d\n", &timeout_writes);
+            num_expected_reads -= timeout_writes;
+            cout << "timed out writes " << timeout_writes << ", we expect "
+                 << num_expected_reads << endl;
           }
-
-          //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-          fscanf (writers_completed, "%d\n", &timeout_writes);
-          num_expected_reads -= timeout_writes;
-          cout << "timed out writes " << timeout_writes << ", we expect "
-               << num_expected_reads << endl;
         }
+        ACE_OS::sleep (1);
       }
-      ACE_OS::sleep (1);
     }
 
     // Indicate that the subscriber is done

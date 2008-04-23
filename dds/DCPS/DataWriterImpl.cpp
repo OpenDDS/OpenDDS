@@ -94,7 +94,6 @@ DataWriterImpl::~DataWriterImpl (void)
     {
       participant_servant_->_remove_ref ();
       publisher_servant_->_remove_ref ();
-      topic_servant_->_remove_ref ();
 
       delete data_container_;
       delete mb_allocator_;
@@ -116,7 +115,13 @@ DataWriterImpl::cleanup ()
       cancel_timer_ = false;
     }
 
+  // release our Topic_var
+  topic_objref_.out();
   topic_servant_->remove_entity_ref ();
+  topic_servant_->_remove_ref ();
+  topic_servant_ = 0;
+
+  dw_local_objref_.out();
 }
 
 void

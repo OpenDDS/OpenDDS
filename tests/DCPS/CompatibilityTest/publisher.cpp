@@ -148,12 +148,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -260,10 +255,7 @@ int main (int argc, char *argv[])
       dw_qos.liveliness.lease_duration = LEASE_DURATION;
       dw_qos.reliability.kind = reliability_kind;
 
-      DataWriterListenerImpl dwl_servant ;
-
-      ::DDS::DataWriterListener_var dwl
-        = ::OpenDDS::DCPS::servant_to_reference(&dwl_servant);
+      ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                   dw_qos,
@@ -294,19 +286,23 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      // check to see if the publisher worked
-      if(dwl_servant.publication_matched() != compatible)
       {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) Expected publication_matched to be %s, but it wasn't."
-                             "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
-                             "reliability_kind=%s\n"),
-                    (compatible) ? "true" : "false",
-                    durability_kind_str.c_str(),
-                    liveliness_kind_str.c_str(),
-                    LEASE_DURATION_STR.c_str(),
-                    reliability_kind_str.c_str()));
-        return 1 ;
+        DataWriterListenerImpl* dwl_servant =
+          OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+        // check to see if the publisher worked
+        if(dwl_servant->publication_matched() != compatible)
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) Expected publication_matched to be %s, but it wasn't."
+                               "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
+                               "reliability_kind=%s\n"),
+                      (compatible) ? "true" : "false",
+                      durability_kind_str.c_str(),
+                      liveliness_kind_str.c_str(),
+                      LEASE_DURATION_STR.c_str(),
+                      reliability_kind_str.c_str()));
+          return 1 ;
+        }
       }
     }
   catch (const TestException&)

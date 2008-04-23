@@ -209,26 +209,23 @@ int main(int argc, char *argv[])
                                                            DDS::TopicListener::_nil ());
 
        /* Create the listener for datareader */
-       PubDataReaderListenerImpl  listener_servant;
-       DDS::DataReaderListener_var listener =
-	     ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
-
+       DDS::DataReaderListener_var listener (new PubDataReaderListenerImpl);
 
        /* Create AckMessage datareader */
        DDS::DataReader_var dr = s->create_datareader (pubmessage_topic.in (),
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-       listener_servant.init(dr.in(), dw.in(), useZeroCopyRead);
+      {
+        PubDataReaderListenerImpl* listener_servant =
+          OpenDDS::DCPS::reference_to_servant<PubDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+         listener_servant->init(dr.in(), dw.in(), useZeroCopyRead);
 
-       PubMessageDataReader_var pubmessage_reader = 
-         PubMessageDataReader::_narrow (dr);
-
-       while (listener_servant.done () == 0) 
-       {
-         ACE_OS::sleep (1);
-       };
-
+         while (listener_servant->done () == 0) 
+         {
+           ACE_OS::sleep (1);
+         };
+      }
 
 
        std::cout << "Sub: shut down" << std::endl;

@@ -168,9 +168,7 @@ int main (int argc, char *argv[]) {
     }
 
     // activate the listener
-    DataWriterListenerImpl listener_servant;
-    DDS::DataWriterListener_var listener =
-      ::OpenDDS::DCPS::servant_to_reference (&listener_servant);
+    DDS::DataWriterListener_var listener (new DataWriterListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);

@@ -197,11 +197,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -324,10 +320,7 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl drl_servant ;
-
-      ::DDS::DataReaderListener_var drl
-        = ::OpenDDS::DCPS::servant_to_reference(&drl_servant);
+      ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
 
       ::DDS::DataReader_var dr ;
 
@@ -395,22 +388,26 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      ACE_OS::fprintf (stderr, "**********\n") ;
-      ACE_OS::fprintf (stderr, "drl_servant.liveliness_changed_count() = %d\n",
-                     drl_servant.liveliness_changed_count()) ;
-      ACE_OS::fprintf (stderr, "drl_servant.no_writers_generation_count() = %d\n",
-                     drl_servant.no_writers_generation_count()) ;
-      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-      if ((drl_servant.liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
-        (drl_servant.no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
-        // if use take then the instance had "no samples" when it got NO_WRITERS and
-        // hence the instance state terminated and then started again so
-        // no_writers_generation_count should = 0.
-        ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
-          return 1;
+        DataReaderListenerImpl* drl_servant =
+          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
+        ACE_OS::fprintf (stderr, "**********\n") ;
+        ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
+                       drl_servant->liveliness_changed_count()) ;
+        ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
+                       drl_servant->no_writers_generation_count()) ;
+        ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+        if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
+            (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
+        {
+          // if use take then the instance had "no samples" when it got NO_WRITERS and
+          // hence the instance state terminated and then started again so
+          // no_writers_generation_count should = 0.
+          ACE_ERROR ((LM_ERROR,
+             ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
+            return 1;
+        }
       }
 
     }
