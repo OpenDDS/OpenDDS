@@ -169,14 +169,14 @@ namespace OpenDDS
         /// object, in order.
         ///
         /// The remove argument is a flag that should be set to true (1)
-        /// in the visitor's visit_element(T* element, int& remove) method
-        /// if the visitor decides that the element should be removed
+        /// in the visitor's visit_element_remove(T* element, int& remove)
+        /// method if the visitor decides that the element should be removed
         /// from the queue.  The remove flag is always set to false (0)
-        /// prior to calling the visitor's visit_element(T* element,
+        /// prior to calling the visitor's visit_element_remove(T* element,
         /// int& remove) method.
         ///
         /// The visitor can stop visitation early by returning 0 from
-        /// its visit_element(T* element, int& remove) method.
+        /// its visit_element_remove(T* element, int& remove) method.
         void accept_remove_visitor(VisitorType& visitor)
           {
             LinkType* prev_link = 0;
@@ -193,7 +193,7 @@ namespace OpenDDS
 
                 int remove = 0;
 
-                int keep_going = visitor.visit_element(element, remove);
+                int keep_going = visitor.visit_element_remove(element, remove);
 
                 if (remove == 1)
                   {
