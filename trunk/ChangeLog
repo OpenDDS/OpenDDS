@@ -1,3 +1,8 @@
+Wed Apr 23 21:32:04 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+          Put a delay for InfoRepo to stabilize state.
+
 Wed Apr 23 17:14:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/ProcessFactory.pm:
