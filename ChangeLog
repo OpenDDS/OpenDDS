@@ -1,3 +1,13 @@
+Wed Apr 23 16:31:39 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+          Switch to using random ports. Using hardcoded ports can
+          potentially cause bogus test failures.
+
 Wed Apr 23 15:18:45 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/transport/framework/BasicQueueVisitor_T.h:
@@ -20,7 +30,8 @@ Wed Apr 23 14:04:10 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * tests/DCPS/Reconnect/subscriber.cpp:
 
-          A change I made while reveiwing but didn't compile, this it the fix.
+          A change I made while reveiwing but didn't compile, this it the
+          fix.
 
 Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
@@ -31,35 +42,42 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
 
-          Changed _var to self to release in cleanup phase rather than destruction.  Also moved
-          topic_var release into cleanup, but still need to for Participant and Publisher.
+          Changed _var to self to release in cleanup phase rather than
+          destruction.  Also moved topic_var release into cleanup, but
+          still need to for Participant and Publisher.
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
 
-          Removed unneeded _add_ref and _remove_ref for domain participant.  Also cleaned up commented out code.
+          Removed unneeded _add_ref and _remove_ref for domain
+          participant.  Also cleaned up commented out code.
 
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-          Removed unneeded _add_ref and _remove_ref for topic, pub and sub, and added call to cleanup the
-          registered typeSupport for this participant.  Also cleaned up commented out code.
+          Removed unneeded _add_ref and _remove_ref for topic, pub and
+          sub, and added call to cleanup the registered typeSupport for
+          this participant.  Also cleaned up commented out code.
 
         * dds/DCPS/PublisherImpl.cpp:
 
-          Chaned _var to self to release in cleanup phase rather than destruction.  Also moved releasing the
-          participant and detaching the transport to the cleanup phase, rather than destruction.
+          Chaned _var to self to release in cleanup phase rather than
+          destruction.  Also moved releasing the participant and detaching
+          the transport to the cleanup phase, rather than destruction.
 
         * dds/DCPS/Registered_Data_Types.h:
         * dds/DCPS/Registered_Data_Types.cpp:
 
-          Added unregister_participant to unregister all the typeSupports for that participant.
+          Added unregister_participant to unregister all the typeSupports
+          for that participant.
 
         * dds/DCPS/Service_Participant.h:
 
-          Made servant_to_reference a noop, since the reference should be taking ownership of the memory.
+          Made servant_to_reference a noop, since the reference should be
+          taking ownership of the memory.
 
         * dds/DCPS/SubscriberImpl.cpp:
 
-          Changed _var to release in cleanup phase rather than destruction.
+          Changed _var to release in cleanup phase rather than
+          destruction.
 
         * examples/DCPS/Messenger_Imr/subscriber.cpp:
         * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
@@ -84,7 +102,8 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/CompatibilityTest/publisher.cpp:
         * tests/DCPS/LivelinessTest/subscriber.cpp:
 
-          Changed from putting stacked based objects in a _var, to using heap based objects.
+          Changed from putting stacked based objects in a _var, to using
+          heap based objects.
 
 
         * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
@@ -122,8 +141,8 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/unit/Main.cpp:
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
 
-          Removed servant to listeners and making it clearer that the _var was in control of
-          the heap allocated object.
+          Removed servant to listeners and making it clearer that the _var
+          was in control of the heap allocated object.
 
 Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
@@ -147,7 +166,8 @@ Mon Apr 21 18:19:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.h:
 
           Added an #include to pick up the defintion of size_t.  Thanks to
-          "RTP Techie" <rtp dot techie at gmail dot com> for pointing this out.
+          "RTP Techie" <rtp dot techie at gmail dot com> for pointing this
+          out.
 
 Fri Apr 18 16:42:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
