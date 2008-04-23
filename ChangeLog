@@ -1,3 +1,14 @@
+Wed Apr 23 17:01:55 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+          Use transient ports instead of fixed ports. Fixed ports can
+          produce bogus errors.
+
 Wed Apr 23 16:50:26 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * Changelog
@@ -29,7 +40,8 @@ Wed Apr 23 16:44:57 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/Reconnect/subscriber.cpp:
         * tests/DCPS/TransientLocalTest/subscriber.cpp:
 
-          Change to store off servant right after storing off allocated memory.
+          Change to store off servant right after storing off allocated
+          memory.
 
 Wed Apr 23 16:31:39 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
