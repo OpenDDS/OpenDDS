@@ -250,6 +250,8 @@ int main (int argc, char *argv[])
       dr_qos.reliability.kind = reliability_kind;
 
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
 
       ::DDS::DataReader_var dr(sub->create_datareader(description.in (),
                                                       dr_qos,
@@ -270,23 +272,19 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
+      // there is an error if we matched when not compatible (or vice-versa)
+      if (drl_servant->subscription_matched() != compatible)
       {
-        DataReaderListenerImpl* drl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
-        // there is an error if we matched when not compatible (or vice-versa)
-        if (drl_servant->subscription_matched() != compatible)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Expected subscription_matched to be %s, but it wasn't."
-                               "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
-                               "reliability_kind=%s\n"),
-                      (compatible) ? "true" : "false",
-                      durability_kind_str.c_str(),
-                      liveliness_kind_str.c_str(),
-                      LEASE_DURATION_STR.c_str(),
-                      reliability_kind_str.c_str()));
-          return 1;
-        }
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Expected subscription_matched to be %s, but it wasn't."
+                             "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
+                             "reliability_kind=%s\n"),
+                    (compatible) ? "true" : "false",
+                    durability_kind_str.c_str(),
+                    liveliness_kind_str.c_str(),
+                    LEASE_DURATION_STR.c_str(),
+                    reliability_kind_str.c_str()));
+        return 1;
       }
     }
   catch (const TestException&)

@@ -76,6 +76,9 @@ class TestMonitor {
     /// Listeners.
     std::vector< ::DDS::DataReaderListener_var> listener_;
 
+    /// Forwarders.
+    std::vector< ForwardingListenerImpl*> forwarder_;
+
     /// Data transport.
     RepoToTransportMap transport_;
 };

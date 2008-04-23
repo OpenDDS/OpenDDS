@@ -54,6 +54,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
   this->dataReader_.resize(  this->config_.subscriberDomainSize(), ::DDS::DataReader::_nil());
   this->dataWriter_.resize(  this->config_.publisherDomainSize(),  ::DDS::DataWriter::_nil());
   this->listener_.resize(    this->config_.subscriberDomainSize(), ::DDS::DataReaderListener::_nil());
+  this->forwarder_.resize(   this->config_.subscriberDomainSize(), 0);
 
   if( signed(OpenDDS::DCPS::DCPS_debug_level) >= 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -296,6 +297,8 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
               TheServiceParticipant->domain_to_repo(
                 this->config_.subscriberDomain( index)
             ));
+    this->forwarder_[ index] =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index].in());
 
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
@@ -593,20 +596,16 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       }
   }
 
-  for( unsigned int index = 1; index < this->listener_.size(); ++index) {
+  for( unsigned int index = 1; index < this->forwarder_.size(); ++index) {
     // Pass the writer into the (previous) forwarder.
-    ForwardingListenerImpl* listener_servant =
-      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index - 1].in());
-    listener_servant->dataWriter( this->dataWriter_[ index].in());
+    this->forwarder_[ index - 1]->dataWriter( this->dataWriter_[ index].in());
   }
 
-  {
     // The last forwarder does not.
-    ForwardingListenerImpl* listener_servant =
-      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ this->listener_.size() - 1].in());
-    listener_servant->dataWriter(
-      ::DDS::DataWriter::_nil());
-  }
+  this->forwarder_[ this->forwarder_.size() - 1]->dataWriter(
+    ::DDS::DataWriter::_nil()
+  );
+
   //
   // Establish and install the DataReader.  This needs to be done after
   // the writer has been created and attached since it is possible (I
@@ -736,11 +735,8 @@ TestMonitor::run()
   // we are done.
   //
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run about to wait.\n")));
-  {
-    ForwardingListenerImpl* listener_servant =
-      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ this->listener_.size() - 1].in());
-    listener_servant->waitForCompletion();
-  }
+  this->forwarder_[ this->forwarder_.size() - 1]->waitForCompletion();
+
   // This is now a termination message.
   foo.data_source = 30;
 

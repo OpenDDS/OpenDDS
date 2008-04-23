@@ -210,22 +210,20 @@ int main(int argc, char *argv[])
 
        /* Create the listener for datareader */
        DDS::DataReaderListener_var listener (new PubDataReaderListenerImpl);
+       PubDataReaderListenerImpl* listener_servant =
+         OpenDDS::DCPS::reference_to_servant<PubDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
 
        /* Create AckMessage datareader */
        DDS::DataReader_var dr = s->create_datareader (pubmessage_topic.in (),
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-      {
-        PubDataReaderListenerImpl* listener_servant =
-          OpenDDS::DCPS::reference_to_servant<PubDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
-         listener_servant->init(dr.in(), dw.in(), useZeroCopyRead);
+       listener_servant->init(dr.in(), dw.in(), useZeroCopyRead);
 
-         while (listener_servant->done () == 0) 
-         {
-           ACE_OS::sleep (1);
-         };
-      }
+       while (listener_servant->done () == 0) 
+       {
+         ACE_OS::sleep (1);
+       };
 
 
        std::cout << "Sub: shut down" << std::endl;

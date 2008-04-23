@@ -160,6 +160,8 @@ int main (int argc, char *argv[])
 
       // activate the listener
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -179,12 +181,8 @@ int main (int argc, char *argv[])
 
 
       int expected = 10;
-      {
-        DataReaderListenerImpl* listener_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
-        while ( listener_servant->num_reads() < expected) {
-          ACE_OS::sleep (1);
-        }
+      while ( listener_servant->num_reads() < expected) {
+        ACE_OS::sleep (1);
       }
 
       if (!CORBA::is_nil (participant.in ())) {

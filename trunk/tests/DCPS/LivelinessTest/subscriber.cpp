@@ -321,6 +321,8 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -388,26 +390,21 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-
+      ACE_OS::fprintf (stderr, "**********\n") ;
+      ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
+                     drl_servant->liveliness_changed_count()) ;
+      ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
+                     drl_servant->no_writers_generation_count()) ;
+      ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+      if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
+          (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
-        DataReaderListenerImpl* drl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
-        ACE_OS::fprintf (stderr, "**********\n") ;
-        ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
-                       drl_servant->liveliness_changed_count()) ;
-        ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
-                       drl_servant->no_writers_generation_count()) ;
-        ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-        if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
-            (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
-        {
-          // if use take then the instance had "no samples" when it got NO_WRITERS and
-          // hence the instance state terminated and then started again so
-          // no_writers_generation_count should = 0.
-          ACE_ERROR ((LM_ERROR,
-             ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
-            return 1;
-        }
+        // if use take then the instance had "no samples" when it got NO_WRITERS and
+        // hence the instance state terminated and then started again so
+        // no_writers_generation_count should = 0.
+        ACE_ERROR ((LM_ERROR,
+           ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
+          return 1;
       }
 
     }

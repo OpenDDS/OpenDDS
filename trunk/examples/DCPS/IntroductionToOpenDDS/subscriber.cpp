@@ -160,6 +160,8 @@ int main (int argc, char *argv[]) {
     }
 
     DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
+    ExchangeEventDataReaderListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<ExchangeEventDataReaderListenerImpl,DDS::DataReaderListener_ptr>(exchange_evt_listener.in());
 
     if (CORBA::is_nil (exchange_evt_listener.in ())) {
       cerr << "ExchangeEvent listener is nil." << endl;
@@ -185,12 +187,8 @@ int main (int argc, char *argv[]) {
 
     // Wait for events from the Publisher; shut down when "close" received
     cout << "Subscriber: waiting for events" << endl;
-    {
-      ExchangeEventDataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<ExchangeEventDataReaderListenerImpl,DDS::DataReaderListener_ptr>(exchange_evt_listener.in());
-      while ( ! listener_servant->is_exchange_closed_received() ) {
-        ACE_OS::sleep(1);
-      }
+    while ( ! listener_servant->is_exchange_closed_received() ) {
+      ACE_OS::sleep(1);
     }
 
     cout << "Received CLOSED event from publisher; exiting..." << endl;
