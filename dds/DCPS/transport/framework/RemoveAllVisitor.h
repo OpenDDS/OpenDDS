@@ -24,14 +24,10 @@ namespace OpenDDS
 
         virtual ~RemoveAllVisitor();
 
-        // The using declaration is added to resolve the "hides virtual functions"
-        // compilation warnings on Solaris.
-        using BasicQueueVisitor<TransportQueueElement>::visit_element;
-
         /// The BasicQueue<T>::accept_remove_visitor() method will call
-        /// this visit_element() method for each element in the queue.
-        virtual int visit_element(TransportQueueElement* element,
-                                  int&                   remove);
+        /// this visit_element_remove() method for each element in the queue.
+        virtual int visit_element_remove(TransportQueueElement* element,
+                                         int&                   remove);
 
         /// Accessor for the status.  Called after this visitor object has
         /// been passed to BasicQueue<T>::accept_remove_visitor().

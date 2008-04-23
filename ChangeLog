@@ -1,9 +1,23 @@
+Wed Apr 23 15:18:45 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/BasicQueueVisitor_T.h:
+        * dds/DCPS/transport/framework/BasicQueue_T.h:
+        * dds/DCPS/transport/framework/BuildChainVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.h:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+
+          Fixed C++ virtual method hiding issues for some compilers.
+
 Wed Apr 23 14:04:10 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.cpp:
 
           Added a #include that Microsoft didn't complain about.
-	
+
         * tests/DCPS/Reconnect/subscriber.cpp:
 
           A change I made while reveiwing but didn't compile, this it the fix.
