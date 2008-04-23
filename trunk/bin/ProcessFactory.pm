@@ -23,7 +23,6 @@ sub create_process {
   elsif ((!PerlDDS::is_coverage_test()) ||
          (non_dds_test($executable)) ||
          (is_process_special($executable))){
-    print STDOUT "Local Process \n";
     if(PerlDDS::is_coverage_test())
     {
       PerlDDS::special_process_created();

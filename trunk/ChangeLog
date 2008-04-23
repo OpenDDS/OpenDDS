@@ -1,3 +1,9 @@
+Wed Apr 23 17:14:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * bin/ProcessFactory.pm:
+
+          Cleaning up print statement;
+
 Wed Apr 23 17:01:55 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/Prst_delayed_subscriber/pub.ini:
