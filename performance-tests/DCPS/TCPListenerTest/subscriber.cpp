@@ -321,6 +321,8 @@ int main (int argc, char *argv[])
                                    DATA_SIZE,
                                    RECVS_BTWN_READS,
                                    use_zero_copy_reads));
+      DataReaderListenerImpl* listener_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(dr_listener.in());
 
       if (CORBA::is_nil (dr_listener.in()))
       {
@@ -341,13 +343,9 @@ int main (int argc, char *argv[])
                           1);
       }
 
+      while (! listener_servant->is_finished ())
       {
-        DataReaderListenerImpl* listener_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(dr_listener.in());
-        while (! listener_servant->is_finished ())
-          {
-            ACE_OS::sleep(2);
-          }
+          ACE_OS::sleep(2);
       }
 
       // clean up subscriber objects

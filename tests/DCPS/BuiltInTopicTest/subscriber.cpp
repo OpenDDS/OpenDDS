@@ -178,6 +178,8 @@ int main (int argc, char *argv[])
 
       // activate the listener
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -235,12 +237,8 @@ int main (int argc, char *argv[])
                                           reinterpret_cast<CORBA::Octet*>(UPDATED_TOPIC_DATA));
       topic->set_qos (topic_qos);
 
-      {
-        DataReaderListenerImpl* listener_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
-        while ( listener_servant->num_reads() < num_messages) {
-          ACE_OS::sleep (1);
-        }
+      while ( listener_servant->num_reads() < num_messages) {
+        ACE_OS::sleep (1);
       }
 
       if (!CORBA::is_nil (participant.in ())) {

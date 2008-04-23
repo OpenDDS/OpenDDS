@@ -227,6 +227,8 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.nanosec = 0;
 
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -249,24 +251,20 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
+      if (drl_servant->deadline_missed() < threshold_liveliness_lost)
       {
-        DataReaderListenerImpl* drl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
-        if (drl_servant->deadline_missed() < threshold_liveliness_lost)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) The liviness deadline wasn't missed as many times as it should have."
-                      "threashold=%d, num missed=%d\n"),
-                      threshold_liveliness_lost,
-                      drl_servant->deadline_missed()));
-            return 1;
-        }
-        else if (drl_servant->test_failed())
-        {
-          ACE_ERROR ((LM_ERROR,
-             ACE_TEXT("(%P|%t) There was a problem with the test, check error log.\n")));
-            return 1;
-        }
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) The liviness deadline wasn't missed as many times as it should have."
+                    "threashold=%d, num missed=%d\n"),
+                    threshold_liveliness_lost,
+                    drl_servant->deadline_missed()));
+          return 1;
+      }
+      else if (drl_servant->test_failed())
+      {
+        ACE_ERROR ((LM_ERROR,
+           ACE_TEXT("(%P|%t) There was a problem with the test, check error log.\n")));
+          return 1;
       }
     }
   catch (const TestException&)
