@@ -135,11 +135,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -253,16 +249,11 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration = LEASE_DURATION;
       dr_qos.reliability.kind = reliability_kind;
 
-      DataReaderListenerImpl drl_servant ;
+      ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
 
-      ::DDS::DataReaderListener_var drl
-        = ::OpenDDS::DCPS::servant_to_reference(&drl_servant);
-
-      ::DDS::DataReader_var dr ;
-
-      dr = sub->create_datareader(description.in (),
-                                  dr_qos,
-                                  drl.in ());
+      ::DDS::DataReader_var dr(sub->create_datareader(description.in (),
+                                                      dr_qos,
+                                                      drl.in ()));
 
       ACE_OS::sleep(test_duration);
 
@@ -279,21 +270,24 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      // there is an error if we matched when not compatible (or vice-versa)
-      if (drl_servant.subscription_matched() != compatible)
       {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) Expected subscription_matched to be %s, but it wasn't."
-                             "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
-                             "reliability_kind=%s\n"),
-                    (compatible) ? "true" : "false",
-                    durability_kind_str.c_str(),
-                    liveliness_kind_str.c_str(),
-                    LEASE_DURATION_STR.c_str(),
-                    reliability_kind_str.c_str()));
-        return 1;
+        DataReaderListenerImpl* drl_servant =
+          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
+        // there is an error if we matched when not compatible (or vice-versa)
+        if (drl_servant->subscription_matched() != compatible)
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) Expected subscription_matched to be %s, but it wasn't."
+                               "durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,"
+                               "reliability_kind=%s\n"),
+                      (compatible) ? "true" : "false",
+                      durability_kind_str.c_str(),
+                      liveliness_kind_str.c_str(),
+                      LEASE_DURATION_STR.c_str(),
+                      reliability_kind_str.c_str()));
+          return 1;
+        }
       }
-
     }
   catch (const TestException&)
     {

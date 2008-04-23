@@ -411,7 +411,7 @@ namespace OpenDDS
     template <class T>
     T *servant_to_reference (T *servant)
     {
-      servant->_add_ref();
+//      servant->_add_ref();
       return servant;
     }
 

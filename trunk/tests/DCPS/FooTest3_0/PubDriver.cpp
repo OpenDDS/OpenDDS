@@ -220,10 +220,7 @@ PubDriver::initialize(int& argc, char *argv[])
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-  ::Xyz::FooTypeSupport_var fts =
-    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
+  ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
@@ -692,26 +689,11 @@ PubDriver::listener_test ()
 {
   // Create DomainParticipantListener, PublisherListener and
   // DataWriterListener.
-  DomainParticipantListenerImpl* dpl_servant;
-  ACE_NEW (dpl_servant,
-           DomainParticipantListenerImpl());
+  ::DDS::DomainParticipantListener_var dpl(new DomainParticipantListenerImpl);
 
-  ::DDS::DomainParticipantListener_var dpl
-    = ::OpenDDS::DCPS::servant_to_reference (dpl_servant);
+  ::DDS::PublisherListener_var pl (new PublisherListenerImpl);
 
-  PublisherListenerImpl* pl_servant;
-  ACE_NEW (pl_servant,
-           PublisherListenerImpl());
-
-  ::DDS::PublisherListener_var pl
-    = ::OpenDDS::DCPS::servant_to_reference (pl_servant);
-
-  DataWriterListenerImpl* dwl_servant;
-  ACE_NEW (dwl_servant,
-           DataWriterListenerImpl());
-
-  ::DDS::DataWriterListener_var dwl
-    = ::OpenDDS::DCPS::servant_to_reference (dwl_servant);
+  ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got

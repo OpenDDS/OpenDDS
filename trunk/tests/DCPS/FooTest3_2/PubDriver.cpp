@@ -260,11 +260,7 @@ PubDriver::init(int& argc, char *argv[])
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
 
-  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-  ::Xyz::FooTypeSupport_var fts =
-    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
-
+  ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,

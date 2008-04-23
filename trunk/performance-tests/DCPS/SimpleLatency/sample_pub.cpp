@@ -228,9 +228,7 @@ int main(int argc, char *argv[])
 
 
        /* Create the listener for datareader */
-       AckDataReaderListenerImpl  listener_servant (size);
-       DDS::DataReaderListener_var listener =
-	     ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
+       DDS::DataReaderListener_var listener (new AckDataReaderListenerImpl (size));
 
 
        /* Create AckMessage datareader */
@@ -238,7 +236,11 @@ int main(int argc, char *argv[])
                                                       DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
 
-       listener_servant.init(dr.in(), dw.in(), useZeroCopyRead);
+       {
+         AckDataReaderListenerImpl* listener_servant =
+           OpenDDS::DCPS::reference_to_servant<AckDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+         listener_servant->init(dr.in(), dw.in(), useZeroCopyRead);
+       }
 
        // sleep here to wait for the connections.
        ACE_OS::sleep(1);
@@ -256,11 +258,14 @@ int main(int argc, char *argv[])
        pubmessage_writer->write (pubmessage_data,
                                  handle);
 
-       while (listener_servant.done () == 0) 
        {
-         ACE_OS::sleep (1);
-       };
-
+         AckDataReaderListenerImpl* listener_servant =
+           OpenDDS::DCPS::reference_to_servant<AckDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+         while (listener_servant->done () == 0) 
+         {
+           ACE_OS::sleep (1);
+         };
+       }
 
        /* Shut down domain entities */
 

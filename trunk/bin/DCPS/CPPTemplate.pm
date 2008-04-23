@@ -128,11 +128,7 @@ char *
                    <%TYPE%>DataWriterImpl(),
                    ::DDS::DataWriter::_nil());
 
-
-    ::DDS::DataWriter_ptr writer_obj
-        = ::OpenDDS::DCPS::servant_to_reference (writer_impl);
-
-    return writer_obj;
+    return writer_impl;
 }
 
 ::DDS::DataReader_ptr
@@ -147,11 +143,7 @@ char *
                     <%TYPE%>DataReaderImpl(),
                     ::DDS::DataReader::_nil());
 
-
-    ::DDS::DataReader_ptr reader_obj
-            = ::OpenDDS::DCPS::servant_to_reference (reader_impl);
-
-    return reader_obj;
+    return reader_impl;
 }
 
 <%NAMESPACEEND%>
@@ -1934,18 +1926,6 @@ void
   }
 }
 
-
-//OpenDDS::DCPS::DataReaderRemote_ptr
-//<%TYPE%>DataReaderImpl::get_datareaderremote_obj_ref ()
-//{
-//  ::OpenDDS::DCPS::DataReaderRemote_ptr reader_obj
-//      = ::OpenDDS::DCPS::servant_to_reference
-//            (this);
-//  ACE_CHECK_RETURN (::OpenDDS::DCPS::DataReaderRemote::_nil());
-//
-//  // servant_to_reference does not duplicate when the object is already active
-//  return OpenDDS::DCPS::DataReaderRemote::_duplicate(reader_obj);
-//}
 <%NAMESPACEEND%>
 
 

@@ -100,7 +100,6 @@ DataReaderImpl::~DataReaderImpl (void)
     {
       participant_servant_->_remove_ref ();
       subscriber_servant_->_remove_ref ();
-      topic_servant_->_remove_ref ();
       delete rd_allocator_ ;
     }
 }
@@ -122,6 +121,8 @@ DataReaderImpl::cleanup ()
   }
 
   topic_servant_->remove_entity_ref ();
+  topic_servant_->_remove_ref ();
+  dr_local_objref_.out();
 }
 
 

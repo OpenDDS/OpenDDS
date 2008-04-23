@@ -219,26 +219,17 @@ int main (int argc, char *argv[])
 
       if (topics & TOPIC_T1)
         {
-          ::T1::Foo1TypeSupportImpl *fts_servant =
-              new ::T1::Foo1TypeSupportImpl();
-
-          fts1 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts1 = new ::T1::Foo1TypeSupportImpl;
         }
 
       if (topics & TOPIC_T2)
         {
-          ::T2::Foo2TypeSupportImpl *fts_servant =
-              new ::T2::Foo2TypeSupportImpl();
-
-          fts2 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts2 = new ::T2::Foo2TypeSupportImpl();
         }
 
       if (topics & TOPIC_T3)
         {
-          ::T3::Foo3TypeSupportImpl *fts_servant =
-              new ::T3::Foo3TypeSupportImpl();
-
-          fts3 = OpenDDS::DCPS::servant_to_reference (fts_servant);
+          fts3 = new ::T3::Foo3TypeSupportImpl();
         }
 
       ::DDS::DomainParticipant_var dp =

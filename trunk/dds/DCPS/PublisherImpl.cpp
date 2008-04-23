@@ -68,11 +68,7 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
 // Implementation skeleton destructor
 PublisherImpl::~PublisherImpl (void)
 {
-  participant_->_remove_ref ();
 
-  // Tell the transport to detach this
-  // Publisher/TransportInterface.
-  this->detach_transport ();
 
   //The datawriters should be deleted already before calling delete
   //publisher.
@@ -448,6 +444,15 @@ PublisherImpl::~PublisherImpl (void)
 
   // the publisher can now start creating new publications
   set_deleted (false);
+
+  participant_->_remove_ref ();
+  participant_ = 0;
+
+
+  // Tell the transport to detach this
+  // Publisher/TransportInterface.
+  this->detach_transport ();
+  publisher_objref_.out();
 
   return ::DDS::RETCODE_OK;
 }

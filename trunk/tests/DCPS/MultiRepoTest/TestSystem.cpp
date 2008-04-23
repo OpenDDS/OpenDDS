@@ -158,9 +158,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating data reader listener.\n")));
-  ForwardingListenerImpl* forwarder_servant = new ForwardingListenerImpl( 0);
-
-  this->listener_ = ::OpenDDS::DCPS::servant_to_reference(forwarder_servant);
+  this->listener_ = new ForwardingListenerImpl( 0);
 
   if (CORBA::is_nil (this->listener_.in ()))
     {
@@ -368,9 +366,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   // Establish and install the DataWriter.
   //
 
-  DataWriterListenerImpl* listenerServant = new DataWriterListenerImpl( 0);
-  ::DDS::DataWriterListener_var listener
-    = ::OpenDDS::DCPS::servant_to_reference( listenerServant);
+  ::DDS::DataWriterListener_var listener (new DataWriterListenerImpl( 0));
 
   //
   // Keep all data samples to allow us to establish connections in an
@@ -401,7 +397,11 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
     }
 
   // Pass the writer into the forwarder.
-  forwarder_servant->dataWriter( this->dataWriter_.in());
+  {
+    ForwardingListenerImpl* forwarder_servant =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(listener_.in());
+    forwarder_servant->dataWriter( this->dataWriter_.in());
+  }
 
   //
   // Establish and install the DataReader.  This needs to be done after

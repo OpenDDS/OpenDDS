@@ -153,16 +153,17 @@ int main (int argc, char *argv[])
         return 1 ;
       }
 
+      ::Xyz::Pt128TypeSupport_var pt128ts;
+      ::Xyz::Pt512TypeSupport_var pt512ts;
+      ::Xyz::Pt2048TypeSupport_var pt2048ts;
+      ::Xyz::Pt8192TypeSupport_var pt8192ts;
+
       // Register the type supports
       switch (DATA_SIZE)
       {
       case 128:
         {
-          ::Xyz::Pt128TypeSupportImpl* pt128ts_servant = new ::Xyz::Pt128TypeSupportImpl();
-          OpenDDS::DCPS::LocalObject_var safe_servant = pt128ts_servant;
-
-          ::Xyz::Pt128TypeSupport_var pt128ts =
-            OpenDDS::DCPS::servant_to_reference (pt128ts_servant);
+          pt128ts = new ::Xyz::Pt128TypeSupportImpl();
 
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -174,11 +175,7 @@ int main (int argc, char *argv[])
         break;
       case 512:
         {
-          ::Xyz::Pt512TypeSupportImpl* pt512ts_servant = new ::Xyz::Pt512TypeSupportImpl();
-          OpenDDS::DCPS::LocalObject_var safe_servant = pt512ts_servant;
-
-          ::Xyz::Pt512TypeSupport_var pt512ts =
-            OpenDDS::DCPS::servant_to_reference (pt512ts_servant);
+          pt512ts = new ::Xyz::Pt512TypeSupportImpl();
 
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -190,11 +187,7 @@ int main (int argc, char *argv[])
         break;
       case 2048:
         {
-          ::Xyz::Pt2048TypeSupportImpl* pt2048ts_servant = new ::Xyz::Pt2048TypeSupportImpl();
-          OpenDDS::DCPS::LocalObject_var safe_servant = pt2048ts_servant;
-
-          ::Xyz::Pt2048TypeSupport_var pt2048ts =
-            OpenDDS::DCPS::servant_to_reference (pt2048ts_servant);
+          pt2048ts = new ::Xyz::Pt2048TypeSupportImpl();
 
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -206,11 +199,7 @@ int main (int argc, char *argv[])
         break;
       case 8192:
         {
-          ::Xyz::Pt8192TypeSupportImpl* pt8192ts_servant = new ::Xyz::Pt8192TypeSupportImpl();
-          OpenDDS::DCPS::LocalObject_var safe_servant = pt8192ts_servant;
-
-          ::Xyz::Pt8192TypeSupport_var pt8192ts =
-            OpenDDS::DCPS::servant_to_reference (pt8192ts_servant);
+          pt8192ts = new ::Xyz::Pt8192TypeSupportImpl();
 
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
@@ -326,17 +315,13 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.sec = 2 ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl* dr_listener_impl =
+      ::DDS::DataReaderListener_var dr_listener (
         new DataReaderListenerImpl(num_datawriters,
                                    NUM_SAMPLES,
                                    DATA_SIZE,
                                    RECVS_BTWN_READS,
-                                   use_zero_copy_reads);
+                                   use_zero_copy_reads));
 
-      OpenDDS::DCPS::LocalObject_var safe_servant = dr_listener_impl;
-
-      ::DDS::DataReaderListener_var dr_listener =
-        OpenDDS::DCPS::servant_to_reference (dr_listener_impl);
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -356,11 +341,14 @@ int main (int argc, char *argv[])
                           1);
       }
 
-      while (! dr_listener_impl->is_finished ())
-        {
-          ACE_OS::sleep(2);
-        }
-
+      {
+        DataReaderListenerImpl* listener_servant =
+          OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(dr_listener.in());
+        while (! listener_servant->is_finished ())
+          {
+            ACE_OS::sleep(2);
+          }
+      }
 
       // clean up subscriber objects
       sub->delete_contained_entities() ;

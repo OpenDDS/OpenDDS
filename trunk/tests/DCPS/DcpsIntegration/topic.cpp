@@ -73,11 +73,7 @@ main (int argc, char *argv[])
                             2);
         }
 
-
-      OPENDDS_DCPS_DomainParticipantListener_i* dpListenerImpl = new OPENDDS_DCPS_DomainParticipantListener_i;
-
-      ::DDS::DomainParticipantListener_var dpListener =
-        ::OpenDDS::DCPS::servant_to_reference (dpListenerImpl);
+      ::DDS::DomainParticipantListener_var dpListener (new OPENDDS_DCPS_DomainParticipantListener_i);
       if ( CORBA::is_nil (dpListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -99,10 +95,7 @@ main (int argc, char *argv[])
         }
 
       // Intialize the type support
-      FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-
-      FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      FooTypeSupport_var fts (new FooTypeSupportImpl);
 
       if (::DDS::RETCODE_OK != fts->register_type(participant.in (), TEST_TYPE_NAME))
         {
@@ -283,11 +276,7 @@ main (int argc, char *argv[])
                             7);
         }
 
-
-      OPENDDS_DCPS_TopicListener_i* topicListenerImpl = new OPENDDS_DCPS_TopicListener_i;
-
-      ::DDS::TopicListener_var topicListener =
-        ::OpenDDS::DCPS::servant_to_reference (topicListenerImpl);
+      ::DDS::TopicListener_var topicListener (new OPENDDS_DCPS_TopicListener_i);
       if ( CORBA::is_nil (topicListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,

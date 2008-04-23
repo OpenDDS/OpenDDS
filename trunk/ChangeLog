@@ -1,3 +1,106 @@
+Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Remove servant_to_reference from template.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed _var to self to release in cleanup phase rather than destruction.  Also moved 
+          topic_var release into cleanup, but still need to for Participant and Publisher.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          Removed unneeded _add_ref and _remove_ref for domain participant.  Also cleaned up commented out code.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Removed unneeded _add_ref and _remove_ref for topic, pub and sub, and added call to cleanup the 
+          registered typeSupport for this participant.  Also cleaned up commented out code.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Chaned _var to self to release in cleanup phase rather than destruction.  Also moved releasing the 
+          participant and detaching the transport to the cleanup phase, rather than destruction.
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+
+          Added unregister_participant to unregister all the typeSupports for that participant.
+
+        * dds/DCPS/Service_Participant.h:
+
+          Made servant_to_reference a noop, since the reference should be taking ownership of the memory.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Changed _var to release in cleanup phase rather than destruction.
+
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/FooTest4_0/Reader.h:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+
+          Changed from putting stacked based objects in a _var, to using heap based objects.
+
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Removed servant to listeners and making it clearer that the _var was in control of 
+          the heap allocated object.
+
 Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/FooTest5_0/run_test.pl:
@@ -19,7 +122,7 @@ Mon Apr 21 18:19:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.h:
 
-	  Added an #include to pick up the defintion of size_t.  Thanks to
+          Added an #include to pick up the defintion of size_t.  Thanks to
           "RTP Techie" <rtp dot techie at gmail dot com> for pointing this out.
 
 Fri Apr 18 16:42:58 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>

@@ -54,7 +54,6 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
   this->dataReader_.resize(  this->config_.subscriberDomainSize(), ::DDS::DataReader::_nil());
   this->dataWriter_.resize(  this->config_.publisherDomainSize(),  ::DDS::DataWriter::_nil());
   this->listener_.resize(    this->config_.subscriberDomainSize(), ::DDS::DataReaderListener::_nil());
-  this->forwarder_.resize(   this->config_.subscriberDomainSize(), 0);
 
   if( signed(OpenDDS::DCPS::DCPS_debug_level) >= 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -292,14 +291,11 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       ACE_TEXT("%T (%P|%t) INFO: creating data reader listener for domain %d.\n"),
       this->config_.subscriberDomain( index)
     ));
-    this->forwarder_[ index]
-      = new ForwardingListenerImpl(
+    this->listener_[ index] =
+        new ForwardingListenerImpl(
               TheServiceParticipant->domain_to_repo(
                 this->config_.subscriberDomain( index)
             ));
-
-    this->listener_[ index]
-      = ::OpenDDS::DCPS::servant_to_reference( this->forwarder_[ index]);
 
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
@@ -561,13 +557,11 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       ACE_TEXT("%T (%P|%t) INFO: creating datawriter[ %d].\n"),
       index
     ));
-    DataWriterListenerImpl* listenerServant
-      = new DataWriterListenerImpl(
+    ::DDS::DataWriterListener_var listener (
+        new DataWriterListenerImpl(
               TheServiceParticipant->domain_to_repo(
                 this->config_.publisherDomain( index)
-            ));
-    ::DDS::DataWriterListener_var listener
-      = ::OpenDDS::DCPS::servant_to_reference( listenerServant);
+            )));
 
     //
     // Keep all data samples to allow us to establish connections in an
@@ -599,16 +593,20 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       }
   }
 
-  for( unsigned int index = 1; index < this->forwarder_.size(); ++index) {
+  for( unsigned int index = 1; index < this->listener_.size(); ++index) {
     // Pass the writer into the (previous) forwarder.
-    this->forwarder_[ index - 1]->dataWriter( this->dataWriter_[ index].in());
+    ForwardingListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index - 1].in());
+    listener_servant->dataWriter( this->dataWriter_[ index].in());
   }
 
-  // The last forwarder does not.
-  this->forwarder_[ this->forwarder_.size() - 1]->dataWriter(
-    ::DDS::DataWriter::_nil()
-  );
-
+  {
+    // The last forwarder does not.
+    ForwardingListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ this->listener_.size() - 1].in());
+    listener_servant->dataWriter(
+      ::DDS::DataWriter::_nil());
+  }
   //
   // Establish and install the DataReader.  This needs to be done after
   // the writer has been created and attached since it is possible (I
@@ -738,8 +736,11 @@ TestMonitor::run()
   // we are done.
   //
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run about to wait.\n")));
-  this->forwarder_[ this->forwarder_.size() - 1]->waitForCompletion();
-
+  {
+    ForwardingListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ this->listener_.size() - 1].in());
+    listener_servant->waitForCompletion();
+  }
   // This is now a termination message.
   foo.data_source = 30;
 
