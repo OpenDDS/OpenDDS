@@ -223,7 +223,7 @@ int main (int argc, char *argv[])
     int timeout_writes = 0;
     {
       DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in())
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
       while ( listener_servant->num_reads() < num_expected_reads) {
         // Get the number of the timed out writes from publisher so we
         // can re-calculate the number of expected messages. Otherwise,

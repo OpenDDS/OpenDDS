@@ -6,7 +6,7 @@
 #include "Registered_Data_Types.h"
 
 #include "dds/DCPS/Util.h"
-
+#include "dds/DdsDcpsDomainC.h"
 #include "tao/TAO_Singleton.h"
 
 #include "ace/SString.h"
