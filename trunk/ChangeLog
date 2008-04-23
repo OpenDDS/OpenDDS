@@ -1,3 +1,36 @@
+Wed Apr 23 16:50:26 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * Changelog
+
+          I missed commiting  the Changelog.
+
+Wed Apr 23 16:44:57 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Change to store off servant right after storing off allocated memory.
+
 Wed Apr 23 16:31:39 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/DCPS/FooTest3/special_build_test.pl:
