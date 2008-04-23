@@ -1,3 +1,13 @@
+Wed Apr 23 14:04:10 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.cpp:
+
+          Added a #include that Microsoft didn't complain about.
+	
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          A change I made while reveiwing but didn't compile, this it the fix.
+
 Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -7,7 +17,7 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
 
-          Changed _var to self to release in cleanup phase rather than destruction.  Also moved 
+          Changed _var to self to release in cleanup phase rather than destruction.  Also moved
           topic_var release into cleanup, but still need to for Participant and Publisher.
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
@@ -16,12 +26,12 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-          Removed unneeded _add_ref and _remove_ref for topic, pub and sub, and added call to cleanup the 
+          Removed unneeded _add_ref and _remove_ref for topic, pub and sub, and added call to cleanup the
           registered typeSupport for this participant.  Also cleaned up commented out code.
 
         * dds/DCPS/PublisherImpl.cpp:
 
-          Chaned _var to self to release in cleanup phase rather than destruction.  Also moved releasing the 
+          Chaned _var to self to release in cleanup phase rather than destruction.  Also moved releasing the
           participant and detaching the transport to the cleanup phase, rather than destruction.
 
         * dds/DCPS/Registered_Data_Types.h:
@@ -98,7 +108,7 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/unit/Main.cpp:
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
 
-          Removed servant to listeners and making it clearer that the _var was in control of 
+          Removed servant to listeners and making it clearer that the _var was in control of
           the heap allocated object.
 
 Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
