@@ -1,23 +1,66 @@
+Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Removed unneeded parameter for init function and cleaned up.
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Removed unneeded parameter for init function and unneeded 
+          class parameters. Made get_subscriber_servant() to be protected.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to only hold a pointer to parents (DomainParticipant and
+          SubscriberImpl) and not participate in ownership of them.
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Removed unneeded parameter for init function and unneeded 
+          class parameters. Made get_publisher_servant() to be protected.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed to only hold a pointer to parents (DomainParticipant and
+          PublisherImpl) and not participate in ownership of them.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          No longer passing object ref to Pub/Sub Impl.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed unneeded object ref and function to set.
+
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed unneeded object ref and function to set.
+          For RT#12130.
+
 Thu Apr 24 17:10:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
 
-          Changed to set _vars to _nil() instead of missusing the out() function.  
+          Changed to set _vars to _nil() instead of missusing the out() function.
           Also added setting the data reader/writer remote to _nil() in cleanup.
 
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-          Added cleanup of bit objects (subscriber, topics, data readers) to 
+          Added cleanup of bit objects (subscriber, topics, data readers) to
           delete_contained_entities.
 
         * dds/DCPS/PublisherImpl.cpp:
 
-          Changed to set _vars to _nil() instead of missusing the out() function.  
+          Changed to set _vars to _nil() instead of missusing the out() function.
 
         * dds/DCPS/SubscriberImpl.cpp:
 
-          Changed to set _vars to _nil() instead of missusing the out() function.  
+          Changed to set _vars to _nil() instead of missusing the out() function.
+          For RT#12130.
 
 Thu Apr 24 14:23:53 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
@@ -85,6 +128,7 @@ Wed Apr 23 16:44:57 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
           Change to store off servant right after storing off allocated
           memory.
+          For RT#12130.
 
 Wed Apr 23 16:31:39 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
@@ -231,6 +275,7 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
           Removed servant to listeners and making it clearer that the _var
           was in control of the heap allocated object.
+          For RT#12130.
 
 Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
 

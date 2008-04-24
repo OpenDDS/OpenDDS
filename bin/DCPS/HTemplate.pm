@@ -210,14 +210,13 @@ public:
    */
   virtual void init (
         ::DDS::Topic_ptr                       topic,
-        OpenDDS::DCPS::TopicImpl                 *topic_servant,
+        OpenDDS::DCPS::TopicImpl*              topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
-        OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-        ::DDS::Publisher_ptr                   publisher,
-        OpenDDS::DCPS::PublisherImpl*              publisher_servant,
+        OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
+        OpenDDS::DCPS::PublisherImpl*          publisher_servant,
         ::DDS::DataWriter_ptr                  dw_objref,
-        ::OpenDDS::DCPS::DataWriterRemote_ptr      dw_remote_objref
+        ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -323,14 +322,13 @@ public:
    */
   virtual
   void init (
-        OpenDDS::DCPS::TopicImpl*                    a_topic,
+        OpenDDS::DCPS::TopicImpl*                a_topic,
         const ::DDS::DataReaderQos &             qos,
         ::DDS::DataReaderListener_ptr            a_listener,
-        OpenDDS::DCPS::DomainParticipantImpl*        participant,
-        OpenDDS::DCPS::SubscriberImpl*               subscriber,
-        ::DDS::Subscriber_ptr                    subscriber_objref,
-        ::DDS::DataReader_ptr					 dr_objerf,
-        OpenDDS::DCPS::DataReaderRemote_ptr          dr_remote_objref
+        OpenDDS::DCPS::DomainParticipantImpl*    participant,
+        OpenDDS::DCPS::SubscriberImpl*           subscriber,
+        ::DDS::DataReader_ptr                    dr_objref,
+        OpenDDS::DCPS::DataReaderRemote_ptr      dr_remote_objref
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException

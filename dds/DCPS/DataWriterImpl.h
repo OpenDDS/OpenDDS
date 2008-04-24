@@ -207,11 +207,10 @@ namespace OpenDDS
         TopicImpl                             *topic_servant,
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
-        OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-        ::DDS::Publisher_ptr                   publisher,
-        OpenDDS::DCPS::PublisherImpl*              publisher_servant,
+        OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
+        OpenDDS::DCPS::PublisherImpl*          publisher_servant,
         ::DDS::DataWriter_ptr                  dw_local,
-        OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
+        OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote
       )
         ACE_THROW_SPEC ((
         CORBA::SystemException
@@ -315,11 +314,6 @@ namespace OpenDDS
     void control_delivered(ACE_Message_Block* sample);
 
     /**
-    * Accessor of the cached publisher servant.
-    */
-    PublisherImpl* get_publisher_servant ();
-
-    /**
     * Accessor of the associated topic name.
     */
     const char* get_topic_name ();
@@ -415,6 +409,11 @@ namespace OpenDDS
 
   protected:
 
+    /**
+    * Accessor of the cached publisher servant.
+    */
+    PublisherImpl* get_publisher_servant ();
+
     // type specific DataWriter's part of enable.
     virtual ::DDS::ReturnCode_t enable_specific (
       )
@@ -496,8 +495,6 @@ namespace OpenDDS
       ::DDS::DomainId_t               domain_id_;
       /// The publisher servant which creates this datawrite.
       PublisherImpl*                  publisher_servant_;
-      /// The object reference of the publisher.
-      ::DDS::Publisher_var            publisher_objref_;
       /// the object reference of the local datawriter
       ::DDS::DataWriter_var           dw_local_objref_;
       /// The object reference of the remote datawriter.

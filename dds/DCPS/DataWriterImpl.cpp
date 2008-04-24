@@ -92,9 +92,6 @@ DataWriterImpl::~DataWriterImpl (void)
 
   if (initialized_)
     {
-      participant_servant_->_remove_ref ();
-      publisher_servant_->_remove_ref ();
-
       delete data_container_;
       delete mb_allocator_;
       delete db_allocator_;
@@ -131,7 +128,6 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
            const ::DDS::DataWriterQos &           qos,
            ::DDS::DataWriterListener_ptr          a_listener,
            OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-           ::DDS::Publisher_ptr                   publisher,
            OpenDDS::DCPS::PublisherImpl*              publisher_servant,
            ::DDS::DataWriter_ptr                  dw_local,
            OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
@@ -162,13 +158,12 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
       fast_listener_ =
         reference_to_servant<DDS::DataWriterListener> (listener_.in());
     }
+  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
   participant_servant_ = participant_servant;
-  participant_servant_->_add_ref ();
   domain_id_ = participant_servant_->get_domain_id ();
 
-  publisher_objref_  = ::DDS::Publisher::_duplicate (publisher);
+  // only store the publisher pointer, since it is our parent, we will exist as long as it does
   publisher_servant_ = publisher_servant;
-  publisher_servant_->_add_ref ();
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
 
@@ -588,7 +583,7 @@ DataWriterImpl::get_topic ( )
 DataWriterImpl::get_publisher ( )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  return ::DDS::Publisher::_duplicate (publisher_objref_.in ());
+  return ::DDS::Publisher::_duplicate (publisher_servant_);
 }
 
 ::DDS::LivelinessLostStatus

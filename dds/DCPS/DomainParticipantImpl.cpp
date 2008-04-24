@@ -128,8 +128,6 @@ namespace OpenDDS
       ::DDS::Publisher_ptr pub_obj
         = servant_to_reference (pub);
 
-      pub->set_object_reference (pub_obj);
-
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->publishers_protector_,
@@ -262,8 +260,6 @@ namespace OpenDDS
 
       ::DDS::Subscriber_ptr sub_obj
         = servant_to_reference (sub);
-
-      sub->set_object_reference (sub_obj);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,

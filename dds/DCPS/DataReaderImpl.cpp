@@ -98,8 +98,6 @@ DataReaderImpl::~DataReaderImpl (void)
 
   if (initialized_)
     {
-      participant_servant_->_remove_ref ();
-      subscriber_servant_->_remove_ref ();
       delete rd_allocator_ ;
     }
 }
@@ -133,7 +131,6 @@ void DataReaderImpl::init (
 			   ::DDS::DataReaderListener_ptr a_listener,
 			   DomainParticipantImpl*        participant,
 			   SubscriberImpl*               subscriber,
-			   ::DDS::Subscriber_ptr         subscriber_objref,
 			   ::DDS::DataReader_ptr         dr_objref,
                ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
 			   )
@@ -163,16 +160,15 @@ void DataReaderImpl::init (
       fast_listener_ =
         reference_to_servant<DDS::DataReaderListener> (listener_.in ());
     }
+  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
   participant_servant_ = participant;
-  participant_servant_->_add_ref ();
   domain_id_ =
     participant_servant_->get_domain_id ();
 
   topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
 
+  // only store the subscriber pointer, since it is our parent, we will exist as long as it does
   subscriber_servant_ = subscriber ;
-  subscriber_objref_ = ::DDS::Subscriber::_duplicate (subscriber_objref);
-  subscriber_servant_->_add_ref ();
   dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
   dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
@@ -679,7 +675,7 @@ void DataReaderImpl::get_qos (
 		   CORBA::SystemException
 		   ))
 {
-  return ::DDS::Subscriber::_duplicate (subscriber_objref_.in ());
+  return ::DDS::Subscriber::_duplicate (subscriber_servant_);
 }
 
 ::DDS::SampleRejectedStatus DataReaderImpl::get_sample_rejected_status (

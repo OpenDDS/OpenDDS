@@ -210,11 +210,6 @@ namespace OpenDDS
         const RepoId&      reader
       ) ;
 
-    /*
-     * Cache the subscriber's object reference.
-     */
-     void set_object_reference (const ::DDS::Subscriber_ptr& sub) ;
-
     // called by DataReaderImpl::data_received
     void data_received(DataReaderImpl *reader);
 
@@ -246,7 +241,6 @@ namespace OpenDDS
 
       DomainParticipantImpl*        participant_;
       ::DDS::DomainParticipant_var  participant_objref_;
-      ::DDS::Subscriber_var         subscriber_objref_;
 
       DCPSInfo_var                  repository_;
 

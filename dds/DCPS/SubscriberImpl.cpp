@@ -180,7 +180,6 @@ SubscriberImpl::create_datareader (
 		    a_listener,
 		    participant,
 		    this,
-		    subscriber_objref_.in (),
 		    dr_obj.in (),
         dr_remote_obj.in ());
 
@@ -245,8 +244,10 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   DataReaderImpl* dr_servant
     = reference_to_servant<DataReaderImpl> (a_datareader);
 
-  if (dr_servant->get_subscriber_servant () != this)
+  if (dr_servant->get_subscriber () != this)
     {
+      ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
+          " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
@@ -355,7 +356,6 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Decrease the ref count after the servant is removed
   // from the datareader map.
 
-  subscriber_objref_ = ::DDS::Subscriber::_nil();
   dr_servant->_remove_ref ();
   dr_servant = 0;
 
@@ -980,20 +980,6 @@ SubscriberImpl::listener_for (::DDS::StatusKind kind)
     {
       return fast_listener_;
     }
-}
-
-void
-SubscriberImpl::set_object_reference (const ::DDS::Subscriber_ptr& sub)
-{
-  if (! CORBA::is_nil (subscriber_objref_.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_object_reference, ")
-		  ACE_TEXT("This subscriber is already activated. \n")));
-      return;
-    }
-
-  subscriber_objref_ = ::DDS::Subscriber::_duplicate (sub);
 }
 
 } // namespace DCPS
