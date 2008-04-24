@@ -116,12 +116,13 @@ DataWriterImpl::cleanup ()
     }
 
   // release our Topic_var
-  topic_objref_.out();
+  topic_objref_ = ::DDS::Topic::_nil();
   topic_servant_->remove_entity_ref ();
   topic_servant_->_remove_ref ();
   topic_servant_ = 0;
 
-  dw_local_objref_.out();
+  dw_local_objref_ = ::DDS::DataWriter::_nil();
+  dw_remote_objref_ = ::OpenDDS::DCPS::DataWriterRemote::_nil();
 }
 
 void

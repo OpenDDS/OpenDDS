@@ -355,9 +355,9 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // Decrease the ref count after the servant is removed
   // from the datareader map.
 
+  subscriber_objref_ = ::DDS::Subscriber::_nil();
   dr_servant->_remove_ref ();
   dr_servant = 0;
-  subscriber_objref_.out();
 
   return ::DDS::RETCODE_OK;
 }

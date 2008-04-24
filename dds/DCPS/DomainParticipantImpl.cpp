@@ -889,10 +889,23 @@ namespace OpenDDS
           }
       }
 
-      // the participant can now start creating new contained entities
-      set_deleted (false);
+      bit_part_topic_ = ::DDS::Topic::_nil();
+      bit_topic_topic_ = ::DDS::Topic::_nil();
+      bit_pub_topic_ = ::DDS::Topic::_nil();
+      bit_sub_topic_ = ::DDS::Topic::_nil();
+
+      bit_part_dr_ = ::DDS::ParticipantBuiltinTopicDataDataReader::_nil();
+      bit_topic_dr_ = ::DDS::TopicBuiltinTopicDataDataReader::_nil();
+      bit_pub_dr_ = ::DDS::PublicationBuiltinTopicDataDataReader::_nil();
+      bit_sub_dr_ = ::DDS::SubscriptionBuiltinTopicDataDataReader::_nil();
+
+      bit_subscriber_ = ::DDS::Subscriber::_nil();
 
       OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+      participant_objref_ = DDS::DomainParticipant::_nil();
+
+      // the participant can now start creating new contained entities
+      set_deleted (false);
 
       return ret;
     }
