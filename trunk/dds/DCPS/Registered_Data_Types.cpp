@@ -152,7 +152,6 @@ namespace OpenDDS
     ::DDS::ReturnCode_t Data_Types_Register::unregister_participant (
       ::DDS::DomainParticipant_ptr domain_participant)
     {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t)Data_Types_Register::unregister_participant CLEANUP\n"));
       ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
       TypeSupportHash*  supportHash = NULL;
       ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
