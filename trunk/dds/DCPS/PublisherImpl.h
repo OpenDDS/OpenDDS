@@ -249,13 +249,6 @@ namespace OpenDDS
         const RepoId&       writer);
 
     /**
-    * Cache the publisher's object reference.
-    */
-    void set_object_reference (
-        const ::DDS::Publisher_ptr& pub
-      );
-
-    /**
     * This is called by datawriter to notify the publisher to
     * collect the available data from the datawriter for
     * sending.
@@ -308,8 +301,6 @@ namespace OpenDDS
       SequenceNumber                sequence_number_;
         /// Start of current aggregation period. - NOT USED IN FIRST IMPL
       ACE_Time_Value                aggregation_period_start_ ;
-      /// The publisher object reference.
-      ::DDS::Publisher_var          publisher_objref_;
 
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when

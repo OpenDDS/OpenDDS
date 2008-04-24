@@ -175,7 +175,6 @@ PublisherImpl::~PublisherImpl (void)
         dw_qos,
         a_listener,
         participant,
-        publisher_objref_.in (),
         this,
         dw_obj.in (),
         dw_remote_obj.in ());
@@ -237,8 +236,10 @@ PublisherImpl::~PublisherImpl (void)
   DataWriterImpl* dw_servant
     = reference_to_servant <DataWriterImpl> (a_datawriter);
 
-  if (dw_servant->get_publisher_servant () != this)
+  if (dw_servant->get_publisher () != this)
     {
+      ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
+          " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
@@ -452,7 +453,6 @@ PublisherImpl::~PublisherImpl (void)
   // Tell the transport to detach this
   // Publisher/TransportInterface.
   this->detach_transport ();
-  publisher_objref_ = ::DDS::Publisher::_nil();
 
   return ::DDS::RETCODE_OK;
 }
@@ -895,20 +895,6 @@ void PublisherImpl::remove_associations(
   }
 
   return ::DDS::RETCODE_OK;
-}
-
-void
-PublisherImpl::set_object_reference (const ::DDS::Publisher_ptr& pub)
-{
-  if (! CORBA::is_nil (publisher_objref_.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::set_object_reference, ")
-      ACE_TEXT("This publisher is already activated. \n")));
-      return;
-    }
-
-  publisher_objref_ = ::DDS::Publisher::_duplicate (pub);
 }
 
 ::DDS::ReturnCode_t

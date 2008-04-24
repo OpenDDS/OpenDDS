@@ -172,7 +172,6 @@ namespace OpenDDS
         ::DDS::DataReaderListener_ptr a_listener,
         DomainParticipantImpl*        participant,
         SubscriberImpl*               subscriber,
-        ::DDS::Subscriber_ptr         subscriber_objref,
         ::DDS::DataReader_ptr         dr_objref,
         ::OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref
       )
@@ -304,8 +303,6 @@ namespace OpenDDS
       /// process a message that has been received - could be control or a data sample.
       virtual void data_received(const ReceivedDataSample& sample) ;
 
-      SubscriberImpl* get_subscriber_servant ();
-
       RepoId get_subscription_id() const ;
       void set_subscription_id(RepoId subscription_id) ;
 
@@ -359,6 +356,8 @@ namespace OpenDDS
       void release_instance (::DDS::InstanceHandle_t handle);
       
     protected:
+
+      SubscriberImpl* get_subscriber_servant ();
 
       // type specific DataReader's part of enable.
       virtual ::DDS::ReturnCode_t enable_specific (
@@ -430,7 +429,6 @@ namespace OpenDDS
       DomainParticipantImpl*          participant_servant_;
       ::DDS::DomainId_t               domain_id_;
       SubscriberImpl*                 subscriber_servant_;
-      ::DDS::Subscriber_var           subscriber_objref_;
       DataReaderRemote_var            dr_remote_objref_;
       ::DDS::DataReader_var           dr_local_objref_;
       RepoId                          subscription_id_;

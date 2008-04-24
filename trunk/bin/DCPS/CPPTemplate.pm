@@ -419,14 +419,13 @@ DDS::ReturnCode_t
 void
 <%TYPE%>DataWriterImpl::init (
       ::DDS::Topic_ptr                       topic,
-      OpenDDS::DCPS::TopicImpl                   *topic_servant,
+      OpenDDS::DCPS::TopicImpl*              topic_servant,
       const ::DDS::DataWriterQos &           qos,
       ::DDS::DataWriterListener_ptr          a_listener,
-      OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-      ::DDS::Publisher_ptr                   publisher,
-      OpenDDS::DCPS::PublisherImpl*              publisher_servant,
+      OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
+      OpenDDS::DCPS::PublisherImpl*          publisher_servant,
       ::DDS::DataWriter_ptr                  dw_objref,
-        ::OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote_objref
+      ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -437,7 +436,6 @@ void
                                        qos,
                                        a_listener,
                                        participant_servant,
-                                       publisher,
                                        publisher_servant,
                                        dw_objref,
                                        dw_remote_objref);
@@ -645,12 +643,11 @@ void
 void
 <%TYPE%>DataReaderImpl::init (
         OpenDDS::DCPS::TopicImpl*         a_topic,
-        const ::DDS::DataReaderQos &  qos,
-        ::DDS::DataReaderListener_ptr a_listener,
+        const ::DDS::DataReaderQos &          qos,
+        ::DDS::DataReaderListener_ptr         a_listener,
         OpenDDS::DCPS::DomainParticipantImpl* participant,
         OpenDDS::DCPS::SubscriberImpl*        subscriber,
-        ::DDS::Subscriber_ptr             subscriber_objref,
-        ::DDS::DataReader_ptr             dr_objerf,
+        ::DDS::DataReader_ptr                 dr_objref,
         OpenDDS::DCPS::DataReaderRemote_ptr   dr_remote_objref
       )
         ACE_THROW_SPEC ((
@@ -662,8 +659,7 @@ void
                                       a_listener,
                                       participant,
                                       subscriber,
-                                      subscriber_objref,
-                                      dr_objerf,
+                                      dr_objref,
                                       dr_remote_objref) ;
 
 }
