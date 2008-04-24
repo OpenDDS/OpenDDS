@@ -122,7 +122,8 @@ DataReaderImpl::cleanup ()
 
   topic_servant_->remove_entity_ref ();
   topic_servant_->_remove_ref ();
-  dr_local_objref_.out();
+  dr_local_objref_ = ::DDS::DataReader::_nil();
+  dr_remote_objref_ = DataReaderRemote::_nil();
 }
 
 

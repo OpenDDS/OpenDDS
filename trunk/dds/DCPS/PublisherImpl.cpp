@@ -297,8 +297,8 @@ PublisherImpl::~PublisherImpl (void)
     // otherwise some callbacks resulted from remove_association may lost. 
 
     dw_servant->remove_all_associations();
-    
-    
+
+
     OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
     if (impl.is_nil ())
     {
@@ -452,7 +452,7 @@ PublisherImpl::~PublisherImpl (void)
   // Tell the transport to detach this
   // Publisher/TransportInterface.
   this->detach_transport ();
-  publisher_objref_.out();
+  publisher_objref_ = ::DDS::Publisher::_nil();
 
   return ::DDS::RETCODE_OK;
 }
