@@ -11,11 +11,11 @@
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
-  deadline_missed_(0)
- ,inactive_count_(0)
- ,test_failed_(false)
-  {
-  }
+  inactive_count_(0)
+  ,deadline_missed_(0)
+  ,test_failed_(false)
+{
+}
 
 // Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
@@ -229,4 +229,3 @@ void DataReaderListenerImpl::on_subscription_match (
     ))
   {
   }
-
