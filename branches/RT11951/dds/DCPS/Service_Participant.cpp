@@ -600,7 +600,7 @@ namespace OpenDDS
     void
     Service_Participant::set_repo( DCPSInfo_ptr repo, const RepoKey key)
     {
-      this->repoMap_[ key] = repo;
+      this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
     }
 
     void
