@@ -1,3 +1,9 @@
+Fri Apr 25 14:40:37 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+	  Take ownership of the contained repository when directly
+	  loaded.
+
 Tue Apr 22 20:16:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
@@ -10,7 +16,7 @@ Tue Apr 22 20:16:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 1047:1073 out to branch.
 
-	Wed Apr 16 14:40:16 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+        Wed Apr 16 14:40:16 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * MPC/config/coverage_optional.mpb:
 
@@ -21,7 +27,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Added inheritance of coverage_optional.mpb.
 
-	Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+        Wed Apr 16 14:20:40 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
@@ -109,7 +115,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           allow the capturing of Coverage data (and running all test components on VxWorks).
           RT#12130
 
-	Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+        Tue Apr 15 13:39:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/BuiltInTopic/run_test.pl:
         * tests/DCPS/DCPSInfoRepo/run_test.pl:
@@ -125,7 +131,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           NOTE: this Changelog entry was for revision 1070
 
-	Mon Apr 14 14:30:46 UTC 2008  Ciju John  <johnc at ociweb dot com>
+        Mon Apr 14 14:30:46 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * tests/transport/mcast_simple/PubDriver.cpp:
         * tests/transport/mcast_simple/SubDriver.cpp:
@@ -135,12 +141,12 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/transport/udp_simple/SubDriver.cpp:
           Set trace messages log level to 6. By default this gets compiled out.
 
-	Fri Apr 11 21:58:15 UTC 2008  Ciju John  <johnc at ociweb dot com>
+        Fri Apr 11 21:58:15 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
           Add entry for command-line option "-TransportDebugLevel".
 
-	Fri Apr 11 21:45:54 UTC 2008  Ciju John  <johnc at ociweb dot com>
+        Fri Apr 11 21:45:54 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/Service_Participant.cpp:
           New command-line option "-TransportDebugLevel" for specifying
@@ -281,7 +287,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
           Set trace messages log level to 6. By default this gets compiled out.
 
-	Fri Apr 11 16:09:28 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+        Fri Apr 11 16:09:28 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
@@ -291,13 +297,13 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Added dependency on svc_util.
 
-	Fri Apr 11 14:53:58 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+        Fri Apr 11 14:53:58 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests/run_test.pl:
 
           Fixing test for auto test errors on particular platforms.
 
-	Thu Apr 10 21:45:04 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+        Thu Apr 10 21:45:04 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
         * bin/Process.pm:
@@ -307,7 +313,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Further changes for coverage testing.
 
-	Wed Apr  9 18:57:38 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
+        Wed Apr  9 18:57:38 UTC 2008  Brian Johnson  <johnson_b@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
         * bin/Process.pm:
@@ -316,7 +322,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Changes to make coverage the local process and all
           others remote.
 
-	Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+        Wed Apr  9 15:53:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/DDS_Run_Test.pm:
 
@@ -337,7 +343,7 @@ Wed Apr 16 16:01:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Removed this file.
 
-	Wed Apr  9 14:27:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+        Wed Apr  9 14:27:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/Process.pm:
         * bin/Run_Test.pm:
