@@ -78,8 +78,7 @@ namespace OpenDDS
       ///Constructor
       PublisherImpl (const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
-                     DomainParticipantImpl*       participant,
-                     ::DDS::DomainParticipant_ptr participant_objref);
+                     DomainParticipantImpl*       participant);
 
       ///Destructor
       virtual ~PublisherImpl (void);
@@ -291,9 +290,6 @@ namespace OpenDDS
       DCPSInfo_var                  repository_;
       /// The DomainParticipant servant that owns this Publisher.
       DomainParticipantImpl*        participant_;
-      /// The object reference of the DomainParticipant that owns this
-      /// Publisher.
-      ::DDS::DomainParticipant_var  participant_objref_;
       /// The suspend depth count.
       CORBA::Short                  suspend_depth_count_;
       /// Unique sequence number used when the scope_access = GROUP.

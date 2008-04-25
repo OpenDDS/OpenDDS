@@ -63,8 +63,7 @@ namespace OpenDDS
       //Constructor
       SubscriberImpl (const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
-                      DomainParticipantImpl*       participant,
-                      ::DDS::DomainParticipant_ptr participant_objref);
+                      DomainParticipantImpl*       participant);
 
       //Destructor
       virtual ~SubscriberImpl (void);

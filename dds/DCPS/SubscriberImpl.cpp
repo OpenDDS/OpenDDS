@@ -39,9 +39,7 @@ namespace OpenDDS
 // Implementation skeleton constructor
 SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
 				::DDS::SubscriberListener_ptr a_listener,
-				DomainParticipantImpl*       participant,
-				::DDS::DomainParticipant_ptr
-				participant_objref)
+				DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datareader_qos_(
 			    TheServiceParticipant->initial_DataReaderQos()),
@@ -49,11 +47,8 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
     repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id()))
 {
-  participant_->_add_ref ();
-
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
@@ -66,8 +61,6 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
 // Implementation skeleton destructor
 SubscriberImpl::~SubscriberImpl (void)
 {
-  participant_->_remove_ref ();
-
   // Tell the transport to detach this
   // Subscriber/TransportInterface.
   this->detach_transport ();
@@ -172,13 +165,10 @@ SubscriberImpl::create_datareader (
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
-  DomainParticipantImpl* participant =
-    reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
-
   dr_servant->init (topic_servant,
 		    dr_qos,
 		    a_listener,
-		    participant,
+		    participant_,
 		    this,
 		    dr_obj.in (),
         dr_remote_obj.in ());
@@ -693,7 +683,7 @@ SubscriberImpl::get_participant (
 		   CORBA::SystemException
 		   ))
 {
-  return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
+  return ::DDS::DomainParticipant::_duplicate (participant_);
 }
 
 
