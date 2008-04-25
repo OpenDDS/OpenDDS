@@ -40,8 +40,7 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
             ::DDS::PublisherListener_ptr a_listener,
-            DomainParticipantImpl*       participant,
-            ::DDS::DomainParticipant_ptr participant_objref)
+            DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
@@ -49,13 +48,10 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
     group_id_ (DEFAULT_GROUP_ID),
     repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id())),
     participant_ (participant),
-    participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
     suspend_depth_count_ (0),
     sequence_number_ (),
     aggregation_period_start_ (ACE_Time_Value::zero)
 {
-  participant_->_add_ref ();
-
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
@@ -166,15 +162,11 @@ PublisherImpl::~PublisherImpl (void)
   ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
       servant_to_remote_reference(writer_remote_impl);
 
-
-  DomainParticipantImpl* participant
-    = reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
-
   dw_servant->init (a_topic,
         topic_servant,
         dw_qos,
         a_listener,
-        participant,
+        participant_,
         this,
         dw_obj.in (),
         dw_remote_obj.in ());
@@ -446,10 +438,6 @@ PublisherImpl::~PublisherImpl (void)
   // the publisher can now start creating new publications
   set_deleted (false);
 
-  participant_->_remove_ref ();
-  participant_ = 0;
-
-
   // Tell the transport to detach this
   // Publisher/TransportInterface.
   this->detach_transport ();
@@ -665,7 +653,7 @@ void PublisherImpl::get_qos (
        CORBA::SystemException
        ))
 {
-  return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
+  return ::DDS::DomainParticipant::_duplicate (participant_);
 }
 
 ::DDS::ReturnCode_t PublisherImpl::set_default_datawriter_qos (

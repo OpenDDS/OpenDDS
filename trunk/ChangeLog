@@ -1,3 +1,26 @@
+Fri Apr 25 13:14:29 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Removed passing in participant obj ref to publisher and subscriber.  Also
+          fixed problem where I missed protecting code that wasn't defined for MIN
+          BIT.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Remove unneeded object ref to participant and removed manual
+          reference counting, since the DomainParticipant always exists
+          while the PublisherImpl does.
+
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Remove unneeded object ref to participant and removed manual
+          reference counting, since the DomainParticipant always exists
+          while the SubscriberImpl does.
+          For RT#12130.
+
 Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -7,7 +30,7 @@ Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
 
-          Removed unneeded parameter for init function and unneeded 
+          Removed unneeded parameter for init function and unneeded
           class parameters. Made get_subscriber_servant() to be protected.
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -17,7 +40,7 @@ Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
 
-          Removed unneeded parameter for init function and unneeded 
+          Removed unneeded parameter for init function and unneeded
           class parameters. Made get_publisher_servant() to be protected.
 
         * dds/DCPS/DataWriterImpl.cpp:

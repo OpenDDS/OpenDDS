@@ -116,8 +116,7 @@ namespace OpenDDS
       ACE_NEW_RETURN(pub,
                      PublisherImpl(pub_qos,
                                    a_listener,
-                                   this,
-                                   participant_objref_.in ()),
+                                   this),
                      ::DDS::Publisher::_nil());
 
       if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -248,8 +247,7 @@ namespace OpenDDS
       ACE_NEW_RETURN(sub,
                      SubscriberImpl(sub_qos,
                                     a_listener,
-                                    this,
-                                    participant_objref_.in ()),
+                                    this),
                      ::DDS::Subscriber::_nil());
 
 
@@ -885,6 +883,7 @@ namespace OpenDDS
           }
       }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
       bit_part_topic_ = ::DDS::Topic::_nil();
       bit_topic_topic_ = ::DDS::Topic::_nil();
       bit_pub_topic_ = ::DDS::Topic::_nil();
@@ -894,6 +893,7 @@ namespace OpenDDS
       bit_topic_dr_ = ::DDS::TopicBuiltinTopicDataDataReader::_nil();
       bit_pub_dr_ = ::DDS::PublicationBuiltinTopicDataDataReader::_nil();
       bit_sub_dr_ = ::DDS::SubscriptionBuiltinTopicDataDataReader::_nil();
+#endif
 
       bit_subscriber_ = ::DDS::Subscriber::_nil();
 
