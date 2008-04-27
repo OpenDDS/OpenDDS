@@ -124,6 +124,7 @@ PubDriver::init()
   // The only setting that falls into this category is the local address,
   // which we have saved in a data member.
   tcp_config->local_address_ = this->local_address_;
+  tcp_config->local_address_str_ = this->pub_addr_str_;
 
   // Supply the config object to the TransportImpl object.
   if (transport_impl->configure(config.in()) != 0)
@@ -262,11 +263,11 @@ PubDriver::parse_arg_p(const char* arg, bool& flag)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   std::string pub_id_str(arg_str,0,pos);
-  std::string pub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->pub_addr_str_ = std::string (arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   OpenDDS::DCPS::RepoId pub_id = ACE_OS::atoi(pub_id_str.c_str());
 
-  this->local_address_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->local_address_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   this->publisher_.set_local_publisher(pub_id);
   
@@ -316,7 +317,7 @@ PubDriver::parse_arg_s(const char* arg, bool& flag)
 
   ACE_INET_Addr sub_addr(sub_addr_str.c_str());
 
-  this->publisher_.add_remote_subscriber(sub_id,sub_addr);
+  this->publisher_.add_remote_subscriber(sub_id,sub_addr, sub_addr_str);
 
   flag = true;
 }

@@ -52,6 +52,7 @@ static int init_writer_tranport (OpenDDS::DCPS::TransportImpl_rch& writer_transp
     {
       ACE_INET_Addr writer_address (writer_address_str);
       writer_tcp_config->local_address_ = writer_address;
+      writer_tcp_config->local_address_str_ = writer_address_str;
     }
     // else use default address - OS assigned.
 

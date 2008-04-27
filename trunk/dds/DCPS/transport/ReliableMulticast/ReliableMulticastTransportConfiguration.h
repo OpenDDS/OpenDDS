@@ -14,6 +14,7 @@
 #include "ReliableMulticast_Export.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "ace/INET_Addr.h"
+#include <string>
 
 namespace OpenDDS
 {
@@ -33,7 +34,9 @@ namespace OpenDDS
         ACE_Configuration_Heap& config
         );
 
+      std::string   local_address_str_;
       ACE_INET_Addr local_address_;
+      std::string   multicast_group_address_str_;
       ACE_INET_Addr multicast_group_address_;
       bool receiver_;
       size_t sender_history_size_;

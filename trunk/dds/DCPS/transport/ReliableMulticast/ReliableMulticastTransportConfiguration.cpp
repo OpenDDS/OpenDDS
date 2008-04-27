@@ -41,7 +41,8 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("local_address"), str);
     if (str != ACE_TEXT(""))
     {
-      local_address_.set(str.c_str());
+      this->local_address_str_ = str.c_str ();
+      this->local_address_.set (this->local_address_str_.c_str ());
     }
     else
     {
@@ -54,7 +55,8 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("multicast_group_address"), str);
     if (str != ACE_TEXT(""))
     {
-      multicast_group_address_.set(str.c_str());
+      this->multicast_group_address_str_ = str.c_str ();
+      this->multicast_group_address_.set (multicast_group_address_str_.c_str ());
     }
     else
     {

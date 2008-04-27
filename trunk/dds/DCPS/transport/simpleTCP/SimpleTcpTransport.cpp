@@ -15,6 +15,8 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/debug.h"
+#include <sstream>
 
 
 OpenDDS::DCPS::SimpleTcpTransport::SimpleTcpTransport()
@@ -58,12 +60,21 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
   DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
 
   // Get the remote address from the "blob" in the remote_info struct.
-  NetworkAddress* network_order_address =
-    (NetworkAddress*)(remote_info.data.get_buffer());
+  NetworkAddress network_order_address;
 
-  ACE_INET_Addr remote_address;
-  network_order_address->to_addr(remote_address);
+  ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
 
+  cdr >> network_order_address;
+
+  ACE_INET_Addr remote_address; 
+  network_order_address.to_addr (remote_address);
+
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str " 
+    "\"%s\" remote_address \"%s:%d\"\n",  
+    network_order_address.addr_.c_str (), 
+    remote_address.get_host_name(), 
+    remote_address.get_port_number ()), 2);
+ 
   SimpleTcpDataLink_rch link;
 
   { // guard scope
@@ -206,30 +217,6 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   this->tcp_config_ = tcp_config;
 
 
-  // If the IP address in the INET_Addr is the INADDR_ANY address,
-  // then force the actual IP address to be used by initializing a new
-  // INET_Addr with the hostname from the original one.  If that fails
-  // then something is seriously wrong with the systems networking
-  // setup.
-  if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
-    {
-      ACE_INET_Addr new_addr;
-      int result = new_addr.set (
-				 tcp_config->local_address_.get_port_number (),
-				 tcp_config->local_address_.get_host_name ());
-
-      if (result != 0)
-        ACE_ERROR_RETURN((LM_ERROR,
-			  "(%P|%t) ERROR: SimpleTcpTransport::configure_i"
-			  " could not get host name!!\n"),
-			 -1);
-
-      const char *tmp = 0; // just to help debugging
-      tmp = new_addr.get_host_addr ();
-
-      this->tcp_config_->local_address_ = new_addr;
-    }
-
   // Open the reconnect task
   if (this->con_checker_->open ())
     {
@@ -258,6 +245,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
                        -1);
     }
 
+
   // update the port number (incase port zero was given).
   ACE_INET_Addr address;
   if (this->acceptor_->acceptor ().get_local_addr (address) != 0)
@@ -268,20 +256,39 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 		  ACE_TEXT ("cannot get local addr\n")));
     }
 
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %s:%d\n", 
+      address.get_host_name(), address.get_port_number()), 2);
+
   unsigned short port = address.get_port_number ();
+  std::stringstream out;
+  out << port;
 
-  // update this acceptor's copy.
-  this->tcp_config_->local_address_.set_port_number (port);
-
-  // update the caller's copy.
-  // This is redundant because the local and caller's copy point
-  // to the same place but just in case that changes. ;)
-  if (tcp_config->local_address_.get_ip_address () == INADDR_ANY)
+  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully 
+  // qualified hostname and actual listening port number.
+  if (tcp_config_->local_address_.is_any ())
     {
-      tcp_config->local_address_ = this->tcp_config_->local_address_;
+      const std::string& hostname = get_fully_qualified_hostname ();
+
+      this->tcp_config_->local_address_.set (port, hostname.c_str());
+      this->tcp_config_->local_address_str_ = hostname;
+      this->tcp_config_->local_address_str_ += ":";
+      this->tcp_config_->local_address_str_ += out.str ();
     }
 
-  tcp_config->local_address_.set_port_number (port);
+  // Now we got the actual listening port. Update the port nnmber in the configuration 
+  // if it's 0 originally.
+  if (tcp_config_->local_address_.get_port_number () == 0 && port != 0)
+    {
+      this->tcp_config_->local_address_.set_port_number (port);
+
+      if (! this->tcp_config_->local_address_str_.empty ())
+      {
+        std::string::size_type pos = this->tcp_config_->local_address_str_.find_first_of (':'); 
+        std::string str = this->tcp_config_->local_address_str_.substr (0, pos + 1);
+        str += out.str ();
+        this->tcp_config_->local_address_str_ = str;
+      }
+    }
 
   // Ahhh...  The sweet smell of success!
   return 0;
@@ -364,18 +371,23 @@ OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",6);
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s:%d\n",
-             this->tcp_config_->local_address_.get_host_addr (),
-             this->tcp_config_->local_address_.get_port_number ()), 2);
 
-  NetworkAddress network_order_address(this->tcp_config_->local_address_);
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s\n",
+    this->tcp_config_->local_address_str_.c_str ()), 2);
+
+  //Always use local address string to provide to DCPSInfoRepo for advertisement.
+  NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
+
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
   local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
-    (sizeof(NetworkAddress),
-     sizeof(NetworkAddress),
-     (CORBA::Octet*)(&network_order_address));
+    (len,
+     len,
+     (CORBA::Octet*)(cdr.buffer ()));
 
   return 0;
 }

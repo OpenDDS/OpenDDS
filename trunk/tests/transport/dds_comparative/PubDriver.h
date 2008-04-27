@@ -75,6 +75,7 @@ class PubDriver
     /// The Local Address to be used to configure the single TransportImpl
     /// instance that will be used by our (single instance) Pub object.
     ACE_INET_Addr local_address_;
+    std::string   pub_addr_str_;
 };
 
 #endif

@@ -43,6 +43,7 @@ OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
   if (local_address != "")
   {
     this->local_address_.set (local_address.c_str ());
+    this->local_address_str_ = local_address.c_str();
   }
 
   GET_CONFIG_VALUE (cf, trans_sect, "enable_nagle_algorithm",

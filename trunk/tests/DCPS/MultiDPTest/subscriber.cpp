@@ -163,6 +163,7 @@ void init_dcps_objects (int i)
   {
     ACE_INET_Addr reader_address (reader_address_str[i].c_str());
     reader_tcp_config->local_address_ = reader_address;
+    reader_tcp_config->local_address_str_ = reader_address_str[i].c_str();
   }
   // else use default address - OS assigned.
 

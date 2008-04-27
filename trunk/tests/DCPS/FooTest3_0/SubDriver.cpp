@@ -188,6 +188,7 @@ SubDriver::init(int& argc, char* argv[])
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = ACE_INET_Addr (this->sub_addr_.c_str ());
+  tcp_config->local_address_str_ = this->sub_addr_.c_str ();
 
   // Supply the config object to the TranportImpl object via its configure()
   // method.
@@ -354,12 +355,18 @@ SubDriver::run()
       publications[i].remote_id_                = ids[i];
       publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
-      OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+      OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
+
+      ACE_OutputCDR cdr;
+      cdr << network_order_address;
+      size_t len = cdr.total_length ();
+
       publications[i].remote_data_.data
-	= OpenDDS::DCPS::TransportInterfaceBLOB
-	(sizeof(OpenDDS::DCPS::NetworkAddress),
-	 sizeof(OpenDDS::DCPS::NetworkAddress),
-	 (CORBA::Octet*)(&network_order_address));
+        = OpenDDS::DCPS::TransportInterfaceBLOB
+        (len,
+        len,
+        (CORBA::Octet*)(cdr.buffer ()));
+
     }
 
   Pub_Invoke_Task pub_invoke_task;
@@ -441,10 +448,10 @@ SubDriver::parse_pub_arg(const std::string& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }

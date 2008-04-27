@@ -92,6 +92,7 @@ int init_tranport ()
 
       ACE_INET_Addr reader_address (reader_address_str.c_str ());
       reader_udp_config->local_address_ = reader_address;
+      reader_udp_config->local_address_str_ = reader_address_str;
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -118,6 +119,7 @@ int init_tranport ()
         {
           ACE_INET_Addr reader_address (reader_address_str.c_str ());
           reader_tcp_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_str_ = reader_address_str;
         }
         // else use default address - OS assigned.
 
@@ -153,6 +155,7 @@ int init_tranport ()
 
       ACE_INET_Addr writer_address (writer_address_str.c_str ());
       writer_udp_config->local_address_ = writer_address;
+      writer_udp_config->local_address_str_ = writer_address_str;
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)
         {
@@ -178,6 +181,7 @@ int init_tranport ()
         {
           ACE_INET_Addr writer_address (writer_address_str.c_str());
           writer_tcp_config->local_address_ = writer_address;
+          writer_tcp_config->local_address_str_ = writer_address_str;
         }
         // else use default address - OS assigned.
 
