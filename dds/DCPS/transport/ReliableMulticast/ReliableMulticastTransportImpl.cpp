@@ -12,20 +12,6 @@
 #include "ReliableMulticastTransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
-namespace
-{
-  struct TransportInterfaceData
-  {
-    TransportInterfaceData(const ACE_INET_Addr& address)
-      : version_(1)
-      , multicast_group_address_(address)
-    {
-    }
-
-    char version_;
-    OpenDDS::DCPS::NetworkAddress multicast_group_address_;
-  };
-}
 
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
@@ -33,14 +19,21 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
   int connect_as_publisher
   )
 {
-  OpenDDS::DCPS::ReliableMulticastDataLink_rch data_link;
-  const TransportInterfaceData& transport_interface_data =
-    reinterpret_cast<const TransportInterfaceData&>(*(remote_info.data.get_buffer()));
+  // Get the remote address from the "blob" in the remote_info struct.
+  NetworkAddress network_order_address;
+
+  ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
+
+  cdr >> network_order_address;
+
   ACE_INET_Addr multicast_group_address;
 
-  transport_interface_data.multicast_group_address_.to_addr(
-    multicast_group_address
-    );
+  network_order_address.to_addr(multicast_group_address);
+
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)ReliableMulticastTransportImpl::find_or_create_datalink remote addr str \"%s\"\n",  
+    network_order_address.addr_.c_str ()), 2);
+
+  OpenDDS::DCPS::ReliableMulticastDataLink_rch data_link;
 
   ReliableMulticastDataLinkMap::iterator iter =
     data_links_.find(multicast_group_address);
@@ -115,15 +108,21 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::shutdown_i()
 int
 OpenDDS::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterfaceInfo& local_info) const
 {
-  TransportInterfaceData transport_interface_data(configuration_->multicast_group_address_);
+  NetworkAddress network_order_address(configuration_->multicast_group_address_str_);
 
-  local_info.transport_id = 999;
-  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB(
-    sizeof(transport_interface_data),
-    sizeof(transport_interface_data),
-    reinterpret_cast<CORBA::Octet*>(&transport_interface_data)
-    );
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
+  // Allow DCPSInfo to check compatibility of transport implemenations.
+  local_info.transport_id = 999; // TBD Change magic number into a enum or constant value.
+  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
+    (len,
+     len,
+     (CORBA::Octet*)(cdr.buffer ()));
+
   return 0;
+
 }
 
 void

@@ -161,6 +161,7 @@ PubDriver::init()
 
   //mcast_config->local_address_ = this->if_addr_;
   mcast_config->multicast_group_address_ = this->pub_addr_;
+  mcast_config->multicast_group_address_str_ = this->pub_addr_str_;
 
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -194,12 +195,17 @@ PubDriver::run()
   subscriptions[0].remote_id_                = this->sub_id_;
   subscriptions[0].remote_data_.transport_id = 3;  // TBD - not right
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
 
-  subscriptions[0].remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
-                       (sizeof(OpenDDS::DCPS::NetworkAddress),
-                        sizeof(OpenDDS::DCPS::NetworkAddress),
-                        (CORBA::Octet*)(&network_order_address));
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
+  subscriptions[0].remote_data_.data
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimplePublisher object.\n"));
@@ -272,10 +278,10 @@ PubDriver::parse_pub_arg(const std::string& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }

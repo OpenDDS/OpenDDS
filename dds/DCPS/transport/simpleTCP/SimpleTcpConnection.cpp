@@ -152,19 +152,38 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   // in this case) will supply its listening ACE_INET_Addr as the first
   // message it sends to the socket.  This is a one-way connection
   // establishment protocol message.
-  NetworkAddress network_order_address;
 
-  if (this->peer().recv_n((char*)(&network_order_address),
-                          sizeof(network_order_address)) == -1)
+  ACE_UINT32 nlen = 0;
+  if (this->peer().recv_n(&nlen,
+                          sizeof(ACE_UINT32)) == -1)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to receive the remote_address "
+         ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to receive the length of address string "
                         "from the remote (active) side of the connection."
                         " %p\n", "recv_n"),
-                       -1);
+                         -1);
+    }
+ 
+  ACE_UINT32 len = ntohl(nlen);
+
+  char * buf = new char [len];
+
+  if (this->peer().recv_n(buf,
+                          len) != len)
+    {
+         ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to receive the address string "
+                        "from the remote (active) side of the connection."
+                        " %p\n", "recv_n"),
+                         -1);
     }
 
+  NetworkAddress network_order_address(buf);
+
   network_order_address.to_addr(this->remote_address_);
+
+  delete buf;
+
 
 //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
 
@@ -344,18 +363,32 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  NetworkAddress network_order_address(local_address);
+  ACE_UINT32 len = tcp_config_->local_address_str_.length () + 1;
 
-  if (this->peer().send_n((char*)(&network_order_address),
-                          sizeof(network_order_address)) == -1)
+  ACE_UINT32 nlen = htonl(len);
+
+  if (this->peer().send_n( &nlen,
+                           sizeof (ACE_UINT32)) == -1)
     {
       // TBD later - Anything we are supposed to do to close the connection.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to send our local_address_ to "
+                        "(%P|%t) ERROR: Unable to send address string length to "
                         "the passive side to complete the active connection "
                         "establishment.\n"),
                        -1);
     }
+
+  if (this->peer().send_n( tcp_config_->local_address_str_.c_str(),
+                           len)  == -1)
+    {
+      // TBD later - Anything we are supposed to do to close the connection.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to send our address to "
+                        "the passive side to complete the active connection "
+                        "establishment.\n"),
+                       -1);
+    }
+
 
 //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv
 
