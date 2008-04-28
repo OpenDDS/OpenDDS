@@ -76,8 +76,6 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
-//Note: caller should NOT assign to DataReader_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (
 				   ::DDS::TopicDescription_ptr a_topic_desc,
@@ -234,12 +232,12 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   DataReaderImpl* dr_servant
     = reference_to_servant<DataReaderImpl> (a_datareader);
 
-  if (dr_servant->get_subscriber () != this)
-    {
+  if (::DDS::Subscriber_var(dr_servant->get_subscriber ()).in() != this)
+  {
       ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
           " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
+  }
 
   int loans = dr_servant->num_zero_copies ();
   if (0 != loans)

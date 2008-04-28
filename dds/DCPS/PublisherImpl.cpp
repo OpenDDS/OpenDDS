@@ -64,7 +64,9 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
 // Implementation skeleton destructor
 PublisherImpl::~PublisherImpl (void)
 {
-
+  // Tell the transport to detach this
+  // Publisher/TransportInterface.
+  this->detach_transport ();
 
   //The datawriters should be deleted already before calling delete
   //publisher.
@@ -77,8 +79,6 @@ PublisherImpl::~PublisherImpl (void)
     }
 }
 
-//Note: caller should NOT assign to DataWriter_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 ::DDS::DataWriter_ptr PublisherImpl::create_datawriter (
               ::DDS::Topic_ptr a_topic,
               const ::DDS::DataWriterQos & qos,
@@ -228,12 +228,12 @@ PublisherImpl::~PublisherImpl (void)
   DataWriterImpl* dw_servant
     = reference_to_servant <DataWriterImpl> (a_datawriter);
 
-  if (dw_servant->get_publisher () != this)
-    {
-      ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
-          " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
+  if (::DDS::Publisher_var(dw_servant->get_publisher()).in()!= this)
+  {
+    ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
+        " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
@@ -437,10 +437,6 @@ PublisherImpl::~PublisherImpl (void)
 
   // the publisher can now start creating new publications
   set_deleted (false);
-
-  // Tell the transport to detach this
-  // Publisher/TransportInterface.
-  this->detach_transport ();
 
   return ::DDS::RETCODE_OK;
 }

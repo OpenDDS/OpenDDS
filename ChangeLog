@@ -1,14 +1,32 @@
+Mon Apr 28 15:06:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Moved code for adding new memory to a var, to avoid potential memory leak.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Moved call to detatch_transport back to destructor, until I can look at its
+          effects. Removed wrong function comment. Put dw_servant->get_publisher() 
+          inside a var, since the function duplicates the ptr.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Put dw_servant->get_publisher() inside a var, since the function duplicates
+          the ptr.
+          For RT#12161.
+
 Mon Apr 28 05:16:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
-          Fixed a compilation warning. 
+          Fixed a compilation warning.
 
 Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         The main changes are using the address string instead of IP and port for
-        pub/sub endpoint addresss advertisement and fixed problem that default 
-        local_address configurations do not work when hostname is resolved as loopback 
+        pub/sub endpoint addresss advertisement and fixed problem that default
+        local_address configurations do not work when hostname is resolved as loopback
         ip address. (See RT12134).
 
         The address string advertisement changes were made to support the IPv6 as well,
@@ -152,7 +170,7 @@ Fri Apr 25 13:14:29 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
           Remove unneeded object ref to participant and removed manual
           reference counting, since the DomainParticipant always exists
           while the SubscriberImpl does.
-          For RT#12130.
+          For RT#12161.
 
 Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
@@ -194,7 +212,7 @@ Thu Apr 24 20:16:41 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/SubscriberImpl.cpp:
 
           Removed unneeded object ref and function to set.
-          For RT#12130.
+          For RT#12161.
 
 Thu Apr 24 17:10:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
@@ -216,7 +234,7 @@ Thu Apr 24 17:10:00 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/SubscriberImpl.cpp:
 
           Changed to set _vars to _nil() instead of missusing the out() function.
-          For RT#12130.
+          For RT#12161.
 
 Thu Apr 24 14:23:53 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
@@ -284,7 +302,7 @@ Wed Apr 23 16:44:57 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
           Change to store off servant right after storing off allocated
           memory.
-          For RT#12130.
+          For RT#12161.
 
 Wed Apr 23 16:31:39 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
@@ -431,7 +449,7 @@ Wed Apr 23 12:13:42 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
           Removed servant to listeners and making it clearer that the _var
           was in control of the heap allocated object.
-          For RT#12130.
+          For RT#12161.
 
 Tue Apr 22 17:09:24 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
