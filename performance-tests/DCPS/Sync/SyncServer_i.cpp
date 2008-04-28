@@ -38,11 +38,11 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
       CORBA::Object_var obj = root_poa_->id_to_reference (oid);
       ::Sync::Server_var sync_server_obj = Sync::Server::_narrow (obj);
 
-      std::string ior = orb_->object_to_string (sync_server_obj.in ());
+      CORBA::String_var ior = orb_->object_to_string (sync_server_obj.in ());
       CORBA::Object_var table_obj =
         orb_->resolve_initial_references("IORTable");
       table_ = IORTable::Table::_narrow(table_obj.in());
-      table_->bind ("SyncServer", ior.c_str());
+      table_->bind ("SyncServer", ior.in());
 
       // activate task
       if (this->activate (THR_NEW_LWP | THR_JOINABLE |THR_INHERIT_SCHED

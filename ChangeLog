@@ -1,3 +1,11 @@
+Mon Apr 28 18:54:44 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+          Memory was being lost since the memory returned by object_to_string was
+          only being copied (std::string ctor), so changed to CORBA::String_var.
+
 Mon Apr 28 15:06:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
@@ -7,7 +15,7 @@ Mon Apr 28 15:06:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/PublisherImpl.cpp:
 
           Moved call to detatch_transport back to destructor, until I can look at its
-          effects. Removed wrong function comment. Put dw_servant->get_publisher() 
+          effects. Removed wrong function comment. Put dw_servant->get_publisher()
           inside a var, since the function duplicates the ptr.
 
         * dds/DCPS/SubscriberImpl.cpp:

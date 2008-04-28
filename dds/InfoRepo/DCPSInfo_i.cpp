@@ -291,10 +291,10 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
 
   if (um_)
     {
-      std::string callback = orb_->object_to_string (publication);
+      CORBA::String_var callback = orb_->object_to_string (publication);
 
       UpdateManager::UWActor actor (domainId, pubId, topicId, participantId, DataWriter
-                                    , callback.c_str()
+                                    , callback.in()
                                     , const_cast< ::DDS::PublisherQos &>(publisherQos)
                                     , const_cast< ::DDS::DataWriterQos &>(qos)
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
@@ -489,10 +489,10 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
 
   if (um_)
     {
-      std::string callback = orb_->object_to_string (subscription);
+      CORBA::String_var callback = orb_->object_to_string (subscription);
 
       UpdateManager::URActor actor (domainId, subId, topicId, participantId, DataReader
-                                    , callback.c_str()
+                                    , callback.in()
                                     , const_cast< ::DDS::SubscriberQos &>(subscriberQos)
                                     , const_cast< ::DDS::DataReaderQos &>(qos)
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
