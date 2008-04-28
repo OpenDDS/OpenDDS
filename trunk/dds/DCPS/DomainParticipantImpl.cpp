@@ -259,12 +259,12 @@ namespace OpenDDS
       ::DDS::Subscriber_ptr sub_obj
         = servant_to_reference (sub);
 
+      Subscriber_Pair pair (sub, sub_obj, NO_DUP);
+
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->subscribers_protector_,
                         ::DDS::Subscriber::_nil());
-
-      Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
       if (OpenDDS::DCPS::insert(subscribers_, pair) == -1)
         {
