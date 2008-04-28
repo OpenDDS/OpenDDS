@@ -169,7 +169,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   char * buf = new char [len];
 
   if (this->peer().recv_n(buf,
-                          len) != len)
+                          len) == -1)
     {
          ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Unable to receive the address string "

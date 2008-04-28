@@ -1,20 +1,27 @@
-Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com
+Mon Apr 28 05:16:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Fixed a compilation warning. 
+
+Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         The main changes are using the address string instead of IP and port for
-        pub/sub endpoint addresss advertisement and fix for test failure with default 
-        configuration when hostname is resolved as loopback ip address. (See RT12134).
-        
+        pub/sub endpoint addresss advertisement and fixed problem that default 
+        local_address configurations do not work when hostname is resolved as loopback 
+        ip address. (See RT12134).
+
         The address string advertisement changes were made to support the IPv6 as well,
         but more tests need be done. e.g. test on pure ipv6 machine.
-        
+
         * dds/DCPS/transport/framework/NetworkAddress.h:
         * dds/DCPS/transport/framework/NetworkAddress.inl:
         * dds/DCPS/transport/framework/NetworkAddress.cpp:
 
-          Made NetworkAddress struct a wrapper of the stringified address and added 
-          serialize and deserialize methods. A reserved byte is added for the version 
+          Made NetworkAddress struct a wrapper of the stringified address and added
+          serialize and deserialize methods. A reserved byte is added for the version
           support in the future.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
@@ -25,17 +32,17 @@ Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
 
           Added local_address_str_ data member for address advertisement. The address string
-          is either from the configuration or uses code default. The acceptor defaults to 
-          listening on INADDR_ANY if the local_address_ is not configured, but the fully 
-          qualified hostname with the port number randomly picked by OS is sent to 
-          DCPSInfoRepo for endpoint advertisement. This would fix the problem that 
-          
+          is either from the configuration or uses code default. The acceptor defaults to
+          listening on INADDR_ANY if the local_address_ is not configured, but the fully
+          qualified hostname with the port number randomly picked by OS is sent to
+          DCPSInfoRepo for endpoint advertisement. This would fix the problem that
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
-          Made connection send local address string instead of whole NetworkAddress after 
+          Made connection send local address string instead of whole NetworkAddress after
           connection establishment. This simplifies the implementation which does not need
           serialize and deserialize the NetworkAddress.
-          
+
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.h:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
@@ -45,8 +52,8 @@ Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.h:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
 
-          Added multicast_group_address_str_ which is either from configuration file or 
-          uses code default. The default multicast group address is 
+          Added multicast_group_address_str_ which is either from configuration file or
+          uses code default. The default multicast group address is
           ACE_DEFAULT_MULTICAST_ADDR:ACE_DEFAULT_MULTICAST_PORT.
 
         * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
