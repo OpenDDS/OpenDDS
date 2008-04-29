@@ -18,7 +18,7 @@
 
 #include <map>
 #include <list>
-#include <vector>
+#include <memory>
 
 
 namespace OpenDDS
@@ -27,6 +27,7 @@ namespace OpenDDS
   {
     class DomainParticipantImpl;
     class DataWriterImpl;
+    class DataDurabilityCache;
 
     /// Information about a DataWriter
     struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
@@ -272,6 +273,11 @@ namespace OpenDDS
     */
     ::DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
 
+      /// Get the data durability cache corresponding to the given
+      /// DurabilityQosPolicy and sample list depth.
+      DataDurabilityCache * get_data_durability_cache (
+        ::DDS::DurabilityQosPolicy const & durability);
+
     private:
       /// Publisher QoS policy list.
       ::DDS::PublisherQos           qos_;
@@ -318,6 +324,14 @@ namespace OpenDDS
 
       /// The catched available data while suspending.
       DataSampleList                available_data_list_ ;
+
+    private:
+
+      /// The @c TRANSIENT data durability cache.
+      std::auto_ptr<DataDurabilityCache> transient_data_cache_;
+
+      /// The @c PERSISTENT data durability cache.
+      std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
 
     };
 

@@ -28,13 +28,14 @@ namespace OpenDDS
 #endif
 
 WriteDataContainer::WriteDataContainer(
-  char const * topic_name,
-  char const * type_name,
   CORBA::Long    depth,
   bool           should_block ,
   ACE_Time_Value max_blocking_time,
   size_t         n_chunks,
-  ::DDS::DurabilityQosPolicy const & durability)
+  char const * topic_name,
+  char const * type_name,
+  DataDurabilityCache* durability_cache,
+  ::DDS::DurabilityServiceQosPolicy const & durability_service)
   : depth_ (depth),
     should_block_ (should_block),
     max_blocking_time_ (max_blocking_time),
@@ -46,11 +47,10 @@ WriteDataContainer::WriteDataContainer(
 				      sizeof (OpenDDS::DCPS::TransportSendElement)),
     shutdown_ (false),
     next_handle_(1),
-    durability_cache_ (
-      TheServiceParticipant->make_data_durability_cache (topic_name,
-                                                         type_name,
-                                                         durability,
-                                                         depth))
+    topic_name_  (topic_name),
+    type_name_ (type_name),
+    durability_cache_ (durability_cache),
+    durability_service_ (durability_service)
 {
 
   if (DCPS_debug_level >= 2)
@@ -76,6 +76,29 @@ WriteDataContainer::~WriteDataContainer()
                ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
                ACE_TEXT("The container has not be cleaned.\n")));
   }
+
+  // ------------------------------------------------------------
+  // Transfer remaining unsent data to data DURABILITY cache.
+  // ------------------------------------------------------------
+  if (this->durability_cache_)
+  {
+    // A data durability cache is available for TRANSIENT or
+    // PERSISTENT data durability.  Cache the unsent data samples.
+
+    if (this->durability_cache_->insert (
+          this->topic_name_,
+          this->type_name_,
+          this->unsent_data_,
+          this->durability_service_) != ::DDS::RETCODE_OK)
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
+                  ACE_TEXT("failed to make data durable for ")
+                  ACE_TEXT("(topic, type) = (%s, %s)\n"),
+                  this->topic_name_,
+                  this->type_name_));      
+  }
+  // -----------------------------------------------------------
 }
 
 
@@ -104,28 +127,6 @@ WriteDataContainer::enqueue(
   instance_list.enqueue_tail_next_instance_sample (sample);
 
   return ::DDS::RETCODE_OK;
-}
-
-::DDS::ReturnCode_t
-WriteDataContainer::durable_enqueue(char const * topic_name,
-                                    char const * type_name,
-                                    DataSample * sample,
-                                    ::DDS::Time_t const & source_timestamp)
-{
-  ::DDS::ReturnCode_t r = ::DDS::RETCODE_OK;
-
-  if (this->durability_cache_)
-  {
-    // A data durability cache is available for TRANSIENT or
-    // PERSISTENT data durability.  Cache the data sample.
-
-    r = this->durability_cache_->enqueue (topic_name,
-                                          type_name,
-                                          sample,
-                                          source_timestamp);
-  }
-
-  return r;
 }
 
 ::DDS::ReturnCode_t
@@ -984,11 +985,11 @@ WriteDataContainer::send_durable_data (
 {
   return
     this->durability_cache_
-    ? this->durability_cache_->send_durable_data (topic_name,
-                                                  type_name,
-                                                  this,
-                                                  data_writer,
-                                                  lifespan)
+    ? this->durability_cache_->send_data (topic_name,
+                                          type_name,
+                                          this,
+                                          data_writer,
+                                          lifespan)
     : true;
 }
 

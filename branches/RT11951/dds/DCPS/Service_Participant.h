@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
-#define TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
+#ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
+#define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureS.h"
@@ -12,14 +12,12 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
-#include "tao/PortableServer/Root_POA.h"
+#include "tao/PortableServer/PortableServer.h"
 
 #include "ace/Task.h"
-#include "ace/Auto_Ptr.h"
 #include "ace/Configuration.h"
 
 #include <map>
-#include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -33,8 +31,6 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    class DataDurabilityCache;
-
     /**
     * @class Service_Participant
     *
@@ -124,6 +120,7 @@ namespace OpenDDS
       ::DDS::TransportPriorityQosPolicy      initial_TransportPriorityQosPolicy () const;
       ::DDS::LifespanQosPolicy               initial_LifespanQosPolicy () const;
       ::DDS::DurabilityQosPolicy             initial_DurabilityQosPolicy () const;
+      ::DDS::DurabilityServiceQosPolicy      initial_DurabilityServiceQosPolicy () const;
       ::DDS::PresentationQosPolicy           initial_PresentationQosPolicy () const;
       ::DDS::DeadlineQosPolicy               initial_DeadlineQosPolicy () const;
       ::DDS::LatencyBudgetQosPolicy          initial_LatencyBudgetQosPolicy () const;
@@ -232,14 +229,6 @@ namespace OpenDDS
        */
       int init_bit_transport_impl ( RepoKey repo = DEFAULT_REPO);
 
-      /// Make a data durability cache corresponding to the given
-      /// DurabilityQosPolicy and sample list depth.
-      DataDurabilityCache * make_data_durability_cache (
-        char const * topic_name,
-        char const * type_name,
-        ::DDS::DurabilityQosPolicy const & durability,
-        ::CORBA::Long depth);
-
     private:
 
       /** Initalize default qos **/
@@ -310,6 +299,7 @@ namespace OpenDDS
       ::DDS::TransportPriorityQosPolicy      initial_TransportPriorityQosPolicy_;
       ::DDS::LifespanQosPolicy               initial_LifespanQosPolicy_;
       ::DDS::DurabilityQosPolicy             initial_DurabilityQosPolicy_;
+      ::DDS::DurabilityServiceQosPolicy      initial_DurabilityServiceQosPolicy_;
       ::DDS::PresentationQosPolicy           initial_PresentationQosPolicy_;
       ::DDS::DeadlineQosPolicy               initial_DeadlineQosPolicy_;
       ::DDS::LatencyBudgetQosPolicy          initial_LatencyBudgetQosPolicy_;
@@ -369,13 +359,6 @@ namespace OpenDDS
       /// The configuration object that imports the configuration file.
       ACE_Configuration_Heap cf_;
 
-    private:
-
-      /// The @c TRANSIENT data durability cache.
-      DataDurabilityCache * transient_data_cache_;
-
-      /// The @c PERSISTENT data durability cache.
-      DataDurabilityCache * persistent_data_cache_;
     };
 
 #   define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()

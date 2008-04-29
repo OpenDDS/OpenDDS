@@ -103,8 +103,6 @@ namespace OpenDDS
        * No default constructor, must be initialized.
        */
       WriteDataContainer(
-        char const * topic_name, // Topic name.
-        char const * type_name,  // Topic type name.
         /// Depth of the instance sample queue.
         CORBA::Long    depth,
         /// Should the write wait for available space?
@@ -114,9 +112,14 @@ namespace OpenDDS
         /// The number of chunks that the DataSampleListElementAllocator
         /// needs allocate.
         size_t         n_chunks,
-        /// The data durability policy to be used when publishing
-        /// samples.
-        ::DDS::DurabilityQosPolicy const & durability
+        /// Topic name.
+        char const *   topic_name,
+        /// Type name.
+        char const *   type_name,
+        /// The data durability cache for unsent data.
+        DataDurabilityCache * durability_cache,
+        /// DURABILITY_SERVICE QoS specific to the DataWriter.
+        ::DDS::DurabilityServiceQosPolicy const & durability_service
         );
 
       /**
@@ -133,17 +136,6 @@ namespace OpenDDS
         enqueue (
           DataSampleListElement* sample,
           ::DDS::InstanceHandle_t instance);
-
-      /**
-       * Durably enqueue the data sample so that it outlives the
-       * DataWriter.  This is no-op if the DURABILITY QoS is not set
-       * to TRANSIENT or PERSISTENT.
-       */
-      ::DDS::ReturnCode_t
-      durable_enqueue (char const * topic_name,
-                       char const * type_name,
-                       DataSample * sample,
-                       ::DDS::Time_t const & source_timestamp);
 
       /**
        * Create a resend list with the copies of all current "sending"
@@ -299,6 +291,13 @@ namespace OpenDDS
 
     private:
 
+      // --------------------------
+      // Preventing copying
+      // --------------------------
+      WriteDataContainer (WriteDataContainer const &);
+      WriteDataContainer & operator= (WriteDataContainer const &);
+      // --------------------------
+
       void copy_and_append (DataSampleList& list, 
                             const DataSampleList& appended, 
                             const OpenDDS::DCPS::ReaderIdSeq& rds);
@@ -416,6 +415,12 @@ namespace OpenDDS
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t next_handle_;
 
+      /// Topic name.
+      char const * const topic_name_;
+
+      /// Type name.
+      char const * const type_name_;
+
       /// Pointer to the data durability cache.
       /**
        * This a pointer to the data durability cache owned by the
@@ -423,7 +428,11 @@ namespace OpenDDS
        * a singleton.
        */
       DataDurabilityCache * const durability_cache_;
-    } ;
+
+      /// DURABILITY_SERVICE QoS specific to the DataWriter.
+      ::DDS::DurabilityServiceQosPolicy const & durability_service_;
+
+    };
 
   } /// namespace OpenDDS
 } /// namespace DCPS

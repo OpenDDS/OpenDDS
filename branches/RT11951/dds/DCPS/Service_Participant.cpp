@@ -7,8 +7,6 @@
 #include "BuiltInTopicUtils.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/TransientDataDurabilityCache.h"
-// #include "dds/DCPS/PersistentDataDurabilityCache.h"
 
 #include "tao/ORB_Core.h"
 #include "tao/TAO_Singleton.h"
@@ -69,9 +67,7 @@ namespace OpenDDS
                     true
 #endif
                     ),
-      bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC),
-      transient_data_cache_ (0),
-      persistent_data_cache_ (0)
+      bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
     {
       this->set_repo_domain( ANY_DOMAIN, DEFAULT_REPO);
       initialize();
@@ -79,8 +75,6 @@ namespace OpenDDS
 
     Service_Participant::~Service_Participant ()
     {
-      delete this->transient_data_cache_;
-      delete this->persistent_data_cache_;
     }
 
     Service_Participant *
@@ -444,6 +438,20 @@ namespace OpenDDS
       initial_DurabilityQosPolicy_.service_cleanup_delay.sec = ::DDS::DURATION_ZERO_SEC;
       initial_DurabilityQosPolicy_.service_cleanup_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
 
+      initial_DurabilityServiceQosPolicy_.service_cleanup_delay.sec =
+        ::DDS::DURATION_ZERO_SEC;
+      initial_DurabilityServiceQosPolicy_.service_cleanup_delay.nanosec =
+        ::DDS::DURATION_ZERO_NSEC;
+      initial_DurabilityServiceQosPolicy_.history_kind =
+        ::DDS::KEEP_LAST_HISTORY_QOS;
+      initial_DurabilityServiceQosPolicy_.history_depth = 1;
+      initial_DurabilityServiceQosPolicy_.max_samples =
+        ::DDS::LENGTH_UNLIMITED;
+      initial_DurabilityServiceQosPolicy_.max_instances =
+        ::DDS::LENGTH_UNLIMITED;
+      initial_DurabilityServiceQosPolicy_.max_samples_per_instance =
+        ::DDS::LENGTH_UNLIMITED;
+
       initial_PresentationQosPolicy_.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
       initial_PresentationQosPolicy_.coherent_access = 0;
       initial_PresentationQosPolicy_.ordered_access = 0;
@@ -490,6 +498,7 @@ namespace OpenDDS
 
       initial_TopicQos_.topic_data = initial_TopicDataQosPolicy_;
       initial_TopicQos_.durability = initial_DurabilityQosPolicy_;
+      initial_TopicQos_.durability_service = initial_DurabilityServiceQosPolicy_;
       initial_TopicQos_.deadline = initial_DeadlineQosPolicy_;
       initial_TopicQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
       initial_TopicQos_.liveliness = initial_LivelinessQosPolicy_;
@@ -502,6 +511,7 @@ namespace OpenDDS
       initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
 
       initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
+      initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
       initial_DataWriterQos_.deadline = initial_DeadlineQosPolicy_;
       initial_DataWriterQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
       initial_DataWriterQos_.liveliness = initial_LivelinessQosPolicy_;
@@ -1162,103 +1172,6 @@ namespace OpenDDS
       return 0;
     }
 
-    DataDurabilityCache *
-    Service_Participant::make_data_durability_cache (
-      char const * topic_name,
-      char const * type_name,
-      ::DDS::DurabilityQosPolicy const & durability,
-      ::CORBA::Long depth)
-    {
-      DataDurabilityCache * cache = 0;
-
-      ::DDS::DurabilityQosPolicyKind const kind =
-        durability.kind;
-
-      ::DDS::Duration_t const service_cleanup_delay =
-          durability.service_cleanup_delay;
-
-      if (kind == ::DDS::TRANSIENT_DURABILITY_QOS)
-      {
-        {
-          ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
-                            guard,
-                            this->factory_lock_,
-                            0);
-
-          if (this->transient_data_cache_ == 0)
-            {
-              this->transient_data_cache_ =
-                new TransientDataDurabilityCache;
-            }
-        }
-
-        // We assume only one DataWriter will ever publish data for a
-        // given instance (identified uniquely by topic name and type
-        // name).
-        if (this->transient_data_cache_->set_instance_characteristics (
-              topic_name,
-              type_name,
-              durability.service_cleanup_delay,
-              depth))
-        {
-          cache = this->transient_data_cache_;
-        }
-        else
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT ("OpenDDS (%P|%t) ERROR: ")
-                      ACE_TEXT ("Unable to set TRANSIENT ")
-                      ACE_TEXT ("data durability cache ")
-                      ACE_TEXT ("characteristics for topic %s and type %s\n"),
-                      topic_name,
-                      type_name));
-        }
-        
-      }
-      else if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("OpenDDS (%P|%t) ERROR: PERSISTENT durability ")
-                    ACE_TEXT ("is temporarily disabled.\n")));
-                    
-//         {
-//           ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
-//                             guard,
-//                             this->factory_lock_,
-//                             0);
-
-//           if (this->persistent_data_cache_ == 0)
-//             {
-//               this->persistent_data_cache_ =
-//                 new PersistentDataDurabilityCache;
-//             }
-//         }
-
-//         // We assume only one DataWriter will ever publish data for a
-//         // given instance (identified uniquely by topic name and type
-//         // name).
-//         if (this->persistent_data_cache_->set_instance_characteristics (
-//               topic_name,
-//               type_name,
-//               durability.service_cleanup_delay,
-//               depth))
-//         {
-//           cache = this->persistent_data_cache_;
-//         }
-//         else
-//         {
-//           ACE_ERROR ((LM_ERROR,
-//                       ACE_TEXT ("OpenDDS (%P|%t) ERROR: ")
-//                       ACE_TEXT ("Unable to set PERSISTENT ")
-//                       ACE_TEXT ("data durability cache ")
-//                       ACE_TEXT ("characteristics for topic %s and type %s\n"),
-//                       topic_name,
-//                       type_name));
-//         }
-      }
-     
-      return cache;
-    }
 
   } // namespace DCPS
 } // namespace OpenDDS

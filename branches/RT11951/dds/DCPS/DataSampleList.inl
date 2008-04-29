@@ -1,3 +1,6 @@
+// -*- C++ -*-
+
+#include <algorithm>
 
 namespace OpenDDS
 {
@@ -54,6 +57,32 @@ namespace OpenDDS
           sample_->release ();
         }
     }
+
+    ACE_INLINE
+    DataSampleListElement &
+    DataSampleListElement::operator= (DataSampleListElement const & rhs)
+    {
+      sample_ = rhs.sample_->duplicate ();
+      publication_id_ = rhs.publication_id_;
+      num_subs_ = rhs.num_subs_; 
+      for (CORBA::ULong i = 0; i < num_subs_; ++i)
+        subscription_ids_[i] = rhs.subscription_ids_[i];
+      group_id_ = rhs.group_id_;
+      previous_sample_ = rhs.previous_sample_;
+      next_sample_ = rhs.next_sample_;
+      next_instance_sample_ = rhs.next_instance_sample_;
+      next_send_sample_ = rhs.next_send_sample_;
+      previous_send_sample_ = rhs.previous_send_sample_;
+      send_listener_ = rhs.send_listener_;
+      space_available_ = rhs.space_available_;
+      handle_ = rhs.handle_;
+      transport_send_element_allocator_ = rhs.transport_send_element_allocator_;
+
+      return *this;
+    }
+
+
+    // --------------------------------------------
  
     ACE_INLINE
     DataSampleList::DataSampleList() 
@@ -234,6 +263,20 @@ namespace OpenDDS
           stale->next_instance_sample_ = 0;
           return true;
         }
+    }
+
+    ACE_INLINE
+    DataSampleList::iterator
+    DataSampleList::begin()
+    {
+      return iterator (this->head_, this->tail_, this->head_);
+    }
+
+    ACE_INLINE
+    DataSampleList::iterator
+    DataSampleList::end()
+    {
+      return iterator (this->head_, this->tail_, 0);
     }
 
   }  /* namespace DCPS */
