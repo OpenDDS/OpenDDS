@@ -43,6 +43,41 @@ namespace OpenDDS
     }
 
     ACE_INLINE
+    CORBA::Long
+    get_instance_sample_list_depth (
+      ::DDS::HistoryQosPolicyKind history_kind,
+      long                        history_depth,
+      long                        max_samples_per_instance)
+    {
+      CORBA::Long depth = 0;
+
+      if (history_kind == ::DDS::KEEP_ALL_HISTORY_QOS)
+      {
+        // The spec says history_depth is "has no effect"
+        // when history_kind = KEEP_ALL so use
+        // max_samples_per_instance.
+        depth = max_samples_per_instance;
+      }
+      else // history.kind == ::DDS::KEEP_LAST_HISTORY_QOS
+      {
+        depth = history_depth;
+      }
+
+      if (depth == ::DDS::LENGTH_UNLIMITED)
+      {
+        // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
+        // value that is for all intents and purposes unlimited and we
+        // can use it for comparisons.  Use 2147483647L because that
+        // is the greatest value a signed CORBA::Long (a signed 32 bit
+        // integer) can have.
+        // WARNING: The client risks running out of memory in this case.
+        depth = 0x7fffffff; // ACE_Numeric_Limits<CORBA::Long>::max ();
+      }
+
+      return depth;
+    }
+
+    ACE_INLINE
     bool
     Qos_Helper::consistent (const ::DDS::DomainParticipantQos& qos)
     {

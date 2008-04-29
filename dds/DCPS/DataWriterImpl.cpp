@@ -10,10 +10,10 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "TopicImpl.h"
-#include "PublisherImpl.h"
 #include "PublicationInstance.h"
 #include "Serializer.h"
 #include "Transient_Kludge.h"
+#include "DataDurabilityCache.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -761,28 +761,11 @@ DataWriterImpl::enable ()
     max_blocking_time.usec(qos_.reliability.max_blocking_time.nanosec/1000);
   }
 
-  CORBA::Long depth = 0;
-  if (qos_.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS)
-    {
-      // The spec says qos_.history.depth is "has no effect"
-      // when history.kind = KEEP_ALL so use max_samples_per_instance
-      depth = qos_.resource_limits.max_samples_per_instance;
-    }
-  else // qos_.history.kind == ::DDS::KEEP_LAST_HISTORY_QOS
-    {
-      depth = qos_.history.depth;
-    }
-
-  if (depth == ::DDS::LENGTH_UNLIMITED)
-    {
-      // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
-      // value that is for all intents and purposes unlimited
-      // and we can use it for comparisons.
-      // use 2147483647L because that is the greatest value a signed
-      // CORBA::Long can have.
-      // WARNING: The client risks running out of memory in this case.
-      depth = 2147483647L; // ACE_Numeric_Limits<CORBA::Long>::max ();
-    }
+  CORBA::Long const depth =
+    get_instance_sample_list_depth (
+      qos_.history.kind,
+      qos_.history.depth,
+      qos_.resource_limits.max_samples_per_instance);
 
   if (qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
   {
@@ -793,15 +776,21 @@ DataWriterImpl::enable ()
   // enable the type specific part of this DataWriter
   this->enable_specific ();
 
+  // Create data durability cache if DataWriter QoS requires durable
+  // samples.  Publisher servant retains ownership of the cache.
+  DataDurabilityCache* const durability_cache =
+    publisher_servant_->get_data_durability_cache (qos_.durability);
+
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = new WriteDataContainer (this->get_topic_name (),
-                                            this->get_type_name (),
-                                            depth,
+  data_container_ = new WriteDataContainer (depth,
                                             should_block,
                                             max_blocking_time,
                                             n_chunks_,
-                                            qos_.durability);
+                                            get_topic_name (),
+                                            get_type_name (),
+                                            durability_cache,
+                                            qos_.durability_service);
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -1034,25 +1023,6 @@ DataWriterImpl::write ( DataSample* data,
                        ACE_TEXT("enqueue failed.\n")),
                       ret);
   }
-
-  // ---------------------------------------------------------
-  // Place in appropriate data durability cache, if necessary.
-  // ---------------------------------------------------------
-  ret = this->data_container_->durable_enqueue (this->get_topic_name (),
-                                                this->get_type_name (),
-                                                data,
-                                                source_timestamp);
-
-  if (ret != ::DDS::RETCODE_OK)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DataWriterImpl::write, ")
-                       ACE_TEXT("durable enqueue failed.\n")),
-                      ret);
-  }
-  // ---------------------------------------------------------
-
 
   last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
   return this->publisher_servant_->data_available(this);

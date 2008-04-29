@@ -45,6 +45,11 @@ namespace OpenDDS
     EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     ::DDS::Duration_t time_value_to_duration (const ACE_Time_Value& tv);
 
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+    CORBA::Long get_instance_sample_list_depth (
+      ::DDS::HistoryQosPolicyKind history,
+      long                        history_depth,
+      long                        max_samples_per_instance);
 
     /**
     * This class implements methods that verify whether a qos is

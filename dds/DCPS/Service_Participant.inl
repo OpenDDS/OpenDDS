@@ -1,3 +1,7 @@
+// -*- C++ -*-
+//
+// $Id$
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -55,6 +59,13 @@ namespace OpenDDS
     Service_Participant::initial_DurabilityQosPolicy () const
     {
       return initial_DurabilityQosPolicy_;
+    }
+
+    ACE_INLINE
+    ::DDS::DurabilityServiceQosPolicy             
+    Service_Participant::initial_DurabilityServiceQosPolicy () const
+    {
+      return initial_DurabilityServiceQosPolicy_;
     }
 
     ACE_INLINE

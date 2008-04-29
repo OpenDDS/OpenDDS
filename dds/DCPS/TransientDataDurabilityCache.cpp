@@ -1,11 +1,16 @@
 // $Id$
 
 #include "TransientDataDurabilityCache.h"
+#include "Service_Participant.h"
 #include "DataSampleList.h"
 #include "WriteDataContainer.h"
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
+#include "debug.h"
 
+#include "tao/ORB_Core.h"
+
+#include "ace/Reactor.h"
 #include "ace/Message_Block.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_sys_time.h"
@@ -13,20 +18,100 @@
 #include <algorithm>
 
 // --------------------------------------------------
+namespace
+{
+  class Cleanup_Handler : public ACE_Event_Handler
+  {
+  public:
+
+    typedef
+    ::OpenDDS::DCPS::TransientDataDurabilityCache::sample_list_type list_type;
+
+    Cleanup_Handler (list_type & sample_list,
+                     list_type::iterator begin,
+                     list_type::iterator end)
+      : sample_list_ (sample_list)
+      , begin_ (begin)
+      , end_ (end)
+      , tid_ (-1)
+      , timer_ids_ (0)
+    {
+      this->reference_counting_policy ().value (
+        ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+    }
+
+    virtual int handle_timeout (ACE_Time_Value const & /* current_time */,
+                                void const * /* act */)
+    {
+      if (OpenDDS::DCPS::DCPS_debug_level >= 4)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("(%P|%t) OpenDDS - Cleaning up ")
+                    ACE_TEXT ("data durability cache.\n")));
+      }
+
+      // Cleanup all data samples corresponding to the cleanup delay.
+      this->sample_list_.erase (this->begin_, this->end_);
+
+      // No longer any need to keep track of the timer ID.
+      this->timer_ids_->remove (this->tid_);
+
+      return 0;
+    }
+
+    void timer_id (
+      long tid,
+      OpenDDS::DCPS::TransientDataDurabilityCache::timer_id_list_type * timer_ids)
+    {
+      this->tid_ = tid;
+      this->timer_ids_ = timer_ids;
+    }
+
+  protected:
+
+    virtual ~Cleanup_Handler() {}
+
+  private:
+
+    /// List containing samples to be cleaned up when the cleanup timer
+    /// expires.
+    list_type & sample_list_;
+
+    /// Range of iterators pointing to samples to be cleaned up when
+    /// the corresponding cleanup timer expires.
+    //@{
+    list_type::iterator const begin_;
+    list_type::iterator const end_;
+    //@}
+
+    /// Timer ID corresponding to this cleanup event handler.
+    long tid_;
+
+    /// List of timer IDs.
+    /**
+     * If the cleanup timer fires successfully, the timer ID must be
+     * removed from the timer ID list so that a subsequent attempt to
+     * cancel the timer during durability cache destruction does not
+     * occur.
+     */
+    OpenDDS::DCPS::TransientDataDurabilityCache::timer_id_list_type *
+    timer_ids_;
+
+  };
+}
+
+// --------------------------------------------------
 
 OpenDDS::DCPS
 ::TransientDataDurabilityCache::sample_data_type::sample_data_type ()
   : sample (0)
-  , source_timestamp ()
 {
 }
 
 OpenDDS::DCPS
 ::TransientDataDurabilityCache::sample_data_type::sample_data_type (
-  DataSample * s,
-  ::DDS::Time_t t)
+  DataSample * s)
   : sample (ACE_Message_Block::duplicate (s))
-  , source_timestamp (t)
 {
 }
 
@@ -35,9 +120,7 @@ OpenDDS::DCPS
 ::TransientDataDurabilityCache::sample_data_type::sample_data_type (
   sample_data_type const & rhs)
   : sample (ACE_Message_Block::duplicate (rhs.sample))
-  , source_timestamp (rhs.source_timestamp)
 {
-  
 }
 
 OpenDDS::DCPS
@@ -53,133 +136,153 @@ OpenDDS::DCPS::TransientDataDurabilityCache::sample_data_type::operator= (
 {
   // Strongly exception-safe copy assignment.
   sample_data_type tmp (rhs);
-  this->swap (tmp);
+  std::swap (this->sample, tmp.sample);
   return *this;
-}
-
-void
-OpenDDS::DCPS::TransientDataDurabilityCache::sample_data_type::swap (
-  sample_data_type & rhs)
-{
-  std::swap (this->sample, rhs.sample);
-  std::swap (this->source_timestamp, rhs.source_timestamp);
 }
 
 // --------------------------------------------------
 
 OpenDDS::DCPS::TransientDataDurabilityCache::TransientDataDurabilityCache ()
   : samples_ ()
-  , characteristics_ ()
+  , cleanup_timer_ids_ ()
+  , lock_ ()
+  , reactor_ (0)
 {
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+  this->reactor_ = orb->orb_core ()->reactor ();
 }
 
 OpenDDS::DCPS::TransientDataDurabilityCache::~TransientDataDurabilityCache ()
 {
+  // Cancel timers that haven't expired yet.
+  timer_id_list_type::const_iterator const end (
+    this->cleanup_timer_ids_.end ());
+  for (timer_id_list_type::const_iterator i (
+         this->cleanup_timer_ids_.begin ());
+       i != end;
+       ++i)
+  {
+    (void) this->reactor_->cancel_timer (*i);
+  }
 }
 
 bool
-OpenDDS::DCPS::TransientDataDurabilityCache::enqueue (
+OpenDDS::DCPS::TransientDataDurabilityCache::insert (
   char const * topic_name,
   char const * type_name,
-  DataSample * sample,
-  ::DDS::Time_t const & source_timestamp)
+  DataSampleList & unsent_data,
+  ::DDS::DurabilityServiceQosPolicy const & qos)
 {
+  if (unsent_data.size_ == 0)
+    return true;  // Nothing to cache.
+
+  // Apply DURABILITY_SERVICE QoS HISTORY and RESOURCE_LIMITS related
+  // settings prior to data insertion into the cache.
+  CORBA::Long const depth =
+    get_instance_sample_list_depth (
+      qos.history_kind,
+      qos.history_depth,
+      qos.max_samples_per_instance);
+
+  // Iterator to first DataSampleListElement to be copied.
+  DataSampleList::iterator element (unsent_data.begin ());
+
+  if (depth < 0)
+    return false; // Should never occur.
+  else if (depth == 0)
+    return true;  // Nothing else to do.  Discard all data.
+  else if (unsent_data.size_ > depth)
+  { 
+    // Drop "old" samples.  Only keep the "depth" most recent
+    // samples, i.e. those found at the tail end of the
+    // DataSampleList.
+    ssize_t const advance_amount = unsent_data.size_ - depth;
+    std::advance (element, advance_amount);      
+  }
+
+  // -----------
+
+  // Copy unsent samples to the domain/topic/type-specific cache.
+
   key_type const key (topic_name, type_name);
+  DataSampleList::iterator unsent_end (unsent_data.end ());
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
-
-  sample_list_type & sample_list = this->samples_[key];
-
-  typedef characteristic_map_type::iterator iterator;
-
-  iterator const c (this->characteristics_.find (key));
-
-  if (c == this->characteristics_.end ())
+  // Keep track of where the data is inserted in the list so that we
+  // can easily remove that data later on during cleanup.
+  sample_list_type::iterator list_start;
+  sample_list_type::iterator list_end;
+  sample_list_type * sample_list = 0;
   {
-    ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT ("OpenDDS (%P|%t) TRANSIENT durability ")
-                       ACE_TEXT ("cache not initialized correctly for ")
-                       ACE_TEXT ("topic \"%s\" and type \"%s\"\n"),
-                       topic_name,
-                       type_name),
-                      false);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
+
+    sample_list_type & samples = this->samples_[key];
+    sample_list = &samples;
+
+    list_start = samples.end ();
+
+    for (DataSampleList::iterator i (element); i != unsent_end; ++i)
+      samples.push_back (sample_data_type ((*i).sample_));
+
+    list_end = samples.end ();
   }
 
-  // The size() accessor could be an O(n) operation in some STL
-  // implementations.  We can explicitly keep track of the count in
-  // the characteristics map if it proves to be slow in some cases.
-  if (sample_list.size ()
-      == static_cast<characteristic_map_type::size_type> ((*c).second.depth))
-  {
-    sample_list.pop_front ();
-  }
+  // -----------
 
-  sample_list.push_back (sample_data_type (sample, source_timestamp));
+  // Schedule cleanup timer.
+  Cleanup_Handler * const cleanup =
+    new Cleanup_Handler (*sample_list,
+                         list_start,
+                         list_end);
+  ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
+
+  ACE_Time_Value const cleanup_delay (
+    duration_to_time_value (qos.service_cleanup_delay));
+
+  if (cleanup_delay > 0)
+  {
+    long const tid =
+      this->reactor_->schedule_timer (cleanup,
+                                      0, // ACT
+                                      cleanup_delay);
+
+    if (tid == -1)
+    {
+      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
+
+      sample_list->erase (list_start, list_end);
+
+      return false;
+    }
+    else
+    {
+      {
+        ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
+        this->cleanup_timer_ids_.push_back (tid);
+      }
+
+      cleanup->timer_id (tid,
+                         &this->cleanup_timer_ids_);
+    }
+  }
 
   return true;
 }
 
 bool
-OpenDDS::DCPS::TransientDataDurabilityCache::set_instance_characteristics (
-  char const * topic_name,
-  char const * type_name,
-  ::DDS::Duration_t const & service_cleanup_delay,
-  CORBA::Long depth)
-{
-  
-  if (depth <= 0)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("OpenDDS (%P|%t) ERROR: Invalid depth for ")
-                       ACE_TEXT("TRANSIENT data cache characteristics for ")
-                       ACE_TEXT("topic \"%s\" / type \"%s\"\n")),
-                      false);
-  }
-
-  typedef characteristic_map_type::iterator iterator;
-
-  std::pair<iterator, bool> result;
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
-
-    result =
-      this->characteristics_.insert (
-        std::make_pair (key_type (topic_name, type_name),
-                        characteristic_data_type (service_cleanup_delay,
-                                                  depth)));
-  }
-
-  if (result.second)
-  {
-    // @todo For now we ignore the service_cleanup_delay
-    //       characteristic.
-  }
-  else
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("OpenDDS (%P|%t) ERROR: Attempt to reset ")
-                ACE_TEXT("TRANSIENT data cache characteristics for ")
-                ACE_TEXT("topic \"%s\" / type \"%s\"\n")));
-  }
-
-  return result.second;
-}
-
-bool
-OpenDDS::DCPS::TransientDataDurabilityCache::send_durable_data (
+OpenDDS::DCPS::TransientDataDurabilityCache::send_data (
   char const * topic_name,
   char const * type_name,
   WriteDataContainer * data_container,
   DataWriterImpl * data_writer,
-  ::DDS::LifespanQosPolicy const & lifespan)
+  ::DDS::LifespanQosPolicy const & /* lifespan */)
 {
-  static ::DDS::Duration_t const INFINITE_EXPIRATION =
-    {
-      ::DDS::DURATION_INFINITY_SEC,
-      ::DDS::DURATION_INFINITY_NSEC
-    };
+//   static ::DDS::Duration_t const INFINITE_EXPIRATION =
+//     {
+//       ::DDS::DURATION_INFINITY_SEC,
+//       ::DDS::DURATION_INFINITY_NSEC
+//     };
 
-  ::DDS::Duration_t const duration = lifespan.duration;
+//   ::DDS::Duration_t const duration = lifespan.duration;
 
   key_type const key (topic_name, type_name);
 
@@ -205,33 +308,33 @@ OpenDDS::DCPS::TransientDataDurabilityCache::send_durable_data (
   iterator const the_end (sample_list.end ());
   for (iterator i (sample_list.begin ()); i != the_end; ++i)
   {
-    ::DDS::Time_t const & source_timestamp = (*i).source_timestamp;
+//     ::DDS::Time_t const & source_timestamp = (*i).source_timestamp;
 
-    // Determine if the cached sample has exceeded its lifespan.
-    ::DDS::Duration_t const expiration =
-        {
-          // Not foolproof on the boundaries but better than nothing.
-          //
-          // @todo Do we really need to check for an infinite source
-          //       timestamp?  Is that a legal timestamp?
-          ((duration.sec == ::DDS::DURATION_INFINITY_SEC
-            || source_timestamp.sec == ::DDS::DURATION_INFINITY_SEC)
-           ? ::DDS::DURATION_INFINITY_SEC
-           : duration.sec + source_timestamp.sec),
+//     // Determine if the cached sample has exceeded its lifespan.
+//     ::DDS::Duration_t const expiration =
+//         {
+//           // Not foolproof on the boundaries but better than nothing.
+//           //
+//           // @todo Do we really need to check for an infinite source
+//           //       timestamp?  Is that a legal timestamp?
+//           ((duration.sec == ::DDS::DURATION_INFINITY_SEC
+//             || source_timestamp.sec == ::DDS::DURATION_INFINITY_SEC)
+//            ? ::DDS::DURATION_INFINITY_SEC
+//            : duration.sec + source_timestamp.sec),
 
-          ((duration.nanosec == ::DDS::DURATION_INFINITY_NSEC
-            || source_timestamp.nanosec == ::DDS::DURATION_INFINITY_NSEC)
-           ? ::DDS::DURATION_INFINITY_NSEC
-           : duration.nanosec + source_timestamp.nanosec)
-        };
+//           ((duration.nanosec == ::DDS::DURATION_INFINITY_NSEC
+//             || source_timestamp.nanosec == ::DDS::DURATION_INFINITY_NSEC)
+//            ? ::DDS::DURATION_INFINITY_NSEC
+//            : duration.nanosec + source_timestamp.nanosec)
+//         };
 
-    if (!(expiration == INFINITE_EXPIRATION)
-        && ::OpenDDS::DCPS::duration_to_time_value (expiration) >=
-        ACE_OS::gettimeofday ())
-    {
-      sample_list.erase (i);
-      continue;
-    }
+//     if (!(expiration == INFINITE_EXPIRATION)
+//         && ::OpenDDS::DCPS::duration_to_time_value (expiration) >=
+//         ACE_OS::gettimeofday ())
+//     {
+//       sample_list.erase (i);
+//       continue;
+//     }
 
     // Data is valid.  Append it to the write data container's resend queue.
     DataSampleListElement* element = 0;
@@ -242,19 +345,15 @@ OpenDDS::DCPS::TransientDataDurabilityCache::send_durable_data (
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("OpenDDS (%P|%t) ERROR: ")
-                         ACE_TEXT("TransientDataDurabilityCache::")
-                         ACE_TEXT("send_durable_data, ")
-                         ACE_TEXT("obtain_buffer returned %d.\n"),
+                         ACE_TEXT ("OpenDDS (%P|%t) ERROR: ")
+                         ACE_TEXT ("TransientDataDurabilityCache::")
+                         ACE_TEXT ("send_durable_data, ")
+                         ACE_TEXT ("obtain_buffer returned %d.\n"),
                          ret),
                         false);
     }
 
-    DataSample * const data = (*i).sample;
-    ret = data_writer->create_sample_data_message (data,
-                                                   handle,
-                                                   element->sample_,
-                                                   source_timestamp);
+    element->sample_ = ACE_Message_Block::duplicate ((*i).sample);
 
     if (ret != ::DDS::RETCODE_OK)
     {
@@ -263,7 +362,7 @@ OpenDDS::DCPS::TransientDataDurabilityCache::send_durable_data (
 
     // This approach may cause data that was sent to be sent again.
 
-    ret = data_container->enqueue(element, handle);
+    ret = data_container->enqueue (element, handle);
 
     if (ret != ::DDS::RETCODE_OK)
     {

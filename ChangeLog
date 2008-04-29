@@ -1,3 +1,61 @@
+Tue Apr 29 19:41:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+	* dds/DCPS/DataDurabilityCache.h:
+	* dds/DCPS/TransientDataDurabilityCache.cpp:
+	* dds/DCPS/TransientDataDurabilityCache.h:
+
+	  Rewrote interface and implementation to expect unsent data to be
+	  inserted into the cache when a DataWriter is destroyed.
+
+	  Implemented DURABILITY_SERVICE support.
+
+	  Implemented service_cleanup_delay support.
+
+	  Addressed a problem where marshaled sample message containing a
+	  header ended up with an additional header.
+
+	* dds/DCPS/DataSampleList.cpp:
+	* dds/DCPS/DataSampleList.h:
+	* dds/DCPS/DataSampleList.inl:
+
+	  Added STL-style iterator support.
+
+	* dds/DCPS/DataWriterImpl.cpp:
+
+	  Refactored history depth computation code so that it could be
+	  used by similar DURABILITY_SERVICE code.
+
+	  Samples are no longer made durable by caching each time samples
+	  are written by the user.  Instead, unsent samples are made
+	  durable when the DataWriter is destroyed.
+
+	* dds/DCPS/PublisherImpl.cpp:
+	* dds/DCPS/PublisherImpl.h:
+
+	  Data durability caches are now owned by the Publisher.  This
+	  makes them domain-specific.
+
+	* dds/DCPS/Qos_Helper.h:
+	* dds/DCPS/Qos_Helper.inl:
+
+	  Refactored history depth computation code from DataWriterImpl so
+	  that it may be used by similar DURABILITY_SERVICE code.
+
+	* dds/DCPS/Service_Participant.cpp:
+	* dds/DCPS/Service_Participant.h:
+	* dds/DCPS/Service_Participant.inl:
+
+	  Data durability caches are now owned by the Publisher.  This
+	  makes them domain-specific.
+
+	  Added default values for Topic and DataWriter DURABILITY_SERVICE
+	  QoS.
+
+	* dds/DCPS/WriteDataContainer.cpp:
+	* dds/DCPS/WriteDataContainer.h:
+
+	  Transfer remaining unsent data to data DURABILITY cache.
+
 Fri Apr 25 14:40:37 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

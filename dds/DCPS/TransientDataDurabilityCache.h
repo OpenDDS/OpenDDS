@@ -17,6 +17,8 @@
 #define OPENDDS_TRANSIENT_DATA_DURABILITY_CACHE_H
 
 #include "dds/DCPS/DataDurabilityCache.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/DataSampleList.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -27,6 +29,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <utility>
 
 
 namespace OpenDDS
@@ -36,12 +39,12 @@ namespace OpenDDS
     /**
      * @class TransientDataDurabilityCache
      *
-     * @brief Underlying data cache used by OpenDDS @c TRANSIENT @c
-     *        DURABILITY implementation.
+     * @brief Underlying data cache used by OpenDDS @c TRANSIENT
+     *        @c DURABILITY implementation.
      *
-     * This class implements a transient cache that outlives @c
-     * DataWriters but not the process within which the @c DataWriters
-     * reside.
+     * This class implements a transient cache that outlives
+     * @c DataWriters but not the @c Publisher within which the
+     * @c DataWriters reside.
      */
     class TransientDataDurabilityCache
       : public DataDurabilityCache
@@ -100,61 +103,30 @@ namespace OpenDDS
       /**
        * @class sample_data_type
        *
-       * @brief Map data type for all samples and their corresponding
-       *        source timestamp.
+       * @brief Sample list data type for all samples.
        */
       class sample_data_type
       {
       public:
 
         sample_data_type ();
-        sample_data_type (DataSample * s, ::DDS::Time_t t);
+        explicit sample_data_type (DataSample * s);
         sample_data_type (sample_data_type const & rhs);
 
         ~sample_data_type ();
 
         sample_data_type & operator= (sample_data_type const & rhs);
 
-      private:
-
-        /// Non-throwing swap operation.
-        /**
-         * Non-throwing swap operation used in assignment operator
-         * implementation.
-         */
-        void swap (sample_data_type & rhs);
-
       public:
 
         DataSample * sample;
-        ::DDS::Time_t source_timestamp;
+
       };
-
-      /**
-       * @struct characteristic_data_type
-       *
-       * @brief Map data type for all topic instance characteristics.
-       */
-      struct characteristic_data_type
-      {
-        characteristic_data_type (::DDS::Duration_t scd,
-                                  ::CORBA::Long d)
-          : service_cleanup_delay (scd)
-          , depth (d)
-        {
-        }
-
-        ::DDS::Duration_t service_cleanup_delay;
-        CORBA::Long depth;
-      };
-
 
       typedef std::list<sample_data_type> sample_list_type;
       typedef std::map<key_type,
                        sample_list_type> sample_map_type;
-
-      typedef std::map<key_type,
-                       characteristic_data_type> characteristic_map_type;
+      typedef std::list<long> timer_id_list_type;
 
       /// Constructor.
       TransientDataDurabilityCache ();
@@ -162,18 +134,12 @@ namespace OpenDDS
       /// Destructor.
       virtual ~TransientDataDurabilityCache ();
 
-      virtual bool enqueue (char const * topic_name,
-                            char const * type_name,
-                            DataSample * sample,
-                            ::DDS::Time_t const & source_timestamp);
+      virtual bool insert (char const * topic_name,
+                           char const * type_name,
+                           DataSampleList & unsent_data,
+                           ::DDS::DurabilityServiceQosPolicy const & qos);
 
-      virtual bool set_instance_characteristics (
-        char const * topic_name,
-        char const * type_name,
-        ::DDS::Duration_t const & service_cleanup_delay,
-        CORBA::Long depth);
-
-      virtual bool send_durable_data (
+      virtual bool send_data (
         char const * topic_name,
         char const * type_name,
         WriteDataContainer * data_container,
@@ -185,11 +151,18 @@ namespace OpenDDS
       /// Map of all data samples.
       sample_map_type samples_;
 
-      /// Topic instance characteristics map.
-      characteristic_map_type characteristics_;
+      /// Timer ID list.
+      /**
+       * Keep track of cleanup timer IDs in case we need to cancel
+       * before they expire.
+       */
+      timer_id_list_type cleanup_timer_ids_;
 
       /// Lock for synchronized access to the underlying list.
       ACE_SYNCH_MUTEX lock_;
+
+      /// Reactor with which cleanup timers will be registered.
+      ACE_Reactor * reactor_;
 
     };
 
