@@ -119,6 +119,7 @@ DataWriterImpl::cleanup ()
   topic_servant_ = 0;
 
   dw_local_objref_ = ::DDS::DataWriter::_nil();
+  deactivate_remote_object(dw_remote_objref_.in());
   dw_remote_objref_ = ::OpenDDS::DCPS::DataWriterRemote::_nil();
 }
 

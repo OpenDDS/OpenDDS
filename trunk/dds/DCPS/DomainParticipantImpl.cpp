@@ -1587,8 +1587,8 @@ namespace OpenDDS
         if (0 == type_support)
           {
             // Participant topic
-            ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant
-              = new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
+            ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport_servant(
+              new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl());
             ::DDS::ReturnCode_t ret
               = participantTypeSupport_servant->register_type(participant_objref_.in (),
                                                       BUILT_IN_PARTICIPANT_TOPIC_TYPE);
@@ -1623,8 +1623,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
-              new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
+            ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport_servant(
+              new ::DDS::TopicBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = topicTypeSupport_servant->register_type(participant_objref_.in (),
@@ -1661,8 +1661,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant
-              = new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
+            ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport_servant(
+              new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = subscriptionTypeSupport_servant->register_type(participant_objref_.in (),
@@ -1699,8 +1699,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant
-              = new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
+            ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport_servant(
+              new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = publicationTypeSupport_servant->register_type(participant_objref_.in (),

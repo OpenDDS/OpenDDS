@@ -232,11 +232,14 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   DataReaderImpl* dr_servant
     = reference_to_servant<DataReaderImpl> (a_datareader);
 
-  if (::DDS::Subscriber_var(dr_servant->get_subscriber ()).in() != this)
   {
-      ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
-          " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    ::DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber ());
+    if (dr_subscriber.in() != this)
+    {
+        ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
+            " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
+        return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   int loans = dr_servant->num_zero_copies ();

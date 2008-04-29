@@ -1,3 +1,37 @@
+Tue Apr 29 19:35:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Deactivating remote object DataReaderRemoteImpl with the poa.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Deactivating remote object DataWriterRemoteImpl with the poa.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Storing allocated TypeSupportImpls in _vars so that they get
+          cleaned up.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Making the code clearer by creating a _var, rather than a 
+          temporary variable.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Deleting AssociationInfoList in pending_association_sub_map_.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Was previously using an auto_ptr to manage a reference counted
+          object.  Changed to use a ServantBase_var
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Removing all DCPS_IR_Domains stored in the map on destruction.
+
 Mon Apr 28 18:54:44 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:

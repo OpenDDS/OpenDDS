@@ -32,6 +32,12 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
 //  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 {
+  DCPS_IR_Domain_Map::ITERATOR iter = domains_.begin();
+  while(iter != domains_.end())
+  {
+    delete (*iter++).int_id_;
+
+  }
 }
 
 
