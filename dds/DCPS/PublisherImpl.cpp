@@ -228,11 +228,14 @@ PublisherImpl::~PublisherImpl (void)
   DataWriterImpl* dw_servant
     = reference_to_servant <DataWriterImpl> (a_datawriter);
 
-  if (::DDS::Publisher_var(dw_servant->get_publisher()).in()!= this)
   {
-    ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
-        " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
-    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    ::DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
+    if (dw_publisher.in()!= this)
+    {
+      ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
+          " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
