@@ -1,11 +1,19 @@
+Thu May  1 23:50:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Allowed the short host name discoved via ACE::get_fqdn() to be used if fully qualified
+          hostname is not found and print warning when it happens.
+
 Thu May  1 20:34:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
 
           Made default mcast_group_address to be ACE_DEFAULT_MULTICAST_PORT:ACE_DEFAULT_MULTICAST_ADDR.
           This made reliable mcast to support default configuration to be consistent with unreliable
-          mcast. 
-          
+          mcast.
+
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
 
           Removed error returns when local_address and mcast_group_address are not configured in
@@ -13,17 +21,17 @@ Thu May  1 20:34:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           configured.
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
-       
+
           Added debug logging for advertisement address.
-           
+
         * DevGuideExamples/DCPS/Messenger/publisher.cpp:
         * DevGuideExamples/DCPS/Messenger/run_test.pl:
         * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
 
           Added default_reliable_mcast test case.
-          
+
         * bin/dcps_tests.lst:
-        
+
           Added default_reliable_mcast test case.
 
 Wed Apr 30 00:17:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>

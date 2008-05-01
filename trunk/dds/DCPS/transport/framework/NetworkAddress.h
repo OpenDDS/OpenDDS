@@ -8,12 +8,16 @@
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
 #include <string>
+#include <vector>
+
 
 namespace OpenDDS
 {
 
   namespace DCPS
   {
+
+    typedef std::vector <std::string> StringVector;
 
     /**
      * @struct NetworkAddress
