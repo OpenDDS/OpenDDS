@@ -44,26 +44,12 @@ OpenDDS::DCPS::ReliableMulticastTransportConfiguration::load(
       this->local_address_str_ = str.c_str ();
       this->local_address_.set (this->local_address_str_.c_str ());
     }
-    else
-    {
-      ACE_ERROR_RETURN(
-        (LM_ERROR, ACE_TEXT("(%P|%t) ERROR: No local_address configuration value specified.\n")),
-        -1
-        );
-    }
 
     GET_CONFIG_STRING_VALUE(config, trans_sect, ACE_TEXT("multicast_group_address"), str);
     if (str != ACE_TEXT(""))
     {
       this->multicast_group_address_str_ = str.c_str ();
       this->multicast_group_address_.set (multicast_group_address_str_.c_str ());
-    }
-    else
-    {
-      ACE_ERROR_RETURN(
-        (LM_ERROR, ACE_TEXT("(%P|%t) ERROR: No multicast_group_address configuration value specified.\n")),
-        -1
-        );
     }
 
     GET_CONFIG_VALUE(config, trans_sect, ACE_TEXT("receiver"), receiver_, bool);

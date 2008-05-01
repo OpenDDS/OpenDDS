@@ -61,6 +61,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_reliable_mcast_sub")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID;
+      }
       break;
     case '?':
     default:

@@ -1,15 +1,43 @@
+Thu May  1 20:34:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+
+          Made default mcast_group_address to be ACE_DEFAULT_MULTICAST_PORT:ACE_DEFAULT_MULTICAST_ADDR.
+          This made reliable mcast to support default configuration to be consistent with unreliable
+          mcast. 
+          
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+
+          Removed error returns when local_address and mcast_group_address are not configured in
+          the configuration file. The code default values are used when the addresses are not
+          configured.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+       
+          Added debug logging for advertisement address.
+           
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Added default_reliable_mcast test case.
+          
+        * bin/dcps_tests.lst:
+        
+          Added default_reliable_mcast test case.
+
 Wed Apr 30 00:17:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         Continued the effort to support IPv6 (RT11158).
-        
+
         * dds/DCPS/Service_Participant.cpp:
 
           Used set_port_number() instead of creating an ACE_INET_Addr with port number.
           It fixed the problem that ipv4 address was introduced by the constructor in IPv6 build.
-          
+
         * dds/DCPS/transport/framework/NetworkAddress.cpp:
 
-          Updated the get_fully_qualified_hostname() function to work for both ipv4 and ipv6 
+          Updated the get_fully_qualified_hostname() function to work for both ipv4 and ipv6
           builds on current DDS supported platforms.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
@@ -17,7 +45,7 @@ Wed Apr 30 00:17:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           Removed code to set the local_address with port 0 and INADDR_ANY which should
           only apply to ipv4. Leave it use the default constructor. This would fix ipv4
           address used in ipv6 build problem.
-          
+
 Tue Apr 29 19:35:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

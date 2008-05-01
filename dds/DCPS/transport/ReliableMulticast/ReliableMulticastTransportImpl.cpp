@@ -110,6 +110,9 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::connection_info_i(TransportInterf
 {
   NetworkAddress network_order_address(configuration_->multicast_group_address_str_);
 
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)ReliableMulticastTransportImpl::connection_info_i %s\n", 
+    configuration_->multicast_group_address_str_.c_str ()), 2);
+
   ACE_OutputCDR cdr;
   cdr << network_order_address;
   size_t len = cdr.total_length ();
