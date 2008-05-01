@@ -42,6 +42,8 @@ const std::string& get_fully_qualified_hostname ()
   {
     size_t addr_count;
     ACE_INET_Addr *addr_array;
+    OpenDDS::DCPS::StringVector nonFQDN;
+
     int result = ACE::get_ip_interfaces(addr_count, addr_array);
     if (result != 0 || addr_count < 1)
     {
@@ -56,14 +58,34 @@ const std::string& get_fully_qualified_hostname ()
 
         //Discover the fully qualified hostname
 
-        if (ACE::get_fqdn (addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0
-          && ACE_OS::strchr (hostname, '.') != 0)
+        if (ACE::get_fqdn (addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0)
         {
-          VDBG_LVL ((LM_DEBUG, "(%P|%t)got fqdn %s \n",  
-            hostname), 2);
-          fullname = hostname;
-          return fullname;
-        }  
+          if (ACE_OS::strchr (hostname, '.') != 0)
+          {
+            VDBG_LVL ((LM_DEBUG, "(%P|%t)found fqdn %s \n",  
+              hostname), 2);
+            fullname = hostname;
+            return fullname;
+          }
+          else
+          {
+            VDBG_LVL ((LM_DEBUG, "(%P|%t)ip interface %s:%d - hostname %s \n",  
+              addr_array[i].get_host_addr(), addr_array[i].get_port_number (), hostname), 2);
+            nonFQDN.push_back (hostname);
+          }
+        }
+      }
+    }
+
+    OpenDDS::DCPS::StringVector::iterator itEnd = nonFQDN.end ();
+    for (OpenDDS::DCPS::StringVector::iterator it = nonFQDN.begin (); it != itEnd; ++it)
+    {
+      if (*it != "localhost")
+      {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not discover the FQDN, please "
+          "correct system configuration.\n"));
+        fullname = *it;
+        return fullname;
       }
     }
 
@@ -73,4 +95,5 @@ const std::string& get_fully_qualified_hostname ()
 
   return fullname;
 }
+
 
