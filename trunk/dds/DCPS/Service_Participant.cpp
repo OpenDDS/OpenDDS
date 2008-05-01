@@ -695,7 +695,7 @@ namespace OpenDDS
 
       if (0 == this->bitTransportIpMap_[ repo].length ())
         {
-          tcp_config->local_address_ = ACE_INET_Addr( this->bitTransportPortMap_[ repo]);
+          tcp_config->local_address_.set_port_number( this->bitTransportPortMap_[ repo]);
         }
       else
         {

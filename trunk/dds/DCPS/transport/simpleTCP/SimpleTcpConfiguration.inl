@@ -17,10 +17,4 @@ OpenDDS::DCPS::SimpleTcpConfiguration::SimpleTcpConfiguration()
   DBG_ENTRY_LVL("SimpleTcpConfiguration","SimpleTcpConfiguration",6);
 
   transport_type_ = ACE_TEXT("SimpleTcp");
-
-  if (local_address_.set (static_cast<unsigned short> (0),
-                static_cast<ACE_UINT32> (INADDR_ANY),
-                1) != 0)
-    ACE_ERROR((LM_ERROR,"(%P|%t) ERROR: "
-       "SimpleTcpConfiguration::SimpleTcpConfiguration could not set default addr\n"));
 }
