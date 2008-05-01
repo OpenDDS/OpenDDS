@@ -8,6 +8,8 @@
 #include "ace/Time_Value.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
+#include <set>
+
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -57,13 +59,13 @@ namespace OpenDDS
       size_t no_writers_generation_count() const ;
       
       /// DISPOSE message received for this instance.
-      void dispose_was_received() ;
+      void dispose_was_received(const PublicationId&  writer_id) ;
 
       /// Data sample received for this instance.
-      void data_was_received() ;
+      void data_was_received(const PublicationId&  writer_id) ;
 
       /// LIVELINESS message received for this DataWriter.
-      void lively(PublicationId         writer_id) ;
+      void lively(const PublicationId&  writer_id) ;
 
       /// A read or take operation has been performed on this instance.
       void accessed() ;
@@ -77,12 +79,16 @@ namespace OpenDDS
       /// and no writers.
       void release_if_empty();
 
-    /// tell this instance when a DataWriter transitions to NOT_ALIVE
-    void writer_became_dead (PublicationId         writer_id,
-                              int                   num_alive_writers,
-                             const ACE_Time_Value& when);
+      /// tell this instance when a DataWriter transitions to NOT_ALIVE
+      void writer_became_dead (const PublicationId&  writer_id,
+        int                   num_alive_writers,
+        const ACE_Time_Value& when);
+
+      void unregister_was_received(const PublicationId& writer_id);
 
     private:
+
+
       /**
        * Current instance state.
        *
@@ -141,6 +147,9 @@ namespace OpenDDS
       DataReaderImpl* reader_ ;
       ::DDS::InstanceHandle_t handle_ ;
 
+      typedef std::set <PublicationId> Writers;
+
+      Writers writers_;
     } ;
 
   } // namespace DCPS

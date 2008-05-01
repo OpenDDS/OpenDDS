@@ -19,8 +19,6 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
-#include <dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h>
-#include <dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h>
 #endif
 
 #include <ace/streams.h>
@@ -29,45 +27,33 @@
 using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
+long num_expected_dispose = 0;
+long num_expected_unregister = 0;
+long num_expected_data = 10;
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("du"));
   int c;
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
     {
-    case 't':
-      if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
-        transport_impl_id = 2;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
-        transport_impl_id = 3;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("reliable_mcast")) == 0) {
-        transport_impl_id = 4;
-      }
-      // test with DEFAULT_SIMPLE_TCP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
-      }
-      // test with DEFAULT_SIMPLE_UDP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
-      }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
-      }
+    case 'd':
+      num_expected_dispose = 1;
+      break;
+    case 'u':
+      num_expected_unregister = 1;
       break;
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-        "-t <tcp/udp/default> "
-        "\n",
+        "-d -u"
+        "\n"
+	"-d for dispose notification test and -u for unregister notification test \n",
         argv [0]),
         -1);
     }
@@ -180,7 +166,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
 
-      int expected = 10;
+      int expected = num_expected_data + num_expected_dispose + num_expected_unregister;
+
       while ( listener_servant.num_reads() < expected ) { 
         ACE_OS::sleep (1);
       }
@@ -195,6 +182,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
+
+      if (listener_servant.num_received_dispose () != num_expected_dispose)
+      {
+         cerr << "did not receive dispose sample as expected." << endl;
+         return 1;
+      }
+      if (listener_servant.num_received_unregister () != num_expected_unregister)
+      {
+         cerr << "did not receive unregister sample as expected." << num_expected_unregister << " " << listener_servant.num_received_unregister () << endl;
+         return 1;
+      }
 
     }
   catch (CORBA::Exception& e)

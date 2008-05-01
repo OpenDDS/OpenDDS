@@ -11,7 +11,9 @@ using namespace Messenger;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
+  : num_reads_(0),
+    num_received_dispose_(0),
+    num_received_unregister_(0)
 {
 }
 
@@ -56,17 +58,18 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
         cout << "instance is disposed" << endl;
+        ++ num_received_dispose_;
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
         cout << "instance is unregistered" << endl;
+        ++ num_received_unregister_;
       }
       else
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderListenerImpl::on_data_available:"
+      ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderListenerImpl::on_data_available:"
                              " received unknown instance state %d\n", si.instance_state));
       }
-
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {

@@ -1,3 +1,42 @@
+Thu May  1 07:03:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+
+          Added unregister notification support.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Removed dispose notification test code since a new test was
+          added for notification test.
+
+        * bin/dcps_tests.lst:
+        
+          Added NotifyTest test.
+
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/Messenger.idl:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/NotifyTest/Writer.h:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/domain_ids:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/tcp.conf:
+
+          Added dispose and unregister notification test.
+
 Tue Apr 29 19:41:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.h:
@@ -59,8 +98,8 @@ Tue Apr 29 19:41:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 Fri Apr 25 14:40:37 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
-	  Take ownership of the contained repository when directly
-	  loaded.
+          Take ownership of the contained repository when directly
+          loaded.
 
 Tue Apr 22 20:16:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 

@@ -368,6 +368,8 @@ public:
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample);
 
     virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    
+    virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample);
 
     //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 

@@ -1595,6 +1595,8 @@ void
     const OpenDDS::DCPS::DataSampleHeader& header )
 {
   bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
+  bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
+
 
   DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
 
@@ -1602,6 +1604,21 @@ void
 
   InstanceMap::const_iterator const it = instance_map_.find(*instance_data);
 
+  if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
+  {
+    ACE_DES_FREE (instance_data,
+                  data_allocator_->free,
+                  <%TYPE%> );
+    instance_data = 0;
+
+    ACE_ERROR_RETURN ((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ")
+                       ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                       ACE_TEXT("store_instance_data, ")
+                       ACE_TEXT("can not dispose or unregister a not registered instance. \n")),
+                      ::DDS::RETCODE_ERROR);
+  }
+  
   if (it == instance_map_.end())
   {
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
@@ -1645,7 +1662,7 @@ void
   {
     OpenDDS::DCPS::SubscriptionInstance* instance_ptr =
       this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (handle);
-
+    
     // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
     //       and RESOURCE_LIMITS.max_instances.
     if ((this->qos_.resource_limits.max_samples_per_instance !=
@@ -1657,7 +1674,7 @@ void
         // If it's dispose control message, we do not want to reject it.
         // It just simply removes the oldest sample no matter what the 
         // view state is.
-        if  (! is_dispose_msg
+        if  (! is_dispose_msg  && ! is_unregister_msg
           && instance_ptr->rcvd_sample_.head_->sample_state_
           == ::DDS::NOT_READ_SAMPLE_STATE)
         {
@@ -1697,7 +1714,7 @@ void
       }
     }
 
-    if (is_dispose_msg)
+    if (is_dispose_msg || is_unregister_msg)
     {
       ACE_DES_FREE (instance_data,
                     data_allocator_->free,
@@ -1715,11 +1732,15 @@ void
 
     if (is_dispose_msg)
     {
-      instance_ptr->instance_state_.dispose_was_received() ;
+      instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
+    }
+    else if (is_unregister_msg)
+    {
+      instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
     }
     else
     {
-      instance_ptr->instance_state_.data_was_received() ;
+      instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
     ptr->source_timestamp_.sec = header.source_timestamp_sec_;
@@ -1778,11 +1799,6 @@ void
         listener->on_data_available(dr.in ());
       }
     }
-    
-    if (is_dispose_msg)
-    {
-      instance_ptr->instance_state_.dispose_was_received() ;
-    }
   }
   else
   {
@@ -1806,6 +1822,18 @@ void
   // What it needs here is the key value to identify the instance to dispose.
   // The demarshal push this "sample" to received sample list so the user 
   // can be notified the dispose event.
+  this->dds_demarshal (sample);
+}
+
+void
+<%TYPE%>DataReaderImpl::unregister(const OpenDDS::DCPS::ReceivedDataSample& sample)
+{
+  //!!! caller should already have the sample_lock_
+  
+  // The data sample in this unregister message does not contain any valid data.
+  // What it needs here is the key value to identify the instance to unregister.
+  // The demarshal push this "sample" to received sample list so the user 
+  // can be notified the unregister event.
   this->dds_demarshal (sample);
 }
 
