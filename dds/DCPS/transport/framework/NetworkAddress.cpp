@@ -4,6 +4,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "NetworkAddress.h"
 #include "ace/OS_NS_netdb.h"
+#include "ace/Sock_Connect.h"
 
 
 #if !defined (__ACE_INLINE__)
@@ -39,29 +40,37 @@ const std::string& get_fully_qualified_hostname ()
 
   if (fullname.empty ())
   {
-    char hostname[MAXHOSTNAMELEN+1];      
-
-    //Discover the fully qualified hostname
-
-    ACE_INET_Addr addr;
-    if (addr.get_host_name(hostname, MAXHOSTNAMELEN+1) == -1)
+    size_t addr_count;
+    ACE_INET_Addr *addr_array;
+    int result = ACE::get_ip_interfaces(addr_count, addr_array);
+    if (result != 0 || addr_count < 1)
     {
-      ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: get_full_qualified_hostname failed %p\n", 
-        "get_host_name"));
+      ACE_ERROR ((LM_ERROR,
+        "(%P|%t)!!! ERROR: get_fully_qualified_hostname failed on %p\n"
+        "ACE::get_ip_interfaces"));
     }
-
-    if (strchr (hostname, '.') == 0)
+    else
     {
-      ACE_INET_Addr addr (1000, hostname);
-      if (addr.get_host_name(hostname, MAXHOSTNAMELEN+1) == -1)
-      {
-        ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: failed to get host name %p\n", 
-          "get_host_name"));
+      for( size_t i = 0; i < addr_count; i++) {
+        char hostname[MAXHOSTNAMELEN+1] = "";  
+
+        //Discover the fully qualified hostname
+
+        if (ACE::get_fqdn (addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0
+          && ACE_OS::strchr (hostname, '.') != 0)
+        {
+          VDBG_LVL ((LM_DEBUG, "(%P|%t)got fqdn %s \n",  
+            hostname), 2);
+          fullname = hostname;
+          return fullname;
+        }  
       }
     }
 
-    fullname = hostname;
+    ACE_ERROR ((LM_ERROR,
+        "(%P|%t)!!! ERROR: failed to discover the fully qualified hostname \n"));
   }
 
   return fullname;
 }
+

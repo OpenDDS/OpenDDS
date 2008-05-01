@@ -1,3 +1,23 @@
+Wed Apr 30 00:17:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Continued the effort to support IPv6 (RT11158).
+        
+        * dds/DCPS/Service_Participant.cpp:
+
+          Used set_port_number() instead of creating an ACE_INET_Addr with port number.
+          It fixed the problem that ipv4 address was introduced by the constructor in IPv6 build.
+          
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Updated the get_fully_qualified_hostname() function to work for both ipv4 and ipv6 
+          builds on current DDS supported platforms.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.inl:
+
+          Removed code to set the local_address with port 0 and INADDR_ANY which should
+          only apply to ipv4. Leave it use the default constructor. This would fix ipv4
+          address used in ipv6 build problem.
+          
 Tue Apr 29 19:35:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -16,7 +36,7 @@ Tue Apr 29 19:35:38 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
 
-          Making the code clearer by creating a _var, rather than a 
+          Making the code clearer by creating a _var, rather than a
           temporary variable.
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
@@ -95,7 +115,9 @@ Sun Apr 27 06:49:34 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           is either from the configuration or uses code default. The acceptor defaults to
           listening on INADDR_ANY if the local_address_ is not configured, but the fully
           qualified hostname with the port number randomly picked by OS is sent to
-          DCPSInfoRepo for endpoint advertisement. This would fix the problem that
+          DCPSInfoRepo for endpoint advertisement. This would fix the problem that default
+          local_address configurations do not work when hostname is resolved as loopback
+          ip address.
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
 
