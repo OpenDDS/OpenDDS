@@ -10,6 +10,8 @@ using namespace Messenger;
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
+extern bool unregister_notify_test;
+extern bool dispose_notify_test;
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -88,8 +90,20 @@ Writer::svc ()
           timeout_writes_ ++;
         }
       }
+      if (unregister_notify_test && i == num_messages/2)
+      {
+        message_dw->unregister(message, handle);
+	handle = message_dw->_cxx_register (message);
+      }
+ 
       message.count++;
     }
+
+    if (dispose_notify_test)
+    {
+      message_dw->dispose (message, handle);
+    }
+    
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
 	 << e << endl;

@@ -33,8 +33,10 @@ OpenDDS::DCPS::InstanceState::InstanceState (DataReaderImpl* reader,
 // cannot ACE_INLINE because of #include loop
 
 void
-OpenDDS::DCPS::InstanceState::dispose_was_received()
+OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
+  writers_.erase (writer_id);
+
   //
   // Manage the instance state on disposal here.
   //
@@ -47,24 +49,37 @@ OpenDDS::DCPS::InstanceState::dispose_was_received()
     }
 }
 
+void
+OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
+{
+  writers_.erase (writer_id);
+
+  if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
+    {
+      this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
+     // spec says if "no samples in the DataReader" then the
+     //      instance is removed.
+
+      this->release_if_empty ();
+    }
+}
+
+
 void 
 OpenDDS::DCPS::InstanceState::writer_became_dead (
-  PublicationId         /* writer_id */,
-  int                   num_alive_writers,
+  const PublicationId&  writer_id,
+  int                   /*num_alive_writers*/,
   const ACE_Time_Value& /* when */)
 {
-  //TBD keep track of which writer has written to this instance
-  // and only set to NOT_ALIVE if no other writers are writing to
-  // this instance.
-  // the CURRENT implementation just assumes that all writers are
-  // writing to all instances.
+  writers_.erase (writer_id);
 
-  if(num_alive_writers == 0 && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
+  if(writers_.empty () && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)
     {
       this->no_writers_ = true;
       this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
      // spec says if "no samples in the DataReader" then the
      //      instance is removed.
+
       this->release_if_empty ();
     }
 }
@@ -78,3 +93,6 @@ OpenDDS::DCPS::InstanceState::release_if_empty()
     this->reader_->release_instance (this->handle_);
   }
 }
+
+
+

@@ -95,13 +95,15 @@ size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::data_was_received()
+OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 {
   //
   // Update the view state here, since only sample data received affects
   // this state value.  Then manage the data sample only transistions
   // here.  Let the lively() method manage the other transitions.
   //
+
+  writers_.insert (writer_id);
 
   switch( this->view_state_)
     {
@@ -138,8 +140,10 @@ OpenDDS::DCPS::InstanceState::data_was_received()
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::lively(PublicationId         /* writer_id */)
+OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 {
+  writers_.insert (writer_id);
+
   //
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.

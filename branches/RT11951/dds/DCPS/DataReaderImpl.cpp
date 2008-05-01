@@ -998,6 +998,12 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
       this->dispose(sample);
       break ;
 
+    case UNREGISTER_INSTANCE:
+      this->writer_activity(sample.header_.publication_id_);
+      this->unregister(sample);
+      break ;
+
+
     default:
       ACE_ERROR((LM_ERROR,
 		 "(%P|%t) %T ERRRO: DataReaderImpl::data_received"
@@ -1565,6 +1571,12 @@ DataReaderImpl::set_sample_rejected_status(
 void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%T)BIT dispose\n"));
+}
+
+
+void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
+{
+  ACE_DEBUG ((LM_DEBUG, "(%P|%T)BIT unregister\n"));
 }
 
 
