@@ -182,7 +182,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 
   network_order_address.to_addr(this->remote_address_);
 
-  delete buf;
+  delete[] buf;
 
 
 //MJM: vvv CONNECTION ESTABLISHMENT CHANGES vvv

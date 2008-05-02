@@ -1,3 +1,18 @@
+Fri May  2 16:22:15 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added notes for qos compatibility (RT# 12054) and memory management
+          (RT# 12161).
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Needed to delete[] buf.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Needed to delete[] buf not delete.
+
 Thu May  1 23:50:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.h:

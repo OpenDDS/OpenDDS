@@ -31,6 +31,17 @@ New to this version are the following changes:
   fully copied to buffer when the qos contains sequence data. The
   TAO_OutputCDR stream needs be cosolidated before memcpy.
 
+- Fixed compliance with qos RxO
+
+  Fixed compliance with the DDS specification that qos parameters that
+  Durability kind and Deadline.duration be compatible between the 
+  subscriber and the publisher (RxO - Received x Offered)
+
+- Improved Memory Mangament
+
+  Fixed issue with reference counting for classes derived from 
+  LocalObject.
+
 =========================================================================
 
 Version 1.0 of OpenDDS.
