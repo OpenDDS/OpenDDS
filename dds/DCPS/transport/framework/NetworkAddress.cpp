@@ -30,6 +30,8 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
   inCdr >> buf;
   value.addr_ = buf;
 
+  delete[] buf;
+
   return inCdr.good_bit ();
 }
 
