@@ -1,63 +1,9 @@
-project(*Federator): dcps {
-  sharedname = Federator
-  libout     = $(DDS_ROOT)/lib
-  includes  += $(DDS_ROOT)
-
-  idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
-  dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
-  dcps_ts_flags += --export=OpenDDS_Federator_Export --pch DcpsInfo_pch.h
-
-  pch_header   =
-  pch_source   =
-
-  TypeSupport_Files {
-    Federator.idl >> LinkStateTypeSupport.idl LinkStateTypeSupportImpl.h LinkStateTypeSupportImpl.cpp TopicUpdateTypeSupport.idl TopicUpdateTypeSupportImpl.h TopicUpdateTypeSupportImpl.cpp ParticipantUpdateTypeSupport.idl ParticipantUpdateTypeSupportImpl.h ParticipantUpdateTypeSupportImpl.cpp PublicationUpdateTypeSupport.idl PublicationUpdateTypeSupportImpl.h PublicationUpdateTypeSupportImpl.cpp SubscriptionUpdateTypeSupport.idl SubscriptionUpdateTypeSupportImpl.h SubscriptionUpdateTypeSupportImpl.cpp
-  }
-
-  IDL_Files {
-    Federator.idl
-    LinkStateTypeSupport.idl
-    TopicUpdateTypeSupport.idl
-    ParticipantUpdateTypeSupport.idl
-    PublicationUpdateTypeSupport.idl
-    SubscriptionUpdateTypeSupport.idl
-  }
-
-  Source_Files {
-    FederatorConfig.cpp
-    FederatorRemoteLink.cpp
-    FederatorSubscriptions.cpp
-    FederatorPublications.cpp
-    FederatorManagerImpl.cpp
-    FederatorLinkListener.cpp
-    LinkStateManager.cpp
-    LinkStateTypeSupportImpl.cpp
-    TopicUpdateTypeSupportImpl.cpp
-    ParticipantUpdateTypeSupportImpl.cpp
-    PublicationUpdateTypeSupportImpl.cpp
-    SubscriptionUpdateTypeSupportImpl.cpp
-  }
-
-  Header_Files {
-    UpdateListener_T.h
-    FederatorManagerImpl.h
-  }
-
-  Template_Files {
-    UpdateListener_T.cpp
-    FederatorManager_T.cpp
-    FederatorManager_T_Impl.cpp
-  }
-
-}
 
 project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
 
   libpaths += $(DDS_ROOT)/lib
-  libs     += Federator
-  after    += *Federator
 
   IDL_Files {
   }
