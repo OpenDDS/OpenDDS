@@ -14,8 +14,10 @@
 
 ACE_CDR::Boolean
 operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
-{
-  outCdr << value.reserved_;
+{    
+  outCdr << ACE_OutputCDR::from_boolean (ACE_CDR_BYTE_ORDER);
+
+  outCdr << ACE_OutputCDR::from_octet (value.reserved_);
   outCdr << value.addr_.c_str();
 
   return outCdr.good_bit ();
@@ -25,9 +27,20 @@ operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
 ACE_CDR::Boolean
 operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
-  inCdr >> ACE_InputCDR::to_octet (value.reserved_);
+  CORBA::Boolean byte_order;
+  if (inCdr >> ACE_InputCDR::to_boolean (byte_order) == 0)
+    return 0;
+
+  inCdr.reset_byte_order (byte_order);
+
+  if (inCdr >> ACE_InputCDR::to_octet (value.reserved_) == 0)
+    return 0;
+
   char* buf = 0;
-  inCdr >> buf;
+  
+  if (inCdr >> buf == 0)
+    return 0;
+
   value.addr_ = buf;
 
   delete[] buf;
