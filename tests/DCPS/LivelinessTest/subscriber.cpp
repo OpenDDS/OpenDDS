@@ -62,6 +62,8 @@ static int init_reader_tranport ()
 
       ACE_INET_Addr reader_address (reader_address_str);
       reader_udp_config->local_address_ = reader_address;
+      reader_udp_config->local_address_str_ = reader_address_str;
+
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
         {
@@ -88,6 +90,7 @@ static int init_reader_tranport ()
         {
           ACE_INET_Addr reader_address (reader_address_str);
           reader_tcp_config->local_address_ = reader_address;
+          reader_tcp_config->local_address_str_ = reader_address_str;
         }
         // else use default address - OS assigned.
 
@@ -197,11 +200,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -324,10 +323,9 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl drl_servant ;
-
-      ::DDS::DataReaderListener_var drl
-        = ::OpenDDS::DCPS::servant_to_reference(&drl_servant);
+      ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -396,14 +394,13 @@ int main (int argc, char *argv[])
       TheServiceParticipant->shutdown ();
 
       ACE_OS::fprintf (stderr, "**********\n") ;
-      ACE_OS::fprintf (stderr, "drl_servant.liveliness_changed_count() = %d\n",
-                     drl_servant.liveliness_changed_count()) ;
-      ACE_OS::fprintf (stderr, "drl_servant.no_writers_generation_count() = %d\n",
-                     drl_servant.no_writers_generation_count()) ;
+      ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
+                     drl_servant->liveliness_changed_count()) ;
+      ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
+                     drl_servant->no_writers_generation_count()) ;
       ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-
-      if ((drl_servant.liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
-        (drl_servant.no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
+      if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
+          (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
         // if use take then the instance had "no samples" when it got NO_WRITERS and
         // hence the instance state terminated and then started again so

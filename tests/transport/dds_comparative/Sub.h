@@ -31,7 +31,8 @@ class Sub : public OpenDDS::DCPS::TransportInterface
 
     /// Add a remote publisher
     void add_remote_publisher(OpenDDS::DCPS::RepoId    pub_id,
-                              const ACE_INET_Addr& pub_addr);
+                              const ACE_INET_Addr& pub_addr,
+                              const std::string&   pub_addr_str);
 
     void init(unsigned impl_id);
     void wait();
@@ -51,9 +52,12 @@ class Sub : public OpenDDS::DCPS::TransportInterface
     {
       OpenDDS::DCPS::RepoId pub_id_;
       ACE_INET_Addr     pub_addr_;
+      std::string       pub_addr_str_;
 
-      PubInfo(OpenDDS::DCPS::RepoId pub_id, const ACE_INET_Addr& pub_addr)
-        : pub_id_(pub_id), pub_addr_(pub_addr)
+      PubInfo(OpenDDS::DCPS::RepoId pub_id, 
+              const ACE_INET_Addr& pub_addr,
+              const std::string&   pub_addr_str)
+        : pub_id_(pub_id), pub_addr_(pub_addr), pub_addr_str_(pub_addr_str)
         {}
 
       void as_association(OpenDDS::DCPS::AssociationData& assoc_data)
@@ -61,12 +65,17 @@ class Sub : public OpenDDS::DCPS::TransportInterface
           assoc_data.remote_id_ = this->pub_id_;
           assoc_data.remote_data_.transport_id = 1;
 
-          OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+          OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
 
-          assoc_data.remote_data_.data = OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+          ACE_OutputCDR cdr;
+          cdr << network_order_address;
+          size_t len = cdr.total_length ();
+
+          assoc_data.remote_data_.data
+            = OpenDDS::DCPS::TransportInterfaceBLOB
+            (len,
+            len,
+            (CORBA::Octet*)(cdr.buffer ()));
         }
     };
 

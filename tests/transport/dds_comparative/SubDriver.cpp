@@ -108,6 +108,7 @@ SubDriver::init()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->local_address_;
+  tcp_config->local_address_str_ = this->sub_addr_str_;
 
   if (transport_impl->configure(config.in()) != 0)
     {
@@ -235,7 +236,7 @@ SubDriver::parse_arg_p(const char* arg, bool& flag)
 
   ACE_INET_Addr pub_addr(pub_addr_str.c_str());
 
-  this->subscriber_.add_remote_publisher(pub_id,pub_addr);
+  this->subscriber_.add_remote_publisher(pub_id,pub_addr, pub_addr_str);
   
   flag = true;
 }
@@ -284,11 +285,11 @@ SubDriver::parse_arg_s(const char* arg, bool& flag)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   std::string sub_id_str(arg_str,0,pos);
-  std::string sub_addr_str(arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->sub_addr_str_ = std::string (arg_str,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   OpenDDS::DCPS::RepoId sub_id = ACE_OS::atoi(sub_id_str.c_str());
 
-  this->local_address_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->local_address_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   this->subscriber_.set_local_subscriber(sub_id);
 

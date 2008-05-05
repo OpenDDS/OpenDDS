@@ -96,11 +96,7 @@ int init (int argc, ACE_TCHAR *argv[])
       // TBD - find some way to avoid this.
     ACE_OS::sleep (2);
 
-      ::Xyz::FooTypeSupportImpl* ts_servant = new ::Xyz::FooTypeSupportImpl();
-      OpenDDS::DCPS::LocalObject_var safe_servant = ts_servant;
-
-      ::Xyz::FooTypeSupport_var ts =
-        OpenDDS::DCPS::servant_to_reference (ts_servant);
+      ::Xyz::FooTypeSupport_var ts (new ::Xyz::FooTypeSupportImpl);
 
       if (::DDS::RETCODE_OK != ts->register_type(participant.in (), TEST_TOPIC_TYPE))
       {

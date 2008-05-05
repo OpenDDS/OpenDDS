@@ -104,9 +104,6 @@ namespace OpenDDS
         = servant_to_reference (dp);
 
 
-      // Give ownership to poa.
-      //x dp->_remove_ref (); //xxx 2-> 1
-
       if (CORBA::is_nil (dp_obj))
         {
           ACE_ERROR ((LM_ERROR,
@@ -130,6 +127,9 @@ namespace OpenDDS
                         this->participants_protector_,
                         ::DDS::DomainParticipant::_nil ());
 
+
+      // the Pair will also act as a guard against leaking the 
+      // new DomainParticipantImpl (NO_DUP, so this takes over mem)
       Participant_Pair pair (dp, dp_obj, NO_DUP);
 
       DPSet* entry;
@@ -170,9 +170,6 @@ namespace OpenDDS
             }
         }
 //xxx still ref_count = 1
-      // Increase ref count when the servant is referenced by the
-      // map.
-      dp->_add_ref (); //xxx 1->2
 
       return ::DDS::DomainParticipant::_duplicate(dp_obj); //xxx still 2  (obj 3->4)
     } //xxx obj 4->3
@@ -304,8 +301,6 @@ namespace OpenDDS
           return ::DDS::RETCODE_ERROR;
         }
 
-      // Decrease ref count when the servant is removed from map.
-      the_servant->_remove_ref ();
 //xxx ^^^ obj rc = 3 servant rc 4->3
       deactivate_object < ::DDS::DomainParticipant_ptr > (a_participant);
 //xxx ^^^ obj rc = 3 servant rc 3->2

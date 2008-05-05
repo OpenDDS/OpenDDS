@@ -20,8 +20,6 @@ $multiple_instance=0;
 $num_samples_per_reader=3;
 $num_readers=1;
 $use_take=0;
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
-
 
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
@@ -37,7 +35,6 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     . " -d $domains_file -ORBSvcConf ../../tcp.conf");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
-# -b
 $parameters = "$svc_config -r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
 
@@ -45,7 +42,7 @@ if ($ARGV[0] eq 'udp') {
   $parameters .= " -ORBSvcConf udp.conf -us -s localhost:16701 -up -p localhost:29803";
 }
 if ($ARGV[0] eq 'give_addrs') {
-  $parameters .= "$svc_config -s localhost:16701 -p localhost:29803";
+  $parameters .= " -s localhost:16701 -p localhost:29803";
 }
 elsif ($ARGV[0] eq 'diff_trans') {
   $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";

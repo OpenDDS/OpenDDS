@@ -13,9 +13,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Qos_Helper.h"
 
-int main (int argc, char *argv[])
+int main (int , char *[])
 {
-
   int status = 0;
 
   // verify that if dw is infinite, that it is always greater

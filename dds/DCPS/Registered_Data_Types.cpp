@@ -6,7 +6,7 @@
 #include "Registered_Data_Types.h"
 
 #include "dds/DCPS/Util.h"
-
+#include "dds/DdsDcpsDomainC.h"
 #include "tao/TAO_Singleton.h"
 
 #include "ace/SString.h"
@@ -145,6 +145,42 @@ namespace OpenDDS
             } /* if (0 == domains_.bind(domain_participant, supportHash)) */
         } /* if (0 == domains_.find(domain_participant, supportHash)) */
 
+      return retCode;
+    }
+
+
+    ::DDS::ReturnCode_t Data_Types_Register::unregister_participant (
+      ::DDS::DomainParticipant_ptr domain_participant)
+    {
+      ::DDS::ReturnCode_t retCode = ::DDS::RETCODE_ERROR;
+      TypeSupportHash*  supportHash = NULL;
+      ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
+
+      if ((!domains_.empty() ) &&
+          (0 == find(domains_, reinterpret_cast <void*> (domain_participant), supportHash)))
+        {
+          if (!supportHash->empty() )
+            {
+              TypeSupportHash::iterator supportIter = supportHash->begin();
+
+              while (supportIter != supportHash->end())
+                {
+                  // ignore the error of adding a duplicate pointer.
+                  // this done to handle a pointer having been registered
+                  // to multiple names.
+                  supportIter->second->_remove_ref();
+                  ++supportIter;
+
+                } /* while (supportIter != supportEnd) */
+              supportHash->clear();
+            }
+
+            if(0 != unbind(domains_, reinterpret_cast <void*> (domain_participant)))
+              {
+                ACE_ERROR ((LM_ERROR, "(%P|%t)Data_Types_Register::unregister_participant failed to unbind domain_participant for %s\n", domain_participant->get_domain_id()));
+              }
+            delete supportHash;
+        }
       return retCode;
     }
 

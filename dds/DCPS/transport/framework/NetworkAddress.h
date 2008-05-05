@@ -6,6 +6,9 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/INET_Addr.h"
+#include "ace/CDR_Stream.h"
+#include <string>
+#include <vector>
 
 
 namespace OpenDDS
@@ -14,45 +17,60 @@ namespace OpenDDS
   namespace DCPS
   {
 
+    typedef std::vector <std::string> StringVector;
+
     /**
      * @struct NetworkAddress
      *
-     * @brief Defines a wrapper around ip/port always held in network order.
+     * @brief Defines a wrapper around address info which is used for advertise.
+     *       
      *
-     * This is used to send/receive an ACE_INET_Addr through the transport.
+     * This is used to send/receive an address information through transport.
      */
     struct OpenDDS_Dcps_Export NetworkAddress
     {
       /// Default Ctor
       NetworkAddress();
 
-      /// Ctor using ACE_INET_Addr to obtain ip and port values.
-      NetworkAddress(const ACE_INET_Addr& addr);
+      ~NetworkAddress();
+
+      /// Ctor using address string.
+      NetworkAddress(const std::string& addr);
+
+      void dump ();
 
       /// Accessor to populate the provided ACE_INET_Addr object from the
-      /// network order ip and port number.  The resulting ACE_INET_Addr
-      /// object will be in local order.
+      /// address string received through transport.
       void to_addr(ACE_INET_Addr& addr) const;
 
-      /// The network order ip address (4 bytes)
-      ACE_UINT32 ip_;
+      /// Reserve byte for some feature supports in the future. 
+      /// e.g. version support.
+      unsigned char  reserved_;
 
-      /// The network order port number (2 bytes)
-      u_short port_;
+      /// The address in string format. e.g. ip:port, hostname:port
+      std::string addr_;
     };
-
   }
 
 }
 
-// CLEANUP
-#if 0
-//MJM: would it help to overload insertion and extraction operators
-//MJM: to/from message block chains at this point?
-#endif
+#if defined (__ACE_INLINE__)
+# include "NetworkAddress.inl"
+#endif  /* __ACE_INLINE__ */
 
-#if defined(__ACE_INLINE__)
-#include "NetworkAddress.inl"
-#endif /* __ACE_INLINE__ */
+
+/// Marshal into a buffer.
+extern OpenDDS_Dcps_Export
+ACE_CDR::Boolean
+operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value);
+
+/// Demarshal from a buffer.
+extern OpenDDS_Dcps_Export
+ACE_CDR::Boolean
+operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value);
+
+/// Helper function to get the fully qualified hostname.
+extern OpenDDS_Dcps_Export
+const std::string& get_fully_qualified_hostname ();
 
 #endif /* OPENDDS_DCPS_NETWORKADDRESS_H */

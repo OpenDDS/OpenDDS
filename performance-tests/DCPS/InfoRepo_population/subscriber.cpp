@@ -279,18 +279,6 @@ Subscriber::run (void)
             }
         }
 
-      /*
-        // activate the listener
-        DataReaderListenerImpl        listener_servant;
-        DDS::DataReaderListener_var listener =
-        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
-
-        if (CORBA::is_nil (listener.in ())) {
-        cerr << "listener is nil." << endl;
-        exit(1);
-        }
-      */
-
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       subs_[0]->get_default_datareader_qos (dr_qos);

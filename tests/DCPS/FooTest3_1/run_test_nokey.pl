@@ -64,8 +64,8 @@ $pubdriver_ior = "pubdriver.ior";
 # pub_id_fname will be part of the parameter of the -p option
 # which will be parsed using ':' delimiter.
 $pub_id_fname = "pub_id.txt";
-$pub_port = 5555;
-$sub_port = 6666;
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port();
 $sub_id = 1;
 
 unlink $dcpsrepo_ior;

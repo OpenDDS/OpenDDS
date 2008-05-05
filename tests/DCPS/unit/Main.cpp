@@ -145,12 +145,7 @@ int run_domain_test ()
 
   TEST_CHECK (domain_id == MY_DOMAIN);
 
-  MyTypeSupportImpl* fts_servant = new MyTypeSupportImpl();
-  OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-
-  MyTypeSupport_var fts =
-    OpenDDS::DCPS::servant_to_reference (fts_servant);
+  MyTypeSupport_var fts (new MyTypeSupportImpl);
 
   if (::DDS::RETCODE_OK != fts->register_type(new_dp.in (), MY_TYPE))
     {

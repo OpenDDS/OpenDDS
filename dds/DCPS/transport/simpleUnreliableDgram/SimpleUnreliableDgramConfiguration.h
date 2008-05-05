@@ -7,6 +7,7 @@
 #include "SimpleUnreliableDgram_export.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
 #include "ace/INET_Addr.h"
+#include <string>
 
 
 namespace OpenDDS
@@ -23,6 +24,12 @@ namespace OpenDDS
         virtual ~SimpleUnreliableDgramConfiguration();
 
         /// Describes the local endpoint.
+        std::string local_address_str_;
+
+        /// The address string used to provide to DCPSInfoRepo.
+        /// This string is either from configuration file or default
+        /// to hostname:port. The hostname is fully qualified hostname
+        /// and the port is randomly picked by os.
         ACE_INET_Addr local_address_;
 
         /// Maximum period (in milliseconds) of not being able to send queued

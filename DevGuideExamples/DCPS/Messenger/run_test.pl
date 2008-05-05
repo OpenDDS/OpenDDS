@@ -32,8 +32,8 @@ elsif ($ARGV[0] eq 'mcast') {
 elsif ($ARGV[0] eq 'reliable_mcast') {
     $opts .= ($use_svc_config ? " -ORBSvcConf reliable_mcast.conf " : '')
         . "-t reliable_mcast";
-    $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini";
+    $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini -TransportDebugLevel 3";
+    $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini -TransportDebugLevel 3";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
     $opts .= " -t default_tcp";
@@ -51,10 +51,21 @@ elsif ($ARGV[0] eq 'default_mcast') {
     $pub_opts = "$opts -t default_mcast_pub";
     $sub_opts = "$opts -t default_mcast_sub";
 }
+elsif ($ARGV[0] eq 'default_reliable_mcast') {
+    $opts .= ($use_svc_config ? " -ORBSvcConf reliable_mcast.conf " : '');
+    $pub_opts = "$opts -t default_reliable_mcast_pub";
+    $sub_opts = "$opts -t default_reliable_mcast_sub";
+}
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= ' -DCPSBit 0';
     $sub_opts .= ' -DCPSBit 0';
+}
+elsif ($ARGV[0] eq 'stack') {
+    $opts .= " -t default_tcp";
+    $pub_opts = "$opts";
+    $sub_opts = "$opts";
+    $stack_based = 1;
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
@@ -68,7 +79,15 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+
+if($stack_based == 0) {
+  #create
+  $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+}
+else {
+  $Subscriber = PerlDDS::create_process ("stack_subscriber", " $sub_opts");
+}
+
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";

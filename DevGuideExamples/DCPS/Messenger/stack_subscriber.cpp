@@ -10,13 +10,18 @@
 // ============================================================================
 
 
-#include "DataReaderListener.h"
+#include "StackDataReaderListener.h"
 #include "MessageTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.h>
+#include <dds/DCPS/transport/ReliableMulticast/ReliableMulticast.h>
+#endif
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -26,9 +31,9 @@ using namespace Messenger;
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int
-parse_args (int argc, char *argv[])
+parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "t:");
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -36,22 +41,28 @@ parse_args (int argc, char *argv[])
     switch (c)
     {
     case 't':
-      if (ACE_OS::strcmp (get_opts.opt_arg (), "udp") == 0) {
+      if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("udp")) == 0) {
         transport_impl_id = 2;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "mcast") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("mcast")) == 0) {
         transport_impl_id = 3;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("reliable_mcast")) == 0) {
+        transport_impl_id = 4;
+      }
       // test with DEFAULT_SIMPLE_TCP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_tcp") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
       }
       // test with DEFAULT_SIMPLE_UDP_ID.
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_udp") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_UDP_ID;
       }
-      else if (ACE_OS::strcmp (get_opts.opt_arg (), "default_mcast_sub") == 0) {
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
+      }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_reliable_mcast_sub")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID;
       }
       break;
     case '?':
@@ -69,7 +80,7 @@ parse_args (int argc, char *argv[])
 }
 
 
-int main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -89,30 +100,27 @@ int main (int argc, char *argv[])
         return -1;
       }
 
-      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
-      OpenDDS::DCPS::LocalObject_var safe_servant = mts_servant;
+      MessageTypeSupport_var mts = new MessageTypeSupportImpl();
 
-      if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (), "")) {
+      if (DDS::RETCODE_OK != mts->register_type(participant.in (), "")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;
           exit(1);
         }
 
-      CORBA::String_var type_name = mts_servant->get_type_name ();
+      CORBA::String_var type_name = mts->get_type_name ();
 
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
       DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
-                                                        type_name.in (),
-                                                        topic_qos,
-                                                        DDS::TopicListener::_nil());
+                                                       type_name.in (),
+                                                       TOPIC_QOS_DEFAULT,
+                                                       DDS::TopicListener::_nil());
       if (CORBA::is_nil (topic.in ())) {
         cerr << "Failed to create_topic." << endl;
         exit(1);
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      OpenDDS::DCPS::TransportImpl_rch transport_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -133,7 +141,7 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-      OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
+      OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(transport_impl.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
         switch (status) {
@@ -156,9 +164,8 @@ int main (int argc, char *argv[])
       }
 
       // activate the listener
-      DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
-      DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+      StackDataReaderListenerImpl listener_servant;
+      DDS::DataReaderListener_var listener (&listener_servant);
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -166,10 +173,8 @@ int main (int argc, char *argv[])
       }
 
       // Create the Datareaders
-      DDS::DataReaderQos dr_qos;
-      sub->get_default_datareader_qos (dr_qos);
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
-                                                      dr_qos,
+                                                      DATAREADER_QOS_DEFAULT,
                                                       listener.in ());
       if (CORBA::is_nil (dr.in ())) {
         cerr << "create_datareader failed." << endl;
@@ -178,7 +183,7 @@ int main (int argc, char *argv[])
 
 
       int expected = 10;
-      while ( listener_servant->num_reads() < expected) {
+      while ( listener_servant.num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 

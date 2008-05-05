@@ -45,7 +45,8 @@ OpenDDS::DCPS::SimpleUdpConfiguration::load (const TransportIdType& id,
   GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT("local_address"), local_address);
   if (local_address != ACE_TEXT(""))
   {
-    this->local_address_.set (local_address.c_str ());
+    this->local_address_str_ = local_address.c_str ();
+    this->local_address_.set (local_address_str_.c_str ());
   }
 
   GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT("max_output_pause_period"),

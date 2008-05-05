@@ -38,7 +38,7 @@ namespace OpenDDS
           }
 
 
-        /// This is the visit_element() method that will be called when the
+        /// This is the visit_element_remove() method that will be called when the
         /// visitation method used is BasicQueue<T>::accept_remove_visitor().
         ///
         /// Return 0 if visiting should stop, return 1 to continue visiting.
@@ -50,7 +50,7 @@ namespace OpenDDS
         /// By default, this method is implemented to just return 0 to
         /// stop the "remove visitation" immediately.  It doesn't modify
         /// the value of the remove argument.
-        virtual int visit_element(T* element, int& remove)
+        virtual int visit_element_remove(T* element, int& remove)
           {
             ACE_UNUSED_ARG(element);
             ACE_UNUSED_ARG(remove);
@@ -58,7 +58,7 @@ namespace OpenDDS
           }
 
 
-        /// This is the visit_element() method that will be called when the
+        /// This is the visit_element_ref() method that will be called when the
         /// visitation method used is BasicQueue<T>::accept_replace_visitor().
         ///
         /// Return 0 if visiting should stop, return 1 to continue visiting.
