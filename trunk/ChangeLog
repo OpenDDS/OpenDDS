@@ -1,8 +1,15 @@
+Mon May  5 19:15:05 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+	  
+	  Adding patch from Jim Chappell that corrects "not supported"
+	  error message generation problems with newer compilers (gcc 4.3+).
+
 Mon May  5 19:03:27 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
 
-          Added a StackSubscriber project w/ stack_subscriber.cpp, StackDataReaderListener.h, and 
+          Added a StackSubscriber project w/ stack_subscriber.cpp, StackDataReaderListener.h, and
           StackDataReaderListener.cpp
 
         * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
