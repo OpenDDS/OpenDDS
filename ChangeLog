@@ -1,3 +1,10 @@
+Mon May  5 18:47:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/README:
+
+          Added PublisherImpl.cpp patch needed for reproducing the deadlock and 
+          testing the fix.
+
 Mon May  5 14:38:27 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/Writer.cpp:
