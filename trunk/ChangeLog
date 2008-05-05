@@ -1,3 +1,19 @@
+Mon May  5 22:18:38 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+
+          Added the example configuration that used by IPV6 specific DevGuideExample.
+          The local_address is configured with IPV6 format localhost address.
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Added the IPV6 specific test case.
+
+        * bin/dcps_tests.lst:
+
+          Added IPV6 specific DevGuideExample test.
+
 Mon May  5 20:11:51 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
