@@ -161,7 +161,6 @@ public:
         const ::DDS::DataWriterQos &           qos,
         ::DDS::DataWriterListener_ptr          a_listener,
         OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
-        ::DDS::Publisher_ptr                   publisher,
         OpenDDS::DCPS::PublisherImpl*          publisher_servant,
         ::DDS::DataWriter_ptr                  dw_objref,
         ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
@@ -266,8 +265,7 @@ public:
         ::DDS::DataReaderListener_ptr            a_listener,
         OpenDDS::DCPS::DomainParticipantImpl*    participant,
         OpenDDS::DCPS::SubscriberImpl*           subscriber,
-        ::DDS::Subscriber_ptr                    subscriber_objref,
-        ::DDS::DataReader_ptr                    dr_objerf,
+        ::DDS::DataReader_ptr                    dr_objref,
         OpenDDS::DCPS::DataReaderRemote_ptr      dr_remote_objref
       )
     ACE_THROW_SPEC ((CORBA::SystemException));

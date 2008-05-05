@@ -52,6 +52,7 @@ static int init_writer_tranport (OpenDDS::DCPS::TransportImpl_rch& writer_transp
     {
       ACE_INET_Addr writer_address (writer_address_str);
       writer_tcp_config->local_address_ = writer_address;
+      writer_tcp_config->local_address_str_ = writer_address_str;
     }
     // else use default address - OS assigned.
 
@@ -121,11 +122,7 @@ int main (int argc, char *argv[])
       parse_args (argc, argv);
 
 
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -230,10 +227,7 @@ int main (int argc, char *argv[])
       dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
       dw_qos.liveliness.lease_duration.nanosec = 0;
 
-      DataWriterListenerImpl dwl_servant ;
-
-      ::DDS::DataWriterListener_var dwl
-        = ::OpenDDS::DCPS::servant_to_reference(&dwl_servant);
+      ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                   dw_qos,
@@ -265,12 +259,16 @@ int main (int argc, char *argv[])
       TheServiceParticipant->shutdown ();
 
       // check to see if the publisher worked
-      if(!dwl_servant.valid())
       {
-        ACE_ERROR ((LM_ERROR,
-                   ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. test_duration=%d\n"),
-                   test_duration));
-        return 1 ;
+        DataWriterListenerImpl* dwl_servant =
+          OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+        if(!dwl_servant->valid())
+        {
+          ACE_ERROR ((LM_ERROR,
+                     ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. test_duration=%d\n"),
+                     test_duration));
+          return 1 ;
+        }
       }
     }
   catch (const TestException&)

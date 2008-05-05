@@ -220,10 +220,7 @@ PubDriver::initialize(int& argc, char *argv[])
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-  ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl();
-
-  ::Xyz::FooTypeSupport_var fts =
-    ::OpenDDS::DCPS::servant_to_reference (fts_servant);
+  ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
   participant_ =
     dpf->create_participant(MY_DOMAIN,
@@ -692,26 +689,11 @@ PubDriver::listener_test ()
 {
   // Create DomainParticipantListener, PublisherListener and
   // DataWriterListener.
-  DomainParticipantListenerImpl* dpl_servant;
-  ACE_NEW (dpl_servant,
-           DomainParticipantListenerImpl());
+  ::DDS::DomainParticipantListener_var dpl(new DomainParticipantListenerImpl);
 
-  ::DDS::DomainParticipantListener_var dpl
-    = ::OpenDDS::DCPS::servant_to_reference (dpl_servant);
+  ::DDS::PublisherListener_var pl (new PublisherListenerImpl);
 
-  PublisherListenerImpl* pl_servant;
-  ACE_NEW (pl_servant,
-           PublisherListenerImpl());
-
-  ::DDS::PublisherListener_var pl
-    = ::OpenDDS::DCPS::servant_to_reference (pl_servant);
-
-  DataWriterListenerImpl* dwl_servant;
-  ACE_NEW (dwl_servant,
-           DataWriterListenerImpl());
-
-  ::DDS::DataWriterListener_var dwl
-    = ::OpenDDS::DCPS::servant_to_reference (dwl_servant);
+  ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got
@@ -1032,10 +1014,10 @@ PubDriver::parse_pub_arg(const std::string& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -1114,13 +1096,17 @@ void PubDriver::add_subscription (
   associations.length (1);
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
 
-  ACE_INET_Addr sub_inet_addr(sub_addr);
-  OpenDDS::DCPS::NetworkAddress network_order_address(sub_inet_addr);
+  OpenDDS::DCPS::NetworkAddress network_order_address(sub_addr);
+
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
   associations[0].readerTransInfo.data
     = OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
 
   associations[0].readerId = reader_id;
@@ -1144,6 +1130,7 @@ void PubDriver::attach_to_transport ()
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
+  tcp_config->local_address_str_ = this->pub_addr_str_;
 
   if (transport_impl->configure(config.in ()) != 0)
     {

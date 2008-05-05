@@ -141,6 +141,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
     {
       ACE_INET_Addr reader_address( this->config_.transportAddressName().c_str());
       reader_tcp_config->local_address_ = reader_address;
+      reader_tcp_config->local_address_str_ = this->config_.transportAddressName();
     }
     // else use default address - OS assigned.
 
@@ -158,9 +159,9 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating data reader listener.\n")));
-  ForwardingListenerImpl* forwarder_servant = new ForwardingListenerImpl( 0);
-
-  this->listener_ = ::OpenDDS::DCPS::servant_to_reference(forwarder_servant);
+  this->listener_ = new ForwardingListenerImpl( 0);
+  ForwardingListenerImpl* forwarder_servant =
+    OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(listener_.in());
 
   if (CORBA::is_nil (this->listener_.in ()))
     {
@@ -368,9 +369,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   // Establish and install the DataWriter.
   //
 
-  DataWriterListenerImpl* listenerServant = new DataWriterListenerImpl( 0);
-  ::DDS::DataWriterListener_var listener
-    = ::OpenDDS::DCPS::servant_to_reference( listenerServant);
+  ::DDS::DataWriterListener_var listener (new DataWriterListenerImpl( 0));
 
   //
   // Keep all data samples to allow us to establish connections in an

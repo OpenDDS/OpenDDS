@@ -63,11 +63,7 @@ MyTypeSupportImpl::get_type_name (
                    MyDataWriterImpl(),
                    ::DDS::DataWriter::_nil());
 
-
-    ::DDS::DataWriter_ptr writer_obj
-      = ::OpenDDS::DCPS::servant_to_reference (writer_impl);
-
-    return writer_obj;
+    return writer_impl;
   }
 
 ::DDS::DataReader_ptr MyTypeSupportImpl::create_datareader (
@@ -81,11 +77,7 @@ MyTypeSupportImpl::get_type_name (
                    MyDataReaderImpl(),
                    ::DDS::DataReader::_nil());
 
-
-    ::DDS::DataReader_ptr reader_obj
-      = ::OpenDDS::DCPS::servant_to_reference (reader_impl);
-
-    return reader_obj;
+    return reader_impl;
   }
 
 

@@ -61,6 +61,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_mcast_sub")) == 0) {
         transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_MCAST_SUB_ID;
       }
+      else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_reliable_mcast_sub")) == 0) {
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID;
+      }
       break;
     case '?':
     default:
@@ -161,9 +164,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      DataReaderListenerImpl        listener_servant;
-      DDS::DataReaderListener_var listener =
-        ::OpenDDS::DCPS::servant_to_reference(&listener_servant);
+      DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+      DataReaderListenerImpl* listener_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -181,7 +184,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = 10;
-      while ( listener_servant.num_reads() < expected ) { 
+      while ( listener_servant->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 

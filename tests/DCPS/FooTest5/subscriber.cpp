@@ -462,10 +462,7 @@ int main (int argc, char *argv[])
       //dr_qos.history.depth = history_depth  ;
 
       // activate the listener
-      DataReaderListenerImpl* listener_servant = new DataReaderListenerImpl();
-
-      ::DDS::DataReaderListener_var listener
-        = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+      ::DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
 
       if (CORBA::is_nil (listener.in ()))
         {

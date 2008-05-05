@@ -10,7 +10,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    // support "OpenDDS::DCPS" style _ptr and _var
+    // support TAO-style _ptr and _var
     typedef CORBA::LocalObject_ptr LocalObject_ptr;
     typedef CORBA::LocalObject_var LocalObject_var;
 

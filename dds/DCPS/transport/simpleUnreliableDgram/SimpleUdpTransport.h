@@ -6,6 +6,7 @@
 
 #include "SimpleUnreliableDgram_export.h"
 #include "SimpleUnreliableDgramTransport.h"
+#include <string>
 
 
 namespace OpenDDS
@@ -33,7 +34,8 @@ namespace OpenDDS
 
       private:
 
-        ACE_INET_Addr local_address_;
+        std::string    local_address_str_;
+        ACE_INET_Addr  local_address_;
     };
 
   } /* namespace DCPS */

@@ -111,13 +111,13 @@ int main (int argc, char *argv[])
     }
 
     // activate the listener
-    DataReaderListenerImpl        listener_servant;
-    DDS::DataReaderListener_var listener =
-      DDS::DataReaderListener::_narrow (&listener_servant);
+    DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
     }
+    DataReaderListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
 
 
     int expected = 10;
-    while ( listener_servant.num_reads() < expected) {
+    while ( listener_servant->num_reads() < expected) {
       ACE_OS::sleep (1);
     }
 

@@ -60,9 +60,12 @@ class PubDriver
 
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
+    std::string       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
+    std::string       sub_addr_str_;
+
     int               block_on_write_;
     int               num_threads_to_write_;
     int               multiple_instances_;

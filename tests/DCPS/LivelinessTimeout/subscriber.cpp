@@ -29,9 +29,6 @@
 
 #include "common.h"
 
-static const char * reader_address_str = "";
-static int reader_address_given = 0;
-
 static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transport_impl)
 {
   int status = 0;
@@ -43,9 +40,6 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, "SimpleTcp");
-
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
@@ -119,11 +113,7 @@ int main (int argc, char *argv[])
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-
-      ::Xyz::FooTypeSupportImpl* fts_servant = new ::Xyz::FooTypeSupportImpl;
-
-      ::Xyz::FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
+      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -236,10 +226,9 @@ int main (int argc, char *argv[])
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
       dr_qos.liveliness.lease_duration.nanosec = 0;
 
-      DataReaderListenerImpl drl_servant ;
-
-      ::DDS::DataReaderListener_var drl
-        = ::OpenDDS::DCPS::servant_to_reference(&drl_servant);
+      ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
+      DataReaderListenerImpl* drl_servant =
+        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -250,7 +239,7 @@ int main (int argc, char *argv[])
       ACE_OS::sleep(test_duration);
 
       // clean up subscriber objects
-      
+
 
       sub->delete_contained_entities() ;
 
@@ -262,22 +251,21 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      if (drl_servant.deadline_missed() < threshold_liveliness_lost)
+      if (drl_servant->deadline_missed() < threshold_liveliness_lost)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) The liviness deadline wasn't missed as many times as it should have."
                     "threashold=%d, num missed=%d\n"),
                     threshold_liveliness_lost,
-                    drl_servant.deadline_missed()));
+                    drl_servant->deadline_missed()));
           return 1;
       }
-      else if (drl_servant.test_failed())
+      else if (drl_servant->test_failed())
       {
         ACE_ERROR ((LM_ERROR,
            ACE_TEXT("(%P|%t) There was a problem with the test, check error log.\n")));
           return 1;
       }
-
     }
   catch (const TestException&)
     {

@@ -32,6 +32,15 @@ namespace
 OpenDDS::DCPS::TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl","~TransportImpl",6);
+  PendingAssociationsMap::iterator penditer =
+    pending_association_sub_map_.begin();
+
+  while(penditer != pending_association_sub_map_.end())
+  {
+    delete (penditer->second);
+    ++penditer;
+  }
+
   clear(dw_map_);
   clear(dr_map_);
 
@@ -489,8 +498,9 @@ OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
     }
     RepoIdSet_rch tmp = this->pending_sub_map_.remove_set (pub_id);
     tmp = this->acked_sub_map_.remove_set (pub_id);
-    delete remote_associations;
+    remote_associations = penditer->second;
     pending_association_sub_map_.erase(pub_id);
+    delete remote_associations;
   }
   else if (penditer != pending_association_sub_map_.end())
   {

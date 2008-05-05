@@ -20,10 +20,10 @@ OpenDDS::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
 
 
 int
-OpenDDS::DCPS::RemoveAllVisitor::visit_element(TransportQueueElement* element,
-                                           int&                   remove)
+OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* element,
+                                                      int&                   remove)
 {
-  DBG_ENTRY_LVL("RemoveAllVisitor","visit_element",6);
+  DBG_ENTRY_LVL("RemoveAllVisitor","visit_element_remove",6);
 
   // Always remove the element passed in. Always set the remove flag
   // to true (1).  The BasicQueue<T> will perform the actual removal

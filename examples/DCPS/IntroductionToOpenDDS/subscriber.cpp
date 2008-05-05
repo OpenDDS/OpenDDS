@@ -152,21 +152,16 @@ int main (int argc, char *argv[]) {
 
     // Create DataReaders and DataReaderListeners for the
     // Quote and ExchangeEvent
-
-    QuoteDataReaderListenerImpl quote_listener_servant;
-
-    DDS::DataReaderListener_var quote_listener =
-      OpenDDS::DCPS::servant_to_reference( &quote_listener_servant );
+    DDS::DataReaderListener_var quote_listener (new QuoteDataReaderListenerImpl);
 
     if (CORBA::is_nil (quote_listener.in ())) {
       cerr << "Quote listener is nil." << endl;
       ACE_OS::exit(1);
     }
 
-    ExchangeEventDataReaderListenerImpl exchange_evt_listener_servant;
-
-    DDS::DataReaderListener_var exchange_evt_listener =
-      OpenDDS::DCPS::servant_to_reference( &exchange_evt_listener_servant );
+    DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
+    ExchangeEventDataReaderListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<ExchangeEventDataReaderListenerImpl,DDS::DataReaderListener_ptr>(exchange_evt_listener.in());
 
     if (CORBA::is_nil (exchange_evt_listener.in ())) {
       cerr << "ExchangeEvent listener is nil." << endl;
@@ -192,7 +187,7 @@ int main (int argc, char *argv[]) {
 
     // Wait for events from the Publisher; shut down when "close" received
     cout << "Subscriber: waiting for events" << endl;
-    while ( ! exchange_evt_listener_servant.is_exchange_closed_received() ) {
+    while ( ! listener_servant->is_exchange_closed_received() ) {
       ACE_OS::sleep(1);
     }
 
