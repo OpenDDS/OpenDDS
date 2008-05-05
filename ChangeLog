@@ -1,8 +1,37 @@
+Mon May  5 19:03:27 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+
+          Added a StackSubscriber project w/ stack_subscriber.cpp, StackDataReaderListener.h, and 
+          StackDataReaderListener.cpp
+
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.cpp:
+
+          The implementation for DataReaderListener that doesn't inherit from LocalObject<...>,
+          so no reference counting is performed
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Added code to run the stack based example when "stack" is passed to the perl script.
+
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+
+          Exactly the same code as subscriber.cpp, except that StackDataReaderListener is created on the stack.
+
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Cleaned up unnecessary template parameter.
+
+        * bin/dcps_tests.lst:
+
+          Added new stack test.
+
 Mon May  5 18:47:14 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/README:
 
-          Added PublisherImpl.cpp patch needed for reproducing the deadlock and 
+          Added PublisherImpl.cpp patch needed for reproducing the deadlock and
           testing the fix.
 
 Mon May  5 14:38:27 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>

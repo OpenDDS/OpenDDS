@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "DataReaderListener.h"
+#include "StackDataReaderListener.h"
 #include "MessageTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -164,9 +164,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
-      DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl>(listener.in());
+      StackDataReaderListenerImpl listener_servant;
+      DDS::DataReaderListener_var listener (&listener_servant);
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
@@ -184,7 +183,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = 10;
-      while ( listener_servant->num_reads() < expected) {
+      while ( listener_servant.num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 
