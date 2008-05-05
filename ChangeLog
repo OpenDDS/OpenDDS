@@ -1,7 +1,40 @@
+Mon May  5 19:06:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+	  Removed references to federation files.
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManager_T.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/FederatorPublications.h:
+        * dds/InfoRepo/FederatorPublications.inl:
+        * dds/InfoRepo/FederatorPublications.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.inl:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+        * dds/InfoRepo/federator_export.h:
+
+          Removed these files.  These have been retaines on the
+	  branches/federation branch.
+
 Mon May  5 14:58:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/LinkStateManager.cpp:
-	  Updated diagnostic messages.
+          Updated diagnostic messages.
 
 Thu May  1 07:03:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
