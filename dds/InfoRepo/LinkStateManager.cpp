@@ -40,7 +40,7 @@ LinkStateManager::LinkStateManager()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
+      ACE_TEXT("(%P|%t) LinkStateManager::LinkStateManager\n")
     ));
   }
 }
@@ -50,7 +50,7 @@ LinkStateManager::LinkStateManager( RepoKey repoId)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::LinkStateManager\n")
+      ACE_TEXT("(%P|%t) LinkStateManager::LinkStateManager\n")
     ));
   }
 }
@@ -59,7 +59,7 @@ LinkStateManager::~LinkStateManager (void)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::~LinkStateManager\n")
+      ACE_TEXT("(%P|%t) LinkStateManager::~LinkStateManager\n")
     ));
   }
 }
@@ -92,7 +92,12 @@ LinkStateManager::update(
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::update\n")
+      ACE_TEXT("(%P|%t) LinkStateManager::update( ")
+      ACE_TEXT("%d, %d, %d, %d);\n"),
+      linkState.source,
+      linkState.destination,
+      linkState.cost,
+      linkState.packet
     ));
   }
 
@@ -130,7 +135,7 @@ LinkStateManager::update(
 
   if( OpenDDS::DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::update - removing %d edges from MST\n"),
+      ACE_TEXT("(%P|%t) LinkStateManager::update - removing %d edges from MST\n"),
       (end - removedFromMst.begin())
     ));
   }
@@ -144,7 +149,7 @@ LinkStateManager::update(
 
   if( OpenDDS::DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::update - adding %d edges to MST\n"),
+      ACE_TEXT("(%P|%t) LinkStateManager::update - adding %d edges to MST\n"),
       (end - addedToMst.begin())
     ));
   }
@@ -237,7 +242,7 @@ LinkStateManager::prim( LinkSet& mst)
 
   if( OpenDDS::DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - nodes:\n >>> ")
+      ACE_TEXT("(%P|%t) LinkStateManager::prim - nodes:\n >>> ")
     ));
     int col = 6;
     for( NodeSet::const_iterator diagNodeLocation = unattached.begin();
@@ -253,7 +258,7 @@ LinkStateManager::prim( LinkSet& mst)
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - edges:\n >>> ")
+      ACE_TEXT("(%P|%t) LinkStateManager::prim - edges:\n >>> ")
     ));
     col = 6;
     for( LinkList::const_iterator diagEdgeLocation = edges.begin();
@@ -341,7 +346,7 @@ LinkStateManager::prim( LinkSet& mst)
 
     if( OpenDDS::DCPS::DCPS_debug_level > 8) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - unattached nodes after MST generated:\n >>> ")
+        ACE_TEXT("(%P|%t) LinkStateManager::prim - unattached nodes after MST generated:\n >>> ")
       ));
       int col = 6;
       for( NodeSet::const_iterator diagNodeLocation = unattached.begin();
@@ -357,7 +362,7 @@ LinkStateManager::prim( LinkSet& mst)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - nodes in MST after MST generated:\n >>> ")
+        ACE_TEXT("(%P|%t) LinkStateManager::prim - nodes in MST after MST generated:\n >>> ")
       ));
       col = 6;
       for( NodeSet::const_iterator diagNodeLocation = currentNodes.begin();
@@ -373,7 +378,7 @@ LinkStateManager::prim( LinkSet& mst)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("\n")));
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) LinkStateManager::prim - generated MST:\n >>> ")
+        ACE_TEXT("(%P|%t) LinkStateManager::prim - generated MST:\n >>> ")
       ));
       col = 6;
       for( LinkSet::const_iterator mstLocation = mst.begin();
@@ -410,7 +415,7 @@ LinkStateManager::prim( LinkSet& mst)
   if( OpenDDS::DCPS::DCPS_debug_level > 8) {
     int col = 6;
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) LinkStateManager::prim - MST being returned:\n >>> ")
+      ACE_TEXT("(%P|%t) LinkStateManager::prim - MST being returned:\n >>> ")
     ));
     for( LinkSet::const_iterator mstLocation = mst.begin();
          (mstLocation != mst.end());

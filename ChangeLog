@@ -1,3 +1,8 @@
+Mon May  5 14:58:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/LinkStateManager.cpp:
+	  Updated diagnostic messages.
+
 Thu May  1 07:03:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
@@ -18,7 +23,7 @@ Thu May  1 07:03:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           added for notification test.
 
         * bin/dcps_tests.lst:
-        
+
           Added NotifyTest test.
 
         * tests/DCPS/NotifyTest/DataReaderListener.h:
