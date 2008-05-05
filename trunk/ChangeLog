@@ -1,3 +1,30 @@
+Thu May  5 06:04:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed a deadlock situation that happens between fully_associated()
+          thread and write()/register() thread when using
+          TRANSIENT_LOCAL_DURABILITY_QOS. The two threads acquire writer
+          container lock and publisher lock in reverse order. Making
+          fully_associated() to acquire the write container lock before calling
+          PublisherImpl::data_available() would resolve the deadlock.
+
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/Writer.h:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/README:
+
+          Added the test case for the deadlock fix.
+          To simulate the test scenario, the PublisherImpl::data_availabe()
+          need be modified to have sleep for 2 seconds before send(list) if
+          resend is true. Without the fix, a deadlock happened in this test.
+          With the fix, the test should pass.
+
 Fri May  2 16:22:15 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * DDS_release_notes.txt:

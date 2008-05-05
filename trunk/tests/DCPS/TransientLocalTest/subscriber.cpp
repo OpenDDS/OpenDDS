@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-      int expected = 5;
+      int expected = 10;
       while ( listener_servant->num_reads() < expected) {
         ACE_OS::sleep (1);
       }

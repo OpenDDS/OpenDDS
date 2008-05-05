@@ -32,6 +32,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   Source_Files {
     publisher.cpp
     Writer.cpp
+    DataWriterListenerImpl.cpp
     MessageTypeSupportImpl.cpp
   }
 }
