@@ -61,6 +61,12 @@ elsif ($ARGV[0] eq 'nobits') {
     $pub_opts .= ' -DCPSBit 0';
     $sub_opts .= ' -DCPSBit 0';
 }
+elsif ($ARGV[0] eq 'stack') {
+    $opts .= " -t default_tcp";
+    $pub_opts = "$opts";
+    $sub_opts = "$opts";
+    $stack_based = 1;
+}
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
@@ -73,7 +79,15 @@ unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+
+if($stack_based == 0) {
+  #create
+  $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+}
+else {
+  $Subscriber = PerlDDS::create_process ("stack_subscriber", " $sub_opts");
+}
+
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";
