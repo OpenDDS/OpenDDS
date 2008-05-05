@@ -1,3 +1,21 @@
+Mon May  5 21:09:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+
+        * tests/DCPS/LinkState:
+        * tests/DCPS/LinkState/DiagnosticManager.h:
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/LinkState.mpc:
+        * tests/DCPS/LinkState/README:
+        * tests/DCPS/LinkState/TestConfig.h:
+        * tests/DCPS/LinkState/TestConfig.cpp:
+        * tests/DCPS/LinkState/TestException.h:
+        * tests/DCPS/LinkState/TestRouter.h:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+        * tests/DCPS/LinkState/router.cpp:
+        * tests/DCPS/LinkState/run_test.pl:
+
+          Removed these files.  Tests for a removed feature.
+
 Mon May  5 19:41:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 1074:1114 out to branch.
 
