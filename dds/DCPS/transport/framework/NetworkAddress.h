@@ -5,6 +5,7 @@
 #define OPENDDS_DCPS_NETWORKADDRESS_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "tao/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
 #include <string>
@@ -45,7 +46,7 @@ namespace OpenDDS
 
       /// Reserve byte for some feature supports in the future. 
       /// e.g. version support.
-      unsigned char  reserved_;
+      CORBA::Octet reserved_;
 
       /// The address in string format. e.g. ip:port, hostname:port
       std::string addr_;

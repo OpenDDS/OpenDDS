@@ -1,3 +1,18 @@
+Mon May  5 23:19:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Embeded the byte order to CDR stream for serialization and de-serialization
+          of the NetworkAddress.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Updated find_or_create_datalink() to check return value from NetworkAddress
+          deserialize.
+
 Mon May  5 22:18:38 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
