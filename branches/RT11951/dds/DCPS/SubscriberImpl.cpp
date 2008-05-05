@@ -41,9 +41,7 @@ namespace OpenDDS
 // Implementation skeleton constructor
 SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
 				::DDS::SubscriberListener_ptr a_listener,
-				DomainParticipantImpl*       participant,
-				::DDS::DomainParticipant_ptr
-				participant_objref)
+				DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datareader_qos_(
 			    TheServiceParticipant->initial_DataReaderQos()),
@@ -51,11 +49,8 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
     repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id()))
 {
-  participant_->_add_ref ();
-
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
@@ -68,8 +63,6 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
 // Implementation skeleton destructor
 SubscriberImpl::~SubscriberImpl (void)
 {
-  participant_->_remove_ref ();
-
   // Tell the transport to detach this
   // Subscriber/TransportInterface.
   this->detach_transport ();
@@ -85,8 +78,6 @@ SubscriberImpl::~SubscriberImpl (void)
     }
 }
 
-//Note: caller should NOT assign to DataReader_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 ::DDS::DataReader_ptr
 SubscriberImpl::create_datareader (
 				   ::DDS::TopicDescription_ptr a_topic_desc,
@@ -174,15 +165,11 @@ SubscriberImpl::create_datareader (
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
-  DomainParticipantImpl* participant =
-    reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
-
   dr_servant->init (topic_servant,
 		    dr_qos,
 		    a_listener,
-		    participant,
+		    participant_,
 		    this,
-		    subscriber_objref_.in (),
 		    dr_obj.in (),
 		    dr_remote_obj.in ());
 
@@ -247,10 +234,15 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   DataReaderImpl* dr_servant
     = reference_to_servant<DataReaderImpl> (a_datareader);
 
-  if (dr_servant->get_subscriber_servant () != this)
+  {
+    ::DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber ());
+    if (dr_subscriber.in() != this)
     {
-      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+        ACE_ERROR ((LM_ERROR,"(%P|%t) SubscriberImpl::delete_datareader"
+            " the data reader (subId=%d) doesn't belong to this subscriber \n", dr_servant->get_subscription_id()));
+        return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
+  }
 
   int loans = dr_servant->num_zero_copies ();
   if (0 != loans)
@@ -358,6 +350,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
   // from the datareader map.
 
   dr_servant->_remove_ref ();
+  dr_servant = 0;
 
   return ::DDS::RETCODE_OK;
 }
@@ -693,7 +686,7 @@ SubscriberImpl::get_participant (
 		   CORBA::SystemException
 		   ))
 {
-  return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
+  return ::DDS::DomainParticipant::_duplicate (participant_);
 }
 
 
@@ -979,20 +972,6 @@ SubscriberImpl::listener_for (::DDS::StatusKind kind)
     {
       return fast_listener_;
     }
-}
-
-void
-SubscriberImpl::set_object_reference (const ::DDS::Subscriber_ptr& sub)
-{
-  if (! CORBA::is_nil (subscriber_objref_.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_object_reference, ")
-		  ACE_TEXT("This subscriber is already activated. \n")));
-      return;
-    }
-
-  subscriber_objref_ = ::DDS::Subscriber::_duplicate (sub);
 }
 
 } // namespace DCPS

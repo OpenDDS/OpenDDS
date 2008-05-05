@@ -10,6 +10,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/Task.h"
 #include "ace/String_Base.h"
+#include <string>
 
 class PubDriver
   : public ACE_Task_Base,
@@ -94,6 +95,7 @@ class PubDriver
 
     ACE_CString       pub_id_fname_;
     ACE_INET_Addr     pub_addr_;
+    std::string       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_CString       sub_addr_;

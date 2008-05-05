@@ -121,7 +121,7 @@ char *
                  <%TYPE%>DataWriterImpl(),
                  ::DDS::DataWriter::_nil());
 
-  return ::OpenDDS::DCPS::servant_to_reference (writer_impl);
+    return writer_impl;
 }
 
 ::DDS::DataReader_ptr
@@ -133,7 +133,7 @@ char *
                  <%TYPE%>DataReaderImpl(),
                  ::DDS::DataReader::_nil());
 
-  return ::OpenDDS::DCPS::servant_to_reference (reader_impl);
+    return reader_impl;
 }
 
 <%NAMESPACEEND%>
@@ -394,27 +394,27 @@ DDS::ReturnCode_t
 
 void
 <%TYPE%>DataWriterImpl::init (
-    ::DDS::Topic_ptr                       topic,
-    OpenDDS::DCPS::TopicImpl*              topic_servant,
-    const ::DDS::DataWriterQos &           qos,
-    ::DDS::DataWriterListener_ptr          a_listener,
-    OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
-    ::DDS::Publisher_ptr                   publisher,
-    OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-    ::DDS::DataWriter_ptr                  dw_objref,
-    ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
-  )
-  ACE_THROW_SPEC ((CORBA::SystemException))
+      ::DDS::Topic_ptr                       topic,
+      OpenDDS::DCPS::TopicImpl*              topic_servant,
+      const ::DDS::DataWriterQos &           qos,
+      ::DDS::DataWriterListener_ptr          a_listener,
+      OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
+      OpenDDS::DCPS::PublisherImpl*          publisher_servant,
+      ::DDS::DataWriter_ptr                  dw_objref,
+      ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ))
 {
   this->OPENDDS_DCPS_DataWriterImpl::init (topic,
-                                           topic_servant,
-                                           qos,
-                                           a_listener,
-                                           participant_servant,
-                                           publisher,
-                                           publisher_servant,
-                                           dw_objref,
-                                           dw_remote_objref);
+                                       topic_servant,
+                                       qos,
+                                       a_listener,
+                                       participant_servant,
+                                       publisher_servant,
+                                       dw_objref,
+                                       dw_remote_objref);
 
   ::<%SCOPE%><%TYPE%> data;
   if (_tao_is_bounded_size (data))
@@ -631,25 +631,25 @@ void
 
 void
 <%TYPE%>DataReaderImpl::init (
-    OpenDDS::DCPS::TopicImpl*             a_topic,
-    const ::DDS::DataReaderQos &          qos,
-    ::DDS::DataReaderListener_ptr         a_listener,
-    OpenDDS::DCPS::DomainParticipantImpl* participant,
-    OpenDDS::DCPS::SubscriberImpl*        subscriber,
-    ::DDS::Subscriber_ptr                 subscriber_objref,
-    ::DDS::DataReader_ptr                 dr_objerf,
-    OpenDDS::DCPS::DataReaderRemote_ptr   dr_remote_objref
-  )
-  ACE_THROW_SPEC ((CORBA::SystemException))
+        OpenDDS::DCPS::TopicImpl*         a_topic,
+        const ::DDS::DataReaderQos &          qos,
+        ::DDS::DataReaderListener_ptr         a_listener,
+        OpenDDS::DCPS::DomainParticipantImpl* participant,
+        OpenDDS::DCPS::SubscriberImpl*        subscriber,
+        ::DDS::DataReader_ptr                 dr_objref,
+        OpenDDS::DCPS::DataReaderRemote_ptr   dr_remote_objref
+      )
+        ACE_THROW_SPEC ((
+        CORBA::SystemException
+      ))
 {
   this->OPENDDS_DCPS_DataReaderImpl::init(a_topic,
-                                          qos,
-                                          a_listener,
-                                          participant,
-                                          subscriber,
-                                          subscriber_objref,
-                                          dr_objerf,
-                                          dr_remote_objref);
+                                      qos,
+                                      a_listener,
+                                      participant,
+                                      subscriber,
+                                      dr_objref,
+                                      dr_remote_objref) ;
 
 }
 
@@ -1953,17 +1953,6 @@ void
   }
 }
 
-
-//OpenDDS::DCPS::DataReaderRemote_ptr
-//<%TYPE%>DataReaderImpl::get_datareaderremote_obj_ref ()
-//{
-//  ::OpenDDS::DCPS::DataReaderRemote_ptr reader_obj =
-//    ::OpenDDS::DCPS::servant_to_reference (this);
-//
-//  // servant_to_reference does not duplicate when the object is already
-//  // active
-//  return OpenDDS::DCPS::DataReaderRemote::_duplicate(reader_obj);
-//}
 <%NAMESPACEEND%>
 
 

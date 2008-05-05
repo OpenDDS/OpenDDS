@@ -91,11 +91,7 @@ DataWriterImpl::~DataWriterImpl (void)
   DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl",6);
 
   if (initialized_)
-  {
-    participant_servant_->_remove_ref ();
-    publisher_servant_->_remove_ref ();
-    topic_servant_->_remove_ref ();
-
+    {
     delete data_container_;
     delete mb_allocator_;
     delete db_allocator_;
@@ -115,20 +111,27 @@ DataWriterImpl::cleanup ()
     cancel_timer_ = false;
   }
 
+  // release our Topic_var
+  topic_objref_ = ::DDS::Topic::_nil();
   topic_servant_->remove_entity_ref ();
+  topic_servant_->_remove_ref ();
+  topic_servant_ = 0;
+
+  dw_local_objref_ = ::DDS::DataWriter::_nil();
+  deactivate_remote_object(dw_remote_objref_.in());
+  dw_remote_objref_ = ::OpenDDS::DCPS::DataWriterRemote::_nil();
 }
 
 void
-DataWriterImpl::init (
- ::DDS::Topic_ptr                       topic,
- TopicImpl*                             topic_servant,
- const ::DDS::DataWriterQos &           qos,
- ::DDS::DataWriterListener_ptr          a_listener,
- OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
- ::DDS::Publisher_ptr                   publisher,
- OpenDDS::DCPS::PublisherImpl*          publisher_servant,
- ::DDS::DataWriter_ptr                  dw_local,
- OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
+           TopicImpl                             *topic_servant,
+           const ::DDS::DataWriterQos &           qos,
+           ::DDS::DataWriterListener_ptr          a_listener,
+           OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
+           OpenDDS::DCPS::PublisherImpl*              publisher_servant,
+           ::DDS::DataWriter_ptr                  dw_local,
+           OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
+           )
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","init",6);
@@ -156,13 +159,12 @@ DataWriterImpl::init (
     fast_listener_ =
       reference_to_servant<DDS::DataWriterListener> (listener_.in());
   }
+  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
   participant_servant_ = participant_servant;
-  participant_servant_->_add_ref ();
   domain_id_ = participant_servant_->get_domain_id ();
 
-  publisher_objref_  = ::DDS::Publisher::_duplicate (publisher);
+  // only store the publisher pointer, since it is our parent, we will exist as long as it does
   publisher_servant_ = publisher_servant;
-  publisher_servant_->_add_ref ();
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
 
@@ -321,20 +323,23 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     // DURABILITY.kind=TRANSIENT_LOCAL
     // It suffers from resending the history to every subscription.
 
-    // Tell the WriteDataContainer to resend all sending/sent
-    // samples.
-    this->data_container_->reenqueue_all (rd_ids);
-    this->publisher_servant_->data_available(this, true);
-  }
-  else if (this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
-           /*|| this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS*/)
-  {
-    this->data_container_->send_durable_data (this->get_topic_name (),
-                                              this->get_type_name (),
-                                              this,
-                                              this->qos_.lifespan);
-    this->publisher_servant_->data_available (this, true);
-  }
+      // Tell the WriteDataContainer to resend all sending/sent
+      // samples.
+      this->data_container_->reenqueue_all (rd_ids);
+
+      // Acquire the data writer container lock to avoid deadlock. The thread
+      // calling fully_associated() has to acquire lock in the same order as 
+      // the write()/register() operation. 
+
+      // Since the thread calling fully_associated() is the reactor thread, it
+      // may have some performance penalty. If the performance is an issue, 
+      // we may need a new thread to handle the data_availble() calls. 
+      ACE_GUARD (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->get_lock());
+
+      this->publisher_servant_->data_available(this, true) ;
+    }
 }
 
 
@@ -597,7 +602,7 @@ DataWriterImpl::get_topic ()
 DataWriterImpl::get_publisher ()
   ACE_THROW_SPEC (( CORBA::SystemException ))
 {
-  return ::DDS::Publisher::_duplicate (publisher_objref_.in ());
+  return ::DDS::Publisher::_duplicate (publisher_servant_);
 }
 
 ::DDS::LivelinessLostStatus

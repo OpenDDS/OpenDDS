@@ -42,9 +42,10 @@ Pub::set_local_publisher(OpenDDS::DCPS::RepoId pub_id)
 
 void
 Pub::add_remote_subscriber(OpenDDS::DCPS::RepoId    sub_id,
-                           const ACE_INET_Addr& sub_addr)
+                           const ACE_INET_Addr& sub_addr,
+                           const std::string&   sub_addr_str)
 {
-  this->subs_.push_back(SubInfo(sub_id,sub_addr));
+  this->subs_.push_back(SubInfo(sub_id,sub_addr,sub_addr_str));
 }
 
 

@@ -30,7 +30,6 @@ private:
   int max_samples_per_instance_ ;
   ::DDS::DomainParticipant_var dp_ ;
   ::DDS::Subscriber_var sub_;
-  DataReaderListenerImpl drl_servant_;
 };
 
 #endif /* READER_H */

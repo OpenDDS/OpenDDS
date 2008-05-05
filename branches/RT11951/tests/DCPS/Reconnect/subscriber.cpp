@@ -181,13 +181,13 @@ int main (int argc, char *argv[])
     }
 
     // activate the listener
-    DataReaderListenerImpl listener_servant;
-    DDS::DataReaderListener_var listener =
-      ::OpenDDS::DCPS::servant_to_reference (&listener_servant);
+    DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
     }
+    DataReaderListenerImpl* listener_servant =
+      OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -223,7 +223,7 @@ int main (int argc, char *argv[])
 
     FILE* writers_completed = 0;
     int timeout_writes = 0;
-    while ( listener_servant.num_reads() < num_expected_reads) {
+    while ( listener_servant->num_reads() < num_expected_reads) {
       // Get the number of the timed out writes from publisher so we
       // can re-calculate the number of expected messages. Otherwise,
       // the blocking timeout test will never exit from this loop.

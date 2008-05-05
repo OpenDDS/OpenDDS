@@ -194,7 +194,8 @@ elsif ($kill_subscriber == 0 &&  $PublisherResult != 0) {
     $status = 1;
 }
 
-
+# give InfoRepo a chance to digest the publisher crash.
+sleep (5);
 $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";

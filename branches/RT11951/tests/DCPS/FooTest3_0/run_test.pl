@@ -54,8 +54,8 @@ elsif ($ARGV[0] eq 'liveliness') {
 }
 
 #Disabled the reenqueue_all test since we changed to not use the TransientKludge,
-#as the condition of reenqueue_all, the TRANSIENT_LOCAL durability is supported. 
-#This reenqueue_all test will not be applicable in the new TRANSIENT_LOCAL 
+#as the condition of reenqueue_all, the TRANSIENT_LOCAL durability is supported.
+#This reenqueue_all test will not be applicable in the new TRANSIENT_LOCAL
 #implementation.
 
 #elsif ($ARGV[0] eq 'reenqueue_all') { # transient_local support test
@@ -89,8 +89,8 @@ $pubdriver_ior = "pubdriver.ior";
 # which will be parsed using ':' delimiter.
 $pub_id_fname = "pub_id.txt";
 
-$pub_port = 5555;
-$sub_port = 6666;
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port();
 $sub_id = 1;
 $history_depth=10;
 $repo_bit_conf = "-NOBITS";

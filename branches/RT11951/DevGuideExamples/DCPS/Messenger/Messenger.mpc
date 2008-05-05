@@ -48,3 +48,20 @@ project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable
     MessageTypeSupportImpl.cpp
   }
 }
+
+project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+
+  exename   = stack_subscriber
+  after    += DDS*idl
+
+  IDL_Files {
+    Messenger.idl
+    MessageTypeSupport.idl
+  }
+
+  Source_Files {
+    stack_subscriber.cpp
+    StackDataReaderListener.cpp
+    MessageTypeSupportImpl.cpp
+  }
+}

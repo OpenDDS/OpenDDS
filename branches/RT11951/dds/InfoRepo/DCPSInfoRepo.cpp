@@ -59,8 +59,6 @@ private:
   PortableServer::POA_var info_poa_;
   PortableServer::POAManager_var poa_manager_;
 
-  auto_ptr<TAO_DDS_DCPSInfo_i> info_;
-
   ACE_TString ior_file_;
   ACE_TString domain_file_;
   ACE_TString listen_address_str_;
@@ -191,7 +189,8 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   ACE_Argv_Type_Converter cvt (argc, argv);
 
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
-  info_.reset(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
+  PortableServer::ServantBase_var info(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
+  TAO_DDS_DCPSInfo_i* info_servant = ::OpenDDS::DCPS::reference_to_servant<TAO_DDS_DCPSInfo_i>(info.in());
 
   CORBA::Object_var obj =
     orb_->resolve_initial_references ("RootPOA");
@@ -220,7 +219,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId ("InfoRepo");
   info_poa_->activate_object_with_id (oid.in (),
-                                      info_.get());
+                                      info.in());
   obj = info_poa_->id_to_reference(oid.in());
   // the object is created locally, so it is safe to do an 
   // _unchecked_narrow, this was needed to prevent an exception
@@ -251,7 +250,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
     {
       ACE_INET_Addr address (listen_address_str_.c_str());
 
-      if (0 != info_->init_transport(listen_address_given_, address))
+      if (0 != info_servant->init_transport(listen_address_given_, address))
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
@@ -272,7 +271,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   // Load the domains _after_ initializing the participant factory and initializing
   // the transport
-  if (0 >= info_->load_domains (domain_file_.c_str(), use_bits_))
+  if (0 >= info_servant->load_domains (domain_file_.c_str(), use_bits_))
     {
       //ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: Failed to load any domains!\n")), -1);
     }

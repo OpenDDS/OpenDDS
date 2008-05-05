@@ -40,9 +40,11 @@ class SubDriver
 
     OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
+    std::string       pub_addr_str_;
 
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
+    std::string       sub_addr_str_;
 };
 
 #endif

@@ -72,8 +72,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
 	  static_cast<CORBA::Long> (max_blocking_time.sec ());
   dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-  ::DDS::DataReaderListener_var drl
-    = ::OpenDDS::DCPS::servant_to_reference(&drl_servant_);
+  ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
 
   ::DDS::DataReader_var dr = sub_->create_datareader(description.in (),
                                 dr_qos,
@@ -228,6 +227,7 @@ int Reader::init_transport ()
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_tcp_config->local_address_ = reader_address;
+  reader_tcp_config->local_address_str_ = reader_address_str;
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {
