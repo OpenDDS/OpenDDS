@@ -63,8 +63,7 @@ namespace OpenDDS
       //Constructor
       SubscriberImpl (const ::DDS::SubscriberQos & qos,
                       ::DDS::SubscriberListener_ptr a_listener,
-                      DomainParticipantImpl*       participant,
-                      ::DDS::DomainParticipant_ptr participant_objref);
+                      DomainParticipantImpl*       participant);
 
       //Destructor
       virtual ~SubscriberImpl (void);
@@ -210,11 +209,6 @@ namespace OpenDDS
         const RepoId&      reader
       ) ;
 
-    /*
-     * Cache the subscriber's object reference.
-     */
-     void set_object_reference (const ::DDS::Subscriber_ptr& sub) ;
-
     // called by DataReaderImpl::data_received
     void data_received(DataReaderImpl *reader);
 
@@ -246,7 +240,6 @@ namespace OpenDDS
 
       DomainParticipantImpl*        participant_;
       ::DDS::DomainParticipant_var  participant_objref_;
-      ::DDS::Subscriber_var         subscriber_objref_;
 
       DCPSInfo_var                  repository_;
 

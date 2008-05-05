@@ -43,8 +43,7 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
             ::DDS::PublisherListener_ptr a_listener,
-            DomainParticipantImpl*       participant,
-            ::DDS::DomainParticipant_ptr participant_objref)
+            DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
@@ -52,15 +51,12 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
     group_id_ (DEFAULT_GROUP_ID),
     repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id())),
     participant_ (participant),
-    participant_objref_ (::DDS::DomainParticipant::_duplicate (participant_objref)),
     suspend_depth_count_ (0),
     sequence_number_ (),
     aggregation_period_start_ (ACE_Time_Value::zero),
     transient_data_cache_ (0),
     persistent_data_cache_ (0)
 {
-  participant_->_add_ref ();
-
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
@@ -73,8 +69,6 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
 // Implementation skeleton destructor
 PublisherImpl::~PublisherImpl (void)
 {
-  participant_->_remove_ref ();
-
   // Tell the transport to detach this
   // Publisher/TransportInterface.
   this->detach_transport ();
@@ -90,8 +84,6 @@ PublisherImpl::~PublisherImpl (void)
     }
 }
 
-//Note: caller should NOT assign to DataWriter_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 ::DDS::DataWriter_ptr PublisherImpl::create_datawriter (
               ::DDS::Topic_ptr a_topic,
               const ::DDS::DataWriterQos & qos,
@@ -175,16 +167,11 @@ PublisherImpl::~PublisherImpl (void)
   ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
       servant_to_remote_reference(writer_remote_impl);
 
-
-  DomainParticipantImpl* participant
-    = reference_to_servant<DomainParticipantImpl> (participant_objref_.in ());
-
   dw_servant->init (a_topic,
         topic_servant,
         dw_qos,
         a_listener,
-        participant,
-        publisher_objref_.in (),
+        participant_,
         this,
         dw_obj.in (),
         dw_remote_obj.in ());
@@ -246,10 +233,15 @@ PublisherImpl::~PublisherImpl (void)
   DataWriterImpl* dw_servant
     = reference_to_servant <DataWriterImpl> (a_datawriter);
 
-  if (dw_servant->get_publisher_servant () != this)
+  {
+    ::DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
+    if (dw_publisher.in()!= this)
     {
+      ACE_ERROR ((LM_ERROR,"(%P|%t) PublisherImpl::delete_datareader"
+          " the data writer (pubId=%d) doesn't belong to this subscriber \n", dw_servant->get_publication_id()));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
+  }
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
@@ -306,8 +298,8 @@ PublisherImpl::~PublisherImpl (void)
     // otherwise some callbacks resulted from remove_association may lost. 
 
     dw_servant->remove_all_associations();
-    
-    
+
+
     OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
     if (impl.is_nil ())
     {
@@ -665,7 +657,7 @@ void PublisherImpl::get_qos (
        CORBA::SystemException
        ))
 {
-  return ::DDS::DomainParticipant::_duplicate (participant_objref_.in ());
+  return ::DDS::DomainParticipant::_duplicate (participant_);
 }
 
 ::DDS::ReturnCode_t PublisherImpl::set_default_datawriter_qos (
@@ -895,20 +887,6 @@ void PublisherImpl::remove_associations(
   }
 
   return ::DDS::RETCODE_OK;
-}
-
-void
-PublisherImpl::set_object_reference (const ::DDS::Publisher_ptr& pub)
-{
-  if (! CORBA::is_nil (publisher_objref_.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::set_object_reference, ")
-      ACE_TEXT("This publisher is already activated. \n")));
-      return;
-    }
-
-  publisher_objref_ = ::DDS::Publisher::_duplicate (pub);
 }
 
 ::DDS::ReturnCode_t

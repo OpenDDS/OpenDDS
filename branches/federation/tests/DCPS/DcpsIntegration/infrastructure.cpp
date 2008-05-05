@@ -88,11 +88,8 @@ main (int argc, char *argv[])
       // --
       // Check the DomainParticipantFactory
       // --
+      ::DDS::DomainParticipantListener_var dpListener (new OPENDDS_DCPS_DomainParticipantListener_i);
 
-      OPENDDS_DCPS_DomainParticipantListener_i* dpListenerImpl = new OPENDDS_DCPS_DomainParticipantListener_i;
-
-      ::DDS::DomainParticipantListener_var dpListener =
-        ::OpenDDS::DCPS::servant_to_reference (dpListenerImpl);
       if ( CORBA::is_nil (dpListener.in()) )
         {
           ACE_ERROR_RETURN((LM_ERROR,

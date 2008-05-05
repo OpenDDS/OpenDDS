@@ -116,8 +116,7 @@ namespace OpenDDS
       ACE_NEW_RETURN(pub,
                      PublisherImpl(pub_qos,
                                    a_listener,
-                                   this,
-                                   participant_objref_.in ()),
+                                   this),
                      ::DDS::Publisher::_nil());
 
       if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1))
@@ -128,13 +127,12 @@ namespace OpenDDS
       ::DDS::Publisher_ptr pub_obj
         = servant_to_reference (pub);
 
-      pub->set_object_reference (pub_obj);
-
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->publishers_protector_,
                         ::DDS::Publisher::_nil());
 
+      // this object will also act as the guard for leaking Publisher Impl
       Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
       if (OpenDDS::DCPS::insert(publishers_, pair) == -1)
@@ -146,9 +144,7 @@ namespace OpenDDS
           return ::DDS::Publisher::_nil();
         }
 
-      // Increase ref count when the servant is added to
-      // publisher set.
-      pub->_add_ref ();
+
 
       return ::DDS::Publisher::_duplicate (pub_obj);
     }
@@ -201,9 +197,7 @@ namespace OpenDDS
         }
       else
         {
-          // Remove ref count after the servant is removed
-          // from publisher set.
-          the_servant->_remove_ref ();
+
 
           deactivate_object < ::DDS::Publisher_ptr > (p);
 
@@ -253,8 +247,7 @@ namespace OpenDDS
       ACE_NEW_RETURN(sub,
                      SubscriberImpl(sub_qos,
                                     a_listener,
-                                    this,
-                                    participant_objref_.in ()),
+                                    this),
                      ::DDS::Subscriber::_nil());
 
 
@@ -266,14 +259,12 @@ namespace OpenDDS
       ::DDS::Subscriber_ptr sub_obj
         = servant_to_reference (sub);
 
-      sub->set_object_reference (sub_obj);
+      Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->subscribers_protector_,
                         ::DDS::Subscriber::_nil());
-
-      Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
       if (OpenDDS::DCPS::insert(subscribers_, pair) == -1)
         {
@@ -283,10 +274,6 @@ namespace OpenDDS
                       ACE_TEXT("insert")));
           return ::DDS::Subscriber::_nil();
         }
-
-      // Increase ref count when the servant is added to
-      // subscriber set.
-      sub->_add_ref ();
 
       return ::DDS::Subscriber::_duplicate (sub_obj);
     }
@@ -351,10 +338,6 @@ namespace OpenDDS
         }
       else
         {
-          // Decrease ref count after the servant is removed
-          // from subscriber set.
-          the_servant->_remove_ref ();
-
           deactivate_object < ::DDS::Subscriber_ptr > (s);
           return ::DDS::RETCODE_OK;
         }
@@ -609,10 +592,6 @@ namespace OpenDDS
                                     ACE_TEXT("remove_topic failed\n")),
                                     ::DDS::RETCODE_ERROR);
                 }
-
-              // Decrease ref count after the servant is removed
-              // from the topic map.
-              the_topic_servant->_remove_ref ();
 
               deactivate_object < ::DDS::Topic_ptr > (a_topic);
 
@@ -903,6 +882,23 @@ namespace OpenDDS
               }
           }
       }
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+      bit_part_topic_ = ::DDS::Topic::_nil();
+      bit_topic_topic_ = ::DDS::Topic::_nil();
+      bit_pub_topic_ = ::DDS::Topic::_nil();
+      bit_sub_topic_ = ::DDS::Topic::_nil();
+
+      bit_part_dr_ = ::DDS::ParticipantBuiltinTopicDataDataReader::_nil();
+      bit_topic_dr_ = ::DDS::TopicBuiltinTopicDataDataReader::_nil();
+      bit_pub_dr_ = ::DDS::PublicationBuiltinTopicDataDataReader::_nil();
+      bit_sub_dr_ = ::DDS::SubscriptionBuiltinTopicDataDataReader::_nil();
+#endif
+
+      bit_subscriber_ = ::DDS::Subscriber::_nil();
+
+      OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+      participant_objref_ = DDS::DomainParticipant::_nil();
 
       // the participant can now start creating new contained entities
       set_deleted (false);
@@ -1484,6 +1480,8 @@ namespace OpenDDS
 
       ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
 
+
+      // this object will also act as a guard against leaking the new TopicImpl
       RefCounted_Topic refCounted_topic (Topic_Pair (topic_servant, obj, NO_DUP));
 
       if (bind(topics_, topic_name, refCounted_topic) == -1)
@@ -1495,9 +1493,6 @@ namespace OpenDDS
           return ::DDS::Topic::_nil();
         }
 
-      // Increase ref count when the servant is added to
-      // topic map.
-      topic_servant->_add_ref ();
 
       // the topics_ map has one reference and we duplicate to give
       // the caller another reference.
@@ -1592,8 +1587,8 @@ namespace OpenDDS
         if (0 == type_support)
           {
             // Participant topic
-            ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant
-              = new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
+            ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport_servant(
+              new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl());
             ::DDS::ReturnCode_t ret
               = participantTypeSupport_servant->register_type(participant_objref_.in (),
                                                       BUILT_IN_PARTICIPANT_TOPIC_TYPE);
@@ -1628,8 +1623,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
-              new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
+            ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport_servant(
+              new ::DDS::TopicBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = topicTypeSupport_servant->register_type(participant_objref_.in (),
@@ -1666,8 +1661,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant
-              = new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
+            ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport_servant(
+              new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = subscriptionTypeSupport_servant->register_type(participant_objref_.in (),
@@ -1704,8 +1699,8 @@ namespace OpenDDS
 
         if (0 == type_support)
           {
-            ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant
-              = new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
+            ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport_servant(
+              new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl());
 
             ::DDS::ReturnCode_t ret
               = publicationTypeSupport_servant->register_type(participant_objref_.in (),

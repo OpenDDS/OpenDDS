@@ -104,8 +104,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
 
   // Create the listener for datareader
-  FileInfoListener* listener_servant = new FileInfoListener(this);
-  listener_ = ::OpenDDS::DCPS::servant_to_reference(listener_servant);
+  listener_ = new FileInfoListener(this);
 
 
   // Create the datareader

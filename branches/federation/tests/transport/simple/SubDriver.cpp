@@ -173,6 +173,7 @@ SubDriver::init()
              "Set the config->local_address_ to our (local) sub_addr_.\n"));
 
   tcp_config->local_address_ = this->sub_addr_;
+  tcp_config->local_address_str_ = this->sub_addr_str_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));
@@ -205,13 +206,17 @@ SubDriver::run()
   publications[0].remote_id_                = this->pub_id_;
   publications[0].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
 
-  publications[0].remote_data_.data =
-         OpenDDS::DCPS::TransportInterfaceBLOB
-                                   (sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    sizeof(OpenDDS::DCPS::NetworkAddress),
-                                    (CORBA::Octet*)(&network_order_address));
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  size_t len = cdr.total_length ();
+
+  publications[0].remote_data_.data
+    = OpenDDS::DCPS::TransportInterfaceBLOB
+    (len,
+    len,
+    (CORBA::Octet*)(cdr.buffer ()));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
@@ -285,13 +290,13 @@ SubDriver::parse_pub_arg(const std::string& arg)
 
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   std::string pub_id_str(arg,0,pos);
-  std::string pub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->pub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   this->pub_id_ = ACE_OS::atoi(pub_id_str.c_str());
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.
-  if ((pos = pub_addr_str.find_first_of(':')) == std::string::npos) {
+  if ((pos = this->pub_addr_str_.find_first_of(':')) == std::string::npos) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Bad -p command-line value (%s). "
                "Missing second ':' char.\n",
@@ -316,7 +321,7 @@ SubDriver::parse_pub_arg(const std::string& arg)
   }
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->pub_addr_ = ACE_INET_Addr(pub_addr_str.c_str());
+  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;
 }
@@ -355,12 +360,12 @@ SubDriver::parse_sub_arg(const std::string& arg)
 
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   std::string sub_id_str(arg,0,pos);
-  std::string sub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
+  this->sub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
   this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(sub_addr_str.c_str());
+  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
 
   return 0;
 }

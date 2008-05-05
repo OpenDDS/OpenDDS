@@ -271,6 +271,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 //  {
 //    ACE_INET_Addr reader_address( this->config_.transportAddressName().c_str());
 //    reader_tcp_config->local_address_ = reader_address;
+//    reader_tcp_config->local_address_str_ = this->config_.transportAddressName();
 //  }
     // else use default address - OS assigned.
 
@@ -292,14 +293,13 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       ACE_TEXT("%T (%P|%t) INFO: creating data reader listener for domain %d.\n"),
       this->config_.subscriberDomain( index)
     ));
-    this->forwarder_[ index]
-      = new ForwardingListenerImpl(
+    this->listener_[ index] =
+        new ForwardingListenerImpl(
               TheServiceParticipant->domain_to_repo(
                 this->config_.subscriberDomain( index)
             ));
-
-    this->listener_[ index]
-      = ::OpenDDS::DCPS::servant_to_reference( this->forwarder_[ index]);
+    this->forwarder_[ index] =
+      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index].in());
 
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
@@ -561,13 +561,11 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       ACE_TEXT("%T (%P|%t) INFO: creating datawriter[ %d].\n"),
       index
     ));
-    DataWriterListenerImpl* listenerServant
-      = new DataWriterListenerImpl(
+    ::DDS::DataWriterListener_var listener (
+        new DataWriterListenerImpl(
               TheServiceParticipant->domain_to_repo(
                 this->config_.publisherDomain( index)
-            ));
-    ::DDS::DataWriterListener_var listener
-      = ::OpenDDS::DCPS::servant_to_reference( listenerServant);
+            )));
 
     //
     // Keep all data samples to allow us to establish connections in an
@@ -604,7 +602,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     this->forwarder_[ index - 1]->dataWriter( this->dataWriter_[ index].in());
   }
 
-  // The last forwarder does not.
+    // The last forwarder does not.
   this->forwarder_[ this->forwarder_.size() - 1]->dataWriter(
     ::DDS::DataWriter::_nil()
   );

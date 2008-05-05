@@ -368,7 +368,7 @@ OpenDDS::DCPS::DummyTcpTransport::connection_info_i
              this->tcp_config_->local_address_.get_host_addr (),
              this->tcp_config_->local_address_.get_port_number ()), 2);
 
-  NetworkAddress network_order_address(this->tcp_config_->local_address_);
+  NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.

@@ -34,14 +34,21 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
   // For MCAST, we don't care why we are connecting.
   ACE_UNUSED_ARG(connect_as_publisher);
 
+  // Get the remote address from the "blob" in the remote_info struct.
+  NetworkAddress network_order_address;
+
+  ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
+
+  cdr >> network_order_address;
+  
   ACE_INET_Addr remote_address;
 
-  // TBD SOON - Add method(s) to NetworkAddress to do this ugly stuff.
-  // Get the remote address from the "blob" in the remote_info struct.
-  NetworkAddress* network_order_address =
-    (NetworkAddress*)(remote_info.data.get_buffer());
+  network_order_address.to_addr(remote_address);
 
-  network_order_address->to_addr(remote_address);
+
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleUnreliableDgramTransport::find_or_create_datalink remote addr str \"%s\"\n",  
+    network_order_address.addr_.c_str ()), 2);
+
 
   // First, we have to try to find an existing (connected) DataLink
   // that suits the caller's needs.

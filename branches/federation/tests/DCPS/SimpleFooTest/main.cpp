@@ -61,13 +61,7 @@ int main (int argc, char *argv[])
     {
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-
-      FooTypeSupportImpl* fts_servant = new FooTypeSupportImpl();
-      OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
-
-      FooTypeSupport_var fts =
-        OpenDDS::DCPS::servant_to_reference (fts_servant);
-
+      FooTypeSupport_var fts (new FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,

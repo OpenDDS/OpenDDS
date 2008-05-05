@@ -79,8 +79,7 @@ namespace OpenDDS
       ///Constructor
       PublisherImpl (const ::DDS::PublisherQos & qos,
                      ::DDS::PublisherListener_ptr a_listener,
-                     DomainParticipantImpl*       participant,
-                     ::DDS::DomainParticipant_ptr participant_objref);
+                     DomainParticipantImpl*       participant);
 
       ///Destructor
       virtual ~PublisherImpl (void);
@@ -250,13 +249,6 @@ namespace OpenDDS
         const RepoId&       writer);
 
     /**
-    * Cache the publisher's object reference.
-    */
-    void set_object_reference (
-        const ::DDS::Publisher_ptr& pub
-      );
-
-    /**
     * This is called by datawriter to notify the publisher to
     * collect the available data from the datawriter for
     * sending.
@@ -304,9 +296,6 @@ namespace OpenDDS
       DCPSInfo_var                  repository_;
       /// The DomainParticipant servant that owns this Publisher.
       DomainParticipantImpl*        participant_;
-      /// The object reference of the DomainParticipant that owns this
-      /// Publisher.
-      ::DDS::DomainParticipant_var  participant_objref_;
       /// The suspend depth count.
       CORBA::Short                  suspend_depth_count_;
       /// Unique sequence number used when the scope_access = GROUP.
@@ -314,8 +303,6 @@ namespace OpenDDS
       SequenceNumber                sequence_number_;
         /// Start of current aggregation period. - NOT USED IN FIRST IMPL
       ACE_Time_Value                aggregation_period_start_ ;
-      /// The publisher object reference.
-      ::DDS::Publisher_var          publisher_objref_;
 
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when

@@ -42,6 +42,7 @@ class SubDriver
     Sub subscriber_;
 
     ACE_INET_Addr local_address_;
+    std::string   sub_addr_str_;
 };
 
 #endif
