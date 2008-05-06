@@ -14,7 +14,7 @@
 
 ACE_CDR::Boolean
 operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
-{    
+{
   outCdr << ACE_OutputCDR::from_boolean (ACE_CDR_BYTE_ORDER);
 
   outCdr << ACE_OutputCDR::from_octet (value.reserved_);
@@ -37,7 +37,7 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
     return 0;
 
   char* buf = 0;
-  
+
   if (inCdr >> buf == 0)
     return 0;
 
@@ -63,13 +63,12 @@ const std::string& get_fully_qualified_hostname ()
     if (result != 0 || addr_count < 1)
     {
       ACE_ERROR ((LM_ERROR,
-        "(%P|%t)!!! ERROR: get_fully_qualified_hostname failed on %p\n"
-        "ACE::get_ip_interfaces"));
+                  "(%P|%t)!!! ERROR: Unable to probe network. %p\n"));
     }
     else
     {
       for( size_t i = 0; i < addr_count; i++) {
-        char hostname[MAXHOSTNAMELEN+1] = "";  
+        char hostname[MAXHOSTNAMELEN+1] = "";
 
         //Discover the fully qualified hostname
 
@@ -77,14 +76,14 @@ const std::string& get_fully_qualified_hostname ()
         {
           if (addr_array[i].is_loopback() == false && ACE_OS::strchr (hostname, '.') != 0)
           {
-            VDBG_LVL ((LM_DEBUG, "(%P|%t)found fqdn %s from %s:%d\n",  
+            VDBG_LVL ((LM_DEBUG, "(%P|%t) found fqdn %s from %s:%d\n",
               hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             fullname = hostname;
             return fullname;
           }
           else
           {
-            VDBG_LVL ((LM_DEBUG, "(%P|%t)ip interface %s:%d - hostname %s \n",  
+            VDBG_LVL ((LM_DEBUG, "(%P|%t) ip interface %s:%d maps to hostname %s \n",
               addr_array[i].get_host_addr(), addr_array[i].get_port_number (), hostname), 2);
             OpenDDS::DCPS::HostnameInfo info;
 	    info.index_ = i;
@@ -101,8 +100,9 @@ const std::string& get_fully_qualified_hostname ()
     {
       if (addr_array[it->index_].is_loopback() == false)
       {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN, use \"%s\" as fully qualified hostname, please "
-          "correct system configuration.\n", it->hostname_.c_str()));
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN. Using "
+                    "\"%s\" as fully qualified hostname, please "
+                    "correct system configuration.\n", it->hostname_.c_str()));
         fullname = it->hostname_;
         return fullname;
       }
@@ -110,10 +110,11 @@ const std::string& get_fully_qualified_hostname ()
 
     if (itBegin != itEnd)
     {
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN, use \"%s\" as fully qualified hostname, please "
-        "correct system configuration.\n", itBegin->hostname_.c_str()));
-      fullname = itBegin->hostname_; 
-      return fullname; 
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN. Using "
+                  "\"%s\" as fully qualified hostname, please "
+                  "correct system configuration.\n", itBegin->hostname_.c_str()));
+      fullname = itBegin->hostname_;
+      return fullname;
     }
 
 
@@ -123,5 +124,3 @@ const std::string& get_fully_qualified_hostname ()
 
   return fullname;
 }
-
-
