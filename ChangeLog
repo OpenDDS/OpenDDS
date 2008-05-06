@@ -1,13 +1,128 @@
+Tue May  6 20:37:31 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed servant_to_reference, reference_to_servant, and deactivate_object.
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Removed all calls to deactivate_object.  Removed calls to servant_to_reference and changed _var creation
+          to containment of allocated memory where I could.  Replaced calls to reference_to_servant with dynamic_cast.
+
 Tue May  6 19:54:11 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.h:
         * dds/DCPS/transport/framework/NetworkAddress.cpp:
 
-          Fixed problem in get_fully_qualified_hostname() that returns the loopback 
+          Fixed problem in get_fully_qualified_hostname() that returns the loopback
           address resolved name without checking the non-loopback network interfaces.
           The get_fully_qualified_hostname() will return the name in the order whoever
-          is found first - FQDN, short hostname, name resolved from loopback address. 
-          In the case using short hostname or name resolved from loopback address, a 
+          is found first - FQDN, short hostname, name resolved from loopback address.
+          In the case using short hostname or name resolved from loopback address, a
           warning is logged. If there is no any name discovered from network interfaces,
           an error is logged and an empty string is returned.
 

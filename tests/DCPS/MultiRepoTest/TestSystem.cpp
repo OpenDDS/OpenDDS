@@ -161,7 +161,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating data reader listener.\n")));
   this->listener_ = new ForwardingListenerImpl( 0);
   ForwardingListenerImpl* forwarder_servant =
-    OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(listener_.in());
+    dynamic_cast<ForwardingListenerImpl*>(listener_.in());
 
   if (CORBA::is_nil (this->listener_.in ()))
     {
@@ -262,9 +262,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(
-        this->subscriber_.in ()
-      );
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(this->subscriber_.in ());
 
   if (0 == sub_impl)
     {
@@ -323,9 +321,7 @@ TestSystem::TestSystem( int argc, char** argv, char** envp)
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>(
-        this->publisher_.in ()
-      );
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(this->publisher_.in ());
 
   if (0 == pub_impl)
     {
@@ -490,9 +486,7 @@ void
 TestSystem::run()
 {
   ForwardingListenerImpl* forwarder
-    = OpenDDS::DCPS::reference_to_servant< ForwardingListenerImpl>(
-        this->listener_.in ()
-      );
+    = dynamic_cast< ForwardingListenerImpl*>(this->listener_.in ());
   forwarder->waitForCompletion();
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: processing complete.\n")));
 }

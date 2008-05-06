@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -308,7 +308,7 @@ int main (int argc, char *argv[])
                                    DATA_SIZE,
                                    RECVS_BTWN_READS));
       DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(dr_listener.in());
+        dynamic_cast<DataReaderListenerImpl*>(dr_listener.in());
 
       if (CORBA::is_nil (dr_listener.in()))
       {

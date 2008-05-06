@@ -34,7 +34,7 @@ Writer::start ()
   try
   {
     OpenDDS::DCPS::DataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataReaderImpl> (reader_);
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*> (reader_);
 
     ::Xyz::Foo foo;
     foo.x = 0.0 ;

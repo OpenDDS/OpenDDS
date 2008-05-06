@@ -158,8 +158,7 @@ void DataReaderImpl::init (
 
   if (! CORBA::is_nil (listener_.in()))
     {
-      fast_listener_ =
-        reference_to_servant<DDS::DataReaderListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
     }
   // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
   participant_servant_ = participant;
@@ -646,8 +645,7 @@ void DataReaderImpl::get_qos (
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataReaderListener::_duplicate(a_listener);
-  fast_listener_
-    = reference_to_servant<DDS::DataReaderListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 

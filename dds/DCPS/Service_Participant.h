@@ -380,13 +380,6 @@ namespace OpenDDS
       return the_servant;
     }
 
-    /// Get a servant pointer given a local object reference.
-    template <class T_impl, class T_ptr>
-    T_impl* reference_to_servant (T_ptr p)
-    {
-      return dynamic_cast<T_impl*> (p);
-    }
-
     /// Given a servant, return the emote object reference from the local POA.
     /// @throws PortableServer::POA::ServantNotActive,
     ///         PortableServer::POA::WrongPolicy
@@ -405,16 +398,6 @@ namespace OpenDDS
       return the_obj;
     }
 
-    // For local interfaces, servant_to_reference is a no-op.
-    // We are guaranteed that the "servant" type is convertible
-    // to the interface's stub type.
-    template <class T>
-    T *servant_to_reference (T *servant)
-    {
-//      servant->_add_ref();
-      return servant;
-    }
-
     template <class T>
     void deactivate_remote_object (T obj)
     {
@@ -422,12 +405,6 @@ namespace OpenDDS
       PortableServer::ObjectId_var oid =
         poa->reference_to_id (obj);
       poa->deactivate_object (oid.in ());
-    }
-
-    template <class T>
-    void deactivate_object (T)
-    {
-        // no-op
     }
 
   } // namespace DCPS
