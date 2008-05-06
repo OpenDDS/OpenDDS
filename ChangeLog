@@ -1,3 +1,16 @@
+Tue May  6 19:54:11 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Fixed problem in get_fully_qualified_hostname() that returns the loopback 
+          address resolved name without checking the non-loopback network interfaces.
+          The get_fully_qualified_hostname() will return the name in the order whoever
+          is found first - FQDN, short hostname, name resolved from loopback address. 
+          In the case using short hostname or name resolved from loopback address, a 
+          warning is logged. If there is no any name discovered from network interfaces,
+          an error is logged and an empty string is returned.
+
 Tue May  6 15:19:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5_0/run_test.pl:

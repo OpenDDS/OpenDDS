@@ -57,7 +57,7 @@ const std::string& get_fully_qualified_hostname ()
   {
     size_t addr_count;
     ACE_INET_Addr *addr_array;
-    OpenDDS::DCPS::StringVector nonFQDN;
+    OpenDDS::DCPS::HostnameInfoVector nonFQDN;
 
     int result = ACE::get_ip_interfaces(addr_count, addr_array);
     if (result != 0 || addr_count < 1)
@@ -75,10 +75,10 @@ const std::string& get_fully_qualified_hostname ()
 
         if (ACE::get_fqdn (addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0)
         {
-          if (ACE_OS::strchr (hostname, '.') != 0)
+          if (addr_array[i].is_loopback() == false && ACE_OS::strchr (hostname, '.') != 0)
           {
-            VDBG_LVL ((LM_DEBUG, "(%P|%t)found fqdn %s \n",  
-              hostname), 2);
+            VDBG_LVL ((LM_DEBUG, "(%P|%t)found fqdn %s from %s:%d\n",  
+              hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             fullname = hostname;
             return fullname;
           }
@@ -86,23 +86,36 @@ const std::string& get_fully_qualified_hostname ()
           {
             VDBG_LVL ((LM_DEBUG, "(%P|%t)ip interface %s:%d - hostname %s \n",  
               addr_array[i].get_host_addr(), addr_array[i].get_port_number (), hostname), 2);
-            nonFQDN.push_back (hostname);
+            OpenDDS::DCPS::HostnameInfo info;
+	    info.index_ = i;
+	    info.hostname_ = hostname;
+	    nonFQDN.push_back (info);
           }
         }
       }
     }
 
-    OpenDDS::DCPS::StringVector::iterator itEnd = nonFQDN.end ();
-    for (OpenDDS::DCPS::StringVector::iterator it = nonFQDN.begin (); it != itEnd; ++it)
+    OpenDDS::DCPS::HostnameInfoVector::iterator itBegin = nonFQDN.begin ();
+    OpenDDS::DCPS::HostnameInfoVector::iterator itEnd = nonFQDN.end ();
+    for (OpenDDS::DCPS::HostnameInfoVector::iterator it = itBegin; it != itEnd; ++it)
     {
-      if (*it != "localhost")
+      if (addr_array[it->index_].is_loopback() == false)
       {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not discover the FQDN, please "
-          "correct system configuration.\n"));
-        fullname = *it;
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN, use \"%s\" as fully qualified hostname, please "
+          "correct system configuration.\n", it->hostname_.c_str()));
+        fullname = it->hostname_;
         return fullname;
       }
     }
+
+    if (itBegin != itEnd)
+    {
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)!!! WARNING: Could not find FQDN, use \"%s\" as fully qualified hostname, please "
+        "correct system configuration.\n", itBegin->hostname_.c_str()));
+      fullname = itBegin->hostname_; 
+      return fullname; 
+    }
+
 
     ACE_ERROR ((LM_ERROR,
         "(%P|%t)!!! ERROR: failed to discover the fully qualified hostname \n"));
