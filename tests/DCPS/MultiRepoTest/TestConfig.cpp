@@ -5,6 +5,10 @@
 #include "ace/OS_NS_stdlib.h"
 // #include "ace/Log_Msg.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#endif
+
 namespace { // anonymous namespace for file scope.
   //
   // Default values.
