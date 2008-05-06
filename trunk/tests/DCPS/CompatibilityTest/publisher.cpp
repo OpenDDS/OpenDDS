@@ -207,7 +207,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -289,7 +289,7 @@ int main (int argc, char *argv[])
 
       {
         DataWriterListenerImpl* dwl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+          dynamic_cast<DataWriterListenerImpl*>(dwl.in());
         // check to see if the publisher worked
         if(dwl_servant->publication_matched() != compatible)
         {

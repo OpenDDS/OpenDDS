@@ -190,7 +190,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
 
   orb_ = CORBA::ORB_init (cvt.get_argc(), cvt.get_ASCII_argv(), "");
   PortableServer::ServantBase_var info(new TAO_DDS_DCPSInfo_i (orb_.in(), resurrect_));
-  TAO_DDS_DCPSInfo_i* info_servant = ::OpenDDS::DCPS::reference_to_servant<TAO_DDS_DCPSInfo_i>(info.in());
+  TAO_DDS_DCPSInfo_i* info_servant = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info.in());
 
   CORBA::Object_var obj =
     orb_->resolve_initial_references ("RootPOA");

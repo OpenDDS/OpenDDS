@@ -53,8 +53,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
     {
-      fast_listener_ =
-        reference_to_servant<DDS::SubscriberListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
     }
 }
 
@@ -97,7 +96,7 @@ SubscriberImpl::create_datareader (
 
   ::DDS::DataReaderQos dr_qos;
 
-  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic_desc);
+  TopicImpl* topic_servant = dynamic_cast<TopicImpl*> (a_topic_desc);
 
   if (qos == DATAREADER_QOS_DEFAULT)
     {
@@ -153,7 +152,7 @@ SubscriberImpl::create_datareader (
     ::DDS::DataReader_var dr_obj = typesupport->create_datareader();
 
   DataReaderImpl* dr_servant =
-    reference_to_servant<DataReaderImpl> (dr_obj.in ());
+    dynamic_cast<DataReaderImpl*> (dr_obj.in ());
 
   DataReaderRemoteImpl* reader_remote_impl = 0;
   ACE_NEW_RETURN(reader_remote_impl,
@@ -230,7 +229,7 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
     }
 
   DataReaderImpl* dr_servant
-    = reference_to_servant<DataReaderImpl> (a_datareader);
+    = dynamic_cast<DataReaderImpl*> (a_datareader);
 
   {
     ::DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber ());
@@ -636,8 +635,7 @@ SubscriberImpl::set_listener (
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
-  fast_listener_
-    = reference_to_servant<DDS::SubscriberListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 

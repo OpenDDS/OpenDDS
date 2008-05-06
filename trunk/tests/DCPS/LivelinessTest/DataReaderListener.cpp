@@ -164,7 +164,7 @@ void DataReaderListenerImpl::on_subscription_match (
       }
 
     ::Xyz::FooDataReaderImpl* dr_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl>(foo_dr.in());
+      = dynamic_cast< ::Xyz::FooDataReaderImpl*>(foo_dr.in());
 
     ::Xyz::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

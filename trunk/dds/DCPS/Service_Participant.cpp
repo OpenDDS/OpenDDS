@@ -285,7 +285,7 @@ namespace OpenDDS
                                   DomainParticipantFactoryImpl (),
                                   ::DDS::DomainParticipantFactory::_nil ());
 
-                  dp_factory_ = servant_to_reference (dp_factory_servant_);
+                  dp_factory_ = dp_factory_servant_;
 
                   // Give ownership to poa.
                   //REMOVE SHH ???? dp_factory_servant_->_remove_ref ();

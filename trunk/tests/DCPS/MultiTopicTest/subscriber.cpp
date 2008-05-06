@@ -392,7 +392,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -582,7 +582,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T1)
         {
           DataReaderListenerImpl1* drl_servant1 =
-            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl1,DDS::DataReaderListener_ptr>(drl1.in());
+            dynamic_cast<DataReaderListenerImpl1*>(drl1.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC1,
                         drl_servant1->num_samples()) ;
           if (drl_servant1->num_samples() != num_ops_per_thread)
@@ -597,7 +597,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T2)
         {
           DataReaderListenerImpl2* drl_servant2 =
-            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl2,DDS::DataReaderListener_ptr>(drl2.in());
+            dynamic_cast<DataReaderListenerImpl2*>(drl2.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC2,
                         drl_servant2->num_samples()) ;
           if (drl_servant2->num_samples() != num_ops_per_thread)
@@ -612,7 +612,7 @@ int main (int argc, char *argv[])
       if (topics & TOPIC_T3)
         {
           DataReaderListenerImpl3* drl_servant3 =
-            OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl3,DDS::DataReaderListener_ptr>(drl3.in());
+            dynamic_cast<DataReaderListenerImpl3*>(drl3.in());
           ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC3,
                         drl_servant3->num_samples()) ;
           if (drl_servant3->num_samples() != num_ops_per_thread)

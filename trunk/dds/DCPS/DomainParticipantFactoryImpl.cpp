@@ -100,8 +100,7 @@ namespace OpenDDS
                       DomainParticipantImpl(domainId, dp_id, qos, a_listener),
                       ::DDS::DomainParticipant::_nil ());
 
-      ::DDS::DomainParticipant_ptr dp_obj
-        = servant_to_reference (dp);
+      ::DDS::DomainParticipant_ptr dp_obj(dp);
 
 
       if (CORBA::is_nil (dp_obj))
@@ -196,7 +195,7 @@ namespace OpenDDS
       // The servant's ref count should be 2 at this point, one referenced
       // by the poa and the other referenced by the map.
       DomainParticipantImpl* the_servant
-        = reference_to_servant<DomainParticipantImpl> (a_participant);
+        = dynamic_cast<DomainParticipantImpl*> (a_participant);
 
       //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_ 
       if (the_servant->is_clean () == 0)
@@ -301,9 +300,6 @@ namespace OpenDDS
           return ::DDS::RETCODE_ERROR;
         }
 
-//xxx ^^^ obj rc = 3 servant rc 4->3
-      deactivate_object < ::DDS::DomainParticipant_ptr > (a_participant);
-//xxx ^^^ obj rc = 3 servant rc 3->2
       return ::DDS::RETCODE_OK;
     }
 

@@ -42,7 +42,7 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
 
   if (0 == sub_impl)
   {
@@ -150,7 +150,7 @@ Reader::read (const SampleInfoMap& si_map,
       }
 
       ::Xyz::FooDataReaderImpl* dr_servant =
-        OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
+        dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
       DDS::ReturnCode_t status  ;
       status = dr_servant->read(foo, si,

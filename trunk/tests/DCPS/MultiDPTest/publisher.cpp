@@ -173,7 +173,7 @@ void init ()
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
     (publisher.in ());
 
   if (0 == pub_impl)

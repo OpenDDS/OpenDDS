@@ -201,7 +201,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
 
       if (0 == pub_impl)
         {

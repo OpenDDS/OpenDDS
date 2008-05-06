@@ -42,7 +42,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -84,8 +84,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ =
-    OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
+  fast_dw_ = 
+    dynamic_cast< ::Xyz::FooDataWriterImpl*> (foo_dw.in ());
 
 }
 
