@@ -65,21 +65,21 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink
   ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
 
   if (cdr >> network_order_address == 0)
-  {  
+  {
     ACE_ERROR ((LM_ERROR, "(%P|%t)SimpleTcpTransport::find_or_create_datalink failed "
       "to de-serialize the NetworkAddress\n"));
     return 0;
   }
 
-  ACE_INET_Addr remote_address; 
+  ACE_INET_Addr remote_address;
   network_order_address.to_addr (remote_address);
 
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str " 
-    "\"%s\" remote_address \"%s:%d\"\n",  
-    network_order_address.addr_.c_str (), 
-    remote_address.get_host_name(), 
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str "
+    "\"%s\" remote_address \"%s:%d\"\n",
+    network_order_address.addr_.c_str (),
+    remote_address.get_host_name(),
     remote_address.get_port_number ()), 2);
- 
+
   SimpleTcpDataLink_rch link;
 
   { // guard scope
@@ -261,14 +261,14 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 		  ACE_TEXT ("cannot get local addr\n")));
     }
 
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %s:%d\n", 
+  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %s:%d\n",
       address.get_host_name(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number ();
   std::stringstream out;
   out << port;
 
-  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully 
+  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
   if (tcp_config_->local_address_.is_any ())
     {
@@ -280,7 +280,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
       this->tcp_config_->local_address_str_ += out.str ();
     }
 
-  // Now we got the actual listening port. Update the port nnmber in the configuration 
+  // Now we got the actual listening port. Update the port nnmber in the configuration
   // if it's 0 originally.
   if (tcp_config_->local_address_.get_port_number () == 0 && port != 0)
     {
@@ -288,7 +288,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 
       if (! this->tcp_config_->local_address_str_.empty ())
       {
-        std::string::size_type pos = this->tcp_config_->local_address_str_.find_first_of (':'); 
+        std::string::size_type pos = this->tcp_config_->local_address_str_.find_first_of (':');
         std::string str = this->tcp_config_->local_address_str_.substr (0, pos + 1);
         str += out.str ();
         this->tcp_config_->local_address_str_ = str;
@@ -377,8 +377,8 @@ OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","connection_info_i",6);
 
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)SimpleTcpTransport::connection_info_i %s\n",
-    this->tcp_config_->local_address_str_.c_str ()), 2);
+  VDBG_LVL ((LM_DEBUG, "(%P|%t) SimpleTcpTransport local address str %s\n",
+             this->tcp_config_->local_address_str_.c_str ()), 2);
 
   //Always use local address string to provide to DCPSInfoRepo for advertisement.
   NetworkAddress network_order_address(this->tcp_config_->local_address_str_);

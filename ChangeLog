@@ -1,3 +1,9 @@
+Tue May  6 20:41:21 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+          Improve log messages.
+
 Tue May  6 20:37:31 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
