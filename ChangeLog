@@ -1,3 +1,10 @@
+Tue May  6 15:19:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          This script was passing the same -ORBSvcConf argument twice on the
+          DCPSInfoRepo command line, causing failures on some platforms.
+
 Mon May  5 23:19:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.h:
