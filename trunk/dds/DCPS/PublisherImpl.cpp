@@ -158,6 +158,10 @@ PublisherImpl::~PublisherImpl (void)
                  DataWriterRemoteImpl(dw_servant),
                  ::DDS::DataWriter::_nil());
 
+  //this is taking ownership of the DataWriterRemoteImpl (server side) allocated above
+  PortableServer::ServantBase_var writer_remote(writer_remote_impl);
+
+  //this is the client reference to the DataWriterRemoteImpl
   ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
       servant_to_remote_reference(writer_remote_impl);
 

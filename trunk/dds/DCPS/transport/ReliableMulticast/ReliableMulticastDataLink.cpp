@@ -27,12 +27,11 @@ OpenDDS::DCPS::ReliableMulticastDataLink::ReliableMulticastDataLink(
   , receiver_buffer_size_(configuration.receiver_buffer_size_)
   , is_publisher_(false)
   , reactor_task_(reactor_task)
-  , transport_impl_(&transport_impl)
+  , transport_impl_(&transport_impl, false)
   , receive_strategy_(*this)
   , send_strategy_(configuration, new OpenDDS::DCPS::ReliableMulticastThreadSynchResource)
   , running_(false)
 {
-  transport_impl_->_add_ref();
 }
 
 bool
