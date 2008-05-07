@@ -48,7 +48,7 @@ namespace OpenDDS
       virtual bool acked(RepoId);
 
     private:
-      ReliableMulticastTransportConfiguration* configuration_;
+      ReliableMulticastTransportConfiguration_rch configuration_;
       // JSP: Add transport configuration storage
       typedef std::map<
         ACE_INET_Addr,

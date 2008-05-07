@@ -49,7 +49,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 
   data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
-    *configuration_,
+    *(configuration_.in()),
     multicast_group_address,
     *this
     );

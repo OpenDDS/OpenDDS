@@ -60,6 +60,17 @@ const std::string& get_fully_qualified_hostname ()
     OpenDDS::DCPS::HostnameInfoVector nonFQDN;
 
     int result = ACE::get_ip_interfaces(addr_count, addr_array);
+
+    struct Array_Guard
+    {
+      Array_Guard(ACE_INET_Addr *ptr) : ptr_(ptr) {}
+      ~Array_Guard()
+      {
+        delete [] ptr_;
+      }
+      ACE_INET_Addr* const ptr_;
+    } guardObject(addr_array);
+
     if (result != 0 || addr_count < 1)
     {
       ACE_ERROR ((LM_ERROR,

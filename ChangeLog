@@ -1,3 +1,34 @@
+Wed May  7 19:04:50 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Made PortableServer::ServantBase_var to make sure DataWriterRemoteImpl reference gets removed.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Made PortableServer::ServantBase_var to make sure DataReaderRemoteImpl reference gets removed.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.cpp:
+
+          Use RcHandle CTOR to _add_ref rather than doing explicitly.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastRcHandles.h:
+
+          Added ReliableMulticastTransportConfiguration_rch.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Changed to use ReliableMulticastTransportConfiguration_rch to fix a memory leak.
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Added guard to make sure array memory gets deleted.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+
+          Use RcHandle CTOR to _add_ref rather than doing explicitly.
+
 Tue May  6 22:04:43 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.cpp:

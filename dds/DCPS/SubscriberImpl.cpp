@@ -159,6 +159,10 @@ SubscriberImpl::create_datareader (
                     DataReaderRemoteImpl(dr_servant),
                     ::DDS::DataReader::_nil());
 
+  //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
+  PortableServer::ServantBase_var reader_remote(reader_remote_impl);
+
+  //this is the client reference to the DataReaderRemoteImpl
   ::OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj = 
       servant_to_remote_reference(reader_remote_impl);
 
