@@ -606,7 +606,6 @@ void DataReaderImpl::update_incompatible_qos (
       }
       else
       {
-        qos_ = qos;
         try
         {
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
@@ -615,7 +614,7 @@ void DataReaderImpl::update_incompatible_qos (
           repo->update_subscription_qos(this->participant_servant_->get_domain_id(), 
                                         this->participant_servant_->get_id(), 
                                         this->subscription_id_, 
-                                        this->qos_,
+                                        qos,
                                         subscriberQos);
         }
         catch (const CORBA::SystemException& sysex)
@@ -634,10 +633,17 @@ void DataReaderImpl::update_incompatible_qos (
         }
       }
     }
-    else
+
+    // Reset the deadline timer if the period has changed.
+    if (qos_.deadline.period.sec != qos.deadline.period.sec
+        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      qos_ = qos;
+      this->watchdog_->reset_interval (
+        duration_to_time_value (qos.deadline.period));
     }
+
+    qos_ = qos;
+
     return ::DDS::RETCODE_OK;
   }
   else
