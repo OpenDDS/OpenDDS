@@ -24,6 +24,7 @@
 #include "ace/String_Base.h"
 
 #include <map>
+#include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -39,6 +40,7 @@ namespace OpenDDS
     class DomainParticipantImpl;
     class SubscriptionInstance ;
     class TopicImpl;
+    class RequestedDeadlineWatchdog;
 
     typedef Cached_Allocator_With_Overflow< ::OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
                 ReceivedDataAllocator;
@@ -467,7 +469,12 @@ namespace OpenDDS
       /// The time interval for checking liveliness.
       ACE_Time_Value             liveliness_lease_duration_;
       /// liveliness timer id; -1 if no timer is set
-      int liveliness_timer_id_;
+      long liveliness_timer_id_;
+
+      CORBA::Long last_deadline_missed_total_count_;
+      /// Watchdog responsible for reporting missed offered
+      /// deadlines.
+      std::auto_ptr<RequestedDeadlineWatchdog> watchdog_;
 
       /// Flag indicates that this datareader is a builtin topic
       /// datareader.
@@ -478,9 +485,9 @@ namespace OpenDDS
 
       typedef std::map<PublicationId, WriterInfo> WriterMapType;
 
-
       /// publications writing to this reader.
       WriterMapType writers_;
+
     };
 
   } // namespace DCPS

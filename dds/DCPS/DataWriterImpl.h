@@ -21,6 +21,7 @@
 #include "ace/Event_Handler.h"
 
 #include <map>
+#include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,6 +35,7 @@ namespace OpenDDS
   {
     class PublisherImpl;
     class DomainParticipantImpl;
+    class OfferedDeadlineWatchdog;
 
     /**
     * @class DataWriterImpl
@@ -554,6 +556,12 @@ namespace OpenDDS
       ACE_Time_Value             liveliness_check_interval_;
       /// Timestamp of last write/dispose/assert_liveliness.
       ACE_Time_Value             last_liveliness_activity_time_;
+      /// Total number of offered deadlines missed during last offered
+      /// deadline status check.
+      CORBA::Long last_deadline_missed_total_count_;
+      /// Watchdog responsible for reporting missed offered
+      /// deadlines.
+      std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
       /// The flag indicates whether the liveliness timer is scheduled and
       /// needs be cancelled.
       bool                       cancel_timer_;

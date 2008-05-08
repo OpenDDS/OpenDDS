@@ -215,12 +215,11 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DurabilityQosPolicy& qos) 
     {
-      if (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS //TheServiceParticipant->initial_DurabilityQosPolicy()
-        || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
-      {
-        return true;
-      }
-      return false;
+      return
+        qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
+        || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS
+        /*|| qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
+          || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS*/;
     }
 
         
@@ -238,11 +237,22 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DeadlineQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_DeadlineQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ::DDS::Duration_t const INFINITY =
+        {
+          ::DDS::DURATION_INFINITY_SEC,
+          ::DDS::DURATION_INFINITY_NSEC
+        };
+
+      // Only accept infinite or positive finite deadline periods.
+      //
+      // Note that it doesn't make much sense for users to set
+      // deadline periods less than 10 milliseconds since the
+      // underlying timer resolution is generally no better than
+      // that.
+      return
+        qos.period == INFINITY
+        || qos.period.sec > 0
+        || (qos.period.sec >= 0 && qos.period.nanosec > 0);
     }
 
       

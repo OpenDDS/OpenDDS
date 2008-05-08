@@ -925,6 +925,16 @@ WriteDataContainer::get_handle_instance (::DDS::InstanceHandle_t handle)
 
 
 ::DDS::InstanceHandle_t
+WriteDataContainer::last_unsent_instance_handle () const
+{
+  return
+    this->unsent_data_.head_
+    ? this->unsent_data_.head_->handle_->instance_handle_
+    : ::DDS::HANDLE_NIL;
+}
+
+
+::DDS::InstanceHandle_t
 WriteDataContainer::get_next_handle ()
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
