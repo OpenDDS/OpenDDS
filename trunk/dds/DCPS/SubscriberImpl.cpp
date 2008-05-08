@@ -388,7 +388,7 @@ SubscriberImpl::delete_contained_entities (
 
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end ();
-    for (it = datareader_map_.begin (); it != datareader_map_.end (); ++it)
+    for (it = datareader_map_.begin (); it != itEnd; ++it)
     {
        drs.push_back (it->second->local_reader_objref_);
     }
