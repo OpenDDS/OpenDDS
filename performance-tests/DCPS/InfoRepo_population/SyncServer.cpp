@@ -23,14 +23,12 @@ private:
 
   size_t pub_count_;
   size_t sub_count_;
-
-  std::string status_file_;
 };
 
 bool
 SyncServer::parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "p:s:o:");
+  ACE_Get_Opt get_opts (argc, argv, "p:s:");
   int c;
   std::string usage =
     " -p <publisher count>\n"
@@ -41,9 +39,6 @@ SyncServer::parse_args (int argc, char *argv[])
   {
     switch (c)
       {
-      case 'o':
-        status_file_ = get_opts.opt_arg ();
-        break;
       case 'p':
         pub_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
@@ -59,27 +54,19 @@ SyncServer::parse_args (int argc, char *argv[])
       }
   }
 
-
   return true;
 }
 
 SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
   : pub_count_ (1), sub_count_ (1)
-    , status_file_ ("sync_status")
 {
   try
     {
+      CORBA::ORB_var orb = CORBA::ORB_init (argc, argv, "SyncServer");
       this->parse_args (argc, argv);
 
       sync_server_.reset (new SyncExt_i (pub_count_, sub_count_
-                                          , CORBA::ORB::_nil()));
-
-      std::ofstream status_stream (status_file_.c_str());
-      if (!status_stream)
-        throw InitError ("Unable to open status file");
-
-      status_stream << "ready" << std::endl;
-
+                                         , orb.in()));
     }
   catch (SyncServer_i::InitError& e) {
     throw InitError (e);
