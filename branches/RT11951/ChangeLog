@@ -1,3 +1,10 @@
+Thu May  8 19:56:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+
+          Added the required pre-compiled header include.
+
 Wed May  8 20:20:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/OfferedDeadlineWatchdog.cpp (execute):
