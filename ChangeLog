@@ -1,3 +1,9 @@
+Thu May  8 06:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+        
+          Fixed a warning because of a not used variable.
+
 Wed May  7 19:04:50 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
