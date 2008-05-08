@@ -14,12 +14,15 @@
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
+#include "RequestedDeadlineWatchdog.h"
+
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "ace/Reactor.h"
+#include "ace/Auto_Ptr.h"
 
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
@@ -54,6 +57,8 @@ DataReaderImpl::DataReaderImpl (void) :
   reactor_(0),
   liveliness_lease_duration_ (ACE_Time_Value::zero),
   liveliness_timer_id_(-1),
+  last_deadline_missed_total_count_ (0),
+  watchdog_ (),
   is_bit_ (false),
   initialized_ (false)
 {
@@ -171,6 +176,23 @@ void DataReaderImpl::init (
   subscriber_servant_ = subscriber ;
   dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
   dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
+
+  // Setup the requested deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+                        new RequestedDeadlineWatchdog (
+                          this->reactor_,
+                          this->sample_lock_,
+                          qos.deadline,
+                          a_listener,
+                          dr_objref,
+                          this->requested_deadline_missed_status_,
+                          this->last_deadline_missed_total_count_));
+  }
 
   initialized_ = true;
 }
@@ -722,10 +744,23 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
   set_status_changed_flag(::DDS::REQUESTED_DEADLINE_MISSED_STATUS,
 			  false);
-  ::DDS::RequestedDeadlineMissedStatus status =
+
+  this->requested_deadline_missed_status_.last_instance_handle =
+    ::DDS::HANDLE_NIL; // @todo Implement last_instance_handle
+                       // support.
+
+  this->requested_deadline_missed_status_.total_count_change =
+    this->requested_deadline_missed_status_.total_count
+    - this->last_deadline_missed_total_count_;
+
+  // Update for next status check.
+  this->last_deadline_missed_total_count_ =
+    this->requested_deadline_missed_status_.total_count;
+
+  ::DDS::RequestedDeadlineMissedStatus const status =
       requested_deadline_missed_status_;
-  requested_deadline_missed_status_.total_count_change = 0 ;
-  return status ;
+
+  return status;
 }
 
 ::DDS::RequestedIncompatibleQosStatus * DataReaderImpl::get_requested_incompatible_qos_status (
@@ -967,6 +1002,11 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
     case SAMPLE_DATA:
     case INSTANCE_REGISTRATION:
       {
+        // "Pet the dog" so that it doesn't callback on the listener
+        // the next time deadline timer expires.
+        if (this->watchdog_.get ())
+          this->watchdog_->signal ();
+
 	this->writer_activity(sample.header_.publication_id_);
 	// This also adds to the sample container
 	this->dds_demarshal(sample) ;

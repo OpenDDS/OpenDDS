@@ -1,3 +1,67 @@
+Wed May  8 06:47:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WatchdogTimer.h:
+
+          New "watchdog" implementations responsible for reporting missed
+          offered and requested deadlines, i.e. deadlines corresponding to
+          the "Deadline" QoS policy.
+
+        * dds/DCPS/DataReaderImpl.cpp (init):
+
+          Initialize the new RequestedDeadlineWatchdog member if a finite
+          deadline period is configured.
+
+          (get_requested_deadline_missed_status):
+
+          Implemented this method (except for "last_instance_handle"
+          updates).
+
+          (data_received):
+
+          Signal the RequestedDeadlineWatchdog to prevent it from calling
+          back on the DataReaderListener::on_requested_deadline_missed()
+          method.
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Added new RequestedDeadlineWatchdog member.
+
+        * dds/DCPS/DataWriterImpl.cpp (init):
+
+          Initialize the new OfferedDeadlineWatchdog member if a finite
+          deadline period is configured.
+
+          (get_offered_deadline_missed_status):
+
+          Implemented this method.
+
+          (data_received):
+
+          Signal the OfferedDeadlineWatchdog to prevent it from calling
+          back on the DataReaderListener::on_offered_deadline_missed()
+          method.
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Added new OfferedDeadlineWatchdog member.
+
+        * dds/DCPS/Qos_Helper.inl (valid):
+
+          Implemented this method for the DDS::DeadlineQosPolicy case.
+
+        * dds/DCPS/WriteDataContainer.cpp (last_unsent_instance_handle):
+        * dds/DCPS/WriteDataContainer.h (last_unsent_instance_handle):
+
+          New method that returns the InstanceHandle_t value of unsent
+          data head sample.
+
 Mon May  5 21:09:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
 

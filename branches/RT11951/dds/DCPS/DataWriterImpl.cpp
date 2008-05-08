@@ -14,6 +14,7 @@
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
+#include "OfferedDeadlineWatchdog.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -23,6 +24,8 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
+#include "ace/Auto_Ptr.h"
+
 
 namespace OpenDDS
 {
@@ -63,6 +66,8 @@ DataWriterImpl::DataWriterImpl (void)
     reactor_ (0),
     liveliness_check_interval_ (ACE_Time_Value::zero),
     last_liveliness_activity_time_ (ACE_Time_Value::zero),
+    last_deadline_missed_total_count_ (0),
+    watchdog_ (),
     cancel_timer_ (false),
     is_bit_ (false),
     initialized_ (false)
@@ -167,6 +172,26 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   publisher_servant_ = publisher_servant;
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
+
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+  this->reactor_ = orb->orb_core()->reactor();
+
+  // Setup the offered deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+                        new OfferedDeadlineWatchdog (
+                          this->reactor_,
+                          this->lock_,
+                          qos.deadline,
+                          a_listener,
+                          dw_local,
+                          this->offered_deadline_missed_status_,
+                          this->last_deadline_missed_total_count_));
+  }
 
   initialized_ = true;
 }
@@ -511,8 +536,6 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
         }
         else
         {
-          qos_ = qos;
-
           try
           {
             DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
@@ -521,7 +544,7 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
             repo->update_publication_qos(this->participant_servant_->get_domain_id(), 
                                          this->participant_servant_->get_id(), 
                                          this->publication_id_, 
-                                         this->qos_,
+                                         qos,
                                          publisherQos);
           }
           catch (const CORBA::SystemException& sysex)
@@ -540,13 +563,29 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
           }
         }
       }
-      else
-        qos_ = qos;
+
+      // Reset the deadline timer if the period has changed.
+      if (qos_.deadline.period.sec != qos.deadline.period.sec
+          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
+
+      qos_ = qos;
 
       return ::DDS::RETCODE_OK;
     }
     if (! (qos_ == qos))
     {
+      // Reset the deadline timer if the period has changed.
+      if (qos_.deadline.period.sec != qos.deadline.period.sec
+          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
+
       qos_ = qos;
       // TBD - when there are changable QoS supported
       //       this code may need to do something
@@ -628,8 +667,21 @@ DataWriterImpl::get_offered_deadline_missed_status ()
                     this->lock_,
                     ::DDS::OfferedDeadlineMissedStatus ());
   set_status_changed_flag (::DDS::OFFERED_DEADLINE_MISSED_STATUS, false);
-  ::DDS::OfferedDeadlineMissedStatus status = offered_deadline_missed_status_;
-  offered_deadline_missed_status_.total_count_change = 0;
+
+  this->offered_deadline_missed_status_.last_instance_handle =
+    this->data_container_->last_unsent_instance_handle ();
+
+  this->offered_deadline_missed_status_.total_count_change =
+    this->offered_deadline_missed_status_.total_count
+    - this->last_deadline_missed_total_count_;
+
+  // Update for next status check.
+  this->last_deadline_missed_total_count_ =
+    this->offered_deadline_missed_status_.total_count;
+
+  ::DDS::OfferedDeadlineMissedStatus const status =
+      offered_deadline_missed_status_;
+
   return status;
 }
 
@@ -831,9 +883,6 @@ DataWriterImpl::enable ()
     liveliness_check_interval_ *=
       TheServiceParticipant->liveliness_factor ()/100.0;
 
-    CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
-    reactor_ = orb->orb_core()->reactor();
-
     if (reactor_->schedule_timer(this,
                                  0,
                                  liveliness_check_interval_,
@@ -1030,6 +1079,12 @@ DataWriterImpl::write ( DataSample* data,
   }
 
   last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
+
+  // "Pet the dog" so that it doesn't callback on the listener the
+  // next time deadline timer expires.
+  if (this->watchdog_.get ())
+    this->watchdog_->signal ();
+
   return this->publisher_servant_->data_available(this);
 }
 

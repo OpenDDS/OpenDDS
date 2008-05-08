@@ -289,6 +289,10 @@ namespace OpenDDS
       PublicationInstance* get_handle_instance (
           ::DDS::InstanceHandle_t handle);
 
+      /// Get the instance handle for last unsent sample.  This
+      /// corresponds to the head of the @c unsent_data_ list.
+      ::DDS::InstanceHandle_t last_unsent_instance_handle () const;
+
     private:
 
       // --------------------------
