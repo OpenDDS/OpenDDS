@@ -1,3 +1,11 @@
+Thu May  8 19:08:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+
+          Added a state variable (bool complete_) for use in waitForCompletion.
+	  Use of condition variables without external state is dangerous.
+
 Thu May  8 15:13:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
