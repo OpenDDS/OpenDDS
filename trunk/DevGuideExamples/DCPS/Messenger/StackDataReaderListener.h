@@ -13,7 +13,7 @@
 
 //Class StackDataReaderListenerImpl
 class StackDataReaderListenerImpl
-  : public virtual DDS::DataReaderListener
+  : public virtual OpenDDS::DCPS::LocalObject_NoRefCount<DDS::DataReaderListener>
 {
 public:
   //Constructor

@@ -1,7 +1,25 @@
+Thu May  8 15:13:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+
+          Changed to inherit from LocalObject_NoRefCount to fix problem with DOC release making
+          the default be to reference count local objects.
+
+        * dds/DCPS/LocalObject.h:
+
+          Added a LocalObject_NoRefCount to fix problem with DOC release making the default be
+          to reference count local objects.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+
+          Removed incorrect _add_ref.  When the object is allocated, it starts with a refcount of 1, so
+          the ref count is correct after storing in _rch.
+
 Thu May  8 06:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/SubscriberImpl.cpp:
-        
+
           Fixed a warning because of a not used variable.
 
 Wed May  7 19:04:50 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>

@@ -12,7 +12,6 @@ OpenDDS::DCPS::SimpleMcastTransport::SimpleMcastTransport()
 {
   DBG_ENTRY_LVL("SimpleMcastTransport","SimpleMcastTransport",6);
   this->socket_ = new SimpleMcastSocket();
-  this->socket_->_add_ref() ;
 }
 
 
