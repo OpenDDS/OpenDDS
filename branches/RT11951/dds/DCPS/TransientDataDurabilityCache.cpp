@@ -238,7 +238,7 @@ OpenDDS::DCPS::TransientDataDurabilityCache::insert (
   ACE_Time_Value const cleanup_delay (
     duration_to_time_value (qos.service_cleanup_delay));
 
-  if (cleanup_delay > 0)
+  if (cleanup_delay > ACE_Time_Value::zero)
   {
     long const tid =
       this->reactor_->schedule_timer (cleanup,
