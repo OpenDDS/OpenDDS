@@ -237,7 +237,7 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DeadlineQosPolicy& qos) 
     {
-      ::DDS::Duration_t const INFINITY =
+      ::DDS::Duration_t const DDS_DURATION_INFINITY =
         {
           ::DDS::DURATION_INFINITY_SEC,
           ::DDS::DURATION_INFINITY_NSEC
@@ -250,7 +250,7 @@ namespace OpenDDS
       // underlying timer resolution is generally no better than
       // that.
       return
-        qos.period == INFINITY
+        qos.period == DDS_DURATION_INFINITY
         || qos.period.sec > 0
         || (qos.period.sec >= 0 && qos.period.nanosec > 0);
     }

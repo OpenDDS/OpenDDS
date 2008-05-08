@@ -1,3 +1,11 @@
+Wed May  8 19:16:33 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (valid):
+
+          Work around "INFINITY" preprocessor macro namespace pollution.
+          s/INFINITY/DDS_DURATION_INFINITY/g.  Thanks to Adam for pointing
+          out the error.
+
 Wed May  8 07:32:53 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/WatchdogTimer.h:
