@@ -14,7 +14,6 @@ OpenDDS::DCPS::SimpleUdpTransport::SimpleUdpTransport()
 {
   DBG_ENTRY_LVL("SimpleUdpTransport","SimpleUdpTransport",6);
   this->socket_ = new SimpleUdpSocket();
-  this->socket_->_add_ref() ;
 }
 
 
