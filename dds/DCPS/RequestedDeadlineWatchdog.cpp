@@ -3,12 +3,10 @@
 #include "RequestedDeadlineWatchdog.h"
 #include "Qos_Helper.h"
 
-#include "ace/Reverse_Lock_T.h"
-
 
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog (
   ACE_Reactor * reactor,
-  ACE_Recursive_Thread_Mutex & lock,
+  OpenDDS::DCPS::RequestedDeadlineWatchdog::lock_type & lock,
   ::DDS::DeadlineQosPolicy qos,
   ::DDS::DataReaderListener_ptr listener,
   ::DDS::DataReader_ptr reader,
@@ -17,6 +15,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog (
   : Watchdog (reactor,
               duration_to_time_value (qos.period))
   , lock_ (lock)
+  , reverse_lock_ (lock)
   , signaled_ (false)
   , listener_ (::DDS::DataReaderListener::_duplicate (listener))
   , reader_ (::DDS::DataReader::_duplicate (reader))
@@ -44,7 +43,8 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute ()
     ::DDS::RequestedDeadlineMissedStatus const status = this->status_;
 
     // Release the lock during the upcall.
-    ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> reverse_lock (this->lock_);
+
+    ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
 
     if (!CORBA::is_nil (this->listener_.in ()))
     {

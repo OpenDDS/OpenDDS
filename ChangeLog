@@ -1,3 +1,17 @@
+Wed May  8 20:20:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+
+          Made the reverse lock a member of the class since it only needs
+          to be instantiated once.
+
+          Added missing ACE_GUARD that actually acquires and releases the
+          reverse lock.  Thanks to Adam and Mike for pointing out the
+          missing guard.
+
 Wed May  8 19:16:33 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (valid):

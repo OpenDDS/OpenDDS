@@ -24,6 +24,8 @@
 
 #include "dds/DCPS/Watchdog.h"
 
+#include "ace/Reverse_Lock_T.h"
+
 
 namespace OpenDDS
 {
@@ -44,10 +46,13 @@ namespace OpenDDS
     {
     public:
 
+      typedef ACE_Recursive_Thread_Mutex  lock_type;
+      typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
+
       /// Constructor
       RequestedDeadlineWatchdog (
         ACE_Reactor * reactor,
-        ACE_Recursive_Thread_Mutex & lock,
+        lock_type & lock,
         ::DDS::DeadlineQosPolicy qos,
         ::DDS::DataReaderListener_ptr listener,
         ::DDS::DataReader_ptr reader,
@@ -72,7 +77,10 @@ namespace OpenDDS
     private:
 
       /// Lock for synchronization of @c status_ member.
-      ACE_Recursive_Thread_Mutex & lock_;
+      lock_type & lock_;
+
+      /// Reverse lock used for releasing the @c lock_ listener upcall.
+      reverse_lock_type reverse_lock_;
 
       /// Flag that indicates whether the watchdog has been signaled
       /// to not execute upon timer expiration.  This flag is reset to
