@@ -15,8 +15,7 @@
 #ifndef OPENDDS_WATCHDOG_TIMER_H
 #define OPENDDS_WATCHDOG_TIMER_H
 
-#include "ace/Event_Handler.h"
-#include "ace/Atomic_Op_T.h"
+#include"ace/Event_Handler.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
