@@ -6,20 +6,21 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
-                            , CORBA::ORB_ptr orb) throw (InitError)
+                            , CORBA::ORB_ptr orb, bool write_ior) throw (InitError)
   : count_ (0), pub_count_(pub_count), sub_count_(sub_count)
-    , shutdown_ (false)
+  , shutdown_ (false), ior_file_("sync.ior")
 {
   try
     {
       if (CORBA::is_nil (orb))
         {
           // create new ORB
-          int argc = 2;
-          ACE_TCHAR* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
-          orb_ = CORBA::ORB_init (argc, (ACE_TCHAR **)argv, "SyncServer");
+          int argc = 0;
+          //ACE_TCHAR* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
+          orb_ = CORBA::ORB_init (argc, (ACE_TCHAR **)0, "SyncServer");
           if (CORBA::is_nil (orb_.in())) {
             throw InitError ("SyncServer_i::ctr> Orb init failed.");
           }
@@ -49,14 +50,19 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
                           , 1) != 0) {
         throw InitError ("SyncServer_i::ctr> Task activation failed.");
       }
+
+      if (write_ior) {
+        std::ofstream ior_stream (ior_file_.c_str());
+        if (!ior_stream) {
+          throw InitError ("SyncServer_i::ctr> Unable to open IOR file.");
+        }
+        ior_stream << ior.in() << std::endl;
+      }
     }
   catch (const CORBA::SystemException& ex)
     {
       throw InitError (ex._info().c_str());
     }
-
-  //ACE_DEBUG ((LM_DEBUG, "SyncServer_i> pubs: %d, subs: %d\n"
-  //, pub_count_, sub_count_));
 }
 
 SyncServer_i::~SyncServer_i (void)
@@ -64,6 +70,8 @@ SyncServer_i::~SyncServer_i (void)
   orb_->destroy ();
 
   this->wait ();
+
+  unlink (ior_file_.c_str());
 }
 
 void

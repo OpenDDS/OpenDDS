@@ -1,3 +1,13 @@
+Thu May  8 21:47:59 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Moved away from fixed port to using ephemeral port. Simplidfied
+          usage.
+
 Thu May  8 19:44:26 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
