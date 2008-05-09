@@ -1,3 +1,11 @@
+Wed May  9 23:06:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp (matching_partitions):
+
+          Use ACE::wild_match() instead of the POSIX fnmatch() function to
+          maximize portability.  fnmatch() is not supported on all
+          platforms.
+
 Fri May  9 15:34:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/dcps_tests.lst:
