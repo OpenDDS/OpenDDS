@@ -20,8 +20,8 @@
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
 
-
 #include "ace/String_Base.h"
+#include "ace/Reverse_Lock_T.h"
 
 #include <map>
 
@@ -402,6 +402,9 @@ namespace OpenDDS
 
       /// lock protecting sample container as well as statuses.
       ACE_Recursive_Thread_Mutex                sample_lock_;
+
+      typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
+      Reverse_Lock_t reverse_sample_lock_;
 
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t         next_handle_;

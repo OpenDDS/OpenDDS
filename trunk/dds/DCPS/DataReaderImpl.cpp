@@ -41,6 +41,7 @@ namespace OpenDDS
 DataReaderImpl::DataReaderImpl (void) :
   rd_allocator_(0),
   qos_ (TheServiceParticipant->initial_DataReaderQos ()),
+  reverse_sample_lock_(sample_lock_),
   next_handle_(0),
   topic_servant_ (0),
   topic_desc_(0),

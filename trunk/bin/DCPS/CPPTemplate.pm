@@ -37,7 +37,6 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/Util.h"
 #include "<%TYPE%>TypeSupportImpl.h"
 
-
 namespace
 {
   using ::OpenDDS::DCPS::DataReaderImpl;
@@ -1611,6 +1610,7 @@ void
   DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL) ;
 
   //!!! caller should already have the sample_lock_
+  //We will unlock it before calling into listeners
 
   InstanceMap::const_iterator it = instance_map_.find(*instance_data);
 
@@ -1681,6 +1681,8 @@ void
 
         if (listener != 0)
         {
+          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                            ::DDS::RETCODE_ERROR);
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
@@ -1741,6 +1743,8 @@ void
 
         if (listener)
         {
+          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                            ::DDS::RETCODE_ERROR);
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
@@ -1754,6 +1758,8 @@ void
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS) ;
     if (sub_listener != 0)
     {
+      ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                        ::DDS::RETCODE_ERROR);
       sub_listener->on_data_on_readers(get_subscriber()) ;
     }
     else
@@ -1763,6 +1769,8 @@ void
 
       if (listener != 0)
       {
+        ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                          ::DDS::RETCODE_ERROR);
         ::DDS::DataReader_var dr = get_dr_obj_ref();
         listener->on_data_available(dr.in ());
       }

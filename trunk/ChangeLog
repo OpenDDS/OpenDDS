@@ -1,14 +1,23 @@
+Fri May  9 15:15:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Unlock the sample_lock_ during callbacks to the data reader
+          (or subscriber) listener.
+
 Fri May  9 00:16:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
         * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
-        
+
           Used ACE_DEFAULT_MULTICASTV6_ADDR as default multicast IPv6 address.
-          
+
         * dds/DCPS/transport/framework/DataLink.cpp:
 
           Fixed an access violation in exist() method.
-          
+
         * tests/DCPS/BuiltInTopic/common.cpp:
         * tests/DCPS/CompatibilityTest/publisher.cpp:
         * tests/DCPS/FooTest4_0/Reader.cpp:
