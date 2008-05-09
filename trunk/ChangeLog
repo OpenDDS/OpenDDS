@@ -1,3 +1,19 @@
+Fri May  9 21:37:04 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Making sure the ReactorTask doesn't get destroyed till everything else is shutdown.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Making sure the ReactorTask isn't destroyed till the socket is destroyed.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          This code went in to fix a memory leak, but exercises infrastructure code that 
+          isn't valid while we are going down.  Removing the code since currently this is
+          only at shutdown.
+
 Fri May  9 15:15:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
