@@ -201,11 +201,11 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
     this->links_.unbind_all();
   }
 
-  // Drop our reference to the TransportReactorTask
-  this->reactor_task_ = 0;
-
   // Drop our reference to the socket
   this->socket_ = 0;
+
+  // Drop our reference to the TransportReactorTask
+  this->reactor_task_ = 0;
 
 #if 0
   // Drop our reference to the TransportReceiveStrategy object.
