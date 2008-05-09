@@ -48,7 +48,7 @@ Publisher::Publisher( int argc, char** argv, char** envp)
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: create_participant failed for ")
       ACE_TEXT("publisher in domain %d.\n"),
-      index, this->config_.domain()
+      this->config_.domain()
     ));
     throw BadParticipantException ();
   }
