@@ -14,7 +14,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
-static const char * writer_address_str = "127.0.0.1:29876";
+static const char * writer_address_str = "localhost:29876";
 
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,

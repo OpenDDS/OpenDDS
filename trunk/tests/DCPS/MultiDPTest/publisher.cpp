@@ -33,7 +33,7 @@ OpenDDS::DCPS::TransportImpl_rch writer_impl;
 ::DDS::DataWriter_var datawriter[2];
 Writer* writers[2];
 int writer_address_given = 0;
-ACE_TString writer_address_str;
+ACE_TString writer_address_str = "localhost:0";
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])

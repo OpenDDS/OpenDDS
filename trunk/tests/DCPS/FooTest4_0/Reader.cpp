@@ -15,7 +15,7 @@
 #include "tests/DCPS/FooType4/FooTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
 
-static const char * reader_address_str = "127.0.0.1:16789";
+static const char * reader_address_str = "localhost:16789";
 
 Reader::Reader(::DDS::DomainParticipant_ptr dp,
                int history_depth,

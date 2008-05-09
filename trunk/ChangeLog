@@ -1,3 +1,33 @@
+Fri May  9 00:16:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+        
+          Used ACE_DEFAULT_MULTICASTV6_ADDR as default multicast IPv6 address.
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fixed an access violation in exist() method.
+          
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+
+          Replaced empty address string with "localhost:0". This fixed some test failures
+          on IPV6 build since ACE think an ACE_INET_Addr constructed from an empty address string
+          is an IPV4 address.
+
 Thu May  8 21:47:59 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
