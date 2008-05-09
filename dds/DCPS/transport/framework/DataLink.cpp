@@ -762,12 +762,16 @@ OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
   {
     GuardType guard(this->pub_map_lock_);
     RepoIdSet_rch pubs = this->sub_map_.find(remote_id);
-    return pubs->exist (local_id, last);
+    if (!pubs.is_nil())
+      return pubs->exist (local_id, last);
   }
   else
   {
     GuardType guard(this->sub_map_lock_);
     ReceiveListenerSet_rch subs = this->pub_map_.find(remote_id);
-    return subs->exist (local_id, last);
+    if (!subs.is_nil())
+      return subs->exist (local_id, last);
   }
+
+  return false;
 }

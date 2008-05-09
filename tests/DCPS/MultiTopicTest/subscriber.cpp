@@ -30,7 +30,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-static const char * reader_address_str = "";
+static const char * reader_address_str = "localhost:0";
 static int reader_address_given = 0;
 
 static int topics = 0 ;

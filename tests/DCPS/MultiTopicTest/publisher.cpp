@@ -27,7 +27,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-static const char * writer_address_str = "";
+static const char * writer_address_str = "localhost:0";
 static int writer_address_given = 0;
 
 static int topics = 0 ;

@@ -31,8 +31,8 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-std::string reader_address_str; // = "localhost:16701";
-std::string writer_address_str; // = "localhost:29803";
+std::string reader_address_str = "localhost:0";
+std::string writer_address_str = "localhost:0";
 int reader_address_given = 0;
 int writer_address_given = 0;
 
