@@ -2,7 +2,8 @@
 #include /**/ "DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
 
-#include "ace/os_include/os_fnmatch.h"
+#include "ace/ACE.h"  /* For ACE::wild_match() */
+// #include "ace/os_include/os_fnmatch.h"
 
 namespace
 {
@@ -22,6 +23,9 @@ namespace
       return true;
 
     bool match = false;
+    // We currently don't support "[]" wildcards.  See pattern_match()
+    // function above for details.
+    static char const wildcard[] = "*?" /* "[[*?])" */;
 
     // @todo Really slow (O(n^2)) search.  Optimize if partition name
     //       sequences will potentially be very long.  If they remain
@@ -31,23 +35,31 @@ namespace
       {
         char const * const pname = publisher_partitions[i];
 
-        bool const pub_is_wildcard = (::fnmatch(pname, "[[*?])", 0) == 0);
+        // The DDS specification requires pattern matching
+        // capabilities corresponding to those provided by the POSIX
+        // fnmatch() function.  However, some platforms, such as
+        // Windows, do not support such capabilities.  To be
+        // completely portable across all platforms we instead use
+        // ACE::wild_match().  Currently this prevents matching of
+        // patterns containing square brackets, i.e. "[]" even though
+        // some platforms support fnmatch().
+        bool const pub_is_wildcard = ACE::wild_match (wildcard, pname);
 
         for (CORBA::ULong j = 0; j < sub_len; ++j)
           {
             char const * const sname = subscriber_partitions[j];
 
-            bool const sub_is_wildcard = (::fnmatch(sname, "[[*?])" ,0) == 0);
+            bool const sub_is_wildcard = ACE::wild_match (wildcard, sname);
 
             if (pub_is_wildcard && sub_is_wildcard)
               continue;
 
-            // @@ Is it really necessary place the "pattern" argument
-            //    to fnmatch() in the first parameter?
+            // @@ Is it really necessary to place the "pattern"
+            //    argument to fnmatch() in the first parameter?
             if (pub_is_wildcard)
-              match = (::fnmatch (pname, sname, 0) == 0);
+              match = ACE::wild_match (sname, pname);
             else if (sub_is_wildcard)
-              match = (::fnmatch (sname, pname, 0) == 0);
+              match = ACE::wild_match (pname, sname);
             else
               match = (ACE_OS::strcmp (pname, sname) == 0);
           }
