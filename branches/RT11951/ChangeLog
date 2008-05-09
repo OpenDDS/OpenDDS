@@ -1,3 +1,9 @@
+Fri May  9 22:53:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Federation/Publisher.cpp:
+
+          Removed reference to the "index" varaible, which was not defined.
+
 Wed May  9 23:06:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/InfoRepo/DCPS_Utils.cpp (matching_partitions):
@@ -9,7 +15,7 @@ Wed May  9 23:06:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 Fri May  9 15:34:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/dcps_tests.lst:
-	  Remove removed test from list of tests to execute.
+          Remove removed test from list of tests to execute.
 
 Thu May  8 20:12:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
