@@ -71,6 +71,7 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
 
   bool synched (void);
   void notify (void);
+  void reset (void);
 
   bool shutdown_;
   std::string ior_file_;

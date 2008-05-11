@@ -1,3 +1,12 @@
+Sun May 11 07:12:25 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+          Bump up ref count to bypass ORB memory management.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Fix incorrect ID assignment.
+
 Fri May  9 21:37:04 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
@@ -10,7 +19,7 @@ Fri May  9 21:37:04 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-          This code went in to fix a memory leak, but exercises infrastructure code that 
+          This code went in to fix a memory leak, but exercises infrastructure code that
           isn't valid while we are going down.  Removing the code since currently this is
           only at shutdown.
 
