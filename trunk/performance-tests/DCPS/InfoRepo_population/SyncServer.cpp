@@ -32,8 +32,7 @@ SyncServer::parse_args (int argc, char *argv[])
   int c;
   std::string usage =
     " -p <publisher count>\n"
-    " -s <subscriber count>\n"
-    " -o <status file>\n";
+    " -s <subscriber count>\n";
 
   while ((c = get_opts ()) != -1)
   {
@@ -63,10 +62,15 @@ SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
   try
     {
       CORBA::ORB_var orb = CORBA::ORB_init (argc, argv, "SyncServer");
-      this->parse_args (argc, argv);
+      if (!this->parse_args (argc, argv)) {
+        throw InitError ("SyncServer encountered failure while parsing arguments.\n");
+      }
 
       sync_server_.reset (new SyncExt_i (pub_count_, sub_count_
                                          , orb.in()));
+      // Bump up the ref count (TAO proprietary) so object can exist
+      //  beyond ORB destruction.
+      sync_server_->_add_ref();
     }
   catch (SyncServer_i::InitError& e) {
     throw InitError (e);
@@ -105,9 +109,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   catch (const CORBA::Exception& ex)
     {
-      ex._tao_print_exception (
-        "ERROR: SyncServer caught exception");
-
+      ex._tao_print_exception ("ERROR: SyncServer caught exception");
       return -1;
     }
 
