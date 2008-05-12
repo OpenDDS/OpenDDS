@@ -127,12 +127,12 @@ Writer::svc ()
       if (handles.length() == 0)
         {
           finished_sending_ = true;
-          done_condition_.signal(); // tell publisher look if I am finished.
         }
     }
 
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc finished.\n")));
+  done_condition_.signal(); // tell publisher look if I am finished.
   return 0;
 }
 
