@@ -38,7 +38,7 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
 
       PortableServer::ObjectId_var oid = root_poa_->activate_object (this);
       CORBA::Object_var obj = root_poa_->id_to_reference (oid);
-      ::Sync::Server_var sync_server_obj = Sync::Server::_narrow (obj);
+      ::Sync::Server_var sync_server_obj = Sync::Server::_narrow (obj.in());
 
       CORBA::String_var ior = orb_->object_to_string (sync_server_obj.in ());
       CORBA::Object_var table_obj =
