@@ -61,6 +61,10 @@ elsif ($ARGV[0] eq 'nobits') {
     $pub_opts .= ' -DCPSBit 0';
     $sub_opts .= ' -DCPSBit 0';
 }
+elsif ($ARGV[0] eq 'ipv6') {
+    $pub_opts = "$opts -DCPSConfigFile pub_ipv6.ini";
+    $sub_opts = "$opts -DCPSConfigFile sub_ipv6.ini";
+}
 elsif ($ARGV[0] eq 'stack') {
     $opts .= " -t default_tcp";
     $pub_opts = "$opts";

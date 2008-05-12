@@ -159,12 +159,10 @@ int run_domain_test ()
     = dpf->lookup_participant(MY_DOMAIN);
 
   OpenDDS::DCPS::DomainParticipantImpl* new_dp_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
-    (new_dp.in());
+    = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(new_dp.in());
 
   OpenDDS::DCPS::DomainParticipantImpl* looked_dp_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
-    (looked_dp.in ());
+    = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(looked_dp.in ());
 
   TEST_CHECK (looked_dp_servant == new_dp_servant);
 
@@ -176,8 +174,7 @@ int run_domain_test ()
                            ::DDS::TopicListener::_nil ());
 
   OpenDDS::DCPS::TopicImpl* new_topic_servant
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
-    (new_topic.in ());
+    = dynamic_cast<OpenDDS::DCPS::TopicImpl*>(new_topic.in ());
 
   ::DDS::Duration_t timeout;
   timeout.sec = static_cast<long>(find_topic_timeout.sec ());
@@ -188,7 +185,7 @@ int run_domain_test ()
     = new_dp->find_topic(MY_TOPIC, timeout);
 
   ::OpenDDS::DCPS::TopicImpl* found_topic_servant
-    = ::OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl>
+    = dynamic_cast<OpenDDS::DCPS::TopicImpl*>
     (found_topic.in ());
 
   TEST_CHECK (new_topic_servant == found_topic_servant);

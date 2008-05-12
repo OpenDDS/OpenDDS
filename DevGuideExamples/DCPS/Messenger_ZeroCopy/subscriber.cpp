@@ -125,8 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl =
-        ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-                                           DDS::Subscriber_ptr> (sub.in ());
+        dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
       if (0 == sub_impl) {
         cerr << "Failed to obtain subscriber servant\n" << endl;
         exit(1);
@@ -157,7 +156,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // activate the listener
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
       DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;

@@ -40,8 +40,7 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
       throw BadReaderException() ;
     }
 
-    DR_impl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+    DR_impl* dr_servant = dynamic_cast<DR_impl*> (foo_dr.in ());
 
     ::DDS::SampleInfo si ;
 

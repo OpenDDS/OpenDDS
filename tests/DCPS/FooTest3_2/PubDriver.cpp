@@ -387,7 +387,7 @@ PubDriver::run()
   for (int i = 0; i < num_datawriters_; i ++)
   {
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
 
@@ -429,7 +429,7 @@ PubDriver::run()
   {
 
     ::Xyz::FooDataWriterImpl* datawriter_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl>
+      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
     ::OpenDDS::DCPS::DataWriterRemote_var dw_remote =
@@ -578,8 +578,7 @@ void PubDriver::attach_to_transport ()
 
   // Attach the Publisher with the TransportImpl.
   ::OpenDDS::DCPS::PublisherImpl* pub_servant
-    = ::OpenDDS::DCPS::reference_to_servant < ::OpenDDS::DCPS::PublisherImpl, ::DDS::Publisher_ptr>
-      (publisher_.in());
+    = dynamic_cast < ::OpenDDS::DCPS::PublisherImpl*>(publisher_.in());
 
   TEST_CHECK (pub_servant != 0);
 

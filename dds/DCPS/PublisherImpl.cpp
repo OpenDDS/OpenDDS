@@ -61,8 +61,7 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
   if (! CORBA::is_nil (a_listener))
     {
-      fast_listener_ =
-        reference_to_servant<DDS::PublisherListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
     }
 }
 
@@ -139,7 +138,7 @@ PublisherImpl::~PublisherImpl (void)
       return ::DDS::DataWriter::_nil();
     }
 
-  TopicImpl* topic_servant = reference_to_servant<TopicImpl> (a_topic);
+  TopicImpl* topic_servant = dynamic_cast<TopicImpl*> (a_topic);
 
   OpenDDS::DCPS::TypeSupport_ptr typesupport = topic_servant->get_type_support();
 
@@ -157,13 +156,17 @@ PublisherImpl::~PublisherImpl (void)
   ::DDS::DataWriter_var dw_obj = typesupport->create_datawriter ();
 
   DataWriterImpl* dw_servant =
-    reference_to_servant <DataWriterImpl> (dw_obj.in ());
+    dynamic_cast <DataWriterImpl*> (dw_obj.in ());
 
   DataWriterRemoteImpl* writer_remote_impl = 0;
   ACE_NEW_RETURN(writer_remote_impl,
                  DataWriterRemoteImpl(dw_servant),
                  ::DDS::DataWriter::_nil());
 
+  //this is taking ownership of the DataWriterRemoteImpl (server side) allocated above
+  PortableServer::ServantBase_var writer_remote(writer_remote_impl);
+
+  //this is the client reference to the DataWriterRemoteImpl
   ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
       servant_to_remote_reference(writer_remote_impl);
 
@@ -231,7 +234,7 @@ PublisherImpl::~PublisherImpl (void)
     }
 
   DataWriterImpl* dw_servant
-    = reference_to_servant <DataWriterImpl> (a_datawriter);
+    = dynamic_cast <DataWriterImpl*> (a_datawriter);
 
   {
     ::DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
@@ -353,8 +356,6 @@ PublisherImpl::~PublisherImpl (void)
   // Decrease ref count after the servant is removed from the
   // map.
   local_writer->_remove_ref ();
-
-  deactivate_object < ::DDS::DataWriter_ptr > (a_datawriter);
 
   return ::DDS::RETCODE_OK;
 }
@@ -560,8 +561,7 @@ void PublisherImpl::get_qos (
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
-  fast_listener_
-    = reference_to_servant<DDS::PublisherListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 
@@ -813,7 +813,7 @@ void PublisherImpl::remove_associations(
   info->remote_writer_objref_ = remote_writer ;
   info->local_writer_objref_ = local_writer ;
   info->local_writer_impl_
-    = reference_to_servant<DataWriterImpl> (local_writer);
+    = dynamic_cast<DataWriterImpl*> (local_writer);
 
   info->topic_id_      = topic_id ;
   // all other info memebers default in constructor

@@ -45,7 +45,7 @@ int read (::DDS::DataReader_ptr reader)
     }
 
     DR_impl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+      dynamic_cast<DR_impl*> (foo_dr.in ());
 
     char action[5] ;
     if (use_take)

@@ -303,7 +303,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
 
       if (0 == sub_impl)
       {
@@ -317,7 +317,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -380,8 +380,7 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataWriterImpl* fast_dw =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
-        (foo_dw.in ());
+        dynamic_cast<Test::SimpleDataWriterImpl*>(foo_dw.in ());
 
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
@@ -393,8 +392,7 @@ int main (int argc, char *argv[])
       }
 
       Test::SimpleDataReaderImpl* fast_dr =
-        OpenDDS::DCPS::reference_to_servant<Test::SimpleDataReaderImpl>
-        (foo_dr.in ());
+        dynamic_cast<Test::SimpleDataReaderImpl*>(foo_dr.in ());
 
 
       // wait for association establishement before writing.

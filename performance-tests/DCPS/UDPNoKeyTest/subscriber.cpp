@@ -249,7 +249,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = ::OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(sub.in());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
 
       if (0 == sub_impl)
       {

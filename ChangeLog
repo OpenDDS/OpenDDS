@@ -1,4 +1,362 @@
-Fri May  9 22:53:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+Mon May 12 19:42:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Merging trunk changes 1115:1148 out to branch.
+
+        Mon May 12 18:41:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Close the writers_completed file as soon as possible, so changes are
+          flushed to the disk.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          For udp and (unreliable) multicast, pass a -y 50 to the publisher so
+          that it sleeps for 50 ms between writes.
+
+        Mon May 12 16:03:40 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Fix type conversion warning.
+
+        Sun May 11 07:12:25 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+          Bump up ref count to bypass ORB memory management.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Fix incorrect ID assignment.
+
+        Fri May  9 21:37:04 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Making sure the ReactorTask doesn't get destroyed till everything else is shutdown.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Making sure the ReactorTask isn't destroyed till the socket is destroyed.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          This code went in to fix a memory leak, but exercises infrastructure code that
+          isn't valid while we are going down.  Removing the code since currently this is
+          only at shutdown.
+
+        Fri May  9 15:15:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Unlock the sample_lock_ during callbacks to the data reader
+          (or subscriber) listener.
+
+        Fri May  9 00:16:55 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.inl:
+
+          Used ACE_DEFAULT_MULTICASTV6_ADDR as default multicast IPv6 address.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fixed an access violation in exist() method.
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+
+          Replaced empty address string with "localhost:0". This fixed some test failures
+          on IPV6 build since ACE think an ACE_INET_Addr constructed from an empty address string
+          is an IPV4 address.
+
+        Thu May  8 21:47:59 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          Moved away from fixed port to using ephemeral port. Simplidfied
+          usage.
+
+        Thu May  8 19:44:26 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed the unreliable forms of Messenger from the list of tests run
+          in automated builds.  See comments in the lst file for details.
+
+        Thu May  8 19:08:59 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+
+          Added a state variable (bool complete_) for use in waitForCompletion.
+          Use of condition variables without external state is dangerous.
+
+        Thu May  8 15:13:10 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+
+          Changed to inherit from LocalObject_NoRefCount to fix problem with DOC release making
+          the default be to reference count local objects.
+
+        * dds/DCPS/LocalObject.h:
+
+          Added a LocalObject_NoRefCount to fix problem with DOC release making the default be
+          to reference count local objects.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+
+          Removed incorrect _add_ref.  When the object is allocated, it starts with a refcount of 1, so
+          the ref count is correct after storing in _rch.
+
+        Thu May  8 06:24:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed a warning because of a not used variable.
+
+        Wed May  7 19:04:50 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Made PortableServer::ServantBase_var to make sure DataWriterRemoteImpl reference gets removed.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Made PortableServer::ServantBase_var to make sure DataReaderRemoteImpl reference gets removed.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.cpp:
+
+          Use RcHandle CTOR to _add_ref rather than doing explicitly.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastRcHandles.h:
+
+          Added ReliableMulticastTransportConfiguration_rch.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Changed to use ReliableMulticastTransportConfiguration_rch to fix a memory leak.
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Added guard to make sure array memory gets deleted.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp:
+
+          Use RcHandle CTOR to _add_ref rather than doing explicitly.
+
+        Tue May  6 22:04:43 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+
+          For static builds, explicitly include the SimpleTcp header so the
+          linker doesn't discard all references to SimpleTcp.
+
+        Tue May  6 20:41:21 UTC 2008  Ciju John  <johnc at ociweb dot com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+          Improve log messages.
+
+        Tue May  6 20:37:31 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed servant_to_reference, reference_to_servant, and deactivate_object.
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Removed all calls to deactivate_object.  Removed calls to servant_to_reference and changed _var creation
+          to containment of allocated memory where I could.  Replaced calls to reference_to_servant with dynamic_cast.
+
+        Tue May  6 19:54:11 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Fixed problem in get_fully_qualified_hostname() that returns the loopback
+          address resolved name without checking the non-loopback network interfaces.
+          The get_fully_qualified_hostname() will return the name in the order whoever
+          is found first - FQDN, short hostname, name resolved from loopback address.
+          In the case using short hostname or name resolved from loopback address, a
+          warning is logged. If there is no any name discovered from network interfaces,
+          an error is logged and an empty string is returned.
+
+        Tue May  6 15:19:37 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          This script was passing the same -ORBSvcConf argument twice on the
+          DCPSInfoRepo command line, causing failures on some platforms.
+
+        Mon May  5 23:19:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Embeded the byte order to CDR stream for serialization and de-serialization
+          of the NetworkAddress.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Updated find_or_create_datalink() to check return value from NetworkAddress
+          deserialize.
+
+        Mon May  5 22:18:38 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+
+          Added the example configuration that used by IPV6 specific DevGuideExample.
+          The local_address is configured with IPV6 format localhost address.
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Added the IPV6 specific test case.
+
+        * bin/dcps_tests.lst:
+
+          Added IPV6 specific DevGuideExample test.
+
+        Mon May  5 20:11:51 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Group all of the TCPListenerTest variants together.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+
+          Don't pass -ORBSvcConf twice with the same service conf file.  This
+          fails on DOC ACE+TAO on Win32.
+
+
+        Fri May  9 22:53:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Federation/Publisher.cpp:
 

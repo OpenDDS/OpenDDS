@@ -32,7 +32,7 @@ unlink $pub_id_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_conf -o $dcpsrepo_ior"
-                                    . " -d $domains_file -ORBSvcConf ../../tcp.conf");
+                                    . " -d $domains_file");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $parameters = "$svc_config -r $num_readers -t $use_take"

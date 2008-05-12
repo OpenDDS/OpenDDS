@@ -117,8 +117,7 @@ int main (int argc, char *argv[])
       TEST_CHECK (! CORBA::is_nil (description.in ()));
 
       OpenDDS::DCPS::TopicDescriptionImpl* ti =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicDescriptionImpl>
-        (description.in ());
+        dynamic_cast<OpenDDS::DCPS::TopicDescriptionImpl*>(description.in ());
       TEST_CHECK (ti != 0);
 
       ::DDS::DataReader_var dr =

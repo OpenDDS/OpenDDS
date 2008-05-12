@@ -73,7 +73,7 @@ int main (int argc, char *argv[]) {
 
     // Attach the publisher to the TCP transport.
     OpenDDS::DCPS::PublisherImpl* pub_impl =
-      OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl >(pub.in ());
+      dynamic_cast< OpenDDS::DCPS::PublisherImpl* >(pub.in ());
     if (0 == pub_impl) {
       cerr << "Failed to obtain publisher servant" << endl;
       ACE_OS::exit(1);

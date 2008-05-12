@@ -247,8 +247,7 @@ Subscriber::run (void)
           }
 
           OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-            DDS::Subscriber_ptr> (subs_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (subs_[count].in ());
           if (0 == sub_impl) {
             cerr << "Failed to obtain subscriber servant\n" << endl;
             return false;

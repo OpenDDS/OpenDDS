@@ -17,8 +17,8 @@
 const long  TEST_DOMAIN   = 911;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
-const char * reader_address_str = "";
-const char * writer_address_str = "";
+const char * reader_address_str = "localhost:0";
+const char * writer_address_str = "localhost:0";
 int default_key = 101010;
 int num_writes = 1;
 
@@ -437,7 +437,7 @@ int read (int expect_success)
     }
 
     ::Xyz::FooDataReaderImpl* dr_servant =
-      reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
+      dynamic_cast< ::Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
     int num_reads = 0;
     int num_received = 0;

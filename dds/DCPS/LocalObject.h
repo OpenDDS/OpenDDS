@@ -32,6 +32,26 @@ namespace OpenDDS
       }
     };
 
+    /// OpenDDS::DCPS::LocalObject_NoRefCount is the same as LocalObject, but needs to 
+    /// be inherited from if the user wishes to allocate a "Local Object" on the stack.
+    /// class MyReaderListener
+    ///   : public OpenDDS::DCPS::LocalObject_NoRefCount<OpenDDS::DCPS::DataReaderListener> {...};
+    template <class Stub>
+    class LocalObject_NoRefCount
+      : public virtual Stub
+    {
+    public:
+      typedef typename Stub::_ptr_type _ptr_type;
+      static _ptr_type _narrow (::CORBA::Object_ptr obj)
+      { 
+        return Stub::_narrow(obj);
+      }
+
+      // we want to keep refcounting from happening
+      virtual void _add_ref (void) {}
+      virtual void _remove_ref (void) {}
+    };
+
   };
 };
 

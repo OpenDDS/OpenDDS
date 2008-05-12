@@ -103,7 +103,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   }
 
   this->sync_     = new DataReaderListenerImpl( this->config_.samples());
-  this->listener_ = ::OpenDDS::DCPS::servant_to_reference( this->sync_);
+  this->listener_ = this->sync_;
   if( CORBA::is_nil (this->listener_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT ("(%P|%t) ERROR: failed to obtain listener for domain %d.\n"),
@@ -170,9 +170,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(
-        this->subscriber_.in()
-      );
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>( this->subscriber_.in());
   if( 0 == sub_impl) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to obtain subscriber servant\n")));
     throw BadSubscriberException ();

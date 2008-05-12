@@ -186,8 +186,7 @@ void init_dcps_objects (int i)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
-    (subscriber[i].in ());
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber[i].in ());
 
   if (0 == sub_impl)
     {

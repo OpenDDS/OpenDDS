@@ -160,10 +160,9 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
 
   if (! CORBA::is_nil (listener_.in()))
-  {
-    fast_listener_ =
-      reference_to_servant<DDS::DataWriterListener> (listener_.in());
-  }
+    {
+      fast_listener_ = listener_.in();
+    }
   // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
   participant_servant_ = participant_servant;
   domain_id_ = participant_servant_->get_domain_id ();
@@ -618,8 +617,7 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
-  fast_listener_ =
-    reference_to_servant<DDS::DataWriterListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 

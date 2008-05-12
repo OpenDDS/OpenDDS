@@ -259,7 +259,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
   publisher_servant_
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
     (publisher_.in ());
 
   attach_to_transport ();
@@ -328,9 +328,9 @@ PubDriver::initialize(int& argc, char *argv[])
   // the topics should point to the same servant
   // but not the same Object Reference.
   TopicImpl* topic_got_servant
-    = reference_to_servant<TopicImpl> (topic_got.in ());
+    = dynamic_cast<TopicImpl*> (topic_got.in ());
   TopicImpl* topic_servant
-    = reference_to_servant<TopicImpl> (topic_.in ());
+    = dynamic_cast<TopicImpl*> (topic_.in ());
 
   TEST_CHECK (topic_got_servant == topic_servant);
 
@@ -378,7 +378,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (datawriter_.in ()));
 
   datawriter_servant_
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl> (datawriter_.in ());
+    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*> (datawriter_.in ());
 
   foo_datawriter_
     = ::Xyz::FooDataWriter::_narrow(datawriter_.in ());
@@ -386,7 +386,7 @@ PubDriver::initialize(int& argc, char *argv[])
   TEST_CHECK (! CORBA::is_nil (foo_datawriter_.in ()));
 
   foo_datawriter_servant_
-    = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>
+    = dynamic_cast<Xyz::FooDataWriterImpl*>
     (foo_datawriter_.in ());
 
   TEST_CHECK (foo_datawriter_servant_ != 0);

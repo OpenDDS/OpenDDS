@@ -227,8 +227,7 @@ Publisher::run (void)
           }
 
           OpenDDS::DCPS::PublisherImpl* pub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl,
-            DDS::Publisher_ptr>(pub_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub_[count].in ());
           if (0 == pub_impl) {
             cerr << "Failed to obtain publisher servant" << endl;
             return false;
