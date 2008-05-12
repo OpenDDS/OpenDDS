@@ -510,6 +510,7 @@ int main (int argc, char *argv[])
         {
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
         }
+      ACE_OS::fclose(writers_completed);
 
       // Wait for the subscriber to finish.
       FILE* readers_completed = 0;
@@ -520,7 +521,6 @@ int main (int argc, char *argv[])
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
         } while (0 == readers_completed);
 
-      ACE_OS::fclose(writers_completed);
       ACE_OS::fclose(readers_completed);
 
       {  // Extra scope for VC6
