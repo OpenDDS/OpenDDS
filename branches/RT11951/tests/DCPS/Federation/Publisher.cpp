@@ -154,7 +154,7 @@ Publisher::Publisher( int argc, char** argv, char** envp)
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>(
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
         this->publisher_.in()
       );
   if (0 == pub_impl) {

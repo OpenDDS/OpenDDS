@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the publishing entity */
        OpenDDS::DCPS::PublisherImpl* p_impl =
-         OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (p.in ());
+         dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (p.in ());
        p_impl->attach_transport (pub_tcp_impl.in ());
 
 
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
        /* Attach the transport protocol with the subscribing entity */
        OpenDDS::DCPS::SubscriberImpl* sub_impl =
-         OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (s.in ());
+         dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (s.in ());
        sub_impl->attach_transport(sub_tcp_impl.in());
 
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
        /* Create the listener for datareader */
        DDS::DataReaderListener_var listener (new AckDataReaderListenerImpl (size));
        AckDataReaderListenerImpl* listener_servant =
-         OpenDDS::DCPS::reference_to_servant<AckDataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+         dynamic_cast<AckDataReaderListenerImpl*>(listener.in());
 
 
        /* Create AckMessage datareader */

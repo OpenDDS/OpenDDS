@@ -67,7 +67,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
   // Attach the transport protocol with the publishing entity
   OpenDDS::DCPS::PublisherImpl* p_impl =
-    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
+    dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
   p_impl->attach_transport (pub_tcp_impl_.in ());
 
 
@@ -99,7 +99,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
   // Attach the transport protocol with the subscribing entity
   OpenDDS::DCPS::SubscriberImpl* sub_impl =
-    OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub_.in ());
+    dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
   sub_impl->attach_transport(sub_tcp_impl_.in());
 
 
@@ -123,7 +123,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   // We need the servants of the Domain Participant and the Data Reader to
   // get information to set up the ignore.
   ::OpenDDS::DCPS::DomainParticipantImpl* dp_servant =
-    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DomainParticipantImpl>(dp_.in());
+    dynamic_cast< ::OpenDDS::DCPS::DomainParticipantImpl*>(dp_.in());
   if (0 == dp_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of domain participant failed.\n") ));
@@ -131,7 +131,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   }
 
   ::OpenDDS::DCPS::DataReaderImpl* dr_servant =
-    ::OpenDDS::DCPS::reference_to_servant< ::OpenDDS::DCPS::DataReaderImpl>(dr_.in());
+    dynamic_cast< ::OpenDDS::DCPS::DataReaderImpl*>(dr_.in());
   if (0 == dr_servant ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Servant dereference of data reader failed.\n") ));

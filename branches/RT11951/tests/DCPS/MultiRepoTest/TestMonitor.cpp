@@ -299,7 +299,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
                 this->config_.subscriberDomain( index)
             ));
     this->forwarder_[ index] =
-      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index].in());
+      dynamic_cast<ForwardingListenerImpl*>(this->listener_[ index].in());
 
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
@@ -419,7 +419,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
     // Attach the subscriber to the transport.
     OpenDDS::DCPS::SubscriberImpl* sub_impl
-      = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(
+      = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(
           this->subscriber_[ index].in ()
         );
 
@@ -497,7 +497,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
     // Attach the publisher to the transport.
     OpenDDS::DCPS::PublisherImpl* pub_impl
-      = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>(
+      = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
           this->publisher_[ index].in ()
         );
 

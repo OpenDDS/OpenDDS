@@ -124,16 +124,15 @@ namespace OpenDDS
           pub->enable();
         }
 
-      ::DDS::Publisher_ptr pub_obj
-        = servant_to_reference (pub);
+      ::DDS::Publisher_ptr pub_obj(pub);
+
+      // this object will also act as the guard for leaking Publisher Impl
+      Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         tao_mon,
                         this->publishers_protector_,
                         ::DDS::Publisher::_nil());
-
-      // this object will also act as the guard for leaking Publisher Impl
-      Publisher_Pair pair(pub, pub_obj, NO_DUP);
 
       if (OpenDDS::DCPS::insert(publishers_, pair) == -1)
         {
@@ -169,7 +168,7 @@ namespace OpenDDS
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      PublisherImpl* the_servant = reference_to_servant<PublisherImpl> (p);
+      PublisherImpl* the_servant = dynamic_cast<PublisherImpl*> (p);
 
       if (the_servant->is_clean () == 0)
         {
@@ -197,10 +196,6 @@ namespace OpenDDS
         }
       else
         {
-
-
-          deactivate_object < ::DDS::Publisher_ptr > (p);
-
           return ::DDS::RETCODE_OK;
         }
     }
@@ -256,8 +251,7 @@ namespace OpenDDS
           sub->enable();
         }
 
-      ::DDS::Subscriber_ptr sub_obj
-        = servant_to_reference (sub);
+      ::DDS::Subscriber_ptr sub_obj(sub);
 
       Subscriber_Pair pair (sub, sub_obj, NO_DUP);
 
@@ -298,7 +292,7 @@ namespace OpenDDS
       // The servant's ref count should be 2 at this point,
       // one referenced by poa, one referenced by the subscriber
       // set.
-      SubscriberImpl* the_servant = reference_to_servant<SubscriberImpl> (s);
+      SubscriberImpl* the_servant = dynamic_cast<SubscriberImpl*> (s);
 
       if (the_servant->is_clean () == 0)
         {
@@ -338,7 +332,6 @@ namespace OpenDDS
         }
       else
         {
-          deactivate_object < ::DDS::Subscriber_ptr > (s);
           return ::DDS::RETCODE_OK;
         }
     }
@@ -541,14 +534,14 @@ namespace OpenDDS
         // The servant's ref count should be greater than 2 at this point,
         // one referenced by poa, one referenced by the topic map and
         // others referenced by the datareader/datawriter.
-        TopicImpl* the_topic_servant = reference_to_servant<TopicImpl> (a_topic);
+        TopicImpl* the_topic_servant = dynamic_cast<TopicImpl*> (a_topic);
 
         CORBA::String_var topic_name = the_topic_servant->get_name();
 
         ::DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
 
         DomainParticipantImpl* the_dp_servant =
-          reference_to_servant<DomainParticipantImpl> (dp.in ());
+          dynamic_cast<DomainParticipantImpl*> (dp.in ());
 
         if (the_dp_servant != this)
           {
@@ -592,8 +585,6 @@ namespace OpenDDS
                                     ACE_TEXT("remove_topic failed\n")),
                                     ::DDS::RETCODE_ERROR);
                 }
-
-              deactivate_object < ::DDS::Topic_ptr > (a_topic);
 
               // note: this will destroy the TopicImpl if there are no
               // client object reference to it.
@@ -989,8 +980,7 @@ namespace OpenDDS
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::DomainParticipantListener::_duplicate(a_listener);
-      fast_listener_
-        = reference_to_servant<DDS::DomainParticipantListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
       return ::DDS::RETCODE_OK;
     }
 
@@ -1478,7 +1468,7 @@ namespace OpenDDS
           topic_servant->enable();
         }
 
-      ::DDS::Topic_ptr obj  = servant_to_reference (topic_servant);
+      ::DDS::Topic_ptr obj(topic_servant);
 
 
       // this object will also act as a guard against leaking the new TopicImpl
@@ -1840,7 +1830,7 @@ namespace OpenDDS
       {
         // Attach the Subscriber with the TransportImpl.
         ::OpenDDS::DCPS::SubscriberImpl* sub_servant
-          = reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (bit_subscriber_.in ());
+          = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (bit_subscriber_.in ());
 
         TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl ( this->domain_id_);
 

@@ -49,8 +49,7 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant =
-    OpenDDS::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
+  Wimpl* pt_servant = dynamic_cast<Wimpl*> (pt_dw.in ());
 
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));

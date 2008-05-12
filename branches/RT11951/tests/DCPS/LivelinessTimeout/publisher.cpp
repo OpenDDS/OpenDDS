@@ -30,7 +30,7 @@
 
 #include "common.h"
 
-static const char * writer_address_str = "";
+static const char * writer_address_str = "localhost:0";
 static int writer_address_given = 0;
 
 static int init_writer_tranport (OpenDDS::DCPS::TransportImpl_rch& writer_transport_impl)
@@ -180,7 +180,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -261,7 +261,7 @@ int main (int argc, char *argv[])
       // check to see if the publisher worked
       {
         DataWriterListenerImpl* dwl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+          dynamic_cast<DataWriterListenerImpl*>(dwl.in());
         if(!dwl_servant->valid())
         {
           ACE_ERROR ((LM_ERROR,

@@ -44,7 +44,8 @@ SyncClient_i::SyncClient_i (const std::string& sync_server
 
       std::string sync_srvr;
       if (sync_server.empty()) {
-        sync_srvr = "corbaloc:iiop:localhost:12345/SyncServer";
+        //sync_srvr = "corbaloc:iiop:localhost:12345/SyncServer";
+        sync_srvr = "file://sync.ior";
       }
 
       obj = orb_->string_to_object (sync_srvr.c_str());

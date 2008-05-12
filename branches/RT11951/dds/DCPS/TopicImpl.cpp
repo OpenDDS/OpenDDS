@@ -67,7 +67,7 @@ namespace OpenDDS
               else 
                 {
                   qos_ = qos;
-                  DomainParticipantImpl* part = reference_to_servant<DomainParticipantImpl> (this->participant_);
+                  DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*> (this->participant_);
 
                   try
                   {
@@ -126,8 +126,7 @@ namespace OpenDDS
       listener_mask_ = mask;
       //note: OK to duplicate  and reference_to_servant a nil object ref
       listener_ = ::DDS::TopicListener::_duplicate(a_listener);
-      fast_listener_ =
-        reference_to_servant<DDS::TopicListener> (listener_.in ());
+      fast_listener_ = listener_.in ();
       return ::DDS::RETCODE_OK;
     }
 

@@ -26,7 +26,7 @@
       }
 
     ::T2::Foo2DataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant< ::T2::Foo2DataReaderImpl>(foo_dr.in());
+      dynamic_cast< ::T2::Foo2DataReaderImpl*>(foo_dr.in());
 
     ::T2::Foo2Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

@@ -57,7 +57,8 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
+$svc_config = ($use_svc_config && $app_bit_conf eq '')
+    ? " -ORBSvcConf ../../tcp.conf " : '';
 $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
