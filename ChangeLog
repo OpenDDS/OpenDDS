@@ -1,3 +1,15 @@
+Mon May 12 18:41:29 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Close the writers_completed file as soon as possible, so changes are
+          flushed to the disk.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          For udp and (unreliable) multicast, pass a -y 50 to the publisher so
+          that it sleeps for 50 ms between writes.
+
 Mon May 12 16:03:40 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * performance-tests/DCPS/Sync/SyncServer_i.cpp:

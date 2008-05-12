@@ -48,12 +48,14 @@ if ($ARGV[$arg_idx] eq 'nokey') {
 if ($ARGV[$arg_idx] eq 'udp') {
   $use_udp = 1;
   $arg_idx = $arg_idx + 1;
+  $write_interval_ms = 50;
 }
 
 if ($ARGV[$arg_idx] eq 'mcast') {
   $use_mcast = 1;
   $pub_addr = "224.0.0.1:29803";
   $arg_idx = $arg_idx + 1;
+  $write_interval_ms = 50;
 }
 
 if ($ARGV[$arg_idx] eq 'reliable_multicast') {
