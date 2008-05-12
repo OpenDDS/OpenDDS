@@ -1,3 +1,11 @@
+Mon May 12 20:28:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+
+          Moved listener object to the heap so reference counting works as
+          expected.  The merge from trunk takes care of this for other tests,
+          but this test doesn't exist yet on the trunk.
+
 Mon May 12 19:42:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 1115:1148 out to branch.
 

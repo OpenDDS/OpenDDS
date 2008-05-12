@@ -147,8 +147,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // activate the listener
-      DataReaderListenerImpl        listener_servant;
-      DDS::DataReaderListener_var listener = &listener_servant;
+      DDS::DataReaderListener_var listener = new DataReaderListenerImpl;
+      DataReaderListenerImpl &listener_servant =
+        *dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
         cerr << "listener is nil." << endl;
