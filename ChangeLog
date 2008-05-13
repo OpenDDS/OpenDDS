@@ -1,3 +1,19 @@
+Tue May 13 16:37:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+
+          Corrected last on_liveliness_change call status verification.
+
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+        
+          Removed inactive_count_ and test_failed() method as they are not 
+          needed.
+
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Removed test_failed() verification from listener.
+          
 Tue May 13 14:26:10 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:

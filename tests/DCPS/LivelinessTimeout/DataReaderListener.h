@@ -113,15 +113,8 @@ public:
     return deadline_missed_;
   }
 
-  bool test_failed() const
-  {
-    return test_failed_;
-  }
-
 private:
-  int inactive_count_;
   unsigned int deadline_missed_;
-  bool test_failed_;
   ::DDS::SampleInfo last_si_ ;
 };
 

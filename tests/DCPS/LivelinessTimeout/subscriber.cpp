@@ -260,12 +260,6 @@ int main (int argc, char *argv[])
                     drl_servant->deadline_missed()));
           return 1;
       }
-      else if (drl_servant->test_failed())
-      {
-        ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) There was a problem with the test, check error log.\n")));
-          return 1;
-      }
     }
   catch (const TestException&)
     {
