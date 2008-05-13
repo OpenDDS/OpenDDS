@@ -29,7 +29,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   // Initialize the Participant Factory
   dpf_ = TheParticipantFactoryWithArgs (argc, argv);
   if (CORBA::is_nil (dpf_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create participant factory failed.\n") ));
     return false;
   }
@@ -37,29 +37,29 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
 
   // Create participant
   dp_ = dpf_->create_participant (DOMAINID,
-                                  PARTICIPANT_QOS_DEFAULT, 
+                                  PARTICIPANT_QOS_DEFAULT,
                                   DDS::DomainParticipantListener::_nil ());
   if (CORBA::is_nil (dp_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create participant failed.\n") ));
     return false;
   }
-  
+
   // Initialize the transports (uses SimpleTcp transport)
   // The code in this section would need to be changed if the system needs to
   //  use another transport type.
-  pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID, 
-                                                              "SimpleTcp", 
+  pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID,
+                                                              "SimpleTcp",
                                                               ::OpenDDS::DCPS::AUTO_CONFIG);
-  sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID, 
-                                                              "SimpleTcp", 
+  sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID,
+                                                              "SimpleTcp",
                                                               ::OpenDDS::DCPS::AUTO_CONFIG);
 
   // Create publisher
   pub_ = dp_->create_publisher (PUBLISHER_QOS_DEFAULT,
                                 DDS::PublisherListener::_nil ());
   if (CORBA::is_nil (pub_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create publisher failed.\n") ));
     return false;
   }
@@ -74,14 +74,14 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   // Create topic for datawriter and datareader
   DistributedContent::FileDiffTypeSupportImpl* fileinfo_dt =
                 new DistributedContent::FileDiffTypeSupportImpl();
-  fileinfo_dt->register_type (dp_.in (), 
+  fileinfo_dt->register_type (dp_.in (),
                               "DistributedContent::FileDiff");
    topic_ = dp_->create_topic ("fileinfo_topic", // topic name
                                "DistributedContent::FileDiff", // topic type
-                               TOPIC_QOS_DEFAULT, 
+                               TOPIC_QOS_DEFAULT,
                                DDS::TopicListener::_nil ());
   if (CORBA::is_nil (topic_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create topic failed.\n") ));
     return false;
   }
@@ -91,7 +91,7 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
   sub_ = dp_->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                 DDS::SubscriberListener::_nil());
   if (CORBA::is_nil (sub_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create subscriber failed.\n") ));
     return false;
   }
@@ -182,13 +182,13 @@ AbstractionLayer::init_DDS(int& argc, char *argv[])
                                  DATAWRITER_QOS_DEFAULT,
                                  DDS::DataWriterListener::_nil ());
   if (CORBA::is_nil (dw_.in ()) ) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Create data writer failed.\n") ));
     return false;
   }
 
   // Narrow down the data writer to the FileDiffDataWriter
-  filediff_writer_ = DistributedContent::FileDiffDataWriter::_narrow (dw_);
+  filediff_writer_ = DistributedContent::FileDiffDataWriter::_narrow (dw_.in());
   if (CORBA::is_nil (filediff_writer_.in ()) ) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("ERROR - Narrow of data writer failed.\n") ));
@@ -205,7 +205,7 @@ void
 AbstractionLayer::shutdown_DDS()
 {
 
-  // Clean up all the entities in the participant 
+  // Clean up all the entities in the participant
   dp_->delete_contained_entities ();
 
   // Clean up the participant
@@ -250,9 +250,8 @@ AbstractionLayer::receive_diff(const DistributedContent::FileDiff& diff)
 bool
 AbstractionLayer::send_diff(const DistributedContent::FileDiff& diff)
 {
-  // Have the writer publish the diff 
+  // Have the writer publish the diff
   DDS::ReturnCode_t result = filediff_writer_->write(diff, handle_);
 
   return (result == DDS::RETCODE_OK);
 }
-
