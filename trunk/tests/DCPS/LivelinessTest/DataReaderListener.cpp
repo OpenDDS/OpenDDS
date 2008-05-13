@@ -91,7 +91,11 @@ void DataReaderListenerImpl::on_liveliness_changed (
           " Both active_count and inactive_count 0 should not happen at liveliness_changed_count %d\n",
           liveliness_changed_count_));
       }
-      else 
+      else if (status.active_count == 0 && status.inactive_count == 0)
+      {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderListenerImpl::on_liveliness_changed - this is the time callback\n"));
+      }
+      else
       {
         ::DDS::LivelinessChangedStatus expected_status;
         // expect the active_count either 0 or 1

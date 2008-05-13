@@ -11,9 +11,7 @@
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
-  inactive_count_(0)
-  ,deadline_missed_(0)
-  ,test_failed_(false)
+  deadline_missed_(0)
 {
 }
 
@@ -65,31 +63,16 @@ void DataReaderListenerImpl::on_liveliness_changed (
     if(status.active_count_change < 0)
     {
       ++deadline_missed_;
-      // subtract the negative active acount change
-      inactive_count_ -= status.active_count_change;
-    }
-    else
-    {
-      // subtract the active acount change
-      inactive_count_ -= status.active_count_change;
-      if(inactive_count_ < 0)
-      {
-        test_failed_ = true;
-        ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed "
-               "we shouldn't have negative publishers inactive, there is now %d inactive."
-               " This is an error with the test. Active count change %d\n"),
-               inactive_count_, status.active_count_change));
-      }
     }
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed"
-               "   active=%d, inactive=%d, activeDelta=%d, inactiveDelta=%d\n"),
+               "   active=%d, inactive=%d, activeDelta=%d, inactiveDelta=%d deadline_missed=%d\n"),
                status.active_count,
                status.inactive_count,
                status.active_count_change,
-               status.inactive_count_change ));
+               status.inactive_count_change,
+               deadline_missed_));
   }
 
 void DataReaderListenerImpl::on_subscription_match (
