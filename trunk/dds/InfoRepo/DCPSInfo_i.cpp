@@ -351,7 +351,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                    pubId,
                    partPtr,
                    topic,
-                   publication,
+                   publication.in(),
                    qos,
                    transInfo,
                    publisherQos),
@@ -552,7 +552,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
                    subId,
                    partPtr,
                    topic,
-                   subscription,
+                   subscription.in(),
                    qos,
                    transInfo,
                    subscriberQos),
@@ -890,7 +890,7 @@ void TAO_DDS_DCPSInfo_i::update_publication_qos (
     {
       throw OpenDDS::DCPS::Invalid_Publication();
     }
-    
+
   SpecificQos qosType = pub->set_qos (qos, publisherQos);
 
   if (um_)
@@ -941,7 +941,7 @@ void TAO_DDS_DCPSInfo_i::update_subscription_qos (
     {
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
- 
+
   SpecificQos qosType = sub->set_qos (qos, subscriberQos);
 
   if (um_)
@@ -1004,7 +1004,7 @@ void TAO_DDS_DCPSInfo_i::update_topic_qos (
        um_->updateQos (Topic, topicId, topic_qos);
     }
 }
- 
+
 
 void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::DDS::DomainId_t domainId,
@@ -1253,7 +1253,7 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
 
 
 template <typename QosType, typename Qos>
-void 
+void
 TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq)
 {
   TAO_OutputCDR outCdr;

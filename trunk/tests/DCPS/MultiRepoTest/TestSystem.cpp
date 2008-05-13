@@ -445,7 +445,7 @@ TestSystem::~TestSystem()
   } else {
     // Release publisher participant.
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-        == TheParticipantFactory->delete_participant( this->publisherParticipant_)
+        == TheParticipantFactory->delete_participant( this->publisherParticipant_.in())
       ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("%T (%P|%t) ERROR: Unable to release the publication participant.\n")));
@@ -465,7 +465,7 @@ TestSystem::~TestSystem()
     } else {
       // Release subscriber participant.
       if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-          == TheParticipantFactory->delete_participant( this->subscriberParticipant_)
+          == TheParticipantFactory->delete_participant( this->subscriberParticipant_.in())
         ) {
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("%T (%P|%t) ERROR: Unable to release the subscription participant.\n")));
@@ -490,4 +490,3 @@ TestSystem::run()
   forwarder->waitForCompletion();
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: processing complete.\n")));
 }
-

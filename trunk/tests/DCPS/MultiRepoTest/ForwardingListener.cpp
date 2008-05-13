@@ -233,8 +233,8 @@ void ForwardingListenerImpl::on_subscription_match (
         ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available Repo[ %d] read failed.\n"),
         this->repo_
       ));
-    
-    } else if( CORBA::is_nil( this->dataWriter_)) {
+
+    } else if( CORBA::is_nil( this->dataWriter_.in())) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("%T (%P|%t) ForwardingListenerImpl Repo[ %d] - bit bucket reached. \n"),
         this->repo_
@@ -303,4 +303,3 @@ void ForwardingListenerImpl::on_subscription_match (
       this->repo_
     ));
   }
-

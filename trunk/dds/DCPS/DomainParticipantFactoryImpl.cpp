@@ -54,7 +54,7 @@ namespace OpenDDS
         }
 
       DCPSInfo_var repo = TheServiceParticipant->get_repository ( domainId);
-      if ( CORBA::is_nil( repo.in())) 
+      if ( CORBA::is_nil( repo.in()))
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -127,7 +127,7 @@ namespace OpenDDS
                         ::DDS::DomainParticipant::_nil ());
 
 
-      // the Pair will also act as a guard against leaking the 
+      // the Pair will also act as a guard against leaking the
       // new DomainParticipantImpl (NO_DUP, so this takes over mem)
       Participant_Pair pair (dp, dp_obj, NO_DUP);
 
@@ -197,7 +197,7 @@ namespace OpenDDS
       DomainParticipantImpl* the_servant
         = dynamic_cast<DomainParticipantImpl*> (a_participant);
 
-      //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_ 
+      //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
       if (the_servant->is_clean () == 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
@@ -376,8 +376,6 @@ namespace OpenDDS
                         tao_mon,
                         this->participants_protector_,
                         ::DDS::RETCODE_ERROR);
-
-      DPMap::iterator mapIter(participants_.begin());
 
       for (DPMap::iterator mapIter = participants_.begin();
         mapIter != participants_.end();

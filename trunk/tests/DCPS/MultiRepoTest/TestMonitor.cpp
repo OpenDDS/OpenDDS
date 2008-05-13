@@ -171,9 +171,8 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         }
     }
     this->subscriberParticipant_[ index]
-      = ::DDS::DomainParticipant::_duplicate(
-          this->participants_[ this->config_.subscriberDomain( index)]
-        );
+      = ::DDS::DomainParticipant::_duplicate
+      (this->participants_[ this->config_.subscriberDomain( index)].in());
   }
 
   //
@@ -204,9 +203,8 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         }
     }
     this->publisherParticipant_[ index]
-      = ::DDS::DomainParticipant::_duplicate(
-          this->participants_[ this->config_.publisherDomain( index)]
-        );
+      = ::DDS::DomainParticipant::_duplicate
+      (this->participants_[ this->config_.publisherDomain( index)].in());
   }
 
   //
@@ -582,11 +580,9 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     writerQos.reliability.max_blocking_time.sec        = 0;
     writerQos.reliability.max_blocking_time.nanosec    = 0;
 
-    this->dataWriter_[ index] = this->publisher_[ index]->create_datawriter(
-                                  this->writerTopic_[ index].in(),
-                                  writerQos,
-                                  listener
-                                );
+    this->dataWriter_[ index]
+      = this->publisher_[ index]->create_datawriter(this->writerTopic_[ index].in(),
+                                                    writerQos, listener.in());
     if( CORBA::is_nil( this->dataWriter_[ index].in()) )
       {
         ACE_ERROR((LM_ERROR,
@@ -782,4 +778,3 @@ TestMonitor::run()
   ACE_OS::sleep(5);
 
 }
-
