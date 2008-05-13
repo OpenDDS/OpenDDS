@@ -13,6 +13,11 @@
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
   liveliness_changed_count_(0)
   {
+    last_status_.active_count = 0;
+    last_status_.inactive_count = 0;
+    last_status_.active_count_change = 0;
+    last_status_.inactive_count_change = 0;
+
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
 
@@ -76,45 +81,48 @@ void DataReaderListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(status);
 
     liveliness_changed_count_++ ;
-
-    if (0 == liveliness_changed_count_ % 2)
+    
+    if (liveliness_changed_count_ > 1)
+    {
+      if (last_status_.active_count == 0 && last_status_.inactive_count == 0)
       {
-        // becoming active
-        if (status.active_count != 1 ||
-            status.inactive_count != 0 ||
-            status.active_count_change != 1 ||
-            status.inactive_count_change != -1)
+        ACE_ERROR ((LM_ERROR,
+          "ERROR: DataReaderListenerImpl::on_liveliness_changed"
+          " Both active_count and inactive_count 0 should not happen at liveliness_changed_count %d\n",
+          liveliness_changed_count_));
+      }
+      else 
+      {
+        ::DDS::LivelinessChangedStatus expected_status;
+        // expect the active_count either 0 or 1
+        expected_status.active_count = 1 - last_status_.active_count;     
+        expected_status.inactive_count = 1 - last_status_.inactive_count; 
+        expected_status.active_count_change = status.active_count - last_status_.active_count;
+        expected_status.inactive_count_change = status.inactive_count - last_status_.inactive_count;
 
+        if (status.active_count != expected_status.active_count
+          || status.inactive_count != expected_status.inactive_count 
+          || status.active_count_change != expected_status.active_count_change 
+          || status.inactive_count_change != expected_status.inactive_count_change)
+        {
           ACE_ERROR ((LM_ERROR,
                       "ERROR: DataReaderListenerImpl::on_liveliness_changed"
-                      " expected/got active_count 1/%d inactive_count 0/%d"
-                      " active_count_change 1/%d inactive_count_change -1/%d\n",
-                      status.active_count,
-                      status.inactive_count,
-                      status.active_count_change,
-                      status.inactive_count_change ));
+                      " expected/got active_count %d/%d inactive_count %d/%d"
+                      " active_count_change %d/%d inactive_count_change %d/%d\n",
+                      expected_status.active_count, status.active_count,
+                      expected_status.inactive_count, status.inactive_count,
+                      expected_status.active_count_change, status.active_count_change,
+                      expected_status.inactive_count_change, status.inactive_count_change ));
+        }
       }
-    else
-      {
-        // becoming inactive
-        if (status.active_count != 0 ||
-            status.inactive_count != 1 ||
-            status.active_count_change != -1 ||
-            status.inactive_count_change != 1)
-
-          ACE_ERROR ((LM_ERROR,
-                      "ERROR: DataReaderListenerImpl::on_liveliness_changed"
-                      " expected/got active_count 0/%d inactive_count 1/%d"
-                      " active_count_change -1/%d inactive_count_change 1/%d\n",
-                      status.active_count,
-                      status.inactive_count,
-                      status.active_count_change,
-                      status.inactive_count_change ));
-      }
-
+    }
+  
+    last_status_ = status;
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"),
-               liveliness_changed_count_));
+      ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"
+      "active_count %d inactive_count %d active_count_change %d inactive_count_change %d\n"),
+               liveliness_changed_count_, status.active_count, status.inactive_count,
+               status.active_count_change, status.inactive_count_change));
   }
 
 void DataReaderListenerImpl::on_subscription_match (

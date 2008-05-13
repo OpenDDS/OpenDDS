@@ -399,14 +399,16 @@ int main (int argc, char *argv[])
       ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
                      drl_servant->no_writers_generation_count()) ;
       ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-      if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
+      
+      if ((drl_servant->liveliness_changed_count() < 2 + 2 * num_unlively_periods) ||
+          (drl_servant->verify_last_liveliness_status () == false) ||
           (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
         // if use take then the instance had "no samples" when it got NO_WRITERS and
         // hence the instance state terminated and then started again so
         // no_writers_generation_count should = 0.
         ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
+           ACE_TEXT("(%P|%t) Test failed. \n")));
           return 1;
       }
 
