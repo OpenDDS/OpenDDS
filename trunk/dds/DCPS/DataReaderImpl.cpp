@@ -222,46 +222,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           "ERROR: Unable to insert writer publisher_id %d.\n",
           writer_id));
       }
-
-      // TBD should we set the status flag?
-
-      liveliness_changed_status_.active_count++;
-      // don't increment the change count because we don't call the listner
-      // TBD - does this make sense?
-      //liveliness_changed_status_.active_count_change++;
-
-      // inactive count remains the same - this is a new writer
-      //liveliness_changed_status_.inactive_count xx;
-      //liveliness_changed_status_.inactive_count_change xx;
-
-      if (liveliness_changed_status_.active_count < 0)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-          ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
-        return;
-      }
-      if (liveliness_changed_status_.inactive_count < 0)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-          ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
-        return;
-      }
-      if (this->writers_.size() !=
-        unsigned (liveliness_changed_status_.active_count +
-        liveliness_changed_status_.inactive_count) )
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-          ACE_TEXT(" liveliness count does not match the number of writers.\n")));
-        return;
-      }
-
-      //TBD - I don't think we should call the listner->on_liveliness_changed
-      //      even though this new association is "alive".
-      //      ?? or is it not alive until the first sample is recieved?
-
     }
 
     // add associations to the transport before using
@@ -361,76 +321,54 @@ void DataReaderImpl::remove_associations (
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-  // keep track of writers associate with this reader
+  WriterIdSeq updated_writers;
+
+  //Remove the writers from writer list. If the supplied writer
+  //is not in the cached writers list then it is already removed.
+  //We just need remove the writers in the list that have not been
+  //removed.
   CORBA::ULong wr_len = writers.length ();
   for (CORBA::ULong i = 0; i < wr_len; i++)
   {
     PublicationId writer_id = writers[i];
 
-    int was_alive = 0;
-    WriterMapType::iterator iter = writers_.find(writer_id);
-    if (iter != writers_.end())
-      was_alive = iter->second.is_alive ();
+    WriterMapType::iterator it = this->writers_.find (writer_id);
+    if (it != this->writers_.end())
+    {
+      it->second.removed ();
+    }
 
     if (this->writers_.erase(writer_id) == 0)
     {
-      ACE_ERROR((LM_ERROR,
-        "(%P|%t) DataReaderImpl::remove_associations: "
-        "ERROR: Unable to remove writer publisher_id %d.\n",
-        writer_id));
-    }
-
-    // No need to cancel the liveliness timer becaue it will
-    // have no impact if there are no writers or existing writers are alive
-
-    //TBD ? should we tell the sample instances that the writer has been removed?
-
-    //TBD should we set the status flag?
-
-    if (was_alive)
-    {
-      liveliness_changed_status_.active_count--;
-      liveliness_changed_status_.active_count_change--;
+      if (DCPS_debug_level >= 1)
+      {
+        ACE_DEBUG((LM_DEBUG,
+          "(%P|%t) DataReaderImpl::remove_associations: "
+          "the writer %d was already removed.\n",
+          writer_id));
+      }
     }
     else
     {
-      liveliness_changed_status_.inactive_count--;
-      liveliness_changed_status_.inactive_count_change--;
+      CORBA::Long len = updated_writers.length ();
+      updated_writers.length (len + 1);
+      updated_writers[len] = writer_id;
     }
+  }
 
-    if (liveliness_changed_status_.active_count < 0)
-    {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
-        ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
-      return;
-    }
-    if (liveliness_changed_status_.inactive_count < 0)
-    {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
-        ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
-      return;
-    }
-    if (this->writers_.size() !=
-      unsigned (liveliness_changed_status_.active_count +
-      liveliness_changed_status_.inactive_count) )
-    {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::remove_associations, ")
-        ACE_TEXT(" liveliness count does not match the number of writers.\n")));
-      return;
-    }
+  wr_len = updated_writers.length ();
 
-    //TBD - I don't think we should call the listner->on_liveliness_changed
-    //      even though this write is dead because it is removed.
+  // Return now if the supplied writers have been removed already.
+  if (wr_len == 0)
+  {
+    return;
   }
 
   if (! is_bit_)
   {
     // The writer should be in the id_to_handle map at this time so
     // log with error.
-    if (this->cache_lookup_instance_handles (writers, handles) == false)
+    if (this->cache_lookup_instance_handles (updated_writers, handles) == false)
     {
       ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderImpl::remove_associations "
         "cache_lookup_instance_handles failed\n"));
@@ -467,15 +405,15 @@ void DataReaderImpl::remove_associations (
     }
   }
 
-  this->subscriber_servant_->remove_associations(writers, this->subscription_id_);
+  this->subscriber_servant_->remove_associations(updated_writers, this->subscription_id_);
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost writer then make a callback to notify
   // subscription lost.
   if (notify_lost)
-    {
-      this->notify_subscription_lost (writers);
-    }
+  {
+    this->notify_subscription_lost (updated_writers);
+  }
 }
 
 
@@ -1307,6 +1245,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     " reader %d has %d live writers; from_reator=%d\n",
     subscription_id_, alive_writers, arg == this ? 0 : 1));
 
+
   if (alive_writers)
   {
     ACE_Time_Value relative;
@@ -1317,7 +1256,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
     else
       relative = ACE_Time_Value(0,1); // ASAP
 
-    liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
+   liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
     if (liveliness_timer_id_ == -1)
     {
       ACE_ERROR((LM_ERROR,
@@ -1364,7 +1303,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
 
 OpenDDS::DCPS::WriterInfo::WriterInfo ()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
-    is_alive_(1),
+    state_(NOT_SET),
     reader_(0),
     writer_id_(0)
 {
@@ -1373,7 +1312,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo ()
 OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
 				   PublicationId   writer_id)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
-    is_alive_(1),
+    state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id)
 {
@@ -1383,132 +1322,176 @@ OpenDDS::DCPS::WriterInfo::WriterInfo (DataReaderImpl* reader,
 	       writer_id_, reader_->subscription_id_));
 }
 
+
 ACE_Time_Value
 OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
 {
   ACE_Time_Value expires_at = ACE_Time_Value::max_time;
-  if (is_alive_)
+
+  // We only need check the liveliness with the non-zero liveliness_lease_duration_.
+  if (state_ != DEAD && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero)
+  {
+    expires_at = this->last_liveliness_activity_time_ +
+      reader_->liveliness_lease_duration_ ;
+    if (expires_at <= now)
     {
-      expires_at = this->last_liveliness_activity_time_ +
-	reader_->liveliness_lease_duration_ ;
-      if (expires_at <= now)
-	{
-	  is_alive_ = 0;
-	  // let all instances know this write is not alive.
-	  reader_->writer_became_dead(writer_id_, now);
-	  expires_at = ACE_Time_Value::max_time;
-	}
+      // let all instances know this write is not alive.
+      reader_->writer_became_dead(writer_id_, now, state_);
+      expires_at = ACE_Time_Value::max_time;
     }
+  }
   return expires_at;
+}
+
+
+void OpenDDS::DCPS::WriterInfo::removed ()
+{
+  reader_->writer_removed (writer_id_, this->state_);
+}
+
+void
+DataReaderImpl::writer_removed (PublicationId   writer_id,
+             WriterInfo::WriterState& state)
+{
+  if (DCPS_debug_level >= 5)
+    ACE_DEBUG((LM_DEBUG,
+	       "(%P|%t)%T  DataReaderImpl::writer_removed reader %d to writer %d\n",
+	       this->subscription_id_, writer_id));
+
+  bool liveliness_changed = false;
+  if (state == WriterInfo::ALIVE)
+  {
+    -- liveliness_changed_status_.active_count;
+    -- liveliness_changed_status_.active_count_change;
+    liveliness_changed = true;
+  }
+
+  if (state == WriterInfo::DEAD)
+  {
+    -- liveliness_changed_status_.inactive_count;
+    -- liveliness_changed_status_.inactive_count_change;
+    liveliness_changed = true;
+  }
+   
+  if (liveliness_changed)
+    this->notify_liveliness_change ();
 }
 
 void
 DataReaderImpl::writer_became_alive (PublicationId   writer_id,
-				     const ACE_Time_Value& when)
+				     const ACE_Time_Value& when,
+             WriterInfo::WriterState& state)
 {
   ACE_UNUSED_ARG(when) ;
   if (DCPS_debug_level >= 5)
     ACE_DEBUG((LM_DEBUG,
-	       "(%P|%t) DataReaderImpl::writer_became_alive writer %d to reader %d\n",
+	       "(%P|%t)%T  DataReaderImpl::writer_became_alive reader %d to writer %d\n",
 	       this->subscription_id_, writer_id));
 
   // caller should already have the samples_lock_ !!!
 
   // NOTE: each instance will change to ALIVE_STATE when they recieve a sample
 
-  ::DDS::DataReaderListener* listener
-      = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
+  bool liveliness_changed = false;
+  if (state != WriterInfo::ALIVE)
+  {
+    liveliness_changed_status_.active_count++;
+    liveliness_changed_status_.active_count_change++;
+    liveliness_changed = true;
+  }
 
-  set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS,
-			  true) ;
+  if (state == WriterInfo::DEAD)
+  {
+    liveliness_changed_status_.inactive_count--;
+    liveliness_changed_status_.inactive_count_change--;
+    liveliness_changed = true;
+  }
 
-  liveliness_changed_status_.active_count++;
-  liveliness_changed_status_.inactive_count--;
-  liveliness_changed_status_.active_count_change++;
-  liveliness_changed_status_.inactive_count_change--;
+  set_status_changed_flag(::DDS::LIVELINESS_CHANGED_STATUS, true) ;
 
   if (liveliness_changed_status_.active_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
+		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive, ")
+		  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"), 
+      liveliness_changed_status_.active_count));
       return;
     }
   if (liveliness_changed_status_.inactive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
-      return;
-    }
-  if (this->writers_.size () !=
-      unsigned (liveliness_changed_status_.active_count +
-		liveliness_changed_status_.inactive_count) )
-    {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" liveliness count does not match the number of writers.\n")));
+		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive, ")
+		  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d .\n"),
+      liveliness_changed_status_.inactive_count));
       return;
     }
 
+  // Change the state to ALIVE since handle_timeout may call writer_became_dead 
+  // which need the current state info.
+  state = WriterInfo::ALIVE;
+
+  // Call listener only when there are liveliness status changes.
+  if (liveliness_changed)
+  {
+    this->notify_liveliness_change ();
+  }
 
   // this call will start the livilness timer if it is not already set
   ACE_Time_Value now = ACE_OS::gettimeofday ();
   this->handle_timeout (now, this);
-
-  if (listener != 0)
-    {
-      listener->on_liveliness_changed (dr_local_objref_.in (),
-				       liveliness_changed_status_);
-
-      liveliness_changed_status_.active_count_change = 0;
-      liveliness_changed_status_.inactive_count_change = 0;
-    }
 }
 
 void
 DataReaderImpl::writer_became_dead (PublicationId   writer_id,
-				    const ACE_Time_Value& when)
+				    const ACE_Time_Value& when,
+            WriterInfo::WriterState& state)
 {
   if (DCPS_debug_level >= 5)
     ACE_DEBUG((LM_DEBUG,
-	       "(%P|%t) DataReaderImpl::writer_became_dead writer %d to reader %d\n",
-	       this->subscription_id_, writer_id));
+	       "(%P|%t) DataReaderImpl::writer_became_dead reader %d to writer %d state %d\n",
+	       this->subscription_id_, writer_id, state));
 
   // caller should already have the samples_lock_ !!!
+  bool liveliness_changed = false;
+
+  if (state == OpenDDS::DCPS::WriterInfo::NOT_SET) 
+  {
+    liveliness_changed_status_.inactive_count++;
+    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed = true;
+  }
+
+  if (state == WriterInfo::ALIVE)
+  {
+    liveliness_changed_status_.active_count--;
+    liveliness_changed_status_.active_count_change--;
+    liveliness_changed_status_.inactive_count++;
+    liveliness_changed_status_.inactive_count_change++;
+    liveliness_changed = true;
+  }
+
+  //update the state to DEAD.
+  state = WriterInfo::DEAD;
 
   set_status_changed_flag(::DDS::LIVELINESS_LOST_STATUS,
-			  true) ;
-
-  liveliness_changed_status_.active_count--;
-  liveliness_changed_status_.inactive_count++;
-  liveliness_changed_status_.active_count_change--;
-  liveliness_changed_status_.inactive_count_change++;
+    true) ;
 
   if (liveliness_changed_status_.active_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" invalid liveliness_changed_status active count.\n")));
+		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead, ")
+		  ACE_TEXT(" invalid liveliness_changed_status active count - %d.\n"),
+      liveliness_changed_status_.active_count));
       return;
     }
   if (liveliness_changed_status_.inactive_count < 0)
     {
       ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" invalid liveliness_changed_status inactive count.\n")));
+		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead, ")
+		  ACE_TEXT(" invalid liveliness_changed_status inactive count - %d.\n"),
+      liveliness_changed_status_.inactive_count));
       return;
     }
-  if (this->writers_.size () !=
-      unsigned (liveliness_changed_status_.active_count +
-		liveliness_changed_status_.inactive_count) )
-    {
-      ACE_ERROR ((LM_ERROR,
-		  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations, ")
-		  ACE_TEXT(" liveliness count does not match the number of writers.\n")));
-      return;
-    }
-
 
     SubscriptionInstanceMapType::iterator iter = instances_.begin();
     SubscriptionInstanceMapType::iterator next = iter;
@@ -1524,18 +1507,12 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
       iter = next;
     }
 
-  ::DDS::DataReaderListener* listener
-      = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
-
-  if (listener != 0)
-    {
-      listener->on_liveliness_changed (dr_local_objref_.in (),
-				       liveliness_changed_status_);
-
-      liveliness_changed_status_.active_count_change = 0;
-      liveliness_changed_status_.inactive_count_change = 0;
-    }
-
+    
+  // Call listener only when there are liveliness status changes.
+  if (liveliness_changed)
+  {
+    this->notify_liveliness_change ();
+  }
 }
 
 
@@ -1781,6 +1758,21 @@ DataReaderImpl::num_zero_copies()
     }
 
     return loans;
+}
+
+
+void DataReaderImpl::notify_liveliness_change()
+{
+  ::DDS::DataReaderListener* listener
+    = listener_for (::DDS::LIVELINESS_CHANGED_STATUS);
+  if (listener != 0)
+  {
+    listener->on_liveliness_changed (dr_local_objref_.in (),
+      liveliness_changed_status_);
+
+    liveliness_changed_status_.active_count_change = 0;
+    liveliness_changed_status_.inactive_count_change = 0;
+  }
 }
 
 } // namespace DCPS

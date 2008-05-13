@@ -355,12 +355,18 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
   }
 
+  ReaderIdSeq updated_readers;
+
   CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
+   
+    //Remove the readers from reader list. If the supplied reader
+    //is not in the cached reader list then it is already removed.
+    //We just need remove the readers in the list that have not been
+    //removed.
     CORBA::ULong num_orig_readers = readers_.length();
-
+    
     for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; rm_idx++)
     {
       for (CORBA::ULong orig_idx = 0;
@@ -376,10 +382,20 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
           }
           num_orig_readers --;
           readers_.length (num_orig_readers);
+
+          CORBA::ULong len = updated_readers.length();
+          updated_readers.length(len + 1);
+          updated_readers[len] = readers[rm_idx];
           break;
         }
       }
     }
+
+    num_removed_readers = updated_readers.length ();
+    
+    // Return now if the supplied readers have been removed already.
+    if (num_removed_readers == 0)
+      return;
 
     if (! is_bit_)
     {
@@ -387,7 +403,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
       // The reader should be in the id_to_handle map at this time so
       // log with error.
-      if (this->cache_lookup_instance_handles (readers, handles) == false)
+      if (this->cache_lookup_instance_handles (updated_readers, handles) == false)
       {
         ACE_ERROR ((LM_ERROR, "(%P|%t)DataWriterImpl::remove_associations "
           "cache_lookup_instance_handles failed\n"));
@@ -420,17 +436,17 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
 
     for (CORBA::ULong i = 0; i < num_removed_readers; i++)
     {
-      id_to_handle_map_.erase(readers[i]);
+      id_to_handle_map_.erase(updated_readers[i]);
     }
   }
 
-  this->publisher_servant_->remove_associations (readers, this->publication_id_);
+  this->publisher_servant_->remove_associations (updated_readers, this->publication_id_);
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
   // subscription lost.
   if (notify_lost)
     {
-      this->notify_publication_lost (readers);
+      this->notify_publication_lost (updated_readers);
     }
 }
 

@@ -1,3 +1,25 @@
+Tue May 13 00:09:18 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed remove_association to not try to remove same writer/reader
+          multiple times.
+          Corrected the liveliness implementation to make consistent active
+          count and inactive count changes. The active count is increased when
+          writer became active and is decreased when it became dead from ACTIVE
+          state or remove_association is called. The inactive count is increased 
+          when the writer became dead from ACTIVE state and is decreased when
+          it became active from DEAD state or remove_association is called.
+           
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+
+          Corrected the test result verification based on current implementation.
+          
 Mon May 12 20:52:01 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/DCPS/McastListenerTest/Writer.cpp:
@@ -5,7 +27,7 @@ Mon May 12 20:52:01 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
         * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
         * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
 
-          Moved condition signal to the end of the Writer::svc function, to 
+          Moved condition signal to the end of the Writer::svc function, to
           avoid race condition.
 
 Mon May 12 19:02:53 UTC 2008  Ciju John  <johnc at ociweb dot com>

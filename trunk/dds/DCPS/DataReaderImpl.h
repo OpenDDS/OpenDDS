@@ -48,6 +48,8 @@ namespace OpenDDS
     /// Keeps track of a DataWriter's liveliness for a DataReader.
     class OpenDDS_Dcps_Export WriterInfo {
       public:
+        enum WriterState { NOT_SET, ALIVE, DEAD };
+
         WriterInfo (); // needed for maps
 
         WriterInfo (DataReaderImpl* reader,
@@ -64,14 +66,17 @@ namespace OpenDDS
         int received_activity (const ACE_Time_Value& when);
 
         /// returns 1 if the DataWriter is lively; otherwise returns 0.
-        int is_alive () { return is_alive_; };
+        WriterState get_state () { return state_; };
+
+        /// update liveliness when remove_association is called.
+        void removed ();
 
       private:
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
-        /// 1 if the DataWrite is "alive"
-        int is_alive_;
+        /// State of the writer. 
+        WriterState state_;
 
         /// The DataReader owning this WriterInfo
         DataReaderImpl* reader_;
@@ -151,12 +156,23 @@ namespace OpenDDS
                                 const void *arg);
 
     /// tell instances when a DataWriter transitions to being alive
+    /// The writer state is inout parameter, it has to be set ALIVE before 
+    /// handle_timeout is called since some subroutine use the state.
     void writer_became_alive (PublicationId         writer_id,
-                              const ACE_Time_Value& when);
+                              const ACE_Time_Value& when,
+                              WriterInfo::WriterState& state);
 
-    /// tell instances when a DataWriter transitions to NOT_ALIVE
+    /// tell instances when a DataWriter transitions to DEAD
+    /// The writer state is inout parameter, the state is set to DEAD
+    /// when it returns.
     void writer_became_dead (PublicationId         writer_id,
-                             const ACE_Time_Value& when);
+                             const ACE_Time_Value& when,
+                             WriterInfo::WriterState& state);
+
+    /// tell instance when a DataWriter is removed.
+    /// The liveliness status need update.
+    void writer_removed (PublicationId   writer_id,
+                         WriterInfo::WriterState& state);
 
     virtual int handle_close (ACE_HANDLE,
                               ACE_Reactor_Mask);
@@ -328,6 +344,7 @@ namespace OpenDDS
       void notify_subscription_reconnected (const WriterIdSeq& pubids);
       void notify_subscription_lost (const WriterIdSeq& pubids);
       void notify_connection_deleted ();
+      void notify_liveliness_change ();
 
       bool is_bit () const;
 
@@ -466,8 +483,15 @@ namespace OpenDDS
       /// The orb's reactor to be used to register the liveliness
       /// timer.
       ACE_Reactor*               reactor_;
+
       /// The time interval for checking liveliness.
+      /// TBD: Should this be initialized with 
+      ///      ::DDS::DURATION_INFINITY_SEC and ::DDS::DURATION_INFINITY_NSEC 
+      ///      instead of ACE_Time_Value::zero to be consistent with default 
+      ///      duration qos ? Or should we simply use the ACE_Time_Value::zero 
+      ///      to indicate the INFINITY duration ?
       ACE_Time_Value             liveliness_lease_duration_;
+
       /// liveliness timer id; -1 if no timer is set
       int liveliness_timer_id_;
 

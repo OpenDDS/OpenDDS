@@ -31,14 +31,16 @@ int
 OpenDDS::DCPS::WriterInfo::received_activity (const ACE_Time_Value& when)
 {
   last_liveliness_activity_time_ = when;
-  if (!is_alive_)
+  if (state_ != ALIVE) // NOT_SET || DEAD
     {
-      is_alive_ = 1;
-      reader_->writer_became_alive (writer_id_, when);
+      reader_->writer_became_alive (writer_id_, when, state_);
       return 0;
     }
   //TBD - is the "was alive" return value used?
   return 1;
 }
+
+
+ 
 
 
