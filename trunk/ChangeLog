@@ -1,18 +1,25 @@
+Wed May 14 20:14:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added ipv6 support feature and other features and bug fixes.
+
 Wed May 14 03:23:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
-        
-          - Fixed a problem that the re-established connection failed state 
-          check when send strategy resume send. The problem is an active 
-          disconnect due to the peer graceful disconnect did not terminate 
+
+          - Fixed a problem that the re-established connection failed state
+          check when send strategy resume send. The problem is an active
+          disconnect due to the peer graceful disconnect did not terminate
           send.
-          
-          - Added new method active_connect which is thread protected and 
-          moved non-thread protected version active_establishment() to be 
+
+          - Added new method active_connect which is thread protected and
+          moved non-thread protected version active_establishment() to be
           private. This would avoid the same connection connect multiple
-          times when add_associations() related to same datalink be handled 
+          times when add_associations() related to same datalink be handled
           simalteneously.
-           
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
           Replaced connection active_establishment() call with active_connect().
