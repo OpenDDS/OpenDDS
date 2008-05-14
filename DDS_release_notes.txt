@@ -2,7 +2,7 @@ Version 1.01 (??) of OpenDDS.
 
 New to this version are the following changes:
 
-- New command-line option "-TransportDebugLevel".
+- New command-line option "-DCPSTransportDebugLevel".
 
 - Add the ability to attach to multiple DCPSInfoRepo processes.
 
@@ -41,6 +41,41 @@ New to this version are the following changes:
 
   Fixed issue with reference counting for classes derived from 
   LocalObject.
+
+- Supported IPv6.
+
+  The requirement for using IPv6 is the FQDN needs be resolved as IPv6
+  address as it's used by default configuration to support BuiltInTopic.
+  
+  The local_address in the configuration file should use IPv6 decimal 
+  address or hostname that can be resolved as IPv6 address.
+
+- Used the address string instead of 4-byte IP address and port number
+  for pub/sub endpoint address advertisement. 
+  
+  The address string in the configuration can use decimal IPv4/IPv6 address
+  or hostname that can be resolved on both pub and sub sides.
+  
+  The default address string is 
+  "[fully qualified hostname]:[port]". The port is picked randomly by OS.
+  
+- Fixed problem that default local_address does not work when hostname 
+  is resolved as loopback ip address. 
+  
+  With the default local_address, the acceptor now is listening on IPv4/IPv6
+  ANY, but use the fully qualified hostname for address advertisement.
+
+- Added default configuration for reliable multicast.
+
+- Fixed a bug in DataReaderImpl::remove_associations() and 
+  DataWriterImpl::remove_associations() that should not attempt to remove 
+  the already removed writer/reader.
+  
+- Fixed a bug in SimpleTCP that an active disconnect due to the peer 
+  graceful disconnect does not terminate send. This bug made the re-established 
+  connection fail on send strategy state check.
+  
+- Added dispose() and unregister() notification.
 
 =========================================================================
 
