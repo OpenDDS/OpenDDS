@@ -494,9 +494,9 @@ OpenDDS::DCPS::SimpleTcpTransport::make_active_connection
   SimpleTcpConnection_rch connection = new SimpleTcpConnection();
 
   // Ask the connection object to attempt the active connection establishment.
-  if (connection->active_establishment(remote_address,
-                                       this->tcp_config_->local_address_,
-                                       this->tcp_config_) != 0)
+  if (connection->active_connect (remote_address,
+                                  this->tcp_config_->local_address_,
+                                  this->tcp_config_) != 0)
     {
       return -1;
     }
