@@ -115,39 +115,45 @@ $Pub3->Spawn ();
 $Pub4->Spawn ();
 
 
-$Pub1Result = $Pub1->WaitKill (1200);
+$wait_to_kill = 200;
+$Pub1Result = $Pub1->WaitKill ($wait_to_kill);
 if ($Pub1Result != 0) {
     print STDERR "ERROR: publisher 1 returned $Pub1Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub2Result = $Pub2->WaitKill (1200);
+$Pub2Result = $Pub2->WaitKill ($wait_to_kill);
 if ($Pub2Result != 0) {
     print STDERR "ERROR: publisher 2 returned $Pub2Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub3Result = $Pub3->WaitKill (1200);
+$Pub3Result = $Pub3->WaitKill ($wait_to_kill);
 if ($Pub3Result != 0) {
     print STDERR "ERROR: publisher 3 returned $Pub3Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Pub4Result = $Pub4->WaitKill (1200);
+$Pub4Result = $Pub4->WaitKill ($wait_to_kill);
 if ($Pub4Result != 0) {
     print STDERR "ERROR: publisher 4 returned $Pub4Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
 
-$Sub1Result = $Sub1->WaitKill (1200);
+$Sub1Result = $Sub1->WaitKill ($wait_to_kill);
 if ($Sub1Result != 0) {
     print STDERR "ERROR: subscriber 1 returned $Sub1Result\n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
@@ -156,6 +162,7 @@ $ir = $DCPSREPO->TerminateWaitKill(10);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 

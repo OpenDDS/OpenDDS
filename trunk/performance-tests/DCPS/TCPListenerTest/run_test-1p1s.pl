@@ -111,13 +111,15 @@ $Publisher->Spawn ();
 
 $Subscriber->Spawn ();
 
-$PublisherResult = $Publisher->WaitKill (1200);
+$wait_to_kill = 200;
+$PublisherResult = $Publisher->WaitKill ($wait_to_kill);
 
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
-$SubscriberResult = $Subscriber->WaitKill (1200);
+$SubscriberResult = $Subscriber->WaitKill ($wait_to_kill);
 
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
