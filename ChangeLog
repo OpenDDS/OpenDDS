@@ -1,3 +1,14 @@
+Thu May 15 16:33:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+
+          Made endpoint port to be randomly picked instead of a fixed
+          number. This avoids nightly build test failure because the port
+          may be used by other tests.
+
 Thu May 15 14:52:24 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
