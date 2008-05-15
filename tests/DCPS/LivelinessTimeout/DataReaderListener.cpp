@@ -60,7 +60,9 @@ void DataReaderListenerImpl::on_liveliness_changed (
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
-    if(status.active_count_change < 0)
+    // if we have gone from active to inactive, then we missed a deadline
+    if((status.active_count_change < 0) &&
+       (status.inactive_count_change > 0))
     {
       ++deadline_missed_;
     }

@@ -1,3 +1,17 @@
+Thu May 15 14:52:24 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+
+          Reduced the time it takes to complete test on a failure.
+
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+
+          Fixed to only count publishers that went from active to inactive
+          as missed.
+
 Thu May 15 06:59:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
