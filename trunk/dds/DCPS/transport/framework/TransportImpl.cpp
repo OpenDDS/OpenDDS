@@ -43,11 +43,6 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 
   clear(dw_map_);
   clear(dr_map_);
-
-  // The DL Cleanup task belongs to the Transportimpl object.
-  // Cleanup before leaving the house.
-  this->dl_clean_task_.close (1);
-  this->dl_clean_task_.wait ();
 }
 
 
@@ -99,6 +94,9 @@ OpenDDS::DCPS::TransportImpl::shutdown()
     GuardType guard(this->lock_);
     this->reactor_task_ = 0;
   }
+
+  // Stop datalink clean task.
+  this->dl_clean_task_.close (1);
 }
 
 

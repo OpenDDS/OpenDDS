@@ -1,3 +1,11 @@
+Thu May 15 06:59:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Moved the DataLinkCleanupTask close to shutdown() instead of in
+          destructor. This makes the thread exit upon shutdown and not impacted
+          by whether the TransportImpl destructor is called or not.
+
 Wed May 14 20:14:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DDS_release_notes.txt:
