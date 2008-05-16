@@ -1,6 +1,49 @@
-Version 1.01 (??) of OpenDDS.
+        Version 1.01 (??) of OpenDDS.
 
 New to this version are the following changes:
+
+- Added support for PARTITION QoS policy.
+
+  This QoS policy allows publishers and subscribers to belong to one
+  or more logical partitions.  Partition names may contain wildcards.
+  However, only wildcards containing "*" or "?" are currently
+  supported.
+
+- Added support for DEADLINE QoS policy.
+
+  The DEADLINE QoS policy allows the application to detect when data
+  is not written or read within a specified amount of time.
+
+- Added support for LIFESPAN QoS policy.  **** FIXES PENDING ****
+
+  This policy allows the application to specify when data expires,
+  meaning invalid.
+
+- Added support for the TRANSIENT kind of DURABILITY QoS policy.
+  **** FIXES PENDING ****
+
+  Unsent data will outlive DataWriters when TRANSIENT DURABILITY is
+  configured, and will be sent once a new DataWriter is created within
+  the same domain for the same topic and type.  Remaining unsent data
+  cached data will be discarded when the corresponding publisher is
+  destroyed.
+
+- Added support for the PERSISTENT kind of DURABILITY QoS policy.
+  **** FIXES PENDING ****
+
+  PERSISTENT DURABILITY provides basically the same functionality as
+  TRANSIENT DURABILITY, except that unsent cached data will survive
+  publisher and process destruction.
+
+
+- Added support for the DURABILITY_SERVICE QoS policy.
+  **** FIXES PENDING ****
+
+  This QoS policy provides a way to specify resource limits for
+  domain/topic/type-specific unsent data in a TRANSIENT or PERSISTENT
+  DURABILITY cache.  The resource limits in question are analogous to,
+  although independent of, those found in the HISTORY and
+  RESOURCE_LIMITS policies.
 
 - New command-line option "-TransportDebugLevel".
 
