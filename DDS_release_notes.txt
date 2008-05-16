@@ -1,4 +1,4 @@
-Version 1.01 (??) of OpenDDS.
+Version 1.1 of OpenDDS.
 
 New to this version are the following changes:
 
