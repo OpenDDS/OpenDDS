@@ -1,8 +1,14 @@
+Mon May 19 22:23:58 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Made listener address use ACE_IPV6_LOCALHOST for IPv6 build.
+          
 Mon May 19 21:55:23 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
-        
-          Fixed a bug in add_associations() that called 
+
+          Fixed a bug in add_associations() that called
           subscriber_servant_->add_associations() twice.
 
 Mon May 19 20:04:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>

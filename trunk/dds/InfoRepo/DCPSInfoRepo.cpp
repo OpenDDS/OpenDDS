@@ -74,7 +74,11 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
     , use_bits_ (true)
     , resurrect_ (true)
 {
+#ifdef ACE_HAS_IPV6
+  listen_address_str_ = ACE_IPV6_LOCALHOST;
+#else
   listen_address_str_ = ACE_LOCALHOST;
+#endif
   listen_address_str_ += ACE_TEXT(":2839");
 
   init (argc, argv);
