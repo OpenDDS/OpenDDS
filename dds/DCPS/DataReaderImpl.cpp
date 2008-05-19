@@ -249,10 +249,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     // Built-In Topic support and telling the listener.
     this->subscriber_servant_->add_associations(writers, this, qos_) ;
 
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    this->subscriber_servant_->add_associations(writers, this, qos_) ;
-
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
     {
       // this call will start the timer if it is not already set
