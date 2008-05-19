@@ -1,3 +1,10 @@
+Mon May 19 21:55:23 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        
+          Fixed a bug in add_associations() that called 
+          subscriber_servant_->add_associations() twice.
+
 Mon May 19 20:04:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         Merge of RT11951 branch to trunk.  Full ChangeLog entries in
