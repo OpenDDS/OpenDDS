@@ -32,6 +32,7 @@
 #include /**/ "ace/Map_Manager.h"
 #include /**/ "ace/Null_Mutex.h"
 
+#include <map> // For the TopicId --> Topic lookup.
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -105,6 +106,9 @@ public:
   /// Returns OpenDDS::DCPS::FOUND if exists and topic is changed, -1 otherwise
   OpenDDS::DCPS::TopicStatus find_topic(const char * topicName,
                                     DCPS_IR_Topic*& topic);
+
+  /// Find a topic object reference using the topic Id value.
+  DCPS_IR_Topic* find_topic( const OpenDDS::DCPS::RepoId id);
 
   /// Remove the topic
   /// The topic has been deleted if returns successful
@@ -204,6 +208,11 @@ private:
   /// all the topics
   DCPS_IR_Topic_Description_Set topicDescriptions_;
 
+  /// Mapping from RepoId values to Topic object references.
+  typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Topic*> IdToTopicMap;
+
+  /// Actual mapping of Id values to Topic object references.
+  IdToTopicMap idToTopicMap_;
 
   /// indicates if the BuiltIn Topics are enabled
   bool useBIT_;

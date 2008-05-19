@@ -126,7 +126,6 @@ namespace OpenDDS
                         this->participants_protector_,
                         ::DDS::DomainParticipant::_nil ());
 
-
       // the Pair will also act as a guard against leaking the
       // new DomainParticipantImpl (NO_DUP, so this takes over mem)
       Participant_Pair pair (dp, dp_obj, NO_DUP);

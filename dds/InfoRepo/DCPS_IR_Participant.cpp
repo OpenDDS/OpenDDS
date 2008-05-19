@@ -34,7 +34,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Subscription_Map::ITERATOR end = subscriptions_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
 
@@ -43,7 +43,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
           subscription = (*iter).int_id_;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: Removing subscription id %d that was still held!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: Removing subscription id %d that was still held!\n"),
                      subscription->get_id()
                      ));
           remove_subscription(subscription->get_id());
@@ -57,7 +57,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Publication_Map::ITERATOR end = publications_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
 
@@ -66,7 +66,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
           publication = (*iter).int_id_;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: Removing publication id %d that was still held!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: Removing publication id %d that was still held!\n"),
                      publication->get_id()
                      ));
           remove_publication(publication->get_id());
@@ -80,7 +80,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
       DCPS_IR_Topic_Map::ITERATOR end = topicRefs_.end();
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
                  ACE_TEXT("domain %d  id  %d\n"),
                  domain_, id_ ));
 
@@ -89,7 +89,7 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
           topicId = (*iter).ext_id_;
           ++iter;
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("\tERROR: Topic id %d still held!\n"),
+                     ACE_TEXT("(%P|%t) \tERROR: Topic id %d still held!\n"),
                      topicId
                      ));
         }
@@ -116,12 +116,12 @@ int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_publication ")
         ACE_TEXT("Attempted to add existing publication id %d\n"),
         pubId));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_publication ")
         ACE_TEXT("Unknown error while adding publication id %d\n"),
         pubId));
     };
@@ -169,7 +169,7 @@ int DCPS_IR_Participant::remove_publication (long pubId)
       status = pub->remove_associations(dont_notify_lost);
       if (0 != status)
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_publication ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication ")
           ACE_TEXT("Error removing associations from publication id: %d\n"),
           pubId));
         return status;
@@ -189,7 +189,7 @@ int DCPS_IR_Participant::remove_publication (long pubId)
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_publication ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication ")
         ACE_TEXT("Error removing publication %X id: %d\n"),
         pub, pubId));
     } // if (0 == status)
@@ -215,12 +215,12 @@ int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_subscription ")
         ACE_TEXT("Attempted to add existing subscription id %d\n"),
         subId));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_subscription ")
         ACE_TEXT("Unknown error while adding subscription id %d\n"),
         subId));
     };
@@ -267,7 +267,7 @@ int DCPS_IR_Participant::remove_subscription (long subId)
       status = sub->remove_associations(dont_notify_lost);
       if (0 != status)
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_subscription ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription ")
           ACE_TEXT("Error removing all associations for subscription id: %d\n"),
           subId));
         return status;
@@ -287,7 +287,7 @@ int DCPS_IR_Participant::remove_subscription (long subId)
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_subscription ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription ")
         ACE_TEXT("Error removing subscription %X id: %d\n"),
         sub, subId));
     } // if (0 == status)
@@ -312,12 +312,12 @@ int DCPS_IR_Participant::add_topic_reference (DCPS_IR_Topic* topic)
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_topic_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_topic_reference ")
         ACE_TEXT("Attempted to add existing topic reference id %d\n"),
         topicId));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::add_topic_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_topic_reference ")
         ACE_TEXT("Unknown error while adding topic reference id %d\n"),
         topicId));
     };
@@ -342,7 +342,7 @@ int DCPS_IR_Participant::remove_topic_reference (long topicId,
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::remove_topic_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_topic_reference ")
         ACE_TEXT("Error removing topic reference %X id: %d\n"),
         topic, topicId));
     } // if (0 == status)
@@ -367,7 +367,7 @@ int DCPS_IR_Participant::find_topic_reference (long topicId,
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Participant::find_topic_reference ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_topic_reference ")
         ACE_TEXT("Error finding topic reference %X id: %d\n"),
         topic, topicId));
     } // if (0 == status)

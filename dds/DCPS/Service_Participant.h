@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
-#define TAO_DDS_DCPS_SERVICE_PARTICIPANT_H
+#ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
+#define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureS.h"
@@ -12,14 +12,12 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
-#include "tao/PortableServer/Root_POA.h"
+#include "tao/PortableServer/PortableServer.h"
 
 #include "ace/Task.h"
-#include "ace/Auto_Ptr.h"
 #include "ace/Configuration.h"
 
 #include <map>
-#include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -68,6 +66,9 @@ namespace OpenDDS
 
       /** Constructor **/
       Service_Participant ();
+
+      /// Destructor.
+      ~Service_Participant ();
 
       /// Return a singleton instance of this class.
       static Service_Participant * instance (void);
@@ -119,6 +120,7 @@ namespace OpenDDS
       ::DDS::TransportPriorityQosPolicy      initial_TransportPriorityQosPolicy () const;
       ::DDS::LifespanQosPolicy               initial_LifespanQosPolicy () const;
       ::DDS::DurabilityQosPolicy             initial_DurabilityQosPolicy () const;
+      ::DDS::DurabilityServiceQosPolicy      initial_DurabilityServiceQosPolicy () const;
       ::DDS::PresentationQosPolicy           initial_PresentationQosPolicy () const;
       ::DDS::DeadlineQosPolicy               initial_DeadlineQosPolicy () const;
       ::DDS::LatencyBudgetQosPolicy          initial_LatencyBudgetQosPolicy () const;
@@ -173,7 +175,12 @@ namespace OpenDDS
       /**
        * Load DCPSInfoRepo IORs.
        */
-      void set_repo_ior( const ACE_TCHAR* ior, const RepoKey repo = DEFAULT_REPO);
+      void set_repo_ior( const ACE_TCHAR* ior, const RepoKey key = DEFAULT_REPO);
+
+      /**
+       * Load DCPSInfoRepo reference directly.
+       */
+      void set_repo( DCPSInfo_ptr repo, const RepoKey key = DEFAULT_REPO);
 
       /**
        * Bind DCPSInfoRepo IORs to domains.
@@ -252,6 +259,8 @@ namespace OpenDDS
        */
       int load_repo_configuration ();
 
+    public:
+
       /// The orb object reference which can be provided by client or initialized
       /// by this sigleton.
       CORBA::ORB_var orb_;
@@ -290,6 +299,7 @@ namespace OpenDDS
       ::DDS::TransportPriorityQosPolicy      initial_TransportPriorityQosPolicy_;
       ::DDS::LifespanQosPolicy               initial_LifespanQosPolicy_;
       ::DDS::DurabilityQosPolicy             initial_DurabilityQosPolicy_;
+      ::DDS::DurabilityServiceQosPolicy      initial_DurabilityServiceQosPolicy_;
       ::DDS::PresentationQosPolicy           initial_PresentationQosPolicy_;
       ::DDS::DeadlineQosPolicy               initial_DeadlineQosPolicy_;
       ::DDS::LatencyBudgetQosPolicy          initial_LatencyBudgetQosPolicy_;
@@ -348,13 +358,14 @@ namespace OpenDDS
 
       /// The configuration object that imports the configuration file.
       ACE_Configuration_Heap cf_;
+
     };
 
-    #define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()
+#   define TheServiceParticipant                     OpenDDS::DCPS::Service_Participant::instance()
 
-    #define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
+#   define TheParticipantFactory                     TheServiceParticipant->get_domain_participant_factory()
 
-    #define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
+#   define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
 
     /// Get a servant pointer given an object reference.
     /// @throws PortableServer::POA::OjbectNotActive,

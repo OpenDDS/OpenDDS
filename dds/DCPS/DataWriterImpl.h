@@ -21,6 +21,7 @@
 #include "ace/Event_Handler.h"
 
 #include <map>
+#include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,6 +35,7 @@ namespace OpenDDS
   {
     class PublisherImpl;
     class DomainParticipantImpl;
+    class OfferedDeadlineWatchdog;
 
     /**
     * @class DataWriterImpl
@@ -319,6 +321,11 @@ namespace OpenDDS
     const char* get_topic_name ();
 
     /**
+     * Get associated topic type name.
+     */
+    char const * get_type_name () const;
+
+    /**
     * This method is called when there is no more space in the
     * instance sample list for a non-blocking write. It requests
     * the transport to drop the oldest sample.
@@ -407,6 +414,18 @@ namespace OpenDDS
       size_t                  num_remote_associations,
       const AssociationData*  remote_associations);
 
+      /** This method create a header message block and chain with
+      * the sample data. The header contains the information
+      * needed. e.g. message id, length of whole message...
+      * The fast allocator is used to allocate the message block,
+      * data block and header.
+      */
+      ::DDS::ReturnCode_t
+      create_sample_data_message (DataSample* data,
+                                  ::DDS::InstanceHandle_t instance_handle,
+                                  ACE_Message_Block*& message,
+                                  const ::DDS::Time_t& source_timestamp);
+
   protected:
 
     /**
@@ -445,18 +464,6 @@ namespace OpenDDS
                               ACE_Message_Block* data,
                               const ::DDS::Time_t& source_timestamp);
 
-      /** This method create a header message block and chain with
-      * the sample data. The header contains the information
-      * needed. e.g. message id, length of whole message...
-      * The fast allocator is used to allocate the message block,
-      * data block and header.
-      */
-      ::DDS::ReturnCode_t
-      create_sample_data_message (DataSample* data,
-                                  ::DDS::InstanceHandle_t instance_handle,
-                                  ACE_Message_Block*& message,
-                                  const ::DDS::Time_t& source_timestamp);
-
       /// Send the liveliness message.
       void send_liveliness (const ACE_Time_Value& now);
 
@@ -473,6 +480,8 @@ namespace OpenDDS
 
       /// The name of associated topic.
       CORBA::String_var               topic_name_;
+      /// The type name of associated topic.
+      CORBA::String_var               type_name_;
       /// The associated topic repository id.
       RepoId                          topic_id_;
       /// The object reference of the associated topic.
@@ -547,6 +556,12 @@ namespace OpenDDS
       ACE_Time_Value             liveliness_check_interval_;
       /// Timestamp of last write/dispose/assert_liveliness.
       ACE_Time_Value             last_liveliness_activity_time_;
+      /// Total number of offered deadlines missed during last offered
+      /// deadline status check.
+      CORBA::Long last_deadline_missed_total_count_;
+      /// Watchdog responsible for reporting missed offered
+      /// deadlines.
+      std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
       /// The flag indicates whether the liveliness timer is scheduled and
       /// needs be cancelled.
       bool                       cancel_timer_;

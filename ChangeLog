@@ -1,3 +1,125 @@
+Mon May 19 20:04:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        Merge of RT11951 branch to trunk.  Full ChangeLog entries in
+        history/ChangeLog-RT1151.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WatchdogTimer.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * docs/design/deadline.txt:
+        * docs/design/durability.txt:
+        * docs/design/federation.txt:
+        * docs/design/lifespan.txt:
+        * docs/design/partition.txt:
+        * history/ChangeLog-RT11951:
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Publisher.h:
+        * tests/DCPS/Federation/README:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/Subscriber.h:
+        * tests/DCPS/Federation/TestConfig.cpp:
+        * tests/DCPS/Federation/TestConfig.h:
+        * tests/DCPS/Federation/TestException.h:
+        * tests/DCPS/Federation/domain1_ids:
+        * tests/DCPS/Federation/domain2_ids:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/Federation:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/Messenger.idl:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/Writer.h:
+        * tests/DCPS/NotifyTest/domain_ids:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/tcp.conf:
+        * tests/DCPS/NotifyTest:
+        * tests/DCPS/README:
+
+          Newly added files.
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with RT11951 branch-specific items.
+
+        * AUTHORS:
+        * LICENSE:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/BuiltInTopicUtils.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataBlockLockPool.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/Marked_Default_Qos.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/InfoRepo/ArrDelAdapter.h:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+        * docs/DomainRepoConfig.html:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+
+          Files modified in RT11951 branch.
+
 Fri May 16 11:45:42 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * DDS_release_notes.txt:

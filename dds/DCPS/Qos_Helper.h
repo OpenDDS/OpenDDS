@@ -10,6 +10,15 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#if defined (ACE_MAJOR_VERSION)                                 \
+  && (ACE_MAJOR_VERSION > 5                                     \
+      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
+      || (ACE_MAJOR_VERSION == 5                                \
+          && ACE_MINOR_VERSION == 5                             \
+          && ACE_BETA_VERSION > 3))
+# include "ace/Truncate.h"
+#endif  /* ACE >= 5.5.4 */
+
 // Define a macro since we should NOT declare methods as extern and
 // then define them as inline
 #if defined(__ACE_INLINE__)
@@ -36,6 +45,11 @@ namespace OpenDDS
     EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     ::DDS::Duration_t time_value_to_duration (const ACE_Time_Value& tv);
 
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+    CORBA::Long get_instance_sample_list_depth (
+      ::DDS::HistoryQosPolicyKind history,
+      long                        history_depth,
+      long                        max_samples_per_instance);
 
     /**
     * This class implements methods that verify whether a qos is
@@ -77,17 +91,17 @@ namespace OpenDDS
     {
     public:
 
-      static bool consistent (const ::DDS::DomainParticipantQos& qos) ;
+      static bool consistent (const ::DDS::DomainParticipantQos& qos);
 
-      static bool consistent (const ::DDS::TopicQos            & qos) ;
+      static bool consistent (const ::DDS::TopicQos            & qos);
 
-      static bool consistent (const ::DDS::DataWriterQos       & qos) ;
+      static bool consistent (const ::DDS::DataWriterQos       & qos);
 
-      static bool consistent (const ::DDS::PublisherQos        & qos) ;
+      static bool consistent (const ::DDS::PublisherQos        & qos);
 
-      static bool consistent (const ::DDS::DataReaderQos       & qos) ;
+      static bool consistent (const ::DDS::DataReaderQos       & qos);
 
-      static bool consistent (const ::DDS::SubscriberQos       & qos) ;
+      static bool consistent (const ::DDS::SubscriberQos       & qos);
 
       static bool valid (const ::DDS::UserDataQosPolicy& qos);
 
@@ -231,17 +245,49 @@ namespace OpenDDS
 
     };
 
+    // Convenience function to avoid introducing preprocessor
+    // conditionals in more than one place.
+    template<typename TO, typename FROM>
+    inline TO truncate_cast (FROM val)
+    {
+#if defined (ACE_MAJOR_VERSION)
+# if (ACE_MAJOR_VERSION > 5                                     \
+      || (ACE_MAJOR_VERSION == 5 && ACE_MINOR_VERSION > 5)      \
+      || (ACE_MAJOR_VERSION == 5                                \
+          && ACE_MINOR_VERSION == 5                             \
+          && ACE_BETA_VERSION > 6))
+      // ACE_Utils::truncate_cast<> is only supported in ACE 5.5.7 or
+      // better.
+      return ACE_Utils::truncate_cast<TO> (val);
+# elif (ACE_MAJOR_VERSION == 5     \
+        && ACE_MINOR_VERSION == 5  \
+        && ACE_BETA_VERSION > 3)
+      // ACE_Utils::Truncate<> is only supported between ACE 5.5.4 and
+      // 5.5.6.
+      return ACE_Utils::Truncate<TO> (val);
+# else
+      // We're SoL.  Ideally, ACE_Utils::truncate_cast<> should be
+      // backported to both TAO 1.4a and TAO 1.5a to avoid the need
+      // for this convenience function altogether.
+      return static_cast<TO> (val);
+# endif
+#else
+      // We're SoL.  See above.
+      return static_cast<TO> (val);
+#endif
+    }
+
   } // namespace DCPS
 } // namespace OpenDDS
 
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export 
 bool operator== (const ::DDS::Duration_t& t1, 
-                const ::DDS::Duration_t& t2);
+		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator < (const ::DDS::Duration_t& t1, 
-                  const ::DDS::Duration_t& t2);
+		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator <= (const ::DDS::Duration_t& t1, 
