@@ -232,5 +232,113 @@ namespace OpenDDS
         }
      }
 
+    // -----------------------------------------------
+
+    DataSampleListIterator::DataSampleListIterator()
+      : head_ (0)
+      , tail_ (0)
+      , current_ (0)
+    {
+    }
+
+    DataSampleListIterator::DataSampleListIterator(
+      DataSampleListElement* head,
+      DataSampleListElement* tail,
+      DataSampleListElement* current)
+      : head_ (head)
+      , tail_ (tail)
+      , current_ (current)
+    {
+    }
+
+    DataSampleListIterator::DataSampleListIterator(
+      DataSampleListIterator const & rhs)
+      : head_ (rhs.head_)
+      , tail_ (rhs.tail_)
+      , current_ (rhs.current_)
+    {
+    }
+
+    DataSampleListIterator&
+    DataSampleListIterator::operator=(DataSampleListIterator const & rhs)
+    {
+      this->head_ = rhs.head_;
+      this->tail_ = rhs.tail_;
+      this->current_ = rhs.current_;
+
+      return *this;
+    }
+
+    bool
+    DataSampleListIterator::operator==(DataSampleListIterator& rhs) const
+    {
+      return
+        this->head_ == rhs.head_
+        && this->tail_ == rhs.tail_
+        && this->current_ == rhs.current_;
+    }
+
+    bool
+    DataSampleListIterator::operator!=(DataSampleListIterator& rhs) const
+    {
+      return
+        this->head_ != rhs.head_
+        || this->tail_ != rhs.tail_
+        || this->current_ != rhs.current_;
+    }
+
+    DataSampleListIterator&
+    DataSampleListIterator::operator++()
+    {
+      if (this->current_)
+        this->current_ = this->current_->next_send_sample_;
+
+      return *this;
+    }
+
+    DataSampleListIterator
+    DataSampleListIterator::operator++(int)
+    {
+      DataSampleListIterator tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+
+    DataSampleListIterator&
+    DataSampleListIterator::operator--()
+    {
+      if (this->current_)
+        this->current_ = this->current_->previous_send_sample_;
+      else
+        this->current_ = this->tail_;
+
+      return *this;
+    }
+
+    DataSampleListIterator
+    DataSampleListIterator::operator--(int)
+    {
+      DataSampleListIterator tmp(*this);
+      --(*this);
+      return tmp;
+    }
+
+    DataSampleListIterator::reference
+    DataSampleListIterator::operator*()
+    {
+      // Hopefully folks will be smart enough to not dereference a
+      // null iterator.  Such a case should only exist for an "end"
+      // iterator.  Otherwise we may want to throw an exception here.
+      // assert (this->current_ != 0);
+
+      return *(this->current_);
+    }
+
+    DataSampleListIterator::pointer
+    DataSampleListIterator::operator->()
+    {
+      return this->current_;
+    }
+
   }
 }

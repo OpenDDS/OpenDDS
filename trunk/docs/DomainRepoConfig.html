@@ -96,12 +96,22 @@ or domain sections within a single configuration file.
 </p>
 
 <p>
-Repository subsections require 2, and only 2, key/value pairs to be
-specified within each subsection.  The keys to specify values for
+Repository subsections require at least 2 key/value pairs to be
+specified within each subsection.  The required keys to specify values for
 are <strong>RepositoryIor</strong> and <strong>RepositoryKey</strong>.
 The <strong>RepositoryKey</strong> values must be unique for each
 repository within the entire configuration file.  They also must not be
 reused for a different repository through the use of the API.
+</p>
+
+<p>
+Optional key/value pairs that may be specified in a repository subsection
+are the <strong>DCPSBitTransportIPAddress</strong> and
+<strong>DCPSBitTransportPort</strong> keys.  These are identical to the
+existing keys for the common subsection but specify the address and port
+to be bound by the transport used for the instant repository.  When these
+key values are used in the common subsection, they specify the values to
+be bound to the transport used for the default repository.
 </p>
 
 <p>
@@ -129,13 +139,23 @@ will be honored.
 <caption><strong>Multiple repository configuration sections</strong></caption>
 <tr><th>(Sub)section</th><th>Key</th><th width="40%">Value</th><th>Default</th></tr>
 <tr>
-  <td>[common]</td>
+  <td rowspan="3">[common]</td>
   <td>DCPSInfoRepo</td>
   <td>IOR locating the default repository.</td>
   <td>file://repo.ior</td>
 </tr>
 <tr>
-  <td rowspan="2">[repository/&lt;NAME&gt;]</td>
+  <td>DCPSBitTransportIPAddress</td>
+  <td>IP Address to bind to transport for connection used by the Builtin Topics for the default repository.</td>
+  <td>localhost</td>
+</tr>
+<tr>
+  <td>DCPSBitTransportPort</td>
+  <td>Port to bind to transport for connection used by the Builtin Topics for the default repository.</td>
+  <td>IN_ADDR_ANY</td>
+</tr>
+<tr>
+  <td rowspan="4">[repository/&lt;NAME&gt;]</td>
   <td>RepositoryIor</td>
   <td>IOR locating the repository.</td>
   <td>none</td>
@@ -144,6 +164,16 @@ will be honored.
   <td>RepositoryKey</td>
   <td>Unique key value for the repository.</td>
   <td>none</td>
+</tr>
+<tr>
+  <td>DCPSBitTransportIPAddress</td>
+  <td>IP Address to bind to transport for connection used by the Builtin Topics for this repository.</td>
+  <td>localhost</td>
+</tr>
+<tr>
+  <td>DCPSBitTransportPort</td>
+  <td>Port to bind to transport for connection used by the Builtin Topics for this repository.</td>
+  <td>IN_ADDR_ANY</td>
 </tr>
 <tr>
   <td rowspan="2">[domain/&lt;NAME&gt;]</td>

@@ -258,6 +258,7 @@ module DDS {
     const string GROUPDATA_QOS_POLICY_NAME           = "GroupData";
     const string TRANSPORTPRIORITY_QOS_POLICY_NAME   = "TransportPriority";
     const string LIFESPAN_QOS_POLICY_NAME            = "Lifespan";
+    const string DURABILITYSERVICE_POLICY_NAME       = "DurabilityService";
     const string TRANSPORTTYPE_QOS_POLICY_NAME       = "TransportType"; // TAO Specific
 
     const QosPolicyId_t USERDATA_QOS_POLICY_ID            = 1;
@@ -281,7 +282,8 @@ module DDS {
     const QosPolicyId_t GROUPDATA_QOS_POLICY_ID           = 19;
     const QosPolicyId_t TRANSPORTPRIORITY_QOS_POLICY_ID   = 20;
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
-    const QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID       = 22; // TAO specific
+    const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
+    const QosPolicyId_t TRANSPORTTYPE_QOS_POLICY_ID       = 23; // TAO specific
 
     struct UserDataQosPolicy {
 		sequence<octet> value;
@@ -414,6 +416,15 @@ module DDS {
 		Duration_t autopurge_nowriter_samples_delay;
 		};
 
+    struct DurabilityServiceQosPolicy {
+        Duration_t              service_cleanup_delay;
+        HistoryQosPolicyKind    history_kind;
+        long                    history_depth;
+        long                    max_samples;
+        long                    max_instances;
+        long                    max_samples_per_instance;
+    };
+
     struct DomainParticipantQos {
 		UserDataQosPolicy user_data;
 		EntityFactoryQosPolicy entity_factory;
@@ -422,6 +433,7 @@ module DDS {
     struct TopicQos {
 		TopicDataQosPolicy topic_data;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -436,6 +448,7 @@ module DDS {
 
     struct DataWriterQos {
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -501,6 +514,7 @@ module DDS {
 		string name;
 		string type_name;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -525,6 +539,7 @@ module DDS {
 		string topic_name;
 		string type_name;
 		DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
 		DeadlineQosPolicy deadline;
 		LatencyBudgetQosPolicy latency_budget;
 		LivelinessQosPolicy liveliness;
@@ -589,6 +604,8 @@ module DDS {
 		long sample_rank;
 		long generation_rank;
 		long absolute_generation_rank;
+    InstanceHandle_t publication_handle;
+    boolean valid_data;
 		};
 
     native SampleInfoSeq; // support zero-copy read

@@ -1,0 +1,711 @@
+
+Federated DDS InfoRepo objects.
+
+  This discussion assumes a familiarity with the OMG Data Distribution
+  Service as well as the OpenDDS implementation of that service.
+  Processes which incarnate objects that implement the OpenDDS InfoRepo
+  CORBA IDL interface are the subject of this discussion.  These
+  processes are considered as a repository in the following discussion.
+
+  Federating one or more repositories allows multiple, possibly
+  preexisting, DDS services to operate a single DDS service.  This allows
+  the possibility of joining existing services as well as providing a
+  mechanism to tolerate the failure of one or more repositories without
+  degradation of service.
+
+Context
+
+  For this discussion we assume applications using separate DDS services
+  provisioned by dedicated repositories.  Each application can be attached
+  to one or more repositories.  Today, each repository provides a service
+  segment for a disjoint set of (DDS defined) domains.  This means that
+  there is no interaction between the repositories required or allowed.
+  Federation of the repositories allows the separate services to operate
+  as a single DDS service.
+
+  Applications are constrained to obtain all information about any
+  individual DDS domain from a single repository.  This is required by
+  the current implementation allowing an application to attach to more
+  than a single repository.  What this means to applications is that
+  all service entities created for a domain must be obtained from the
+  same repository.  This does not limit the application functionally or
+  impede federation of repositories in any way.
+
+  Individual repositories are required to distinguishable within a
+  federation of repositories.  This is done through the use of a unique
+  repository identifier value.  This value must be unique among all
+  repositories that are to be federated at run time.  This is similar
+  to the problem of identifying interfaces, such as using a hardware
+  MAC address or a unique interface IP address.  The assignment and
+  management of these identifiers is beyond the scope of the federation
+  mechanism and is assumed for this purpose.  This implementation of
+  federation has chosen to identify repositories using a unique 32
+  bit Id value.  Any given repository Id value is expected to refer
+  to the same repository for the lifetime of that repository and any
+  federation that it is a part of.  That is repository Id values should
+  not be changed by any repository within its lifetime.  And a federation
+  should never reuse an Id value to identify a different repository.
+
+  *** If a repository is killed and restarted, is it appropriate to
+      assign the same Id value?
+
+Repositories
+
+  Each repository manages the service information for OpenDDS
+  Service_Participants which have attached to the repository.  This
+  information consists of Topic (and TopicDescription), Participant,
+  Publication and Subscription data, along with the transport connection
+  information for endpoints and established associations between
+  publications and subscriptions as well as policy information for
+  the entities.  This information is referenced by an internal Id value
+  generated within the repository.  This internal Id value is unique
+  only within a single repository and no attempt is made to synchronize
+  these values between repositories.  This value is also used within
+  the Service_Participants (within the applications) to manage active
+  associations between publications and subscriptions.
+
+  Any individual repository will be allowed to join a federation of
+  repositories (including a federation of a single other repository) at
+  any time and in any state.  The resulting federated repositories are
+  likely to have conflicting internal Id values referencing different
+  service entities.  That is an internal Id value may be the same in
+  two different repositories but may reference different objects, in
+  value as well as type, within the different repositories.  In order
+  to not require synchronization between repositories prior to them
+  becoming federated, entities are referenced within the federation of
+  repositories by a tuple that includes the unique repository Id as well
+  as the internal Id value.
+
+  This implementation has defined a FederatedId value that contains two
+  Long components, one of which contains the 32 bit unique repository Id
+  and the other which contains the 32 bit internal reference Id value.
+  A value of this FederatedId type is sufficient to identify each object
+  within a collection of repositories regardless of their federation state
+  as long as each repository has a unique repository Id.  The structure
+  of the FederatedId type allows easy identification of the originating
+  repository and the internal reference Id value within that repository.
+  This is useful for ownership and synchronization considerations.
+
+  Federated repositories contain information originating with themselves
+  as well as shared data that originated from other repositories.  Any
+  DDS service object will be created within a single repository, which
+  will retain ownership of the object, with the information and any
+  updates published to any federated repositories.
+
+  For most service entities: DomainParticipant, Publications and
+  Subscriptions, there will never be a valid reason for any application
+  other than the creating application from modifying the entity.
+  This means that for data other than Topic and TopicDescription data,
+  there will only ever be a single repository that will update the data.
+  This means that the FederatedId value of the entities are fixed for
+  their lifetime.  It also allows identification of the only repository
+  which is allowed to update the entities.
+
+  Topic and TopicDescription data presents an issue of how to synchronize
+  similar entities when joining a federation.  While this issue is
+  solvable, the initial implementation of federation does not require
+  this synchronization and has opted instead to constrain the original
+  creator of a Topic (and associated TopicDescription) to be updated by
+  the originating application only.
+
+  This leaves the case where the Topic and associated TopicDescription
+  are identical which needs to be handled.  This can occur when a
+  repository that has been associated looses connectivity to a federation
+  and then later rejoins.  In this case, both the data values and the
+  FederatedId value identifying the data will be identical and needs only
+  to be checked.  Federation will not be allowed for a new repository
+  attempting to join if this check fails.
+
+  In order to allow the ability of updating from any repository in the
+  future an ownership passing request/grant or a read-for-ownership
+  interface can be implemented.  This is not done in the initial
+  implementation.  All strategies for synchronizing data over
+  a distributed layer are time consuming and open to problems with
+  deadlock if resources are unreliable or become unavailable.  They are
+  discouraged for all but those applications requiring the capability
+  and willing to accept the cost of incorporating error recovery or
+  fault tolerance mechanisms.
+
+  Federation of repositories is implemented by adding a Federator object
+  to each repository process.  This Federator has a CORBA IDL interface
+  defined to allow other repositories to join and leave the federation
+  as well as its own DDS service publications of FederationTopics.  Note
+  that these FederationTopics are a superset of the DDS service defined
+  BuiltinTopics.  The BuiltinTopics are not sufficient to subscribe to
+  since they do not carry OpenDDS specific implementation data required
+  to correctly allow federated operation.  The transport interface data
+  associated with Publications and Subscriptions is an example of this
+  kind of data.
+
+  When a repository desires to join a federation, it locates an existing
+  repository within the federation and makes a remote call to it to
+  give the federation its own Federator interface IOR and then creates
+  a DomainParticipant for the DDS domain in which the FederationTopics
+  of the remote repository are published.  It then subscribes to the
+  remote repository FederationTopics.  When the remote repository is
+  processing the request to join the federation, it makes a call back to
+  the joining repository and attempts to join it as a separate federation.
+  The end result is that after the remote calls complete, each repository
+  now subscribes to the others FederationTopics and has a reference to
+  the control interface to make federation management calls with.
+
+Applications
+
+  Applications participate in a DDS service by attaching to one or more
+  repositories.  A repository retains information about all service
+  entities created within a domain which it manages for that application.
+  An application contains a Service_Participant which retains references
+  to all attached repositories and local service entities.  Each Publisher
+  and Subscriber entity within an application is associated with one (and
+  only one) transport object.  Each transport object manages connections
+  and associations between Publications and Subscriptions by tracking
+  them with the internal repository Id value discussed above.  This is
+  the source of the constraint on applications being required to create
+  all entities within a single domain from a single repository.
+
+  DataSamples are published and sent over transport mechanisms along
+  with additional information used by the DDS service in their delivery.
+  Part of the service information included in the sample message contains
+  a publication Id value.  This identifies the source of the DataSample.
+  This value must be unique within the set of possible publications.
+  With a federated set of repositories, this can include subscriptions
+  created by more than a single repository, which means that the full
+  FederatedId value described above is needed to identify the publication.
+  Since a transport needs to be able to place this FederatedId value into
+  a message, a translation from the available internal repository Id value
+  to the FederatedId value required in the message.  This translation
+  is done by looking up the mapping in a table within the application
+  managed remotely by the repository.
+
+  Since any transport will need to translate between its own internal
+  Id value to a FederatedId value, each repository attached to an
+  application will have manage a separate mapping.  These mappings are
+  located within the applications Service_Participant which is where the
+  multiple repository attachments are made as well.  Outbound messages
+  will have the FederatedId value added to them by the transport.
+  Incoming messages will have the received FederatedId value translated
+  back to the specific repository Id value within the transport as well.
+
+Communications
+
+  Communications between repositories which become federated is performed
+  through a combination of CORBA IDL interfaces and the publication and
+  subscription to federation information using the DDS service itself.
+  The interfaces are used to control the federation of the repositories.
+  They allow repositories to become connected and federated, unconnected,
+  and unfederated.
+
+  Data used to update internal entity information within each federated
+  repository is distributed by being published at the source of an update
+  and then republished by other repositories as they receive the update.
+  Data used to manage the distribution of the data through the federation
+  is published and republished as well.  All of the data published
+  and republished in this fashion is referred to as "FederationTopic"
+  data.  There are multiple FederationTopics, but when referred to as
+  a FederationTopic, the reference should be applied to each actual DDS
+  Topic individually.
+
+  Each repository may be federated with one or more other repositories.
+  It tracks all DataSamples that it receives by using a sequence number
+  unique to each repository in the federation.  If it has not seen the
+  request before, then it will republish the sample as well as process
+  it internally.  If it has seen the sample before, then it will take no
+  further action.  The sequence numbers generated by each repository are
+  incremented in a "lollipop" fashion to allow the federated repositories
+  to invalidate previous information if a repository with a given Id
+  value is restarted.
+
+  Repositories can be connected in an arbitrary fashion. The connectivity
+  changes as repositories join and leave the federation, One of the
+  FederationTopic topics includes link state information.  A link state
+  manager associated with each Federator object then uses this information
+  to develop a minimal spanning tree of the current topology each time
+  an update is received.  This information can then be used to reduce
+  subscriptions to the remaining FederationTopic data to only those on the
+  minimal spanning tree.  This reduces to a minimum the amount of data
+  passed through the mesh of connected repositories in order to update
+  service entity information.  The link state information subscriptions
+  can not be restricted by the topology since as connections appear and
+  disappear from the topology the minimal spanning tree will be changed;
+  meaning the link state data may need to traverse links not in the
+  previous tree.
+
+Implementation Details
+
+  The following sections describe in more detail the interfaces and data
+  required for the implementation of repository federation.
+
+RepoUpdater interface
+
+  An abstract repository update interface has been defined to localize
+  the features required to synchronize the data within the federated
+  repositories.  This interface has methods for each entity type to be
+  updated as well as an ownership passing mechanism.  This interface
+  needs to be implemented by the existing DCPSInfo objects in order
+  for them to participate in federated repository operation.  It is also
+  implemented by the Federator objects which allows the DCPSInfo objects
+  to pass local updates to the federation.
+
+  Update interfaces exist for Topic, DomainParticipant, Publication and
+  Subscription service entities.  Parameters to these calls include the
+  owner FederatedId value and an updated value.  The value type is unique
+  to each update to be made.  Transport information and QoS policy values
+  are updated along with the entities that they are associated with.
+  Domains and domain associations with entities are carried with the
+  individual entities being updated.
+
+  Ownership is passed from one repository to another through a
+  request/grant mechanism.  A repository that wishes to assert ownership
+  over an entity (in order to update it) needs to make a request for
+  ownership.  This is similar to a Read-For-Ownership operation in
+  other synchronization strategies.  The request is propagated through
+  the federated repositories until the current owner receives it.
+  If a determination is made to relinquish ownership, a grant is made
+  and propagated in a fashion similar to the request.  Ownership is
+  considered passed as soon as the current owner issues the grant.
+
+  Note that there are no race conditions since there can be only a
+  single owner and that owner will process only one call at a time.
+  If the first request is granted, any subsequent requests to that
+  owner are invalidated, even if they are already propagating within the
+  repositories.  If a request has been made and a grant relinquishing
+  ownership to a different repository is seen, then the request needs
+  to be reissued to the new owner.  While it is possible to imagine a
+  pathological scenario where a particular repository is never granted
+  ownership, any such scenario is unlikely in actual applications; it
+  would require at least three different applications constantly making
+  changes to a Topic or its description.
+
+  The request and grant requests have parameters with the old owning
+  repository FederatedId value, the new repository FederatedId value
+  and a call sequence id from the repository issuing the request or
+  grant.  It can be assumed by all repositories seeing (and possibly
+  propagating) these calls that a requests new repository name is that
+  of the originator of the request and that a grants old repository name
+  is that of the originator of the grant.
+
+Federator interface
+
+  A repository federation interface has been defined to localize the
+  features required to manage the federation process.  This interface
+  contains methods to allow adding and removing external repositories
+  from a federation as well as containing the local repository unique
+  Id value and a mapping for all externally owned objects to local
+  reference values.  A set of repository Id values for each repository
+  that has an Id mapping in the current repository is kept as well in
+  order to simplify adding and removing repositories from the federation.
+
+  There are methods to allow adding a repository to the federation and
+  removing a repository from the federation.  It is possible to remove a
+  connection (or have a connection dropped) without losing connectivity
+  to a repository since there may be redundant paths.  The ability to
+  remove a connection only is also provided.  Since adding a connection
+  to a repository will either add it to the federation or provide a
+  redundant path to the repository, no separate remote method is required
+  for adding a connection.  Processing will terminate after adding the
+  connection if the repository is already a member of the federation.
+
+  When adding a new repository to an already federated repository (a
+  federation of one, for the first federation), the added repository
+  calls the existing federated repository with the IORs of both the new
+  repository and its Federator interface.  This allows the federated
+  repository to add the new repository to its list of connections as well
+  as subscribe to the new repository's FederationTopics.  Once the call
+  to the federated repository has completed, the new repository then
+  subscribes to the FederationTopics of the federation.
+
+  Removing a repository from a federation may be performed cooperatively:
+  where communications allow calls and data to be passed between the
+  federated repositories and the repository(ies) being removed from
+  the federation.  It may also be performed independently: where
+  a communication link has failed and it is no longer possible to
+  communicate between the federated repositories and one or more
+  repositories that had previously been federated.  The processing
+  performed in both these scenarios is identical.
+
+  Note that there is only a difference of degree and not kind when
+  removing a single repository or separating two topologically separate
+  groups of repositories from federation.  The actions required by both
+  parties are the same in both cases.  In the discussion that follows,
+  the removal is spoken of as a single repository.  The operations and
+  sequencing is the same if there were an island of connected
+  repositories being removed.
+
+  To remove a repository(ies) from a federation, calls are made to the
+  Federator interfaces of the repositories attached to the federation.
+  For each call the communication link is dropped.  This means that the
+  subscribers on both sides of the association are deleted and the remote
+  references between the two repositories are removed.  This will result
+  in updated link state information flooding the federated repositories.
+
+  When the last connection between the federated repositories and the
+  repository being removed is detached, the link state manager will note
+  that there are unreachable repositories in the topology.  This triggers
+  the remainder of the removal operations.  All data in the federated
+  repository which is owned by repositories that have become unreachable
+  is removed.  Each repository in the federation will detect the same
+  topology change. This allows suppression of updates for the removal
+  of this data.
+
+  Topic and TopicDescription entities which are owned by an unreachable
+  repository are handled specially.  Since it is possible to have a Topic
+  used by entities which are not in the same repository, they persist
+  after the removal of the repository.  Ownership is passed automatically
+  to the repository which was the last to have a connection to the now
+  disconnected repository.  Note that when reconnecting to a repository,
+  the ability to match Topic and TopicDescription entities and deduce
+  ownership will be required.
+
+DataWriter and DataReader interface extensions
+
+  The DataWriterRemote and DataReaderRemote interfaces accessed by the
+  repositories are extended to implement the repository federation
+  as well.  They each have a method added that allows the Federator
+  object of a repository to add mapping information to the application.
+  This mapping information is necessary in order to generate the
+  correct publication Id in the data sample headers being sent and to
+  recognize the publication Id values in received data sample headers.
+  The values that are in the headers are the FederatedId values, which
+  need to be mapped to and from the internal repository id values used
+  by the service transport implementations.
+
+Repository objects
+
+  Federated repositories extend the DCPSInfo servant into a
+  FederatedRepo servant.  This is done to add the new RepoUpdate interface
+  methods that are called by the Federator servant.  The Federator servant
+  contains all logic required to allow multiple repositories to become
+  federated.  In the absence of any external federated repositories, this
+  object maintains mappings and pushes publication ids to the data writers
+  and readers.  This means that only publications and subscriptions
+  managed by this repository will be recognized.
+
+  The Federator object maintains an internal mapping for all objects in
+  the federated repositories, performing translations between the local
+  repository Id values and the full FederatedId values.
+
+Application objects
+
+  The Service_Participant within any application has a mapping added for
+  each repository which is attached to that Service_Participant.  The
+  mapping contains reference information for all known publications
+  within the federated repositories.  This is the information used to
+  translate to and from the publication Id values in the data sample
+  headers.  Since the internal repository Id values mapped are different
+  for each repository, a separate map for each attached repository is
+  required.
+
+************************************************************************
+*** Use Cases:
+
+A) Repository starts operation
+
+   This is essentially the previous mode of operation for the repository.
+   In addition, the Federator::Manager object is incarnated and its IOR
+   stored to the IORTable along with the DCPSInfoRepo interface IOR.
+
+   *********************************************************************
+   Scenario A.1) Standalone startup
+
+   This scenario consists of a repository starting up and initializing
+   its DCPSInfoRepo and Federator components so that federation can be
+   supported by the executing process.
+
+   *********************************************************************
+   Scenario A.2) Startup and federate
+
+   This scenario extends the previous one (A.1) by including the initial
+   federation with another repository.  The federation information is
+   provided on the command line and the federation process is the same as
+   that described in use case (B).  The command line argument consists of
+   an endpoint to reach the external repository to federate with.
+
+B) Repository joins a federation of (one or more) other repositories
+
+   This is the initial join operation where a repository receives
+   federation information and provides its internal information back to
+   the federation in return.  At the end of this processing, each
+   repository of the federation will contain the same information in
+   slightly different format.  Each repository will retain a mapping from
+   the federation scope identification of service Entities to its own
+   internal representation of these Entities.
+
+   *********************************************************************
+   Scenario B.1) Repository has no prior information from federation
+
+   This is the initial federation operation, where a repository that has
+   been operating standalone is given the endpoint of another repository
+   with which to federate.  It finds the DCPSInfoRepo and Federator
+   objects (in the IORTable) at that endpoint.
+
+   The external repository provides updates for information that it
+   contains and the federating repository provides its internal
+   information to the external repository.
+
+   *********************************************************************
+   Scenario B.2) Repository has prior information from federation
+
+   This is where a repository had participated in a federation of
+   repositories, left the federation and in this scenario is rejoining
+   the federation.  This includes validating that the residual
+   information from the previous participation in the federation does not
+   conflict with the current values.  It also includes updating new
+   information that was added to the repository as well as internal to
+   the federation while the repository was not participating in the
+   federation.
+
+   *********************************************************************
+   Scenario B.3) Repository is already member of federation
+
+   This is where an additional connection is added to a repository that
+   is already participating in the federation.  No new information is
+   exchanged when this connection is added.  The topology and possibly
+   the minimal spanning tree used to distribute updates within the
+   federation may be updated.  Sample numbers are used to prevent
+   updating repository information more than once.
+
+C) Repository removes a redundant connection
+
+   This is where a connection between repositories in the federation is
+   removed.  In this case, the connection is redundant in the sense that
+   the repositories at the ends of the connection still have a path over
+   which they can communicate, which means that the federation
+   information does not change.  The topology and the mechanisms to
+   transmit data updates will change according to the details of the
+   connection that was removed.
+
+   *********************************************************************
+   Scenario C.1) Topology minimum spanning tree unaffected
+
+   This scenario simply updates the topolgy information and removes
+   the connection from internal tables.  No change to the federation
+   information or its distribution is made.
+
+   *********************************************************************
+   Scenario C.2) Topology minumum spanning tree changed
+
+   This scenario extends the previous one (C.1) and results in a
+   change in the way updates are distributed within the federation.
+   Subscriptions to update information is changed from the previosu
+   minimum spanning tree links to the new ones.
+
+D) Repository removes an irredundant connection
+
+   This is where a connection between repositories in the federation is
+   removed.  In this case, the connection is the only path between the
+   repositories at its ends.  This results in the federation being split
+   into two separate sub-federations, where each of these may contain one
+   or more repositories of the original federation.  The federation
+   information within each new, separate, federation is affected as well
+   as changes to the topology.  Other than not being able to send updates
+   to over the removed connection, update data is trasmitted over the
+   same paths as before the connection was removed, since it was by
+   definition on the minumum spanning tree and its removal will not
+   affect the two sub-trees that are the minimal spanning trees of the
+   resulting sub-federations.
+
+   *********************************************************************
+   Scenario D.1) Repository becomes isolated from entire federation
+
+   This scenario is where a repository leaves a federation of
+   repositories.  The connection is removed as in scenario (C.1).  Since
+   the remaining repository federation will not have a change to the
+   minimum spanning tree, no other distribution changes are required.
+   The leaving repository will remove all internal references to service
+   Entities _other_ _than_ _Topics_ that are owned by other repositories.
+   The federation will remove references to all non-Topic Entity
+   references owned by the leaving repository.
+
+   *********************************************************************
+   Scenario D.2) Repository becomes isolated from portion of federation
+
+   This scenario is similar to the previous one (D.1) with the additional
+   behavior that both new groups of repositories that remain connected
+   are what is described for the remaining federated repositories in that
+   scenario.
+
+************************************************************************
+*** Scenarios:
+
+   *********************************************************************
+   Scenario A.1) Standalone startup
+
+   main():
+   1) DCPSInfoRepo instantiated, activated and IOR bound to IORTable.
+
+      [design: this is existing code]
+
+   2) Federator::Manager instantiated, activated and IOR bound to IORTAble.
+
+      a) Obtain federation Id value from command line
+
+   *********************************************************************
+   Scenario A.2) Startup and federate
+
+   main():
+   1) Initiate processing of scenario (A.1).
+
+   2) Initiate processing of (B.1) using endpoint supplied from command
+      line.
+
+   *********************************************************************
+   Scenario B.1) Repository has no prior information from federation
+
+   Federator::Manager::join_federation( endpoint):
+   1) resolve remote federator at corbaloc:iiop:endpoint/Federator
+
+   2) call remote Federator::Manager federatorId() and generate a new
+      <remote> domain value for this connection as its federation Id value
+
+      [rationale: a separate domain is required in order to attach two
+       separate repositories within the same Service_Participant.  This
+       is an artifact of the way multiple repositories are handled within
+       the Service_Participant]
+
+   3) call remote Federator::Manager join_federation( endpoint)
+
+      [rationale: this lets the federated repository add ourselves to
+       its federation]
+
+      [design: we need to mark ourselves as in process so that we can
+       return immediately when we are called back from the remote side
+       while still processing]
+
+      [dependency: this can be done at any point between here and where
+       we return.]
+
+   4) resolve remote repository at corbaloc:iiop:endpoint/DCPSInfoRepo
+
+   5) add remote repository to Service_Participant bound to <remote>
+      domain
+
+   6) add publication for update topics on <self> domain in
+      "<self>-<remote>" partition with DURABILITY==TRANSIENT_LOCAL
+
+   7) publish all internal Entities to new publication
+
+      [caveat: this may need to be delayed if DURABILITY does not hold
+       the data until a subscriber is associated]
+
+      [note: the choice to examine the internal storage or create a
+       separate storage for updates is yet to be made]
+
+   8) add publication for LinkState data on <remote> domain in
+      "<self>-<remote>" partition
+
+   9) publish (<self>,<remote>,ON,<sequence>) on all link state
+      publications in federator
+
+  10) subscribe to LinkState data on <remote> domain in "<remote>-<self>"
+      partition
+
+      [rationale: separate partitions are required in order to allow
+       different physical links or otherwise restricted connections to be
+       used within the same domains]
+
+  11) on_data_available( LinkState): update topology and determine new
+      minimum spanning tree
+
+      a) for each link removed from MST, unsubscribe from update topics
+         on that domain
+
+      b) for each link added to MST, subscribe to update topics on
+         that domain
+
+      c) for each repository that becomes unreachable, remove all
+         references to non-Topic Entities from that repository
+
+         [rationale: the Topic Entity references are left intact since
+          they may still be in use]
+
+         [design: calling delete on the publication and subscription
+          entities should result in the remove_associations being
+          forwarded to the Service_Participants involved]
+
+  12) on_data_available( Udpate*):
+
+      a) Find the set of <remote> repositories on the MST that does not
+         include the source of this sample and forward the sample to them
+
+      b) If this is an update for a new (to this repository) Entity:
+
+         i) Create new entity and obtain its <localId>
+
+        ii) Add mapping from (<remote>,<id>) to <localId>
+
+       iii) If the mapping is for a publication, call the
+            DataReaderRemote and DataWriterRemote add_mapping() method
+            on attached readers and writers
+
+            [design: this is simpler than adding an IDL interface to
+             each participant and calling just once per participant.
+             It is only necessary to add the mapping to each distinct
+             Service_Participant that is attached to the repository]
+
+      c) If this is an update for an existing Entity:
+
+         i) obtain <localId> for (<remote>,<id>) value
+
+        ii) update data for <localId>
+
+   *********************************************************************
+   Scenario B.2) Repository has prior information from federation
+
+   The processing for this scenario is identical to that of the previous
+   (B.1) scenario.  The difference is that when receiving data updates
+   for Topics, they will be handled as existing entities.  The update
+   processing for Topic data will therefore need to ensure validity of
+   the update.
+
+   *********************************************************************
+   Scenario B.3) Repository is already member of federation
+
+   The processing for this scenario is identical to the earlier (B.1)
+   scenario.  The difference is that no additional update topic data
+   will be distributed.  If some historical data is distributed, then it
+   will be ignored since it will already have been received and
+   processed.
+
+   *********************************************************************
+   Scenario C.1) Topology minimum spanning tree unaffected
+
+   Federator::Manager::remove_connection( remote):
+   1) delete subscriptions to update and link state topics in <remote>
+      domain
+
+   2) delete publications of update and link state topics in <self>
+      domain, "<self>-<remote>" partition
+
+   3) publish (<self>,<remote>,OFF,<sequence>) on all link state
+      publications in federator
+
+   *********************************************************************
+   Scenario C.2) Topology minumum spanning tree changed
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.
+
+   *********************************************************************
+   Scenario D.1) Repository becomes isolated from entire federation
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.  As
+   repositories become isolated, references to their owned entities are
+   removed from the repositories that can no longer reach the isolated
+   repository
+
+   *********************************************************************
+   Scenario D.2) Repository becomes isolated from portion of federation
+
+   The processing for this scenario is identical to that of the previous
+   (C.1) scenario.  The difference is that the MST change will be
+   detected and processed as described in scenario (B.1) step 11.  This
+   is where the LinkState topic listener processing is described.  As
+   repositories become isolated, references to their owned entities are
+   removed from the repositories that can no longer reach the isolated
+   repository
+

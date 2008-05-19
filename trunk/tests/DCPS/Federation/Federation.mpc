@@ -1,0 +1,27 @@
+project(*Publisher): dcpsexe_with_tcp {
+  exename   = publisher
+  libpaths += ../FooType5
+  libs     +=  DcpsFooType5
+  after    += DcpsFooType5
+
+  Source_Files {
+    publisher_main.cpp
+    Publisher.cpp
+    TestConfig.cpp
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename   = subscriber
+  libpaths += ../FooType5
+  libs     +=  DcpsFooType5
+  after    += DcpsFooType5
+
+  Source_Files {
+    subscriber_main.cpp
+    Subscriber.cpp
+    TestConfig.cpp
+    DataReaderListener.cpp
+  }
+}
+

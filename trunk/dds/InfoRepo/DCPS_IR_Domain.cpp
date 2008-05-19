@@ -39,7 +39,7 @@ DCPS_IR_Domain::~DCPS_IR_Domain()
 #if !defined (DDS_HAS_MINIMUM_BIT)
   if (0 != cleanup_built_in_topics() )
     {
-      ACE_ERROR((LM_ERROR, "ERROR: Failed to clean up the Built-In Topics!\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to clean up the Built-In Topics!\n"));
     }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
@@ -66,12 +66,12 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
         }
       break;
     case 1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_participant ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant ")
         ACE_TEXT("Domain %d failed to add already existing participant id %d\n"),
         id_, participantId));
       break;
     case -1:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_participant ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant ")
         ACE_TEXT("Domain %d Unknown error while adding participant id %d\n"),
         id_, participantId));
     };
@@ -112,14 +112,14 @@ int DCPS_IR_Domain::remove_participant(OpenDDS::DCPS::RepoId participantId,
         }
       else
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::remove_participant ")
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_participant ")
             ACE_TEXT("Domain %d Error removing participant %X id: %d\n"),
             id_, participant, participantId));
         } // if (0 == status)
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::remove_participant ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_participant ")
         ACE_TEXT("Domain %d Unable to find participant id: %d\n"),
         id_, participantId));
     } // if (0 == status)
@@ -260,12 +260,15 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId to
             }
           topicStatus = OpenDDS::DCPS::CREATED;
 
+          // Keep a reference to easily locate the topic by id.
+          this->idToTopicMap_[ topicId] = topic;
+
           // Publish the BIT information
           publish_topic_bit(topic);
         }
       else
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic ")
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic ")
             ACE_TEXT("Unable to add topic %X id %d to Domain Participant\n"),
             topic, topicId));
           topicStatus = OpenDDS::DCPS::NOT_FOUND;
@@ -276,7 +279,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId to
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic ")
         ACE_TEXT("Unable to add topic %X id %d to Topic Description\n"),
         topic, topicId));
       topicStatus = OpenDDS::DCPS::NOT_FOUND;
@@ -322,6 +325,16 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::find_topic(const char * topicName,
   return topicStatus;
 }
 
+DCPS_IR_Topic*
+DCPS_IR_Domain::find_topic( const OpenDDS::DCPS::RepoId id)
+{
+  IdToTopicMap::const_iterator location = this->idToTopicMap_.find( id);
+  if( location == this->idToTopicMap_.end()) {
+    return 0;
+  }
+  return location->second;
+}
+
 
 
 OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* part,
@@ -345,7 +358,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* par
           // An unknown error means that the description may still
           // have the topic in its topic set.
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Topic Description %s %s  ")
+                     ACE_TEXT("(%P|%t) ERROR: Topic Description %s %s  ")
                      ACE_TEXT("was not correctly removed from Domain %d"),
                      description->get_name(),
                      description->get_dataTypeName(),
@@ -363,7 +376,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::remove_topic(DCPS_IR_Participant* par
   if (part->remove_topic_reference(topic->get_id(), topic) != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("ERROR: Domain %d Topic %d ")
+        ACE_TEXT("(%P|%t) ERROR: Domain %d Topic %d ")
         ACE_TEXT("was not correctly removed from Participant %d"),
         id_, topic->get_id(), part->get_id() ));
 
@@ -413,7 +426,7 @@ int DCPS_IR_Domain::find_topic_description(const char* name,
               status = 1;
               if (TAO_debug_level > 0)
                 {
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::find_topic_description ")
+                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::find_topic_description ")
                     ACE_TEXT("Domain %d Located inconsistent topic description existing: %s %s  ")
                     ACE_TEXT(" attempted: %s %s\n"),
                     id_,
@@ -521,7 +534,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                                 ::OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport.")));
+            ACE_TEXT ("(%P|%t) ERROR: Failed to register the ParticipantBuiltinTopicDataTypeSupport.")));
           return 1;
         }
 
@@ -549,7 +562,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                           ::OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport.")));
+            ACE_TEXT ("(%P|%t) ERROR: Failed to register the TopicBuiltinTopicDataTypeSupport.")));
           return 1;
         }
 
@@ -577,7 +590,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                                  ::OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport.")));
+            ACE_TEXT ("(%P|%t) ERROR: Failed to register the SubscriptionBuiltinTopicDataTypeSupport.")));
           return 1;
         }
 
@@ -605,7 +618,7 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
                                                 ::OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport.")));
+            ACE_TEXT ("(%P|%t) ERROR: Failed to register the PublicationBuiltinTopicDataTypeSupport.")));
           return 1;
         }
 
@@ -891,7 +904,7 @@ int DCPS_IR_Domain::add_topic_description(DCPS_IR_Topic_Description*& desc)
               foundConflicting = 2;
               if (TAO_debug_level > 0)
                 {
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic_description ")
+                  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description ")
                     ACE_TEXT("Domain %d Located inconsistent topic description existing: %s %s  ")
                     ACE_TEXT(" attempted: %s %s\n"),
                     id_,
@@ -921,12 +934,12 @@ int DCPS_IR_Domain::add_topic_description(DCPS_IR_Topic_Description*& desc)
           }
         break;
       case 1:
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic_description ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description ")
           ACE_TEXT("Domain %d failed to add already existing Topic Description %X\n"),
           id_, desc));
         break;
       case -1:
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::add_topic_description ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description ")
           ACE_TEXT("Domain %d Unknown error while adding Topic Description %X\n"),
           id_, desc));
       };
@@ -955,7 +968,7 @@ int DCPS_IR_Domain::remove_topic_description(DCPS_IR_Topic_Description*& desc)
     }
   else
     {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DCPS_IR_Domain::remove_topic_description ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_topic_description ")
         ACE_TEXT("Domain %d Unable to remove Topic Description %X\n"),
         id_, desc));
     } // if (0 == status)
@@ -985,7 +998,7 @@ void DCPS_IR_Domain::remove_dead_participants ()
           dead = *iter;
           ++iter;
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("ERROR: DCPS_IR_Domain::remove_dead_participants () ")
+            ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_dead_participants () ")
             ACE_TEXT("Removing dead participant %X id %d\n"),
             dead,
             dead->get_id()

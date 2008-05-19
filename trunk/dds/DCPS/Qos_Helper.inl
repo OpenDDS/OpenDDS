@@ -4,6 +4,7 @@
 
 // TMB - I had to add the following line
 #include "Service_Participant.h"
+#include "ace/OS_NS_string.h" // for strcmp() in partition operator==()
 
 namespace OpenDDS
 {
@@ -39,6 +40,41 @@ namespace OpenDDS
       t.sec = static_cast<CORBA::Long> (tv.sec ());
       t.nanosec = tv.usec () * 1000;
       return t;
+    }
+
+    ACE_INLINE
+    CORBA::Long
+    get_instance_sample_list_depth (
+      ::DDS::HistoryQosPolicyKind history_kind,
+      long                        history_depth,
+      long                        max_samples_per_instance)
+    {
+      CORBA::Long depth = 0;
+
+      if (history_kind == ::DDS::KEEP_ALL_HISTORY_QOS)
+      {
+        // The spec says history_depth is "has no effect"
+        // when history_kind = KEEP_ALL so use
+        // max_samples_per_instance.
+        depth = max_samples_per_instance;
+      }
+      else // history.kind == ::DDS::KEEP_LAST_HISTORY_QOS
+      {
+        depth = history_depth;
+      }
+
+      if (depth == ::DDS::LENGTH_UNLIMITED)
+      {
+        // ::DDS::LENGTH_UNLIMITED is negative so make it a positive
+        // value that is for all intents and purposes unlimited and we
+        // can use it for comparisons.  Use 2147483647L because that
+        // is the greatest value a signed CORBA::Long (a signed 32 bit
+        // integer) can have.
+        // WARNING: The client risks running out of memory in this case.
+        depth = 0x7fffffff; // ACE_Numeric_Limits<CORBA::Long>::max ();
+      }
+
+      return depth;
     }
 
     ACE_INLINE
@@ -179,12 +215,11 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DurabilityQosPolicy& qos) 
     {
-      if (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS //TheServiceParticipant->initial_DurabilityQosPolicy()
-        || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
-      {
-        return true;
-      }
-      return false;
+      return
+        qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
+        || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS
+        /*|| qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
+          || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS*/;
     }
 
         
@@ -202,11 +237,22 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::DeadlineQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_DeadlineQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ::DDS::Duration_t const DDS_DURATION_INFINITY =
+        {
+          ::DDS::DURATION_INFINITY_SEC,
+          ::DDS::DURATION_INFINITY_NSEC
+        };
+
+      // Only accept infinite or positive finite deadline periods.
+      //
+      // Note that it doesn't make much sense for users to set
+      // deadline periods less than 10 milliseconds since the
+      // underlying timer resolution is generally no better than
+      // that.
+      return
+        qos.period == DDS_DURATION_INFINITY
+        || qos.period.sec > 0
+        || (qos.period.sec >= 0 && qos.period.nanosec > 0);
     }
 
       
@@ -274,11 +320,8 @@ namespace OpenDDS
     ACE_INLINE
     bool Qos_Helper::valid (const ::DDS::PartitionQosPolicy& qos) 
     {
-      if (qos == TheServiceParticipant->initial_PartitionQosPolicy())
-      {
-        return true;
-      }
-      return false;
+      ACE_UNUSED_ARG (qos);
+      return true;
     }  
       
     ACE_INLINE 
@@ -1003,7 +1046,7 @@ bool operator == (const ::DDS::PartitionQosPolicy& qos1,
   {
     for(CORBA::ULong i = 0; i < qos1.name.length(); i++)
     {
-      if (qos1.name[i] != qos2.name[i])
+      if ( 0 != ACE_OS::strcmp( qos1.name[i], qos2.name[i]) )
       {
         return false;
       }

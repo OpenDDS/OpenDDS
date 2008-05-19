@@ -17,6 +17,9 @@
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/TransientDataDurabilityCache.h"
+// #include "dds/DCPS/PersistentDataDurabilityCache.h"
+#include <ace/Auto_Ptr.h>
 #include "tao/debug.h"
 
 namespace OpenDDS
@@ -50,7 +53,9 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
     participant_ (participant),
     suspend_depth_count_ (0),
     sequence_number_ (),
-    aggregation_period_start_ (ACE_Time_Value::zero)
+    aggregation_period_start_ (ACE_Time_Value::zero),
+    transient_data_cache_ (0),
+    persistent_data_cache_ (0)
 {
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::PublisherListener::_duplicate(a_listener);
@@ -941,6 +946,57 @@ PublisherImpl::listener_for (::DDS::StatusKind kind)
     }
 }
 
+DataDurabilityCache *
+PublisherImpl::get_data_durability_cache (
+  ::DDS::DurabilityQosPolicy const & durability)
+{
+  DataDurabilityCache * cache = 0;
+
+  ::DDS::DurabilityQosPolicyKind const kind =
+      durability.kind;
+
+  if (kind == ::DDS::TRANSIENT_DURABILITY_QOS)
+  {
+    {
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                        guard,
+                        this->pi_lock_,
+                        0);
+
+      if (this->transient_data_cache_.get () == 0)
+      {
+        ACE_auto_ptr_reset (this->transient_data_cache_,
+                            new TransientDataDurabilityCache);
+      }
+    }
+
+    cache = this->transient_data_cache_.get ();
+  }
+  else if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("OpenDDS (%P|%t) ERROR: PERSISTENT durability ")
+                ACE_TEXT ("is temporarily disabled.\n")));
+
+//     {
+//       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+//                         guard,
+//                         this->pi_lock_,
+//                         0);
+
+//       if (this->persistent_data_cache_.get () == 0)
+//       {
+//         ACE_auto_ptr_reset (this->persistent_data_cache_,
+//                             new PersistentDataDurabilityCache);
+//       }
+//     }
+
+//     cache = this->persistent_data_cache_.get ();
+  }
+     
+  return cache;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
@@ -949,12 +1005,10 @@ PublisherImpl::listener_for (::DDS::StatusKind kind)
 
 template class std::multimap<ACE_CString, PublisherDataWriterInfo*>;
 template class std::map< PublicationId, PublisherDataWriterInfo*>;
-template class std::vector< MessageData*> MessageDataList;
 
 #elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
 
-#pragma instantiate std::multimap<ACE_CString, PublisherDataWriterInfo*>;
-#pragma instantiate std::map< PublicationId, PublisherDataWriterInfo*>;
-#pragma instantiate std::vector< MessageData*> MessageDataList;
+#pragma instantiate std::multimap<ACE_CString, PublisherDataWriterInfo*>
+#pragma instantiate std::map< PublicationId, PublisherDataWriterInfo*>
 
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

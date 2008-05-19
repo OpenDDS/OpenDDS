@@ -32,6 +32,14 @@ namespace OpenDDS
       /// Default constructor starts negative.
       SequenceNumber() { value_ = SHRT_MIN ; }
 
+      /// Construct with a value.
+      SequenceNumber( ACE_INT16 value) : value_( value) { }
+
+      // N.B: Default copy constructor is sufficient.
+
+      /// Allow assignments.
+      SequenceNumber& operator=( const SequenceNumber& rhs) { value_ = rhs.value_; return *this; }
+
       /// Pre-increment.
       SequenceNumber operator++() {
         this->increment() ;
@@ -40,17 +48,32 @@ namespace OpenDDS
 
       /// Post-increment.
       SequenceNumber operator++(int) {
-        SequenceNumber value = *this ;
-        this->increment() ;
+	SequenceNumber value (*this);
+	++*this;
         return value ;
       }
 
-      bool operator==( const SequenceNumber& rvalue) { return value_ == rvalue.value_ ; }
-      bool operator!=( const SequenceNumber& rvalue) { return value_ != rvalue.value_ ; }
-      bool operator<(  const SequenceNumber& rvalue) { return value_  < rvalue.value_ ; }
-      bool operator>(  const SequenceNumber& rvalue) { return value_  > rvalue.value_ ; }
-      bool operator>=( const SequenceNumber& rvalue) { return value_ >= rvalue.value_ ; }
-      bool operator<=( const SequenceNumber& rvalue) { return value_ <= rvalue.value_ ; }
+      /// Convert to integer type.
+      operator ACE_INT16() { return this->value_; }
+
+      /// This is the magic of the lollipop.
+      /// N.B. This comparison is only good until the distance reaches
+      ///      half of the lollipop size (SHRT_MAX/2).
+      bool operator<(  const SequenceNumber& rvalue) const {
+             return (value_ < 0)?              (value_ < rvalue.value_):
+                    (value_ == rvalue.value_)? false:
+                    (value_ <  rvalue.value_)? (((rvalue.value_ - value_) < (SHRT_MAX/2))?
+                                                true: false):
+                                               (((value_ - rvalue.value_) < (SHRT_MAX/2))?
+                                                false: true);
+           }
+
+      bool operator==( const SequenceNumber& rvalue) const { return value_ == rvalue.value_ ; }
+      bool operator!=( const SequenceNumber& rvalue) const { return value_ != rvalue.value_ ; }
+      bool operator>=( const SequenceNumber& rvalue) const { return !(*this  < rvalue);  }
+      bool operator<=( const SequenceNumber& rvalue) const { return !(rvalue < *this); }
+      bool operator>(  const SequenceNumber& rvalue) const { return  (rvalue < *this)
+                                                                  && (*this != rvalue);  }
 
       ACE_INT16 value_ ;
 
@@ -68,8 +91,8 @@ namespace OpenDDS
     typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Null_Mutex>  
       DataBlockAllocator;
     
-    #define DUP true
-    #define NO_DUP false
+#define DUP true
+#define NO_DUP false
 
 
     /// This struct holds both object reference and the corresponding servant.

@@ -2,6 +2,49 @@ Version 1.1 of OpenDDS.
 
 New to this version are the following changes:
 
+- Added support for PARTITION QoS policy.
+
+  This QoS policy allows publishers and subscribers to belong to one
+  or more logical partitions.  Partition names may contain wildcards.
+  However, only wildcards containing "*" or "?" are currently
+  supported.
+
+- Added support for DEADLINE QoS policy.
+
+  The DEADLINE QoS policy allows the application to detect when data
+  is not written or read within a specified amount of time.
+
+- Added support for LIFESPAN QoS policy.  **** FIXES PENDING ****
+
+  This policy allows the application to specify when data expires,
+  meaning invalid.
+
+- Added support for the TRANSIENT kind of DURABILITY QoS policy.
+  **** FIXES PENDING ****
+
+  Unsent data will outlive DataWriters when TRANSIENT DURABILITY is
+  configured, and will be sent once a new DataWriter is created within
+  the same domain for the same topic and type.  Remaining unsent data
+  cached data will be discarded when the corresponding publisher is
+  destroyed.
+
+- Added support for the PERSISTENT kind of DURABILITY QoS policy.
+  **** FIXES PENDING ****
+
+  PERSISTENT DURABILITY provides basically the same functionality as
+  TRANSIENT DURABILITY, except that unsent cached data will survive
+  publisher and process destruction.
+
+
+- Added support for the DURABILITY_SERVICE QoS policy.
+  **** FIXES PENDING ****
+
+  This QoS policy provides a way to specify resource limits for
+  domain/topic/type-specific unsent data in a TRANSIENT or PERSISTENT
+  DURABILITY cache.  The resource limits in question are analogous to,
+  although independent of, those found in the HISTORY and
+  RESOURCE_LIMITS policies.
+
 - New command-line option "-DCPSTransportDebugLevel".
 
 - Add the ability to attach to multiple DCPSInfoRepo processes.
@@ -34,48 +77,49 @@ New to this version are the following changes:
 - Fixed compliance with qos RxO
 
   Fixed compliance with the DDS specification that qos parameters that
-  Durability kind and Deadline.duration be compatible between the 
+  Durability kind and Deadline.duration be compatible between the
   subscriber and the publisher (RxO - Received x Offered)
 
 - Improved Memory Mangament
 
-  Fixed issue with reference counting for classes derived from 
+  Fixed issue with reference counting for classes derived from
   LocalObject.
 
 - Supported IPv6.
 
   The requirement for using IPv6 is the FQDN needs be resolved as IPv6
   address as it's used by default configuration to support BuiltInTopic.
-  
-  The local_address in the configuration file should use IPv6 decimal 
+
+  The local_address in the configuration file should use IPv6 decimal
   address or hostname that can be resolved as IPv6 address.
 
 - Used the address string instead of 4-byte IP address and port number
-  for pub/sub endpoint address advertisement. 
-  
+  for pub/sub endpoint address advertisement.
+
   The address string in the configuration can use decimal IPv4/IPv6 address
   or hostname that can be resolved on both pub and sub sides.
-  
-  The default address string is 
+
+  The default address string is
   "[fully qualified hostname]:[port]". The port is picked randomly by OS.
-  
-- Fixed problem that default local_address does not work when hostname 
-  is resolved as loopback ip address. 
-  
+
+- Fixed problem that default local_address does not work when hostname
+  is resolved as loopback ip address.
+
   With the default local_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
 
 - Added default configuration for reliable multicast.
 
-- Fixed a bug in DataReaderImpl::remove_associations() and 
-  DataWriterImpl::remove_associations() that should not attempt to remove 
+- Fixed a bug in DataReaderImpl::remove_associations() and
+  DataWriterImpl::remove_associations() that should not attempt to remove
   the already removed writer/reader.
-  
-- Fixed a bug in SimpleTCP that an active disconnect due to the peer 
-  graceful disconnect does not terminate send. This bug made the re-established 
+
+- Fixed a bug in SimpleTCP that an active disconnect due to the peer
+  graceful disconnect does not terminate send. This bug made the re-established
   connection fail on send strategy state check.
-  
+
 - Added dispose() and unregister() notification.
+
 
 =========================================================================
 

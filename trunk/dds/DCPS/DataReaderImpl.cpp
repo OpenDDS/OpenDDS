@@ -14,12 +14,15 @@
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
+#include "RequestedDeadlineWatchdog.h"
+
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "ace/Reactor.h"
+#include "ace/Auto_Ptr.h"
 
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
@@ -55,6 +58,8 @@ DataReaderImpl::DataReaderImpl (void) :
   reactor_(0),
   liveliness_lease_duration_ (ACE_Time_Value::zero),
   liveliness_timer_id_(-1),
+  last_deadline_missed_total_count_ (0),
+  watchdog_ (),
   is_bit_ (false),
   initialized_ (false)
 {
@@ -114,8 +119,7 @@ DataReaderImpl::cleanup ()
 
   if (liveliness_timer_id_ != -1)
     {
-      int num_handlers = reactor_->cancel_timer (this);
-      ACE_UNUSED_ARG (num_handlers);
+      (void) reactor_->cancel_timer (this);
     }
   }
 
@@ -173,6 +177,23 @@ void DataReaderImpl::init (
   dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
   dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
+  // Setup the requested deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+                        new RequestedDeadlineWatchdog (
+                          this->reactor_,
+                          this->sample_lock_,
+                          qos.deadline,
+                          a_listener,
+                          dr_objref,
+                          this->requested_deadline_missed_status_,
+                          this->last_deadline_missed_total_count_));
+  }
+
   initialized_ = true;
 }
 
@@ -223,6 +244,10 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           writer_id));
       }
     }
+
+    // add associations to the transport before using
+    // Built-In Topic support and telling the listener.
+    this->subscriber_servant_->add_associations(writers, this, qos_) ;
 
     // add associations to the transport before using
     // Built-In Topic support and telling the listener.
@@ -523,7 +548,6 @@ void DataReaderImpl::update_incompatible_qos (
       }
       else
       {
-        qos_ = qos;
         try
         {
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
@@ -532,7 +556,7 @@ void DataReaderImpl::update_incompatible_qos (
           repo->update_subscription_qos(this->participant_servant_->get_domain_id(), 
                                         this->participant_servant_->get_id(), 
                                         this->subscription_id_, 
-                                        this->qos_,
+                                        qos,
                                         subscriberQos);
         }
         catch (const CORBA::SystemException& sysex)
@@ -551,10 +575,17 @@ void DataReaderImpl::update_incompatible_qos (
         }
       }
     }
-    else
+
+    // Reset the deadline timer if the period has changed.
+    if (qos_.deadline.period.sec != qos.deadline.period.sec
+        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      qos_ = qos;
+      this->watchdog_->reset_interval (
+        duration_to_time_value (qos.deadline.period));
     }
+
+    qos_ = qos;
+
     return ::DDS::RETCODE_OK;
   }
   else
@@ -660,10 +691,23 @@ DataReaderImpl::get_requested_deadline_missed_status (
 
   set_status_changed_flag(::DDS::REQUESTED_DEADLINE_MISSED_STATUS,
 			  false);
-  ::DDS::RequestedDeadlineMissedStatus status =
+
+  this->requested_deadline_missed_status_.last_instance_handle =
+    ::DDS::HANDLE_NIL; // @todo Implement last_instance_handle
+                       // support.
+
+  this->requested_deadline_missed_status_.total_count_change =
+    this->requested_deadline_missed_status_.total_count
+    - this->last_deadline_missed_total_count_;
+
+  // Update for next status check.
+  this->last_deadline_missed_total_count_ =
+    this->requested_deadline_missed_status_.total_count;
+
+  ::DDS::RequestedDeadlineMissedStatus const status =
       requested_deadline_missed_status_;
-  requested_deadline_missed_status_.total_count_change = 0 ;
-  return status ;
+
+  return status;
 }
 
 ::DDS::RequestedIncompatibleQosStatus * DataReaderImpl::get_requested_incompatible_qos_status (
@@ -713,13 +757,11 @@ DataReaderImpl::get_requested_deadline_missed_status (
 }
 
 ::DDS::ReturnCode_t DataReaderImpl::wait_for_historical_data (
-							      const ::DDS::Duration_t & max_wait
-							      )
+    const ::DDS::Duration_t & /* max_wait */ )
   ACE_THROW_SPEC ((
 		   CORBA::SystemException
 		   ))
 {
-  ACE_UNUSED_ARG( max_wait) ;
   // Add your implementation here
   return 0;
 }
@@ -907,6 +949,11 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
     case SAMPLE_DATA:
     case INSTANCE_REGISTRATION:
       {
+        // "Pet the dog" so that it doesn't callback on the listener
+        // the next time deadline timer expires.
+        if (this->watchdog_.get ())
+          this->watchdog_->signal ();
+
 	this->writer_activity(sample.header_.publication_id_);
 	// This also adds to the sample container
 	this->dds_demarshal(sample) ;
@@ -936,6 +983,12 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
       this->writer_activity(sample.header_.publication_id_);
       this->dispose(sample);
       break ;
+
+    case UNREGISTER_INSTANCE:
+      this->writer_activity(sample.header_.publication_id_);
+      this->unregister(sample);
+      break ;
+
 
     default:
       ACE_ERROR((LM_ERROR,
@@ -1181,10 +1234,8 @@ CORBA::Long DataReaderImpl::total_samples() const
 
 int
 DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
-				const void *arg)
+				const void * arg)
 {
-  ACE_UNUSED_ARG(arg);
-
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
     guard,
     this->sample_lock_,
@@ -1378,11 +1429,10 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
 }
 
 void
-DataReaderImpl::writer_became_alive (PublicationId   writer_id,
-				     const ACE_Time_Value& when,
-             WriterInfo::WriterState& state)
+DataReaderImpl::writer_became_alive (PublicationId writer_id,
+				     const ACE_Time_Value& /* when */,
+                                     WriterInfo::WriterState& state)
 {
-  ACE_UNUSED_ARG(when) ;
   if (DCPS_debug_level >= 5)
     ACE_DEBUG((LM_DEBUG,
 	       "(%P|%t)%T  DataReaderImpl::writer_became_alive reader %d to writer %d\n",
@@ -1390,7 +1440,7 @@ DataReaderImpl::writer_became_alive (PublicationId   writer_id,
 
   // caller should already have the samples_lock_ !!!
 
-  // NOTE: each instance will change to ALIVE_STATE when they recieve a sample
+  // NOTE: each instance will change to ALIVE_STATE when they receive a sample
 
   bool liveliness_changed = false;
   if (state != WriterInfo::ALIVE)
@@ -1543,9 +1593,15 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 
-void DataReaderImpl::dispose(const ReceivedDataSample& sample)
+void DataReaderImpl::dispose(const ReceivedDataSample& /* sample */)
 {
-  ACE_UNUSED_ARG(sample) ;
+  ACE_DEBUG ((LM_DEBUG, "(%P|%T)BIT dispose\n"));
+}
+
+
+void DataReaderImpl::unregister(const ReceivedDataSample& /* sample */)
+{
+  ACE_DEBUG ((LM_DEBUG, "(%P|%T)BIT unregister\n"));
 }
 
 

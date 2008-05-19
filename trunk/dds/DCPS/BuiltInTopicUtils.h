@@ -22,17 +22,17 @@
 namespace OpenDDS {
   namespace DCPS {
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PARTICIPANT_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_TOPIC_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_TOPIC_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC;
-    OpenDDS_Dcps_Export extern const char* BUILT_IN_PUBLICATION_TOPIC_TYPE;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
+    OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
     enum BuiltInTopicTransportTypeId
     {
@@ -45,6 +45,20 @@ namespace OpenDDS {
     };
 
     class DomainParticipantImpl;
+
+    /**
+     * Functor for ordering BuiltinKey_t.
+     *
+     * Use this like this:
+     *   std::map< ::DDS::BuiltinTopicKey_t, int, OpenDDS::DCPS::BuiltinTopicKeyLess> MapType;
+     */
+    class BuiltinTopicKeyLess {
+      public:
+        bool operator()(
+               const ::DDS::BuiltinTopicKey_t& lhs,
+               const ::DDS::BuiltinTopicKey_t& rhs
+             );
+    };
 
     // changed from member function template to class template
     // to avoid VC++ v6 build problem.
@@ -266,18 +280,21 @@ namespace OpenDDS {
 
               CORBA::ULong count = 0;
 
-              for (CORBA::ULong i = 0; i < repoid_len; i++)
+              for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
-                  for (CORBA::ULong j = 0; j < data_len; j++)
+                  for (CORBA::ULong j = 0; j < data_len; ++j)
                     {
                       if (DCPS_debug_level >= 10)
-                        ACE_DEBUG((LM_DEBUG,"%s BIT has [%d, %d, %d]\n",
-                          bit_name, data[j].key[0], data[j].key[1],
-                          data[j].key[2] ));
+                        ACE_DEBUG((LM_DEBUG,
+				   "%s BIT has [%d, %d, %d]\n",
+				   bit_name,
+				   data[j].key[0],
+				   data[j].key[1],
+				   data[j].key[2] ));
                       if (data[j].key[key_pos] == repoids[i])
                         {
                           handles[i] = infos[j].instance_handle;
-                          count ++;
+                          ++count;
                           break;
                         }
                     }
@@ -317,6 +334,22 @@ namespace OpenDDS {
         }
 
     };
+
+    inline
+    bool
+    BuiltinTopicKeyLess::operator()(
+      const ::DDS::BuiltinTopicKey_t& lhs,
+      const ::DDS::BuiltinTopicKey_t& rhs
+    ) {
+      // N.B.  This assumes that the MS index is 2 and the LS index is 0.
+      return (lhs[2] < rhs[2])? true:
+             (lhs[2] > rhs[2])? false:
+             (lhs[1] < rhs[1])? true:
+             (lhs[1] > rhs[1])? false:
+             (lhs[0] < rhs[0])? true:
+                                false;
+
+    }
 
   } // End of namespace DCPS
 } // End of namespace OpenDDS

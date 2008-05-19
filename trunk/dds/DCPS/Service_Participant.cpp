@@ -73,6 +73,10 @@ namespace OpenDDS
       initialize();
     }
 
+    Service_Participant::~Service_Participant ()
+    {
+    }
+
     Service_Participant *
     Service_Participant::instance (void)
     {
@@ -434,6 +438,20 @@ namespace OpenDDS
       initial_DurabilityQosPolicy_.service_cleanup_delay.sec = ::DDS::DURATION_ZERO_SEC;
       initial_DurabilityQosPolicy_.service_cleanup_delay.nanosec = ::DDS::DURATION_ZERO_NSEC;
 
+      initial_DurabilityServiceQosPolicy_.service_cleanup_delay.sec =
+        ::DDS::DURATION_ZERO_SEC;
+      initial_DurabilityServiceQosPolicy_.service_cleanup_delay.nanosec =
+        ::DDS::DURATION_ZERO_NSEC;
+      initial_DurabilityServiceQosPolicy_.history_kind =
+        ::DDS::KEEP_LAST_HISTORY_QOS;
+      initial_DurabilityServiceQosPolicy_.history_depth = 1;
+      initial_DurabilityServiceQosPolicy_.max_samples =
+        ::DDS::LENGTH_UNLIMITED;
+      initial_DurabilityServiceQosPolicy_.max_instances =
+        ::DDS::LENGTH_UNLIMITED;
+      initial_DurabilityServiceQosPolicy_.max_samples_per_instance =
+        ::DDS::LENGTH_UNLIMITED;
+
       initial_PresentationQosPolicy_.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
       initial_PresentationQosPolicy_.coherent_access = 0;
       initial_PresentationQosPolicy_.ordered_access = 0;
@@ -480,6 +498,7 @@ namespace OpenDDS
 
       initial_TopicQos_.topic_data = initial_TopicDataQosPolicy_;
       initial_TopicQos_.durability = initial_DurabilityQosPolicy_;
+      initial_TopicQos_.durability_service = initial_DurabilityServiceQosPolicy_;
       initial_TopicQos_.deadline = initial_DeadlineQosPolicy_;
       initial_TopicQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
       initial_TopicQos_.liveliness = initial_LivelinessQosPolicy_;
@@ -492,6 +511,7 @@ namespace OpenDDS
       initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
 
       initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
+      initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
       initial_DataWriterQos_.deadline = initial_DeadlineQosPolicy_;
       initial_DataWriterQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
       initial_DataWriterQos_.liveliness = initial_LivelinessQosPolicy_;
@@ -529,17 +549,17 @@ namespace OpenDDS
     }
 
     void
-    Service_Participant::set_repo_ior( const ACE_TCHAR* ior, const RepoKey repo)
+    Service_Participant::set_repo_ior( const ACE_TCHAR* ior, const RepoKey key)
     {
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Repo[ %d] == %s\n"),
-          repo, ior
+          key, ior
         ));
       }
 
       got_info = true;
-      RepoMap::const_iterator location = this->repoMap_.find( repo);
+      RepoMap::const_iterator location = this->repoMap_.find( key);
       if( location != this->repoMap_.end()) {
         // Repository is already loaded.  Remove the repository only if
         // it is bound to no domains.
@@ -553,7 +573,7 @@ namespace OpenDDS
               ACE_TEXT( "Service_Participant::set_repo_ior, ")
               ACE_TEXT( "attempt to set new repository for key %d ")
               ACE_TEXT( "while previous repository still bound. \n"),
-              repo
+              key
             ));
             return; // throw;
           }
@@ -567,24 +587,30 @@ namespace OpenDDS
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT ("(%P|%t) ERROR: ")
                     ACE_TEXT ("Service_Participant::set_repo_ior, ")
-                    ACE_TEXT ("nil DCPSInfo (%s) for key %d. \n"), ior, repo));
+                    ACE_TEXT ("nil DCPSInfo (%s) for key %d. \n"), ior, key));
         return; // throw;
 
       } else {
-        this->repoMap_[ repo] = DCPSInfo::_narrow( obj.in());
-        if( CORBA::is_nil( this->repoMap_[ repo].in())) {
+        this->repoMap_[ key] = DCPSInfo::_narrow( obj.in());
+        if( CORBA::is_nil( this->repoMap_[ key].in())) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT ("(%P|%t) ERROR: ")
                       ACE_TEXT ("Service_Participant::set_repo_ior, ")
                       ACE_TEXT ("unable to narrow DCPSInfo (%s) for key %d. \n"),
-                      ior, repo));
+                      ior, key));
           return; // throw;
         }
       }
 
       // Create and install the Built In Topic transport for this
       // repository.
-      if (this->bit_enabled_) this->init_bit_transport_impl( repo);
+      if (this->bit_enabled_) this->init_bit_transport_impl( key);
+    }
+
+    void
+    Service_Participant::set_repo( DCPSInfo_ptr repo, const RepoKey key)
+    {
+      this->repoMap_[ key] = DCPSInfo::_duplicate( repo);
     }
 
     void
@@ -1118,11 +1144,34 @@ namespace OpenDDS
           }
 
           this->set_repo_ior( repoIor.c_str(), repoKey);
+
+          ACE_TString bitIp;
+          this->cf_.get_string_value( sectionKey, ACE_TEXT("DCPSBitTransportIPAddress"), bitIp);
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DCPSBitTransportIPAddress == %s\n"),
+              sectionName.c_str(), bitIp.c_str()
+            ));
+          }
+          this->bitTransportIpMap_[ repoKey]   = bitIp;
+
+          ACE_TString portString;
+          this->cf_.get_string_value( sectionKey, ACE_TEXT("DCPSBitTransportPort"), portString);
+
+          int bitPort = ACE_OS::atoi(portString.c_str());
+          if( DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %s: DCPSBitTransportPort == %d\n"),
+              sectionName.c_str(), bitPort
+            ));
+          }
+          this->bitTransportPortMap_[ repoKey] = bitPort;
         }
       }
 
       return 0;
     }
+
 
   } // namespace DCPS
 } // namespace OpenDDS
