@@ -99,8 +99,8 @@ New to this version are the following changes:
   The address string in the configuration can use decimal IPv4/IPv6 address
   or hostname that can be resolved on both pub and sub sides.
 
-  The default address string is
-  "[fully qualified hostname]:[port]". The port is picked randomly by OS.
+  The default address string is "host:port". The "host" is the fully qualified 
+  domain name and the "port" is picked randomly by OS.
 
 - Fixed problem that default local_address does not work when hostname
   is resolved as loopback ip address.
@@ -108,7 +108,10 @@ New to this version are the following changes:
   With the default local_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
 
-- Added default configuration for reliable multicast.
+- Added default configuration for reliable multicast. The 
+  multicast_group_address defaults to ACE default multicast address(
+  224.9.9.2:20001 for ipv4 and ff05:0::ff01:1:20001 for ipv6) and the 
+  local_address defaults to ANY with random port picked by OS.
 
 - Fixed a bug in DataReaderImpl::remove_associations() and
   DataWriterImpl::remove_associations() that should not attempt to remove
@@ -118,7 +121,7 @@ New to this version are the following changes:
   graceful disconnect does not terminate send. This bug made the re-established
   connection fail on send strategy state check.
 
-- Added dispose() and unregister() notification.
+- Added dispose() and unregister() notifications.
 
 
 =========================================================================
