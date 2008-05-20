@@ -765,8 +765,7 @@ DDS::ReturnCode_t
           {
             if (item->registered_data_ == 0)
             {
-              ::<%SCOPE%><%TYPE%> dummy;
-              received_data_p.assign_sample(count, dummy) ;
+              received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
             }
             else
             {
@@ -1187,8 +1186,7 @@ DDS::ReturnCode_t
         {
           if (item->registered_data_ == 0)
           {
-            ::<%SCOPE%><%TYPE%> dummy;
-            received_data_p.assign_sample(count, dummy) ;
+            received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
           }
           else
           {
@@ -1292,8 +1290,7 @@ DDS::ReturnCode_t
         {
           if (item->registered_data_ == 0)
           {
-            ::<%SCOPE%><%TYPE%> dummy;
-            received_data_p.assign_sample(count, dummy) ;
+            received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
           }
           else
           {

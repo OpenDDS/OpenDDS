@@ -3,7 +3,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 
 #include "ace/ACE.h"  /* For ACE::wild_match() */
-// #include "ace/os_include/os_fnmatch.h"
+#include "ace/OS_NS_string.h"
 
 namespace
 {
@@ -38,11 +38,10 @@ namespace
         // The DDS specification requires pattern matching
         // capabilities corresponding to those provided by the POSIX
         // fnmatch() function.  However, some platforms, such as
-        // Windows, do not support such capabilities.  To be
+        // Windows, do not provide such a function.  To be
         // completely portable across all platforms we instead use
         // ACE::wild_match().  Currently this prevents matching of
-        // patterns containing square brackets, i.e. "[]" even though
-        // some platforms support fnmatch().
+        // patterns containing square brackets, i.e. "[]".
         bool const pub_is_wildcard = ACE::wild_match (wildcard, pname);
 
         for (CORBA::ULong j = 0; j < sub_len; ++j)
@@ -54,8 +53,6 @@ namespace
             if (pub_is_wildcard && sub_is_wildcard)
               continue;
 
-            // @@ Is it really necessary to place the "pattern"
-            //    argument to fnmatch() in the first parameter?
             if (pub_is_wildcard)
               match = ACE::wild_match (sname, pname);
             else if (sub_is_wildcard)
