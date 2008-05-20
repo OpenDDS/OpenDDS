@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DDS_DCPS_QOS_HELPER_H
-#define TAO_DDS_DCPS_QOS_HELPER_H
+#ifndef OPENDDS_DCPS_QOS_HELPER_H
+#define OPENDDS_DCPS_QOS_HELPER_H
 
 #include "dds/DdsDcpsC.h"
 
@@ -33,13 +33,13 @@ namespace OpenDDS
   {
     class Service_Participant;
 
-    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export 
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     ACE_Time_Value time_to_time_value (const ::DDS::Time_t& t);
 
     EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     ::DDS::Time_t time_value_to_time (const ACE_Time_Value& tv);
 
-    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export 
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
     ACE_Time_Value duration_to_time_value (const ::DDS::Duration_t& t);
 
     EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
@@ -51,45 +51,64 @@ namespace OpenDDS
       long                        history_depth,
       long                        max_samples_per_instance);
 
+
+    /// Validate DDS::Duration_t value (infinite or positive and
+    /// non-zero).
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+    bool valid_duration (::DDS::Duration_t const & t);
+
+    /// Check if given duration is either infinite or greater than or
+    /// equal to zero.
+    EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+    bool non_negative_duration (::DDS::Duration_t const & t);
+
     /**
-    * This class implements methods that verify whether a qos is
-    * valid, consistent and changeable.
-    *
-    * valid - the values are in acceptable ranges without respect 
-    *         to any other values.
-    *
-    * consistent - the values are consistent with each other.
-    *         The spec sometimes calls this "compatible" but I
-    *         this compatible should be reserved for matching
-    *         QoS of subscriptions and publications.
-    *         The spec is confusing in its inconsistency of the
-    *         use of "compatible" and "consistent".
-    *
-    * The qos supported in current implementation:
-    *         Liveliness  :   kind = AUTOMATIC
-    *         Reliability :   kind = RELIABLE | BEST_EFFORT 
-    *                         max_blocking_time
-    *         History     :   kind = KEEP_ALL | KEEP_LAST
-    *                         depth > 1
-    *         RESOURCE_LIMITS : max_samples_per_instance
-    *         
-    * Other than these supported qos, any qos that is different from the 
-    * initial value is invalid.
-    * 
-    * Note: 
-    *    Since in the first implmenation of DSS in TAO a limited number
-    *    of QoS values are allowed to be modified, the consistency 
-    *    test on QoS settings have not been implemented to check future  
-    *    "valid" QoS values.
-    *
-    * Note: 
-    *    None of the supported QoS in the first implemenation are 
-    *    changeable. The changed value will be checked per QoS table
-    *    in ::DDS spec.
-    */
+     * @class Qos_Helper
+     *
+     * @brief This class implements methods that verify whether a qos is
+     *        valid, consistent and changeable.
+     *
+     * valid - the values are in acceptable ranges without respect
+     *         to any other values.
+     *
+     * consistent - the values are consistent with each other.
+     *         The spec sometimes calls this "compatible" but I
+     *         this compatible should be reserved for matching
+     *         QoS of subscriptions and publications.
+     *         The spec is confusing in its inconsistency of the
+     *         use of "compatible" and "consistent".
+     *
+     * The qos supported in current implementation:
+     *         Liveliness  :   kind = AUTOMATIC
+     *         Reliability :   kind = RELIABLE | BEST_EFFORT
+     *                         max_blocking_time
+     *         History     :   kind = KEEP_ALL | KEEP_LAST
+     *                         depth > 1
+     *         RESOURCE_LIMITS : max_samples_per_instance
+     *
+     * Other than these supported qos, any qos that is different from the
+     * initial value is invalid.
+     *
+     * @note Since in the first implemenation of DSS in TAO a limited
+     *       number of QoS values are allowed to be modified, the
+     *       consistency test on QoS settings have not been
+     *       implemented to check future "valid" QoS values.
+     *
+     * @note None of the supported QoS in the first implemenation are
+     *       changeable. The changed value will be checked per the QoS
+     *       table in the DDS specification.
+     */
     class OpenDDS_Dcps_Export Qos_Helper
     {
     public:
+
+      static bool consistent (
+        ::DDS::ResourceLimitsQosPolicy const & resource_limits,
+        ::DDS::HistoryQosPolicy const & history);
+
+      static bool consistent (
+        ::DDS::DeadlineQosPolicy const & deadline,
+        ::DDS::TimeBasedFilterQosPolicy const & time_based_filter);
 
       static bool consistent (const ::DDS::DomainParticipantQos& qos);
 
@@ -115,6 +134,8 @@ namespace OpenDDS
 
       static bool valid (const ::DDS::DurabilityQosPolicy& qos);
 
+      static bool valid (const ::DDS::DurabilityServiceQosPolicy& qos);
+
       static bool valid (const ::DDS::PresentationQosPolicy& qos);
 
       static bool valid (const ::DDS::DeadlineQosPolicy& qos);
@@ -137,11 +158,11 @@ namespace OpenDDS
 
       static bool valid (const ::DDS::HistoryQosPolicy& qos);
 
-      static bool valid (const ::DDS::ResourceLimitsQosPolicy& qos);    
+      static bool valid (const ::DDS::ResourceLimitsQosPolicy& qos);
 
       static bool valid (const ::DDS::EntityFactoryQosPolicy& qos);
 
-      static bool valid (const ::DDS::WriterDataLifecycleQosPolicy& qos);   
+      static bool valid (const ::DDS::WriterDataLifecycleQosPolicy& qos);
 
       static bool valid (const ::DDS::ReaderDataLifecycleQosPolicy& qos);
 
@@ -151,20 +172,20 @@ namespace OpenDDS
 
       static bool valid (const ::DDS::DataWriterQos& qos);
 
-      static bool valid (const ::DDS::PublisherQos& qos);    
+      static bool valid (const ::DDS::PublisherQos& qos);
 
       static bool valid (const ::DDS::DataReaderQos& qos);
 
       static bool valid (const ::DDS::SubscriberQos& qos);
 
-      static bool changeable (const ::DDS::UserDataQosPolicy& qos1, 
+      static bool changeable (const ::DDS::UserDataQosPolicy& qos1,
                               const ::DDS::UserDataQosPolicy& qos2);
-     
+
       static bool changeable (const ::DDS::TopicDataQosPolicy & qos1,
                               const ::DDS::TopicDataQosPolicy & qos2);
 
       static bool changeable (const ::DDS::GroupDataQosPolicy& qos1,
-				                      const ::DDS::GroupDataQosPolicy& qos2);
+                              const ::DDS::GroupDataQosPolicy& qos2);
 
       static bool changeable (const ::DDS::TransportPriorityQosPolicy& qos1,
                               const ::DDS::TransportPriorityQosPolicy& qos2);
@@ -174,13 +195,16 @@ namespace OpenDDS
 
       static bool changeable (const ::DDS::DurabilityQosPolicy& qos1,
                               const ::DDS::DurabilityQosPolicy& qos2);
-        
+
+      static bool changeable (const ::DDS::DurabilityServiceQosPolicy& qos1,
+                              const ::DDS::DurabilityServiceQosPolicy& qos2);
+
       static bool changeable (const ::DDS::PresentationQosPolicy& qos1,
                               const ::DDS::PresentationQosPolicy& qos2);
 
       static bool changeable (const ::DDS::DeadlineQosPolicy& qos1,
                               const ::DDS::DeadlineQosPolicy& qos2);
-      
+
       static bool changeable (const ::DDS::LatencyBudgetQosPolicy& qos1,
                               const ::DDS::LatencyBudgetQosPolicy& qos2);
 
@@ -198,19 +222,19 @@ namespace OpenDDS
 
       static bool changeable (const ::DDS::PartitionQosPolicy& qos1,
                               const ::DDS::PartitionQosPolicy& qos2);
-      
+
       static bool changeable (const ::DDS::ReliabilityQosPolicy& qos1,
                                  const ::DDS::ReliabilityQosPolicy& qos2);
-      
+
       static bool changeable (const ::DDS::DestinationOrderQosPolicy& qos1,
                               const ::DDS::DestinationOrderQosPolicy& qos2);
-          
+
       static bool changeable (const ::DDS::HistoryQosPolicy& qos1,
                               const ::DDS::HistoryQosPolicy& qos2);
 
       static bool changeable (const ::DDS::ResourceLimitsQosPolicy& qos1,
                               const ::DDS::ResourceLimitsQosPolicy& qos2);
-            
+
       static bool changeable (const ::DDS::EntityFactoryQosPolicy& qos1,
                               const ::DDS::EntityFactoryQosPolicy& qos2) ;
 
@@ -222,19 +246,19 @@ namespace OpenDDS
 
       static bool changeable (const ::DDS::DomainParticipantQos& qos1,
                               const ::DDS::DomainParticipantQos& qos2);
-      
+
       static bool changeable (const ::DDS::TopicQos            & qos1,
                               const ::DDS::TopicQos            & qos2);
-      
+
       static bool changeable (const ::DDS::DataWriterQos       & qos1,
                               const ::DDS::DataWriterQos       & qos2);
-      
+
       static bool changeable (const ::DDS::PublisherQos        & qos1,
                               const ::DDS::PublisherQos        & qos2);
-      
+
       static bool changeable (const ::DDS::DataReaderQos       & qos1,
                               const ::DDS::DataReaderQos       & qos2);
-      
+
       static bool changeable (const ::DDS::SubscriberQos       & qos1,
                               const ::DDS::SubscriberQos       & qos2);
 
@@ -281,41 +305,45 @@ namespace OpenDDS
 } // namespace OpenDDS
 
 
-EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export 
-bool operator== (const ::DDS::Duration_t& t1, 
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator== (const ::DDS::Duration_t& t1,
 		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator < (const ::DDS::Duration_t& t1, 
+bool operator < (const ::DDS::Duration_t& t1,
 		 const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator <= (const ::DDS::Duration_t& t1, 
+bool operator <= (const ::DDS::Duration_t& t1,
                   const ::DDS::Duration_t& t2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator == (const ::DDS::UserDataQosPolicy& qos1, 
+bool operator == (const ::DDS::UserDataQosPolicy& qos1,
                   const ::DDS::UserDataQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator == (const ::DDS::TopicDataQosPolicy & qos1, 
+bool operator == (const ::DDS::TopicDataQosPolicy & qos1,
                   const ::DDS::TopicDataQosPolicy & qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator == (const ::DDS::GroupDataQosPolicy& qos1, 
+bool operator == (const ::DDS::GroupDataQosPolicy& qos1,
                   const ::DDS::GroupDataQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator == (const ::DDS::TransportPriorityQosPolicy& qos1, 
+bool operator == (const ::DDS::TransportPriorityQosPolicy& qos1,
                   const ::DDS::TransportPriorityQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
-bool operator == (const ::DDS::LifespanQosPolicy& qos1, 
+bool operator == (const ::DDS::LifespanQosPolicy& qos1,
                   const ::DDS::LifespanQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::DurabilityQosPolicy& qos1,
-                  const ::DDS::DurabilityQosPolicy& qos2);    
+                  const ::DDS::DurabilityQosPolicy& qos2);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+bool operator == (const ::DDS::DurabilityServiceQosPolicy& qos1,
+                  const ::DDS::DurabilityServiceQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::PresentationQosPolicy& qos1,
@@ -324,15 +352,15 @@ bool operator == (const ::DDS::PresentationQosPolicy& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::DeadlineQosPolicy& qos1,
                   const ::DDS::DeadlineQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::LatencyBudgetQosPolicy& qos1,
                   const ::DDS::LatencyBudgetQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::OwnershipQosPolicy& qos1,
                   const ::DDS::OwnershipQosPolicy& qos2);
-  
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::OwnershipStrengthQosPolicy& qos1,
                   const ::DDS::OwnershipStrengthQosPolicy& qos2);
@@ -340,7 +368,7 @@ bool operator == (const ::DDS::OwnershipStrengthQosPolicy& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::LivelinessQosPolicy& qos1,
                   const ::DDS::LivelinessQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::TimeBasedFilterQosPolicy& qos1,
                   const ::DDS::TimeBasedFilterQosPolicy& qos2);
@@ -348,11 +376,11 @@ bool operator == (const ::DDS::TimeBasedFilterQosPolicy& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::PartitionQosPolicy& qos1,
                   const ::DDS::PartitionQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::ReliabilityQosPolicy& qos1,
                   const ::DDS::ReliabilityQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::DestinationOrderQosPolicy& qos1,
                   const ::DDS::DestinationOrderQosPolicy& qos2);
@@ -360,18 +388,18 @@ bool operator == (const ::DDS::DestinationOrderQosPolicy& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::HistoryQosPolicy& qos1,
                   const ::DDS::HistoryQosPolicy& qos2);
-          
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::ResourceLimitsQosPolicy& qos1,
                   const ::DDS::ResourceLimitsQosPolicy& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::EntityFactoryQosPolicy& qos1,
                   const ::DDS::EntityFactoryQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
-                  const ::DDS::WriterDataLifecycleQosPolicy& qos2);   
+                  const ::DDS::WriterDataLifecycleQosPolicy& qos2);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
@@ -392,7 +420,7 @@ bool operator == (const ::DDS::DataWriterQos& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::PublisherQos& qos1,
                   const ::DDS::PublisherQos& qos2);
-    
+
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const ::DDS::DataReaderQos& qos1,
                   const ::DDS::DataReaderQos& qos2);
@@ -405,4 +433,4 @@ bool operator == (const ::DDS::SubscriberQos& qos1,
 #include "Qos_Helper.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_QOS_HELPER_H */
+#endif /* OPENDDS_DCPS_QOS_HELPER_H */

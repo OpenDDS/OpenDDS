@@ -1,3 +1,17 @@
+Tue May 20 18:27:01 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Refactored DDS::Duration_t value validation code.
+
+          Added missing DURABILITY_SERVICE QoS validation code.
+
+          Refactored HISTORY and RESOURCE_LIMITS QoS validation code so
+          that it may be leveraged by DURABILITY_SERVICE validation code.
+
+          Code clean-up.
+
 Tue May 20 16:08:09 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
