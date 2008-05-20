@@ -2,6 +2,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "OfferedDeadlineWatchdog.h"
+#include "ace/Recursive_Thread_Mutex.h"
 #include "Qos_Helper.h"
 
 
