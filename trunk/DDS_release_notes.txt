@@ -121,8 +121,15 @@ New to this version are the following changes:
   graceful disconnect does not terminate send. This bug made the re-established
   connection fail on send strategy state check.
 
-- Added dispose() and unregister() notifications.
+- Added dispose() and unregister() notifications.  When dispose()
+  is explicitly called on the DataWriter side, the DataReader listener
+  on_data_available() callback should receive a sample with the valid_data
+  flag == 0 and the instance state == NOT_ALIVE_DISPOSED_INSTANCE_STATE.
 
+  When unregister() is explicitly called on DataWriter side,
+  the DataReader listener on_data_available() callback should
+  receive a sample with the valid_data flag == 0 and the instance state ==
+  NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.
 
 =========================================================================
 
