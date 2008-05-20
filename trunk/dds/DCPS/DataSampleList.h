@@ -16,7 +16,7 @@ namespace OpenDDS
   namespace DCPS
   {
     const CORBA::ULong MAX_READERS_PER_ELEM = 5;
-    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
+    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
                                               TransportSendElementAllocator;
     
     const int MAX_READERS_TO_RESEND = 5;
