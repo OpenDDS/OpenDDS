@@ -1,3 +1,9 @@
+Wed May 21 15:50:14 UTC 2008  Steve Totten  <totten_s@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Minor rewording and reformatting of some items.
+
 Wed May 21 12:41:03 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:
