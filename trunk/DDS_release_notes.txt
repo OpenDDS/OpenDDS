@@ -47,6 +47,9 @@ New to this version are the following changes:
 
 - New command-line option "-DCPSTransportDebugLevel".
 
+  This can be used to specify a debug level at run-time. OpenDDS debug
+  statements range from 0 to 5 in increasing verboseness order.
+
 - Add the ability to attach to multiple DCPSInfoRepo processes.
 
   Applications which communicate using DDS are no longer restricted to
@@ -99,7 +102,7 @@ New to this version are the following changes:
   The address string in the configuration can use decimal IPv4/IPv6 address
   or hostname that can be resolved on both pub and sub sides.
 
-  The default address string is "host:port". The "host" is the fully qualified 
+  The default address string is "host:port". The "host" is the fully qualified
   domain name and the "port" is picked randomly by OS.
 
 - Fixed problem that default local_address does not work when hostname
@@ -108,9 +111,9 @@ New to this version are the following changes:
   With the default local_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
 
-- Added default configuration for reliable multicast. The 
+- Added default configuration for reliable multicast. The
   multicast_group_address defaults to ACE default multicast address(
-  224.9.9.2:20001 for ipv4 and ff05:0::ff01:1:20001 for ipv6) and the 
+  224.9.9.2:20001 for ipv4 and ff05:0::ff01:1:20001 for ipv6) and the
   local_address defaults to ANY with random port picked by OS.
 
 - Fixed a bug in DataReaderImpl::remove_associations() and
