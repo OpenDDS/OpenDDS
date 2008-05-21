@@ -1,3 +1,11 @@
+<<<<<<< .mine
+Wed May 21 04:53:22 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Removed "FIXES PENDING" comments.
+
+=======
 Wed May 21 03:55:23 UTC 2008  Ciju John  <johnc at ociweb dot com>
 
         * DDS_release_notes.txt:
@@ -34,6 +42,7 @@ Tue May 20 20:04:28 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
           Resolved warnings on gcc 4.1.1.
 
+>>>>>>> .r1171
 Tue May 20 18:27:01 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
