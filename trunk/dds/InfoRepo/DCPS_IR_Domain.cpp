@@ -1150,6 +1150,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             data.name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
             data.durability = topicQos->durability;
+            data.durability_service = topicQos->durability_service;
             data.deadline = topicQos->deadline;
             data.latency_budget = topicQos->latency_budget;
             data.liveliness = topicQos->liveliness;
@@ -1312,6 +1313,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.topic_name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
             data.durability = writerQos->durability;
+            data.durability_service = writerQos->durability_service;
             data.deadline = writerQos->deadline;
             data.latency_budget = writerQos->latency_budget;
             data.liveliness = writerQos->liveliness;

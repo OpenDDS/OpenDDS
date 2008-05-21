@@ -436,9 +436,18 @@ namespace OpenDDS
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
 
-      /// Lookup the cache to get the instance handle by the publication repo ids.
+      /// Lookup the cache to get the instance handle by the
+      /// publication repo ids.
       bool cache_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
+
+      /// Check if the received data sample expired.
+      /**
+       * @note Expiration will only occur if the application
+       *       configured a finite duration in the Topic's LIFESPAN
+       *       QoS policy.
+       */
+      bool data_expired (DataSampleHeader const & header) const;
 
       friend class WriterInfo;
 

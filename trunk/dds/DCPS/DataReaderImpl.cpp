@@ -945,16 +945,27 @@ void DataReaderImpl::data_received(const ReceivedDataSample& sample)
     case SAMPLE_DATA:
     case INSTANCE_REGISTRATION:
       {
+        DataSampleHeader const & header = sample.header_;
+
+	this->writer_activity(header.publication_id_);
+
         // "Pet the dog" so that it doesn't callback on the listener
         // the next time deadline timer expires.
         if (this->watchdog_.get ())
           this->watchdog_->signal ();
 
-	this->writer_activity(sample.header_.publication_id_);
-	// This also adds to the sample container
-	this->dds_demarshal(sample) ;
+        // Verify data has not exceeded its lifespan.
+        if (this->data_expired (header))
+        {
+          // Data expired.  Do not demarshal the data.  Simply allow
+          // the caller to deallocate the data buffer.
+          break;
+        }
 
-	this->subscriber_servant_->data_received(this) ;
+	// This also adds to the sample container
+	this->dds_demarshal(sample);
+
+	this->subscriber_servant_->data_received(this);
       }
       break ;
 
@@ -1781,6 +1792,49 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
   return ret;
 }
 
+bool
+DataReaderImpl::data_expired (DataSampleHeader const & header) const
+{
+  // @@ Is getting the LIFESPAN value from the Topic sufficient?
+  ::DDS::TopicQos topic_qos;
+  this->topic_servant_->get_qos (topic_qos);
+
+  ::DDS::LifespanQosPolicy const & lifespan = topic_qos.lifespan;
+
+  if (lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
+      || lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    // Finite lifespan.  Check if data has expired.
+
+    ::DDS::Time_t const tmp =
+      {
+        header.source_timestamp_sec_ + lifespan.duration.sec,
+        header.source_timestamp_nanosec_ + lifespan.duration.nanosec
+      };
+
+    // We assume that the publisher host's clock and subcriber host's
+    // clock are synchronized (allowed by the spec).
+    ACE_Time_Value const now (ACE_OS::gettimeofday ());
+    ACE_Time_Value const expiration_time (
+      OpenDDS::DCPS::time_to_time_value (tmp));
+    if (now <= expiration_time)
+    {
+      if (DCPS_debug_level >= 8)
+      {
+        ACE_Time_Value const diff (expiration_time - now);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("OpenDDS (%P|%t) Received data ")
+                   ACE_TEXT("expired by %d seconds, %u microseconds.\n"),
+                   diff.sec (),
+                   diff.usec ()));
+      }
+
+      return true;  // Data expired.
+    }
+  }
+
+  return false;
+}
 
 bool DataReaderImpl::is_bit () const
 {
