@@ -1,29 +1,53 @@
+Wed May 21 06:23:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+
+          Do not push expired data to the application, where expiration is
+          determined through the LIFESPAN QoS policy value.
+
+        * dds/DCPS/Qos_Helper.inl (time_value_to_time):
+          (time_value_to_duration):
+
+          Reinstated use of truncate_cast<> instead of static_cast<> that
+          was lost during the RT11951/trunk merge.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp (publish_topic_bit):
+          (publish_publication_bit):
+
+          Retrieve DURABILITY_SERVICE value from appropriate Qos type.
+
+        * dds/InfoRepo/DCPS_Utils.cpp (compatibleQOS):
+
+          Removed duplicate DURABILITY and LIVELINESS compatibility
+          checks.
+
 Wed May 21 06:17:31 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
-        
+
           Added remove_handler call before disconnecting backpressure connection
-          in notify_lost_on_backpressure_timeout(). This is to solve access 
-          violation on connection object when reactor cleanup the event handles 
+          in notify_lost_on_backpressure_timeout(). This is to solve access
+          violation on connection object when reactor cleanup the event handles
           during shutdown.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
-        
-          Removed connection reference in stop_i() to be consistent with send 
+
+          Removed connection reference in stop_i() to be consistent with send
           strategy.
-          
+
         * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
 
           Removed code to register/remove connection handle with reactor since
           the receive strategy already remove old connection handle and register
           new connection handle.
-          
+
         * tests/DCPS/Reconnect/pub.ini:
         * tests/DCPS/Reconnect/sub.ini:
 
           Used fixed port to test reconnect logic on both pub and sub.
-          
-Wed May 21 04:53:22 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+Wed May 21 04:53:22 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * DDS_release_notes.txt:
 

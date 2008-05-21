@@ -32,7 +32,7 @@ namespace OpenDDS
     ::DDS::Time_t time_value_to_time (const ACE_Time_Value& tv)
     {
       ::DDS::Time_t t;
-      t.sec = static_cast<CORBA::Long> (tv.sec ());
+      t.sec = truncate_cast<CORBA::Long> (tv.sec ());
       t.nanosec = tv.usec () * 1000;
       return t;
     }
@@ -48,7 +48,7 @@ namespace OpenDDS
     ::DDS::Duration_t time_value_to_duration (const ACE_Time_Value& tv)
     {
       ::DDS::Duration_t t;
-      t.sec = static_cast<CORBA::Long> (tv.sec ());
+      t.sec = truncate_cast<CORBA::Long> (tv.sec ());
       t.nanosec = tv.usec () * 1000;
       return t;
     }
