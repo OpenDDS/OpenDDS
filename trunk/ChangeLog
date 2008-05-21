@@ -1,3 +1,28 @@
+Wed May 21 06:17:31 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        
+          Added remove_handler call before disconnecting backpressure connection
+          in notify_lost_on_backpressure_timeout(). This is to solve access 
+          violation on connection object when reactor cleanup the event handles 
+          during shutdown.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        
+          Removed connection reference in stop_i() to be consistent with send 
+          strategy.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+
+          Removed code to register/remove connection handle with reactor since
+          the receive strategy already remove old connection handle and register
+          new connection handle.
+          
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+
+          Used fixed port to test reconnect logic on both pub and sub.
+          
 Wed May 21 04:53:22 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * DDS_release_notes.txt:
