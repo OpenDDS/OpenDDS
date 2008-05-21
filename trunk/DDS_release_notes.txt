@@ -33,7 +33,6 @@ New to this version are the following changes:
   TRANSIENT DURABILITY, except that unsent cached data will survive
   publisher and process destruction.
 
-
 - Added support for the DURABILITY_SERVICE QoS policy.
 
   This QoS policy provides a way to specify resource limits for
@@ -44,8 +43,9 @@ New to this version are the following changes:
 
 - New command-line option "-DCPSTransportDebugLevel".
 
-  This can be used to specify a debug level at run-time. OpenDDS debug
-  statements range from 0 to 5 in increasing verboseness order.
+  This can be used to specify a debug level for the OpenDDS
+  transport layer at run-time. OpenDDS debug statements range
+  from 0 to 5 in increasing order of verbosity.
 
 - Add the ability to attach to multiple DCPSInfoRepo processes.
 
@@ -85,10 +85,11 @@ New to this version are the following changes:
   Fixed issue with reference counting for classes derived from
   LocalObject.
 
-- Supported IPv6.
+- Added support for IPv6.
 
-  The requirement for using IPv6 is the FQDN needs be resolved as IPv6
-  address as it's used by default configuration to support BuiltInTopic.
+  The requirement for using IPv6 is the fully qualified domain name (FQDN)
+  needs be resolved as IPv6 address as it is used by default configuration
+  to support BuiltInTopic.
 
   The local_address in the configuration file should use IPv6 decimal
   address or hostname that can be resolved as IPv6 address.
@@ -108,10 +109,11 @@ New to this version are the following changes:
   With the default local_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
 
-- Added default configuration for reliable multicast. The
-  multicast_group_address defaults to ACE default multicast address(
-  224.9.9.2:20001 for ipv4 and ff05:0::ff01:1:20001 for ipv6) and the
-  local_address defaults to ANY with random port picked by OS.
+- Added default configuration for the reliable multicast transport type.
+
+  The multicast_group_address defaults to the ACE default multicast address
+  (224.9.9.2:20001 for IPv4 and ff05:0::ff01:1:20001 for IPv6) and the
+  local_address defaults to ANY with a random port picked by the OS.
 
 - Fixed a bug in DataReaderImpl::remove_associations() and
   DataWriterImpl::remove_associations() that should not attempt to remove
@@ -126,9 +128,9 @@ New to this version are the following changes:
   on_data_available() callback should receive a sample with the valid_data
   flag == 0 and the instance state == NOT_ALIVE_DISPOSED_INSTANCE_STATE.
 
-  When unregister() is explicitly called on DataWriter side,
-  the DataReader listener on_data_available() callback should
-  receive a sample with the valid_data flag == 0 and the instance state ==
+  When unregister() is explicitly called on the DataWriter side,
+  the DataReader listener on_data_available() callback should receive a
+  sample with the valid_data flag == 0 and the instance state ==
   NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.
 
 =========================================================================
