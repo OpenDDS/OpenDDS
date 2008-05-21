@@ -249,8 +249,7 @@ OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 
   if (!this->send_strategy_.is_nil())
     this->send_strategy_->terminate_send ();
-  this->peer().close();
-  this->connected_ = false;
+  this->disconnect();
   return 0;
 }
 
@@ -266,8 +265,7 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 
   if (!this->send_strategy_.is_nil())
     this->send_strategy_->terminate_send ();
-  this->peer().close();
-  this->connected_ = false;
+  this->disconnect();
   return 0;
 }
 
@@ -557,8 +555,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
       // Suspend send once.
       this->send_strategy_->suspend_send ();
 
-      this->peer ().close ();
-      this->connected_ = false;
+      this->disconnect();
+
       if (this->tcp_config_->conn_retry_attempts_ > 0)
       {
         this->link_->notify (DataLink::DISCONNECTED);
@@ -780,8 +778,17 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
       {
         this->reconnect_state_ = LOST_STATE;
         notify_lost = true;
-        this->peer ().close ();
-        this->connected_ = false;
+        
+        // Add remove_handler to solve access violation on connection object
+        // when reactor cleanup the event handles during shutdown.
+        SimpleTcpReceiveStrategy* rs
+          = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+        rs->get_reactor()->remove_handler (this,
+          ACE_Event_Handler::READ_MASK |
+          ACE_Event_Handler::DONT_CALL);
+
+        this->disconnect();
       }
   }
 

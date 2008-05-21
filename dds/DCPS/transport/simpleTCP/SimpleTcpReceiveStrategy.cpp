@@ -195,13 +195,15 @@ OpenDDS::DCPS::SimpleTcpReceiveStrategy::stop_i()
                                              (this->connection_.in(),
                                               ACE_Event_Handler::READ_MASK |
                                               ACE_Event_Handler::DONT_CALL);
-
+ 
   // Take back the "copy" we made (see start_i() implementation).
   this->connection_->_remove_ref();
 
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
+
+  this->connection_ = 0;
 }
 
 
