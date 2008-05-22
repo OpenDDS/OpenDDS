@@ -7,3 +7,11 @@ This work was done as part if RT11951.  It includes:
    federate the repositories;
    send data.
 
+NOTE!
+Currently this test is a placeholder for verifying the implementation of
+repository federation.  This will be extended as federation is
+implemented.
+
+Until federation is implemented, this test does not check any additional
+features of DDS.
+
