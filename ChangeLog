@@ -1,11 +1,22 @@
+Thu May 22 16:28:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added note about memory management and possible crashes on exit.
+
+        * tests/DCPS/CompatibilityTest/README:
+        * tests/DCPS/UnitTests/README:
+
+          Improved documentation on these tests.
+
 Thu May 22 14:26:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Federation/Publisher.cpp:
         * tests/DCPS/Federation/README:
         * tests/DCPS/Federation/Subscriber.cpp:
 
-	  Corrected some pointer derefencing issues and added a note
-	  about the applicability of this test.
+          Corrected some pointer derefencing issues and added a note
+          about the applicability of this test.
 
 Wed May 21 15:50:14 UTC 2008  Steve Totten  <totten_s@ociweb.com>
 

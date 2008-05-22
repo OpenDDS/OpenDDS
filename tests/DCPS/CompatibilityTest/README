@@ -1,7 +1,9 @@
-A basic liveliness timeout test of DDS.
+A basic test to verify that only compatible publishers and subscribers are paired together by the DCPSInfoRepo.
 
 run_test.pl
   Run a separate publisher and subscriber process.
 
-This test is to verify RT#12036.
-This test will stop working once RT#12054 is fixed.(the test exploits the fact that we don't require the publisher liveliness to be less than the subscriber liveliness)
+This test is to verify RT#12054.
+This test starts multiple pairs of one publisher and one subscriber.  Various qos parameters are varied to verify that
+the DCPSInfoRepo pairs up compatible publishers and subscribers and doesn't pair uncompatible ones.
+Further granularity for varifying Liveliness Duration compatibility is handled by "UnitTest/run_test.pl LivelinessCompatibility".
