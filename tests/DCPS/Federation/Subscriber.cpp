@@ -125,7 +125,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   }
   ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != subscriber_data->register_type(
-                            this->participant_,
+                            this->participant_.in(),
                             this->config_.typeName().c_str()
                           )
     ) {
@@ -242,7 +242,7 @@ Subscriber::~Subscriber()
   }
 
   // Release the participant
-  if( 0 == CORBA::is_nil( this->participant_)) {
+  if( 0 == CORBA::is_nil( this->participant_.in())) {
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
          == this->participant_->delete_contained_entities()
       ) {
@@ -251,7 +251,7 @@ Subscriber::~Subscriber()
       ));
 
     } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant( this->participant_)
+               == TheParticipantFactory->delete_participant( this->participant_.in())
              ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Unable to release the participant.\n")
