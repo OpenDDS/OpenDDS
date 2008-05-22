@@ -83,7 +83,8 @@ New to this version are the following changes:
 - Improved Memory Mangament
 
   Fixed issue with reference counting for classes derived from
-  LocalObject.
+  LocalObject.  If a user defined application is crashing on exit or
+  cleanup, see the OpenDDS FAQ.
 
 - Added support for IPv6.
 
