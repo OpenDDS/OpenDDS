@@ -1,3 +1,30 @@
+Fri May 23 10:12:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (operator<):
+
+          Corrected logic that prevented expected result of false when
+          left operand was infinite.
+
+        * tests/DCPS/FooTest5_0/main.cpp (main):
+        * tests/DCPS/ZeroCopyRead/main.cpp (main):
+
+          s/DDS::TRANSPORTTYPE/OpenDDS::TRANSPORTTYPE/g.  The
+          OpenDDS-specific TRANSPORTTYPE_QOS_POLICY_ID constant is now in
+          the OpenDDS namespace.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+          (lease_greater_than):
+
+          New convenience function introduced merely to minimize changes
+          needed to address build errors caused by removed of
+          OpenDDS::DCPS::Qos_Helper::lease_greater_than() method.
+
+          (main):
+
+          Dropped "OpenDDS::DCPS::Qos_Helper::" scope qualifier from all
+          calls to lease_greater_than().  That function is now local to
+          this file.
+
 Fri May 23 06:02:44 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * DDS_release_notes.txt:

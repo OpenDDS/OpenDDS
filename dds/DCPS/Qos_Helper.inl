@@ -46,9 +46,10 @@ operator< (::DDS::Duration_t const & t1,
   // are.  It doesn't make sense for only one of the fields to be
   // INFINITY.
   return
-    (t1 != DDS_DURATION_INFINITY && t2 == DDS_DURATION_INFINITY)
-    || t1.sec < t2.sec
-    || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
+    t1 != DDS_DURATION_INFINITY
+    && (t2 == DDS_DURATION_INFINITY
+        || t1.sec < t2.sec
+        || (t1.sec == t2.sec && t1.nanosec < t2.nanosec));
 }
 
 ACE_INLINE
