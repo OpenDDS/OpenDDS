@@ -1,4 +1,82 @@
-Thu May 22 16:28:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>
+Fri May 23 06:02:44 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Added note about TRANSPORTTYPE_QOS_POLICY_{NAME,ID} constant
+          namespace change.
+
+        * bin/DCPS/CPPTemplate.pm (get_type_name):
+
+          Do not check for nil CORBA::String_var by comparing to NULL.
+          Compare to zero instead since TAO's CORBA::String_var uses zero,
+          not NULL.  The NULL constant is not guaranteed to be zero.
+
+        * dds/DdsDcpsInfrastructure.idl (TRANSPORTTYPE_QOS_POLICY_NAME):
+          (TRANSPORTTYPE_QOS_POLICY_ID):
+
+          Moved these constants from DDS namespace to OpenDDS namespace
+          since they are specific to OpenDDS.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+
+          Pass "this" pointer to Watchdog object.  The Watchdog object
+          now dynamically retrieves the Listener object each time it times
+          out the listener may be changed by the application.
+
+        * dds/DCPS/DataSampleHeader.h (source_timestamp_nanosec_):
+
+          Changed this field's type from ACE_INT32 to ACE_UINT32 to match
+          corresponding type ::DDS::Time_t::nanosec field type,
+          i.e. CORBA::ULong.
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          (operator<):
+
+          Handle the INFINITY case explicitly since the DDS spec does not
+          define infinite nanosec value to be the maximum possible value
+          for the underlying type.
+
+          (operator<=):
+
+          Tightened up operator<= implementation so that it is implemented
+          in terms of operator< alone, instead of both operator< and
+          operator==.
+
+          (operator!=, operator>, operator>=):
+
+          Added !=, > and >= operators for the DDS::Duration_t type.
+          Allows for simplification of some Duration_t comparisons.
+
+          Moved relational operators ahead of Qos_Helper methods that use
+          them.  Some compilers require the inline definition to appear
+          before its use.
+
+          (lease_greater_than):
+
+          Removed this method.  Use the new greater-than operator
+          instead.
+
+        * dds/InfoRepo/DCPS_Utils.cpp (compatibleQOS):
+
+          The TRANSPORTTYPE_QOS_POLICY_ID constant is now in the OpenDDS
+          namespace.
+
+          Use operator>() instead of
+          OpenDDS::Qos_Helper::lease_greater_than().  The latter no longer
+          exists.
+
+          Added missing DEADLINE compatibility check.  The DDS
+          specification requires the offered deadline period to be less
+          than or equal to the requested deadline period.
+
+May 22 16:28:59 UTC 2008  Brian Johnson  <johnsonb@ociweb.com>:
 
         * DDS_release_notes.txt:
 

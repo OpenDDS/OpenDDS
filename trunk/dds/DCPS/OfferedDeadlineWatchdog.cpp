@@ -2,15 +2,16 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "OfferedDeadlineWatchdog.h"
-#include "ace/Recursive_Thread_Mutex.h"
+#include "DataWriterImpl.h"
 #include "Qos_Helper.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 
 OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog (
   ACE_Reactor * reactor,
   OpenDDS::DCPS::OfferedDeadlineWatchdog::lock_type & lock,
   ::DDS::DeadlineQosPolicy qos,
-  ::DDS::DataWriterListener_ptr listener,
+  OpenDDS::DCPS::DataWriterImpl * writer_impl,
   ::DDS::DataWriter_ptr writer,
   ::DDS::OfferedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
@@ -19,7 +20,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog (
   , lock_ (lock)
   , reverse_lock_ (lock)
   , signaled_ (false)
-  , listener_ (::DDS::DataWriterListener::_duplicate (listener))
+  , writer_impl_ (writer_impl)
   , writer_ (::DDS::DataWriter::_duplicate (writer))
   , status_ (status)
   , last_total_count_ (last_total_count)
@@ -44,16 +45,17 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute ()
     // Copy before releasing the lock.
     ::DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
+    ::DDS::DataWriterListener * const listener =
+        this->writer_impl_->listener_for (
+          ::DDS::OFFERED_DEADLINE_MISSED_STATUS);
+
     // Release the lock during the upcall.
     ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
 
-    if (!CORBA::is_nil (this->listener_.in ()))
-    {
-      // @todo Will this operation ever throw?  If so we may want to
-      //       catch all exceptions, and act accordingly.
-      this->listener_->on_offered_deadline_missed (this->writer_.in (),
-                                                   status);
-    }
+    // @todo Will this operation ever throw?  If so we may want to
+    //       catch all exceptions, and act accordingly.
+    listener->on_offered_deadline_missed (this->writer_.in (),
+                                          status);
   }
   else
   {

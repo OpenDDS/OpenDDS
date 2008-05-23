@@ -31,6 +31,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class DataWriterImpl;
 
     /**
      * @class OfferedDeadlineWatchdog
@@ -54,7 +55,7 @@ namespace OpenDDS
         ACE_Reactor * reactor,
         lock_type & lock,
         ::DDS::DeadlineQosPolicy qos,
-        ::DDS::DataWriterListener_ptr listener,
+        OpenDDS::DCPS::DataWriterImpl * writer_impl,
         ::DDS::DataWriter_ptr writer,
         ::DDS::OfferedDeadlineMissedStatus & status,
         CORBA::Long & last_total_count);
@@ -87,9 +88,9 @@ namespace OpenDDS
       /// @c false after each deadline timeout.
       bool signaled_;
 
-      /// Reference to listener that will be called when the deadline
-      /// expires.
-      ::DDS::DataWriterListener_var      listener_;
+      /// Pointer to the @c DataWriterImpl object from which the
+      /// @c DataWriterListener is obtained.
+      OpenDDS::DCPS::DataWriterImpl * const writer_impl_;
 
       /// Reference to DataWriter passed to listener when the deadline
       /// expires.

@@ -165,17 +165,20 @@ void DataReaderImpl::init (
     {
       fast_listener_ = listener_.in ();
     }
-  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
+
+  // Only store the participant pointer, since it is our "grand"
+  // parent, we will exist as long as it does
   participant_servant_ = participant;
-  domain_id_ =
-    participant_servant_->get_domain_id ();
+  domain_id_ = participant_servant_->get_domain_id ();
+  topic_desc_ =
+    participant_servant_->lookup_topicdescription(topic_name.in ());
 
-  topic_desc_ = participant_servant_->lookup_topicdescription(topic_name.in ()) ;
-
-  // only store the subscriber pointer, since it is our parent, we will exist as long as it does
+  // Only store the subscriber pointer, since it is our parent, we
+  // will exist as long as it does.
   subscriber_servant_ = subscriber ;
-  dr_local_objref_        = ::DDS::DataReader::_duplicate (dr_objref);
-  dr_remote_objref_ = ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
+  dr_local_objref_    = ::DDS::DataReader::_duplicate (dr_objref);
+  dr_remote_objref_   =
+    ::OpenDDS::DCPS::DataReaderRemote::_duplicate (dr_remote_objref );
 
   // Setup the requested deadline watchdog if the configured deadline
   // period is not the default (infinite).
@@ -188,7 +191,7 @@ void DataReaderImpl::init (
                           this->reactor_,
                           this->sample_lock_,
                           qos.deadline,
-                          a_listener,
+                          this,
                           dr_objref,
                           this->requested_deadline_missed_status_,
                           this->last_deadline_missed_total_count_));
@@ -473,19 +476,18 @@ void DataReaderImpl::remove_all_associations ()
 
 
 void DataReaderImpl::update_incompatible_qos (
-					      const OpenDDS::DCPS::IncompatibleQosStatus & status
-					      )
-  ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
+    const OpenDDS::DCPS::IncompatibleQosStatus & status)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  ::DDS::DataReaderListener* listener
-      = listener_for (::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
+  ::DDS::DataReaderListener* listener =
+    listener_for (::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
-  ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+  ACE_GUARD (ACE_Recursive_Thread_Mutex,
+             guard,
+             this->publication_handle_lock_);
 
   set_status_changed_flag(::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
-			  true) ;
+			  true);
 
   // copy status and increment change
   requested_incompatible_qos_status_.total_count = status.total_count;
@@ -497,7 +499,6 @@ void DataReaderImpl::update_incompatible_qos (
 
   if (listener != 0)
     {
-
       listener->on_requested_incompatible_qos (dr_local_objref_.in (),
 					       requested_incompatible_qos_status_);
 
@@ -511,11 +512,8 @@ void DataReaderImpl::update_incompatible_qos (
     }
 }
 
-::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities (
-							       )
-  ACE_THROW_SPEC ((
-		   CORBA::SystemException
-		   ))
+::DDS::ReturnCode_t DataReaderImpl::delete_contained_entities ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (DCPS_debug_level >= 2)
     ACE_DEBUG ((LM_DEBUG,
@@ -1263,7 +1261,7 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
       // so cancel the existing timer.
       if (reactor_->cancel_timer (this->liveliness_timer_id_, &arg) == -1)
       {
-        // this could fail becaue the reactor's call and
+        // this could fail because the reactor's call and
         // the add_associations' call to this could overlap
         // so it is not a failure.
         ACE_DEBUG((LM_DEBUG,

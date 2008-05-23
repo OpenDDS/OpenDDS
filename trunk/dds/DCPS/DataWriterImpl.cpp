@@ -128,16 +128,16 @@ DataWriterImpl::cleanup ()
 }
 
 void
-DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
-           TopicImpl                             *topic_servant,
-           const ::DDS::DataWriterQos &           qos,
-           ::DDS::DataWriterListener_ptr          a_listener,
-           OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-           OpenDDS::DCPS::PublisherImpl*              publisher_servant,
-           ::DDS::DataWriter_ptr                  dw_local,
-           OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
-           )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::init (
+    ::DDS::Topic_ptr                       topic,
+    TopicImpl *                            topic_servant,
+    const ::DDS::DataWriterQos &           qos,
+    ::DDS::DataWriterListener_ptr          a_listener,
+    OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
+    OpenDDS::DCPS::PublisherImpl *         publisher_servant,
+    ::DDS::DataWriter_ptr                  dw_local,
+    OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","init",6);
   topic_objref_ = ::DDS::Topic::_duplicate (topic);
@@ -163,11 +163,14 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
     {
       fast_listener_ = listener_.in();
     }
-  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
+
+  // Only store the participant pointer, since it is our "grand"
+  // parent, we will exist as long as it does.
   participant_servant_ = participant_servant;
   domain_id_ = participant_servant_->get_domain_id ();
 
-  // only store the publisher pointer, since it is our parent, we will exist as long as it does
+  // Only store the publisher pointer, since it is our parent, we will
+  // exist as long as it does.
   publisher_servant_ = publisher_servant;
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
@@ -186,7 +189,7 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
                           this->reactor_,
                           this->lock_,
                           qos.deadline,
-                          a_listener,
+                          this,
                           dw_local,
                           this->offered_deadline_missed_status_,
                           this->last_deadline_missed_total_count_));
