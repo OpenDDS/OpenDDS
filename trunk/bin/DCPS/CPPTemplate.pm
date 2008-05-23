@@ -104,7 +104,7 @@ char *
 <%TYPE%>TypeSupportImpl::get_type_name ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  if (this->type_name_ == NULL)
+  if (this->type_name_.in () == 0)
     return CORBA::string_dup (this->_interface_repository_id());
   else
     return CORBA::string_dup (this->type_name_.in ());
@@ -120,7 +120,7 @@ char *
                  <%TYPE%>DataWriterImpl(),
                  ::DDS::DataWriter::_nil());
 
-    return writer_impl;
+  return writer_impl;
 }
 
 ::DDS::DataReader_ptr
