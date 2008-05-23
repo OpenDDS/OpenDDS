@@ -1255,16 +1255,16 @@ TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq&
 {
   TAO_OutputCDR outCdr;
   outCdr << qos;
-  size_t len = outCdr.total_length();
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
   char *buf = new char[len];
   if (buf == 0) {
     ACE_ERROR ((LM_ERROR, "(%P|%t)TAO_DDS_DCPSInfo_i::get_qos_seq "
       "Allocation failed.\n"));
-    exit (1);
   }
 
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
   ACE_OS::memcpy (buf, dst.base(), len);
 
   qosSeq.first = qosType;
