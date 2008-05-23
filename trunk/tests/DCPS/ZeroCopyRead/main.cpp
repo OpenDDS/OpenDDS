@@ -645,7 +645,7 @@ int main (int argc, char *argv[])
       for (CORBA::ULong ii =0; ii < incomp->policies.length (); ii++)
         {
           if (incomp->policies[ii].policy_id
-                        == ::DDS::TRANSPORTTYPE_QOS_POLICY_ID)
+                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
             incompatible_transport_found = 1;
         }
 
