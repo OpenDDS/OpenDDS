@@ -6,9 +6,8 @@
 #include "Service_Participant.h"
 #include "ace/OS_NS_string.h" // for strcmp() in partition operator==()
 
-// This inline equality operator is used in some inline functions
-// below.  Some compilers require its inline definition to appear
-// before its use.
+// These operators are used in some inline functions below.  Some
+// compilers require the inline definition to appear before its use.
 ACE_INLINE
 bool
 operator== (::DDS::Duration_t const & t1,
@@ -16,6 +15,377 @@ operator== (::DDS::Duration_t const & t1,
 {
   return t1.sec == t2.sec && t1.nanosec == t2.nanosec;
 }
+
+ACE_INLINE
+bool
+operator!= (::DDS::Duration_t const & t1,
+            ::DDS::Duration_t const & t2)
+{
+  return !(t1 == t2);
+}
+
+
+ACE_INLINE
+bool
+operator< (::DDS::Duration_t const & t1,
+           ::DDS::Duration_t const & t2)
+{
+  // @note We wouldn't have to handle the case for INFINITY explicitly
+  //       if both the Duration_t sec and nanosec fields were the
+  //       maximum values for their corresponding types.
+  //       Unfortunately, the OMG DDS specification defines the
+  //       infinite nanosec value to be somewhere in the middle.
+  ::DDS::Duration_t const DDS_DURATION_INFINITY =
+    {
+      ::DDS::DURATION_INFINITY_SEC,
+      ::DDS::DURATION_INFINITY_NSEC
+    };
+
+  // We assume that either both the DDS::Duration_t::sec and
+  // DDS::Duration_t::nanosec fields are INFINITY or neither of them
+  // are.  It doesn't make sense for only one of the fields to be
+  // INFINITY.
+  return
+    (t1 != DDS_DURATION_INFINITY && t2 == DDS_DURATION_INFINITY)
+    || t1.sec < t2.sec
+    || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
+}
+
+ACE_INLINE
+bool
+operator<= (const ::DDS::Duration_t& t1,
+            const ::DDS::Duration_t& t2)
+{
+  // If t2 is *not* less than t1, t1 must be less than
+  // or equal to t2.
+  // This is more concise than:
+  //   t1 < t2 || t1 == t2
+  return !(t2 < t1);
+}
+
+ACE_INLINE
+bool
+operator> (::DDS::Duration_t const & t1,
+           ::DDS::Duration_t const & t2)
+{
+  return t2 < t1;
+}
+
+ACE_INLINE
+bool
+operator>= (::DDS::Duration_t const & t1,
+            ::DDS::Duration_t const & t2)
+{
+  return t2 <= t1;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::UserDataQosPolicy& qos1,
+                  const ::DDS::UserDataQosPolicy& qos2)
+{
+  return qos1.value == qos2.value;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::TopicDataQosPolicy & qos1,
+                  const ::DDS::TopicDataQosPolicy & qos2)
+{
+  return qos1.value == qos2.value;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::GroupDataQosPolicy& qos1,
+                  const ::DDS::GroupDataQosPolicy& qos2)
+{
+  return qos1.value == qos2.value;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::TransportPriorityQosPolicy& qos1,
+                  const ::DDS::TransportPriorityQosPolicy& qos2)
+{
+  return qos1.value == qos2.value;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::LifespanQosPolicy& qos1,
+                  const ::DDS::LifespanQosPolicy& qos2)
+{
+  return qos1.duration == qos2.duration;
+}
+
+
+ACE_INLINE
+bool
+operator== (const ::DDS::DurabilityQosPolicy& qos1,
+            const ::DDS::DurabilityQosPolicy& qos2)
+{
+  return
+    qos1.kind == qos2.kind
+    && qos1.service_cleanup_delay == qos2.service_cleanup_delay;
+}
+
+ACE_INLINE
+bool
+operator== (::DDS::DurabilityServiceQosPolicy const & qos1,
+            ::DDS::DurabilityServiceQosPolicy const & qos2)
+{
+  return
+    qos1.service_cleanup_delay == qos2.service_cleanup_delay
+    && qos1.history_kind == qos2.history_kind
+    && qos1.history_depth == qos2.history_depth
+    && qos1.max_samples == qos2.max_samples
+    && qos1.max_instances == qos2.max_instances
+    && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::PresentationQosPolicy& qos1,
+                  const ::DDS::PresentationQosPolicy& qos2)
+{
+  return
+    qos1.access_scope == qos2.access_scope
+    && qos1.coherent_access == qos2.coherent_access
+    && qos1.ordered_access == qos2.ordered_access;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::DeadlineQosPolicy& qos1,
+                  const ::DDS::DeadlineQosPolicy& qos2)
+{
+  return qos1.period == qos2.period;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::LatencyBudgetQosPolicy& qos1,
+                  const ::DDS::LatencyBudgetQosPolicy& qos2)
+{
+  return qos1.duration == qos2.duration;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::OwnershipQosPolicy& qos1,
+                  const ::DDS::OwnershipQosPolicy& qos2)
+{
+  return qos1.kind == qos2.kind;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::OwnershipStrengthQosPolicy& qos1,
+                  const ::DDS::OwnershipStrengthQosPolicy& qos2)
+{
+  return qos1.value == qos2.value;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::LivelinessQosPolicy& qos1,
+                  const ::DDS::LivelinessQosPolicy& qos2)
+{
+  return
+    qos1.kind == qos2.kind
+    && qos1.lease_duration == qos2.lease_duration;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::TimeBasedFilterQosPolicy& qos1,
+                  const ::DDS::TimeBasedFilterQosPolicy& qos2)
+{
+  return qos1.minimum_separation == qos2.minimum_separation;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::PartitionQosPolicy& qos1,
+                  const ::DDS::PartitionQosPolicy& qos2)
+{
+  CORBA::ULong const len = qos1.name.length();
+  if (len == qos2.name.length())
+  {
+    for(CORBA::ULong i = 0; i < len; ++i)
+    {
+      if ( 0 != ACE_OS::strcmp (qos1.name[i], qos2.name[i]))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::ReliabilityQosPolicy& qos1,
+                  const ::DDS::ReliabilityQosPolicy& qos2)
+{
+  return
+    qos1.kind == qos2.kind
+    && qos1.max_blocking_time == qos2.max_blocking_time;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::DestinationOrderQosPolicy& qos1,
+                  const ::DDS::DestinationOrderQosPolicy& qos2)
+{
+  return qos1.kind == qos2.kind;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::HistoryQosPolicy& qos1,
+                  const ::DDS::HistoryQosPolicy& qos2)
+{
+  return
+    qos1.kind == qos2.kind
+    && qos1.depth == qos2.depth;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::ResourceLimitsQosPolicy& qos1,
+                  const ::DDS::ResourceLimitsQosPolicy& qos2)
+{
+  return
+    qos1.max_samples == qos2.max_samples
+    && qos1.max_instances == qos2.max_instances
+    && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::EntityFactoryQosPolicy& qos1,
+                  const ::DDS::EntityFactoryQosPolicy& qos2)
+{
+  return
+    qos1.autoenable_created_entities == qos2.autoenable_created_entities;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
+                  const ::DDS::WriterDataLifecycleQosPolicy& qos2)
+{
+  return
+    qos1.autodispose_unregistered_instances == qos2.autodispose_unregistered_instances;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
+                  const ::DDS::ReaderDataLifecycleQosPolicy& qos2)
+{
+  return
+    qos1.autopurge_nowriter_samples_delay == qos2.autopurge_nowriter_samples_delay;
+}
+
+
+ACE_INLINE
+bool operator ==  (const ::DDS::DomainParticipantQos& qos1,
+                   const ::DDS::DomainParticipantQos& qos2)
+{
+  return
+    qos1.user_data == qos2.user_data
+    && qos1.entity_factory == qos2.entity_factory;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::TopicQos& qos1,
+                  const ::DDS::TopicQos& qos2)
+{
+  return
+    qos1.topic_data == qos2.topic_data
+    && qos1.durability == qos2.durability
+    && qos1.deadline == qos2.deadline
+    && qos1.latency_budget == qos2.latency_budget
+    && qos1.liveliness == qos2.liveliness
+    && qos1.reliability == qos2.reliability
+    && qos1.destination_order == qos2.destination_order
+    && qos1.history == qos2.history
+    && qos1.resource_limits == qos2.resource_limits
+    && qos1.transport_priority == qos2.transport_priority
+    && qos1.lifespan == qos2.lifespan
+    && qos1.ownership == qos2.ownership;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::DataWriterQos& qos1,
+                  const ::DDS::DataWriterQos& qos2)
+{
+  return
+    qos1.durability == qos2.durability
+    && qos1.deadline == qos2.deadline
+    && qos1.latency_budget == qos2.latency_budget
+    && qos1.liveliness == qos2.liveliness
+    && qos1.reliability == qos2.reliability
+    && qos1.destination_order == qos2.destination_order
+    && qos1.history == qos2.history
+    && qos1.resource_limits == qos2.resource_limits
+    && qos1.transport_priority == qos2.transport_priority
+    && qos1.lifespan == qos2.lifespan
+    && qos1.user_data == qos2.user_data
+    && qos1.ownership_strength == qos2.ownership_strength
+    && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::PublisherQos& qos1,
+                  const ::DDS::PublisherQos& qos2)
+{
+  return
+    qos1.presentation == qos2.presentation
+    && qos1.partition == qos2.partition
+    && qos1.group_data == qos2.group_data
+    && qos1.entity_factory == qos2.entity_factory;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::DataReaderQos& qos1,
+                  const ::DDS::DataReaderQos& qos2)
+{
+  return
+    qos1.durability == qos2.durability
+    && qos1.deadline == qos2.deadline
+    && qos1.latency_budget == qos2.latency_budget
+    && qos1.liveliness == qos2.liveliness
+    && qos1.reliability == qos2.reliability
+    && qos1.destination_order == qos2.destination_order
+    && qos1.history == qos2.history
+    && qos1.resource_limits == qos2.resource_limits
+    && qos1.user_data == qos2.user_data
+    && qos1.time_based_filter == qos2.time_based_filter
+    && qos1.reader_data_lifecycle == qos2.reader_data_lifecycle;
+}
+
+
+ACE_INLINE
+bool operator == (const ::DDS::SubscriberQos& qos1,
+                  const ::DDS::SubscriberQos& qos2)
+{
+  return
+    qos1.presentation == qos2.presentation
+    && qos1.partition == qos2.partition
+    && qos1.group_data == qos2.group_data
+    && qos1.entity_factory == qos2.entity_factory;
+}
+
+// ------------------------------------------------------------------
 
 namespace OpenDDS
 {
@@ -804,347 +1174,5 @@ namespace OpenDDS
         && changeable(qos1.entity_factory, qos2.entity_factory);
     }
 
-
-    ACE_INLINE
-    bool Qos_Helper::lease_greater_than (
-      const ::DDS::LivelinessQosPolicy& qos1,
-      const ::DDS::LivelinessQosPolicy& qos2)
-    {
-      // kind is ignored
-      return
-        (qos2.lease_duration.sec     != ::DDS::DURATION_INFINITY_SEC
-         || qos2.lease_duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
-        && ((qos1.lease_duration.sec     == ::DDS::DURATION_INFINITY_SEC
-             && qos1.lease_duration.nanosec == ::DDS::DURATION_INFINITY_NSEC)
-            || (qos1.lease_duration.sec   >  qos2.lease_duration.sec
-                || (qos1.lease_duration.sec  == qos2.lease_duration.sec
-                    && qos1.lease_duration.nanosec > qos2.lease_duration.nanosec)));
-    }
-
-
   } // namespace ::DDS
 } // namespace OpenDDS
-
-
-
-ACE_INLINE
-bool operator < (const ::DDS::Duration_t& t1,
-                 const ::DDS::Duration_t& t2)
-{
-  return
-    t1.sec < t2.sec
-    || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
-}
-
-ACE_INLINE
-bool operator<= (const ::DDS::Duration_t& t1,
-                 const ::DDS::Duration_t& t2)
-{
-  return t1 < t2 || t1 == t2;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::UserDataQosPolicy& qos1,
-                  const ::DDS::UserDataQosPolicy& qos2)
-{
-  return qos1.value == qos2.value;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::TopicDataQosPolicy & qos1,
-                  const ::DDS::TopicDataQosPolicy & qos2)
-{
-  return qos1.value == qos2.value;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::GroupDataQosPolicy& qos1,
-                  const ::DDS::GroupDataQosPolicy& qos2)
-{
-  return qos1.value == qos2.value;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::TransportPriorityQosPolicy& qos1,
-                  const ::DDS::TransportPriorityQosPolicy& qos2)
-{
-  return qos1.value == qos2.value;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::LifespanQosPolicy& qos1,
-                  const ::DDS::LifespanQosPolicy& qos2)
-{
-  return qos1.duration == qos2.duration;
-}
-
-
-ACE_INLINE
-bool
-operator== (const ::DDS::DurabilityQosPolicy& qos1,
-                  const ::DDS::DurabilityQosPolicy& qos2)
-{
-  return
-    qos1.kind == qos2.kind
-    && qos1.service_cleanup_delay == qos2.service_cleanup_delay;
-}
-
-ACE_INLINE
-bool
-operator== (::DDS::DurabilityServiceQosPolicy const & qos1,
-            ::DDS::DurabilityServiceQosPolicy const & qos2)
-{
-  return
-    qos1.service_cleanup_delay == qos2.service_cleanup_delay
-    && qos1.history_kind == qos2.history_kind
-    && qos1.history_depth == qos2.history_depth
-    && qos1.max_samples == qos2.max_samples
-    && qos1.max_instances == qos2.max_instances
-    && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::PresentationQosPolicy& qos1,
-                  const ::DDS::PresentationQosPolicy& qos2)
-{
-  return
-    qos1.access_scope == qos2.access_scope
-    && qos1.coherent_access == qos2.coherent_access
-    && qos1.ordered_access == qos2.ordered_access;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::DeadlineQosPolicy& qos1,
-                  const ::DDS::DeadlineQosPolicy& qos2)
-{
-  return qos1.period == qos2.period;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::LatencyBudgetQosPolicy& qos1,
-                  const ::DDS::LatencyBudgetQosPolicy& qos2)
-{
-  return qos1.duration == qos2.duration;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::OwnershipQosPolicy& qos1,
-                  const ::DDS::OwnershipQosPolicy& qos2)
-{
-  return qos1.kind == qos2.kind;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::OwnershipStrengthQosPolicy& qos1,
-                  const ::DDS::OwnershipStrengthQosPolicy& qos2)
-{
-  return qos1.value == qos2.value;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::LivelinessQosPolicy& qos1,
-                  const ::DDS::LivelinessQosPolicy& qos2)
-{
-  return
-    qos1.kind == qos2.kind
-    && qos1.lease_duration == qos2.lease_duration;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::TimeBasedFilterQosPolicy& qos1,
-                  const ::DDS::TimeBasedFilterQosPolicy& qos2)
-{
-  return qos1.minimum_separation == qos2.minimum_separation;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::PartitionQosPolicy& qos1,
-                  const ::DDS::PartitionQosPolicy& qos2)
-{
-  CORBA::ULong const len = qos1.name.length();
-  if (len == qos2.name.length())
-  {
-    for(CORBA::ULong i = 0; i < len; ++i)
-    {
-      if ( 0 != ACE_OS::strcmp (qos1.name[i], qos2.name[i]))
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::ReliabilityQosPolicy& qos1,
-                  const ::DDS::ReliabilityQosPolicy& qos2)
-{
-  return
-    qos1.kind == qos2.kind
-    && qos1.max_blocking_time == qos2.max_blocking_time;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::DestinationOrderQosPolicy& qos1,
-                  const ::DDS::DestinationOrderQosPolicy& qos2)
-{
-  return qos1.kind == qos2.kind;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::HistoryQosPolicy& qos1,
-                  const ::DDS::HistoryQosPolicy& qos2)
-{
-  return
-    qos1.kind == qos2.kind
-    && qos1.depth == qos2.depth;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::ResourceLimitsQosPolicy& qos1,
-                  const ::DDS::ResourceLimitsQosPolicy& qos2)
-{
-  return
-    qos1.max_samples == qos2.max_samples
-    && qos1.max_instances == qos2.max_instances
-    && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::EntityFactoryQosPolicy& qos1,
-                  const ::DDS::EntityFactoryQosPolicy& qos2)
-{
-  return
-    qos1.autoenable_created_entities == qos2.autoenable_created_entities;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::WriterDataLifecycleQosPolicy& qos1,
-                  const ::DDS::WriterDataLifecycleQosPolicy& qos2)
-{
-  return
-    qos1.autodispose_unregistered_instances == qos2.autodispose_unregistered_instances;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::ReaderDataLifecycleQosPolicy& qos1,
-                  const ::DDS::ReaderDataLifecycleQosPolicy& qos2)
-{
-  return
-    qos1.autopurge_nowriter_samples_delay == qos2.autopurge_nowriter_samples_delay;
-}
-
-
-ACE_INLINE
-bool operator ==  (const ::DDS::DomainParticipantQos& qos1,
-                   const ::DDS::DomainParticipantQos& qos2)
-{
-  return
-    qos1.user_data == qos2.user_data
-    && qos1.entity_factory == qos2.entity_factory;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::TopicQos& qos1,
-                  const ::DDS::TopicQos& qos2)
-{
-  return
-    qos1.topic_data == qos2.topic_data
-    && qos1.durability == qos2.durability
-    && qos1.deadline == qos2.deadline
-    && qos1.latency_budget == qos2.latency_budget
-    && qos1.liveliness == qos2.liveliness
-    && qos1.reliability == qos2.reliability
-    && qos1.destination_order == qos2.destination_order
-    && qos1.history == qos2.history
-    && qos1.resource_limits == qos2.resource_limits
-    && qos1.transport_priority == qos2.transport_priority
-    && qos1.lifespan == qos2.lifespan
-    && qos1.ownership == qos2.ownership;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::DataWriterQos& qos1,
-                  const ::DDS::DataWriterQos& qos2)
-{
-  return
-    qos1.durability == qos2.durability
-    && qos1.deadline == qos2.deadline
-    && qos1.latency_budget == qos2.latency_budget
-    && qos1.liveliness == qos2.liveliness
-    && qos1.reliability == qos2.reliability
-    && qos1.destination_order == qos2.destination_order
-    && qos1.history == qos2.history
-    && qos1.resource_limits == qos2.resource_limits
-    && qos1.transport_priority == qos2.transport_priority
-    && qos1.lifespan == qos2.lifespan
-    && qos1.user_data == qos2.user_data
-    && qos1.ownership_strength == qos2.ownership_strength
-    && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::PublisherQos& qos1,
-                  const ::DDS::PublisherQos& qos2)
-{
-  return
-    qos1.presentation == qos2.presentation
-    && qos1.partition == qos2.partition
-    && qos1.group_data == qos2.group_data
-    && qos1.entity_factory == qos2.entity_factory;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::DataReaderQos& qos1,
-                  const ::DDS::DataReaderQos& qos2)
-{
-  return
-    qos1.durability == qos2.durability
-    && qos1.deadline == qos2.deadline
-    && qos1.latency_budget == qos2.latency_budget
-    && qos1.liveliness == qos2.liveliness
-    && qos1.reliability == qos2.reliability
-    && qos1.destination_order == qos2.destination_order
-    && qos1.history == qos2.history
-    && qos1.resource_limits == qos2.resource_limits
-    && qos1.user_data == qos2.user_data
-    && qos1.time_based_filter == qos2.time_based_filter
-    && qos1.reader_data_lifecycle == qos2.reader_data_lifecycle;
-}
-
-
-ACE_INLINE
-bool operator == (const ::DDS::SubscriberQos& qos1,
-                  const ::DDS::SubscriberQos& qos2)
-{
-  return
-    qos1.presentation == qos2.presentation
-    && qos1.partition == qos2.partition
-    && qos1.group_data == qos2.group_data
-    && qos1.entity_factory == qos2.entity_factory;
-}

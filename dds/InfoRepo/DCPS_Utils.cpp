@@ -99,7 +99,7 @@ increment_incompatibility_count (OpenDDS::DCPS::IncompatibleQosStatus* status,
 // This is extremely simple now but will get very complex when more
 // QOSes are supported.
 bool
-compatibleQOS (DCPS_IR_Publication * publication,
+compatibleQOS (DCPS_IR_Publication  * publication,
                DCPS_IR_Subscription * subscription)
 {
   bool compatible = true;
@@ -109,10 +109,10 @@ compatibleQOS (DCPS_IR_Publication * publication,
     // Transports are not compatible.
     compatible = false;
     increment_incompatibility_count(publication->get_incompatibleQosStatus(),
-                                    ::DDS::TRANSPORTTYPE_QOS_POLICY_ID);
+                                    ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
     increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
-                                    ::DDS::TRANSPORTTYPE_QOS_POLICY_ID);
-    }
+                                    ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
+  }
 
   ::DDS::DataWriterQos const * const writerQos =
     publication->get_datawriter_qos();
@@ -136,41 +136,56 @@ compatibleQOS (DCPS_IR_Publication * publication,
       subscription->get_subscriber_qos ();
 
   // Verify publisher and subscriber are in a matching partition.
+  //
+  // According to the DDS spec:
+  //
+  //   Failure to match partitions is not considered an incompatible
+  //   QoS and does not trigger any listeners nor conditions.
+  //
+  // Don't increment the incompatibity count.
   compatible =
     compatible && matching_partitions (pubQos->partition,
                                        subQos->partition);
 
-    // According to the DDS spec:
-    //
-    //   Failure to match partitions is not considered an incompatible
-    //   QoS and does not trigger any listeners nor conditions.
-    //
-    // Don't increment the incompatibity count.
-
   // Check the DURABILITY_QOS_POLICY_ID
   if ( writerQos->durability.kind < readerQos->durability.kind )
-    {
-      compatible = 0;
+  {
+    compatible = false;
 
-      increment_incompatibility_count(publication->get_incompatibleQosStatus(),
-                                      ::DDS::DURABILITY_QOS_POLICY_ID);
-      increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
-                                      ::DDS::DURABILITY_QOS_POLICY_ID);
-    }
+    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+                                    ::DDS::DURABILITY_QOS_POLICY_ID);
+    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+                                    ::DDS::DURABILITY_QOS_POLICY_ID);
+  }
 
   // Check the LIVELINESS_QOS_POLICY_ID
   // invalid if offered kind is less than requested kind OR
-  //         if offered liveliness duration greater than requested liveliness duration
-  if (( writerQos->liveliness.kind < readerQos->liveliness.kind ) ||
-      ( ::OpenDDS::DCPS::Qos_Helper::lease_greater_than(writerQos->liveliness,readerQos->liveliness)))
-    {
-      compatible = 0;
+  //         if offered liveliness duration greater than requested
+  //         liveliness duration
+  if (writerQos->liveliness.kind < readerQos->liveliness.kind
+      || writerQos->liveliness.lease_duration
+         > readerQos->liveliness.lease_duration)
+  {
+    compatible = false;
 
-      increment_incompatibility_count(publication->get_incompatibleQosStatus(),
-                                      ::DDS::LIVELINESS_QOS_POLICY_ID);
-      increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
-                                      ::DDS::LIVELINESS_QOS_POLICY_ID);
-    }
+    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+                                    ::DDS::LIVELINESS_QOS_POLICY_ID);
+    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+                                    ::DDS::LIVELINESS_QOS_POLICY_ID);
+  }
+
+  // Check the DEADLINE_QOS_POLICY_ID
+  //   Offered deadline must be less than or equal to the requested
+  //   deadline.
+  if (writerQos->deadline.period > readerQos->deadline.period)
+  {
+    compatible = false;
+
+    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+                                    ::DDS::DEADLINE_QOS_POLICY_ID);
+    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+                                    ::DDS::DEADLINE_QOS_POLICY_ID);
+  }
 
   return compatible;
 }

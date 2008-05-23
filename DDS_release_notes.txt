@@ -134,6 +134,10 @@ New to this version are the following changes:
   sample with the valid_data flag == 0 and the instance state ==
   NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.
 
+- Moved TRANSPORTTYPE_QOS_POLICY_NAME and TRANSPORTTYPE_QOS_POLICY_ID
+  from DDS namespace to OpenDDS namespace since they are specific to
+  OpenDDS.
+
 =========================================================================
 
 Version 1.0 of OpenDDS.

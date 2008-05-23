@@ -31,6 +31,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class DataReaderImpl;
 
     /**
      * @class RequestedDeadlineWatchdog
@@ -54,7 +55,7 @@ namespace OpenDDS
         ACE_Reactor * reactor,
         lock_type & lock,
         ::DDS::DeadlineQosPolicy qos,
-        ::DDS::DataReaderListener_ptr listener,
+        OpenDDS::DCPS::DataReaderImpl * reader_impl,
         ::DDS::DataReader_ptr reader,
         ::DDS::RequestedDeadlineMissedStatus & status,
         CORBA::Long & last_total_count);
@@ -87,9 +88,9 @@ namespace OpenDDS
       /// @c false after each deadline timeout.
       bool signaled_;
 
-      /// Reference to listener that will be called when the deadline
-      /// expires.
-      ::DDS::DataReaderListener_var      listener_;
+      /// Pointer to the @c DataReaderImpl object from which the
+      /// @c DataReaderListener is obtained.
+      OpenDDS::DCPS::DataReaderImpl * const reader_impl_;
 
       /// Reference to DataReader passed to listener when the deadline
       /// expires.
