@@ -1,3 +1,13 @@
+Fri May 23 17:12:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/UpdateManager.inl:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          Corrected qos memory allocation to use the consolidated message block 
+          length instead of total length of cdr stream and not use the same message
+          block for multiple consolidations.
+          
 Fri May 23 10:12:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (operator<):
