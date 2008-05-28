@@ -1,13 +1,32 @@
+Wed May 28 17:04:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Made fresh_link() ignore the nil connection(new datalink/connection) case.
+          This would avoid nil connection error on SimpleTcpDataLink::reconnect().
+          The connection could be nil in fresh_link() when the new connection is
+          accepted before the connection is associated with the datalink in
+          make_passive_connection.
+
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Added delay between getting matched publication and delete_datareader call.
+          This would avoid the bit lookup timeout issue. The problem observed is the
+          remove_associations for the same reader could be called before the
+          fully_associted message is received on datawriter side. It has to have delay
+          to ensure the DataWriter received fully_associated call before subscriber
+          deletes datareader.
+
 Fri May 23 17:12:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
         * dds/InfoRepo/UpdateManager.inl:
         * dds/InfoRepo/UpdateManager.cpp:
 
-          Corrected qos memory allocation to use the consolidated message block 
+          Corrected qos memory allocation to use the consolidated message block
           length instead of total length of cdr stream and not use the same message
           block for multiple consolidations.
-          
+
 Fri May 23 10:12:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (operator<):
