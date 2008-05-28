@@ -612,6 +612,15 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link (const ACE_INET_Addr&    remote_ad
   if (this->links_.find(remote_address,link) == 0)
     {
       SimpleTcpConnection_rch old_con = link->get_connection ();
+
+      // The connection is accepted but may not be associated with the datalink
+      // at this point. The thread calling add_associations() will associate 
+      // the datalink with the connection in make_passive_connection().
+      if (old_con.is_nil ())
+      {      
+        return 0;
+      }
+
       if (old_con.in () != connection.in ())
         // Replace the "old" connection object with the "new" connection object.
       {

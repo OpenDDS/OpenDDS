@@ -206,7 +206,13 @@ int main (int argc, char *argv[])
               ACE_Time_Value small (0,250000);
               ACE_OS::sleep (small);
             }
-            //ACE_OS::sleep (2);
+
+          // Add sleep to let the fully_associted message arrive datawriter 
+          // before remove_associations is called upon delete_datareader, 
+          // otherwise the datawriter will encounter bit lookup timeout upon 
+          // fully associated.
+          ACE_Time_Value small (0,250000);
+	        ACE_OS::sleep (small);
 
           if (verbose) {
             ACE_DEBUG ((LM_DEBUG, "(%P|%t) *** Destroying Subscriber\n"));
