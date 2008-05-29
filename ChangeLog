@@ -1,3 +1,37 @@
+Thu May 29 10:25:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp (matching_partitions):
+
+          Fixed problem where partitions of length greater than one were
+          not matched correctly.
+
+          Fixed problem where wildcards were not handled correctly.
+
+          Match zero length partition name sequence (the default) to an
+          explicitly specified empty string "" partition name.
+
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/Partition/domain_ids:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/Partition/Partition_Table.h:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/README:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/Partition/sub.ini:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Partition/tcp.conf:
+        * tests/DCPS/Partition/Test.idl:
+
+          New PARTITION QoS test.
+
+        * bin/dcps_tests.lst:
+
+          Added new Partition test to the list of tests to run.
+
 Wed May 28 17:04:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:

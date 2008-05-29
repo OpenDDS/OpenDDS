@@ -14,15 +14,29 @@ namespace
     ::DDS::StringSeq const & publisher_partitions  = pub.name;
     ::DDS::StringSeq const & subscriber_partitions = sub.name;
 
+    bool match = false;
+
     // Both publisher and subscriber are in the same (default)
     // partition if the partition string sequence lengths are both
     // zero.
     CORBA::ULong const pub_len = publisher_partitions.length ();
     CORBA::ULong const sub_len = subscriber_partitions.length ();
-    if (pub_len == 0 && sub_len == 0)
-      return true;
 
-    bool match = false;
+    if (pub_len == 0 && sub_len == 0)
+      match = true;
+    else if (pub_len == 0)
+    {
+      // Attempt to match an explicitly specified empty string
+      // partition against the special zero length partition
+      // sequence.
+      for (CORBA::ULong n = 0; n < sub_len && !match; ++n)
+        {
+          char const * const sname = subscriber_partitions[n];
+          if (*sname == 0)
+            match = true;
+        }
+    }
+
     // We currently don't support "[]" wildcards.  See pattern_match()
     // function above for details.
     static char const wildcard[] = "*?" /* "[[*?])" */;
@@ -31,9 +45,18 @@ namespace
     //       sequences will potentially be very long.  If they remain
     //       short, optimizing may be unnecessary or simply not worth
     //       the trouble.
-    for (CORBA::ULong i = 0; i < pub_len; ++i)
+    for (CORBA::ULong i = 0; i < pub_len && !match; ++i)
       {
         char const * const pname = publisher_partitions[i];
+
+        if (sub_len == 0 && *pname == 0)
+        {
+          // Attempt to match an explicitly specified empty string
+          // partition against the special zero length partition
+          // sequence.
+          match = true;
+          continue;
+        }
 
         // The DDS specification requires pattern matching
         // capabilities corresponding to those provided by the POSIX
@@ -42,13 +65,17 @@ namespace
         // completely portable across all platforms we instead use
         // ACE::wild_match().  Currently this prevents matching of
         // patterns containing square brackets, i.e. "[]".
-        bool const pub_is_wildcard = ACE::wild_match (wildcard, pname);
+        bool const pub_is_wildcard =
+          (ACE_OS::strcspn (pname, wildcard) != ACE_OS::strlen (pname));
+          // ACE::wild_match (wildcard, pname);
 
-        for (CORBA::ULong j = 0; j < sub_len; ++j)
+        for (CORBA::ULong j = 0; j < sub_len && !match; ++j)
           {
             char const * const sname = subscriber_partitions[j];
 
-            bool const sub_is_wildcard = ACE::wild_match (wildcard, sname);
+            bool const sub_is_wildcard =
+              (ACE_OS::strcspn (sname, wildcard) != ACE_OS::strlen (sname));
+            // ACE::wild_match (wildcard, sname);
 
             if (pub_is_wildcard && sub_is_wildcard)
               continue;
@@ -105,7 +132,7 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   bool compatible = true;
 
   if (publication->get_transport_id() != subscription->get_transport_id())
-  {  
+  {
     // Transports are not compatible.
     compatible = false;
     increment_incompatibility_count(publication->get_incompatibleQosStatus(),
