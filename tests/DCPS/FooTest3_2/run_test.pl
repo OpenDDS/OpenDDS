@@ -34,6 +34,7 @@ $publisher_running_sec=20;
 $subscriber_running_sec=20;
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
+$sub_ready_file = "sub_ready.txt";
 
 # multiple instances test
 if ($ARGV[0] eq 'mi') {
@@ -98,6 +99,7 @@ $sub_id=1;
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
+unlink $sub_ready_file;
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : " -ORBSvcConf ../../tcp.conf ";
@@ -113,14 +115,14 @@ $publisher=PerlDDS::create_process ("FooTest3_publisher"
                                    . " -m $multiple_instance -i $num_writes_per_thread "
                                    . " -n $max_samples_per_instance -d $history_depth"
                                    . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
-                                   . " -b $blocking_write ");
+                                   . " -b $blocking_write -f $sub_ready_file");
 
 print $publisher->CommandLine(), "\n";
 
 $subscriber=PerlDDS::create_process ("FooTest3_subscriber",
                                     , "$svc_config"
                                     . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                    . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec");
+                                    . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec $sub_ready_file");
 
 print $subscriber->CommandLine(), "\n";
 

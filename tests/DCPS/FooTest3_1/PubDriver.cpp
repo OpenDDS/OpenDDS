@@ -40,7 +40,8 @@ PubDriver::PubDriver()
   write_delay_msec_ (0),
   check_data_dropped_ (0),
   pub_driver_ior_ ("pubdriver.ior"),
-  shutdown_ (false)
+  shutdown_ (false),
+  sub_ready_filename_("sub_ready.txt")
 {
 }
 
@@ -199,6 +200,11 @@ PubDriver::parse_args(int& argc, char* argv[])
       check_data_dropped_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
+    else if ((current_arg = arg_shifter.get_the_parameter("-f")) != 0)
+	  {
+	    sub_ready_filename_ = current_arg;
+	    arg_shifter.consume_arg ();
+	  }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -403,6 +409,17 @@ PubDriver::run()
   }
 
   fclose (fp);
+
+  // Wait for the subscriber to be ready to accept connection.
+  FILE* readers_ready = 0;
+  do
+    {
+      ACE_Time_Value small(0,250000);
+      ACE_OS::sleep (small);
+      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("r"));
+    } while (0 == readers_ready);
+
+  ACE_OS::fclose(readers_ready);
 
   // Set up the subscriptions.
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;

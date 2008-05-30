@@ -25,6 +25,8 @@ $shutdown_pub = 1;
 $add_new_subscription = 0;
 $num_subscribers = 1;
 $shutdown_delay_secs=10;
+$sub_ready_file = "sub_ready.txt";
+
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
@@ -99,6 +101,7 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior;
 unlink $pub_id_fname;
 unlink $pubdriver_ior;
+unlink $sub_ready_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$svc_config $repo_bit_conf -o $dcpsrepo_ior"
@@ -110,7 +113,8 @@ $publisher = PerlDDS::create_process ("FooTest3_publisher",
                                      . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port "
                                      . "-s $sub_id:localhost:$sub_port "
                                      . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
-                                     . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior");
+                                     . " -t $test_to_run -DCPSChunks $n_chunks -v $pubdriver_ior"
+                                     . " -f $sub_ready_file");
 
 print $publisher->CommandLine(), "\n";
 
@@ -119,7 +123,8 @@ $subscriber = PerlDDS::create_process ("FooTest3_subscriber",
                                       . "-p $pub_id_fname:localhost:$pub_port "
                                       . "$app_bit_conf -s $sub_id:localhost:$sub_port -n $num_writes "
                                       . "-v file://$pubdriver_ior -x $shutdown_pub "
-                                      . "-a $add_new_subscription -d $shutdown_delay_secs");
+                                      . "-a $add_new_subscription -d $shutdown_delay_secs "
+                                      . "-f $sub_ready_file");
 
 print $subscriber->CommandLine(), "\n";
 
@@ -152,7 +157,7 @@ if ($num_subscribers == 2)
                                            . "-p $pub_id_fname:localhost:$pub_port "
                                            . "-s $sub_id:localhost:$sub_port -n $num_writes "
                                            . "-v file://$pubdriver_ior -x 1 -a 1 "
-                                           . "-d $shutdown_delay_secs");
+                                           . "-d $shutdown_delay_secs -f $sub_ready_file");
 
     print $subscriber2->CommandLine(), "\n";
 
