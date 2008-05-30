@@ -1,8 +1,34 @@
+Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Added sub ready file to indicate the subscriber is ready accept 
+          connection. This would synchronize sub and pub to make the pub 
+          add_associations called after sub opened a port for listening.
+          It should resolve the "Failed to connect" problem on publication
+          side.
+          
 Fri May 30 02:59:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Partition/Publisher.cpp:
 
-          Fixed compilation error of conversion from `char*' to 
+          Fixed compilation error of conversion from `char*' to
           TAO_String_Manager against TAO 1.4a.
 
 Thu May 29 10:25:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>

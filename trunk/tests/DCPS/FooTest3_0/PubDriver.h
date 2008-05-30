@@ -105,6 +105,8 @@ class PubDriver
     ACE_CString       pub_driver_ior_;
     int               add_new_subscription_;
     int               shutdown_;
+
+    std::string       sub_ready_filename_;
 };
 
 #endif
