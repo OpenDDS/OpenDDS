@@ -1,3 +1,11 @@
+Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+        
+          Made script to calculate lost message based on the time between sub 
+          crash and restart instead of just fixed delay time. This expects to
+          fix the reconnect sub test.
+
 Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociewb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.h:
@@ -18,12 +26,12 @@ Fri May 30 19:45:24 UTC 2008  Yan Dai  <dai_y@ociewb.com>
         * tests/DCPS/FooTest3_2/SubDriver.cpp:
         * tests/DCPS/FooTest3_2/run_test.pl:
 
-          Added sub ready file to indicate the subscriber is ready accept 
-          connection. This would synchronize sub and pub to make the pub 
+          Added sub ready file to indicate the subscriber is ready accept
+          connection. This would synchronize sub and pub to make the pub
           add_associations called after sub opened a port for listening.
           It should resolve the "Failed to connect" problem on publication
           side.
-          
+
 Fri May 30 02:59:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Partition/Publisher.cpp:
