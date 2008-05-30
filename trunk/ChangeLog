@@ -1,3 +1,10 @@
+Fri May 30 02:59:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Partition/Publisher.cpp:
+
+          Fixed compilation error of conversion from `char*' to 
+          TAO_String_Manager against TAO 1.4a.
+
 Thu May 29 10:25:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/InfoRepo/DCPS_Utils.cpp (matching_partitions):

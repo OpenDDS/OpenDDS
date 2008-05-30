@@ -169,11 +169,9 @@ main (int argc, char *argv[])
           exit(1);
         }
 
-        Test::Data the_data =
-          {
-            2, // key
-            CORBA::string_dup ("Data Wuz Here!")
-          };
+        Test::Data the_data;
+        the_data.key = 2;
+        the_data.the_data = CORBA::string_dup ("Data Wuz Here!");
 
         ::DDS::InstanceHandle_t const handle =
             writer->_cxx_register (the_data);
