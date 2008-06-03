@@ -310,6 +310,7 @@ bool operator == (const ::DDS::TopicQos& qos1,
   return
     qos1.topic_data == qos2.topic_data
     && qos1.durability == qos2.durability
+    && qos1.durability_service == qos2.durability_service
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness
@@ -329,6 +330,7 @@ bool operator == (const ::DDS::DataWriterQos& qos1,
 {
   return
     qos1.durability == qos2.durability
+    && qos1.durability_service == qos2.durability_service
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness

@@ -1,8 +1,15 @@
+Tue Jun  3 09:28:37 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (operator==):
+
+          Added equality check for DurabilityServiceQosPolicy member in
+          TopicQos and DataWriterQos.
+
 Fri May 30 23:10:43 UTC 2008  Yan Dai  <dai_y@ociewb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
-        
-          Made script to calculate lost message based on the time between sub 
+
+          Made script to calculate lost message based on the time between sub
           crash and restart instead of just fixed delay time. This expects to
           fix the reconnect sub test.
 
