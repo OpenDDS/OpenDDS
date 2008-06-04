@@ -51,6 +51,9 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",6);
 
+  // Stop datalink clean task.
+  this->dl_clean_task_.close (1);
+
   if (! this->reactor_task_.is_nil ())
   {
     this->reactor_task_->stop ();
@@ -94,9 +97,6 @@ OpenDDS::DCPS::TransportImpl::shutdown()
     GuardType guard(this->lock_);
     this->reactor_task_ = 0;
   }
-
-  // Stop datalink clean task.
-  this->dl_clean_task_.close (1);
 }
 
 

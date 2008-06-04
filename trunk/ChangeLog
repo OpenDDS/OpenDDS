@@ -1,3 +1,12 @@
+Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociewb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Moved the datalink cleanup task shutdown to the begin of shutdown() 
+          function instead of the end of the function. This would fix access
+          violation when transport_detached() wiped the TransportImpl reference
+          in TransportInterface while datalink clean task is removing associations. 
+          
 Tue Jun  3 09:28:37 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (operator==):
