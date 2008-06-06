@@ -328,12 +328,6 @@ namespace OpenDDS
        */
       ::DDS::InstanceHandle_t get_next_handle ();
 
-      /// Flush data durability cache.
-      bool send_durable_data (char const * topic_name,
-                              char const * type_name,
-                              DataWriterImpl * data_writer,
-                              ::DDS::LifespanQosPolicy const & lifespan);
-
     private:
 
       /// List of data that has not been sent yet.

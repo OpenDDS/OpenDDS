@@ -109,6 +109,9 @@ namespace OpenDDS
       /// This is not used in the first implementation (INSTANCE level)
       CoherencyGroup         group_id_ ;
 
+      /// Timestamp for the sample when it was first written.
+      ::DDS::Time_t source_timestamp_;
+
       /// Used to make removal from the
       /// container _much_ more efficient.
       

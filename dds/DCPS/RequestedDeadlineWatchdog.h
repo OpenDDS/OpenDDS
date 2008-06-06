@@ -103,6 +103,9 @@ namespace OpenDDS
       /// Last total_count when status was last checked.
       CORBA::Long & last_total_count_;
 
+      /// Handle to last instance being read.
+//       ::DDS::InstanceHandle_t & last_instance_handle_;
+
     };
 
   }

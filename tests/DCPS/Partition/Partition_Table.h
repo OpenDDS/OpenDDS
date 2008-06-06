@@ -38,7 +38,7 @@ namespace Test
     /// Partition Four
     char const * Four[] =
       {
-        "Wun?Two*Tree",
+        "Wun?Two*Tree",  // A wildcard
         0
       };
 
@@ -68,7 +68,7 @@ namespace Test
     char const * Two[] =
       {
         "Amadeus",
-        "Wun1Two23Tree",   // A wildcard
+        "Wun1Two23Tree",
         0
       };
 
@@ -82,7 +82,7 @@ namespace Test
     /// Partition Four
     char const * Four[] =
       {
-        "Not?A*Match",
+        "Not?A*Match",  // A wildcard
         0
       };
 
