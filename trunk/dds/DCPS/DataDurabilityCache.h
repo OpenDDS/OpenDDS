@@ -26,6 +26,8 @@
 
 #include "ace/Hash_Map_Manager_T.h"
 #include "ace/Array_Base.h"
+#include "ace/String_Base.h"
+#include "ace/SStringfwd.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Synch_Traits.h"
