@@ -1,3 +1,14 @@
+Fri Jun  6 19:56:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Workaround lack of STL-style traits in ACE_Hash_Map_Manager_Ex<>
+          and ACE_Array_Base<> in ACE 5.4a.
+
+        * dds/DCPS/DataDurabilityCache.h:
+
+          Include "ace/SStringfwd.h" to pull in ACE_CString typedef.
+
 Fri Jun  6 08:27:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

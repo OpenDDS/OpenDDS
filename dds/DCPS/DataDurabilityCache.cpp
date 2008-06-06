@@ -39,9 +39,10 @@ namespace
     ::OpenDDS::DCPS::DataDurabilityCache::sample_data_type data_type;
     typedef
     ::OpenDDS::DCPS::DataDurabilityCache::sample_list_type list_type;
+    typedef ptrdiff_t list_difference_type;
 
     Cleanup_Handler (list_type & sample_list,
-                     list_type::difference_type index,
+                     list_difference_type index,
                      ACE_Allocator * allocator)
       : sample_list_ (sample_list)
       , index_ (index)
@@ -99,10 +100,10 @@ namespace
     list_type & sample_list_;
 
     /// Location in list/array of queue to be deallocated.
-    list_type::difference_type index_;
+    list_difference_type const index_;
 
     /// Allocator to be used when deallocating data queue.
-    ACE_Allocator * allocator_;
+    ACE_Allocator * const allocator_;
 
     /// Timer ID corresponding to this cleanup event handler.
     long tid_;
@@ -225,7 +226,7 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   ::DDS::DurabilityQosPolicyKind kind,
   ::DDS::DomainId_t domain_id)
   : allocator_ (make_allocator (kind, domain_id))
-  , samples_ (allocator_.get (), allocator_.get ())
+  , samples_ (allocator_.get ())
   , cleanup_timer_ids_ ()
   , lock_ ()
   , reactor_ (0)
@@ -257,12 +258,10 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
     {
       sample_list_type * const list = (*s).int_id_;
 
-      sample_list_type::iterator const list_end = list->end ();
-      for (sample_list_type::iterator l = list->begin ();
-           l != list_end;
-           ++l)
+      size_t const len = list->size ();;
+      for (size_t l = 0; l != len;  ++l)
       {
-        ACE_DES_FREE ((*l),
+        ACE_DES_FREE ((*list)[l],
                       this->allocator_->free,
                       ACE_Unbounded_Queue<sample_data_type>);
       }
@@ -316,15 +315,15 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
   DataSampleList::iterator unsent_end (unsent_data.end ());
 
   sample_list_type * sample_list = 0;
-  sample_list_type::iterator slot;
 
   typedef ACE_Unbounded_Queue<sample_data_type> data_queue_type;
+  data_queue_type ** slot = 0;
   data_queue_type * samples = 0;  // sample_list_type::value_type
 
   {
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
-    sample_map_type::value_type * entry = 0;
+    sample_map_type::ENTRY * entry = 0;
     if (this->samples_.find (key, entry) == 0)
     {
       sample_list = entry->int_id_;
@@ -344,20 +343,23 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
         return false;
     }
 
+    data_queue_type ** const end =
+      &((*sample_list)[0]) + sample_list->size ();
+
     // Find an empty slot in the array.  This is a linear search but
     // that should be fine for the common case, i.e. a small number of
     // DataWriters that push unsent data into the cache.x
-    slot = std::find (sample_list->begin (),
-                      sample_list->end (),
-                      static_cast<sample_list_type::value_type> (0));
+    slot = std::find (&((*sample_list)[0]),
+                      end,
+                      static_cast<data_queue_type *> (0));
 
-    if (slot == sample_list->end ())
+    if (slot == end)
     {
       // No available slots.  Grow the array accordingly.
-      sample_list_type::size_type const old_len = sample_list->size ();
+      size_t const old_len = sample_list->size ();
       sample_list->size (old_len + 1);
 
-      slot = sample_list->begin () + old_len;
+      slot = &((*sample_list)[0]) + old_len;
     }
 
     ACE_NEW_MALLOC_RETURN (
@@ -382,7 +384,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
   // Schedule cleanup timer.
   Cleanup_Handler * const cleanup =
     new Cleanup_Handler (*sample_list,
-                         std::distance (sample_list->begin (), slot),
+                         std::distance (&(*sample_list)[0], slot),
                          this->allocator_.get ());
   ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
 
@@ -488,15 +490,14 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
 
   registration_sample.release ();
 
-  sample_list_type::iterator const end = sample_list.end ();
-  for (sample_list_type::iterator i = sample_list.begin ();
-       i != end;
-       ++i)
+  typedef ACE_Unbounded_Queue<sample_data_type> data_queue_type;
+  size_t const len = sample_list.size ();
+  for (size_t i = 0; i != len; ++i)
   {
-    typedef sample_list_type::value_type value_type;
-    value_type q = *i;
 
-    for (ACE_Unbounded_Queue<sample_data_type>::ITERATOR j = q->begin ();
+    data_queue_type * const q = sample_list[i];
+
+    for (data_queue_type::ITERATOR j = q->begin ();
          !j.done ();
          j.advance ())
     {
@@ -584,8 +585,7 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
                     // region is unmapped - the behavior desired!
         true,  // Guess on fault.
         0,   // Windows LPSECURITY_ATTRIBUTES
-        /* 0 */ ACE_DEFAULT_FILE_PERMS,
-        false); // Do not generate an unique pool for each mmap.
+        /* 0 */ ACE_DEFAULT_FILE_PERMS);
 
       std::stringstream bss;
       bss << "OpenDDS-durable-data-" << domain_id;
