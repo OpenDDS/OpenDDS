@@ -26,26 +26,34 @@ namespace OpenDDS
         handle_(handle),
         transport_send_element_allocator_(allocator)
     {
+      source_timestamp_.sec = 0;
+      source_timestamp_.nanosec = 0;
     }
 
     ACE_INLINE
-    DataSampleListElement::DataSampleListElement (const DataSampleListElement& elem)
+    DataSampleListElement::DataSampleListElement (
+      const DataSampleListElement& elem)
+      : sample_ (elem.sample_->duplicate ())
+      , publication_id_ (elem.publication_id_)
+      , num_subs_ (elem.num_subs_)
+      , group_id_ (elem.group_id_)
+      , previous_sample_ (elem.previous_sample_)
+      , next_sample_ (elem.next_sample_)
+      , next_instance_sample_ (elem.next_instance_sample_)
+      , next_send_sample_ (elem.next_send_sample_)
+      , previous_send_sample_ (elem.previous_send_sample_)
+      , send_listener_ (elem.send_listener_)
+      , space_available_ (elem.space_available_)
+      , handle_ (elem.handle_)
+      , transport_send_element_allocator_ (
+          elem.transport_send_element_allocator_)
     {
-      sample_ = elem.sample_->duplicate ();
-      publication_id_ = elem.publication_id_;
-      num_subs_ = elem.num_subs_; 
-      for (CORBA::ULong i = 0; i < num_subs_; ++i)
-        subscription_ids_[i] = elem.subscription_ids_[i];
-      group_id_ = elem.group_id_;
-      previous_sample_ = elem.previous_sample_;
-      next_sample_ = elem.next_sample_;
-      next_instance_sample_ = elem.next_instance_sample_;
-      next_send_sample_ = elem.next_send_sample_;
-      previous_send_sample_ = elem.previous_send_sample_;
-      send_listener_ = elem.send_listener_;
-      space_available_ = elem.space_available_;
-      handle_ = elem.handle_;
-      transport_send_element_allocator_ = elem.transport_send_element_allocator_;
+      std::copy (elem.subscription_ids_,
+                 elem.subscription_ids_ + num_subs_,
+                 subscription_ids_);
+
+      source_timestamp_.sec = elem.source_timestamp_.sec;
+      source_timestamp_.nanosec = elem.source_timestamp_.nanosec;
     }
 
 
@@ -65,9 +73,12 @@ namespace OpenDDS
       sample_ = rhs.sample_->duplicate ();
       publication_id_ = rhs.publication_id_;
       num_subs_ = rhs.num_subs_; 
-      for (CORBA::ULong i = 0; i < num_subs_; ++i)
-        subscription_ids_[i] = rhs.subscription_ids_[i];
+      std::copy (rhs.subscription_ids_,
+                 rhs.subscription_ids_ + num_subs_,
+                 subscription_ids_);
       group_id_ = rhs.group_id_;
+      source_timestamp_.sec = rhs.source_timestamp_.sec;
+      source_timestamp_.nanosec = rhs.source_timestamp_.nanosec;
       previous_sample_ = rhs.previous_sample_;
       next_sample_ = rhs.next_sample_;
       next_instance_sample_ = rhs.next_instance_sample_;

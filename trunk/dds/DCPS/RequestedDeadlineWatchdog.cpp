@@ -25,6 +25,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog (
   , reader_ (::DDS::DataReader::_duplicate (reader))
   , status_ (status)
   , last_total_count_ (last_total_count)
+//   , last_instance_handle_ (handle)
 {
 }
 
@@ -42,21 +43,25 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute ()
     ++this->status_.total_count;
     this->status_.total_count_change =
       this->status_.total_count - this->last_total_count_;
-
-    // Copy before releasing the lock.
-    ::DDS::RequestedDeadlineMissedStatus const status = this->status_;
+//     this->status_.last_instance_handle = this->last_instance_handle_;
 
     ::DDS::DataReaderListener * const listener =
         this->reader_impl_->listener_for (
           ::DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
-    // Release the lock during the upcall.
-    ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
+    if (listener != 0)
+    {
+      // Copy before releasing the lock.
+      ::DDS::RequestedDeadlineMissedStatus const status = this->status_;
 
-    // @todo Will this operation ever throw?  If so we may want to
-    //       catch all exceptions, and act accordingly.
-    listener->on_requested_deadline_missed (this->reader_.in (),
-                                            status);
+      // Release the lock during the upcall.
+      ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
+
+      // @todo Will this operation ever throw?  If so we may want to
+      //       catch all exceptions, and act accordingly.
+      listener->on_requested_deadline_missed (this->reader_.in (),
+                                              status);
+    }
   }
   else
   {

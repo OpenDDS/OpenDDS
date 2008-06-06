@@ -178,23 +178,6 @@ DataWriterImpl::init (
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   this->reactor_ = orb->orb_core()->reactor();
 
-  // Setup the offered deadline watchdog if the configured deadline
-  // period is not the default (infinite).
-  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
-  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
-      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
-  {
-    ACE_auto_ptr_reset (this->watchdog_,
-                        new OfferedDeadlineWatchdog (
-                          this->reactor_,
-                          this->lock_,
-                          qos.deadline,
-                          this,
-                          dw_local,
-                          this->offered_deadline_missed_status_,
-                          this->last_deadline_missed_total_count_));
-  }
-
   initialized_ = true;
 }
 
@@ -832,8 +815,8 @@ DataWriterImpl::enable ()
   ACE_Time_Value max_blocking_time = ACE_Time_Value::zero;
   if (should_block)
   {
-    max_blocking_time.sec (qos_.reliability.max_blocking_time.sec);
-    max_blocking_time.usec(qos_.reliability.max_blocking_time.nanosec/1000);
+    max_blocking_time =
+      duration_to_time_value (qos_.reliability.max_blocking_time);
   }
 
   CORBA::Long const depth =
@@ -851,7 +834,7 @@ DataWriterImpl::enable ()
   // enable the type specific part of this DataWriter
   this->enable_specific ();
 
-  // Create data durability cache if DataWriter QoS requires durable
+  // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
     publisher_servant_->get_data_durability_cache (qos_.durability);
@@ -907,7 +890,7 @@ DataWriterImpl::enable ()
                                  liveliness_check_interval_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::init, ")
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
                   ACE_TEXT(" %p. \n"), "schedule_timer"));
     }
     else
@@ -917,27 +900,64 @@ DataWriterImpl::enable ()
     }
   }
 
+  // Setup the offered deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+                        new OfferedDeadlineWatchdog (
+                          this->reactor_,
+                          this->lock_,
+                          this->qos_.deadline,
+                          this,
+                          this->dw_local_objref_.in (),
+                          this->offered_deadline_missed_status_,
+                          this->last_deadline_missed_total_count_));
+  }
+
+  // Move cached data from the durability cache to the unsent data
+  // queue.
+  if (durability_cache != 0)
+  {
+    if (durability_cache->get_data (get_topic_name (),
+                                    get_type_name (),
+                                    this,
+                                    this->mb_allocator_,
+                                    this->db_allocator_,
+                                    this->qos_.lifespan))
+    {
+      this->publisher_servant_->data_available (this);
+    }
+    else
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+                  ACE_TEXT("unable to retrieve durable data\n")));
+    }
+  }
+
   this->set_enabled ();
 
-  return publisher_servant_->writer_enabled (
-               dw_remote_objref_.in(),
-               dw_local_objref_.in (),
-               topic_name_.in (),
-               topic_id_);
+  return publisher_servant_->writer_enabled (dw_remote_objref_.in(),
+                                             dw_local_objref_.in (),
+                                             topic_name_.in (),
+                                             topic_id_);
 }
 
 ::DDS::StatusKindMask
-DataWriterImpl::get_status_changes ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::get_status_changes ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
   return EntityImpl::get_status_changes ();
 }
 
 ::DDS::ReturnCode_t
-DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
-                                   DataSample* data,
-                                   const ::DDS::Time_t & source_timestamp)
+DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
+                                  DataSample* data,
+                                  const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance",6);
@@ -1045,10 +1065,10 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
 }
 
 ::DDS::ReturnCode_t
-DataWriterImpl::write ( DataSample* data,
-                        ::DDS::InstanceHandle_t handle,
-                        const ::DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::write (DataSample* data,
+                       ::DDS::InstanceHandle_t handle,
+                       const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
   if (enabled_ == false)
@@ -1083,6 +1103,9 @@ DataWriterImpl::write ( DataSample* data,
   {
     return ret;
   }
+
+  element->source_timestamp_.sec     = source_timestamp.sec;
+  element->source_timestamp_.nanosec = source_timestamp.nanosec;
 
   ret = this->data_container_->enqueue(element,
                                        handle);

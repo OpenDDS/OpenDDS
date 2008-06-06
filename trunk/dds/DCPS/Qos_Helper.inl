@@ -658,8 +658,8 @@ namespace OpenDDS
       return
         (qos.kind == ::DDS::VOLATILE_DURABILITY_QOS
          || qos.kind == ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS
-         /*|| qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
-           || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS*/)
+         || qos.kind == ::DDS::TRANSIENT_DURABILITY_QOS
+         || qos.kind == ::DDS::PERSISTENT_DURABILITY_QOS)
         && non_negative_duration (qos.service_cleanup_delay);
 
     }

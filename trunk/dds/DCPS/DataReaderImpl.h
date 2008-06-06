@@ -38,7 +38,7 @@ namespace OpenDDS
   {
     class SubscriberImpl;
     class DomainParticipantImpl;
-    class SubscriptionInstance ;
+    class SubscriptionInstance;
     class TopicImpl;
     class RequestedDeadlineWatchdog;
 
@@ -77,7 +77,7 @@ namespace OpenDDS
         /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
         ACE_Time_Value last_liveliness_activity_time_;
 
-        /// State of the writer. 
+        /// State of the writer.
         WriterState state_;
 
         /// The DataReader owning this WriterInfo
@@ -158,7 +158,7 @@ namespace OpenDDS
                                 const void *arg);
 
     /// tell instances when a DataWriter transitions to being alive
-    /// The writer state is inout parameter, it has to be set ALIVE before 
+    /// The writer state is inout parameter, it has to be set ALIVE before
     /// handle_timeout is called since some subroutine use the state.
     void writer_became_alive (PublicationId         writer_id,
                               const ACE_Time_Value& when,
@@ -319,27 +319,27 @@ namespace OpenDDS
       void writer_activity(PublicationId writer_id);
 
       /// process a message that has been received - could be control or a data sample.
-      virtual void data_received(const ReceivedDataSample& sample) ;
+      virtual void data_received(const ReceivedDataSample& sample);
 
-      RepoId get_subscription_id() const ;
-      void set_subscription_id(RepoId subscription_id) ;
+      RepoId get_subscription_id() const;
+      void set_subscription_id(RepoId subscription_id);
 
       ::DDS::DataReader_ptr get_dr_obj_ref();
 
       char *get_topic_name() const;
 
-      bool have_sample_states(::DDS::SampleStateMask sample_states) const ;
-      bool have_view_states(::DDS::ViewStateMask view_states) const ;
+      bool have_sample_states(::DDS::SampleStateMask sample_states) const;
+      bool have_view_states(::DDS::ViewStateMask view_states) const;
       bool have_instance_states(::DDS::InstanceStateMask instance_states) const;
 
       virtual void dds_demarshal(const ReceivedDataSample& sample) = 0;
-      virtual void dispose(const ReceivedDataSample& sample) ;
-      virtual void unregister(const ReceivedDataSample& sample) ;
+      virtual void dispose(const ReceivedDataSample& sample);
+      virtual void unregister(const ReceivedDataSample& sample);
 
-      CORBA::Long get_depth() const { return depth_ ; }
-      size_t get_n_chunks() const { return n_chunks_ ; }
+      CORBA::Long get_depth() const { return depth_; }
+      size_t get_n_chunks() const { return n_chunks_; }
 
-      void liveliness_lost() ;
+      void liveliness_lost();
 
       void remove_all_associations();
 
@@ -374,7 +374,7 @@ namespace OpenDDS
 
       /// Release the instance with the handle.
       void release_instance (::DDS::InstanceHandle_t handle);
-      
+
     protected:
 
       SubscriberImpl* get_subscriber_servant ();
@@ -388,16 +388,16 @@ namespace OpenDDS
 
       void sample_info(::DDS::SampleInfoSeq & info_seq,
                        size_t start_idx, size_t count,
-                       ReceivedDataElement *ptr) ;
+                       ReceivedDataElement *ptr);
 
       void sample_info(::DDS::SampleInfo & sample_info,
-                       ReceivedDataElement *ptr) ;
+                       ReceivedDataElement *ptr);
 
-      CORBA::Long total_samples() const ;
+      CORBA::Long total_samples() const;
 
-      void set_sample_lost_status(const ::DDS::SampleLostStatus& status) ;
+      void set_sample_lost_status(const ::DDS::SampleLostStatus& status);
       void set_sample_rejected_status(
-              const ::DDS::SampleRejectedStatus& status) ;
+              const ::DDS::SampleRejectedStatus& status);
 
 //remove document this!
       SubscriptionInstance* get_handle_instance (
@@ -412,11 +412,12 @@ namespace OpenDDS
 
       virtual void release_instance_i (::DDS::InstanceHandle_t handle) = 0;
 
-      mutable SubscriptionInstanceMapType           instances_ ;
+      mutable SubscriptionInstanceMapType           instances_;
 
-      ReceivedDataAllocator          *rd_allocator_ ;
+      ReceivedDataAllocator          *rd_allocator_;
       ::DDS::DataReaderQos            qos_;
 
+      // Status conditions accessible by subclasses.
       ::DDS::SampleRejectedStatus sample_rejected_status_;
       ::DDS::SampleLostStatus sample_lost_status_;
 
@@ -454,7 +455,7 @@ namespace OpenDDS
       friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
 
       TopicImpl*                      topic_servant_;
-      ::DDS::TopicDescription_var     topic_desc_ ;
+      ::DDS::TopicDescription_var     topic_desc_;
       ::DDS::StatusKindMask           listener_mask_;
       ::DDS::DataReaderListener_var   listener_;
       ::DDS::DataReaderListener*  fast_listener_;
@@ -465,10 +466,10 @@ namespace OpenDDS
       ::DDS::DataReader_var           dr_local_objref_;
       RepoId                          subscription_id_;
 
-      CORBA::Long                     depth_ ;
-      size_t                          n_chunks_ ;
+      CORBA::Long                     depth_;
+      size_t                          n_chunks_;
 
-      ACE_Recursive_Thread_Mutex      publication_handle_lock_ ;
+      ACE_Recursive_Thread_Mutex      publication_handle_lock_;
 
       typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
 
@@ -477,19 +478,22 @@ namespace OpenDDS
 
 
       // Status conditions.
-      ::DDS::LivelinessChangedStatus        liveliness_changed_status_ ;
-      ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_ ;
-      ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_ ;
-      ::DDS::SubscriptionMatchStatus        subscription_match_status_ ;
+      ::DDS::LivelinessChangedStatus        liveliness_changed_status_;
+      ::DDS::RequestedDeadlineMissedStatus  requested_deadline_missed_status_;
+      ::DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
+      ::DDS::SubscriptionMatchStatus        subscription_match_status_;
 
-      // TODO:
-      // The subscription_lost_status_ and subscription_reconnecting_status_
-      // are left here for future use when we add get_subscription_lost_status() and
-      // get_subscription_reconnecting_status() methods.
+      /**
+       * @todo The subscription_lost_status_ and
+       *       subscription_reconnecting_status_ are left here for
+       *       future use when we add get_subscription_lost_status()
+       *       and get_subscription_reconnecting_status() methods.
+       */
       // Statistics of the lost subscriptions due to lost connection.
-      SubscriptionLostStatus               subscription_lost_status_;
-      // Statistics of the subscriptions that are associated with a reconnecting datalink.
-      // SubscriptionReconnectingStatus       subscription_reconnecting_status_;
+      SubscriptionLostStatus              subscription_lost_status_;
+      // Statistics of the subscriptions that are associated with a
+      // reconnecting datalink.
+      // SubscriptionReconnectingStatus      subscription_reconnecting_status_;
 
 
       /// The orb's reactor to be used to register the liveliness
@@ -497,10 +501,10 @@ namespace OpenDDS
       ACE_Reactor*               reactor_;
 
       /// The time interval for checking liveliness.
-      /// TBD: Should this be initialized with 
-      ///      ::DDS::DURATION_INFINITY_SEC and ::DDS::DURATION_INFINITY_NSEC 
-      ///      instead of ACE_Time_Value::zero to be consistent with default 
-      ///      duration qos ? Or should we simply use the ACE_Time_Value::zero 
+      /// TBD: Should this be initialized with
+      ///      ::DDS::DURATION_INFINITY_SEC and ::DDS::DURATION_INFINITY_NSEC
+      ///      instead of ACE_Time_Value::zero to be consistent with default
+      ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
       ///      to indicate the INFINITY duration ?
       ACE_Time_Value             liveliness_lease_duration_;
 

@@ -106,7 +106,7 @@ WriteDataContainer::~WriteDataContainer()
 ::DDS::ReturnCode_t
 WriteDataContainer::enqueue(
                             DataSampleListElement* sample,
-                            ::DDS::InstanceHandle_t       instance_handle)
+                            ::DDS::InstanceHandle_t instance_handle)
 {
   // Get the PublicationInstance pointer from InstanceHandle_t.
   PublicationInstance* const instance =
@@ -218,10 +218,10 @@ WriteDataContainer::register_instance(
 
 ::DDS::ReturnCode_t
 WriteDataContainer::unregister(
-                               ::DDS::InstanceHandle_t   instance_handle,
-                               DataSample*&              registered_sample,
-                               DataWriterImpl*           writer,
-                               bool                      dup_registered_sample)
+  ::DDS::InstanceHandle_t instance_handle,
+  DataSample*&            registered_sample,
+  DataWriterImpl*         writer,
+  bool                    dup_registered_sample)
 {
   PublicationInstance* instance = 0;
 
@@ -811,8 +811,7 @@ WriteDataContainer::unregister_all (DataWriterImpl* writer)
 
   // Tell transport remove all control messages currently
   // transport is processing.
-  int const result = writer->remove_all_control_msgs ();
-  ACE_UNUSED_ARG (result);
+  (void) writer->remove_all_control_msgs ();
 
   {
     //The internal list needs protection since this call may result from the 
@@ -985,25 +984,6 @@ WriteDataContainer::copy_and_append (DataSampleList& list,
      }     
    }
  }
-
-bool
-WriteDataContainer::send_durable_data (
-  char const * topic_name,
-  char const * type_name,
-  DataWriterImpl * data_writer,
-  ::DDS::LifespanQosPolicy const & lifespan)
-{
-  return
-    this->durability_cache_
-    ? this->durability_cache_->send_data (topic_name,
-                                          type_name,
-                                          this,
-                                          data_writer,
-                                          lifespan)
-    : true;
-}
-
-
 
 } // namespace OpenDDS
 } // namespace DCPS

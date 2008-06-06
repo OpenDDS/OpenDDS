@@ -1,12 +1,77 @@
+Fri Jun  6 08:27:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+
+          Moved code out of TransientDataDurabilityCache.* to these files,
+          and rewrote code to utilize allocators to allow the same code to
+          be used by both TRANSIENT and PERSISTENT durability QoS
+          configurations.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+
+          Added source_timestamp field to simplify access of that value
+          for each sample when transferring data to the durability cache.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Delay start of requested deadline watchdog until first
+          association is established.  There is no reason to start it
+          before then.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Delay start of offered deadline watchdog until the DataWriter is
+          enabled.  There is no reason to start it  before then.
+
+          Updated code to use new durability cache interface.
+
+          Initialize the DataSampleListElement::source_timestamp field
+          when writing.  That value will later be store in the durability
+          cache.
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+
+          Only call back through the listener pointer if it is non-zero.
+
+        * dds/DCPS/PublisherImpl.cpp (get_data_durability_cache):
+
+          Updated code to use new durability cache interface.
+
+          Enabled PERSISTENT durability code.
+
+        * dds/DCPS/Qos_Helper.inl (valid):
+
+          Enabled support for TRANSIENT and PERSISTENT durability QoS
+          policies.
+
+        * dds/DCPS/WriteDataContainer.cpp (send_durable_data):
+        * dds/DCPS/WriteDataContainer.h (send_durable_data):
+
+          Removed this method.  It is no longer needed.
+
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.h:
+
+          Removed these files.  All durability cache code is now in
+          DataDurabilityCache.{h,cpp}.
+
+        * tests/DCPS/Partition/Partition_Table.h:
+
+          Corrected some comments.
+
 Wed Jun  4 04:42:10 UTC 2008  Yan Dai  <dai_y@ociewb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
-          Moved the datalink cleanup task shutdown to the begin of shutdown() 
+          Moved the datalink cleanup task shutdown to the begin of shutdown()
           function instead of the end of the function. This would fix access
           violation when transport_detached() wiped the TransportImpl reference
-          in TransportInterface while datalink clean task is removing associations. 
-          
+          in TransportInterface while datalink clean task is removing associations.
+
 Tue Jun  3 09:28:37 UTC 2007  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl (operator==):

@@ -42,20 +42,23 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute ()
     this->status_.total_count_change =
       this->status_.total_count - this->last_total_count_;
 
-    // Copy before releasing the lock.
-    ::DDS::OfferedDeadlineMissedStatus const status = this->status_;
-
     ::DDS::DataWriterListener * const listener =
         this->writer_impl_->listener_for (
           ::DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-    // Release the lock during the upcall.
-    ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
+    if (listener != 0)
+    {
+      // Copy before releasing the lock.
+      ::DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
-    // @todo Will this operation ever throw?  If so we may want to
-    //       catch all exceptions, and act accordingly.
-    listener->on_offered_deadline_missed (this->writer_.in (),
-                                          status);
+      // Release the lock during the upcall.
+      ACE_GUARD (reverse_lock_type, reverse_monitor, this->reverse_lock_);
+
+      // @todo Will this operation ever throw?  If so we may want to
+      //       catch all exceptions, and act accordingly.
+      listener->on_offered_deadline_missed (this->writer_.in (),
+                                            status);
+    }
   }
   else
   {
