@@ -1,3 +1,9 @@
+Mon Jun 09 22:34:24 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Fixed typo.
+
 Fri Jun  6 19:56:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

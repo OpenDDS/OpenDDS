@@ -77,7 +77,7 @@ New to this version are the following changes:
 - Fixed compliance with qos RxO
 
   Fixed compliance with the DDS specification that qos parameters that
-  Durability kind and Deadline.duration be compatible between the
+  Durability kind and Deadline.period be compatible between the
   subscriber and the publisher (RxO - Received x Offered)
 
 - Improved Memory Mangament
