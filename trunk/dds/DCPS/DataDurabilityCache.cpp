@@ -384,7 +384,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
   // Schedule cleanup timer.
   Cleanup_Handler * const cleanup =
     new Cleanup_Handler (*sample_list,
-                         std::distance (&(*sample_list)[0], slot),
+                         slot - &(*sample_list)[0],
                          this->allocator_.get ());
   ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
 
