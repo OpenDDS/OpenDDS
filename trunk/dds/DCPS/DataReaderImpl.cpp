@@ -1804,14 +1804,14 @@ DataReaderImpl::data_expired (DataSampleHeader const & header) const
     ACE_Time_Value const now (ACE_OS::gettimeofday ());
     ACE_Time_Value const expiration_time (
       OpenDDS::DCPS::time_to_time_value (tmp));
-    if (now <= expiration_time)
+    if (now >= expiration_time)
     {
       if (DCPS_debug_level >= 8)
       {
-        ACE_Time_Value const diff (expiration_time - now);
+        ACE_Time_Value const diff (now - expiration_time);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("OpenDDS (%P|%t) Received data ")
-                   ACE_TEXT("expired by %d seconds, %u microseconds.\n"),
+                   ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
                    diff.sec (),
                    diff.usec ()));
       }
