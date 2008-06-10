@@ -1,3 +1,33 @@
+Tue Jun 10 12:23:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp (data_expired):
+
+          Corrected sense of data expiration check.  Future times were
+          incorrectly checked instead of those in the past.
+          
+        * tests/DCPS/Lifespan:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.h:
+        * tests/DCPS/Lifespan/domain_ids:
+        * tests/DCPS/Lifespan/Messenger.idl:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/README:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/Lifespan/sub.ini:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/Lifespan/tcp.conf:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/Lifespan/Writer.h:
+
+          New LIFESPAN QoS policy test.
+        
+        * bin/dcps_tests.lst:
+
+          Run LIFESPAN test in automated builds.
+
 Tue Jun 10 10:58:34 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/Deadline/DataReaderListener.cpp:
