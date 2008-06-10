@@ -1,3 +1,28 @@
+Tue Jun 10 10:58:34 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/domain_ids:
+        * tests/DCPS/Deadline/Messenger.idl:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/README:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Deadline/tcp.conf:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/Writer.h:
+
+          New DEADLINE QoS policy test.
+
+        * bin/dcps_tests.lst:
+
+          Run DEADLINE test in automated builds.
+
 Tue Jun 10 00:22:02 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp (insert):
