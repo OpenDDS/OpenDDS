@@ -3,7 +3,7 @@ Tue Jun 10 00:22:02 UTC 2008  Ossama Othman  <othmano@ociweb.com>
         * dds/DCPS/DataDurabilityCache.cpp (insert):
 
           Replaced call to std::distance() on pointer-based iterators with
-          straight pointer arithmetic.  Addresses a Sun Studio 10 build
+          straight pointer arithmetic.  Addresses a Sun Studio 8 build
           error.
 
 Mon Jun 09 22:34:24 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
