@@ -1,3 +1,9 @@
+Wed Jun 11 18:10:41 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+
+          Added MPC file for this test.
+
 Wed Jun 11 05:58:20 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/Lifespan/DataWriterListenerImpl.cpp:
@@ -10,7 +16,7 @@ Tue Jun 10 12:23:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
           Corrected sense of data expiration check.  Future times were
           incorrectly checked instead of those in the past.
-          
+
         * tests/DCPS/Lifespan:
         * tests/DCPS/Lifespan/DataReaderListener.cpp:
         * tests/DCPS/Lifespan/DataReaderListener.h:
@@ -29,7 +35,7 @@ Tue Jun 10 12:23:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
         * tests/DCPS/Lifespan/Writer.h:
 
           New LIFESPAN QoS policy test.
-        
+
         * bin/dcps_tests.lst:
 
           Run LIFESPAN test in automated builds.
