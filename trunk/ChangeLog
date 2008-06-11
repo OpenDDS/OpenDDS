@@ -1,3 +1,9 @@
+Wed Jun 11 05:58:20 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.cpp:
+
+          Fixed unused parameter warning.
+
 Tue Jun 10 12:23:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp (data_expired):
