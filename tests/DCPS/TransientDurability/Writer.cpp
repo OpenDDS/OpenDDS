@@ -29,9 +29,6 @@ Writer::~Writer ()
 int
 Writer::svc ()
 {
-  if (this->dwl_servant_ == 0)
-    return -1;  // Should not occur.
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("(%P|%t) Writer::svc begins.\n")));
 
