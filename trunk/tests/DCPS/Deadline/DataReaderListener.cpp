@@ -11,6 +11,7 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl ()
+  : num_reads_(0)
 {
 }
 
@@ -22,6 +23,7 @@ void
 DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr)
   throw (CORBA::SystemException)
 {
+  num_reads_ ++;
 }
 
 void

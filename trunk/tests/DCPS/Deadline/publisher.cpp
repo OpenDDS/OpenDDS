@@ -32,7 +32,7 @@ using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int main (int argc, char *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -236,6 +236,27 @@ int main (int argc, char *argv[]) {
       {
         // Just write with our first DataWriter since it has a listener.
         std::auto_ptr<Writer> writer (new Writer (dw1.in ()));
+
+        int const max_attempts = 15;
+        int attempts = 1; 
+        while (attempts != max_attempts)
+        {
+          // Wait for the third subscription before we proceed.
+          DDS::PublicationMatchStatus const publication_status =
+                     dw1->get_publication_match_status ();
+
+          if (publication_status.total_count == 3)
+            break;
+
+          ACE_OS::sleep (1);
+          ++attempts;
+        }
+
+        if (attempts == max_attempts)
+        {
+          cerr << "ERROR: subscriptions failed to match." << endl;
+          exit (1);
+        }
 
         writer->start ();
 

@@ -52,17 +52,6 @@ Writer::svc ()
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
-  int const max_attempts = 15;
-  for (int attempts = 1; attempts != max_attempts; ++attempts)
-  {
-    // Wait for a publication before we proceed.
-    DDS::PublicationMatchStatus const publication_status =
-      this->writer_->get_publication_match_status ();
-
-    if (publication_status.total_count_change == 0)
-      ACE_OS::sleep (1);
-  }
-
   ::DDS::InstanceHandleSeq handles;
   try
   {

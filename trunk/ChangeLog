@@ -1,3 +1,13 @@
+Thu Jun 12 05:49:36 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+
+          Correct synchronization issue between publisher and subscriber.
+
 Thu Jun 12 04:38:01 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/Deadline/DataWriterListenerImpl.cpp
