@@ -1,3 +1,24 @@
+Thu Jun 12 09:23:26 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientDurability/domain_ids:
+        * tests/DCPS/TransientDurability/Messenger.idl:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/README:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientDurability/tcp.conf:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientDurability/Writer.h:
+
+          New TRANSIENT DURABILITY test.
+
 Thu Jun 12 05:49:36 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Deadline/DataReaderListener.cpp:
