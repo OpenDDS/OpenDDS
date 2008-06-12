@@ -128,10 +128,11 @@ Writer::get_timeout_writes () const
   return timeout_writes_.value ();
 }
 
-int Writer::write (Messenger::MessageDataWriter_ptr message_dw,
-                   ::DDS::InstanceHandle_t& handle,
-                   Messenger::Message& message, 
-                   int num_messages)
+int
+Writer::write (Messenger::MessageDataWriter_ptr message_dw,
+               ::DDS::InstanceHandle_t& handle,
+               Messenger::Message& message, 
+               int num_messages)
 {
   for (int i = 0; i < num_messages; ++i)
   {
@@ -142,7 +143,7 @@ int Writer::write (Messenger::MessageDataWriter_ptr message_dw,
     ACE_Time_Value const timestamp (
       ACE_OS::gettimeofday () - ACE_Time_Value (1000));
 
-    ::DDS::ReturnCode_t ret =
+    ::DDS::ReturnCode_t const ret =
         message_dw->write_w_timestamp (
           message,
           handle,
@@ -164,6 +165,26 @@ int Writer::write (Messenger::MessageDataWriter_ptr message_dw,
 
     // Sleep half a second in between writes.
     ACE_OS::sleep (ACE_Time_Value (0, 500000));
+  }
+
+  // Write a sample with the current timestamp.  It should be received
+  // by the subscriber.
+  ++this->count_;
+  message.count = this->count_;
+
+  ::DDS::ReturnCode_t const ret = message_dw->write (message, handle);
+
+  if (ret != ::DDS::RETCODE_OK)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                ACE_TEXT ("write() returned %d.\n"),
+                -1));
+
+    if (ret == ::DDS::RETCODE_TIMEOUT)
+      {
+        ++this->timeout_writes_;
+      }
   }
 
   return 0;
