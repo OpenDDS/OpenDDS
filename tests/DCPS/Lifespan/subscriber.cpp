@@ -140,17 +140,13 @@ int main (int argc, char *argv[])
         exit(1);
       }
 
-      int const expected = 10;
-      for (int n = 0; n < expected; ++n)
-      {
-        if (listener_servant->num_reads () != 0)
+      ACE_OS::sleep (10);
+      if (listener_servant->num_reads () != 1)
         {
-          cerr << "ERROR: Expired data was read." << std::endl;
+          cerr << "ERROR: Incorrect number of samples received." << endl
+               << "       Expired data was probably read." << endl;
           exit (1);
         }
-
-        ACE_OS::sleep (3);
-      }
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

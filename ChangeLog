@@ -1,3 +1,16 @@
+Thu Jun 12 22:35:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/Lifespan/Writer.cpp (write):
+
+          Added a write() call after the bogus write_w_timestamp() calls
+          to make sure valid data is demarshalled correctly after expired
+          data is rejected.
+
+        * tests/DCPS/Lifespan/subscriber.cpp (main):
+
+          Verify that exactly one sample was received.  The first five
+          with timestamps in the past should not have been read.
+
 Thu Jun 12 22:13:29 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/PersistentDurability/publisher.cpp:
