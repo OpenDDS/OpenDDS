@@ -24,14 +24,10 @@ $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
-$data_file = "test_run.data";
-unlink $data_file;
-
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", "$pub_opts " .
-                                     "-ORBLogFile $data_file");
+$Publisher = PerlDDS::create_process ("publisher", "$pub_opts ");
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -45,21 +41,6 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 $Publisher->Spawn ();
-
-open (DATA, $data_file);
-
-while ($line = <DATA>)
-{
- if ($line =~ /Done writing/)
-   {
-    break;
-   }
-}
-
-# Sleep for 2 seconds after publisher send all samples to avoid the
-# timing issue that the subscriber may start and finish in 1 second
-# while the publisher is waiting for it to start.
-sleep (2);
 
 $Subscriber->Spawn ();
 
@@ -82,7 +63,6 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
-#unlink $data_file;
 
 if ($status == 0) {
   print "test PASSED.\n";

@@ -30,8 +30,7 @@
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
-int
-main (int argc, char *argv[])
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
@@ -119,6 +118,8 @@ main (int argc, char *argv[])
         exit(1);
       }
 
+
+
       // ----------------------------------------------
       {
         // Attempt to create a DataReader with intentionally
@@ -145,16 +146,7 @@ main (int argc, char *argv[])
           exit (1);
         }
 
-        int const max_attempts = 15;
-        for (int attempts = 1; attempts != max_attempts; ++attempts)
-        {
-          // Wait for a subscription before we proceed.
-          DDS::SubscriptionMatchStatus const subscription_status =
-            tmp_dr->get_subscription_match_status ();
-
-          if (subscription_status.total_count_change == 0)
-            ACE_OS::sleep (1);
-        }
+        ACE_OS::sleep (2);
 
         // Check if the incompatible deadline was correctly flagged.
         DDS::RequestedIncompatibleQosStatus_var incompatible_status =
@@ -182,6 +174,7 @@ main (int argc, char *argv[])
           exit (1);
         }
       }
+
 
       // ----------------------------------------------
 
@@ -305,6 +298,22 @@ main (int argc, char *argv[])
 
         exit (1);
       }
+
+
+      // Create 3rd data reader to trigger the data writers to write.
+      DDS::DataReader_var dr3 =
+      sub->create_datareader (topic.in (),
+                              dr_qos,
+                              DDS::DataReaderListener::_nil ());
+
+      DataReaderListenerImpl* listener_servant =
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
+      int expected = 10;
+      while ( listener_servant->num_reads() < expected) {
+        ACE_OS::sleep (1);
+      }
+
+
 
       // @todo We still need a check proper updating of the
       //       @c DDS::RequestedDeadlineMissedStatus::last_instance_handle
