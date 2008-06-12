@@ -144,6 +144,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
         // Write samples using multiple threads.
         std::auto_ptr<Writer> writer (new Writer (dw_tmp.in ()));
+
+        // Explicitly destroy the DataWriter.
+        if (pub->delete_datawriter (dw_tmp.in ())
+            == ::DDS::RETCODE_PRECONDITION_NOT_MET)
+        {
+          cerr << "Unable to delete DataWriter" << endl;
+          exit (1);
+        }
       }
 
       // -------------------------------------------------------
@@ -223,6 +231,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
         // Write samples using multiple threads.
         std::auto_ptr<Writer> writer (new Writer (dummy_dw.in ()));
+
+        // Explicitly destroy the DataWriter.
+        if (pub->delete_datawriter (dummy_dw.in ())
+            == ::DDS::RETCODE_PRECONDITION_NOT_MET)
+        {
+          cerr << "Unable to delete DataWriter" << endl;
+          exit (1);
+        }
 
         // Allow durability cleanup to occur
         ACE_OS::sleep (delay_seconds + 3);

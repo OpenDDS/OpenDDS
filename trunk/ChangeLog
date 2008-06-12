@@ -1,3 +1,13 @@
+Thu Jun 12 16:49:34 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/TransientDurability/publisher.cpp (ACE_TMAIN):
+
+          Explicitly destroy the DataWriter that is meant to push unsent
+          data in to the durability cache before creating a new
+          DataWriter.  The goal is to force all references to the
+          DataWriter held by OpenDDS to be removed before creating the new
+          one.
+
 Thu Jun 12 15:53:44 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
