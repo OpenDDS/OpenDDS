@@ -1,3 +1,24 @@
+Thu Jun 12 17:33:31 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/PersistentDurability/domain_ids:
+        * tests/DCPS/PersistentDurability/Messenger.idl:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/README:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/PersistentDurability/tcp.conf:
+        * tests/DCPS/PersistentDurability/Writer.cpp:
+        * tests/DCPS/PersistentDurability/Writer.h:
+
+          New PERSISTENT DURABILITY test.
+
 Thu Jun 12 16:49:34 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/TransientDurability/publisher.cpp (ACE_TMAIN):
