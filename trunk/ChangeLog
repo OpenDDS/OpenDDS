@@ -1,3 +1,10 @@
+Thu Jun 12 22:06:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/TransientDurability/Writer.cpp (svc):
+
+          Removed nil listener check that prevented writing from
+          occuring.
+
 Thu Jun 12 21:46:21 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/TransientDurability/Writer.cpp:
