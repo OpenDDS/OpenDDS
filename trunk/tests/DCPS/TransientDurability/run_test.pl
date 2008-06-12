@@ -49,20 +49,23 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 $Publisher->Spawn ();
 
-open (DATA, $data_file);
-
-while ($line = <DATA>)
+$foundLineInFile = "false";
+while ( $foundLineInFile !~ /true/)
 {
- if ($line =~ /Done writing/)
-   {
-    break;
-   }
+  open (DATA, $data_file);
+
+  while ($line = <DATA>)
+  {
+    if ($line =~ /Deleted DataWriter/)
+    {
+	  $foundLineInFile = "true";
+      break;
+    }
+  }
+  close(DATA);
 }
 
-# Sleep for 2 seconds after publisher sends all samples to avoid the
-# timing issue that the subscriber may start and finish in 1 second
-# while the publisher is waiting for it to start.
-sleep (8);
+sleep (1);
 
 $Subscriber->Spawn ();
 
