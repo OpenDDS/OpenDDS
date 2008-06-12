@@ -68,20 +68,7 @@ else {
 # to complete its reads.
 $Publisher2->Spawn ();
 
-open (DATA, $data_file);
-
-while ($line = <DATA>)
-{
- if ($line =~ /Done writing/)
-   {
-    break;
-   }
-}
-
-# Sleep for 4 seconds after publisher sends all samples to avoid the
-# timing issue that the subscriber may start and finish in 1 second
-# while the publisher is waiting for it to start.
-sleep (4);
+sleep (1);
 
 $Subscriber->Spawn ();
 
