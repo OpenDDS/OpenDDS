@@ -19,27 +19,10 @@ Writer::Writer (::DDS::DataWriter_ptr writer)
   ::DDS::DataWriterListener_var dwl = writer->get_listener ();
   this->dwl_servant_ =
     dynamic_cast<DataWriterListenerImpl*> (dwl.in ());
-
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Starting Writer \n")));
-
-  // Launch threads.
-  if (this->activate (THR_NEW_LWP | THR_JOINABLE,
-                      num_instances_per_writer) == -1)
-  {
-    cerr << "Writer activation failed" << endl;
-    exit (1);
-  }
-
 }
 
 Writer::~Writer ()
 {
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Ending Writer - waiting for threads\n")));
-
-  this->wait ();
-
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) Done writing. \n"));
 }
 
 
@@ -87,6 +70,40 @@ Writer::svc ()
   ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
   return 0;
+}
+
+bool
+Writer::start ()
+{
+  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Starting Writer \n")));
+
+  // Launch threads.
+  if (this->activate (THR_NEW_LWP | THR_JOINABLE,
+                      num_instances_per_writer) == -1)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+                       ACE_TEXT ("(%P|%t) %p\n"),
+                       ACE_TEXT ("Error activating threads.\n")),
+                      false);
+  }
+
+  return true;
+}
+
+bool
+Writer::end ()
+{
+  int const result = this->wait ();
+   
+  if (result != 0)
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("(%P|%t) %p\n"),
+                ACE_TEXT ("Error waiting for threads.\n")));
+  else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("(%P|%t) Done writing. \n")));
+
+  return result == 0;
 }
 
 int

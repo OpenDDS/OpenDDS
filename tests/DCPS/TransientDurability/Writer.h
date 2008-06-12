@@ -18,6 +18,8 @@ public:
   Writer (::DDS::DataWriter_ptr writer);
   virtual ~Writer ();
   virtual int svc ();
+  bool start ();
+  bool end ();
   int get_timeout_writes () const;
 
 private:
