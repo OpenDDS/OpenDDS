@@ -1,3 +1,14 @@
+Thu Jun 12 21:46:21 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientDurability/Writer.h:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+
+          Provide a means to explicitly control when to wait() for threads
+          to exit so that we know exactly when data durability caching has
+          completed.  Thanks to Trevor Fields for pointing out the
+          problem.
+
 Thu Jun 12 17:33:31 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
