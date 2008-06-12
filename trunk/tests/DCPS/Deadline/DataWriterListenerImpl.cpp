@@ -17,7 +17,7 @@ DataWriterListenerImpl::~DataWriterListenerImpl ()
 
 void
 DataWriterListenerImpl::on_offered_deadline_missed (
-    ::DDS::DataWriter_ptr writer,
+    ::DDS::DataWriter_ptr /* writer */,
     ::DDS::OfferedDeadlineMissedStatus const & status)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
