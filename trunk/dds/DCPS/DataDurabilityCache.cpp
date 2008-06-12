@@ -268,7 +268,7 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
 
       ACE_DES_FREE (list,
                     this->allocator_->free,
-                    sample_list_type);
+                    ACE_Array_Base<ACE_Unbounded_Queue<sample_data_type> *>);
     }
   }
 }
