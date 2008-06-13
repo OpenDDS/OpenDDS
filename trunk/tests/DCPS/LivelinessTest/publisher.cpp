@@ -458,6 +458,12 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      // Moved TransportImpl reference release from just before exit from main
+      // to here. This intended to fix the access violation in some optimize
+      // build on linux during shutdown. I think TransportImpl object cleanup
+      // may reference some resouces that already released.
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -474,9 +480,5 @@ int main (int argc, char *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  writer_transport_impl = 0;
   return status;
 }

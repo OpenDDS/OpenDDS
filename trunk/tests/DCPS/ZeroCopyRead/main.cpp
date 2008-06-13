@@ -1749,6 +1749,9 @@ int main (int argc, char *argv[])
       //done above - in the tests sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       // clean up common objects
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
@@ -1772,10 +1775,5 @@ int main (int argc, char *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encounter an access violation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

@@ -748,6 +748,9 @@ int main (int argc, char *argv[])
 
       }//dp scope
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -764,10 +767,5 @@ int main (int argc, char *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encounter an access violation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

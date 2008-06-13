@@ -1,3 +1,21 @@
+Fri Jun 13 23:00:50 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+
+          Moved TransportImpl reference release from just right before exit 
+          from main to before transport release. This intended to fix the 
+          access violation during shutdown in some optimize build on linux.
+          I think TransportImpl object cleanup may reference some resouces
+          that already released.
+ 
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Made similar changes. 
+
 Fri Jun 13 22:04:01 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
