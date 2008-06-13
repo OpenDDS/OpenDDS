@@ -644,6 +644,9 @@ cleanup:
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -660,10 +663,5 @@ cleanup:
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

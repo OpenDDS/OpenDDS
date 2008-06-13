@@ -453,6 +453,8 @@ void shutdown ()
       "participant  delete_participant failed\n"));
   }
 
+  cleanup_transport ();
+
   TheTransportFactory->release();
 
   TheServiceParticipant->shutdown ();
@@ -530,8 +532,6 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   shutdown ();
-
-  cleanup_transport ();
 
   return failed;
 #else
