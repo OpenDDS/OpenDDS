@@ -520,10 +520,43 @@ int main (int argc, char *argv[])
              
           // The datareader will receive the DISPOSE message and change the
           // instance state from ALIVE to NOT ALIVE.
+          // The dispose sample is an invalid data sample which is used for notification.
+          // Upon receiving dispose, a NEW sample is created which marks InstanceState 
+          // has NOT_READ_SAMPLE, but won't change the view state. The view state is
+          // changed to NEW_VIEW when data sample is received.
           fast_dw->dispose(foo1, handle);
 
+          //// wait for dispose sample to propogate
+          if (!wait_for_data(sub.in (), 5))
+            ACE_ERROR_RETURN ((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
+            1);
+
+          // Read the dispose sample so the view state be NOT_NEW and 
+          // sample state be READ before next write/read 
+          max_samples = 1;
+
+          Test::SimpleSeq     disposeData (max_samples);
+          ::DDS::SampleInfoSeq disposeDataInfo;
+
+          status = fast_dr->read(  disposeData 
+            , disposeDataInfo
+            , max_samples
+            , ::DDS::NOT_READ_SAMPLE_STATE
+            , ::DDS::ANY_VIEW_STATE
+            , ::DDS::ANY_INSTANCE_STATE );
+
+          // verify dispose sample
+          if (disposeDataInfo[0].valid_data == 1 
+            || disposeDataInfo[0].instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+            {
+              ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: failed to verify DISPOSE sample.\n") ));
+              test_failed = 1;
+            }
+
           // Write sample after dispose. The datareader will change the 
-          // view state from NOT NEW to NEW.
+          // view state from NOT_NEW to NEW.
           ::Test::Simple foo3;
           foo3.key  = 1; 
           foo3.count = 3;
