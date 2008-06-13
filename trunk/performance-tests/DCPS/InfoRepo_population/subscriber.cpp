@@ -108,7 +108,7 @@ Subscriber::parse_args (int argc, char *argv[])
   return true;
 }
 
-Subscriber::Subscriber (int argc, char *argv[]) throw (InitError)
+Subscriber::Subscriber (int argc, char *argv[]) throw (Subscriber::InitError)
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
   , transport_impl_id_ (1)
