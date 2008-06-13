@@ -1,3 +1,28 @@
+Fri Jun 13 16:31:33 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * 14a_README:
+
+          Fixed a typo.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Added a "using" statement which may help the Borland compiler.
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoterCommon_Export.h:
+
+          Re-generated using the latest generate_export_file.pl script.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+          Throw specs for the method definition need to use fully-qualified
+          class names for exception classes nested within the method's class.
+
 Thu Jun 12 22:35:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/Lifespan/Writer.cpp (write):

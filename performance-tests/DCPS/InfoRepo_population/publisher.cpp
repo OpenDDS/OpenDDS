@@ -109,7 +109,7 @@ Publisher::parse_args (int argc, char *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, char *argv[]) throw (InitError)
+Publisher::Publisher (int argc, char *argv[]) throw (Publisher::InitError)
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
   , transport_impl_id_ (1)

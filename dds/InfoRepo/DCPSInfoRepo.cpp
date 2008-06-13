@@ -67,7 +67,7 @@ private:
   bool resurrect_;
 };
 
-InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError)
+InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   : ior_file_ (ACE_TEXT("repo.ior"))
     , domain_file_ (ACE_TEXT("domain_ids"))
     , listen_address_given_ (0)
@@ -188,7 +188,7 @@ InfoRepo::parse_args (int argc,
 }
 
 bool
-InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InitError)
+InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 {
   ACE_Argv_Type_Converter cvt (argc, argv);
 

@@ -1494,6 +1494,8 @@ void
   ::OpenDDS::DCPS::ReceivedDataElement* item
   )
 {
+  using ::OpenDDS::DCPS::ReceivedDataElement;
+
   if (0 == item->dec_ref())
   {
     if (item->registered_data_ != 0)

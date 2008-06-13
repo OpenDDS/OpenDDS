@@ -56,7 +56,8 @@ SyncServer::parse_args (int argc, char *argv[])
   return true;
 }
 
-SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
+SyncServer::SyncServer (int argc, ACE_TCHAR* argv[])
+  throw (SyncServer::InitError)
   : pub_count_ (1), sub_count_ (1)
 {
   try
