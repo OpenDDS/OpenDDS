@@ -1,12 +1,25 @@
+Fri Jun 13 22:04:01 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+
+          Added some #includes that seem to be needed by Borland and have no
+          ill effects on either VC 8 or GCC 4.1.1.
+
 Fri Jun 13 20:51:03 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/ViewState/main.cpp:
-        
+
           Fixed a timing issue in the test. The test case 2 should wait until
           dispose and data sample(from write() after dispose) are both received
           before verifying view state change in multiple generations. Current
           test just wait for new sample which may be just dispose sample. Now
-          the dispose sample was read so the view state be NOT_NEW and sample 
+          the dispose sample was read so the view state be NOT_NEW and sample
           state be READ before write() call and we can verify the new sample
           changed the states.
 
