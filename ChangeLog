@@ -1,20 +1,38 @@
+Sat Jun 14 21:43:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+
+          Added #includes that Borland requires, in just a few cases gcc332
+          doesn't accept these, so they have been placed within #ifdef guards
+          for __BORLANDC__.
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+
+          Projects that create executables should not set any "dynamicflags".
+
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+
+          Added .in() in two instances where vars are passed to is_nil().
+
 Fri Jun 13 23:00:50 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/LivelinessTest/publisher.cpp:
         * tests/DCPS/LivelinessTest/subscriber.cpp:
 
-          Moved TransportImpl reference release from just right before exit 
-          from main to before transport release. This intended to fix the 
+          Moved TransportImpl reference release from just right before exit
+          from main to before transport release. This intended to fix the
           access violation during shutdown in some optimize build on linux.
           I think TransportImpl object cleanup may reference some resouces
           that already released.
- 
+
         * tests/DCPS/BuiltInTopic/main.cpp:
         * tests/DCPS/FooTest5_0/main.cpp:
         * tests/DCPS/ViewState/main.cpp:
         * tests/DCPS/ZeroCopyRead/main.cpp:
 
-          Made similar changes. 
+          Made similar changes.
 
 Fri Jun 13 22:04:01 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 

@@ -14,6 +14,7 @@
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include <map>
 
