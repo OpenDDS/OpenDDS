@@ -38,7 +38,6 @@ project(*Publisher) : dcpsexe, svc_utils {
 
   includes += $(TAO_ROOT)/orbsvcs
   libs += StockQuoterCommon
-  dynamicflags = STOCKQUOTERCOMMON_HAS_DLL
 
   TypeSupport_Files {
   }
@@ -70,7 +69,6 @@ project(*Subscriber) : dcpsexe {
 
   includes += $(TAO_ROOT)/orbsvcs
   libs += StockQuoterCommon
-  dynamicflags = STOCKQUOTERCOMMON_HAS_DLL
 
   TypeSupport_Files {
   }

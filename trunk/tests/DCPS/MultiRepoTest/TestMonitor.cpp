@@ -321,7 +321,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       this->config_.typeName().c_str(),
       current->first
     ));
-    if( 0 == CORBA::is_nil( current->second)) {
+    if( 0 == CORBA::is_nil( current->second.in())) {
       ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
       if(::DDS::RETCODE_OK != subscriber_data->register_type(
                                 current->second.in (),
@@ -652,7 +652,7 @@ TestMonitor::~TestMonitor()
       ACE_TEXT("%T (%P|%t) INFO: releasing resources for domain %d.\n"),
       current->first
     ));
-    if( 0 == CORBA::is_nil( current->second)) {
+    if( 0 == CORBA::is_nil( current->second.in())) {
       if( ::DDS::RETCODE_PRECONDITION_NOT_MET
            == current->second->delete_contained_entities()
         ) {

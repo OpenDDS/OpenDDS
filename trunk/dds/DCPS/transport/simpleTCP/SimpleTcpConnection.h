@@ -6,7 +6,9 @@
 
 #include "SimpleTcpConfiguration.h"
 #include "SimpleTcpConfiguration_rch.h"
-#include "SimpleTcpDataLink.h"
+#ifdef __BORLANDC__
+#  include "SimpleTcpDataLink.h"
+#endif
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
 #include "SimpleTcpSendStrategy.h"
