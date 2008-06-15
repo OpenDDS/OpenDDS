@@ -1,3 +1,11 @@
+Sun Jun 15 22:29:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * tests/transport/dds_comparative/pub_main.cpp:
+        * tests/transport/dds_comparative/sub_main.cpp:
+
+          Added a few more #includes needed by Borland.
+
 Sat Jun 14 21:43:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
