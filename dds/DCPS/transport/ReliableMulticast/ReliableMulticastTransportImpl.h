@@ -13,6 +13,7 @@
 
 #include "ReliableMulticast_Export.h"
 #include "ReliableMulticastTransportConfiguration.h"
+#include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
