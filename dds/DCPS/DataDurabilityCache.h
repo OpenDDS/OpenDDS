@@ -72,36 +72,41 @@ namespace OpenDDS
        *
        * @brief Key type for underlying maps.
        *
-       * Each instance may be uniquely identified by its topic name
-       * and type name.  We use that property to establish a map key
-       * type.
+       * Each sample may be uniquely identified by its domain ID,
+       * topic name and type name.  We use that property to establish
+       * a map key type.
        */
       class key_type
       {
       public:
 
         key_type ()
-          : topic_name_ ()
+          : domain_id_ ()
+          , topic_name_ ()
           , type_name_ ()
         {
         }
 
-        key_type (char const * topic,
+        key_type (::DDS::DomainId_t domain_id,
+                  char const * topic,
                   char const * type,
                   ACE_Allocator * allocator)
-          : topic_name_ (topic, allocator)
+          : domain_id_ (domain_id)
+          , topic_name_ (topic, allocator)
           , type_name_ (type, allocator)
         {
         }
 
         key_type (key_type const & rhs)
-          : topic_name_ (rhs.topic_name_)
+          : domain_id_ (rhs.domain_id_)
+          , topic_name_ (rhs.topic_name_)
           , type_name_ (rhs.type_name_)
         {
         }
 
         key_type & operator= (key_type const & rhs)
         {
+          this->domain_id_ = rhs.domain_id_;
           this->topic_name_ = rhs.topic_name_;
           this->type_name_ = rhs.type_name_;
 
@@ -111,24 +116,30 @@ namespace OpenDDS
         bool operator== (key_type const & rhs) const
         {
           return
-            this->topic_name_ == rhs.topic_name_
+            this->domain_id_ == rhs.domain_id_
+            && this->topic_name_ == rhs.topic_name_
             && this->type_name_ == rhs.type_name_;
         }
 
         bool operator< (key_type const & rhs) const
         {
           return
-            this->topic_name_ < rhs.topic_name_
+            this->domain_id_ < rhs.domain_id_
+            && this->topic_name_ < rhs.topic_name_
             && this->type_name_ < rhs.type_name_;
         }
 
         u_long hash () const
         {
-          return this->topic_name_.hash() & this->type_name_.hash ();
+          return
+            static_cast<u_long> (this->domain_id_)
+            + this->topic_name_.hash()
+            + this->type_name_.hash ();
         }
 
       private:
 
+        ::DDS::DomainId_t domain_id_;
         ACE_CString topic_name_;
         ACE_CString type_name_;
 
@@ -181,23 +192,24 @@ namespace OpenDDS
       typedef std::list<long> timer_id_list_type;
 
       /// Constructor.
-      DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind,
-                           ::DDS::DomainId_t domain_id);
+      DataDurabilityCache (::DDS::DurabilityQosPolicyKind kind);
 
       /// Destructor.
       ~DataDurabilityCache ();
 
       /// Insert the samples corresponding to the given topic instance
-      /// (uniquely identify by its topic name and type name within a
-      /// given domain) into the data durability cache.
-      bool insert (char const * topic_name,
+      /// (uniquely identify by its domain, topic name and type name)
+      /// into the data durability cache.
+      bool insert (::DDS::DomainId_t domain_id,
+                   char const * topic_name,
                    char const * type_name,
-                   DataSampleList & samples,
+                   DataSampleList & the_data,
                    ::DDS::DurabilityServiceQosPolicy const & qos);
 
-      /// Write cached data corresponding to given topic and type (and
-      /// domain) to @c DataWriter.
-      bool get_data (char const * topic_name,
+      /// Write cached data corresponding to given domain, topic and
+      /// type to @c DataWriter.
+      bool get_data (::DDS::DomainId_t domain_id,
+                     char const * topic_name,
                      char const * type_name,
                      DataWriterImpl * data_writer,
                      ACE_Allocator * mb_allocator,
@@ -213,8 +225,7 @@ namespace OpenDDS
       /// Make allocator suitable to support specified kind of
       /// @c DURABILITY.
       static std::auto_ptr<ACE_Allocator>
-      make_allocator (::DDS::DurabilityQosPolicyKind kind,
-                      ::DDS::DomainId_t domain_id);
+      make_allocator (::DDS::DurabilityQosPolicyKind kind);
 
     private:
 

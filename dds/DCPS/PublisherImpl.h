@@ -1,8 +1,9 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef TAO_DDS_DCPS_PUBLISHER_IMPL_H
-#define TAO_DDS_DCPS_PUBLISHER_IMPL_H
+
+#ifndef OPENDDS_DCPS_PUBLISHER_IMPL_H
+#define OPENDDS_DCPS_PUBLISHER_IMPL_H
 
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
@@ -18,7 +19,6 @@
 
 #include <map>
 #include <list>
-#include <memory>
 
 
 namespace OpenDDS
@@ -27,29 +27,28 @@ namespace OpenDDS
   {
     class DomainParticipantImpl;
     class DataWriterImpl;
-    class DataDurabilityCache;
 
     /// Information about a DataWriter
     struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
       /// The remote datawriter object reference.
-      ::OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_ ;
+      ::OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_;
       /// The local datawriter object reference.
-      ::DDS::DataWriter_ptr        local_writer_objref_ ;
+      ::DDS::DataWriter_ptr        local_writer_objref_;
       /// The datawriter servant.
       DataWriterImpl*              local_writer_impl_;
       /// The topic id from repository.
-      RepoId			   topic_id_;
+      RepoId                       topic_id_;
       /// The datawriter/publication id from repository.
-      PublicationId                publication_id_ ;
+      PublicationId                publication_id_;
       /// The group id of the datawriter. - NOT USED IN FIRST IMPL
-      CoherencyGroup               group_id_ ;
-    } ;
+      CoherencyGroup               group_id_;
+    };
 
     typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
-        DataWriterMap ;
+        DataWriterMap;
 
     typedef std::map<PublicationId, PublisherDataWriterInfo*>
-        PublicationMap ;
+        PublicationMap;
 
     // DataWriter id to qos map.
     typedef std::map<RepoId, ::DDS::DataWriterQos> DwIdToQosMap;
@@ -265,11 +264,6 @@ namespace OpenDDS
     */
     ::DDS::PublisherListener* listener_for (::DDS::StatusKind kind);
 
-      /// Get the data durability cache corresponding to the given
-      /// DurabilityQosPolicy and sample list depth.
-      DataDurabilityCache * get_data_durability_cache (
-        ::DDS::DurabilityQosPolicy const & durability);
-
     private:
       /// Publisher QoS policy list.
       ::DDS::PublisherQos           qos_;
@@ -289,7 +283,7 @@ namespace OpenDDS
       /// repository id.
       PublicationMap                publication_map_;
       /// Next coherency group ID to use.  -  NOT USED IN FIRST IMPL
-      CoherencyGroup                group_id_ ;
+      CoherencyGroup                group_id_;
       /// Ordered list of active coherency groups. -  NOT USED IN FIRST IMPL
       std::list<CoherencyGroup>     active_coherency_;
       /// Reference to the DCPSInfo repository for this Publisher.
@@ -302,7 +296,7 @@ namespace OpenDDS
       /// -  NOT USED IN FIRST IMPL - not supporting GROUP scope
       SequenceNumber                sequence_number_;
         /// Start of current aggregation period. - NOT USED IN FIRST IMPL
-      ACE_Time_Value                aggregation_period_start_ ;
+      ACE_Time_Value                aggregation_period_start_;
 
       /// The recursive lock to protect datawriter map and suspend count.
       /// It also projects the TransportInterface (it must be held when
@@ -310,19 +304,12 @@ namespace OpenDDS
       mutable ACE_Recursive_Thread_Mutex    pi_lock_;
 
       /// The catched available data while suspending.
-      DataSampleList                available_data_list_ ;
+      DataSampleList                available_data_list_;
 
-    private:
-
-      /// The @c TRANSIENT data durability cache.
-      std::auto_ptr<DataDurabilityCache> transient_data_cache_;
-
-      /// The @c PERSISTENT data durability cache.
-      std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
 
     };
 
   } // namespace  ::DDS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_PUBLISHER_IMPL_H  */
+#endif /* OPENDDS_DCPS_PUBLISHER_IMPL_H  */

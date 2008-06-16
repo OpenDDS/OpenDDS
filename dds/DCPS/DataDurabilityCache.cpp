@@ -18,7 +18,6 @@
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
 
-#include <sstream>
 #include <string>
 #include <algorithm>
 
@@ -223,9 +222,8 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::get_sample (
 // --------------------------------------------------
 
 OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
-  ::DDS::DurabilityQosPolicyKind kind,
-  ::DDS::DomainId_t domain_id)
-  : allocator_ (make_allocator (kind, domain_id))
+  ::DDS::DurabilityQosPolicyKind kind)
+  : allocator_ (make_allocator (kind))
   , samples_ (allocator_.get ())
   , cleanup_timer_ids_ ()
   , lock_ ()
@@ -259,7 +257,7 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
       sample_list_type * const list = (*s).int_id_;
 
       size_t const len = list->size ();;
-      for (size_t l = 0; l != len;  ++l)
+      for (size_t l = 0; l != len; ++l)
       {
         ACE_DES_FREE ((*list)[l],
                       this->allocator_->free,
@@ -275,12 +273,13 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
 
 bool
 OpenDDS::DCPS::DataDurabilityCache::insert (
+  ::DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
-  DataSampleList & unsent_data,
+  DataSampleList & the_data,
   ::DDS::DurabilityServiceQosPolicy const & qos)
 {
-  if (unsent_data.size_ == 0)
+  if (the_data.size_ == 0)
     return true;  // Nothing to cache.
 
   // Apply DURABILITY_SERVICE QoS HISTORY and RESOURCE_LIMITS related
@@ -292,18 +291,18 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
       qos.max_samples_per_instance);
 
   // Iterator to first DataSampleListElement to be copied.
-  DataSampleList::iterator element (unsent_data.begin ());
+  DataSampleList::iterator element (the_data.begin ());
 
   if (depth < 0)
     return false; // Should never occur.
   else if (depth == 0)
     return true;  // Nothing else to do.  Discard all data.
-  else if (unsent_data.size_ > depth)
+  else if (the_data.size_ > depth)
   { 
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
     // DataSampleList.
-    ssize_t const advance_amount = unsent_data.size_ - depth;
+    ssize_t const advance_amount = the_data.size_ - depth;
     std::advance (element, advance_amount);      
   }
 
@@ -311,8 +310,11 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
   // Copy unsent samples to the domain/topic/type-specific cache.
 
-  key_type const key (topic_name, type_name, this->allocator_.get ());
-  DataSampleList::iterator unsent_end (unsent_data.end ());
+  key_type const key (domain_id,
+                      topic_name,
+                      type_name,
+                      this->allocator_.get ());
+  DataSampleList::iterator unsent_end (the_data.end ());
 
   sample_list_type * sample_list = 0;
 
@@ -348,7 +350,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
     // Find an empty slot in the array.  This is a linear search but
     // that should be fine for the common case, i.e. a small number of
-    // DataWriters that push unsent data into the cache.x
+    // DataWriters that push unsent data into the cache.
     slot = std::find (&((*sample_list)[0]),
                       end,
                       static_cast<data_queue_type *> (0));
@@ -373,26 +375,42 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     *slot = samples;
 
     for (DataSampleList::iterator i (element); i != unsent_end; ++i)
+    {
       if (samples->enqueue_tail (
             sample_data_type (*i,
                               this->allocator_.get ())) != 0)
         return false;
+    }
   }
 
   // -----------
 
   // Schedule cleanup timer.
-  Cleanup_Handler * const cleanup =
-    new Cleanup_Handler (*sample_list,
-                         slot - &(*sample_list)[0],
-                         this->allocator_.get ());
-  ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
-
   ACE_Time_Value const cleanup_delay (
     duration_to_time_value (qos.service_cleanup_delay));
 
   if (cleanup_delay > ACE_Time_Value::zero)
   {
+    if (OpenDDS::DCPS::DCPS_debug_level >= 4)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("OpenDDS (%P|%t) Scheduling durable data ")
+                    ACE_TEXT ("cleanup for\n")
+                    ACE_TEXT ("OpenDDS (%P|%t) (domain_id, topic, type) ")
+                    ACE_TEXT ("== (%d, %s, %s,)\n"),
+                    domain_id,
+                    topic_name,
+                    type_name));
+      }
+
+    Cleanup_Handler * const cleanup =
+      new Cleanup_Handler (*sample_list,
+                           slot - &(*sample_list)[0],
+                           this->allocator_.get ());
+    ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
+
+    
+
     long const tid =
       this->reactor_->schedule_timer (cleanup,
                                       0, // ACT
@@ -426,6 +444,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
 bool
 OpenDDS::DCPS::DataDurabilityCache::get_data (
+  ::DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
   DataWriterImpl * data_writer,
@@ -433,8 +452,10 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
   ACE_Allocator * db_allocator,
   ::DDS::LifespanQosPolicy const & /* lifespan */)
 {
-
-  key_type const key (topic_name, type_name, this->allocator_.get ());
+  key_type const key (domain_id,
+                      topic_name,
+                      type_name,
+                      this->allocator_.get ());
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
@@ -494,7 +515,6 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
   size_t const len = sample_list.size ();
   for (size_t i = 0; i != len; ++i)
   {
-
     data_queue_type * const q = sample_list[i];
 
     for (data_queue_type::ITERATOR j = q->begin ();
@@ -558,8 +578,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
 
 std::auto_ptr<ACE_Allocator>
 OpenDDS::DCPS::DataDurabilityCache::make_allocator (
-  ::DDS::DurabilityQosPolicyKind kind,
-  ::DDS::DomainId_t domain_id)
+  ::DDS::DurabilityQosPolicyKind kind)
 {
   if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
     {
@@ -587,9 +606,7 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
         0,   // Windows LPSECURITY_ATTRIBUTES
         /* 0 */ ACE_DEFAULT_FILE_PERMS);
 
-      std::stringstream bss;
-      bss << "OpenDDS-durable-data-" << domain_id;
-      char const * const backing_store = bss.str ().c_str ();
+      char const backing_store[] = "OpenDDS-durable-data";
 
       return
         std::auto_ptr<ACE_Allocator> (new allocator_type (backing_store,

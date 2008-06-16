@@ -32,6 +32,7 @@ WriteDataContainer::WriteDataContainer(
   bool           should_block ,
   ACE_Time_Value max_blocking_time,
   size_t         n_chunks,
+  ::DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
   DataDurabilityCache* durability_cache,
@@ -47,6 +48,7 @@ WriteDataContainer::WriteDataContainer(
 				      sizeof (OpenDDS::DCPS::TransportSendElement)),
     shutdown_ (false),
     next_handle_(1),
+    domain_id_ (domain_id),
     topic_name_  (topic_name),
     type_name_ (type_name),
     durability_cache_ (durability_cache),
@@ -74,7 +76,7 @@ WriteDataContainer::~WriteDataContainer()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
-               ACE_TEXT("The container has not be cleaned.\n")));
+               ACE_TEXT("The container has not been cleaned.\n")));
   }
 
   // ------------------------------------------------------------
@@ -83,18 +85,25 @@ WriteDataContainer::~WriteDataContainer()
   if (this->durability_cache_)
   {
     // A data durability cache is available for TRANSIENT or
-    // PERSISTENT data durability.  Cache the unsent data samples.
+    // PERSISTENT data durability.  Cache the data samples.
 
-    if (this->durability_cache_->insert (
+    /**
+     * @todo We should only cache data that is not in the
+     *       "released_data_" list, i.e. not still in use outside of
+     *       this instance of WriteDataContainer. 
+     */
+    if (!this->durability_cache_->insert (
+          this->domain_id_,
           this->topic_name_,
           this->type_name_,
-          this->unsent_data_,
-          this->durability_service_) != ::DDS::RETCODE_OK)
+          this->data_holder_,
+          this->durability_service_))
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
                   ACE_TEXT("failed to make data durable for ")
-                  ACE_TEXT("(topic, type) = (%s, %s)\n"),
+                  ACE_TEXT("(domain, topic, type) = (%d, %s, %s)\n"),
+                  this->domain_id_,
                   this->topic_name_,
                   this->type_name_));      
   }

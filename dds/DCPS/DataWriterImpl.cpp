@@ -837,7 +837,7 @@ DataWriterImpl::enable ()
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
-    publisher_servant_->get_data_durability_cache (qos_.durability);
+    TheServiceParticipant->get_data_durability_cache (qos_.durability);
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
@@ -845,6 +845,7 @@ DataWriterImpl::enable ()
                                             should_block,
                                             max_blocking_time,
                                             n_chunks_,
+                                            domain_id_,
                                             get_topic_name (),
                                             get_type_name (),
                                             durability_cache,
@@ -921,7 +922,8 @@ DataWriterImpl::enable ()
   // queue.
   if (durability_cache != 0)
   {
-    if (durability_cache->get_data (get_topic_name (),
+    if (durability_cache->get_data (this->domain_id_,
+                                    get_topic_name (),
                                     get_type_name (),
                                     this,
                                     this->mb_allocator_,

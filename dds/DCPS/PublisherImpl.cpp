@@ -1,6 +1,5 @@
-// -*- C++ -*-
-//
 // $Id$
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PublisherImpl.h"
 #include "DataWriterImpl.h"
@@ -11,14 +10,12 @@
 #include "Qos_Helper.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
-#include "dds/DCPS/DataDurabilityCache.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "AssociationData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include <ace/Auto_Ptr.h>
 #include "tao/debug.h"
 
 namespace OpenDDS
@@ -40,22 +37,21 @@ const CoherencyGroup DEFAULT_GROUP_ID = 0;
 //      cannot be false.
 
 // Implementation skeleton constructor
-PublisherImpl::PublisherImpl (const ::DDS::PublisherQos & qos,
-            ::DDS::PublisherListener_ptr a_listener,
-            DomainParticipantImpl*       participant)
+PublisherImpl::PublisherImpl (const ::DDS::PublisherQos &   qos,
+                              ::DDS::PublisherListener_ptr a_listener,
+                              DomainParticipantImpl*       participant)
   : qos_(qos),
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos ()),
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_ (0),
     group_id_ (DEFAULT_GROUP_ID),
-    repository_ (TheServiceParticipant->get_repository (participant->get_domain_id())),
+    repository_ (
+      TheServiceParticipant->get_repository (participant->get_domain_id())),
     participant_ (participant),
     suspend_depth_count_ (0),
     sequence_number_ (),
-    aggregation_period_start_ (ACE_Time_Value::zero),
-    transient_data_cache_ (0),
-    persistent_data_cache_ (0)
+    aggregation_period_start_ (ACE_Time_Value::zero)
 {
   if (! CORBA::is_nil (a_listener))
     {
@@ -169,13 +165,13 @@ PublisherImpl::create_datawriter (
       servant_to_remote_reference(writer_remote_impl);
 
   dw_servant->init (a_topic,
-        topic_servant,
-        dw_qos,
-        a_listener,
-        participant_,
-        this,
-        dw_obj.in (),
-        dw_remote_obj.in ());
+                    topic_servant,
+                    dw_qos,
+                    a_listener,
+                    participant_,
+                    this,
+                    dw_obj.in (),
+                    dw_remote_obj.in ());
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1)
@@ -925,57 +921,6 @@ PublisherImpl::listener_for (::DDS::StatusKind kind)
     {
       return fast_listener_;
     }
-}
-
-DataDurabilityCache *
-PublisherImpl::get_data_durability_cache (
-  ::DDS::DurabilityQosPolicy const & durability)
-{
-  ::DDS::DurabilityQosPolicyKind const kind =
-      durability.kind;
-
-  DataDurabilityCache * cache = 0;
-
-  if (kind == ::DDS::TRANSIENT_DURABILITY_QOS)
-  {
-    {
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                        guard,
-                        this->pi_lock_,
-                        0);
-
-      if (this->transient_data_cache_.get () == 0)
-      {
-        ACE_auto_ptr_reset (this->transient_data_cache_,
-                            new DataDurabilityCache (
-                              kind,
-                              this->participant_->get_domain_id ()));
-      }
-    }
-
-    cache = this->transient_data_cache_.get ();
-  }
-  else if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
-  {
-    {
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                        guard,
-                        this->pi_lock_,
-                        0);
-
-      if (this->persistent_data_cache_.get () == 0)
-      {
-        ACE_auto_ptr_reset (this->persistent_data_cache_,
-                            new DataDurabilityCache (
-                              kind,
-                              this->participant_->get_domain_id ()));
-      }
-    }
-
-    cache = this->persistent_data_cache_.get ();
-  }
-     
-  return cache;
 }
 
 } // namespace DCPS
