@@ -112,6 +112,8 @@ namespace OpenDDS
         /// The number of chunks that the DataSampleListElementAllocator
         /// needs allocate.
         size_t         n_chunks,
+        /// Domain ID.
+        ::DDS::DomainId_t domain_id,
         /// Topic name.
         char const *   topic_name,
         /// Type name.
@@ -412,6 +414,9 @@ namespace OpenDDS
 
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t next_handle_;
+
+      /// Domain ID.
+      ::DDS::DomainId_t const domain_id_;
 
       /// Topic name.
       char const * const topic_name_;

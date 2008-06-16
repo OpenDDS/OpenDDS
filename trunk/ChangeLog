@@ -1,3 +1,32 @@
+Mon Jun 16 08:47:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+
+          Include domain ID as part of durability cache map key.  This
+          must now be done explicitly since the durability cache is
+          resides within the Service_Participant, meaning we no longer get
+          domain-specificness for free.
+
+        * dds/DCPS/DataWriterImpl.cpp (enable):
+
+          Get the data durability cache from the Service_Participant since
+          it no longer resides in the publisher servant.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Moved data durability caches to the Service_Participant to
+          better support the spec requirements.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Added DomainId_t member.  Data durability caching operations now
+          require the domain ID.
+
 Sun Jun 15 22:29:02 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
