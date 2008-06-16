@@ -4,8 +4,8 @@ Mon Jun 16 08:47:45 UTC 2008  Ossama Othman  <othmano@ociweb.com>
         * dds/DCPS/DataDurabilityCache.h:
 
           Include domain ID as part of durability cache map key.  This
-          must now be done explicitly since the durability cache is
-          resides within the Service_Participant, meaning we no longer get
+          must now be done explicitly since the durability cache resides
+          within the Service_Participant, meaning we no longer get
           domain-specificness for free.
 
         * dds/DCPS/DataWriterImpl.cpp (enable):
