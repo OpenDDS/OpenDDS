@@ -139,3 +139,5 @@ tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
+tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN
+tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN

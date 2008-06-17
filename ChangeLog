@@ -1,3 +1,10 @@
+Tue Jun 17 20:34:28 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Run TransientDurability and PersistentDurability tests in the
+          nightly builds.
+
 Tue Jun 17 18:39:13 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/Partition/Partition_Table.h (PartitionConfig):
