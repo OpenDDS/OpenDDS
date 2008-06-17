@@ -307,7 +307,9 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
 
   // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using
   // TheTransientKludge.
-  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
+  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS
+      || this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
+      || this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS)
   //if (TheTransientKludge->is_enabled ())
   {
     // The above condition is only true for the DCPSInfo Server.
