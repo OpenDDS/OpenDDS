@@ -6,6 +6,19 @@ namespace Test
 {
   struct PartitionConfig
   {
+    PartitionConfig (char const * const * p,
+                     short m)
+      : partitions (p)
+      , expected_matches (m)
+    {
+    }
+
+    PartitionConfig (PartitionConfig const & rhs)
+      : partitions (rhs.partitions)
+      , expected_matches (rhs.expected_matches)
+    {
+    }
+
     char const * const * const partitions;
     short const expected_matches;
     
@@ -51,11 +64,11 @@ namespace Test
 
     PartitionConfig const PartitionConfigs[] =
       {
-        { One,   1 },
-        { Two,   0 },
-        { Three, 2 },
-        { Four,  1 },
-        { Five,  0 }
+        PartitionConfig (One,   1),
+        PartitionConfig (Two,   0),
+        PartitionConfig (Three, 2),
+        PartitionConfig (Four,  1),
+        PartitionConfig (Five,  0)
       };
   }
 
@@ -88,10 +101,10 @@ namespace Test
 
     PartitionConfig const PartitionConfigs[] =
       {
-        { One,   1 },
-        { Two,   2 },
-        { Three, 1 },
-        { Four,  0 }
+        PartitionConfig (One,   1),
+        PartitionConfig (Two,   2),
+        PartitionConfig (Three, 1),
+        PartitionConfig (Four,  0)
       };
   }
 }
