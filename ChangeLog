@@ -1,3 +1,18 @@
+Tue Jun 17 22:11:56 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * tests/DCPS/TransientDurability/Writer.cpp
+          (num_instances_per_writer):
+
+          Increased this constant from 1 to 2.  Increases concurrency in
+          the test, and addresses subscriber waiting indefinitely for data
+          to arrive.
+
+        * tests/DCPS/TransientDurability/publisher.cpp:
+
+          Increased publication match loop delay and iterations.
+          Addresses a problem where the publisher would end prior to a
+          subscription match.
+
 Tue Jun 17 21:55:25 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp (fully_associated):
