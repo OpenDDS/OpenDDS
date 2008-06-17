@@ -1,3 +1,24 @@
+Tue Jun 17 04:49:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Updated some comments to avoid referring to unsent data.
+
+        * dds/DCPS/PublisherImpl.cpp (delete_datawriter):
+
+          Initiate durability related data caching prior to unregistering
+          all samples.  Addresses problem where sample list was of zero
+          size by the time durability caching occurred.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.cpp (persist_data):
+        * dds/DCPS/WriteDataContainer.h (persist_data):
+
+          New method explicitly called by publisher servant to trigger
+          durability related caching, as opposed to implicit caching at
+          WriteDataContainer destruction-time.
+
 Mon Jun 16 21:22:24 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:

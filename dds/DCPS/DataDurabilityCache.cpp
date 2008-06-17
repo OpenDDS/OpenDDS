@@ -308,13 +308,13 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
   // -----------
 
-  // Copy unsent samples to the domain/topic/type-specific cache.
+  // Copy samples to the domain/topic/type-specific cache.
 
   key_type const key (domain_id,
                       topic_name,
                       type_name,
                       this->allocator_.get ());
-  DataSampleList::iterator unsent_end (the_data.end ());
+  DataSampleList::iterator the_end (the_data.end ());
 
   sample_list_type * sample_list = 0;
 
@@ -350,7 +350,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
     // Find an empty slot in the array.  This is a linear search but
     // that should be fine for the common case, i.e. a small number of
-    // DataWriters that push unsent data into the cache.
+    // DataWriters that push data into the cache.
     slot = std::find (&((*sample_list)[0]),
                       end,
                       static_cast<data_queue_type *> (0));
@@ -374,7 +374,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     // Insert the samples in to the sample list.
     *slot = samples;
 
-    for (DataSampleList::iterator i (element); i != unsent_end; ++i)
+    for (DataSampleList::iterator i (element); i != the_end; ++i)
     {
       if (samples->enqueue_tail (
             sample_data_type (*i,
