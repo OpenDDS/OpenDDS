@@ -206,14 +206,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
         else
         {
-          int const max_attempts = 15;
+          int const max_attempts = 50;
           int attempts; 
           for (attempts = 1;
                attempts != max_attempts
                  && publication_matched.value () == false;
                ++attempts)
           {
-            ACE_OS::sleep (1);
+            ACE_OS::sleep (5);
           }
 
           if (attempts == max_attempts)
