@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 // $Id$
 
 
@@ -338,12 +336,12 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       this->data_container_->reenqueue_all (rd_ids);
 
       // Acquire the data writer container lock to avoid deadlock. The thread
-      // calling fully_associated() has to acquire lock in the same order as 
-      // the write()/register() operation. 
+      // calling fully_associated() has to acquire lock in the same order as
+      // the write()/register() operation.
 
       // Since the thread calling fully_associated() is the reactor thread, it
-      // may have some performance penalty. If the performance is an issue, 
-      // we may need a new thread to handle the data_availble() calls. 
+      // may have some performance penalty. If the performance is an issue,
+      // we may need a new thread to handle the data_availble() calls.
       ACE_GUARD (ACE_Recursive_Thread_Mutex,
         guard,
         this->get_lock());
@@ -369,13 +367,13 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
   CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-   
+
     //Remove the readers from reader list. If the supplied reader
     //is not in the cached reader list then it is already removed.
     //We just need remove the readers in the list that have not been
     //removed.
     CORBA::ULong num_orig_readers = readers_.length();
-    
+
     for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; ++rm_idx)
     {
       for (CORBA::ULong orig_idx = 0;
@@ -401,7 +399,7 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
     }
 
     num_removed_readers = updated_readers.length ();
-    
+
     // Return now if the supplied readers have been removed already.
     if (num_removed_readers == 0)
       return;
@@ -543,9 +541,9 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
             DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
             ::DDS::PublisherQos publisherQos;
             this->publisher_servant_->get_qos(publisherQos);
-            repo->update_publication_qos(this->participant_servant_->get_domain_id(), 
-                                         this->participant_servant_->get_id(), 
-                                         this->publication_id_, 
+            repo->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                         this->participant_servant_->get_id(),
+                                         this->publication_id_,
                                          qos,
                                          publisherQos);
           }
@@ -667,10 +665,11 @@ DataWriterImpl::get_offered_deadline_missed_status ()
                     guard,
                     this->lock_,
                     ::DDS::OfferedDeadlineMissedStatus ());
+
   set_status_changed_flag (::DDS::OFFERED_DEADLINE_MISSED_STATUS, false);
 
   this->offered_deadline_missed_status_.last_instance_handle =
-    this->data_container_->last_unsent_instance_handle ();
+    ::DDS::HANDLE_NIL;
 
   this->offered_deadline_missed_status_.total_count_change =
     this->offered_deadline_missed_status_.total_count
@@ -1700,6 +1699,12 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
   }
 
   return ret;
+}
+
+bool
+DataWriterImpl::persist_data ()
+{
+  return this->data_container_->persist_data ();
 }
 
 

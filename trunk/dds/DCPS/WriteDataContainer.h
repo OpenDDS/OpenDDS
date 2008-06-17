@@ -268,7 +268,7 @@ namespace OpenDDS
        * waiting.
        * For the non-blocking write case, it asks the transport to drop
        * the oldest sample.
-      */
+       */
       ::DDS::ReturnCode_t obtain_buffer (
         DataSampleListElement*& element,
         ::DDS::InstanceHandle_t handle,
@@ -283,17 +283,21 @@ namespace OpenDDS
       void release_buffer (DataSampleListElement* element);
 
       /**
-      * Unregister all instances managed by this data containers.
-      */
+       * Unregister all instances managed by this data containers.
+       */
       void unregister_all (DataWriterImpl* writer);
 
-//remove document this!
+      /**
+       * @todo remove/document this!
+       */
       PublicationInstance* get_handle_instance (
           ::DDS::InstanceHandle_t handle);
 
-      /// Get the instance handle for last unsent sample.  This
-      /// corresponds to the head of the @c unsent_data_ list.
-      ::DDS::InstanceHandle_t last_unsent_instance_handle () const;
+
+      /**
+       * Copy sent data to data DURABILITY cache.
+       */
+      bool persist_data ();
 
     private:
 

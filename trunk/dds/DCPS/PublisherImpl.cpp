@@ -161,7 +161,7 @@ PublisherImpl::create_datawriter (
   PortableServer::ServantBase_var writer_remote(writer_remote_impl);
 
   //this is the client reference to the DataWriterRemoteImpl
-  ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj = 
+  ::OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj =
       servant_to_remote_reference(writer_remote_impl);
 
   dw_servant->init (a_topic,
@@ -326,6 +326,17 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
     dw_servant->cleanup ();
   }
 
+  // Trigger data to be persisted, i.e. made durable, if so
+  // configured.
+  if (!local_writer->persist_data()
+      && DCPS_debug_level >= 2)
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("PublisherImpl::delete_datawriter, ")
+                ACE_TEXT("failed to make data durable.\n")));
+  }
+
   // not just unregister but remove any pending writes/sends.
   local_writer->unregister_all ();
 
@@ -477,7 +488,7 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
               ++iter)
             {
               ::DDS::DataWriterQos qos;
-              iter->second->local_writer_impl_->get_qos(qos); 
+              iter->second->local_writer_impl_->get_qos(qos);
               RepoId id =
                 iter->second->local_writer_impl_->get_publication_id();
               std::pair<DwIdToQosMap::iterator, bool> pair =
@@ -488,7 +499,7 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
                                    ACE_TEXT("(%P|%t) ")
                                    ACE_TEXT("PublisherImpl::set_qos, ")
                                    ACE_TEXT("insert id(%d) to DwIdToQosMap ")
-                                   ACE_TEXT("failed.\n"), 
+                                   ACE_TEXT("failed.\n"),
                                    id),
                                   ::DDS::RETCODE_ERROR);
               }
@@ -501,8 +512,8 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
             try
             {
               this->repository_->update_publication_qos (
-                participant_->get_domain_id(), 
-                participant_->get_id (), 
+                participant_->get_domain_id(),
+                participant_->get_id (),
                 iter->first,
                 iter->second,
                 this->qos_);
@@ -522,12 +533,12 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
               return ::DDS::RETCODE_ERROR;
             }
             ++iter;
-          } 
+          }
         }
       }
       else
         qos_ = qos;
-        
+
       return ::DDS::RETCODE_OK;
     }
   else
@@ -845,7 +856,7 @@ PublisherImpl::writer_enabled(
       }
 
     std::pair<PublicationMap::iterator, bool> pair =
-      publication_map_.insert( 
+      publication_map_.insert(
         PublicationMap::value_type(info->publication_id_, info));
 
     if (pair.second == false)
@@ -902,7 +913,7 @@ PublisherImpl::data_available(DataWriterImpl* writer,
       // tell the transport to send the data sample(s).
       this->send(list);
     }
-    
+
   return ::DDS::RETCODE_OK;
 }
 
