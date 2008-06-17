@@ -1,3 +1,9 @@
+Tue Jun 17 16:05:57 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Fixed a warning for Borland.
+
 Tue Jun 17 07:41:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
@@ -16,7 +22,7 @@ Tue Jun 17 07:41:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
           Set the DURABILITY_SERVICE DataWriter QoS policy history_kind
           value to ::DDS::KEEP_ALL_HISTORY_QOS so that all samples are
           persisted, instead of the default (one).
-         
+
 Tue Jun 17 04:49:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
