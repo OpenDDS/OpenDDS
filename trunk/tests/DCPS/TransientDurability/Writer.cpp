@@ -7,7 +7,7 @@
 using namespace Messenger;
 using namespace std;
 
-int const num_instances_per_writer = 1;
+int const num_instances_per_writer = 2;
 int const num_messages = 5;
 
 Writer::Writer (::DDS::DataWriter_ptr writer)
@@ -24,7 +24,6 @@ Writer::Writer (::DDS::DataWriter_ptr writer)
 Writer::~Writer ()
 {
 }
-
 
 int
 Writer::svc ()
