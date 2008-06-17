@@ -178,15 +178,20 @@ OpenDDS::DCPS
   this->source_timestamp_.sec     = rhs.source_timestamp_.sec;
   this->source_timestamp_.nanosec = rhs.source_timestamp_.nanosec;
 
-  ACE_ALLOCATOR (this->sample_,
-                 static_cast<char *> (this->allocator_->malloc (rhs.length_)));
-  ACE_OS::memcpy (this->sample_, rhs.sample_, rhs.length_);
+  if (this->allocator_)
+  {
+    ACE_ALLOCATOR (this->sample_,
+                   static_cast<char *> (
+                     this->allocator_->malloc (rhs.length_)));
+    ACE_OS::memcpy (this->sample_, rhs.sample_, rhs.length_);
+  }
 }
 
 OpenDDS::DCPS
 ::DataDurabilityCache::sample_data_type::~sample_data_type ()
 {
-  this->allocator_->free (this->sample_);
+  if (this->allocator_)
+    this->allocator_->free (this->sample_);
 }
 
 
@@ -298,12 +303,12 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
   else if (depth == 0)
     return true;  // Nothing else to do.  Discard all data.
   else if (the_data.size_ > depth)
-  { 
+  {
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
     // DataSampleList.
     ssize_t const advance_amount = the_data.size_ - depth;
-    std::advance (element, advance_amount);      
+    std::advance (element, advance_amount);
   }
 
   // -----------
@@ -409,7 +414,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
                            this->allocator_.get ());
     ACE_Event_Handler_var safe_cleanup (cleanup);  // Transfer ownership
 
-    
+
 
     long const tid =
       this->reactor_->schedule_timer (cleanup,
@@ -505,7 +510,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
       data_writer->register_instance (handle,
                                       registration_sample.get (),
                                       registration_timestamp);
-  
+
   if (ret != ::DDS::RETCODE_OK)
     return false;
 
@@ -559,9 +564,16 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
                               handle,
                               source_timestamp) == ::DDS::RETCODE_OK)
       {
+//         ACE_HEX_DUMP ((LM_DEBUG,
+//                        mb->rd_ptr (),
+//                        mb->total_length (),
+//                        ACE_TEXT ("WRITTEN DURABLE DATA")));
+
+        // @todo This causes a seg fault.  Comment out and reset
+        //       wholesale after queue iteration loop completed.
         // Data successfully written.  Remove it from the cache.
-        sample_data_type data;
-        (void) q->dequeue_head (data);
+//         sample_data_type data;
+//         (void) q->dequeue_head (data);
       }
       else
       {
@@ -571,6 +583,9 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
         return false;
       }
     }
+
+    // Data successfully written.  Empty the queue/list.
+    q->reset ();
   }
 
   return true;

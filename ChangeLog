@@ -1,3 +1,22 @@
+Tue Jun 17 07:41:11 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Addressed crashes that were introduced during the memory
+          management rewrite.
+
+        * dds/DCPS/DataWriterImpl.cpp (enable):
+
+          Retrieve data from the durability cache after the DataWriter is
+          completely enabled.  Addresses a publication ID mismatch error.
+
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+
+          Set the DURABILITY_SERVICE DataWriter QoS policy history_kind
+          value to ::DDS::KEEP_ALL_HISTORY_QOS so that all samples are
+          persisted, instead of the default (one).
+         
 Tue Jun 17 04:49:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

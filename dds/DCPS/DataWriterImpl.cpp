@@ -917,21 +917,25 @@ DataWriterImpl::enable ()
                           this->last_deadline_missed_total_count_));
   }
 
+  this->set_enabled ();
+
+  ::DDS::ReturnCode_t const writer_enabled_result =
+      publisher_servant_->writer_enabled (dw_remote_objref_.in(),
+                                          dw_local_objref_.in (),
+                                          topic_name_.in (),
+                                          topic_id_);
+
   // Move cached data from the durability cache to the unsent data
   // queue.
   if (durability_cache != 0)
   {
-    if (durability_cache->get_data (this->domain_id_,
-                                    get_topic_name (),
-                                    get_type_name (),
-                                    this,
-                                    this->mb_allocator_,
-                                    this->db_allocator_,
-                                    this->qos_.lifespan))
-    {
-      this->publisher_servant_->data_available (this);
-    }
-    else
+    if (!durability_cache->get_data (this->domain_id_,
+                                     get_topic_name (),
+                                     get_type_name (),
+                                     this,
+                                     this->mb_allocator_,
+                                     this->db_allocator_,
+                                     this->qos_.lifespan))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
@@ -939,12 +943,7 @@ DataWriterImpl::enable ()
     }
   }
 
-  this->set_enabled ();
-
-  return publisher_servant_->writer_enabled (dw_remote_objref_.in(),
-                                             dw_local_objref_.in (),
-                                             topic_name_.in (),
-                                             topic_id_);
+  return writer_enabled_result;
 }
 
 ::DDS::StatusKindMask

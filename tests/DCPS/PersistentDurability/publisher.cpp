@@ -153,6 +153,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
       dw_qos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
+      dw_qos.durability_service.history_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.resource_limits.max_samples_per_instance = 1000;
       dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
