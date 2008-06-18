@@ -348,7 +348,7 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
 
       ACE_DES_FREE (list,
                     this->allocator_->free,
-                    ACE_Array_Base<DurabilityQueue<sample_data_type> *>);
+                    DurabilityArray<DurabilityQueue<sample_data_type> *> );
     }
 
     // Yes, this looks strange but please leave it in place.  The third param
