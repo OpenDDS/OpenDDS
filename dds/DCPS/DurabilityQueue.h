@@ -51,6 +51,10 @@ namespace OpenDDS
             this->delete_nodes ();
       }
 
+      ~DurabilityQueue ()
+      {
+      }
+
       void operator= (DurabilityQueue<T> const & rhs)
       {
         DurabilityQueue tmp (rhs);
