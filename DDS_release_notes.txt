@@ -12,31 +12,33 @@ New to this version are the following changes:
 - Added support for DEADLINE QoS policy.
 
   The DEADLINE QoS policy allows the application to detect when data
-  is not written or read within a specified amount of time.
+  is not written or read within a specified amount of time.  The
+  {Offered,Requested}DeadlineMissesStatus::last_instance_handle is
+  currently not updated.
 
 - Added support for LIFESPAN QoS policy.
 
   This policy allows the application to specify when data expires,
-  meaning invalid.
+  meaning invalid.  Expired data will not be delivered to
+  subscribers.
 
 - Added support for the TRANSIENT kind of DURABILITY QoS policy.
 
-  Unsent data will outlive DataWriters when TRANSIENT DURABILITY is
+  Data will outlive DataWriters when TRANSIENT DURABILITY is
   configured, and will be sent once a new DataWriter is created within
-  the same domain for the same topic and type.  Remaining unsent data
-  cached data will be discarded when the corresponding publisher is
-  destroyed.
+  the same domain for the same topic and type.  The cached data will
+  only last as long as the process.
 
 - Added support for the PERSISTENT kind of DURABILITY QoS policy.
 
   PERSISTENT DURABILITY provides basically the same functionality as
-  TRANSIENT DURABILITY, except that unsent cached data will survive
-  publisher and process destruction.
+  TRANSIENT DURABILITY, except that cached data will survive process
+  destruction.
 
 - Added support for the DURABILITY_SERVICE QoS policy.
 
   This QoS policy provides a way to specify resource limits for
-  domain/topic/type-specific unsent data in a TRANSIENT or PERSISTENT
+  domain/topic/type-specific data in a TRANSIENT or PERSISTENT
   DURABILITY cache.  The resource limits in question are analogous to,
   although independent of, those found in the HISTORY and
   RESOURCE_LIMITS policies.
