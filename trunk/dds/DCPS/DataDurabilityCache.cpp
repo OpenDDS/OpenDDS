@@ -308,12 +308,17 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
 
       ACE_DES_FREE (list,
                     this->allocator_->free,
-                    sample_list_type);
+                    ACE_Array_Base<ACE_Unbounded_Queue<sample_data_type> *>);
     }
 
-    ACE_DES_FREE (this->samples_,
-                  this->allocator_->free,
-                  sample_map_type);
+    // Yes, this looks strange but please leave it in place.  The third param
+    // to ACE_DES_FREE must be the actual class name since it's used in an
+    // explicit desturctor call (~T()).  Typedefs are not allowed here.  This
+    // is why the two ACE_DES_FREE's above are not the typedefs.  Below we use
+    // a macro to hide the internal comma from ACE_DES_FREE's macro expansion.
+#define MAP_TYPE ACE_Hash_Map_With_Allocator<key_type, sample_list_type *>
+    ACE_DES_FREE (this->samples_, this->allocator_->free, MAP_TYPE);
+#undef MAP_TYPE
   }
 }
 
