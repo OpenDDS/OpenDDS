@@ -1,3 +1,36 @@
+Wed Jun 18 19:08:38 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+
+          Reset allocator address stored in persistent objects retrieved
+          from the backing store by using new DurabilityArray and
+          DurabilityQueue classes.  Addresses a crash on process exit when
+          using PERSISTENT DURABILITY.
+        
+          Fixed Linux build error.  The MAP_TYPE macro is already defined
+          by the <sys/mman.h> system header.
+        
+          Reset the underlying queue after retrieving data so that the
+          data is not duplicated if the DataWriter ends up reinserting the
+          same data into the durability cache.
+
+        * dds/DCPS/DurabilityArray.h:
+        * dds/DCPS/DurabilityQueue.h:
+
+          New source files containing subclasses of ACE_Array_Base<> and
+          ACE_Unbounded_Queue<>, respectively, that provide a means to
+          reset the allocator.  Needed to properly support persistent
+          durable data that is accessed between different process runs.
+        
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        
+          Fixed memory leaks by assigning newly allocated type support
+          servant to the appropriate "_var" type.
+
 Wed Jun 18 14:05:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
@@ -32,8 +65,8 @@ Tue Jun 17 23:59:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
         * dds/DCPS/DataDurabilityCache.h:
 
           Use an ACE_Hash_Map_With_Allocator_T<> map instead of the "_Ex"
-          version just in case the base address for persistent durability
-          support changes between process runs.
+          version just in case the allocator address changes between
+          process runs.
 
           Allocate the map itself with the allocator so that its state
           (size, etc) is reflected in the backing store in the persistent

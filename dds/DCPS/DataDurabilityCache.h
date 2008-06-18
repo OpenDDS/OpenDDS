@@ -23,6 +23,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DurabilityArray.h"
+#include "dds/DCPS/DurabilityQueue.h"
 
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Array_Base.h"
@@ -167,6 +169,8 @@ namespace OpenDDS
                          size_t & len,
                          ::DDS::Time_t & source_timestamp);
 
+        void set_allocator (ACE_Allocator * allocator);
+
       private:
 
         size_t length_;
@@ -181,8 +185,8 @@ namespace OpenDDS
        *          access to data corresponding to a specific
        *          DurabilityServiceQosPolicy's cleanup delay.
        */
-      typedef ACE_Array_Base<
-        ACE_Unbounded_Queue<sample_data_type> *> sample_list_type;
+      typedef DurabilityArray<
+        DurabilityQueue<sample_data_type> *> sample_list_type;
 
       typedef ACE_Hash_Map_With_Allocator<key_type,
                                           sample_list_type *> sample_map_type;
