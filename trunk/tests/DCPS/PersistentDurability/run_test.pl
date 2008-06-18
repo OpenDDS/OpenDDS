@@ -29,6 +29,10 @@ unlink $dcpsrepo_ior;
 $data_file = "test_run.data";
 unlink $data_file;
 
+$durability_cache = "OpenDDS-durable-data"; # Current a fixed name
+                                            # used by OpenDDS.
+unlink $durability_cache;
+
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                            "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
@@ -53,7 +57,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $Publisher1->Spawn ();
 
 # Wait for the publisher to end before starting the subscriber so that
-# the persistented data will be available to a newly spawned
+# the persistent data will be available to a newly spawned
 # publisher.  This publisher will not wait for subscriptions.
 $PublisherResult = $Publisher1->WaitKill (300);
 if ($PublisherResult != 0) {
@@ -92,6 +96,7 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 unlink $data_file;
+unlink $durability_cache;
 
 if ($status == 0) {
   print "test PASSED.\n";

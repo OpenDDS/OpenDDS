@@ -1,3 +1,24 @@
+Wed Jun 18 08:00:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Added missing calls to ACE_Allocator::bind()/find().  They are
+          necessary for retrieving persistent data from the backing
+          store.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Take into account LIFESPAN QoS policy value when reenqueuing
+          data for TRANSIENT_LOCAL, TRANSIENT and PERSISTENT DURABILITY
+          enabled writes.
+
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Unlink the durability backing store file before and after
+          running the test so that stale data does not skew the results.
+
 Tue Jun 17 23:59:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
@@ -9,7 +30,7 @@ Tue Jun 17 23:59:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
         
           Allocate the map itself with the allocator so that its state
           (size, etc) is reflected in the backing store in the persistent
-          case.          
+          case.
 
 Tue Jun 17 22:22:25 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 

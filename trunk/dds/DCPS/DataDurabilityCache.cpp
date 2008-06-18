@@ -25,6 +25,11 @@
 namespace
 {
   /**
+   * @todo Make the backing store name configurable.
+   */
+  char const dds_backing_store[] = "OpenDDS-durable-data";
+
+  /**
    * @class Cleanup_Handler
    *
    * @brief Event handler that is called when @c service_cleanup_delay
@@ -234,11 +239,37 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   , lock_ ()
   , reactor_ (0)
 {
-  ACE_NEW_MALLOC (
-    this->samples_,
-    static_cast<sample_map_type *> (
-          this->allocator_->malloc (sizeof (sample_map_type))),
-        sample_map_type (this->allocator_.get ()));
+  void * the_map = 0;
+  if (this->allocator_->find (dds_backing_store, the_map) == 0)
+  {
+    // A sample map was found in the backing store.
+    this->samples_ = static_cast<sample_map_type *> (the_map);
+  }
+  else
+  {
+    // No backing store exists.  Create a new sample map.
+    ACE_NEW_MALLOC (
+      this->samples_,
+      static_cast<sample_map_type *> (
+        this->allocator_->malloc (sizeof (sample_map_type))),
+      sample_map_type (this->allocator_.get ()));
+
+    if (this->allocator_->bind (dds_backing_store,
+                                this->samples_) == -1)
+    {
+      if (OpenDDS::DCPS::DCPS_debug_level >= 1
+          && errno != ENOTSUP)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("(%P|%t) ERROR - Unable to bind data ")
+                    ACE_TEXT ("durability map\n")
+                    ACE_TEXT ("address to backing store name ")
+                    ACE_TEXT ("in allocator\n")));
+      }
+ 
+      this->allocator_->remove ();
+    }
+  }
 
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   this->reactor_ = orb->orb_core ()->reactor ();
@@ -350,20 +381,21 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
         sample_list,
         static_cast<sample_list_type *> (
           allocator->malloc (sizeof (sample_list_type))),
-        sample_list_type (0, allocator),
+        sample_list_type (1, static_cast<data_queue_type *> (0), allocator),
         false);
 
       if (this->samples_->bind (key, sample_list, allocator) != 0)
         return false;
     }
 
+    data_queue_type ** const begin = &((*sample_list)[0]);
     data_queue_type ** const end =
-      &((*sample_list)[0]) + sample_list->size ();
+      begin + sample_list->size ();
 
     // Find an empty slot in the array.  This is a linear search but
     // that should be fine for the common case, i.e. a small number of
     // DataWriters that push data into the cache.
-    slot = std::find (&((*sample_list)[0]),
+    slot = std::find (begin,
                       end,
                       static_cast<data_queue_type *> (0));
 
@@ -372,8 +404,9 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
       // No available slots.  Grow the array accordingly.
       size_t const old_len = sample_list->size ();
       sample_list->size (old_len + 1);
-
-      slot = &((*sample_list)[0]) + old_len;
+      
+      data_queue_type ** new_begin = &((*sample_list)[0]);
+      slot = new_begin + old_len;
     }
 
     ACE_NEW_MALLOC_RETURN (
@@ -593,8 +626,10 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
       }
     }
 
+    // @@ We don't want to empty the queue so that other data writers
+    //    will have access to the data.
     // Data successfully written.  Empty the queue/list.
-    q->reset ();
+    // q->reset ();
   }
 
   return true;
@@ -631,10 +666,8 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
         0,     // Windows LPSECURITY_ATTRIBUTES
         /* 0 */ ACE_DEFAULT_FILE_PERMS);
 
-      char const backing_store[] = "OpenDDS-durable-data";
-
       return
-        std::auto_ptr<ACE_Allocator> (new allocator_type (backing_store,
+        std::auto_ptr<ACE_Allocator> (new allocator_type (dds_backing_store,
                                                           0,
                                                           &pool_options));
     }
