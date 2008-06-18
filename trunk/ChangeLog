@@ -1,3 +1,16 @@
+Tue Jun 17 23:59:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+
+          Use an ACE_Hash_Map_With_Allocator_T<> map instead of the "_Ex"
+          version just in case the base address for persistent durability
+          support changes between process runs.
+        
+          Allocate the map itself with the allocator so that its state
+          (size, etc) is reflected in the backing store in the persistent
+          case.          
+
 Tue Jun 17 22:22:25 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * tests/DCPS/PersistentDurability/Writer.cpp:
