@@ -229,11 +229,17 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::get_sample (
 OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   ::DDS::DurabilityQosPolicyKind kind)
   : allocator_ (make_allocator (kind))
-  , samples_ (allocator_.get ())
+  , samples_ (0)
   , cleanup_timer_ids_ ()
   , lock_ ()
   , reactor_ (0)
 {
+  ACE_NEW_MALLOC (
+    this->samples_,
+    static_cast<sample_map_type *> (
+          this->allocator_->malloc (sizeof (sample_map_type))),
+        sample_map_type (this->allocator_.get ()));
+
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
   this->reactor_ = orb->orb_core ()->reactor ();
 }
@@ -254,8 +260,8 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
   // Clean up memory that isn't automatically managed.
   if (this->allocator_.get () != 0)
   {
-    sample_map_type::iterator const map_end = this->samples_.end ();
-    for (sample_map_type::iterator s = this->samples_.begin ();
+    sample_map_type::iterator const map_end = this->samples_->end ();
+    for (sample_map_type::iterator s = this->samples_->begin ();
          s != map_end;
          ++s)
     {
@@ -271,8 +277,12 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
 
       ACE_DES_FREE (list,
                     this->allocator_->free,
-                    ACE_Array_Base<ACE_Unbounded_Queue<sample_data_type> *>);
+                    sample_list_type);
     }
+
+    ACE_DES_FREE (this->samples_,
+                  this->allocator_->free,
+                  sample_map_type);
   }
 }
 
@@ -328,25 +338,22 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
   data_queue_type * samples = 0;  // sample_list_type::value_type
 
   {
+    ACE_Allocator * const allocator = this->allocator_.get ();
+
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
-    sample_map_type::ENTRY * entry = 0;
-    if (this->samples_.find (key, entry) == 0)
-    {
-      sample_list = entry->int_id_;
-    }
-    else
+    if (this->samples_->find (key, sample_list, allocator) != 0)
     {
       // Create a new list (actually an ACE_Array_Base<>) with the
       // appropriate allocator passed to its constructor.
       ACE_NEW_MALLOC_RETURN (
         sample_list,
         static_cast<sample_list_type *> (
-          this->allocator_->malloc (sizeof (sample_list_type))),
-        sample_list_type (0, this->allocator_.get ()),
+          allocator->malloc (sizeof (sample_list_type))),
+        sample_list_type (0, allocator),
         false);
 
-      if (this->samples_.bind (key, sample_list) != 0)
+      if (this->samples_->bind (key, sample_list, allocator) != 0)
         return false;
     }
 
@@ -372,8 +379,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     ACE_NEW_MALLOC_RETURN (
       samples,
       static_cast<data_queue_type *> (
-        this->allocator_->malloc (sizeof (data_queue_type))),
-      data_queue_type (this->allocator_.get ()),
+        allocator->malloc (sizeof (data_queue_type))),
+      data_queue_type (allocator),
       false);
 
     // Insert the samples in to the sample list.
@@ -383,7 +390,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
     {
       if (samples->enqueue_tail (
             sample_data_type (*i,
-                              this->allocator_.get ())) != 0)
+                              allocator)) != 0)
         return false;
     }
   }
@@ -465,7 +472,9 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
   sample_list_type * p_sample_list = 0;
-  if (this->samples_.find (key, p_sample_list) == -1)
+  if (this->samples_->find (key,
+                            p_sample_list,
+                            this->allocator_.get ()) == -1)
     return true;  // No durable data for this domain/topic/type.
   else if (p_sample_list == 0)
     return false; // Should never happen.
@@ -601,7 +610,7 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
         ACE_Allocator_Adapter<
           ACE_Malloc<ACE_MMAP_MEMORY_POOL, ACE_SYNCH_MUTEX> > allocator_type;
 
-      static size_t const minimum_bytes = 1024;
+      size_t const minimum_bytes = 1024;
 
       // @note Each persistent DDS domain will have its own
       //       mmap()-based allocator.  Do we need to worry about the
@@ -615,10 +624,11 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator (
         minimum_bytes,
         MAP_SHARED, // Written data must be reflected in the backing
                     // store.  Fortunately, updates to the backing
-                    // store until sync()ing occurs or the memory
-                    // region is unmapped - the behavior desired!
+                    // store don't occur until sync()ing occurs or the
+                    // memory region is unmapped - the behavior
+                    // desired!
         true,  // Guess on fault.
-        0,   // Windows LPSECURITY_ATTRIBUTES
+        0,     // Windows LPSECURITY_ATTRIBUTES
         /* 0 */ ACE_DEFAULT_FILE_PERMS);
 
       char const backing_store[] = "OpenDDS-durable-data";

@@ -24,7 +24,7 @@
 
 #include "dds/DCPS/DataSampleList.h"
 
-#include "ace/Hash_Map_Manager_T.h"
+#include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Array_Base.h"
 #include "ace/String_Base.h"
 #include "ace/SStringfwd.h"
@@ -184,11 +184,8 @@ namespace OpenDDS
       typedef ACE_Array_Base<
         ACE_Unbounded_Queue<sample_data_type> *> sample_list_type;
 
-      typedef ACE_Hash_Map_Manager_Ex<key_type,
-                                      sample_list_type *,
-                                      ACE_Hash<key_type>,
-                                      ACE_Equal_To<key_type>,
-                                      ACE_Null_Mutex> sample_map_type;
+      typedef ACE_Hash_Map_With_Allocator<key_type,
+                                          sample_list_type *> sample_map_type;
       typedef std::list<long> timer_id_list_type;
 
       /// Constructor.
@@ -238,7 +235,7 @@ namespace OpenDDS
       std::auto_ptr<ACE_Allocator> const allocator_;
 
       /// Map of all data samples.
-      sample_map_type samples_;
+      sample_map_type * samples_;
 
       /// Timer ID list.
       /**
