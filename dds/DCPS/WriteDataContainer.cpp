@@ -8,6 +8,7 @@
 #include "DataDurabilityCache.h"
 #include "PublicationInstance.h"
 #include "Util.h"
+#include "Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "tao/debug.h"
@@ -18,6 +19,47 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    /**
+     * @todo Refactor this code and DataReaderImpl::data_expired() to
+     *       a common function.
+     */
+    bool
+    resend_data_expired (DataSampleListElement const & element,
+                         ::DDS::LifespanQosPolicy const & lifespan)
+    {
+      if (lifespan.duration.sec != ::DDS::DURATION_INFINITY_SEC
+          || lifespan.duration.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+      {
+        // Finite lifespan.  Check if data has expired.
+
+        ::DDS::Time_t const tmp =
+          {
+            element.source_timestamp_.sec + lifespan.duration.sec,
+            element.source_timestamp_.nanosec + lifespan.duration.nanosec
+          };
+
+        ACE_Time_Value const now (ACE_OS::gettimeofday ());
+        ACE_Time_Value const expiration_time (
+          OpenDDS::DCPS::time_to_time_value (tmp));
+        if (now >= expiration_time)
+        {
+          if (DCPS_debug_level >= 8)
+          {
+            ACE_Time_Value const diff (now - expiration_time);
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("OpenDDS (%P|%t) Data to be sent ")
+                       ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
+                       diff.sec (),
+                       diff.usec ()));
+          }
+
+          return true;  // Data expired.
+        }
+      }
+
+      return false;
+    }
+
 
 #if 0
     // Emacs trick to align code with first column
@@ -108,7 +150,8 @@ WriteDataContainer::enqueue(
 }
 
 ::DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds)
+WriteDataContainer::reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
+                                  ::DDS::LifespanQosPolicy const & lifespan)
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -119,12 +162,18 @@ WriteDataContainer::reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds)
 
   if (sending_data_.size_ > 0)
   {
-    this->copy_and_append (this->resend_data_, sending_data_, rds);
+    this->copy_and_append (this->resend_data_,
+                           sending_data_,
+                           rds,
+                           lifespan);
   }
 
   if (sent_data_.size_ > 0)
   {
-    this->copy_and_append (this->resend_data_, sent_data_, rds);
+    this->copy_and_append (this->resend_data_,
+                           sent_data_,
+                           rds,
+                           lifespan);
   }
 
   return ::DDS::RETCODE_OK;
@@ -914,8 +963,9 @@ WriteDataContainer::get_next_handle ()
 
 void
 WriteDataContainer::copy_and_append (DataSampleList& list,
-                                     const DataSampleList& appended,
-                                     const OpenDDS::DCPS::ReaderIdSeq& rds)
+                                     DataSampleList const & appended,
+                                     OpenDDS::DCPS::ReaderIdSeq const & rds,
+                                     ::DDS::LifespanQosPolicy const & lifespan)
 {
   CORBA::ULong const num_rds = rds.length ();
   CORBA::ULong const num_iters_per_sample =
@@ -925,6 +975,11 @@ WriteDataContainer::copy_and_append (DataSampleList& list,
        cur != 0;
        cur = cur->next_send_sample_)
   {
+    // Do not copy and append data that has exceeded the configured
+    // lifespan.
+    if (resend_data_expired (*cur, lifespan))
+      continue;
+
     CORBA::ULong num_rds_left = num_rds;
 
     for (CORBA::ULong i = 0; i < num_iters_per_sample; ++i)

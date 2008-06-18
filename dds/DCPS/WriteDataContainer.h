@@ -145,7 +145,8 @@ namespace OpenDDS
        *  subscribers specified.
        */
       ::DDS::ReturnCode_t
-      reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds);
+      reenqueue_all (OpenDDS::DCPS::ReaderIdSeq const & rds,
+                     ::DDS::LifespanQosPolicy const & lifespan);
 
       /**
        * Dynamically allocate a PublicationInstance object and add to
@@ -156,10 +157,8 @@ namespace OpenDDS
        *        datawriter as part of the control message.
        */
       ::DDS::ReturnCode_t
-      register_instance (
-			 ::DDS::InstanceHandle_t&  instance_handle,
-			 DataSample*&              registered_sample
-			 );
+      register_instance (::DDS::InstanceHandle_t&  instance_handle,
+			 DataSample*&              registered_sample);
 
       /**
        * Remove the provided instance from the instances_ list.
@@ -309,8 +308,9 @@ namespace OpenDDS
       // --------------------------
 
       void copy_and_append (DataSampleList& list, 
-                            const DataSampleList& appended, 
-                            const OpenDDS::DCPS::ReaderIdSeq& rds);
+                            DataSampleList const & appended, 
+                            OpenDDS::DCPS::ReaderIdSeq const & rds,
+                            ::DDS::LifespanQosPolicy const & lifespan);
 
       /**
        * Remove the oldest sample (head) from the instance history list.

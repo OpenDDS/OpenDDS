@@ -333,23 +333,24 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     // DURABILITY.kind=TRANSIENT_LOCAL
     // It suffers from resending the history to every subscription.
 
-      // Tell the WriteDataContainer to resend all sending/sent
-      // samples.
-      this->data_container_->reenqueue_all (rd_ids);
+    // Tell the WriteDataContainer to resend all sending/sent
+    // samples.
+    this->data_container_->reenqueue_all (rd_ids,
+                                          this->qos_.lifespan);
 
-      // Acquire the data writer container lock to avoid deadlock. The thread
-      // calling fully_associated() has to acquire lock in the same order as
-      // the write()/register() operation.
+    // Acquire the data writer container lock to avoid deadlock. The
+    // thread calling fully_associated() has to acquire lock in the
+    // same order as the write()/register() operation.
 
-      // Since the thread calling fully_associated() is the reactor thread, it
-      // may have some performance penalty. If the performance is an issue,
-      // we may need a new thread to handle the data_availble() calls.
-      ACE_GUARD (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->get_lock());
-
-      this->publisher_servant_->data_available(this, true) ;
-    }
+    // Since the thread calling fully_associated() is the reactor
+    // thread, it may have some performance penalty. If the
+    // performance is an issue, we may need a new thread to handle the
+    // data_availble() calls.
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+               guard,
+               this->get_lock());
+    this->publisher_servant_->data_available(this, true);
+  }
 }
 
 
