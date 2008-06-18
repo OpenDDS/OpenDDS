@@ -1,3 +1,10 @@
+Wed Jun 18 14:05:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Re-applied one Borland fix and extended it to the map type as well
+          as the list.
+
 Wed Jun 18 08:00:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
@@ -27,7 +34,7 @@ Tue Jun 17 23:59:42 UTC 2008  Ossama Othman  <othmano@ociweb.com>
           Use an ACE_Hash_Map_With_Allocator_T<> map instead of the "_Ex"
           version just in case the base address for persistent durability
           support changes between process runs.
-        
+
           Allocate the map itself with the allocator so that its state
           (size, etc) is reflected in the backing store in the persistent
           case.
