@@ -1,3 +1,11 @@
+Wed Jun 18 20:37:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DurabilityArray.h:
+        * dds/DCPS/DurabilityQueue.h:
+
+          MS VC++ requires an explicitly defined destructor for this
+          particular use case.  Added one.
+
 Wed Jun 18 19:08:38 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

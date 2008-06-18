@@ -56,6 +56,10 @@ namespace OpenDDS
           this->array_[i] = rhs.array_[i];
       }
 
+      ~DurabilityArray ()
+      {
+      }
+
       void operator= (DurabilityArray<T> const & rhs)
       {
         DurabilityArray tmp (rhs);
