@@ -68,7 +68,7 @@ namespace
                     ACE_TEXT ("data durability cache.\n")));
       }
 
-      typedef ACE_Unbounded_Queue<
+      typedef OpenDDS::DCPS::DurabilityQueue<
         ::OpenDDS::DCPS::DataDurabilityCache::sample_data_type>
         data_queue_type;
 
@@ -228,6 +228,12 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::get_sample (
   source_timestamp.nanosec = this->source_timestamp_.nanosec;
 }
 
+void
+OpenDDS::DCPS::DataDurabilityCache::sample_data_type::set_allocator (
+  ACE_Allocator * allocator)
+{
+  this->allocator_ = allocator;
+}
 
 // --------------------------------------------------
 
@@ -244,6 +250,40 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache (
   {
     // A sample map was found in the backing store.
     this->samples_ = static_cast<sample_map_type *> (the_map);
+
+    ACE_Allocator * const allocator = this->allocator_.get ();
+
+    // Reset allocator address in case it differs from the value
+    // stored in the backing store.
+    sample_map_type::iterator const map_end = this->samples_->end ();
+    for (sample_map_type::iterator s = this->samples_->begin ();
+         s != map_end;
+         ++s)
+    {
+      sample_list_type * const list = (*s).int_id_;
+      list->set_allocator (allocator);
+
+      size_t const len = list->size ();;
+      for (size_t l = 0; l != len; ++l)
+      {
+        typedef DurabilityQueue<sample_data_type> data_queue_type;
+        data_queue_type * const q = (*list)[l];
+
+        q->set_allocator (allocator);
+
+        typedef DurabilityQueue<sample_data_type> data_queue_type;
+        for (data_queue_type::ITERATOR j = q->begin ();
+             !j.done ();
+             j.advance ())
+        {
+          sample_data_type * data = 0;
+          if (j.next (data) != 0)
+          {
+            data->set_allocator (allocator);
+          }
+        }
+      }
+    }
   }
   else
   {
@@ -303,12 +343,12 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
       {
         ACE_DES_FREE ((*list)[l],
                       this->allocator_->free,
-                      ACE_Unbounded_Queue<sample_data_type>);
+                      DurabilityQueue<sample_data_type>);
       }
 
       ACE_DES_FREE (list,
                     this->allocator_->free,
-                    ACE_Array_Base<ACE_Unbounded_Queue<sample_data_type> *>);
+                    ACE_Array_Base<DurabilityQueue<sample_data_type> *>);
     }
 
     // Yes, this looks strange but please leave it in place.  The third param
@@ -316,9 +356,9 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache ()
     // explicit desturctor call (~T()).  Typedefs are not allowed here.  This
     // is why the two ACE_DES_FREE's above are not the typedefs.  Below we use
     // a macro to hide the internal comma from ACE_DES_FREE's macro expansion.
-#define MAP_TYPE ACE_Hash_Map_With_Allocator<key_type, sample_list_type *>
-    ACE_DES_FREE (this->samples_, this->allocator_->free, MAP_TYPE);
-#undef MAP_TYPE
+#define OPENDDS_MAP_TYPE ACE_Hash_Map_With_Allocator<key_type, sample_list_type *>
+    ACE_DES_FREE (this->samples_, this->allocator_->free, OPENDDS_MAP_TYPE);
+#undef OPENDDS_MAP_TYPE
   }
 }
 
@@ -369,7 +409,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
   sample_list_type * sample_list = 0;
 
-  typedef ACE_Unbounded_Queue<sample_data_type> data_queue_type;
+  typedef DurabilityQueue<sample_data_type> data_queue_type;
   data_queue_type ** slot = 0;
   data_queue_type * samples = 0;  // sample_list_type::value_type
 
@@ -472,7 +512,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert (
 
       ACE_DES_FREE (samples,
                     this->allocator_->free,
-                    ACE_Unbounded_Queue<sample_data_type>);
+                    DurabilityQueue<sample_data_type>);
       *slot = 0;
 
       return false;
@@ -563,7 +603,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
 
   registration_sample.release ();
 
-  typedef ACE_Unbounded_Queue<sample_data_type> data_queue_type;
+  typedef DurabilityQueue<sample_data_type> data_queue_type;
   size_t const len = sample_list.size ();
   for (size_t i = 0; i != len; ++i)
   {
@@ -631,10 +671,13 @@ OpenDDS::DCPS::DataDurabilityCache::get_data (
       }
     }
 
-    // @@ We don't want to empty the queue so that other data writers
-    //    will have access to the data.
     // Data successfully written.  Empty the queue/list.
-    // q->reset ();
+    /**
+     * @todo If we don't empty the queue, we'll end up with duplicate
+     *       data since the data retrieved from the cache will be
+     *       reinserted.
+     */
+    q->reset ();
   }
 
   return true;
