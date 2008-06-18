@@ -1,3 +1,9 @@
+Wed Jun 18 20:47:43 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Corrected the class name passed to ACE_DES_FREE macro.
+          
 Wed Jun 18 20:37:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DurabilityArray.h:
