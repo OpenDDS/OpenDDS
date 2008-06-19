@@ -306,61 +306,47 @@ of samples.
 ======================================================================
 * Known Limitations
 
-An instance key must be a base type (not a complex type like array or
-struct).
+----------------------------------------------------------------------
+) An instance key must be a base type (not a complex type like array or
+  struct).
 
-This limitation exists because the generated lessThan operator does
-not currently handle complex types.
+  This limitation exists because the generated lessThan operator does
+  not currently handle complex types.
 
-This limitation can be worked around by specifying multiple keys such
-that all of the base types in the complex type are specified.
+  This limitation can be worked around by specifying multiple keys such
+  that all of the base types in the complex type are specified.
 
 ----------------------------------------------------------------------
 ) Users must ensure that TopicDescriptions are not used after there
   associated Topic is deleted.
 
 ----------------------------------------------------------------------
-) Tests sending large messages quickly may fail sending with
-  the following error:
-
-  SimpleTcpSendStrategy::send_bytes: ERROR: sendv: Invalid argument
-
-  The DataWriter must be deleted and created again to establish
-  the connection.
-
-----------------------------------------------------------------------
-) create_datawriter() does not wait for full association establishment
+) create_datawriter() does not wait for fully association establishment
   so a write shortly after creating the datawriter may be dropped on
   the publisher side because add_associations() has not completed on
   the publisher side.
-  The sample may also be dropped on the subscriber side event though
+  The sample may also be dropped on the subscriber side even though
   the connection exists between the publisher and subscriber when
   the associations have not been mapped on the subscriber side.
 
   If the publisher expects existing DataReaders to receive the
-  messages it sends after creating the DataWriter, it must delay
-  calling write for the first time for a few seconds.
+  messages it sends after creating the DataWriter, it must wait for
+  fully association before writing messages. Do following to avoid
+  message dropping during association period.
 
-----------------------------------------------------------------------
-) Built-in Topic (BIT) support has the following problems:
-
-  1) The QoS values in BIT data samples are not updated when an
-     entities QoS is set (because the DCPSInfoRepo is not told of the
-     set/update).  So looking at USER_DATA will work if the USER_DATA
-     was assigned in the initial creation of the entity but not if it
-     was set_qos() later.  But using the USER_DATA QoS is not yet
-     supported anyway.
+    while (1)
+    {
+      writer_->get_matched_subscriptions(handles);
+      if (handles.length() > 0)
+        break;
+      else
+        ACE_OS::sleep(ACE_Time_Value(0,250000));
+    }
 
 ----------------------------------------------------------------------
 ) When Built-in Topic support is disabled the InstanceHandle_t values
   in statuses are actually RepoIDs (the internal ID assigned by the
   DCPSInfoRepo).  Applications should not depend on this behavior.
-
-----------------------------------------------------------------------
-) Calling set_qos() on an entity does not propagate the QoS changes.
-  This is currently acceptable because all of the supported QoS,
-  (except for DEADLINE, DURABILITY, LIFESPAN and LIVELINESS) are
-  Changeable=no.
 
 ----------------------------------------------------------------------
 ) Auto_dispose on unregister is not implemented.
