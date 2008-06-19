@@ -110,10 +110,15 @@ On Windows platforms, we recommend the use of ActiveState Perl.
 This release of OpenDDS has been tested under the following platforms:
 
 ** Windows XP and Server 2003
-** Linux RedHat EL 5, RedHat 7.2, Fedora Core (3, 4, 6), Ubuntu "Fiesty Fawn"
-        (both x86 and x86_64), Ubuntu 8.04 ("Hardy Heron")
+** RedHat EL 5, x86_64
+** RedHat (7.2, 9), x86
+** Fedora Core 3, x86_64
+** Fedora Core 6, x86
+** CentOS 5, x86_64
+** Ubuntu 7.10 (Gutsy Gibbon), x86
+** Ubuntu 8.04 ("Hardy Heron"), x86
 ** SunOS 5.9 (x86) and 5.10 (sparc)
-** QNX Neutrino 6.3.0 (x86)
+** QNX Neutrino 6.3.2 (x86)
 
 ======================================================================
 * Compilers
