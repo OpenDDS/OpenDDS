@@ -43,13 +43,13 @@ New to this version are the following changes:
   although independent of, those found in the HISTORY and
   RESOURCE_LIMITS policies.
 
-- New command-line option "-DCPSTransportDebugLevel".
+- Added a new command-line option, "-DCPSTransportDebugLevel".
 
   This can be used to specify a debug level for the OpenDDS
   transport layer at run-time. OpenDDS debug statements range
   from 0 to 5 in increasing order of verbosity.
 
-- Add the ability to attach to multiple DCPSInfoRepo processes.
+- Added the ability to attach to multiple DCPSInfoRepo processes.
 
   Applications which communicate using DDS are no longer restricted to
   communicating using domains controlled by a single DCPSInfoRepo
@@ -58,7 +58,7 @@ New to this version are the following changes:
   controlled by a single repository and this association may not be
   changed for the lifetime of the repository or the application.
 
-- Add the qos propagation.
+- Added QoS propagation.
 
   The client applications can change the qos of DCPS entity via
   set_qos() call. The qos updates are propagated to DCPSInfoRepo which
@@ -76,15 +76,15 @@ New to this version are the following changes:
   fully copied to buffer when the qos contains sequence data. The
   TAO_OutputCDR stream needs be cosolidated before memcpy.
 
-- Fixed compliance with qos RxO
+- Fixed compliance with qos RxO.
 
   Fixed compliance with the DDS specification that qos parameters that
   Durability kind and Deadline.period be compatible between the
   subscriber and the publisher (RxO - Received x Offered)
 
-- Improved Memory Mangament
+- Improved Memory Mangament.
 
-  Fixed issue with reference counting for classes derived from
+  Fixed issues with reference counting for classes derived from
   LocalObject.  If a user defined application is crashing on exit or
   cleanup, see the OpenDDS FAQ.
 
@@ -106,8 +106,8 @@ New to this version are the following changes:
   The default address string is "host:port". The "host" is the fully qualified
   domain name and the "port" is picked randomly by OS.
 
-- Fixed problem that default local_address does not work when hostname
-  is resolved as loopback ip address.
+- Fixed a problem that the default local_address does not work when hostname
+  is resolved as the loopback ip address.
 
   With the default local_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
