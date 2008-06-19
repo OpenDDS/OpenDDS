@@ -341,11 +341,12 @@ that all of the base types in the complex type are specified.
 ----------------------------------------------------------------------
 ) Built-in Topic (BIT) support has the following problems:
 
-  1) The QoS values in BIT data samples are not updated when an entities QoS
-     is set (because the DCPSInfoRepo is not told of the set/update).
-     So looking at USER_DATA will work if the USER_DATA was assigned
-     in the initial creation of the entity but not if it was set_qos()
-     later.  But using the USER_DATA QoS is not yet supported anyway.
+  1) The QoS values in BIT data samples are not updated when an
+     entities QoS is set (because the DCPSInfoRepo is not told of the
+     set/update).  So looking at USER_DATA will work if the USER_DATA
+     was assigned in the initial creation of the entity but not if it
+     was set_qos() later.  But using the USER_DATA QoS is not yet
+     supported anyway.
 
 ----------------------------------------------------------------------
 ) When Built-in Topic support is disabled the InstanceHandle_t values
