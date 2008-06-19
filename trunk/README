@@ -1,17 +1,17 @@
-The OpenDDS is an open-source C++ implementation of the Object
-Management Group's specification "Data Distribution Service for
-Real-time Systems". OpenDDS is built on the ACE
+OpenDDS is an open-source C++ implementation of the
+Object Management Group's specification "Data Distribution
+Service for Real-time Systems". OpenDDS is built on the ACE
 (http://www.theaceorb.com/product/aboutace.html) abstraction layer to
-provide platform portability. OpenDDS also leverages capabilities of
-TAO (http://www.theaceorb.com/), such as its IDL compiler and as the
-basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
- 
+provide platform portability. OpenDDS also leverages capabilities of TAO
+(http://www.theaceorb.com/), such as its IDL compiler and as the basis
+of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+
 The primary development of OpenDDS was done by the ACE/TAO development
 team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix. It is released under the same generous license
 terms as ACE, TAO and MPC.
 
-This directory structure contains OpenDDS 1.01 (??).
+This directory structure contains OpenDDS 1.1.
 
 
 ======================================================================
@@ -74,17 +74,25 @@ please see the Support section for contact information.
 
 ** TAO
 
-OpenDDS requires the use of TAO. This release of OpenDDS has been
-tested against the versions of TAO given below. Note that the 1.xa
-releases are from OCI and can be obtained from
-http://www.theaceorb.com/. The DOC Group releases can be obtained from
-http://download.dre.vanderbilt.edu/. Since OpenDDS uses features of the
-IDL compiler provided with TAO, only the following versions of TAO work
-with this release of OpenDDS.
+OpenDDS requires TAO for both IDL compilation as well as interaction
+with the DCPSInfoRepo. At a minimum, you must be at one of the following
+versions (or later) in order to properly compile OpenDDS:
 
 *** TAO 1.4a patch 17
 *** TAO 1.5a patch 1
 *** TAO 1.5.9
+
+Note that the 1.xa releases are from OCI and can be obtained from
+http://www.theaceorb.com/. The DOC Group releases can be obtained from
+http://download.dre.vanderbilt.edu/.
+
+We have tested against the following versions of TAO:
+
+*** TBD
+*** TBD
+*** TBD
+*** TBD
+*** TBD
 
 ** GNU Make
 
