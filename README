@@ -135,7 +135,7 @@ This release of OpenDDS has been tested using the following compilers:
 ** gcc 4.1.2 with Red Hat modifications 
 ** gcc 4.1.2 with Ubuntu modifications
 ** gcc 4.2.3 with Ubuntu modifications
-** QNX gcc 2.95.3
+** QNX gcc 3.3.5 
 ** Sun C++ 5.8 Patch 121017-08 2006/12/06
 
 * Building and Installing
