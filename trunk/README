@@ -402,8 +402,8 @@ that all of the base types in the complex type are specified.
 
 ----------------------------------------------------------------------
 ) The DURABILITY_SERVICE service_cleanup_delay support is currently
-experimental.  The corresponding DURABILITY service_cleanup_delay
-support is not available.
+  experimental.  The corresponding DURABILITY service_cleanup_delay
+  support is not available.
 
 ----------------------------------------------------------------------
 ) LIFESPAN support on the publisher side only expires data when using
