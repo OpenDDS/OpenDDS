@@ -171,6 +171,9 @@ with the following qualifications.
   - RESOURCE_LIMITS.max_samples_per_instance
   - RESOURCE_LIMITS.max_samples
   - RESOURCE_LIMITS.max_instances
+  - USER_DATA 
+  - TOPIC_DATA 
+  - GROUP_DATA
 
 --- supported entities ----
 DomainParticipantFactory, DomainParticipant, Topic, TopicDescription,
