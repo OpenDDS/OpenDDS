@@ -1,4 +1,4 @@
-OpenDDS is an open-source C++ implementation of the
+OpenDDS is an open-source C++ implementation of the 
 Object Management Group's specification "Data Distribution
 Service for Real-time Systems". OpenDDS is built on the ACE
 (http://www.theaceorb.com/product/aboutace.html) abstraction layer to
@@ -20,7 +20,7 @@ This directory structure contains OpenDDS 1.1.
 A developer's guide to OpenDDS is available at 
 http://download.ociweb.com/OpenDDS/ .
 
-It is also available as a chapter of the TAO Devloper's Guide book
+It is also available as a chapter of the TAO Developer's Guide book
 set that can be purchased from 
 http://www.theaceorb.com/purchase/index.html .
 
@@ -94,14 +94,15 @@ on Unix and Linux systems.
 
 ** Perl
 
-Perl is needed at build time (for both OpenDDS and applications built upon
-OpenDDS).  A Perl script, $DDS_ROOT/bin/dcps_ts.pl, generates the "type
-support" code based on the user's IDL definition of DCPS data types.
-Additionally, Perl is used for running the automated tests and examples
-included in this source tree, or if you will be generating Makefiles or
-Visual Studio project files.  In most cases you will *not* need to generate
-Makefiles/project files, but see the docs/INSTALL file for details.
-On Windows platforms, we recommend the use of ActiveState Perl.
+Perl is needed at build time (for both OpenDDS and applications built
+upon OpenDDS).  A Perl script, $DDS_ROOT/bin/dcps_ts.pl, generates the
+"type support" code based on the user's IDL definition of DCPS data
+types.  Additionally, Perl is used for running the automated tests and
+examples included in this source tree, or if you will be generating
+Makefiles or Visual Studio project files.  In most cases you will
+*not* need to generate Makefiles/project files, but see the
+docs/INSTALL file for details.  On Windows platforms, we recommend the
+use of ActiveState Perl.
 
 * Build Targets
 
@@ -146,37 +147,45 @@ For building and installation instructions see docs/INSTALL.
 ======================================================================
 * OpenDDS Compliance with the DDS Specification
 
-OpenDDS supports the following capabilities defined in the DDS Specification:
+OpenDDS supports the following capabilities defined in the DDS
+Specification:
 
-An implementation of the "Minimum Profile" (as defined in the spec) with
-the following qualifications.
+An implementation of the "Minimum Profile" (as defined in the spec)
+with the following qualifications.
 
 --- supported QoS ----
    Note: all other QoS can only have the default values
          (as defined in the spec).
+  - DEADLINE
+  - DURABILITY
+  - DURABILITY_SERVICE
+  - LIFESPAN
   - LIVELINESS.lease_duration = <any period of time>;
   - RELIABILITY.kind = RELIABLE
-  - RELIABILITY.kind = BEST_EFFORT
+    RELIABILITY.kind = BEST_EFFORT
   - HISTORY.kind = KEEP_LAST
     HISTORY.depth = <any value>
-  - HISTORY.kind = KEEP_ALL
-    RESOURCE_LIMITS.max_samples_per_instance
-    RELIABILITY.max_blocking_time = <any period of time>
+    HISTORY.kind = KEEP_ALL
+  - PARTITION
+  - RELIABILITY.max_blocking_time = <any period of time>
+  - RESOURCE_LIMITS.max_samples_per_instance
   - RESOURCE_LIMITS.max_samples
   - RESOURCE_LIMITS.max_instances
 
 --- supported entities ----
-DomainParticipantFactory, DomainParticipant, Topic, TopicDescription, Publisher
-DataWriter,DataReader, Subscriber, all Listeners.
+DomainParticipantFactory, DomainParticipant, Topic, TopicDescription,
+Publisher DataWriter,DataReader, Subscriber, all Listeners.
   - Does not support any Conditions, WaitSet, ContentFilteredTopic or
-    MultiTopic (or the methods on the supported topics related to these
-    classes).
+    MultiTopic (or the methods on the supported topics related to
+    these classes).
 
 -- listener calls supported ---
   --- publisher side --
+  - on_offered_deadline_missed
   - on_offered_incompatible_qos
   - on_publication_match
   --- subscriber side
+  - on_requested_deadline_missed
   - on_requested_incompatible_qos
   - on_sample_rejected
   - on_liveliness_changed
@@ -229,53 +238,56 @@ of samples.
 
   - HISTORY.kind = KEEP_LAST
     HISTORY.depth = <any value>
-    When HISTORY.kind=KEEP_LAST up to HISTORY.depth samples will be held by
-    a DataWriter and DataReader.
-    If there are HISTORY.depth samples not sent by the publisher's transport
-    then the oldest sample will be "lost" when the write call is made.
-    If the transport receives a sample and there are HISTORY.depth NOT_READ
-    samples then the oldest sample will be "lost".
-    See Listener & Status section.
-
+    When HISTORY.kind=KEEP_LAST up to HISTORY.depth samples will be
+    held by a DataWriter and DataReader.
+    If there are HISTORY.depth samples not sent by the publisher's
+    transport then the oldest sample will be "lost" when the write
+    call is made.  If the transport receives a sample and there are
+    HISTORY.depth NOT_READ samples then the oldest sample will be
+    "lost".  See Listener & Status section.
 
   - HISTORY.kind = KEEP_ALL
     RESOURCE_LIMITS.max_samples_per_instance
     RELIABILITY.max_blocking_time = <any period of time>
 
-    When HISTORY.kind = KEEP_ALL a write call will block up to
-    the RELIABILITY.max_blocking_time because
+    When HISTORY.kind = KEEP_ALL a write call will block up to the
+    RELIABILITY.max_blocking_time because
     RESOURCE_LIMITS.max_samples_per_instance are already waiting to be
-    sent.  The write call will return OK if the sample was queued (to be sent)
-    within the timeout period or TIMEOUT if the sample was not queued (because
-    the backpressure had not let up).
-    HISTORY.kind = KEEP_ALL does not make sense when use with the SimpleUDP
-    transport because the SimpleUDP transport does not confirm that the sample
-    was received by the subscriber and hence will never block.
+    sent.  The write call will return OK if the sample was queued (to
+    be sent) within the timeout period or TIMEOUT if the sample was
+    not queued (because the backpressure had not let up).
+    HISTORY.kind = KEEP_ALL does not make sense when use with the
+    SimpleUDP transport because the SimpleUDP transport does not
+    confirm that the sample was received by the subscriber and hence
+    will never block.
 
     If the transport receives a sample and there are
     RESOURCE_LIMITS.max_samples_per_instance
     NOT_READ samples the newly received sample will be "rejected".
 
   - RESOURCE_LIMITS.max_samples
-    This QoS determines the maximum number of samples allowed for a given
-    DataWriter or DataReader. In the OpenDDS implementation it also determines
-    the number of pre-allocated memory chunks for sample data.  If the value is
-    UNLIMITED (the default) then the Service_Participant::n_chunks() value will
-    be used in place of RESOURCE_LIMITS.max_samples to determine the number of
+    This QoS determines the maximum number of samples allowed for a
+    given DataWriter or DataReader. In the OpenDDS implementation it
+    also determines the number of pre-allocated memory chunks for
+    sample data.  If the value is UNLIMITED (the default) then the
+    Service_Participant::n_chunks() value will be used in place of
+    RESOURCE_LIMITS.max_samples to determine the number of
     pre-allocated sample chunks.  n_chunks() defaults to 20 but can be
     set by the client code.
 
-    Note: unbounded data types do not use the pre-allocated memory for samples
-    but they do use pre-allocated data structures related to samples) so
-    unbounded data types will be less efficient than bounded types.
-    Any type containing a sequence/string without bounds or containing a
-    union (even if it contains all bounded fields) is an unbounded type.
+    Note: unbounded data types do not use the pre-allocated memory for
+    samples but they do use pre-allocated data structures related to
+    samples) so unbounded data types will be less efficient than
+    bounded types.  Any type containing a sequence/string without
+    bounds or containing a union (even if it contains all bounded
+    fields) is an unbounded type.
 
     // unbounded  (by any of the fields)
+    typedef sequence<float> FloatSeq;
     struct unbounded {
       string name;
       A_Union data;
-      sequence<float> values;
+      FloatSeq values;
     };
 
     // bounded
@@ -284,7 +296,6 @@ of samples.
       sequence<float,3> values;
     };
 
-
   - RESOURCE_LIMITS.max_instances
     Can be set to any value but is not used by the TAO implementation.
 
@@ -292,19 +303,20 @@ of samples.
 ======================================================================
 * Known Limitations
 
-An instance key must be a base type (not a complex type like array or struct).
+An instance key must be a base type (not a complex type like array or
+struct).
 
-This limitation exists because the generated lessThan operator does not 
-currently handle complex types.
+This limitation exists because the generated lessThan operator does
+not currently handle complex types.
 
-This limitation can be worked around by specifying multiple keys such that
-all of the base types in the complex type are specified.
+This limitation can be worked around by specifying multiple keys such
+that all of the base types in the complex type are specified.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Users must ensure that TopicDescriptions are not used after there
   associated Topic is deleted.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Tests sending large messages quickly may fail sending with
   the following error:
 
@@ -313,11 +325,11 @@ all of the base types in the complex type are specified.
   The DataWriter must be deleted and created again to establish
   the connection.
 
--------------------------------------------------------------------------------
-) create_datawriter() does not wait for full association establishment so
-  a write shortly after creating the datawriter may be dropped on the
-  publisher side because add_associations() has not completed on the
-  publisher side.
+----------------------------------------------------------------------
+) create_datawriter() does not wait for full association establishment
+  so a write shortly after creating the datawriter may be dropped on
+  the publisher side because add_associations() has not completed on
+  the publisher side.
   The sample may also be dropped on the subscriber side event though
   the connection exists between the publisher and subscriber when
   the associations have not been mapped on the subscriber side.
@@ -326,61 +338,80 @@ all of the base types in the complex type are specified.
   messages it sends after creating the DataWriter, it must delay
   calling write for the first time for a few seconds.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Built-in Topic (BIT) support has the following problems:
 
-  1)  The QoS values in BIT data samples are not updated when an entities QoS
+  1) The QoS values in BIT data samples are not updated when an entities QoS
      is set (because the DCPSInfoRepo is not told of the set/update).
-     So looking at USER_DATA will work if the USER_DATA was assigned in
-     the initial creation of the entity but not if it was set_qos() later.
-     But using the USER_DATA QoS is not yet supported anyway.
+     So looking at USER_DATA will work if the USER_DATA was assigned
+     in the initial creation of the entity but not if it was set_qos()
+     later.  But using the USER_DATA QoS is not yet supported anyway.
 
--------------------------------------------------------------------------------
-) When Built-in Topic support is disabled the InstanceHandle_t values in
-  statuses are actually RepoIDs (the internal ID assigned by the DCPSInfoRepo).
-  Applications should not depend on this behavior.
+----------------------------------------------------------------------
+) When Built-in Topic support is disabled the InstanceHandle_t values
+  in statuses are actually RepoIDs (the internal ID assigned by the
+  DCPSInfoRepo).  Applications should not depend on this behavior.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Calling set_qos() on an entity does not propagate the QoS changes.
-  This is currently acceptable because all of the supported QoS are
+  This is currently acceptable because all of the supported QoS,
+  (except for DEADLINE, DURABILITY, LIFESPAN and LIVELINESS) are
   Changeable=no.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Auto_dispose on unregister is not implemented.
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) Samples are only rejected for having more than
   qos.resource_limits.max_samples_per_instance NOT_READ samples in an
   instance.
 
-  The implementation should also reject for too many total NOT_READ samples
-  or too many instances.
+  The implementation should also reject for too many total NOT_READ
+  samples or too many instances.
 
-  Since the OpenDDS implementation does not have hard limits with respect to
-  these values this limitation is considered acceptable.
+  Since the OpenDDS implementation does not have hard limits with
+  respect to these values this limitation is considered acceptable.
 
   Note: When more than resource_limits.max_samples are queued
   in the DataReader the heap will be used instead of pre-allocated
   memory.
 
--------------------------------------------------------------------------------
-) There is no check that the Transport implementation supports the given QoS.
-  The user should not use the SimpleUDPTransport with
+----------------------------------------------------------------------
+) There is no check that the Transport implementation supports the
+  given QoS.  The user should not use the SimpleUDPTransport with
   HISTORY.kind=KEEP_ALL or RELIABILITY.kind = RELIABLE.
 
 
--------------------------------------------------------------------------------
+----------------------------------------------------------------------
 ) The SampleInfo[].instance_state may be wrong.
 
-  The current implementation assumes that all instances have been written
-  to by all writers so the instance only goes to the NO_WRITERS state
-  when there are no active writers for the whole DataReader (not just
-  the instance).
+  The current implementation assumes that all instances have been
+  written to by all writers so the instance only goes to the
+  NO_WRITERS state when there are no active writers for the whole
+  DataReader (not just the instance).
 
--------------------------------------------------------------------------------
-) We have implemented to formal/04-12-02 (v 1.0 of the DDS spec) 
+----------------------------------------------------------------------
+) We have implemented to formal/04-12-02 (v 1.0 of the DDS spec)
   but version 1.2 has come out since with various improvements and
   clarifications that may not be implemented.
+
+----------------------------------------------------------------------
+) The DEADLINE QoS policy related
+  DDS::{Offered,Requested}DeadlineMissedStatus::last_instance_handle
+  field is currently not updated.
+
+----------------------------------------------------------------------
+) The DURABILITY_SERVICE service_cleanup_delay support is currently
+experimental.  The corresponding DURABILITY service_cleanup_delay
+support is not available.
+
+----------------------------------------------------------------------
+) LIFESPAN support on the publisher side only expires data when using
+  a DURABILITY kind other than VOLATILE.
+
+----------------------------------------------------------------------
+) Pattern matching capabilities for the PARTITION QoS policy is
+  currently limited to wildcards containing '*' and/or '?'.
 
 ======================================================================
 * Test Failures
