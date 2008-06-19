@@ -1,4 +1,4 @@
-OpenDDS is an open-source C++ implementation of the 
+OpenDDS is an open-source C++ implementation of the
 Object Management Group's specification "Data Distribution
 Service for Real-time Systems". OpenDDS is built on the ACE
 (http://www.theaceorb.com/product/aboutace.html) abstraction layer to
@@ -17,11 +17,11 @@ This directory structure contains OpenDDS 1.1.
 ======================================================================
 * Documentation
 
-A developer's guide to OpenDDS is available at 
+A developer's guide to OpenDDS is available at
 http://download.ociweb.com/OpenDDS/ .
 
 It is also available as a chapter of the TAO Developer's Guide book
-set that can be purchased from 
+set that can be purchased from
 http://www.theaceorb.com/purchase/index.html .
 
 
@@ -133,10 +133,10 @@ This release of OpenDDS has been tested using the following compilers:
 ** gcc 3.4.4 with Red Hat modifications
 ** gcc 4.1.1
 ** gcc 4.1.1 with Red Hat modifications
-** gcc 4.1.2 with Red Hat modifications 
+** gcc 4.1.2 with Red Hat modifications
 ** gcc 4.1.2 with Ubuntu modifications
 ** gcc 4.2.3 with Ubuntu modifications
-** QNX gcc 3.3.5 
+** QNX gcc 3.3.5
 ** Sun C++ 5.8 Patch 121017-08 2006/12/06
 
 * Building and Installing
