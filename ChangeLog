@@ -1,3 +1,9 @@
+Thu Jun 19 15:32:57 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Made some quick grammatical fixes.
+
 Wed Jun 18 23:23:46 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * DDS_release_notes.txt:
@@ -9,7 +15,7 @@ Wed Jun 18 20:47:43 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataDurabilityCache.cpp:
 
           Corrected the class name passed to ACE_DES_FREE macro.
-          
+
 Wed Jun 18 20:37:23 UTC 2008  Ossama Othman  <othmano@ociweb.com>
 
         * dds/DCPS/DurabilityArray.h:
@@ -27,10 +33,10 @@ Wed Jun 18 19:08:38 UTC 2008  Ossama Othman  <othmano@ociweb.com>
           from the backing store by using new DurabilityArray and
           DurabilityQueue classes.  Addresses a crash on process exit when
           using PERSISTENT DURABILITY.
-        
+
           Fixed Linux build error.  The MAP_TYPE macro is already defined
           by the <sys/mman.h> system header.
-        
+
           Reset the underlying queue after retrieving data so that the
           data is not duplicated if the DataWriter ends up reinserting the
           same data into the durability cache.
@@ -42,12 +48,12 @@ Wed Jun 18 19:08:38 UTC 2008  Ossama Othman  <othmano@ociweb.com>
           ACE_Unbounded_Queue<>, respectively, that provide a means to
           reset the allocator.  Needed to properly support persistent
           durable data that is accessed between different process runs.
-        
+
         * tests/DCPS/PersistentDurability/publisher.cpp:
         * tests/DCPS/PersistentDurability/subscriber.cpp:
         * tests/DCPS/TransientDurability/publisher.cpp:
         * tests/DCPS/TransientDurability/subscriber.cpp:
-        
+
           Fixed memory leaks by assigning newly allocated type support
           servant to the appropriate "_var" type.
 
