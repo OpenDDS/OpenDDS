@@ -1,5 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : dcpsexe, dcps_tcp {
-}

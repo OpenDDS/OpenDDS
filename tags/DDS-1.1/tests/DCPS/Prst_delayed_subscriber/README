@@ -1,8 +1,0 @@
-$Id$
-
-Simple test to test InfoRepo persistance mechanism. The
-publisher expects two subscribers. The test driver starts up the
-InfoRepo and the first subscriber. After the subscriber dies the
-driver kills the InfoRepo and reincarnates it. It then starts up
-the second subscriber. The test will succeed only if InfoRepo is
-running with persistence turned on.
