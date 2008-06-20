@@ -408,3 +408,14 @@ of samples.
 
 Note: A list of tests that are run in the nightly automated build/test
       can be found in $DDS_ROOT/bin/dcps_tests.lst
+
+- The $DDS_ROOT/tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl test 
+  currently fails with SEGV on linux x86-64 platforms in the versions 
+  of TAO 1.4a and 1.5a. The default ACE_DEFAULT_BASE_ADDR 0x0 causes 
+  the system to choose an address which for some unknown reason causes
+  SEGV errors in Malloc_T. Only the test is affected, and this bug does
+  not have any impact on the functionality of DDS or user-written code.
+  Additionally, this bug in TAO has been addressed and a fix is scheduled
+  for inclusion in the next patch release of TAO 1.4a(p22) and 1.5a(p9). 
+  
+  
