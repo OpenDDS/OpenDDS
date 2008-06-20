@@ -1,9 +1,17 @@
+Fri Jun 20 05:44:33 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * README:
+       
+          Added note for 
+          $DDS_ROOT/tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl
+          test failure due to TAO version.
+
 Thu Jun 19 23:01:42 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * README:
 
-          Updated a few limitations.
-          
+          Removed a few limitations.
+
 Thu Jun 19 21:57:09 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * README:
