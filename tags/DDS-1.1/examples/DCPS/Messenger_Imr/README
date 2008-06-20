@@ -1,0 +1,33 @@
+// $Id$
+
+This test builds upon the DevGuide Messenger example.
+
+This test showcases how the DCPSInforepo can be used in combination
+ with the TAO ImplmentationReposity service (ImR). The test starts
+ up the ImR and the Activator Service (AtS). It then starts up the
+ InfoRepo with the -ORBuseimr option turned on. Th InfoRepo in this
+ mode will register with the ImR and writes out an ImRified IOR. The
+ test driver then kills the ImplRepo.
+
+The utility tao_imr is used to updated the ImR's ImplRepo index with
+ the information needed by the AtS to reincarnate the InfoRepo. From
+ here on the test mirrors the regular messenger test. Whats different
+ is that when the first DDS client (Publisher) tries to register with
+ the InfoRepo, it has top wait for the ImR (specifically the Activator)
+ to reincarnate the InfoRepo.
+
+Concerns:
+
+One issue is how the system would behave if the InfoRepo crashes after
+ the DDS client has established a connection. Would TAO detect the broken
+ connection and establish a new connection (via the ImR) or would it just
+ throw a TRANSIENT exception?
+My guess is that TAO would try to re-establish connection using the IOR
+ previously returned by the ImR. If the InfoRepo is alive and listening
+ on the same port, alls well. If however the InfoRepo isn't alive
+ the client will get a CORBA exception. It would then have to repeat
+ the invocation for the ImR assisted connection establishment (including
+ InfoRepo reincarnation) to happen.
+If this is correct we need to have a try-catch block around every
+ InfoRepo invocation and repeat the invocation upon catching any
+ exception.
