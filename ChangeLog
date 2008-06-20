@@ -1,12 +1,8 @@
-Fri Jun 20 14:55:10 UTC 2008  Jonathan S. Pollack  <pollackj@ociweb.com>
-
-        * OpenDDS version 1.1 released.
-
 Fri Jun 20 05:44:33 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * README:
-
-          Added note for
+       
+          Added note for 
           $DDS_ROOT/tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl
           test failure due to TAO version.
 
