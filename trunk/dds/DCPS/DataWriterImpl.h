@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -325,6 +326,8 @@ namespace OpenDDS
       void notify_publication_disconnected (const ReaderIdSeq& subids);
       void notify_publication_reconnected (const ReaderIdSeq& subids);
       void notify_publication_lost (const ReaderIdSeq& subids);
+      void notify_publication_lost (const ::DDS::InstanceHandleSeq& handles);
+
       void notify_connection_deleted ();
 
       /// Statistics counter.
@@ -454,7 +457,9 @@ namespace OpenDDS
 
       RepoIdToHandleMap               id_to_handle_map_;
 
-      ReaderIdSeq                     readers_;
+      typedef std::set<RepoId>        IdSet;
+
+      IdSet                           readers_;
 
       /// Status conditions.
       ::DDS::LivelinessLostStatus         liveliness_lost_status_ ;
@@ -504,6 +509,8 @@ namespace OpenDDS
 
       /// Flag indicates that the init() is called.
       bool                       initialized_;
+
+      IdSet                  pending_readers_;
    };
 
   } // namespace DCPS

@@ -1,3 +1,22 @@
+Wed Jun 25 18:39:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          - Added pending reader list to keep track the pending reader so it can be
+            distinguished from fully associated reader and also added code to manage
+            state transition. This would fix some errors if remove_associations()
+            is called before fully_associated() call.
+          - Changed reader_ to be std::set<RepoId> instead of ReaderIdSeq to simplify
+            implementation for insertion and deletion.
+          
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Removed the delay between delete_datareader and create_datareader, but 
+          still keep the delay between create_datareader and delete_datareader
+          which is needed to avoid problem that datareader removal in DCPSInfoRepo
+          cause bit lookup failure upon fully association. 
+          
 Fri Jun 20 15:58:04 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * DDS_release_notes.txt:
