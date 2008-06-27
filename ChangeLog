@@ -1,3 +1,13 @@
+Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+          Corrected spelling of -DCPSTransportDebugLevel option.
+
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+          Updated usage message to list all possible arguments
+          for the -t (transport type) option.
+
 Fri Jun 27 14:04:41 UTC 2008  Chad Elliott  <elliott_c@ociweb.com>
 
         * MPC/config/dcps_reliable_multicast.mpb:
