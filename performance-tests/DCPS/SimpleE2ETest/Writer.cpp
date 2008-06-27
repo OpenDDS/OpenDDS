@@ -3,14 +3,8 @@
 // $Id$
 #include "Writer.h"
 #include "TestException.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -52,7 +46,7 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant = OpenDDS::DCPS::reference_to_servant<Wimpl> (pt_dw.in ());
+  Wimpl* pt_servant = dynamic_cast<Wimpl*> (pt_dw.in ());
 
   //SHH remove this kludge when the transport is fixed.
   ACE_OS::sleep(5); // ensure that the connection has been fully established

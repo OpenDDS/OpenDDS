@@ -7,14 +7,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 
 
@@ -33,7 +27,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
       throw TestException() ;
     }
 
-  Rimpl* dr_servant = OpenDDS::DCPS::reference_to_servant<Rimpl> (pt_dr.in ());
+  Rimpl* dr_servant = dynamic_cast<Rimpl*> (pt_dr.in ());
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);

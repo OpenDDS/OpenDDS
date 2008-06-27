@@ -23,6 +23,7 @@ $info_prst_file = "info.pr";
 $num_messages = 60;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
+$SRV_PORT = PerlACE::random_port();
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
@@ -33,7 +34,7 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                     #. "-ORBDebugLevel 10 "
                                     . "-ORBSvcConf mySvc.conf "
-                                    . "-orbendpoint iiop://:12345");
+                                    . "-orbendpoint iiop://:$SRV_PORT");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");

@@ -112,6 +112,8 @@ namespace OpenDDS
         /// The number of chunks that the DataSampleListElementAllocator
         /// needs allocate.
         size_t         n_chunks,
+        /// Domain ID.
+        ::DDS::DomainId_t domain_id,
         /// Topic name.
         char const *   topic_name,
         /// Type name.
@@ -143,7 +145,8 @@ namespace OpenDDS
        *  subscribers specified.
        */
       ::DDS::ReturnCode_t
-      reenqueue_all(const OpenDDS::DCPS::ReaderIdSeq& rds);
+      reenqueue_all (OpenDDS::DCPS::ReaderIdSeq const & rds,
+                     ::DDS::LifespanQosPolicy const & lifespan);
 
       /**
        * Dynamically allocate a PublicationInstance object and add to
@@ -154,10 +157,8 @@ namespace OpenDDS
        *        datawriter as part of the control message.
        */
       ::DDS::ReturnCode_t
-      register_instance (
-			 ::DDS::InstanceHandle_t&  instance_handle,
-			 DataSample*&              registered_sample
-			 );
+      register_instance (::DDS::InstanceHandle_t&  instance_handle,
+			 DataSample*&              registered_sample);
 
       /**
        * Remove the provided instance from the instances_ list.
@@ -266,7 +267,7 @@ namespace OpenDDS
        * waiting.
        * For the non-blocking write case, it asks the transport to drop
        * the oldest sample.
-      */
+       */
       ::DDS::ReturnCode_t obtain_buffer (
         DataSampleListElement*& element,
         ::DDS::InstanceHandle_t handle,
@@ -281,13 +282,21 @@ namespace OpenDDS
       void release_buffer (DataSampleListElement* element);
 
       /**
-      * Unregister all instances managed by this data containers.
-      */
+       * Unregister all instances managed by this data containers.
+       */
       void unregister_all (DataWriterImpl* writer);
 
-//remove document this!
+      /**
+       * @todo remove/document this!
+       */
       PublicationInstance* get_handle_instance (
           ::DDS::InstanceHandle_t handle);
+
+
+      /**
+       * Copy sent data to data DURABILITY cache.
+       */
+      bool persist_data ();
 
     private:
 
@@ -299,8 +308,9 @@ namespace OpenDDS
       // --------------------------
 
       void copy_and_append (DataSampleList& list, 
-                            const DataSampleList& appended, 
-                            const OpenDDS::DCPS::ReaderIdSeq& rds);
+                            DataSampleList const & appended, 
+                            OpenDDS::DCPS::ReaderIdSeq const & rds,
+                            ::DDS::LifespanQosPolicy const & lifespan);
 
       /**
        * Remove the oldest sample (head) from the instance history list.
@@ -323,12 +333,6 @@ namespace OpenDDS
        * to ensure that the handle is unique for the container.
        */
       ::DDS::InstanceHandle_t get_next_handle ();
-
-      /// Flush data durability cache.
-      bool send_durable_data (char const * topic_name,
-                              char const * type_name,
-                              DataWriterImpl * data_writer,
-                              ::DDS::LifespanQosPolicy const & lifespan);
 
     private:
 
@@ -414,6 +418,9 @@ namespace OpenDDS
 
       /// The instance handle for the next new instance.
       ::DDS::InstanceHandle_t next_handle_;
+
+      /// Domain ID.
+      ::DDS::DomainId_t const domain_id_;
 
       /// Topic name.
       char const * const topic_name_;

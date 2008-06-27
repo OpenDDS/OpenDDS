@@ -685,11 +685,15 @@ PersistenceUpdater::updateQos(const ItemType& itemType,
 void
 PersistenceUpdater::get_bin_seq (const ::QosSeq& qos, BinSeq & binSeq)
 {
-  //Re-allocate qos memory by the allocator.
+  // Free the old qos data.
+  allocator_->free (binSeq.second);
+
+  //Re-allocate new qos memory by the allocator.
   void* out_buf;
   ACE_ALLOCATOR (out_buf, allocator_->malloc (qos.second.first));
   ACE_OS::memcpy (out_buf, qos.second.second, qos.second.first);
 
+  //replace the old qos.
   binSeq.first = qos.second.first;
   binSeq.second = static_cast<char*>(out_buf);
 }

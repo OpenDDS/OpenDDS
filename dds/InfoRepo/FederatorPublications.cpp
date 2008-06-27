@@ -46,54 +46,20 @@ Publications::initialize(
   writerQos.reliability.max_blocking_time.sec        = 0;
   writerQos.reliability.max_blocking_time.nanosec    = 0;
 
-  // Create the LinkState Topic
-  ::DDS::Topic_var topic
-    = this->participant_->create_topic(
-        LINKSTATETOPICNAME,
-        LINKSTATETYPENAME,
-        TOPIC_QOS_DEFAULT,
-        ::DDS::TopicListener::_nil()
-      );
-
-  // Create the LinkState publication
-  ::DDS::DataWriter_var writer
-    = this->publisher_->create_datawriter(
-        topic.in(),
-        writerQos,
-        ::DDS::DataWriterListener::_nil()
-      );
-  if( CORBA::is_nil( writer.in()) ) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Publications::initialize() - ")
-        ACE_TEXT("create_datawriter() for topic %s failed.\n"),
-        LINKSTATETOPICNAME
-      ));
-      throw Unavailable();
-  }
-  this->linkWriter_ = LinkStateDataWriter::_narrow( writer.in());
-  if( CORBA::is_nil( this->linkWriter_)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Publications::initialize() - ")
-        ACE_TEXT("failed to narrow writer for topic %s.\n"),
-        LINKSTATETOPICNAME
-      ));
-      throw Unavailable();
-  }
-
   // Create the ParticipantUpdate Topic
-  topic = this->participant_->create_topic(
-            PARTICIPANTUPDATETOPICNAME,
-            PARTICIPANTUPDATETYPENAME,
-            TOPIC_QOS_DEFAULT,
-            ::DDS::TopicListener::_nil()
-          );
+  ::DDS::Topic_var topic = this->participant_->create_topic(
+                             PARTICIPANTUPDATETOPICNAME,
+                             PARTICIPANTUPDATETYPENAME,
+                             TOPIC_QOS_DEFAULT,
+                             ::DDS::TopicListener::_nil()
+                           );
 
   // Create the ParticipantUpdate publication
-  writer = this->publisher_->create_datawriter(
-        topic.in(),
-        writerQos,
-        ::DDS::DataWriterListener::_nil()
-      );
+  ::DDS::DataWriter_var writer = this->publisher_->create_datawriter(
+                                   topic.in(),
+                                   writerQos,
+                                   ::DDS::DataWriterListener::_nil()
+                                 );
   if( CORBA::is_nil( writer.in()) ) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Publications::initialize() - ")

@@ -16,9 +16,9 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo2TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3TypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"
@@ -27,7 +27,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-static const char * writer_address_str = "";
+static const char * writer_address_str = "localhost:0";
 static int writer_address_given = 0;
 
 static int topics = 0 ;
@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {

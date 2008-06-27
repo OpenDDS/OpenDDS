@@ -70,7 +70,8 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
+$svc_config = ($use_svc_config && $app_bit_conf eq '')
+    ? " -ORBSvcConf ../../tcp.conf " : '';
 $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p $num_writers"
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
@@ -110,13 +111,15 @@ $Publisher->Spawn ();
 
 $Subscriber->Spawn ();
 
-$PublisherResult = $Publisher->WaitKill (1200);
+$wait_to_kill = 200;
+$PublisherResult = $Publisher->WaitKill ($wait_to_kill);
 
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
-$SubscriberResult = $Subscriber->WaitKill (1200);
+$SubscriberResult = $Subscriber->WaitKill ($wait_to_kill);
 
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";

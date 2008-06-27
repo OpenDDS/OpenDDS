@@ -11,17 +11,8 @@
 #include "federator_export.h"
 #include "dds/DCPS/PublisherImpl.h"
 
-#include "LinkStateTypeSupportC.h"
-#include "LinkStateTypeSupportImpl.h"
-
-#include "ParticipantUpdateTypeSupportC.h"
-#include "ParticipantUpdateTypeSupportImpl.h"
-#include "TopicUpdateTypeSupportC.h"
-#include "TopicUpdateTypeSupportImpl.h"
-#include "SubscriptionUpdateTypeSupportC.h"
-#include "SubscriptionUpdateTypeSupportImpl.h"
-#include "PublicationUpdateTypeSupportC.h"
-#include "PublicationUpdateTypeSupportImpl.h"
+#include "FederatorTypeSupportC.h"
+#include "FederatorTypeSupportImpl.h"
 
 #include <string>
 
@@ -32,7 +23,7 @@ namespace OpenDDS { namespace Federator {
  *
  * @brief Manages the publications to Topics in a remote repository.
  *
- * This class manages the Update and LinkState Topic publications for
+ * This class manages the Update Topic publications for
  * data published to a remote repository.
  *
  * All managed publications are created in the local repository.  They
@@ -68,9 +59,6 @@ class OpenDDS_Federator_Export Publications  {
     // Keep the narrow-ed versions of the writers to avoid the need to
     // perform that operation each time we need to publish data.
     //
-
-    /// LinkState writer to the remote repository.
-    LinkStateDataWriter_var linkWriter_;
 
     /// ParticipantUpdate specific DataWriter.
     ParticipantUpdateDataWriter_var participantWriter_;

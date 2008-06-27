@@ -90,8 +90,6 @@ tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN
 tests/DCPS/ViewState/run_test.pl: !DCPS_MIN
 
-tests/DCPS/LinkState/run_test.pl: !DCPS_MIN
-
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 
 tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
@@ -103,8 +101,8 @@ tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/reliable_multicast/unittest: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
-performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
+performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
 # run with single-copy read (the default is zero-copy read)
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl 13 1 500: !DCPS_MIN
 performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl: !DCPS_MIN
@@ -114,16 +112,23 @@ performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl: !DCPS_MIN
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
-DevGuideExamples/DCPS/Messenger/run_test.pl default_reliable_mcast: !DCPS_MIN
+
+#These tests can't be run in an automated test run, since they are not
+#guaranteed to synchronize the start of publishing with the readiness of the
+#subscribing.  Adding separate synchronization code would unduly compilcate the
+#DevGuidExample, and FooTest5 should already cover these uses.
+#DevGuideExamples/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
+#DevGuideExamples/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
+#DevGuideExamples/DCPS/Messenger/run_test.pl mcast: !DCPS_MIN
+#DevGuideExamples/DCPS/Messenger/run_test.pl default_mcast: !DCPS_MIN
+#DevGuideExamples/DCPS/Messenger/run_test.pl reliable_mcast: !DCPS_MIN
+#DevGuideExamples/DCPS/Messenger/run_test.pl default_reliable_mcast: !DCPS_MIN
+
 DevGuideExamples/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN
+DevGuideExamples/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO
 
@@ -131,3 +136,8 @@ tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl LivelinessCompatibility: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN
+tests/DCPS/Partition/run_test.pl: !DCPS_MIN
+tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
+tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
+tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN
+tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN

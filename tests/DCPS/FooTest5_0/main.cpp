@@ -17,7 +17,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.h"
@@ -31,8 +31,8 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-std::string reader_address_str; // = "localhost:16701";
-std::string writer_address_str; // = "localhost:29803";
+std::string reader_address_str = "localhost:0";
+std::string writer_address_str = "localhost:0";
 int reader_address_given = 0;
 int writer_address_given = 0;
 
@@ -418,7 +418,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -432,7 +432,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -492,7 +492,7 @@ int main (int argc, char *argv[])
       }
 
       ::Xyz::FooDataWriterImpl* fast_dw
-        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataWriterImpl>(foo_dw.in());
+        = dynamic_cast<Xyz::FooDataWriterImpl*>(foo_dw.in());
 
       ::Xyz::FooDataReader_var foo_dr
         = ::Xyz::FooDataReader::_narrow(dr.in ());
@@ -504,7 +504,7 @@ int main (int argc, char *argv[])
       }
 
       ::Xyz::FooDataReaderImpl* fast_dr
-        = OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl>(foo_dr.in());
+        = dynamic_cast<Xyz::FooDataReaderImpl*>(foo_dr.in());
 
 
       // wait for association establishement before writing.
@@ -521,7 +521,7 @@ int main (int argc, char *argv[])
       for (CORBA::ULong ii =0; ii < incomp->policies.length (); ii++)
         {
           if (incomp->policies[ii].policy_id
-                        == ::DDS::TRANSPORTTYPE_QOS_POLICY_ID)
+                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
             incompatible_transport_found = 1;
         }
 
@@ -644,6 +644,9 @@ cleanup:
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      reader_transport_impl = 0;
+      writer_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -660,10 +663,5 @@ cleanup:
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_transport_impl = 0;
-  writer_transport_impl = 0;
   return test_failed;
 }

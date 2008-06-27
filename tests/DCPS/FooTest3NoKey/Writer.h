@@ -7,7 +7,7 @@
 #include "InstanceDataMap.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "tests/DCPS/FooType3NoKey/FooDefC.h"
-#include "tests/DCPS/FooType3NoKey/FooTypeSupportC.h"
+#include "tests/DCPS/FooType3NoKey/FooDefTypeSupportC.h"
 #include "ace/Task.h"
 
 

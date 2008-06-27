@@ -1,10 +1,10 @@
-// -*- C++ -*-
-//
 // $Id$
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
+#include "DataDurabilityCache.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
@@ -16,6 +16,7 @@
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
+#include "ace/Auto_Ptr.h"
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -67,7 +68,9 @@ namespace OpenDDS
                     true
 #endif
                     ),
-      bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC)
+      bit_lookup_duration_msec_ (BIT_LOOKUP_DURATION_MSEC),
+      transient_data_cache_ (),
+      persistent_data_cache_ ()
     {
       this->set_repo_domain( ANY_DOMAIN, DEFAULT_REPO);
       initialize();
@@ -134,7 +137,8 @@ namespace OpenDDS
     int
     Service_Participant::set_ORB (CORBA::ORB_ptr orb)
     {
-      // The orb is already created by the get_domain_participant_factory() call.
+      // The orb is already created by the
+      // get_domain_participant_factory() call.
       ACE_ASSERT (CORBA::is_nil (orb_.in ()));
       // The provided orb should not be nil.
       ACE_ASSERT (! CORBA::is_nil (orb));
@@ -159,7 +163,8 @@ namespace OpenDDS
     {
       if (CORBA::is_nil (root_poa_.in ()))
         {
-          CORBA::Object_var obj = orb_->resolve_initial_references( "RootPOA" );
+          CORBA::Object_var obj =
+            orb_->resolve_initial_references( "RootPOA" );
           root_poa_ = PortableServer::POA::_narrow( obj.in() );
         }
       return PortableServer::POA::_duplicate (root_poa_.in ());
@@ -177,8 +182,9 @@ namespace OpenDDS
               orb_->shutdown (0);
               this->wait ();
             }
-        // Don't delete the participants - require the client code to delete participants
-        #if 0
+          // Don't delete the participants - require the client code
+          // to delete participants 
+#if 0
           //TBD return error code from this call
           // -- non-empty entity will make this call return failure
           if (dp_factory_impl_->delete_contained_participants () != ::DDS::RETCODE_OK)
@@ -187,7 +193,7 @@ namespace OpenDDS
                           ACE_TEXT ("(%P|%t) ERROR: Service_Participant::shutdown, ")
                           ACE_TEXT ("delete_contained_participants failed.\n")));
             }
-        #endif
+#endif
 
           if (! orb_from_user_)
             {
@@ -248,14 +254,17 @@ namespace OpenDDS
                     }
                   else
                     {
-                      // Load configuration only if the configuration file exists.
-                      FILE* in = ACE_OS::fopen (config_fname.c_str(), ACE_LIB_TEXT ("r"));
+                      // Load configuration only if the configuration
+                      // file exists.
+                      FILE* in = ACE_OS::fopen (config_fname.c_str(),
+                                                ACE_LIB_TEXT ("r"));
                       if (!in)
                         {
                           ACE_DEBUG ((LM_INFO,
                                       ACE_TEXT("(%P|%t)INFO: not using file configuration - "
-                                      "can not open \"%s\" for reading. %p\n"),
-                                      config_fname.c_str(), ACE_TEXT("fopen")));
+                                               "can not open \"%s\" for reading. %p\n"),
+                                      config_fname.c_str(),
+                                      ACE_TEXT("fopen")));
                         }
                       else
                         {
@@ -289,7 +298,7 @@ namespace OpenDDS
                                   DomainParticipantFactoryImpl (),
                                   ::DDS::DomainParticipantFactory::_nil ());
 
-                  dp_factory_ = servant_to_reference (dp_factory_servant_);
+                  dp_factory_ = dp_factory_servant_;
 
                   // Give ownership to poa.
                   //REMOVE SHH ???? dp_factory_servant_->_remove_ref ();
@@ -1172,6 +1181,52 @@ namespace OpenDDS
       return 0;
     }
 
+    DataDurabilityCache *
+    Service_Participant::get_data_durability_cache (
+      ::DDS::DurabilityQosPolicy const & durability)
+    {
+      ::DDS::DurabilityQosPolicyKind const kind =
+        durability.kind;
+
+      DataDurabilityCache * cache = 0;
+
+      if (kind == ::DDS::TRANSIENT_DURABILITY_QOS)
+      {
+        {
+          ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                            guard,
+                            this->factory_lock_,
+                            0);
+
+          if (this->transient_data_cache_.get () == 0)
+          {
+            ACE_auto_ptr_reset (this->transient_data_cache_,
+                                new DataDurabilityCache (kind));
+          }
+        }
+
+        cache = this->transient_data_cache_.get ();
+      }
+      else if (kind == ::DDS::PERSISTENT_DURABILITY_QOS)
+      {
+        {
+          ACE_GUARD_RETURN (TAO_SYNCH_MUTEX,
+                            guard,
+                            this->factory_lock_,
+                            0);
+
+          if (this->persistent_data_cache_.get () == 0)
+          {
+            ACE_auto_ptr_reset (this->persistent_data_cache_,
+                                new DataDurabilityCache (kind));
+          }
+        }
+
+        cache = this->persistent_data_cache_.get ();
+      }
+     
+      return cache;
+    }
 
   } // namespace DCPS
 } // namespace OpenDDS

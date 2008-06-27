@@ -1,5 +1,3 @@
-// -*- C++ -*-
-//
 // $Id$
 
 
@@ -14,6 +12,7 @@
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
+#include "OfferedDeadlineWatchdog.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -23,6 +22,8 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
+#include "ace/Auto_Ptr.h"
+
 
 namespace OpenDDS
 {
@@ -63,6 +64,8 @@ DataWriterImpl::DataWriterImpl (void)
     reactor_ (0),
     liveliness_check_interval_ (ACE_Time_Value::zero),
     last_liveliness_activity_time_ (ACE_Time_Value::zero),
+    last_deadline_missed_total_count_ (0),
+    watchdog_ (),
     cancel_timer_ (false),
     is_bit_ (false),
     initialized_ (false)
@@ -91,7 +94,7 @@ DataWriterImpl::~DataWriterImpl (void)
   DBG_ENTRY_LVL ("DataWriterImpl","~DataWriterImpl",6);
 
   if (initialized_)
-    {
+  {
     delete data_container_;
     delete mb_allocator_;
     delete db_allocator_;
@@ -123,16 +126,16 @@ DataWriterImpl::cleanup ()
 }
 
 void
-DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
-           TopicImpl                             *topic_servant,
-           const ::DDS::DataWriterQos &           qos,
-           ::DDS::DataWriterListener_ptr          a_listener,
-           OpenDDS::DCPS::DomainParticipantImpl*      participant_servant,
-           OpenDDS::DCPS::PublisherImpl*              publisher_servant,
-           ::DDS::DataWriter_ptr                  dw_local,
-           OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote
-           )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::init (
+    ::DDS::Topic_ptr                       topic,
+    TopicImpl *                            topic_servant,
+    const ::DDS::DataWriterQos &           qos,
+    ::DDS::DataWriterListener_ptr          a_listener,
+    OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
+    OpenDDS::DCPS::PublisherImpl *         publisher_servant,
+    ::DDS::DataWriter_ptr                  dw_local,
+    OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL ("DataWriterImpl","init",6);
   topic_objref_ = ::DDS::Topic::_duplicate (topic);
@@ -155,18 +158,23 @@ DataWriterImpl::init ( ::DDS::Topic_ptr                       topic,
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
 
   if (! CORBA::is_nil (listener_.in()))
-  {
-    fast_listener_ =
-      reference_to_servant<DDS::DataWriterListener> (listener_.in());
-  }
-  // only store the participant pointer, since it is our "grand" parent, we will exist as long as it does
+    {
+      fast_listener_ = listener_.in();
+    }
+
+  // Only store the participant pointer, since it is our "grand"
+  // parent, we will exist as long as it does.
   participant_servant_ = participant_servant;
   domain_id_ = participant_servant_->get_domain_id ();
 
-  // only store the publisher pointer, since it is our parent, we will exist as long as it does
+  // Only store the publisher pointer, since it is our parent, we will
+  // exist as long as it does.
   publisher_servant_ = publisher_servant;
   dw_local_objref_   = ::DDS::DataWriter::_duplicate (dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate (dw_remote);
+
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+  this->reactor_ = orb->orb_core()->reactor();
 
   initialized_ = true;
 }
@@ -198,6 +206,21 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
     publication_id_ = yourId;
   }
 
+  {
+    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    // Add to pending_readers_ 
+
+    CORBA::ULong len = readers.length();
+
+    for (CORBA::ULong i = 0; i < len; ++i)
+    {
+      if (OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::add_associations insert %d to pending failed\n",
+          readers[i].readerId));
+      }
+    }
+  }
 
   {
     // I am not sure this guard is necessary for
@@ -225,24 +248,42 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       "bit %d local %d remote %d num remotes %d\n", is_bit_, myid, remote_associations[0].remote_id_, num_remote_associations));
   }
 
+  CORBA::ULong len = 0;
+  ReaderIdSeq rd_ids;
+
   {
     // protect readers_
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    CORBA::ULong readers_old_length = readers_.length();
-    readers_.length(readers_old_length + num_remote_associations);
-    for (CORBA::ULong reader_cnt = 0; reader_cnt < num_remote_associations; reader_cnt++)
+
+    for (CORBA::ULong i = 0; i < num_remote_associations; ++i)
     {
-      readers_[reader_cnt+readers_old_length] = remote_associations[reader_cnt].remote_id_;
+      // If the reader is not in pending association list, which indicates it's already
+      // removed by remove_association. In other words, the remove_association()  
+      // is called before fully_associated() call.
+      if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
+      {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
+            "reader %d is not in pending list because remove_association is already called \n",
+            remote_associations[i].remote_id_));
+        continue;
+      }
+      
+      // The reader is in the pending reader, now add it to fully associated reader
+      // list.
+      ++len;
+      rd_ids.length (len);
+      rd_ids[len - 1] = remote_associations[i].remote_id_;
+      
+      if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::fully_associated insert %d from pending failed\n",
+          remote_associations[i].remote_id_));
+      }
     }
   }
 
-  ReaderIdSeq rd_ids;
-  rd_ids.length (num_remote_associations);
-
-  for (CORBA::ULong i = 0; i < num_remote_associations; ++i)
-  {
-    rd_ids[i] = remote_associations[i].remote_id_;
-  }
+  if (len == 0)
+    return;
 
   if (! is_bit_)
   {
@@ -279,27 +320,29 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       }
 
       set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
-
-      ::DDS::DataWriterListener* listener =
-          listener_for (::DDS::PUBLICATION_MATCH_STATUS);
-
-      if (listener != 0)
-      {
-        listener->on_publication_match (dw_local_objref_.in (),
-          publication_match_status_);
-
-        // TBD - why does the spec say to change this but not
-        // change the ChangeFlagStatus after a listener call?
-        publication_match_status_.total_count_change = 0;
-      }
-
-      delete [] remote_associations;
     }
+
+    ::DDS::DataWriterListener* listener =
+        listener_for (::DDS::PUBLICATION_MATCH_STATUS);
+
+    if (listener != 0)
+    {
+      listener->on_publication_match (dw_local_objref_.in (),
+        publication_match_status_);
+
+      // TBD - why does the spec say to change this but not
+      // change the ChangeFlagStatus after a listener call?
+      publication_match_status_.total_count_change = 0;
+    }
+
+    delete [] remote_associations;
   }
 
   // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using
   // TheTransientKludge.
-  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS)
+  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS
+      || this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
+      || this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS)
   //if (TheTransientKludge->is_enabled ())
   {
     // The above condition is only true for the DCPSInfo Server.
@@ -323,23 +366,24 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     // DURABILITY.kind=TRANSIENT_LOCAL
     // It suffers from resending the history to every subscription.
 
-      // Tell the WriteDataContainer to resend all sending/sent
-      // samples.
-      this->data_container_->reenqueue_all (rd_ids);
+    // Tell the WriteDataContainer to resend all sending/sent
+    // samples.
+    this->data_container_->reenqueue_all (rd_ids,
+                                          this->qos_.lifespan);
 
-      // Acquire the data writer container lock to avoid deadlock. The thread
-      // calling fully_associated() has to acquire lock in the same order as 
-      // the write()/register() operation. 
+    // Acquire the data writer container lock to avoid deadlock. The
+    // thread calling fully_associated() has to acquire lock in the
+    // same order as the write()/register() operation.
 
-      // Since the thread calling fully_associated() is the reactor thread, it
-      // may have some performance penalty. If the performance is an issue, 
-      // we may need a new thread to handle the data_availble() calls. 
-      ACE_GUARD (ACE_Recursive_Thread_Mutex,
-        guard,
-        this->get_lock());
-
-      this->publisher_servant_->data_available(this, true) ;
-    }
+    // Since the thread calling fully_associated() is the reactor
+    // thread, it may have some performance penalty. If the
+    // performance is an issue, we may need a new thread to handle the
+    // data_availble() calls.
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+               guard,
+               this->get_lock());
+    this->publisher_servant_->data_available(this, true);
+  }
 }
 
 
@@ -354,42 +398,57 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
   }
 
-  CORBA::ULong num_removed_readers = readers.length();
+  ReaderIdSeq fully_associated_readers;
+  CORBA::ULong fully_associated_len = 0;
+  ReaderIdSeq rds;
+  CORBA::ULong rds_len = 0;
+  ::DDS::InstanceHandleSeq handles;
+
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    CORBA::ULong num_orig_readers = readers_.length();
+    //Remove the readers from fully associated reader list. 
+    //If the supplied reader is not in the cached reader list then it is 
+    //already removed. We just need remove the readers in the list that have
+    //not been removed.
 
-    for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; ++rm_idx)
+    CORBA::ULong len = readers.length();
+    for (CORBA::ULong i = 0; i < len; ++i)
     {
-      for (CORBA::ULong orig_idx = 0;
-           orig_idx < num_orig_readers;
-           ++orig_idx)
+      //Remove the readers from fully associated reader list. If it's not
+      //in there, the fully_associated() is not called yet and remove it
+      //from pending list.
+
+      if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
       {
-        if (readers_[orig_idx] == readers[rm_idx])
-        {
-          // move last element to this position.
-          if (orig_idx < num_orig_readers - 1)
-          {
-            readers_[orig_idx] = readers_[num_orig_readers - 1];
-          }
-          --num_orig_readers;
-          readers_.length (num_orig_readers);
-          break;
-        }
+        ++ fully_associated_len;
+        fully_associated_readers.length (fully_associated_len);
+        fully_associated_readers [fully_associated_len - 1] = readers[i]; 
+
+        ++ rds_len;
+        rds.length (rds_len);
+        rds [rds_len - 1] = readers[i];         
       }
+      else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
+      {
+        ++ rds_len;
+        rds.length (rds_len);
+        rds [rds_len - 1] = readers[i]; 
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
+          "remove reader %d before fully_associated() call\n", readers[i]));
+      }
+      //else reader is already removed which indicates remove_association()
+      //is called multiple times.
     }
-
-    if (! is_bit_)
+  
+    if (fully_associated_len > 0 && ! is_bit_)
     {
-      ::DDS::InstanceHandleSeq handles;
-
       // The reader should be in the id_to_handle map at this time so
       // log with error.
-      if (this->cache_lookup_instance_handles (readers, handles) == false)
+      if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)DataWriterImpl::remove_associations "
-          "cache_lookup_instance_handles failed\n"));
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations "
+          "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
         return;
       }
 
@@ -398,8 +457,8 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       for (CORBA::ULong rd_index = 0; rd_index < rd_len; ++rd_index)
       {
         for (CORBA::ULong subed_index = 0;
-             subed_index < subed_len;
-             ++subed_index)
+              subed_index < subed_len;
+              ++subed_index)
         {
           if (subscription_handles_[subed_index] == handles[rd_index])
           {
@@ -415,24 +474,29 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
           }
         }
       }
-    }
-
-    for (CORBA::ULong i = 0; i < num_removed_readers; ++i)
-    {
-      id_to_handle_map_.erase(readers[i]);
+      
+      for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
+      {
+        id_to_handle_map_.erase(fully_associated_readers[i]);
+      }
     }
   }
 
-  this->publisher_servant_->remove_associations (readers,
-                                                 this->publication_id_);
+  if (rds_len > 0)
+  {
+    this->publisher_servant_->remove_associations (rds,
+      this->publication_id_);
+  }
+
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
   // subscription lost.
-  if (notify_lost)
+  if (notify_lost && handles.length () > 0)
   {
-    this->notify_publication_lost (readers);
+    this->notify_publication_lost (handles);
   }
 }
+
 
 
 void DataWriterImpl::remove_all_associations ()
@@ -440,12 +504,14 @@ void DataWriterImpl::remove_all_associations ()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
 
-  CORBA::ULong size = readers_.length();
+  CORBA::ULong size = readers_.size();
   readers.length(size);
-
-  for (CORBA::ULong i = 0; i < size; ++i)
+ 
+  IdSet::iterator itEnd = readers_.end ();
+  int i = 0;
+  for (IdSet::iterator it = readers_.begin (); it != itEnd; ++it)
   {
-    readers[i] = readers_[i];
+     readers[i ++] = *it;
   }
 
   try
@@ -511,17 +577,15 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
         }
         else
         {
-          qos_ = qos;
-
           try
           {
             DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
             ::DDS::PublisherQos publisherQos;
             this->publisher_servant_->get_qos(publisherQos);
-            repo->update_publication_qos(this->participant_servant_->get_domain_id(), 
-                                         this->participant_servant_->get_id(), 
-                                         this->publication_id_, 
-                                         this->qos_,
+            repo->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                         this->participant_servant_->get_id(),
+                                         this->publication_id_,
+                                         qos,
                                          publisherQos);
           }
           catch (const CORBA::SystemException& sysex)
@@ -540,13 +604,29 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
           }
         }
       }
-      else
-        qos_ = qos;
+
+      // Reset the deadline timer if the period has changed.
+      if (qos_.deadline.period.sec != qos.deadline.period.sec
+          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
+
+      qos_ = qos;
 
       return ::DDS::RETCODE_OK;
     }
     if (! (qos_ == qos))
     {
+      // Reset the deadline timer if the period has changed.
+      if (qos_.deadline.period.sec != qos.deadline.period.sec
+          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
+
       qos_ = qos;
       // TBD - when there are changable QoS supported
       //       this code may need to do something
@@ -579,8 +659,7 @@ DataWriterImpl::set_listener ( ::DDS::DataWriterListener_ptr a_listener,
   listener_mask_ = mask;
   //note: OK to duplicate  and reference_to_servant a nil object ref
   listener_ = ::DDS::DataWriterListener::_duplicate(a_listener);
-  fast_listener_ =
-    reference_to_servant<DDS::DataWriterListener> (listener_.in ());
+  fast_listener_ = listener_.in ();
   return ::DDS::RETCODE_OK;
 }
 
@@ -627,9 +706,23 @@ DataWriterImpl::get_offered_deadline_missed_status ()
                     guard,
                     this->lock_,
                     ::DDS::OfferedDeadlineMissedStatus ());
+
   set_status_changed_flag (::DDS::OFFERED_DEADLINE_MISSED_STATUS, false);
-  ::DDS::OfferedDeadlineMissedStatus status = offered_deadline_missed_status_;
-  offered_deadline_missed_status_.total_count_change = 0;
+
+  this->offered_deadline_missed_status_.last_instance_handle =
+    ::DDS::HANDLE_NIL;
+
+  this->offered_deadline_missed_status_.total_count_change =
+    this->offered_deadline_missed_status_.total_count
+    - this->last_deadline_missed_total_count_;
+
+  // Update for next status check.
+  this->last_deadline_missed_total_count_ =
+    this->offered_deadline_missed_status_.total_count;
+
+  ::DDS::OfferedDeadlineMissedStatus const status =
+      offered_deadline_missed_status_;
+
   return status;
 }
 
@@ -762,8 +855,8 @@ DataWriterImpl::enable ()
   ACE_Time_Value max_blocking_time = ACE_Time_Value::zero;
   if (should_block)
   {
-    max_blocking_time.sec (qos_.reliability.max_blocking_time.sec);
-    max_blocking_time.usec(qos_.reliability.max_blocking_time.nanosec/1000);
+    max_blocking_time =
+      duration_to_time_value (qos_.reliability.max_blocking_time);
   }
 
   CORBA::Long const depth =
@@ -781,10 +874,10 @@ DataWriterImpl::enable ()
   // enable the type specific part of this DataWriter
   this->enable_specific ();
 
-  // Create data durability cache if DataWriter QoS requires durable
+  // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
-    publisher_servant_->get_data_durability_cache (qos_.durability);
+    TheServiceParticipant->get_data_durability_cache (qos_.durability);
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
@@ -792,6 +885,7 @@ DataWriterImpl::enable ()
                                             should_block,
                                             max_blocking_time,
                                             n_chunks_,
+                                            domain_id_,
                                             get_topic_name (),
                                             get_type_name (),
                                             durability_cache,
@@ -831,16 +925,13 @@ DataWriterImpl::enable ()
     liveliness_check_interval_ *=
       TheServiceParticipant->liveliness_factor ()/100.0;
 
-    CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
-    reactor_ = orb->orb_core()->reactor();
-
     if (reactor_->schedule_timer(this,
                                  0,
                                  liveliness_check_interval_,
                                  liveliness_check_interval_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::init, ")
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
                   ACE_TEXT(" %p. \n"), "schedule_timer"));
     }
     else
@@ -850,27 +941,64 @@ DataWriterImpl::enable ()
     }
   }
 
+  // Setup the offered deadline watchdog if the configured deadline
+  // period is not the default (infinite).
+  ::DDS::Duration_t const deadline_period = this->qos_.deadline.period;
+  if (deadline_period.sec != ::DDS::DURATION_INFINITY_SEC
+      || deadline_period.nanosec != ::DDS::DURATION_INFINITY_NSEC)
+  {
+    ACE_auto_ptr_reset (this->watchdog_,
+                        new OfferedDeadlineWatchdog (
+                          this->reactor_,
+                          this->lock_,
+                          this->qos_.deadline,
+                          this,
+                          this->dw_local_objref_.in (),
+                          this->offered_deadline_missed_status_,
+                          this->last_deadline_missed_total_count_));
+  }
+
   this->set_enabled ();
 
-  return publisher_servant_->writer_enabled (
-               dw_remote_objref_.in(),
-               dw_local_objref_.in (),
-               topic_name_.in (),
-               topic_id_);
+  ::DDS::ReturnCode_t const writer_enabled_result =
+      publisher_servant_->writer_enabled (dw_remote_objref_.in(),
+                                          dw_local_objref_.in (),
+                                          topic_name_.in (),
+                                          topic_id_);
+
+  // Move cached data from the durability cache to the unsent data
+  // queue.
+  if (durability_cache != 0)
+  {
+    if (!durability_cache->get_data (this->domain_id_,
+                                     get_topic_name (),
+                                     get_type_name (),
+                                     this,
+                                     this->mb_allocator_,
+                                     this->db_allocator_,
+                                     this->qos_.lifespan))
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+                  ACE_TEXT("unable to retrieve durable data\n")));
+    }
+  }
+
+  return writer_enabled_result;
 }
 
 ::DDS::StatusKindMask
-DataWriterImpl::get_status_changes ( )
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::get_status_changes ()
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
   return EntityImpl::get_status_changes ();
 }
 
 ::DDS::ReturnCode_t
-DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
-                                   DataSample* data,
-                                   const ::DDS::Time_t & source_timestamp)
+DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
+                                  DataSample* data,
+                                  const ::DDS::Time_t & source_timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance",6);
@@ -888,7 +1016,7 @@ DataWriterImpl::register_instance( ::DDS::InstanceHandle_t& handle,
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) DataWriterImpl::register_instance, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance, ")
                        ACE_TEXT("register instance with container failed.\n")),
                       ret);
   }
@@ -978,10 +1106,10 @@ DataWriterImpl::unregister ( ::DDS::InstanceHandle_t handle,
 }
 
 ::DDS::ReturnCode_t
-DataWriterImpl::write ( DataSample* data,
-                        ::DDS::InstanceHandle_t handle,
-                        const ::DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC (( CORBA::SystemException ))
+DataWriterImpl::write (DataSample* data,
+                       ::DDS::InstanceHandle_t handle,
+                       const ::DDS::Time_t & source_timestamp)
+  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
   if (enabled_ == false)
@@ -1017,6 +1145,9 @@ DataWriterImpl::write ( DataSample* data,
     return ret;
   }
 
+  element->source_timestamp_.sec     = source_timestamp.sec;
+  element->source_timestamp_.nanosec = source_timestamp.nanosec;
+
   ret = this->data_container_->enqueue(element,
                                        handle);
 
@@ -1030,6 +1161,12 @@ DataWriterImpl::write ( DataSample* data,
   }
 
   last_liveliness_activity_time_ = ACE_OS::gettimeofday ();
+
+  // "Pet the dog" so that it doesn't callback on the listener the
+  // next time deadline timer expires.
+  if (this->watchdog_.get ())
+    this->watchdog_->signal ();
+
   return this->publisher_servant_->data_available(this);
 }
 
@@ -1481,7 +1618,7 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
                                                status.subscription_handles) == false)
       {
         ACE_ERROR ((LM_ERROR,
-                    "(%P|%t)DataWriterImpl::"
+                    "(%P|%t)ERROR: DataWriterImpl::"
                     "notify_publication_reconnected "
                     "cache_lookup_instance_handles failed\n"));
       }
@@ -1515,6 +1652,35 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
                                            status.subscription_handles);
       the_listener->on_publication_lost (this->dw_local_objref_.in (),
       status);
+    }
+  }
+}
+
+
+void
+DataWriterImpl::notify_publication_lost (const ::DDS::InstanceHandleSeq& handles)
+{
+  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",6);
+  if (! is_bit_)
+  {
+    // Narrow to DDS::DCPS::DataWriterListener. If a
+    // DDS::DataWriterListener is given to this DataWriter then
+    // narrow() fails.
+    DataWriterListener_var the_listener =
+      DataWriterListener::_narrow (this->listener_.in ());
+
+    if (! CORBA::is_nil (the_listener.in ()))
+    {
+      PublicationLostStatus status;
+
+      CORBA::ULong len = handles.length ();
+      status.subscription_handles.length (len);
+      for (CORBA::ULong i = 0;i < len; ++ i)
+      {
+        status.subscription_handles[i] = handles[i];
+        the_listener->on_publication_lost (this->dw_local_objref_.in (),
+          status);
+      }
     }
   }
 }
@@ -1602,6 +1768,12 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
   }
 
   return ret;
+}
+
+bool
+DataWriterImpl::persist_data ()
+{
+  return this->data_container_->persist_data ();
 }
 
 

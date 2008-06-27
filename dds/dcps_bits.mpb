@@ -6,14 +6,11 @@ feature (built_in_topics) : dcps_ts_defaults, built_in_topic_support, taoidldefa
   dcps_ts_flags += --export OpenDDS_Dcps_Export --pch DCPS/DdsDcps_pch.h
 
   TypeSupport_Files {
-    DdsDcpsInfrastructure.idl >> ParticipantBuiltinTopicDataTypeSupport.idl ParticipantBuiltinTopicDataTypeSupportImpl.h ParticipantBuiltinTopicDataTypeSupportImpl.cpp PublicationBuiltinTopicDataTypeSupport.idl PublicationBuiltinTopicDataTypeSupportImpl.h PublicationBuiltinTopicDataTypeSupportImpl.cpp SubscriptionBuiltinTopicDataTypeSupport.idl SubscriptionBuiltinTopicDataTypeSupportImpl.h SubscriptionBuiltinTopicDataTypeSupportImpl.cpp TopicBuiltinTopicDataTypeSupport.idl TopicBuiltinTopicDataTypeSupportImpl.h TopicBuiltinTopicDataTypeSupportImpl.cpp
+    DdsDcpsInfrastructure.idl
   }
 
   Source_Files {
-    ParticipantBuiltinTopicDataTypeSupportImpl.cpp
-    PublicationBuiltinTopicDataTypeSupportImpl.cpp
-    SubscriptionBuiltinTopicDataTypeSupportImpl.cpp
-    TopicBuiltinTopicDataTypeSupportImpl.cpp
+    DdsDcpsInfrastructureTypeSupportImpl.cpp
   }
 
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
@@ -24,10 +21,7 @@ feature (built_in_topics) : dcps_ts_defaults, built_in_topic_support, taoidldefa
   }
 
   IDL_Files {
-    ParticipantBuiltinTopicDataTypeSupport.idl
-    PublicationBuiltinTopicDataTypeSupport.idl
-    SubscriptionBuiltinTopicDataTypeSupport.idl
-    TopicBuiltinTopicDataTypeSupport.idl
+    DdsDcpsInfrastructureTypeSupport.idl
   }
 
 }

@@ -1,10 +1,61 @@
-Version 1.01 (??) of OpenDDS.
+Version 1.2 of OpenDDS.
 
 New to this version are the following changes:
 
-- New command-line option "-TransportDebugLevel".
+=========================================================================
 
-- Add the ability to attach to multiple DCPSInfoRepo processes.
+Version 1.1 of OpenDDS.
+
+New to this version are the following changes:
+
+- Added support for PARTITION QoS policy.
+
+  This QoS policy allows publishers and subscribers to belong to one
+  or more logical partitions.  Partition names may contain wildcards.
+  However, only wildcards containing "*" or "?" are currently
+  supported.
+
+- Added support for DEADLINE QoS policy.
+
+  The DEADLINE QoS policy allows the application to detect when data
+  is not written or read within a specified amount of time.  The
+  {Offered,Requested}DeadlineMissesStatus::last_instance_handle is
+  currently not updated.
+
+- Added support for LIFESPAN QoS policy.
+
+  This policy allows the application to specify when data expires,
+  meaning invalid.  Expired data will not be delivered to
+  subscribers.
+
+- Added support for the TRANSIENT kind of DURABILITY QoS policy.
+
+  Data will outlive DataWriters when TRANSIENT DURABILITY is
+  configured, and will be sent once a new DataWriter is created within
+  the same domain for the same topic and type.  The cached data will
+  only last as long as the process.
+
+- Added support for the PERSISTENT kind of DURABILITY QoS policy.
+
+  PERSISTENT DURABILITY provides basically the same functionality as
+  TRANSIENT DURABILITY, except that cached data will survive process
+  destruction.
+
+- Added support for the DURABILITY_SERVICE QoS policy.
+
+  This QoS policy provides a way to specify resource limits for
+  domain/topic/type-specific data in a TRANSIENT or PERSISTENT
+  DURABILITY cache.  The resource limits in question are analogous to,
+  although independent of, those found in the HISTORY and
+  RESOURCE_LIMITS policies.
+
+- Added a new command-line option, "-DCPSTransportDebugLevel".
+
+  This can be used to specify a debug level for the OpenDDS
+  transport layer at run-time. OpenDDS debug statements range
+  from 0 to 5 in increasing order of verbosity.
+
+- Added the ability to attach to multiple DCPSInfoRepo processes.
 
   Applications which communicate using DDS are no longer restricted to
   communicating using domains controlled by a single DCPSInfoRepo
@@ -13,7 +64,7 @@ New to this version are the following changes:
   controlled by a single repository and this association may not be
   changed for the lifetime of the repository or the application.
 
-- Add the qos propagation.
+- Added QoS propagation.
 
   The client applications can change the qos of DCPS entity via
   set_qos() call. The qos updates are propagated to DCPSInfoRepo which
@@ -31,16 +82,69 @@ New to this version are the following changes:
   fully copied to buffer when the qos contains sequence data. The
   TAO_OutputCDR stream needs be cosolidated before memcpy.
 
-- Fixed compliance with qos RxO
+- Fixed compliance with qos RxO.
 
   Fixed compliance with the DDS specification that qos parameters that
-  Durability kind and Deadline.duration be compatible between the 
+  Durability kind and Deadline.period be compatible between the
   subscriber and the publisher (RxO - Received x Offered)
 
-- Improved Memory Mangament
+- Improved Memory Mangament.
 
-  Fixed issue with reference counting for classes derived from 
-  LocalObject.
+  Fixed issues with reference counting for classes derived from
+  LocalObject.  If a user defined application is crashing on exit or
+  cleanup, see the OpenDDS FAQ.
+
+- Added support for IPv6.
+
+  The requirement for using IPv6 is the fully qualified domain name (FQDN)
+  needs be resolved as IPv6 address as it is used by default configuration
+  to support BuiltInTopic.
+
+  The local_address in the configuration file should use IPv6 decimal
+  address or hostname that can be resolved as IPv6 address.
+
+- Used the address string instead of 4-byte IP address and port number
+  for pub/sub endpoint address advertisement.
+
+  The address string in the configuration can use decimal IPv4/IPv6 address
+  or hostname that can be resolved on both pub and sub sides.
+
+  The default address string is "host:port". The "host" is the fully qualified
+  domain name and the "port" is picked randomly by OS.
+
+- Fixed a problem that the default local_address does not work when hostname
+  is resolved as the loopback ip address.
+
+  With the default local_address, the acceptor now is listening on IPv4/IPv6
+  ANY, but use the fully qualified hostname for address advertisement.
+
+- Added default configuration for the reliable multicast transport type.
+
+  The multicast_group_address defaults to the ACE default multicast address
+  (224.9.9.2:20001 for IPv4 and ff05:0::ff01:1:20001 for IPv6) and the
+  local_address defaults to ANY with a random port picked by the OS.
+
+- Fixed a bug in DataReaderImpl::remove_associations() and
+  DataWriterImpl::remove_associations() that should not attempt to remove
+  the already removed writer/reader.
+
+- Fixed a bug in SimpleTCP that an active disconnect due to the peer
+  graceful disconnect does not terminate send. This bug made the re-established
+  connection fail on send strategy state check.
+
+- Added dispose() and unregister() notifications.  When dispose()
+  is explicitly called on the DataWriter side, the DataReader listener
+  on_data_available() callback should receive a sample with the valid_data
+  flag == 0 and the instance state == NOT_ALIVE_DISPOSED_INSTANCE_STATE.
+
+  When unregister() is explicitly called on the DataWriter side,
+  the DataReader listener on_data_available() callback should receive a
+  sample with the valid_data flag == 0 and the instance state ==
+  NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.
+
+- Moved TRANSPORTTYPE_QOS_POLICY_NAME and TRANSPORTTYPE_QOS_POLICY_ID
+  from DDS namespace to OpenDDS namespace since they are specific to
+  OpenDDS.
 
 =========================================================================
 

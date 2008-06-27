@@ -16,7 +16,6 @@
 namespace OpenDDS { namespace Federator {
 
 class ManagerImpl;
-class LinkListener;
 class UpdateMarker;
 
 /**
@@ -24,7 +23,7 @@ class UpdateMarker;
  *
  * @brief Manages the subscriptions to Topics in a remote repository.
  *
- * This class manages the Update and LinkState Topic subscriptions for
+ * This class manages the Update Topic subscriptions for
  * data published in a remote repository.  An (stateless) UpdateListener
  * is created and installed into each subscription for the Topics:
  *
@@ -32,11 +31,6 @@ class UpdateMarker;
  *   TopicUpdate
  *   PublicationUpdate
  *   SubscriptionUpdate
- *
- * A LinkStateListener is created and installed into a subscription for
- * the Topic:
- *
- *   LinkState
  *
  * All managed subscriptions are created in the remote repository.  They
  * are also in the <remote> DDS domain.  The supplied subscriber is
@@ -81,9 +75,6 @@ class OpenDDS_Federator_Export Subscriptions  {
     /// Subscriber in the remote repository/domain.
     ::DDS::Subscriber_var subscriber_;
 
-    /// LinkState Topic reader.
-    ::DDS::DataReader_var linkReader_;
-
     //
     // By convention (but not required) the indices indicate:
     //
@@ -101,9 +92,6 @@ class OpenDDS_Federator_Export Subscriptions  {
     //   We need to keep these in order to be able to delete them
     //   after the RemoteLink destructor has already called
     //   delete_contained_entities - and deleted the readers.
-
-    /// LinkState servant.
-    LinkListener* linkListener_;
 
     /// Update servants.
     std::vector< UpdateMarker*> listeners_;

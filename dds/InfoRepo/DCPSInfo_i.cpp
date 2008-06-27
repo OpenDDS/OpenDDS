@@ -32,12 +32,6 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
 //  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 {
-  DCPS_IR_Domain_Map::ITERATOR iter = domains_.begin();
-  while(iter != domains_.end())
-  {
-    delete (*iter++).int_id_;
-
-  }
 }
 
 
@@ -356,7 +350,7 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                    pubId,
                    partPtr,
                    topic,
-                   publication,
+                   publication.in(),
                    qos,
                    transInfo,
                    publisherQos),
@@ -556,7 +550,7 @@ TAO_DDS_DCPSInfo_i::add_subscription (
                    subId,
                    partPtr,
                    topic,
-                   subscription,
+                   subscription.in(),
                    qos,
                    transInfo,
                    subscriberQos),
@@ -894,7 +888,7 @@ void TAO_DDS_DCPSInfo_i::update_publication_qos (
     {
       throw OpenDDS::DCPS::Invalid_Publication();
     }
-    
+
   SpecificQos qosType = pub->set_qos (qos, publisherQos);
 
   if (um_)
@@ -945,7 +939,7 @@ void TAO_DDS_DCPSInfo_i::update_subscription_qos (
     {
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
- 
+
   SpecificQos qosType = sub->set_qos (qos, subscriberQos);
 
   if (um_)
@@ -1008,7 +1002,7 @@ void TAO_DDS_DCPSInfo_i::update_topic_qos (
        um_->updateQos (Topic, topicId, topic_qos);
     }
 }
- 
+
 
 void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::DDS::DomainId_t domainId,
@@ -1257,21 +1251,21 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
 
 
 template <typename QosType, typename Qos>
-void 
+void
 TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq)
 {
   TAO_OutputCDR outCdr;
   outCdr << qos;
-  size_t len = outCdr.total_length();
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
   char *buf = new char[len];
   if (buf == 0) {
     ACE_ERROR ((LM_ERROR, "(%P|%t)TAO_DDS_DCPSInfo_i::get_qos_seq "
       "Allocation failed.\n"));
-    exit (1);
   }
 
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
   ACE_OS::memcpy (buf, dst.base(), len);
 
   qosSeq.first = qosType;

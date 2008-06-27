@@ -4,19 +4,21 @@
 #                  substituted when generating the output file:
 #
 #   <%TYPE%>           - Type requiring support in DDS.
-#   <%UPPERTYPE%>      - Uppercase version of <%TYPE%>
 #   <%MODULE%>         - Module containing the type.
 #   <%SCOPE%>          - Enclosing scope of type.
 #   <%PCHINCLUDE%>     - Including a PreCompiled Header file.
 #   <%NAMESPACESTART%> - Beginning of namespace.
 #   <%NAMESPACEEND%>   - End of namespace.
+#   <%COUNT%>          - The number of the current type (per idl file).
+#   <%IDLBASE%>        - The name of the idl file without the extension.
 #
 package DCPS::CPPTemplate;
 
 use warnings;
 use strict;
 
-sub contents { return <<'!EOT'
+sub header {
+  return << '!EOT'
 // -*- C++ -*-
 //
 // $Id$
@@ -35,18 +37,21 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/Util.h"
-#include "<%TYPE%>TypeSupportImpl.h"
+#include "<%IDLBASE%>TypeSupportImpl.h"
 
+!EOT
 
+}
+
+sub contents { return <<'!EOT'
 namespace
 {
   using ::OpenDDS::DCPS::DataReaderImpl;
 
-  typedef ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess SequenceType;
-
-  struct LoanerGuard
+  struct LoanerGuard<%COUNT%>
   {
-    LoanerGuard(SequenceType& seq, DataReaderImpl* dataReader)
+    LoanerGuard<%COUNT%>(::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess& seq,
+                 DataReaderImpl* dataReader)
       : seq_(seq)
       , dataReader_(dataReader)
       , set_(false)
@@ -54,12 +59,12 @@ namespace
 
     void set() { set_ = true; }
 
-    ~LoanerGuard()
+    ~LoanerGuard<%COUNT%>()
     {
       if(set_) seq_.set_loaner(dataReader_);
     }
 
-    SequenceType& seq_;
+    ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess& seq_;
     DataReaderImpl* dataReader_;
     bool set_;
   };
@@ -105,7 +110,7 @@ char *
 <%TYPE%>TypeSupportImpl::get_type_name ()
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
-  if (this->type_name_ == NULL)
+  if (this->type_name_.in () == 0)
     return CORBA::string_dup (this->_interface_repository_id());
   else
     return CORBA::string_dup (this->type_name_.in ());
@@ -121,7 +126,7 @@ char *
                  <%TYPE%>DataWriterImpl(),
                  ::DDS::DataWriter::_nil());
 
-    return writer_impl;
+  return writer_impl;
 }
 
 ::DDS::DataReader_ptr
@@ -733,7 +738,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   InstanceMap::iterator const the_end = instance_map_.end ();
   for (InstanceMap::iterator it = instance_map_.begin ();
@@ -766,8 +771,7 @@ DDS::ReturnCode_t
           {
             if (item->registered_data_ == 0)
             {
-              ::<%SCOPE%><%TYPE%> dummy;
-              received_data_p.assign_sample(count, dummy) ;
+              received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
             }
             else
             {
@@ -857,7 +861,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   InstanceMap::iterator const the_end = instance_map_.end ();
   for (InstanceMap::iterator it = instance_map_.begin ();
@@ -1165,7 +1169,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   OpenDDS::DCPS::SubscriptionInstance * ptr =
       this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle);
@@ -1188,8 +1192,7 @@ DDS::ReturnCode_t
         {
           if (item->registered_data_ == 0)
           {
-            ::<%SCOPE%><%TYPE%> dummy;
-            received_data_p.assign_sample(count, dummy) ;
+            received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
           }
           else
           {
@@ -1267,7 +1270,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   OpenDDS::DCPS::SubscriptionInstance * ptr =
     this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle);
@@ -1293,8 +1296,7 @@ DDS::ReturnCode_t
         {
           if (item->registered_data_ == 0)
           {
-            ::<%SCOPE%><%TYPE%> dummy;
-            received_data_p.assign_sample(count, dummy) ;
+            received_data_p.assign_sample(count, ::<%SCOPE%><%TYPE%>());
           }
           else
           {
@@ -1498,6 +1500,8 @@ void
   ::OpenDDS::DCPS::ReceivedDataElement* item
   )
 {
+  using ::OpenDDS::DCPS::ReceivedDataElement;
+
   if (0 == item->dec_ref())
   {
     if (item->registered_data_ != 0)
@@ -1601,6 +1605,7 @@ void
   DDS::InstanceHandle_t handle(::OpenDDS::DCPS::HANDLE_NIL);
 
   //!!! caller should already have the sample_lock_
+  //We will unlock it before calling into listeners
 
   InstanceMap::const_iterator const it = instance_map_.find(*instance_data);
 
@@ -1693,6 +1698,8 @@ void
 
         if (listener != 0)
         {
+          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                            ::DDS::RETCODE_ERROR);
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
@@ -1773,6 +1780,8 @@ void
 
         if (listener)
         {
+          ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                            ::DDS::RETCODE_ERROR);
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
@@ -1786,7 +1795,9 @@ void
         sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
     if (sub_listener != 0)
     {
-      sub_listener->on_data_on_readers(get_subscriber());
+      ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                        ::DDS::RETCODE_ERROR);
+      sub_listener->on_data_on_readers(get_subscriber()) ;
     }
     else
     {
@@ -1795,6 +1806,8 @@ void
 
       if (listener != 0)
       {
+        ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_sample_lock_,
+                          ::DDS::RETCODE_ERROR);
         ::DDS::DataReader_var dr = get_dr_obj_ref();
         listener->on_data_available(dr.in ());
       }
@@ -1954,8 +1967,6 @@ void
 }
 
 <%NAMESPACEEND%>
-
-
 !EOT
 
 }

@@ -11,16 +11,12 @@ project(*Federator): dcps {
   pch_source   =
 
   TypeSupport_Files {
-    Federator.idl >> LinkStateTypeSupport.idl LinkStateTypeSupportImpl.h LinkStateTypeSupportImpl.cpp TopicUpdateTypeSupport.idl TopicUpdateTypeSupportImpl.h TopicUpdateTypeSupportImpl.cpp ParticipantUpdateTypeSupport.idl ParticipantUpdateTypeSupportImpl.h ParticipantUpdateTypeSupportImpl.cpp PublicationUpdateTypeSupport.idl PublicationUpdateTypeSupportImpl.h PublicationUpdateTypeSupportImpl.cpp SubscriptionUpdateTypeSupport.idl SubscriptionUpdateTypeSupportImpl.h SubscriptionUpdateTypeSupportImpl.cpp
+    Federator.idl
   }
 
   IDL_Files {
     Federator.idl
-    LinkStateTypeSupport.idl
-    TopicUpdateTypeSupport.idl
-    ParticipantUpdateTypeSupport.idl
-    PublicationUpdateTypeSupport.idl
-    SubscriptionUpdateTypeSupport.idl
+    FederatorTypeSupport.idl
   }
 
   Source_Files {
@@ -29,13 +25,7 @@ project(*Federator): dcps {
     FederatorSubscriptions.cpp
     FederatorPublications.cpp
     FederatorManagerImpl.cpp
-    FederatorLinkListener.cpp
-    LinkStateManager.cpp
-    LinkStateTypeSupportImpl.cpp
-    TopicUpdateTypeSupportImpl.cpp
-    ParticipantUpdateTypeSupportImpl.cpp
-    PublicationUpdateTypeSupportImpl.cpp
-    SubscriptionUpdateTypeSupportImpl.cpp
+    FederatorTypeSupportImpl.cpp
   }
 
   Header_Files {

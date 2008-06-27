@@ -100,6 +100,8 @@ private:
   /// Condition used to signal main processing loop when complete.
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
 
+  bool complete_;
+
   /// Repository key that we are attached to.
   OpenDDS::DCPS::Service_Participant::RepoKey repo_;
 };

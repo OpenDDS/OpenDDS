@@ -3,20 +3,13 @@
 // $Id$
 
 #include "FederatorSubscriptions.h"
-#include "FederatorLinkListener.h"
 #include "UpdateListener_T.h"
 #include "FederatorC.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "ParticipantUpdateTypeSupportC.h"
-#include "ParticipantUpdateTypeSupportImpl.h"
-#include "TopicUpdateTypeSupportC.h"
-#include "TopicUpdateTypeSupportImpl.h"
-#include "SubscriptionUpdateTypeSupportC.h"
-#include "SubscriptionUpdateTypeSupportImpl.h"
-#include "PublicationUpdateTypeSupportC.h"
-#include "PublicationUpdateTypeSupportImpl.h"
+#include "FederatorTypeSupportC.h"
+#include "FederatorTypeSupportImpl.h"
 
 #if !defined (__ACE_INLINE__)
 # include "FederatorSubscriptions.inl"
@@ -33,8 +26,6 @@ Subscriptions::~Subscriptions()
 {
   // At this point, the participant->delete_contained_entities() has been
   // called, so non of our service Entities remain valid.
-
-  delete this->linkListener_;
 
   for( unsigned int index = 0; index < this->listeners_.size(); ++index) {
     delete this->listeners_[ index];
@@ -54,30 +45,6 @@ Subscriptions::initialize(
 {
   this->subscriber_ = subscriber;
   this->manager_    = manager;
-
-  // Create the LinkState listener
-  this->linkListener_ = new LinkListener( *manager);
-
-  // Create the LinkState Topic
-  ::DDS::Topic_var topic
-    = participant->create_topic(
-        LINKSTATETOPICNAME,
-        LINKSTATETYPENAME,
-        TOPIC_QOS_DEFAULT,
-        ::DDS::TopicListener::_nil()
-      );
-
-  // Obtain LinkState Topic Description. 
-  ::DDS::TopicDescription_var description
-    = participant->lookup_topicdescription( LINKSTATETOPICNAME);
-
-  // Create the LinkState subscription
-  this->linkReader_
-    = this->subscriber_->create_datareader(
-        description,
-        DATAREADER_QOS_DEFAULT,
-        this->linkListener_
-      );
 
   // Create the ParticipantUpdate Topic
   ::DDS::Topic_var participantTopic

@@ -24,9 +24,9 @@ const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
 const char* MY_TYPE_FOR_MCAST = "FooMcast";
 const char* MY_TYPE_FOR_RELIABLE_MULTICAST = "FooReliableMulticast";
-const char * reader_address_str = "";
-const char * multicast_group_address_str = "";
-const char * writer_address_str = "";
+const char * reader_address_str = "localhost:0";
+std::string multicast_group_address_str;
+const char * writer_address_str = "localhost:0";
 int reader_address_given = 0;
 int multicast_group_address_given = 0;
 int writer_address_given = 0;
@@ -106,7 +106,7 @@ int init_reader_transport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str.c_str());
       reader_mcast_config->local_address_ = reader_address;
       reader_mcast_config->local_address_str_ = reader_address_str;
       reader_mcast_config->multicast_group_address_ = multicast_group_address;
@@ -152,7 +152,7 @@ int init_reader_transport ()
 
 
       ACE_INET_Addr reader_address (reader_address_str);
-      ACE_INET_Addr multicast_group_address (multicast_group_address_str);
+      ACE_INET_Addr multicast_group_address (multicast_group_address_str.c_str());
       reader_reliable_multicast_config->local_address_ = reader_address;
       reader_reliable_multicast_config->local_address_str_ = reader_address_str;
       reader_reliable_multicast_config->multicast_group_address_ = multicast_group_address;

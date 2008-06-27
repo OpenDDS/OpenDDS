@@ -13,33 +13,6 @@ module OpenDDS { module Federator {
 
     typedef sequence<octet> OctetSeq;
 
-    //
-    // Costs associated with a link.  Here we only allow ON (zero cost)
-    // and OFF (infinite cost) links to be advertised.  This can be
-    // changed if more advanced routing algorithms are to be used.
-    //
-    enum LinkCost {
-      LINK_OFF, // Link can not be used.
-      LINK_ON   // Link can be used.
-    };
-
-    ////////////////////////////////////////////////////////////////////
-    //
-    // Contents of the Link State Packets (LSPs).
-    //
-    // This is the data type published to distribute topology information
-    // for repository federation.
-    //
-
-// This pragma is TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::LinkState"
-    struct LinkState {
-      OpenDDS::DCPS::RepoId source;      // Source of the advertised link.
-      OpenDDS::DCPS::RepoId destination; // Destination of the advertised link.
-      LinkCost              cost;        // Cost to use the advertised link.
-      long                  packet;      // The sequence number of the instant sample.
-    };
-
     // Unique identifier for a repository.
     typedef long RepoKey;
 
@@ -51,8 +24,6 @@ module OpenDDS { module Federator {
 
     // Constant values.
     const RepoKey NIL_REPOSITORY     = 0; // Reserved repository Id value.
-    const string  LINKSTATETOPICNAME = "LinkState";
-    const string  LINKSTATETYPENAME  = "LinkState";
 
     ////////////////////////////////////////////////////////////////////
     //

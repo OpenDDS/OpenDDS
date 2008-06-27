@@ -57,6 +57,7 @@ $dcpsrepo_ior = "repo.ior";
 $info_prst_file = "info.pr";
 $repo_bit_opt = "$repo_svc_config -NOBITS";
 $app_bit_opt = "-DCPSBit 0";
+$SRV_PORT = PerlACE::random_port();
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
@@ -66,7 +67,7 @@ unlink $info_prst_file;
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
                                     . "-ORBSvcConf mySvc.conf "
-                                    . "-orbendpoint iiop://:12345");
+                                    . "-orbendpoint iiop://:$SRV_PORT");
 $Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_opt $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$app_bit_opt $pub_opts");
 

@@ -9,6 +9,7 @@
 #include  "ace/Time_Value.h"
 #include  "ace/SString.h"
 #include  "ace/Atomic_Op.h"
+#include  <string>
 
 const long  MY_DOMAIN = 411;
 extern const char* MY_TOPIC;
@@ -20,7 +21,7 @@ extern const char* MY_TYPE_FOR_UDP;
 extern const char* MY_TYPE_FOR_MCAST;
 extern const char* MY_TYPE_FOR_RELIABLE_MULTICAST;
 extern const char * reader_address_str;
-extern const char * multicast_group_address_str;
+extern std::string multicast_group_address_str;
 extern const char * writer_address_str;
 extern int reader_address_given;
 extern int multicast_group_address_given;

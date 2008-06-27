@@ -12,8 +12,11 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ReliableMulticast_Export.h"
+#include "ReliableMulticastTransportConfiguration.h"
+#include "ReliableMulticastDataLink.h"
 #include "ReliableMulticastRcHandles.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include <map>
 
@@ -48,7 +51,7 @@ namespace OpenDDS
       virtual bool acked(RepoId);
 
     private:
-      ReliableMulticastTransportConfiguration* configuration_;
+      ReliableMulticastTransportConfiguration_rch configuration_;
       // JSP: Add transport configuration storage
       typedef std::map<
         ACE_INET_Addr,

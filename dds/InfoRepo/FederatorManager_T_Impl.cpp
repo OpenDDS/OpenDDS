@@ -4,14 +4,8 @@
 
 #include "FederatorManagerImpl.h"
 
-#include "ParticipantUpdateTypeSupportC.h"
-#include "ParticipantUpdateTypeSupportImpl.h"
-#include "TopicUpdateTypeSupportC.h"
-#include "TopicUpdateTypeSupportImpl.h"
-#include "SubscriptionUpdateTypeSupportC.h"
-#include "SubscriptionUpdateTypeSupportImpl.h"
-#include "PublicationUpdateTypeSupportC.h"
-#include "PublicationUpdateTypeSupportImpl.h"
+#include "FederatorTypeSupportC.h"
+#include "FederatorTypeSupportImpl.h"
 
 namespace OpenDDS { namespace Federator {
 

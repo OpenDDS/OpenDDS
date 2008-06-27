@@ -11,7 +11,7 @@
 
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
 
     // Attach the subscriber to the transport.
     OpenDDS::DCPS::SubscriberImpl* sub_impl =
-      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant\n" << endl;
       exit(1);
@@ -187,7 +187,7 @@ int main (int argc, char *argv[])
       exit(1);
     }
     DataReaderListenerImpl* listener_servant =
-      OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(listener.in());
+      dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;

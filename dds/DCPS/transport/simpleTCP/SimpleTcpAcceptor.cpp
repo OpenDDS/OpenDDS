@@ -13,11 +13,9 @@
 // gets a bit circular in the dependencies.  Oh well.
 OpenDDS::DCPS::SimpleTcpAcceptor::SimpleTcpAcceptor
                                          (SimpleTcpTransport* transport_impl)
+: transport_(transport_impl, false)
 {
   DBG_ENTRY_LVL("SimpleTcpAcceptor","SimpleTcpAcceptor",6);
-  // Keep a reference for ourselves
-  transport_impl->_add_ref();
-  this->transport_ = transport_impl;
 }
 
 OpenDDS::DCPS::SimpleTcpAcceptor::~SimpleTcpAcceptor()

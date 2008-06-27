@@ -19,9 +19,9 @@ if ($ARGV[0] eq 'noImr') {
 
 my $status = 0;
 my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
-
+my $pub_port = PerlACE::random_port();
 my $opts = $use_svc_config ? "-ORBSvcConf ../../../tests/tcp.conf" : '';
-my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:12345";
+my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:$pub_port";
 my $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
 #my $OBJ_REF_STYLE = "-orbobjrefstyle url";
@@ -39,8 +39,10 @@ if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";
 }
 
-my $ImR = PerlDDS::create_process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE -orbendpoint iiop://:12346");
-my $Act = PerlDDS::create_process ($imr_activator, "-o $activator_ior $imr_init_ref $OBJ_REF_STYLE -orbendpoint iiop://:12347");
+my $ImR_port = PerlACE::random_port();
+my $Act_port = PerlACE::random_port();
+my $ImR = PerlDDS::create_process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE -orbendpoint iiop://:$ImR_port");
+my $Act = PerlDDS::create_process ($imr_activator, "-o $activator_ior $imr_init_ref $OBJ_REF_STYLE -orbendpoint iiop://:$Act_port");
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 my $imr_util = PerlDDS::create_process ("$tao_imr");
 my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");

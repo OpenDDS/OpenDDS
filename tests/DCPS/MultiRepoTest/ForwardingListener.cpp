@@ -3,8 +3,8 @@
 // $Id$
 #include "ForwardingListener.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 
 // Only for Microsoft VC6
@@ -42,7 +42,7 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
     }
 
     DR_impl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+      dynamic_cast<DR_impl*> (foo_dr.in ());
 
     ::DDS::SampleInfo si ;
 
@@ -84,6 +84,7 @@ ForwardingListenerImpl::ForwardingListenerImpl(
   OpenDDS::DCPS::Service_Participant::RepoKey repo
 ) : samples_( 0),
     condition_( this->lock_),
+    complete_ (false),
     repo_( repo)
 {
   ACE_DEBUG((LM_DEBUG,
@@ -115,7 +116,10 @@ void
 ForwardingListenerImpl::waitForCompletion()
 {
   ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
-  this->condition_.wait();
+  while (!this->complete_)
+    {
+      this->condition_.wait();
+    }
 }
 
 void ForwardingListenerImpl::on_requested_deadline_missed (
@@ -229,14 +233,16 @@ void ForwardingListenerImpl::on_subscription_match (
         ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available Repo[ %d] read failed.\n"),
         this->repo_
       ));
-    
-    } else if( CORBA::is_nil( this->dataWriter_)) {
+
+    } else if( CORBA::is_nil( this->dataWriter_.in())) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("%T (%P|%t) ForwardingListenerImpl Repo[ %d] - bit bucket reached. \n"),
         this->repo_
       ));
       // The bit bucket is done processing when the answer is received.
       if( foo.data_source == 42) {
+        ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
+        this->complete_ = true;
         this->condition_.signal();
       }
 
@@ -247,6 +253,8 @@ void ForwardingListenerImpl::on_subscription_match (
         ACE_TEXT("%T (%P|%t) ForwardingListenerImpl Repo[ %d] - termination command received. \n"),
         this->repo_
       ));
+      ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
+      this->complete_ = true;
       this->condition_.signal();
 
     } else {
@@ -295,4 +303,3 @@ void ForwardingListenerImpl::on_subscription_match (
       this->repo_
     ));
   }
-

@@ -59,6 +59,8 @@ class SubDriver
     int               shutdown_pub_;
     int               add_new_subscription_;
     int               shutdown_delay_secs_;
+
+    std::string       sub_ready_filename_;
 };
 
 #endif

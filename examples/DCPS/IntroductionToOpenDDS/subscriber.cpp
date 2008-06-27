@@ -6,9 +6,8 @@
 //
 // *******************************************************************
 
-#include "QuoteTypeSupportImpl.h"
+#include "StockQuoterTypeSupportImpl.h"
 #include "QuoteDataReaderListenerImpl.h"
-#include "ExchangeEventTypeSupportImpl.h"
 #include "ExchangeEventDataReaderListenerImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -70,7 +69,7 @@ int main (int argc, char *argv[]) {
     // Attach the subscriber to the TCP transport.
     // (almost identical to the publisher)
     OpenDDS::DCPS::SubscriberImpl* sub_impl =
-      OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl >(sub.in ());
+      dynamic_cast< OpenDDS::DCPS::SubscriberImpl* >(sub.in ());
     if (0 == sub_impl) {
       cerr << "Failed to obtain subscriber servant" << endl;
       ACE_OS::exit(1);
@@ -161,7 +160,7 @@ int main (int argc, char *argv[]) {
 
     DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
     ExchangeEventDataReaderListenerImpl* listener_servant =
-      OpenDDS::DCPS::reference_to_servant<ExchangeEventDataReaderListenerImpl,DDS::DataReaderListener_ptr>(exchange_evt_listener.in());
+      dynamic_cast<ExchangeEventDataReaderListenerImpl*>(exchange_evt_listener.in());
 
     if (CORBA::is_nil (exchange_evt_listener.in ())) {
       cerr << "ExchangeEvent listener is nil." << endl;

@@ -16,21 +16,7 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
     return;
   }
 
-  // serialize the Topic QOS
-  TAO_OutputCDR outCdr;
-  outCdr << actor.pubsubQos;
-  size_t len = outCdr.total_length();
-  char *buf = new char[len];
-  ArrDelAdapter<char> guard (buf);
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
-    return;
-  }
-
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-  ACE_OS::memcpy (buf, dst.base(), len);
-
+  // setup qos type
   SpecificQos pubsubQosType;
   SpecificQos dwdrQosType;
   if (actorType == DataWriter)
@@ -44,24 +30,44 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
     dwdrQosType = DataReaderQos;
   }
 
+  // serialize the Topic QOS
+  TAO_OutputCDR outCdr;
+  outCdr << actor.pubsubQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
+  char *buf = new char[len];
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard (buf);
+
+  ACE_OS::memcpy (buf, dst.base(), len);
+
+
   BinSeq pubsub_qos_bin (len, buf);
   QosSeq pubsub_qos (pubsubQosType, pubsub_qos_bin);
 
 
-
   outCdr.reset ();
   outCdr << actor.drdwQos;
-  len = outCdr.total_length();
+  ACE_Message_Block dst2;
+  ACE_CDR::consolidate (&dst2, outCdr.begin ());
+
+  len = dst2.length();
   char *buf2 = new char[len];
 
-  ArrDelAdapter<char> guard2 (buf2);
   if (buf2 == 0) {
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
 
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-  ACE_OS::memcpy (buf2, dst.base(), len);
+  ArrDelAdapter<char> guard2 (buf2);
+
+  ACE_OS::memcpy (buf2, dst2.base(), len);
 
   BinSeq dwdr_qos_bin (len, buf2);
   QosSeq dwdr_qos (dwdrQosType, dwdr_qos_bin);
@@ -69,17 +75,19 @@ UpdateManager::add(const ActorType& actorType, const UA& actor)
 
   outCdr.reset ();
   outCdr << actor.transportInterfaceInfo;
-  len = outCdr.total_length();
+  ACE_Message_Block dst3;
+  ACE_CDR::consolidate (&dst3, outCdr.begin ());
+
+  len = dst3.length();
   char *buf3 = new char[len];
-  ArrDelAdapter<char> guard3 (buf3);
   if (buf3 == 0) {
     ACE_ERROR ((LM_ERROR, "UpdateManager::add actor> Allocation failed.\n"));
     return;
   }
 
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-  ACE_OS::memcpy (buf3, dst.base(), len);
+  ArrDelAdapter<char> guard3 (buf3);
 
+  ACE_OS::memcpy (buf3, dst3.base(), len);
   BinSeq tr_bin (len, buf3);
 
 

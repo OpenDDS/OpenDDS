@@ -3,14 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 
 template<class Tseq, class R, class R_ptr, class Rimpl>
@@ -20,7 +14,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
   R_ptr pt_dr
     = R::_narrow(reader);
 
-  Rimpl* dr_servant = OpenDDS::DCPS::reference_to_servant<Rimpl> (pt_dr);
+  Rimpl* dr_servant = dynamic_cast<Rimpl*> (pt_dr);
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);

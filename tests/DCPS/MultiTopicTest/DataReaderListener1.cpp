@@ -7,8 +7,8 @@
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportC.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportC.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportImpl.h"
 
   void DataReaderListenerImpl1::read(::DDS::DataReader_ptr reader)
   {
@@ -26,7 +26,7 @@
       }
 
     ::T1::Foo1DataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<T1::Foo1DataReaderImpl> (foo_dr.in ());
+      dynamic_cast<T1::Foo1DataReaderImpl*> (foo_dr.in ());
 
     ::T1::Foo1Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;

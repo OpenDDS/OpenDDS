@@ -56,6 +56,8 @@ class SubDriver
     int               receive_delay_msec_;
     ::Test::TestPubDriver_var pub_driver_;
     ACE_CString       pub_driver_ior_;
+
+    std::string       sub_ready_filename_;
 };
 
 #endif

@@ -11,7 +11,7 @@
 
 #include "SyncClientExt_i.h"
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -109,7 +109,7 @@ Publisher::parse_args (int argc, char *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, char *argv[]) throw (InitError)
+Publisher::Publisher (int argc, char *argv[]) throw (Publisher::InitError)
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
   , transport_impl_id_ (1)
@@ -227,8 +227,7 @@ Publisher::run (void)
           }
 
           OpenDDS::DCPS::PublisherImpl* pub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl,
-            DDS::Publisher_ptr>(pub_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub_[count].in ());
           if (0 == pub_impl) {
             cerr << "Failed to obtain publisher servant" << endl;
             return false;

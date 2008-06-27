@@ -23,27 +23,21 @@ private:
 
   size_t pub_count_;
   size_t sub_count_;
-
-  std::string status_file_;
 };
 
 bool
 SyncServer::parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "p:s:o:");
+  ACE_Get_Opt get_opts (argc, argv, "p:s:");
   int c;
   std::string usage =
     " -p <publisher count>\n"
-    " -s <subscriber count>\n"
-    " -o <status file>\n";
+    " -s <subscriber count>\n";
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
       {
-      case 'o':
-        status_file_ = get_opts.opt_arg ();
-        break;
       case 'p':
         pub_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
@@ -59,27 +53,25 @@ SyncServer::parse_args (int argc, char *argv[])
       }
   }
 
-
   return true;
 }
 
-SyncServer::SyncServer (int argc, ACE_TCHAR* argv[]) throw (InitError)
+SyncServer::SyncServer (int argc, ACE_TCHAR* argv[])
+  throw (SyncServer::InitError)
   : pub_count_ (1), sub_count_ (1)
-    , status_file_ ("sync_status")
 {
   try
     {
-      this->parse_args (argc, argv);
+      CORBA::ORB_var orb = CORBA::ORB_init (argc, argv, "SyncServer");
+      if (!this->parse_args (argc, argv)) {
+        throw InitError ("SyncServer encountered failure while parsing arguments.\n");
+      }
 
       sync_server_.reset (new SyncExt_i (pub_count_, sub_count_
-                                          , CORBA::ORB::_nil()));
-
-      std::ofstream status_stream (status_file_.c_str());
-      if (!status_stream)
-        throw InitError ("Unable to open status file");
-
-      status_stream << "ready" << std::endl;
-
+                                         , orb.in()));
+      // Bump up the ref count (TAO proprietary) so object can exist
+      //  beyond ORB destruction.
+      sync_server_->_add_ref();
     }
   catch (SyncServer_i::InitError& e) {
     throw InitError (e);
@@ -118,9 +110,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   catch (const CORBA::Exception& ex)
     {
-      ex._tao_print_exception (
-        "ERROR: SyncServer caught exception");
-
+      ex._tao_print_exception ("ERROR: SyncServer caught exception");
       return -1;
     }
 

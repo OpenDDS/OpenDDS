@@ -8,8 +8,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 const int default_key = 101010;
 
@@ -34,7 +34,7 @@ Writer::start ()
   try
   {
     OpenDDS::DCPS::DataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataReaderImpl> (reader_);
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*> (reader_);
 
     ::Xyz::Foo foo;
     foo.x = 0.0 ;

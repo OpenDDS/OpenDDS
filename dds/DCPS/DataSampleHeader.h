@@ -67,7 +67,7 @@ namespace OpenDDS
       /// It is also required to be present for all data in the 
       /// SampleInfo structure supplied along with each data sample.
       ACE_INT32 source_timestamp_sec_;
-      ACE_INT32 source_timestamp_nanosec_;
+      ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
 
       /// The COHERENCY_GROUP field is obtained from the Publisher as well, 
       /// in order to support the same scope as the SEQUENCE field.  

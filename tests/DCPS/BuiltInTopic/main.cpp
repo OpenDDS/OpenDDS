@@ -16,7 +16,7 @@
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tests/DCPS/common/TestSupport.h"
 
@@ -106,8 +106,7 @@ int init (int argc, ACE_TCHAR *argv[])
       }
 
       participant_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DomainParticipantImpl>
-        (participant.in ());
+        = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in ());
 
       topic = participant->create_topic (TEST_TOPIC,
                                          TEST_TOPIC_TYPE,
@@ -115,15 +114,14 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::TopicListener::_nil ());
 
       topic_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::TopicImpl> (topic.in ());
+        = dynamic_cast<OpenDDS::DCPS::TopicImpl*> (topic.in ());
 
       subscriber
         = participant->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
                                          ::DDS::SubscriberListener::_nil ());
 
       subscriber_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
-        (subscriber.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in ());
 
       // Attach the subscriber to transport
       if (0 != attach_subscriber_transport() )
@@ -142,8 +140,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::PublisherListener::_nil ());
 
       publisher_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
-        (publisher.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in ());
 
       // Attach the publisher to transport
       if (0 != attach_publisher_transport() )
@@ -166,8 +163,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                          ::DDS::DataReaderListener::_nil ());
 
       datareader_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataReaderImpl>
-        (datareader.in ());
+        = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(datareader.in ());
 
       datawriter
         = publisher->create_datawriter (topic.in (),
@@ -175,8 +171,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                         ::DDS::DataWriterListener::_nil ());
 
       datawriter_servant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::DataWriterImpl>
-        (datawriter.in ());
+        = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(datawriter.in ());
   }
   catch (...)
     {
@@ -458,6 +453,8 @@ void shutdown ()
       "participant  delete_participant failed\n"));
   }
 
+  cleanup_transport ();
+
   TheTransportFactory->release();
 
   TheServiceParticipant->shutdown ();
@@ -535,8 +532,6 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   shutdown ();
-
-  cleanup_transport ();
 
   return failed;
 #else

@@ -16,7 +16,7 @@ namespace OpenDDS
   namespace DCPS
   {
     const CORBA::ULong MAX_READERS_PER_ELEM = 5;
-    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>
+    typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
                                               TransportSendElementAllocator;
     
     const int MAX_READERS_TO_RESEND = 5;
@@ -108,6 +108,9 @@ namespace OpenDDS
       /// Group Id used downstream.
       /// This is not used in the first implementation (INSTANCE level)
       CoherencyGroup         group_id_ ;
+
+      /// Timestamp for the sample when it was first written.
+      ::DDS::Time_t source_timestamp_;
 
       /// Used to make removal from the
       /// container _much_ more efficient.

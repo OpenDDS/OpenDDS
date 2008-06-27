@@ -4,19 +4,19 @@ project(*Publisher) : dcpsexe_with_tcp {
   exename   = publisher
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger.idl
   }
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
     DataWriterListener.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -25,17 +25,17 @@ project(*Subscriber) : dcpsexe_with_tcp {
   exename   = subscriber
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger.idl
   }
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }

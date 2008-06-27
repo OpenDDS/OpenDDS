@@ -5,7 +5,7 @@
 #include  "dds/DCPS/Qos_Helper.h"
 #include  "TopicListener.h"
 
-#include "tests/DCPS/FooType/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType/FooTypeTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"

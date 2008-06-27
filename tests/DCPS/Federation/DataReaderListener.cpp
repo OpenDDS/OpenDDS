@@ -3,8 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
@@ -40,8 +40,7 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
       throw BadReaderException() ;
     }
 
-    DR_impl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<DR_impl> (foo_dr.in ());
+    DR_impl* dr_servant = dynamic_cast<DR_impl*> (foo_dr.in ());
 
     ::DDS::SampleInfo si ;
 

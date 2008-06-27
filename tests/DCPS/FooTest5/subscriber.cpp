@@ -22,19 +22,32 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/Default_Constants.h"
 
 #include "common.h"
+#include <sstream>
 
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
+//Create the multicast_group_address_str using default multicast address.
+#ifdef ACE_HAS_IPV6
+  multicast_group_address_str = ACE_DEFAULT_MULTICASTV6_ADDR;
+#else
+  multicast_group_address_str = ACE_DEFAULT_MULTICAST_ADDR;
+#endif
+  multicast_group_address_str += ":";
+  std::stringstream out;
+  out << ACE_DEFAULT_MULTICAST_PORT;
+  multicast_group_address_str += out.str ();
+
+
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
@@ -214,7 +227,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
         {

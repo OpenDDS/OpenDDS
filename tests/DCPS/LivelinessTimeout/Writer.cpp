@@ -4,7 +4,7 @@
 #include "Writer.h"
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "ace/OS_NS_unistd.h"
 
 const int default_key = 101010;

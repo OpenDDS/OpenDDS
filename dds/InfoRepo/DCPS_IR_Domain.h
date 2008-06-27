@@ -18,10 +18,7 @@
 #include /**/ "dds/DdsDcpsDomainC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include /**/ "dds/ParticipantBuiltinTopicDataTypeSupportC.h"
-#include /**/ "dds/TopicBuiltinTopicDataTypeSupportC.h"
-#include /**/ "dds/SubscriptionBuiltinTopicDataTypeSupportC.h"
-#include /**/ "dds/PublicationBuiltinTopicDataTypeSupportC.h"
+#include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"

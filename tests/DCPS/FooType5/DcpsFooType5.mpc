@@ -8,17 +8,15 @@ project : dcps {
   dcps_ts_flags += --export=FooLib_Export
 
   TypeSupport_Files {
-    FooDef.idl >> FooNoKeyTypeSupport.idl FooNoKeyTypeSupportImpl.h FooNoKeyTypeSupportImpl.cpp FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp
+    FooDef.idl
   }
 
   IDL_Files {
     FooDef.idl
-    FooTypeSupport.idl
-    FooNoKeyTypeSupport.idl
+    FooDefTypeSupport.idl
   }
 
   Source_Files {
-    FooTypeSupportImpl.cpp
-    FooNoKeyTypeSupportImpl.cpp
+    FooDefTypeSupportImpl.cpp
   }
 }

@@ -6,20 +6,23 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
-                            , CORBA::ORB_ptr orb) throw (InitError)
+                            , CORBA::ORB_ptr orb, bool write_ior)
+  throw (SyncServer_i::InitError)
   : count_ (0), pub_count_(pub_count), sub_count_(sub_count)
-    , shutdown_ (false)
+  , shutdown_ (false), ior_file_("sync.ior")
 {
   try
     {
+      // Get an ORB
       if (CORBA::is_nil (orb))
         {
           // create new ORB
-          int argc = 2;
-          ACE_TCHAR* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
-          orb_ = CORBA::ORB_init (argc, (ACE_TCHAR **)argv, "SyncServer");
+          int argc = 0;
+          //ACE_TCHAR* argv[] = {"-ORBEndpoint", "iiop://localhost:12345"};
+          orb_ = CORBA::ORB_init (argc, (ACE_TCHAR **)0, "SyncServer");
           if (CORBA::is_nil (orb_.in())) {
             throw InitError ("SyncServer_i::ctr> Orb init failed.");
           }
@@ -36,7 +39,7 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
 
       PortableServer::ObjectId_var oid = root_poa_->activate_object (this);
       CORBA::Object_var obj = root_poa_->id_to_reference (oid);
-      ::Sync::Server_var sync_server_obj = Sync::Server::_narrow (obj);
+      ::Sync::Server_var sync_server_obj = Sync::Server::_narrow (obj.in());
 
       CORBA::String_var ior = orb_->object_to_string (sync_server_obj.in ());
       CORBA::Object_var table_obj =
@@ -49,14 +52,19 @@ SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
                           , 1) != 0) {
         throw InitError ("SyncServer_i::ctr> Task activation failed.");
       }
+
+      if (write_ior) {
+        std::ofstream ior_stream (ior_file_.c_str());
+        if (!ior_stream) {
+          throw InitError ("SyncServer_i::ctr> Unable to open IOR file.");
+        }
+        ior_stream << ior.in() << std::endl;
+      }
     }
   catch (const CORBA::SystemException& ex)
     {
       throw InitError (ex._info().c_str());
     }
-
-  //ACE_DEBUG ((LM_DEBUG, "SyncServer_i> pubs: %d, subs: %d\n"
-  //, pub_count_, sub_count_));
 }
 
 SyncServer_i::~SyncServer_i (void)
@@ -64,6 +72,8 @@ SyncServer_i::~SyncServer_i (void)
   orb_->destroy ();
 
   this->wait ();
+
+  unlink (ior_file_.c_str());
 }
 
 void
@@ -72,38 +82,52 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
   throw (CORBA::SystemException)
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::register_me\n"));
-
-  // Hack to offset connection setup cost later.
-  callback->_non_existent ();
+  try{
+    // Hack to offset connection setup cost later.
+    callback->_non_existent ();
+  }
+  catch (const CORBA::Exception& ex)
+    {
+      ACE_ERROR ((LM_ERROR, "SyncServer> Callback connection establishment failed: %s\n"
+                  , ex._info().c_str()));
+      // should we continue. For now yes, else SynchServer will may become unresponsive.
+    }
 
   Sync::Client_ptr cl = Sync::Client::_duplicate (callback);
-  Cl cl_info (count_, cl, role, -1);
+  ClientInfo cl_info (count_, cl, role, -1);
 
   switch (role)
     {
     case Sync::Sub:
       if (subs_.size() >= sub_count_) {
+        ACE_DEBUG ((LM_DEBUG, "SyncServer> Subscriber list is full. "
+                    "Rejecting new subscriber.\n"));
         return;
       }
 
       if (subs_.insert (subs_.end()
-                        , ClientInfos::value_type(++count_, cl_info))
+                        , ClientInfos::value_type(count_, cl_info))
           != subs_.end()){
         id = count_;
       }
       break;
     case Sync::Pub:
       if (pubs_.size() >= pub_count_) {
+        ACE_DEBUG ((LM_DEBUG, "SyncServer> Publisher list is full. "
+                    "Rejecting new publisher.\n"));
         return;
       }
 
       if (pubs_.insert (pubs_.end()
-                        , ClientInfos::value_type(++count_, cl_info))
+                        , ClientInfos::value_type(count_, cl_info))
           != pubs_.end()){
         id = count_;
       }
       break;
     }
+
+  // increment the id count.
+  count_++;
 
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::register_me\n"
   //"Pubs: %d, Subs: %d\n", pubs_.size(), subs_.size()));
@@ -125,7 +149,13 @@ SyncServer_i::unregister (::Sync::Id id)
   size_t sub_count = subs_.size ();
 
   if ((pub_count == 0) && (sub_count == 0)) {
-    orb_->shutdown ();
+    try {
+      orb_->shutdown (0);
+    }
+    catch (CORBA::Exception& ex) {
+      ACE_ERROR ((LM_ERROR, "SyncServer> ORB shutdown failure: %s.\n"
+                  , ex._info().c_str()));
+    }
   }
 }
 
@@ -136,6 +166,7 @@ SyncServer_i::way_point_reached (::Sync::Id id,
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::way_point_reached\n"));
 
+  // Check if entity is part of subscribe or publisher list
   ClientInfos::iterator iter = subs_.find (id);
   if (iter == subs_.end()) {
     iter = pubs_.find (id);
@@ -144,13 +175,13 @@ SyncServer_i::way_point_reached (::Sync::Id id,
     }
   }
 
-
   iter->second.way_point = way_point;
 
   if ((pubs_.size() == pub_count_)
       && (subs_.size() == sub_count_)
       && synched ()) {
     notify ();
+    reset ();
   }
 }
 
@@ -162,22 +193,18 @@ SyncServer_i::synched (void)
   ::Sync::WayPoint waypoint = pubs_.begin()->second.way_point;
 
   for (ClientInfos::const_iterator iter = pubs_.begin();
-       iter != pubs_.end();
-       iter++)
-    {
-      if (waypoint != iter->second.way_point) {
-        return false;
-      }
+       iter != pubs_.end(); iter++) {
+    if (waypoint != iter->second.way_point) {
+      return false;
     }
+  }
 
   for (ClientInfos::const_iterator iter = subs_.begin();
-       iter != subs_.end();
-       iter++)
-    {
-      if (waypoint != iter->second.way_point) {
-        return false;
-      }
+       iter != subs_.end(); iter++) {
+    if (waypoint != iter->second.way_point) {
+      return false;
     }
+  }
 
   return true;
 }
@@ -188,13 +215,39 @@ SyncServer_i::notify (void)
   for (ClientInfos::const_iterator iter = pubs_.begin();
        iter != pubs_.end();
        iter++) {
-    iter->second.callback->proceed ();
+    try {
+      iter->second.callback->proceed ();
+    }
+    catch (CORBA::Exception& ex) {
+      ACE_ERROR ((LM_ERROR, "SyncServer> Publisher notification failed: %s\n"
+                  , ex._info().c_str()));
+    }
   }
 
   for (ClientInfos::const_iterator iter = subs_.begin();
        iter != subs_.end();
        iter++) {
-    iter->second.callback->proceed ();
+    try {
+      iter->second.callback->proceed ();
+    }
+    catch (CORBA::Exception& ex) {
+      ACE_ERROR ((LM_ERROR, "SyncServer> Subscriber notification failed: %s\n"
+                  , ex._info().c_str()));
+    }
+  }
+}
+
+void
+SyncServer_i::reset (void)
+{
+  for (ClientInfos::iterator iter = pubs_.begin();
+       iter != pubs_.end(); iter++) {
+    iter->second.way_point = -1;
+  }
+
+  for (ClientInfos::iterator iter = subs_.begin();
+       iter != subs_.end(); iter++) {
+    iter->second.way_point = -1;
   }
 }
 
@@ -206,7 +259,9 @@ SyncServer_i::svc (void)
       orb_->run ();
       shutdown_ = true;
     }
-  catch ( CORBA::Exception& ) {
+  catch ( CORBA::Exception& ex) {
+    ACE_ERROR ((LM_ERROR, "SyncServer> Unexpected exception: %s"
+                ,  ex._info().c_str()));
     return -1;
   }
   return 0;

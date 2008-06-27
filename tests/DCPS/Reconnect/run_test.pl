@@ -33,9 +33,12 @@ if ($ARGV[0] eq 'restart_sub') {
   $num_writes = 20;
   $restart_delay = 10;
   $num_reads_before_crash = 2;
-  $num_lost_messages_estimate = $restart_delay * 1000/$write_delay_ms;
-  $num_expected_reads_restart_sub
-    = $num_writes - $num_reads_before_crash - $num_lost_messages_estimate;
+  
+  #The number of lost message depends on the period between sub crash and 
+  #restart.
+  #$num_lost_messages_estimate = $restart_delay * 1000/$write_delay_ms;
+  #$num_expected_reads_restart_sub
+  #  = $num_writes - $num_reads_before_crash - $num_lost_messages_estimate;
   $lost_publication_callback = 1;
 
   # We can not give an exact number of reads we expected when subscriber crashes
@@ -136,18 +139,46 @@ $Publisher->Spawn ();
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
 {
+  $sub_crashed = 0;
+  while($sub_crashed == 0)
+  {
+    open (LOG, $testoutputfilename) or die "Couldn't open client log file $testoutputfilename: $!\n";
+    while (<LOG>) {
+      if (/Subscriber crash after/)
+      {
+        $sub_crashed = 1;
+        break;
+      }
+    }
+    close (LOG);
+    if ($sub_crashed == 0) {
+      sleep ($write_delay_ms/1000);
+    }
+  }
+
+  #get time at crash
+  my $crash_at = time();
+
   $SubscriberResult = $Subscriber->WaitKill (60);
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
   print "Subscriber crashed and returned $SubscriberResult. \n";
+  
+  sleep($restart_delay);
+  
+  #get time before restart so we can calculate the lost messages during sub
+  #crash and restart.
+  my $now = time();
+  my $lost_time = $now - $crash_at;
+  $num_lost_messages_estimate = $lost_time * 1000/$write_delay_ms;
+  $num_expected_reads_restart_sub
+    = $num_writes - $num_reads_before_crash - $num_lost_messages_estimate;
 
   $Subscriber = PerlDDS::create_process
         ("subscriber"
          , " $svc_config -DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub"
          . " -r $num_reads_deviation");
-
-  sleep($restart_delay);
 
   print "\n\n!!! Restart subscriber !!! \n\n";;
   print $Subscriber->CommandLine () . "\n";
