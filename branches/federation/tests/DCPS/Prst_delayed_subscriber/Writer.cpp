@@ -2,7 +2,7 @@
 //
 // $Id$
 #include "Writer.h"
-#include "MessageTypeSupportC.h"
+#include "MessengerTypeSupportC.h"
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>

@@ -1,8 +1,8 @@
 
 #include "Publisher.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
@@ -48,7 +48,7 @@ Publisher::Publisher( int argc, char** argv, char** envp)
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: create_participant failed for ")
       ACE_TEXT("publisher in domain %d.\n"),
-      index, this->config_.domain()
+      this->config_.domain()
     ));
     throw BadParticipantException ();
   }
@@ -109,7 +109,7 @@ Publisher::Publisher( int argc, char** argv, char** envp)
   }
   ::Xyz::FooNoKeyTypeSupportImpl* publisher_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != publisher_data->register_type(
-                            this->participant_,
+                            this->participant_.in(),
                             this->config_.typeName().c_str()
                           )
     ) {
@@ -154,7 +154,7 @@ Publisher::Publisher( int argc, char** argv, char** envp)
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>(
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
         this->publisher_.in()
       );
   if (0 == pub_impl) {
@@ -236,7 +236,7 @@ Publisher::~Publisher()
   }
 
   // Release the participant
-  if( 0 == CORBA::is_nil( this->participant_)) {
+  if( 0 == CORBA::is_nil( this->participant_.in())) {
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
          == this->participant_->delete_contained_entities()
       ) {
@@ -245,7 +245,7 @@ Publisher::~Publisher()
       ));
 
     } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant( this->participant_)
+               == TheParticipantFactory->delete_participant( this->participant_.in())
              ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Unable to release the participant.\n")

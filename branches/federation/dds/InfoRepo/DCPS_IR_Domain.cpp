@@ -12,10 +12,7 @@
 
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/TopicBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/ParticipantBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/SubscriptionBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/PublicationBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -466,10 +463,7 @@ int DCPS_IR_Domain::init_built_in_topics()
     {
       bitParticipantFactory_ = TheParticipantFactory;
 
-      OPENDDS_DCPS_DomainParticipantListener_i* listenerImpl =
-        new OPENDDS_DCPS_DomainParticipantListener_i;
-
-      bitParticipantListener_ = ::OpenDDS::DCPS::servant_to_reference (listenerImpl);
+      bitParticipantListener_ = new OPENDDS_DCPS_DomainParticipantListener_i;
 
       bitParticipant_ =
         bitParticipantFactory_->create_participant(id_,
@@ -529,10 +523,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 
 
       // Participant topic
-      ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl* participantTypeSupport_servant =
-        new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl();
-      ::DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport =
-        OpenDDS::DCPS::servant_to_reference (participantTypeSupport_servant);
+      ::DDS::ParticipantBuiltinTopicDataTypeSupport_var 
+        participantTypeSupport(new ::DDS::ParticipantBuiltinTopicDataTypeSupportImpl());
 
       if (::DDS::RETCODE_OK !=
           participantTypeSupport->register_type(bitParticipant_.in (),
@@ -559,10 +551,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       // Topic topic
-      ::DDS::TopicBuiltinTopicDataTypeSupportImpl* topicTypeSupport_servant =
-        new ::DDS::TopicBuiltinTopicDataTypeSupportImpl();
-      ::DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport =
-        OpenDDS::DCPS::servant_to_reference (topicTypeSupport_servant);
+      ::DDS::TopicBuiltinTopicDataTypeSupport_var 
+        topicTypeSupport(new ::DDS::TopicBuiltinTopicDataTypeSupportImpl());
 
       if (::DDS::RETCODE_OK !=
           topicTypeSupport->register_type(bitParticipant_.in (),
@@ -589,10 +579,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       // Subscription topic
-      ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl* subscriptionTypeSupport_servant =
-        new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl();
-      ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport =
-        OpenDDS::DCPS::servant_to_reference (subscriptionTypeSupport_servant);
+      ::DDS::SubscriptionBuiltinTopicDataTypeSupport_var 
+        subscriptionTypeSupport (new ::DDS::SubscriptionBuiltinTopicDataTypeSupportImpl());
 
       if (::DDS::RETCODE_OK !=
           subscriptionTypeSupport->register_type(bitParticipant_.in (),
@@ -619,10 +607,8 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
         }
 
       // Publication topic
-      ::DDS::PublicationBuiltinTopicDataTypeSupportImpl* publicationTypeSupport_servant =
-        new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl();
-      ::DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport =
-        OpenDDS::DCPS::servant_to_reference (publicationTypeSupport_servant);
+      ::DDS::PublicationBuiltinTopicDataTypeSupport_var 
+        publicationTypeSupport(new ::DDS::PublicationBuiltinTopicDataTypeSupportImpl());
 
       if (::DDS::RETCODE_OK !=
           publicationTypeSupport->register_type(bitParticipant_.in (),
@@ -785,8 +771,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport ()
 
       // Attach the Publisher with the TransportImpl.
       OpenDDS::DCPS::PublisherImpl* pubServant
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>
-        (bitPublisher_.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(bitPublisher_.in ());
 
       OpenDDS::DCPS::AttachStatus status
         = pubServant->attach_transport(transportImpl_.in());
@@ -1162,6 +1147,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             data.name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
             data.durability = topicQos->durability;
+            data.durability_service = topicQos->durability_service;
             data.deadline = topicQos->deadline;
             data.latency_budget = topicQos->latency_budget;
             data.liveliness = topicQos->liveliness;
@@ -1324,6 +1310,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             data.topic_name = desc->get_name();
             data.type_name = desc->get_dataTypeName();
             data.durability = writerQos->durability;
+            data.durability_service = writerQos->durability_service;
             data.deadline = writerQos->deadline;
             data.latency_budget = writerQos->latency_budget;
             data.liveliness = writerQos->liveliness;

@@ -5,19 +5,13 @@ project(*idl): dcps {
   
 
   TypeSupport_Files {
-    DDSPerfTest.idl >> PubMessageTypeSupport.idl \
-                       PubMessageTypeSupportImpl.h \
-                       PubMessageTypeSupportImpl.cpp \
-                       AckMessageTypeSupport.idl \
-                       AckMessageTypeSupportImpl.h \
-                       AckMessageTypeSupportImpl.cpp 
+    DDSPerfTest.idl
 
   }
 
   IDL_Files {
     DDSPerfTest.idl
-    PubMessageTypeSupport.idl
-    AckMessageTypeSupport.idl
+    DDSPerfTestTypeSupport.idl
   }
 
   custom_only = 1
@@ -30,15 +24,13 @@ project(DDS*Pub): dcpsexe {
 
   IDL_Files {
     DDSPerfTest.idl
-    PubMessageTypeSupport.idl
-    AckMessageTypeSupport.idl
+    DDSPerfTestTypeSupport.idl
   }
 
   Source_Files {
     sample_pub.cpp
     PubListener.cpp
-    PubMessageTypeSupportImpl.cpp
-    AckMessageTypeSupportImpl.cpp
+    DDSPerfTestTypeSupportImpl.cpp
   }
 }
 
@@ -50,15 +42,13 @@ project(DDS*Sub): dcpsexe {
 
   IDL_Files {
     DDSPerfTest.idl
-    PubMessageTypeSupport.idl
-    AckMessageTypeSupport.idl
+    DDSPerfTestTypeSupport.idl
   }
 
   Source_Files {
     sample_sub.cpp
     SubListener.cpp
-    PubMessageTypeSupportImpl.cpp
-    AckMessageTypeSupportImpl.cpp
+    DDSPerfTestTypeSupportImpl.cpp
   }
 }
 

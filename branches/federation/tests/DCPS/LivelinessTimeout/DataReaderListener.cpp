@@ -6,14 +6,12 @@
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
-  inactive_count_(0)
-  ,deadline_missed_(0)
-  ,test_failed_(false)
+  deadline_missed_(0)
 {
 }
 
@@ -62,34 +60,21 @@ void DataReaderListenerImpl::on_liveliness_changed (
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
-    if(status.active_count_change < 0)
+    // if we have gone from active to inactive, then we missed a deadline
+    if((status.active_count_change < 0) &&
+       (status.inactive_count_change > 0))
     {
       ++deadline_missed_;
-      // subtract the negative active acount change
-      inactive_count_ -= status.active_count_change;
-    }
-    else
-    {
-      // subtract the active acount change
-      inactive_count_ -= status.active_count_change;
-      if(inactive_count_ < 0)
-      {
-        test_failed_ = true;
-        ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed "
-               "we shouldn't have negative publishers inactive, there is now %d inactive."
-               " This is an error with the test. Active count change %d\n"),
-               inactive_count_, status.active_count_change));
-      }
     }
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed"
-               "   active=%d, inactive=%d, activeDelta=%d, inactiveDelta=%d\n"),
+               "   active=%d, inactive=%d, activeDelta=%d, inactiveDelta=%d deadline_missed=%d\n"),
                status.active_count,
                status.inactive_count,
                status.active_count_change,
-               status.inactive_count_change ));
+               status.inactive_count_change,
+               deadline_missed_));
   }
 
 void DataReaderListenerImpl::on_subscription_match (
@@ -139,7 +124,7 @@ void DataReaderListenerImpl::on_subscription_match (
       }
 
     ::Xyz::FooDataReaderImpl* dr_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl>(foo_dr.in());
+      = dynamic_cast< ::Xyz::FooDataReaderImpl*>(foo_dr.in());
 
     const int num_ops_per_thread = 100;
     ::Xyz::FooSeq foo(num_ops_per_thread) ;

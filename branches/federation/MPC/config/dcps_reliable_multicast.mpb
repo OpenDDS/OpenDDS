@@ -1,4 +1,4 @@
-project {
-  libs        += ReliableMulticast
-  after       += ReliableMulticast
+project: dcps {
+  libs  += ReliableMulticast
+  after += ReliableMulticast
 }

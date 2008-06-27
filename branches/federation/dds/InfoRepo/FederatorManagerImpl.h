@@ -7,7 +7,6 @@
 #include "federator_export.h"
 #include "FederatorS.h"
 #include "FederatorConfig.h"
-#include "LinkStateManager.h"
 #include "FederatorRemoteLink.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
@@ -63,12 +62,6 @@ class OpenDDS_Federator_Export ManagerImpl
     CORBA::ORB_ptr orb();
     void orb( CORBA::ORB_ptr value);
 
-    /// Callback with new routing information.
-    void updateLinkState(
-      LinkState         sample,
-      ::DDS::SampleInfo info
-    );
-
     /// Callback with new repository information.
     template< class SampleType>
     void update( SampleType& sample, ::DDS::SampleInfo& info);
@@ -108,9 +101,6 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// The ORB in which we are activated.
     CORBA::ORB_var orb_;
-
-    /// LinkState manager for distributing update data.
-    LinkStateManager linkStateManager_;
 
     /// Remote repositories that are part of the Minimum Spanning Tree.
     std::set< RepoKey> mstNodes_;

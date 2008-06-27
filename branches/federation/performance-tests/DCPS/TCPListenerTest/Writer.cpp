@@ -3,14 +3,8 @@
 // $Id$
 #include "Writer.h"
 //#include "TestException.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -200,12 +194,12 @@ Writer::svc ()
       if (handles.length() == 0)
         {
           finished_sending_ = true;
-          done_condition_.signal(); // tell publisher look if I am finished.
         }
     }
 
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT(" %P|%t Writer::svc finished.\n")));
+  done_condition_.signal(); // tell publisher look if I am finished.
   return 0;
 }
 

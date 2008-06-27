@@ -39,8 +39,13 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::find_or_create_datalink
 
   ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
 
-  cdr >> network_order_address;
-  
+  if (cdr >> network_order_address == 0)
+  {  
+    ACE_ERROR ((LM_ERROR, "(%P|%t)SimpleUnreliableDgramTransport::find_or_create_datalink failed "
+      "to de-serialize the NetworkAddress\n"));
+    return 0;
+  }
+
   ACE_INET_Addr remote_address;
 
   network_order_address.to_addr(remote_address);
@@ -196,11 +201,11 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::shutdown_i()
     this->links_.unbind_all();
   }
 
-  // Drop our reference to the TransportReactorTask
-  this->reactor_task_ = 0;
-
   // Drop our reference to the socket
   this->socket_ = 0;
+
+  // Drop our reference to the TransportReactorTask
+  this->reactor_task_ = 0;
 
 #if 0
   // Drop our reference to the TransportReceiveStrategy object.

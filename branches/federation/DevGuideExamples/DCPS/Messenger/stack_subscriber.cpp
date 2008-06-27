@@ -11,7 +11,7 @@
 
 
 #include "StackDataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -135,7 +135,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
       if (0 == sub_impl) {
         cerr << "Failed to obtain subscriber servant\n" << endl;
         exit(1);

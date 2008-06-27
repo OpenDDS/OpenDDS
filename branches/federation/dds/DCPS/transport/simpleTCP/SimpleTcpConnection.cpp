@@ -101,7 +101,6 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","open",6);
-
   // A safety check - This should not happen since the is_connector_
   // defaults to true and open() is called after the ACE_Aceptor
   // creates this new svc handler.
@@ -243,12 +242,12 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","close",6);
-
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
 
-  this->peer().close();
-  this->connected_ = false;
+  if (!this->send_strategy_.is_nil())
+    this->send_strategy_->terminate_send ();
+  this->disconnect();
   return 0;
 }
 
@@ -257,13 +256,13 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",6);
-
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
   //            while we are still registered with the reactor.  Right?
 
-  this->peer().close();
-  this->connected_ = false;
+  if (!this->send_strategy_.is_nil())
+    this->send_strategy_->terminate_send ();
+  this->disconnect();
   return 0;
 }
 
@@ -414,7 +413,6 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",6);
-
   if (on_new_association)
     return this->active_reconnect_on_new_association ();
   // Try to reconnect if it's connector previously.
@@ -427,6 +425,22 @@ OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
   return 0;
 }
 
+
+int
+OpenDDS::DCPS::SimpleTcpConnection::active_connect
+                                    (const ACE_INET_Addr& remote_address,
+                                     const ACE_INET_Addr& local_address,
+                                     SimpleTcpConfiguration_rch tcp_config)
+{
+  DBG_ENTRY_LVL("SimpleTcpConnection","active_connect",6);
+  GuardType guard (this->reconnect_lock_);
+
+  if (this->connected_ == true)
+    return 0;
+  return this->active_establishment (remote_address,
+                                     local_address,
+                                     tcp_config);
+}
 
 int
 OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_on_new_association ()
@@ -537,8 +551,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i ()
       // Suspend send once.
       this->send_strategy_->suspend_send ();
 
-      this->peer ().close ();
-      this->connected_ = false;
+      this->disconnect();
+
       if (this->tcp_config_->conn_retry_attempts_ > 0)
       {
         this->link_->notify (DataLink::DISCONNECTED);
@@ -760,8 +774,17 @@ OpenDDS::DCPS::SimpleTcpConnection::notify_lost_on_backpressure_timeout ()
       {
         this->reconnect_state_ = LOST_STATE;
         notify_lost = true;
-        this->peer ().close ();
-        this->connected_ = false;
+        
+        // Add remove_handler to solve access violation on connection object
+        // when reactor cleanup the event handles during shutdown.
+        SimpleTcpReceiveStrategy* rs
+          = dynamic_cast <SimpleTcpReceiveStrategy*> (this->receive_strategy_.in ());
+
+        rs->get_reactor()->remove_handler (this,
+          ACE_Event_Handler::READ_MASK |
+          ACE_Event_Handler::DONT_CALL);
+
+        this->disconnect();
       }
   }
 

@@ -116,9 +116,16 @@ public:
     return last_si_.no_writers_generation_count ;
   }
 
+  bool verify_last_liveliness_status ()
+  {
+    return last_status_.active_count == 0 && last_status_.inactive_count == 0;
+  }
+
 private:
   int liveliness_changed_count_ ;
   ::DDS::SampleInfo last_si_ ;
+
+  ::DDS::LivelinessChangedStatus last_status_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

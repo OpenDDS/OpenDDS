@@ -78,6 +78,8 @@ class PubDriver
     int               check_data_dropped_;
     ACE_CString       pub_driver_ior_;
     bool              shutdown_;
+
+    std::string       sub_ready_filename_;
 };
 
 #endif

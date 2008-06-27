@@ -10,17 +10,8 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
 
-#include "LinkStateTypeSupportC.h"
-#include "LinkStateTypeSupportImpl.h"
-
-#include "ParticipantUpdateTypeSupportC.h"
-#include "ParticipantUpdateTypeSupportImpl.h"
-#include "PublicationUpdateTypeSupportC.h"
-#include "PublicationUpdateTypeSupportImpl.h"
-#include "SubscriptionUpdateTypeSupportC.h"
-#include "SubscriptionUpdateTypeSupportImpl.h"
-#include "TopicUpdateTypeSupportC.h"
-#include "TopicUpdateTypeSupportImpl.h"
+#include "FederatorTypeSupportC.h"
+#include "FederatorTypeSupportImpl.h"
 
 #if !defined (__ACE_INLINE__)
 # include "FederatorRemoteLink.inl"
@@ -133,22 +124,6 @@ RemoteLink::RemoteLink(
     throw Unavailable();
   }
 
-  // Add type support for link state topics
-  LinkStateTypeSupportImpl* linkState = new LinkStateTypeSupportImpl();
-  if( ::DDS::RETCODE_OK != linkState->register_type(
-                             this->participant_,
-                             LINKSTATETYPENAME
-                           )
-    ) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: RemoteLink on repository %d unable to install ")
-      ACE_TEXT("LinkState type support for repository %d.\n"),
-      self,
-      this->federationId()
-    ));
-    throw Unavailable();
-  }
-
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) INFO: RemoteLink on %d initialized ")
@@ -211,9 +186,7 @@ RemoteLink::RemoteLink(
 
   // And attach the transport to it.
   OpenDDS::DCPS::SubscriberImpl* subscriberServant
-    = OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl>(
-        subscriber.in()
-      );
+    = dynamic_cast< OpenDDS::DCPS::SubscriberImpl*>( subscriber.in());
   if( 0 == subscriberServant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: failed to extract servant for ")
@@ -315,9 +288,7 @@ RemoteLink::RemoteLink(
 
   // And attach the transport to it.
   OpenDDS::DCPS::PublisherImpl* publisherServant
-    = OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::PublisherImpl>(
-        publisher.in()
-      );
+    = dynamic_cast< OpenDDS::DCPS::PublisherImpl*>( publisher.in());
   if( 0 == publisherServant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) INFO: failed to extract servant for ")

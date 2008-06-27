@@ -21,7 +21,8 @@ SubDriver::SubDriver()
     pub_driver_ior_ ("file://pubdriver.ior"),
     shutdown_pub_ (1),
     add_new_subscription_ (0),
-    shutdown_delay_secs_ (10)
+    shutdown_delay_secs_ (10),
+    sub_ready_filename_("sub_ready.txt")
 {
 }
 
@@ -121,6 +122,11 @@ SubDriver::parse_args(int& argc, char* argv[])
 	  shutdown_delay_secs_ = ACE_OS::atoi (current_arg);
 	  arg_shifter.consume_arg ();
 	}
+  else if ((current_arg = arg_shifter.get_the_parameter("-f")) != 0)
+	{
+	  sub_ready_filename_ = current_arg;
+	  arg_shifter.consume_arg ();
+	}
       // The '-?' option
       else if (arg_shifter.cur_arg_strncasecmp("-?") == 0) {
 	ACE_DEBUG((LM_DEBUG,
@@ -199,6 +205,15 @@ SubDriver::init(int& argc, char* argv[])
       throw TestException();
     }
 
+  // Indicate that the subscriber is ready to accept connection
+  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("w"));
+  if (readers_ready == 0)
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber ready file\n")));
+  }
+  else
+    ACE_OS::fclose(readers_ready);
   // And we are done with the init().
 }
 
@@ -302,6 +317,7 @@ SubDriver::run()
               ACE_TEXT("(%P|%t) SubDriver::run, ")
               ACE_TEXT(" Wait for %s. \n"),
               pub_id_fname_.c_str ()));
+
 
   PublicationIds ids;
 

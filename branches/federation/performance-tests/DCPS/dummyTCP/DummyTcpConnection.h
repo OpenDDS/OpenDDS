@@ -6,12 +6,14 @@
 
 #include "DummyTcpConfiguration.h"
 #include "DummyTcpConfiguration_rch.h"
-//borland #include "DummyTcpDataLink.h"
+#ifdef __BORLANDC__
+#  include "DummyTcpDataLink.h"
+#endif
 #include "DummyTcpDataLink_rch.h"
 #include "DummyTcpConnection_rch.h"
-//borland #include "DummyTcpSendStrategy.h"
+#include "DummyTcpSendStrategy.h"
 #include "DummyTcpSendStrategy_rch.h"
-//borland #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "DummyTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/RcObject_T.h"

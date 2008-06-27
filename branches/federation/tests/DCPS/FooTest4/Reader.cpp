@@ -8,8 +8,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 const int default_key = 101010;
 
@@ -46,7 +46,7 @@ Reader::start ()
     }
 
     Xyz::FooDataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl> (foo_dr.in ());
+      dynamic_cast< ::Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
     char action[5] ;
     if (use_take_)
@@ -147,7 +147,7 @@ Reader::start1 ()
     }
 
     Xyz::FooDataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
+      dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
     char action[14] ;
     if (use_take_)
@@ -387,7 +387,7 @@ Reader::start2 ()
     }
 
     Xyz::FooDataReaderImpl* dr_servant =
-      OpenDDS::DCPS::reference_to_servant<Xyz::FooDataReaderImpl> (foo_dr.in ());
+      dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
 
     ::Xyz::FooSeq foo;
     ::DDS::SampleInfoSeq si ;

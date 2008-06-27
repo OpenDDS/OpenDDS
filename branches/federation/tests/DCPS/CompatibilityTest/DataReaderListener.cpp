@@ -6,8 +6,8 @@
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
@@ -106,7 +106,7 @@ void DataReaderListenerImpl::on_subscription_match (
       }
 
     ::Xyz::FooDataReaderImpl* dr_servant
-      = OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataReaderImpl>(foo_dr.in());
+      = dynamic_cast< ::Xyz::FooDataReaderImpl*>(foo_dr.in());
 
     const int num_ops_per_thread = 100;
     ::Xyz::FooSeq foo(num_ops_per_thread) ;

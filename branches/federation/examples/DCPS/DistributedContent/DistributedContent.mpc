@@ -4,11 +4,11 @@ project(DDS*Node) : dcpsexe {
   requires += built_in_topics
 
   TypeSupport_Files {
-    FileInfo.idl >> FileDiffTypeSupport.idl FileDiffTypeSupportImpl.h FileDiffTypeSupportImpl.cpp
+    FileInfo.idl
   }
 
   IDL_Files {
     *.idl
-    FileDiffTypeSupport.idl
+    FileInfoTypeSupport.idl
   }
 }

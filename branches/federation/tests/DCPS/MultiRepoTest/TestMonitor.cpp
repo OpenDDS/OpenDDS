@@ -2,8 +2,8 @@
 #include "TestMonitor.h"
 #include "DataWriterListenerImpl.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -171,9 +171,8 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         }
     }
     this->subscriberParticipant_[ index]
-      = ::DDS::DomainParticipant::_duplicate(
-          this->participants_[ this->config_.subscriberDomain( index)]
-        );
+      = ::DDS::DomainParticipant::_duplicate
+      (this->participants_[ this->config_.subscriberDomain( index)].in());
   }
 
   //
@@ -204,9 +203,8 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
         }
     }
     this->publisherParticipant_[ index]
-      = ::DDS::DomainParticipant::_duplicate(
-          this->participants_[ this->config_.publisherDomain( index)]
-        );
+      = ::DDS::DomainParticipant::_duplicate
+      (this->participants_[ this->config_.publisherDomain( index)].in());
   }
 
   //
@@ -299,7 +297,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
                 this->config_.subscriberDomain( index)
             ));
     this->forwarder_[ index] =
-      OpenDDS::DCPS::reference_to_servant<ForwardingListenerImpl,DDS::DataReaderListener_ptr>(this->listener_[ index].in());
+      dynamic_cast<ForwardingListenerImpl*>(this->listener_[ index].in());
 
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
@@ -323,7 +321,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
       this->config_.typeName().c_str(),
       current->first
     ));
-    if( 0 == CORBA::is_nil( current->second)) {
+    if( 0 == CORBA::is_nil( current->second.in())) {
       ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
       if(::DDS::RETCODE_OK != subscriber_data->register_type(
                                 current->second.in (),
@@ -419,7 +417,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
     // Attach the subscriber to the transport.
     OpenDDS::DCPS::SubscriberImpl* sub_impl
-      = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(
+      = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(
           this->subscriber_[ index].in ()
         );
 
@@ -497,7 +495,7 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
 
     // Attach the publisher to the transport.
     OpenDDS::DCPS::PublisherImpl* pub_impl
-      = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl>(
+      = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
           this->publisher_[ index].in ()
         );
 
@@ -582,11 +580,9 @@ TestMonitor::TestMonitor( int argc, char** argv, char** envp)
     writerQos.reliability.max_blocking_time.sec        = 0;
     writerQos.reliability.max_blocking_time.nanosec    = 0;
 
-    this->dataWriter_[ index] = this->publisher_[ index]->create_datawriter(
-                                  this->writerTopic_[ index].in(),
-                                  writerQos,
-                                  listener
-                                );
+    this->dataWriter_[ index]
+      = this->publisher_[ index]->create_datawriter(this->writerTopic_[ index].in(),
+                                                    writerQos, listener.in());
     if( CORBA::is_nil( this->dataWriter_[ index].in()) )
       {
         ACE_ERROR((LM_ERROR,
@@ -656,7 +652,7 @@ TestMonitor::~TestMonitor()
       ACE_TEXT("%T (%P|%t) INFO: releasing resources for domain %d.\n"),
       current->first
     ));
-    if( 0 == CORBA::is_nil( current->second)) {
+    if( 0 == CORBA::is_nil( current->second.in())) {
       if( ::DDS::RETCODE_PRECONDITION_NOT_MET
            == current->second->delete_contained_entities()
         ) {
@@ -782,4 +778,3 @@ TestMonitor::run()
   ACE_OS::sleep(5);
 
 }
-

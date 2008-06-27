@@ -2,10 +2,8 @@
 //
 // $Id$
 
-project : aceexe, coverage_optional {
+project : aceexe, dcps_reliable_multicast, coverage_optional {
   exename = unittest
-  libs  += ReliableMulticast
-  after += ReliableMulticast
   includes += $(DDS_ROOT)
   libpaths += $(DDS_ROOT)/lib
 }

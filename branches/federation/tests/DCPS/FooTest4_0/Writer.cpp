@@ -12,9 +12,9 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-static const char * writer_address_str = "127.0.0.1:29876";
+static const char * writer_address_str = "localhost:29876";
 
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
@@ -42,7 +42,7 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
 
   // Attach the publisher to the transport.
   OpenDDS::DCPS::PublisherImpl* pub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub_.in ());
+    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
 
   if (0 == pub_impl)
   {
@@ -84,8 +84,8 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  fast_dw_ =
-    OpenDDS::DCPS::reference_to_servant< ::Xyz::FooDataWriterImpl> (foo_dw.in ());
+  fast_dw_ = 
+    dynamic_cast< ::Xyz::FooDataWriterImpl*> (foo_dw.in ());
 
 }
 

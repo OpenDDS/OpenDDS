@@ -2,8 +2,8 @@
 #include "Subscriber.h"
 #include "DataReaderListener.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
@@ -103,7 +103,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   }
 
   this->sync_     = new DataReaderListenerImpl( this->config_.samples());
-  this->listener_ = ::OpenDDS::DCPS::servant_to_reference( this->sync_);
+  this->listener_ = this->sync_;
   if( CORBA::is_nil (this->listener_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT ("(%P|%t) ERROR: failed to obtain listener for domain %d.\n"),
@@ -125,7 +125,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   }
   ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != subscriber_data->register_type(
-                            this->participant_,
+                            this->participant_.in(),
                             this->config_.typeName().c_str()
                           )
     ) {
@@ -170,9 +170,7 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>(
-        this->subscriber_.in()
-      );
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>( this->subscriber_.in());
   if( 0 == sub_impl) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to obtain subscriber servant\n")));
     throw BadSubscriberException ();
@@ -244,7 +242,7 @@ Subscriber::~Subscriber()
   }
 
   // Release the participant
-  if( 0 == CORBA::is_nil( this->participant_)) {
+  if( 0 == CORBA::is_nil( this->participant_.in())) {
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
          == this->participant_->delete_contained_entities()
       ) {
@@ -253,7 +251,7 @@ Subscriber::~Subscriber()
       ));
 
     } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant( this->participant_)
+               == TheParticipantFactory->delete_participant( this->participant_.in())
              ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Unable to release the participant.\n")

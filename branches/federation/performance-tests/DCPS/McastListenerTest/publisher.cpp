@@ -16,10 +16,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
 
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
@@ -264,7 +261,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
 
       if (0 == pub_impl)
       {

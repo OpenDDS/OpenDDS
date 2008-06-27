@@ -13,17 +13,8 @@
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 
-#include "LinkStateTypeSupportC.h"
-#include "LinkStateTypeSupportImpl.h"
-
-#include "ParticipantUpdateTypeSupportC.h"
-#include "ParticipantUpdateTypeSupportImpl.h"
-#include "PublicationUpdateTypeSupportC.h"
-#include "PublicationUpdateTypeSupportImpl.h"
-#include "SubscriptionUpdateTypeSupportC.h"
-#include "SubscriptionUpdateTypeSupportImpl.h"
-#include "TopicUpdateTypeSupportC.h"
-#include "TopicUpdateTypeSupportImpl.h"
+#include "FederatorTypeSupportC.h"
+#include "FederatorTypeSupportImpl.h"
 
 #include <string>
 
@@ -170,20 +161,6 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Unable to install ")
       ACE_TEXT("SubscriptionUpdate type support for repository %d.\n"),
-      this->config_.federationId()
-    ));
-    throw Unavailable();
-  }
-
-  // Add type support for link state topics
-  LinkStateTypeSupportImpl* linkState = new LinkStateTypeSupportImpl();
-  if( ::DDS::RETCODE_OK != linkState->register_type(
-                             this->participant_,
-                             LINKSTATETYPENAME
-                           )
-    ) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to install LinkState type support for repository %d.\n"),
       this->config_.federationId()
     ));
     throw Unavailable();
@@ -408,157 +385,6 @@ ACE_THROW_SPEC ((
   /// @TODO: Implement this.
 
   return Unfederated;
-}
-
-void
-ManagerImpl::updateLinkState(
-  LinkState         sample,
-  ::DDS::SampleInfo /* info */
-)
-{
-  ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
-
-  // First determine if this is new data.
-  if( ::OpenDDS::DCPS::SequenceNumber( sample.packet)
-       > this->remoteLink_[ sample.source]->lastSeen()
-    ) {
-    return;
-  }
-
-  // Indicate that we have procesed this sequence datum.
-  this->remoteLink_[ sample.source]->lastSeen() = sample.packet;
-
-  // Lists of repositories removed from and added to the MST.
-  LinkStateManager::LinkList added;
-  LinkStateManager::LinkList removed;
-
-  // Update the topology and current MST.
-  this->linkStateManager_.update( sample, removed, added);
-
-  // Process removals first to avoid flooding historical data over
-  // connections that will be removed during the same processing.
-  for( int index = 0; index < int( removed.size()); ++index) {
-    // This is ugly.
-    RepoKey remote = this->id();
-    if( remote == removed[ index].first) {
-      remote = removed[ index].second;
-
-    } else if( remote == removed[ index].second) {
-      remote = removed[ index].first;
-    }
-
-    if( remote != this->id()) {
-      // Maintain our set of MST connections.
-      std::set< RepoKey>::iterator location = this->mstNodes_.find( remote);
-      if( location != this->mstNodes_.end()) {
-        this->mstNodes_.erase( location);
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
-          ACE_TEXT("on repository %d - ")
-          ACE_TEXT("attempt to remove non-MST repository %d from MST list.\n"),
-          this->id(),
-          remote
-        ));
-
-        // Since our internal state has become noticably corrupt, should
-        // we throw here?
-        continue;
-      }
-
-      //
-      // Since we require the same lock that is held during the
-      // join_federation() call, that call _must_ have completed before
-      // we can receive any LinkState updates that contain this
-      // connection.  Which means that the internal state has been
-      // corrupted if we cannot find the remote link in our maps.
-      //
-      RemoteLinkMap::const_iterator linkLocation
-        = this->remoteLink_.find( remote);
-      if( linkLocation != this->remoteLink_.end()) {
-        // At this point, remote is the Id value of a remote repository
-        // that we are directly connected to that is no longer on the MST.
-        linkLocation->second->removeFromMst();
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
-          ACE_TEXT("on repository %d - ")
-          ACE_TEXT("unable to unsubscribe from remote repository %d.\n"),
-          this->id(),
-          remote
-        ));
-
-        // Since our internal state has become noticably corrupt, should
-        // we throw here?
-        continue;
-      }
-    }
-  }
-
-  // Process additions second to avoid flooding historical data over
-  // connections that have been removed during the same processing.
-  for( int index = 0; index < int( added.size()); ++index) {
-    // This is ugly.
-    RepoKey remote = this->id();
-    if( remote == added[ index].first) {
-      remote = added[ index].second;
-
-    } else if( remote == added[ index].second) {
-      remote = added[ index].first;
-    }
-
-    if( remote != this->id()) {
-      // Maintain our set of MST connections.
-      this->mstNodes_.insert( remote);
-
-      //
-      // Since we require the same lock that is held during the
-      // join_federation() call, that call _must_ have completed before
-      // we can receive any LinkState updates that contain this
-      // connection.  Which means that the internal state has been
-      // corrupted if we cannot find the remote link in our maps.
-      //
-      RemoteLinkMap::const_iterator linkLocation
-        = this->remoteLink_.find( remote);
-      if( linkLocation != this->remoteLink_.end()) {
-        // At this point, remote is the Id value of a remote repository
-        // that we are directly connected to that is now on the MST.
-        linkLocation->second->addToMst();
-
-        // Check if we have this repository in our mappings already.
-        RepoToIdMap::const_iterator inboundLocation
-          = this->inboundMap_.find( remote);
-        if( inboundLocation == this->inboundMap_.end()) {
-          // If we do not already have this repository in our mappings,
-          // publish all of our data to it, since it is a new repository
-          // to the federation.
-
-          /// @TODO: Implement this.
-
-          // Add the remote repository to our mappings so that we do not
-          // publish to it again.  Unless it departs and rejoins, of course.
-          (void)this->inboundMap_.insert(
-            RepoToIdMap::value_type(remote, RepoToIdMap::mapped_type())
-          );
-        }
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::updateLinkState() ")
-          ACE_TEXT("on repository %d - ")
-          ACE_TEXT("unable to subscribe to remote repository %d.\n"),
-          this->id(),
-          remote
-        ));
-
-        // Since our internal state has become noticably corrupt, should
-        // we throw here?
-        continue;
-      }
-    }
-  }
 }
 
 void

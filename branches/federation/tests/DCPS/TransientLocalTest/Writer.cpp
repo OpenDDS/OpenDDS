@@ -21,7 +21,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer)
 {
   ::DDS::DataWriterListener_var dwl = writer->get_listener();
   dwl_servant_ =
-    OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+    dynamic_cast<DataWriterListenerImpl*>(dwl.in());
 }
 
 void

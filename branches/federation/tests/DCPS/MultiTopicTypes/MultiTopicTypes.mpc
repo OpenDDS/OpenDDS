@@ -9,24 +9,24 @@ project : dcps {
   dcps_ts_flags += --export=FooLib_Export
 
   TypeSupport_Files {
-    Foo1Def.idl >> Foo1TypeSupport.idl Foo1TypeSupportImpl.h Foo1TypeSupportImpl.cpp
-    Foo2Def.idl >> Foo2TypeSupport.idl Foo2TypeSupportImpl.h Foo2TypeSupportImpl.cpp
-    Foo3Def.idl >> Foo3TypeSupport.idl Foo3TypeSupportImpl.h Foo3TypeSupportImpl.cpp
+    Foo1Def.idl
+    Foo2Def.idl
+    Foo3Def.idl
   }
 
   IDL_Files {
     Foo1Def.idl
-    Foo1TypeSupport.idl
+    Foo1DefTypeSupport.idl
     Foo2Def.idl
-    Foo2TypeSupport.idl
+    Foo2DefTypeSupport.idl
     Foo3Def.idl
-    Foo3TypeSupport.idl
+    Foo3DefTypeSupport.idl
   }
   
   Source_Files {
-    Foo1TypeSupportImpl.cpp
-    Foo2TypeSupportImpl.cpp
-    Foo3TypeSupportImpl.cpp
+    Foo1DefTypeSupportImpl.cpp
+    Foo2DefTypeSupportImpl.cpp
+    Foo3DefTypeSupportImpl.cpp
   }
 }
 

@@ -286,8 +286,10 @@ UpdateManager::add (const UTopic& topic)
   // serialize the Topic QOS
   TAO_OutputCDR outCdr;
   outCdr << topic.topicQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
 
-  size_t len = outCdr.total_length();
+  size_t len = dst.length();
   char *buf;
   ACE_NEW_NORETURN (buf, char[len]);
   ArrDelAdapter<char> guard (buf);
@@ -296,8 +298,6 @@ UpdateManager::add (const UTopic& topic)
     return;
   }
 
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
   ACE_OS::memcpy (buf, dst.base(), len);
 
   BinSeq qos_bin (len, buf);
@@ -324,8 +324,10 @@ UpdateManager::add(const UParticipant& participant)
   // serialize the Topic QOS
   TAO_OutputCDR outCdr;
   outCdr << participant.participantQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
 
-  size_t len = outCdr.total_length();
+  size_t len = dst.length();
   char *buf;
   ACE_NEW_NORETURN (buf, char[len]);
   ArrDelAdapter<char> guard (buf);
@@ -334,8 +336,6 @@ UpdateManager::add(const UParticipant& participant)
     return;
   }
 
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
   ACE_OS::memcpy (buf, dst.base(), len);
 
   BinSeq qos_bin (len, buf);

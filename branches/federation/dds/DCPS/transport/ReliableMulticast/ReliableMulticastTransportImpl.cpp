@@ -24,7 +24,12 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 
   ACE_InputCDR cdr ((const char*)remote_info.data.get_buffer(), remote_info.data.length ());
 
-  cdr >> network_order_address;
+  if (cdr >> network_order_address == 0)
+  {  
+    ACE_ERROR ((LM_ERROR, "(%P|%t)ReliableMulticastTransportImpl::find_or_create_datalink failed "
+      "to de-serialize the NetworkAddress\n"));
+    return 0;
+  }
 
   ACE_INET_Addr multicast_group_address;
 
@@ -44,7 +49,7 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::find_or_create_datalink(
 
   data_link = new OpenDDS::DCPS::ReliableMulticastDataLink(
     reactor_task_,
-    *configuration_,
+    *(configuration_.in()),
     multicast_group_address,
     *this
     );

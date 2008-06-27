@@ -9,6 +9,10 @@
 
 #include "ace/config-all.h"
 
+#if defined (ACE_AS_STATIC_LIBS) && !defined (STOCKQUOTERCOMMON_HAS_DLL)
+#  define STOCKQUOTERCOMMON_HAS_DLL 0
+#endif /* ACE_AS_STATIC_LIBS && STOCKQUOTERCOMMON_HAS_DLL */
+
 #if !defined (STOCKQUOTERCOMMON_HAS_DLL)
 #  define STOCKQUOTERCOMMON_HAS_DLL 1
 #endif /* ! STOCKQUOTERCOMMON_HAS_DLL */
@@ -42,7 +46,11 @@
 #if (STOCKQUOTERCOMMON_NTRACE == 1)
 #  define STOCKQUOTERCOMMON_TRACE(X)
 #else /* (STOCKQUOTERCOMMON_NTRACE == 1) */
+#  if !defined (ACE_HAS_TRACE)
+#    define ACE_HAS_TRACE
+#  endif /* ACE_HAS_TRACE */
 #  define STOCKQUOTERCOMMON_TRACE(X) ACE_TRACE_IMPL(X)
+#  include "ace/Trace.h"
 #endif /* (STOCKQUOTERCOMMON_NTRACE == 1) */
 
 #endif /* STOCKQUOTERCOMMON_EXPORT_H */

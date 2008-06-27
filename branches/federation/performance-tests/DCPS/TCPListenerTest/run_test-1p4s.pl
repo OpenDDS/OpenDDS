@@ -58,7 +58,8 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
+$svc_config = ($use_svc_config && $app_bit_conf eq '')
+    ? " -ORBSvcConf ../../tcp.conf " : '';
 $sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini "
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
@@ -109,39 +110,44 @@ $Sub4->Spawn ();
 
 $Publisher->Spawn ();
 
-$PublisherResult = $Publisher->WaitKill (1200);
+$wait_to_kill = 200;
+$PublisherResult = $Publisher->WaitKill ($wait_to_kill);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-
-$Sub1Result = $Sub1->WaitKill (1200);
+$Sub1Result = $Sub1->WaitKill ($wait_to_kill);
 if ($Sub1Result != 0) {
     print STDERR "ERROR: subscriber 1 returned $Sub1Result\n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Sub2Result = $Sub2->WaitKill (1200);
+$Sub2Result = $Sub2->WaitKill ($wait_to_kill);
 if ($Sub2Result != 0) {
     print STDERR "ERROR: subscriber 2 returned $Sub2Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Sub3Result = $Sub3->WaitKill (1200);
+$Sub3Result = $Sub3->WaitKill ($wait_to_kill);
 if ($Sub3Result != 0) {
     print STDERR "ERROR: subscriber 3 returned $Sub3Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 
-$Sub4Result = $Sub4->WaitKill (1200);
+$Sub4Result = $Sub4->WaitKill ($wait_to_kill);
 if ($Sub4Result != 0) {
     print STDERR "ERROR: subscriber 4 returned $Sub4Result \n";
     $status = 1;
+    $wait_to_kill = 0;
 }
 
 

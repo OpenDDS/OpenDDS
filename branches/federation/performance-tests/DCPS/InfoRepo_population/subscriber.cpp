@@ -12,7 +12,7 @@
 #include "SyncClientExt_i.h"
 
 #include "DataReaderListener.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -108,7 +108,7 @@ Subscriber::parse_args (int argc, char *argv[])
   return true;
 }
 
-Subscriber::Subscriber (int argc, char *argv[]) throw (InitError)
+Subscriber::Subscriber (int argc, char *argv[]) throw (Subscriber::InitError)
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
   , transport_impl_id_ (1)
@@ -247,8 +247,7 @@ Subscriber::run (void)
           }
 
           OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            ::OpenDDS::DCPS::reference_to_servant< OpenDDS::DCPS::SubscriberImpl,
-            DDS::Subscriber_ptr> (subs_[count].in ());
+            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (subs_[count].in ());
           if (0 == sub_impl) {
             cerr << "Failed to obtain subscriber servant\n" << endl;
             return false;

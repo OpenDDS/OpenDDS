@@ -18,7 +18,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -31,7 +31,7 @@
 #include "common.h"
 
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-static const char * reader_address_str = "";
+static const char * reader_address_str = "localhost:0";
 static int reader_address_given = 0;
 
 static int init_reader_tranport ()
@@ -271,7 +271,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in ());
+        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
 
       if (0 == sub_impl)
       {
@@ -325,7 +325,7 @@ int main (int argc, char *argv[])
 
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
       DataReaderListenerImpl* drl_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(drl.in());
+        dynamic_cast<DataReaderListenerImpl*>(drl.in());
 
       ::DDS::DataReader_var dr ;
 
@@ -390,6 +390,12 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      // Moved TransportImpl reference release from just before exit from main
+      // to here. This intended to fix the access violation in some optimize
+      // build on linux during shutdown. I assume TransportImpl object cleanup
+      // may reference some resouces that already released.
+      reader_transport_impl = 0;
+
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
@@ -399,14 +405,16 @@ int main (int argc, char *argv[])
       ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
                      drl_servant->no_writers_generation_count()) ;
       ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
-      if ((drl_servant->liveliness_changed_count() != 2 + 2 * num_unlively_periods) ||
+      
+      if ((drl_servant->liveliness_changed_count() < 2 + 2 * num_unlively_periods) ||
+          (drl_servant->verify_last_liveliness_status () == false) ||
           (drl_servant->no_writers_generation_count() != (use_take==1 ? 0 : num_unlively_periods) ))
       {
         // if use take then the instance had "no samples" when it got NO_WRITERS and
         // hence the instance state terminated and then started again so
         // no_writers_generation_count should = 0.
         ACE_ERROR ((LM_ERROR,
-           ACE_TEXT("(%P|%t) Unexpected no_writers_generation_count or liveliness_changed_count \n")));
+           ACE_TEXT("(%P|%t) Test failed. \n")));
           return 1;
       }
 
@@ -423,9 +431,5 @@ int main (int argc, char *argv[])
       return 1;
     }
 
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_transport_impl = 0;
   return status;
 }

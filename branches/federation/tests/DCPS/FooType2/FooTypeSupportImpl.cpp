@@ -2,7 +2,7 @@
 //
 // $Id$
 
-#include "FooTypeSupportImpl.h"
+#include "FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Service_Participant.h"

@@ -10,10 +10,10 @@
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
 #include "TransportImpl_rch.h"
-//borland #include "TransportSendStrategy.h"
+#include "TransportSendStrategy.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
-//borland #include "TransportReceiveStrategy.h"
+#include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 

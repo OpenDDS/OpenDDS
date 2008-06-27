@@ -16,7 +16,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "DataWriterListenerImpl.h"
 
@@ -30,7 +30,7 @@
 
 #include "common.h"
 
-static const char * writer_address_str = "";
+static const char * writer_address_str = "localhost:0";
 static int writer_address_given = 0;
 
 static int init_writer_tranport (OpenDDS::DCPS::TransportImpl_rch& writer_transport_impl)
@@ -207,7 +207,7 @@ int main (int argc, char *argv[])
 
       // Attach the publisher to the transport.
       OpenDDS::DCPS::PublisherImpl* pub_impl
-        = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::PublisherImpl> (pub.in ());
+        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
 
       if (0 == pub_impl)
       {
@@ -289,7 +289,7 @@ int main (int argc, char *argv[])
 
       {
         DataWriterListenerImpl* dwl_servant =
-          OpenDDS::DCPS::reference_to_servant<DataWriterListenerImpl,DDS::DataWriterListener_ptr>(dwl.in());
+          dynamic_cast<DataWriterListenerImpl*>(dwl.in());
         // check to see if the publisher worked
         if(dwl_servant->publication_matched() != compatible)
         {

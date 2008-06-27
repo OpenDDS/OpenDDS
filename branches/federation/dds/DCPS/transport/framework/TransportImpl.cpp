@@ -43,11 +43,6 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
 
   clear(dw_map_);
   clear(dr_map_);
-
-  // The DL Cleanup task belongs to the Transportimpl object.
-  // Cleanup before leaving the house.
-  this->dl_clean_task_.close (1);
-  this->dl_clean_task_.wait ();
 }
 
 
@@ -56,10 +51,12 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 {
   DBG_ENTRY_LVL("TransportImpl","shutdown",6);
 
+  // Stop datalink clean task.
+  this->dl_clean_task_.close (1);
+
   if (! this->reactor_task_.is_nil ())
   {
     this->reactor_task_->stop ();
-    this->reactor_task_ = 0;
   }
 
   this->pre_shutdown_i();
@@ -84,9 +81,8 @@ OpenDDS::DCPS::TransportImpl::shutdown()
     // Clear our collection of TransportInterface pointers.
     interfaces_.clear();
 
-    // Drop our references to the config_ and reactor_task_.
+    // Drop our references to the config_.
     this->config_ = 0;
-    this->reactor_task_ = 0;
 
 //MJM: Won't you need to ACE_UNUSED_ARG here since you are depending on
 //MJM: side effects here?
@@ -96,6 +92,11 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
+
+  {
+    GuardType guard(this->lock_);
+    this->reactor_task_ = 0;
+  }
 }
 
 

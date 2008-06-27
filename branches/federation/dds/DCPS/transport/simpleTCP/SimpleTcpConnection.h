@@ -6,12 +6,14 @@
 
 #include "SimpleTcpConfiguration.h"
 #include "SimpleTcpConfiguration_rch.h"
-//borland #include "SimpleTcpDataLink.h"
+#ifdef __BORLANDC__
+#  include "SimpleTcpDataLink.h"
+#endif
 #include "SimpleTcpDataLink_rch.h"
 #include "SimpleTcpConnection_rch.h"
-//borland #include "SimpleTcpSendStrategy.h"
+#include "SimpleTcpSendStrategy.h"
 #include "SimpleTcpSendStrategy_rch.h"
-//borland #include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "SimpleTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_rch.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -48,9 +50,9 @@ namespace OpenDDS
         /// Attempt an active connection establishment to the remote address.
         /// The local address is sent to the remote (passive) side to
         /// identify ourselves to the remote side.
-        int active_establishment(const ACE_INET_Addr& remote_address,
-                                 const ACE_INET_Addr& local_address,
-                                 SimpleTcpConfiguration_rch tcp_config);
+        int active_connect(const ACE_INET_Addr& remote_address,
+                           const ACE_INET_Addr& local_address,
+                           SimpleTcpConfiguration_rch tcp_config);
 
         /// This will be called by the DataLink (that "owns" us) when
         /// the SimpleTcpTransport has been told to shutdown(), or when
@@ -114,6 +116,15 @@ namespace OpenDDS
         void shutdown ();
 
       private:
+
+        /// Attempt an active connection establishment to the remote address.
+        /// The local address is sent to the remote (passive) side to
+        /// identify ourselves to the remote side.
+        /// Note this method is not thread protected. The caller need acquire
+        /// the reconnect_lock_ before calling this function.
+        int active_establishment(const ACE_INET_Addr& remote_address,
+                                 const ACE_INET_Addr& local_address,
+                                 SimpleTcpConfiguration_rch tcp_config);
 
         int active_reconnect_i ();
         int passive_reconnect_i ();

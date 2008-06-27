@@ -16,10 +16,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"
@@ -254,7 +251,7 @@ int main (int argc, char *argv[])
 
       // Attach the subscriber to the transport.
       OpenDDS::DCPS::SubscriberImpl* sub_impl =
-        OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl> (sub.in());
+        dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in());
 
       if (0 == sub_impl)
       {
@@ -306,7 +303,7 @@ int main (int argc, char *argv[])
                                    DATA_SIZE,
                                    RECVS_BTWN_READS));
       DataReaderListenerImpl* listener_servant =
-        OpenDDS::DCPS::reference_to_servant<DataReaderListenerImpl,DDS::DataReaderListener_ptr>(dr_listener.in());
+        dynamic_cast<DataReaderListenerImpl*>(dr_listener.in());
 
       if (CORBA::is_nil (dr_listener.in()))
       {

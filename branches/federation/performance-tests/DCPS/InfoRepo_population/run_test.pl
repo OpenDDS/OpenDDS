@@ -21,11 +21,10 @@ $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
-$sync_status_file = "sync_status";
+$sync_ior="sync.ior";
 $repo_bit_opt = "$opts -NOBITS";
 
 unlink $dcpsrepo_ior;
-unlink $sync_status_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
@@ -33,7 +32,7 @@ $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");
 $SyncServer = PerlDDS::create_process ("syncServer"
-				    , "-p2 -s1 -o$sync_status_file");
+				    , "-p2 -s1");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
@@ -45,8 +44,8 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 print $SyncServer->CommandLine() . "\n";
 $SyncServer->Spawn ();
-if (PerlACE::waitforfile_timed ($sync_status_file, 10) == -1) {
-    print STDERR "ERROR: waiting for SyncServer status file\n";
+if (PerlACE::waitforfile_timed ($sync_ior, 10) == -1) {
+    print STDERR "ERROR: waiting for Sync IOR file\n";
     $DCPSREPO->Kill ();
     $SyncServer->Kill ();
     exit 1;
@@ -90,7 +89,6 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
-unlink $sync_status_file;
 
 if ($status == 0) {
   print "test PASSED.\n";

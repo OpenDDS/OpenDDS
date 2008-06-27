@@ -17,8 +17,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType5/FooTypeSupportImpl.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
@@ -186,8 +185,7 @@ void init_dcps_objects (int i)
 
   // Attach the subscriber to the transport.
   OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = OpenDDS::DCPS::reference_to_servant<OpenDDS::DCPS::SubscriberImpl>
-    (subscriber[i].in ());
+    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber[i].in ());
 
   if (0 == sub_impl)
     {
