@@ -3,8 +3,8 @@
 // $Id$
 #include "Writer.h"
 //#include "TestException.h"
-#include "testMsgTypeSupportC.h"
-#include "testMsgTypeSupportImpl.h"
+#include "testMessageTypeSupportC.h"
+#include "testMessageTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 

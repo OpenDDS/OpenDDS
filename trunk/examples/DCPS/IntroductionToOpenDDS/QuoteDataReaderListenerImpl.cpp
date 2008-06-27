@@ -7,8 +7,8 @@
 // *******************************************************************
 
 #include "QuoteDataReaderListenerImpl.h"
-#include "QuoteTypeSupportC.h"
-#include "QuoteTypeSupportImpl.h"
+#include "StockQuoterTypeSupportC.h"
+#include "StockQuoterTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 

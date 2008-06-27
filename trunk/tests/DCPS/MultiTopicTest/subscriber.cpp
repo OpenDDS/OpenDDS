@@ -20,9 +20,9 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo2TypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3TypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportImpl.h"
+#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"

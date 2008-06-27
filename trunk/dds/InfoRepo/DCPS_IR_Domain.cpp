@@ -12,10 +12,7 @@
 
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/TopicBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/ParticipantBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/SubscriptionBuiltinTopicDataTypeSupportImpl.h"
-#include "dds/PublicationBuiltinTopicDataTypeSupportImpl.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)

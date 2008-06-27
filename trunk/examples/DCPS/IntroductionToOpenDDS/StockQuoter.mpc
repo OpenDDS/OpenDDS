@@ -11,24 +11,20 @@ project(*Common) : dcps {
   dynamicflags = STOCKQUOTERCOMMON_BUILD_DLL
 
   TypeSupport_Files {
-    StockQuoter.idl >> QuoteTypeSupport.idl QuoteTypeSupportImpl.h QuoteTypeSupportImpl.cpp \
-                       ExchangeEventTypeSupport.idl ExchangeEventTypeSupportImpl.h ExchangeEventTypeSupportImpl.cpp
+    StockQuoter.idl
   }
 
   IDL_Files {
-    ExchangeEventTypeSupport.idl
-    QuoteTypeSupport.idl
+    StockQuoterTypeSupport.idl
     StockQuoter.idl
   }
 
   Header_Files {
-    ExchangeEventTypeSupportImpl.h
-    QuoteTypeSupportImpl.h
+    StockQuoterTypeSupportImpl.h
   }
 
   Source_Files {
-   ExchangeEventTypeSupportImpl.cpp
-    QuoteTypeSupportImpl.cpp
+   StockQuoterTypeSupportImpl.cpp
   }
 } 
 

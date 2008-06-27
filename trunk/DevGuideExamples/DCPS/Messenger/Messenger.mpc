@@ -3,12 +3,12 @@ project(DDS*idl): dcps {
   // This project ensures the common components get built first.
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger.idl
   }
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   custom_only = 1
@@ -22,13 +22,13 @@ project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -39,13 +39,13 @@ project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -56,12 +56,12 @@ project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_rel
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
   }
 
   Source_Files {
     stack_subscriber.cpp
     StackDataReaderListener.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }

@@ -7,12 +7,12 @@ project(DcpsFooType) : dcps {
   dcps_ts_flags += --export=FooType_Export
 
   TypeSupport_Files {
-    FooType.idl >> FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp
+    FooType.idl
   }
 
   IDL_Files {
     FooType.idl
-    FooTypeSupport.idl
+    FooTypeTypeSupport.idl
   }
 }
 

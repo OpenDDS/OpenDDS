@@ -12,8 +12,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 static const char * reader_address_str = "localhost:16789";
 

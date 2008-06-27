@@ -6,7 +6,7 @@
 
 #include "DataReaderListener.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "common.h"
 
 class Reader 

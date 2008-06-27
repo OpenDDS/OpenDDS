@@ -2,12 +2,12 @@ project(DDS*idl): dcps {
   // This project ensures the common components get built first.
 
   TypeSupport_Files {
-    Test.idl >> DataTypeSupport.idl DataTypeSupportImpl.h DataTypeSupportImpl.cpp
+    Test.idl
   }
 
   IDL_Files {
     Test.idl
-    DataTypeSupport.idl
+    TestTypeSupport.idl
   }
 
   custom_only = 1
@@ -20,18 +20,18 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   after    += DDS*idl
 
   TypeSupport_Files {
-    Test.idl >> DataTypeSupport.idl DataTypeSupportImpl.h DataTypeSupportImpl.cpp
+    Test.idl
   }
 
   IDL_Files {
     Test.idl
-    DataTypeSupport.idl
+    TestTypeSupport.idl
   }
 
   Source_Files {
     Publisher.cpp
     DataWriterListener.cpp
-    DataTypeSupportImpl.cpp
+    TestTypeSupportImpl.cpp
   }
 }
 
@@ -41,17 +41,17 @@ project(DDS*Subscriber) : dcpsexe_with_tcp {
   after    += DDS*idl
 
   TypeSupport_Files {
-    Test.idl >> DataTypeSupport.idl DataTypeSupportImpl.h DataTypeSupportImpl.cpp
+    Test.idl
   }
 
   IDL_Files {
     Test.idl
-    DataTypeSupport.idl
+    TestTypeSupport.idl
   }
 
   Source_Files {
     Subscriber.cpp
     DataReaderListener.cpp
-    DataTypeSupportImpl.cpp
+    TestTypeSupportImpl.cpp
   }
 }

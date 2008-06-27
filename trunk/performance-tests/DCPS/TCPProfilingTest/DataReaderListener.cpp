@@ -3,8 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "testMsgTypeSupportC.h"
-#include "testMsgTypeSupportImpl.h"
+#include "testMessageTypeSupportC.h"
+#include "testMessageTypeSupportImpl.h"
 
 extern long subscriber_delay_msec; // from common.h
 

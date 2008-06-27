@@ -16,7 +16,7 @@
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tests/DCPS/common/TestSupport.h"
 

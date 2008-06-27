@@ -12,7 +12,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 static const char * writer_address_str = "localhost:29876";
 
