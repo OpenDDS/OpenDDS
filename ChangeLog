@@ -1,3 +1,35 @@
+Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed a race condition described in RT11348.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        
+          Added pub_map_releasing_ and sub_map_releasing_ to save the snapshot 
+          of associations in datalink at the time the link is declared for releasing
+          resource due to connection problem. The DataLinkCleanupTask will remove the 
+          associations based on the snapshot. This would fix race condition that the new
+          associations added to the same link during the period from the datalink
+          is declared for releasing to the removal is performed are removed.
+          
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Moved the datalink cleanup operations in DataLinkCleanupTask::execute to a 
+          new function (clear_associations()) in DataLink class and removed TransportImpl
+          reference in DataLinkCleanupTask as it's not needed.
+          
+        * tests/DCPS/Reconnect/README:
+        
+          Added description of dl_clean test case to reproduce the bug and verify the fix.
+          The dl_clean test can not be run in an automated nightly build since it requires 
+          a special patch to prove the fix.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+       
+          Added dl_clean test case.
+
 Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_test.pl:
