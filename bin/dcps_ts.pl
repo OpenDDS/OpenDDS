@@ -5,9 +5,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+use strict;
+
 use FindBin ;
 use lib "$FindBin::Bin" ;
 use lib "$ENV{ACE_ROOT}/bin";
+use File::Basename;
 use PerlACE::Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
@@ -70,7 +73,7 @@ pod2usage( 1) if not $idlfile ;
 #
 # Parse the idl file for the pragmas that mark the DCPS types
 #
-my @types     = @ARGV;
+my @types = @ARGV;
 if( open(IDLINFILE, $idlfile)) {
   while (<IDLINFILE>) {
     if (/^ *# *pragma *DCPS_DATA_TYPE *"(.*)"/) {
@@ -90,101 +93,15 @@ if (not scalar @types) {
 #
 ########################################################################
 
-########################################################################
-#
-# Parse the options.
-#
-
-foreach my $type (@types) {
-#
-# Break out any scope from the type.
-#
-my $scopepath ;
-my $basetype ;
-if($type=~/^(.*)::([^:]*)$/) {
-  $scopepath = $1 ;
-  $basetype  = $2 ;
-} else {
-  $basetype = $type ;
-}
-$scopepath .= "::" if $scopepath ;
-&console( "Scope path set to: $scopepath") if $scopepath ;
-&console( "Base type set to: $basetype") ;
-
-#
-# Determine any subdirectory substitutions.
-#
-if( $subdir) {
-  $subdir .= "/" ;
-  &console( "Subdirectory set to: $subdir") ;
-} else {
-  $subdir = "" ;
-  &console( "Subdirectory not used.") ;
-}
-
-#
-# Module substitutions are bracketed.
-#
-my $modulestart    = "" ;
-my $moduleend      = "" ;
-my $namespacestart = "" ;
-my $namespaceend   = "" ;
-my $module         = "" ;
-
-# default to the same modulepath as the scope path (new for v0.12 5/9/07)
-&console( "Defaulting Module scope to the path scope $scopepath minus ::.") ;
-my $modulepath = $scopepath;
-$modulepath =~ s/\:\:$//;
-
-if( $modulepath) {
-  $module         = "$modulepath\:\:" ;
-  &console( "Module set to: $module") ;
-
-  #
-  # Each element of the module path is its own scope.
-  #
-  foreach my $entry (split( '::', $modulepath)) {
-    $modulestart    .= "module $entry {\n" ;
-    $moduleend      .= "};\n" ;
-    $namespacestart .= "namespace $entry {\n" ;
-    $namespaceend   .= "}; // $entry\n" ;
-  }
-  &console( "Module start substitution set to: $modulestart") ;
-  &console( "Namespace start substitution set to: $namespacestart") ;
-
-} else {
-  &console( "No enclosing Module scope.") ;
-}
-
-#
-# Uppercase type name for macros.
-#
-my $uppertype = $basetype ;
-$uppertype =~ y/a-z/A-Z/ ;
-
-#
-# Export directive.
-#
-my $export = "" ;
-$export = "${exportmacro}" if $exportmacro ;
-
-#
-# Precompiled header include
-# 
-my $pchinclude = "";
-$pchinclude = "#include \"${pchfile}\"" if $pchfile ;
-
-#
-# POA attachment.
-#
-my $poa = "POA_${module}" ;
-
 #
 # Generate output filenames.
 #
-my $idloutputfile = $basetype . "TypeSupport.idl" ;
-my $houtputfile   = $basetype . "TypeSupportImpl.h" ;
-my $cppoutputfile = $basetype . "TypeSupportImpl.cpp" ;
+my $idlbase = basename($idlfile);
+$idlbase =~ s/\.idl//;
+
+my $idloutputfile = $idlbase . "TypeSupport.idl" ;
+my $houtputfile   = $idlbase . "TypeSupportImpl.h" ;
+my $cppoutputfile = $idlbase . "TypeSupportImpl.cpp" ;
 
 #
 # Rename output files if we need to backup.
@@ -220,120 +137,230 @@ if( $backup) {
 #
 ########################################################################
 
+########################################################################
+#
+# Set up the single file contents and go through each type adding to the
+# contents along the way.
+#
+
+my $idl_content = DCPS::IDLTemplate::header();
+$idl_content =~ s/<%SUBDIR%>/$subdir/g;
+$idl_content =~ s/<%IDLFILE%>/$idlfile/g;
+
+my $h_content = DCPS::HTemplate::header();
+$h_content =~ s/<%IDLBASE%>/$idlbase/g;
+$h_content =~ s/<%UPPERIDLBASE%>/uc($idlbase)/ge;
+
+my $cpp_content = DCPS::CPPTemplate::header();
+my $pchinclude = "";
+$pchinclude = "#include \"${pchfile}\"" if $pchfile ;
+$cpp_content =~ s/<%PCHINCLUDE%>/$pchinclude/g ;
+$cpp_content =~ s/<%IDLBASE%>/$idlbase/g;
+
+my $count = 0;
+foreach my $type (@types) {
+  #
+  # Break out any scope from the type.
+  #
+  my $scopepath ;
+  my $basetype ;
+  if($type=~/^(.*)::([^:]*)$/) {
+    $scopepath = $1 ;
+    $basetype  = $2 ;
+  } else {
+    $basetype = $type ;
+  }
+  $scopepath .= "::" if $scopepath ;
+  &console( "Scope path set to: $scopepath") if $scopepath ;
+  &console( "Base type set to: $basetype") ;
+
+  #
+  # Determine any subdirectory substitutions.
+  #
+  if( $subdir) {
+    $subdir .= "/" ;
+    &console( "Subdirectory set to: $subdir") ;
+  } else {
+    $subdir = "" ;
+    &console( "Subdirectory not used.") ;
+  }
+
+  #
+  # Module substitutions are bracketed.
+  #
+  my $modulestart    = "" ;
+  my $moduleend      = "" ;
+  my $namespacestart = "" ;
+  my $namespaceend   = "" ;
+  my $module         = "" ;
+
+  # default to the same modulepath as the scope path (new for v0.12 5/9/07)
+  &console( "Defaulting Module scope to the path scope $scopepath minus ::.") ;
+  my $modulepath = $scopepath;
+  $modulepath =~ s/\:\:$//;
+
+  if( $modulepath) {
+    $module         = "$modulepath\:\:" ;
+    &console( "Module set to: $module") ;
+
+    #
+    # Each element of the module path is its own scope.
+    #
+    foreach my $entry (split( '::', $modulepath)) {
+      $modulestart    .= "module $entry {\n" ;
+      $moduleend      .= "};\n" ;
+      $namespacestart .= "namespace $entry {\n" ;
+      $namespaceend   .= "}; // $entry\n" ;
+    }
+    &console( "Module start substitution set to: $modulestart") ;
+    &console( "Namespace start substitution set to: $namespacestart") ;
+
+  } else {
+    &console( "No enclosing Module scope.") ;
+  }
+
+  #
+  # Uppercase type name for macros.
+  #
+  my $uppertype = $basetype ;
+  $uppertype =~ y/a-z/A-Z/ ;
+
+  #
+  # Export directive.
+  #
+  my $export = "" ;
+  $export = "${exportmacro}" if $exportmacro ;
+
+  #
+  # POA attachment.
+  #
+  my $poa = "POA_${module}" ;
+
   if ($cpp_only == 0) {
-########################################################################
-#
-# Generate the IDL output file.
-#
+    ########################################################################
+    #
+    # Generate the IDL output file.
+    #
 
-#
-# Slurp the entire template.
-#
-my $idl_template = DCPS::IDLTemplate::contents() ;
+    #
+    # Slurp the entire template.
+    #
+    my $idl_template = DCPS::IDLTemplate::contents() ;
 
-#
-# Convert template tags into the specified values.
-#
-$idl_template =~ s/<%TYPE%>/$basetype/g ;
-$idl_template =~ s/<%SCOPE%>/$scopepath/g ;
-$idl_template =~ s/<%SUBDIR%>/$subdir/g ;
-$idl_template =~ s/<%IDLFILE%>/$idlfile/g ;
-$idl_template =~ s/<%MODULESTART%>/$modulestart/g ;
-$idl_template =~ s/<%MODULEEND%>/$moduleend/g ;
+    #
+    # Convert template tags into the specified values.
+    #
+    $idl_template =~ s/<%TYPE%>/$basetype/g ;
+    $idl_template =~ s/<%SCOPE%>/$scopepath/g ;
+    $idl_template =~ s/<%SUBDIR%>/$subdir/g ;
+    $idl_template =~ s/<%IDLFILE%>/$idlfile/g ;
+    $idl_template =~ s/<%MODULESTART%>/$modulestart/g ;
+    $idl_template =~ s/<%MODULEEND%>/$moduleend/g ;
 
-#
-# Put the results in the file.
-#
-if( open(IDLFILE, ">$idloutputfile")) {
-  print IDLFILE $idl_template ;
-  close IDLFILE ;
-  &console( "IDL file $idloutputfile written.") ;
+    $idl_content .= $idl_template;
+    #
+    ########################################################################
 
-} else {
-  &error( "Failed to open IDL file for output: $idloutputfile\n") ;
-  exit 1 ;
-}
+    ########################################################################
+    #
+    # Generate the C++ header output file.
+    #
 
-#
-########################################################################
+    #
+    # Slurp the entire template.
+    #
+    my $h_template = DCPS::HTemplate::contents() ;
 
-########################################################################
-#
-# Generate the C++ header output file.
-#
+    #
+    # Convert template tags into the specified values.
+    #
+    $h_template =~ s/<%TYPE%>/$basetype/g ;
+    $h_template =~ s/<%SCOPE%>/$scopepath/g ;
+    $h_template =~ s/<%EXPORT%>/$export/g ;
+    $h_template =~ s/<%POA%>/$poa/g ;
+    $h_template =~ s/<%MODULE%>/$module/g ;
+    $h_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
+    $h_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
 
-#
-# Slurp the entire template.
-#
-my $h_template = DCPS::HTemplate::contents() ;
-
-#
-# Convert template tags into the specified values.
-#
-$h_template =~ s/<%TYPE%>/$basetype/g ;
-$h_template =~ s/<%UPPERTYPE%>/$uppertype/g ;
-$h_template =~ s/<%SCOPE%>/$scopepath/g ;
-$h_template =~ s/<%EXPORT%>/$export/g ;
-$h_template =~ s/<%POA%>/$poa/g ;
-$h_template =~ s/<%MODULE%>/$module/g ;
-$h_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
-$h_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
-
-#
-# Put the results in the file.
-#
-if( open(HFILE, ">$houtputfile")) {
-  print HFILE $h_template ;
-  close HFILE ;
-  &console( "IDL file $houtputfile written.") ;
-
-} else {
-  &error( "Failed to open CPP file for output: $houtputfile\n") ;
-  exit 1 ;
-}
-
-#
-########################################################################
+    $h_content .= $h_template;
+    #
+    ########################################################################
 
   } # endif $cpp_only != 0
-  
+
+  ########################################################################
+  #
+  # Generate the C++ implementation output file.
+  #
+
+  #
+  # Slurp the entire template.
+  #
+  my $cpp_template = DCPS::CPPTemplate::contents() ;
+
+  #
+  # Convert template tags into the specified values.
+  #
+  $cpp_template =~ s/<%TYPE%>/$basetype/g ;
+  $cpp_template =~ s/<%SCOPE%>/$scopepath/g ;
+  $cpp_template =~ s/<%MODULE%>/$module/g ;
+  $cpp_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
+  $cpp_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
+  $cpp_template =~ s/<%COUNT%>/$count/g;
+
+  $cpp_content .= $cpp_template;
+  $count++;
+}
+
+my $h_footer = DCPS::HTemplate::footer();
+$h_footer =~ s/<%IDLBASE%>/$idlbase/g ;
+$h_content .= $h_footer;
+
+#
 ########################################################################
-#
-# Generate the C++ implementation output file.
-#
-
-#
-# Slurp the entire template.
-#
-my $cpp_template = DCPS::CPPTemplate::contents() ;
-
-#
-# Convert template tags into the specified values.
-#
-$cpp_template =~ s/<%TYPE%>/$basetype/g ;
-$cpp_template =~ s/<%UPPERTYPE%>/$uppertype/g ;
-$cpp_template =~ s/<%SCOPE%>/$scopepath/g ;
-$cpp_template =~ s/<%MODULE%>/$module/g ;
-$cpp_template =~ s/<%PCHINCLUDE%>/$pchinclude/g ;
-$cpp_template =~ s/<%NAMESPACESTART%>/$namespacestart/g ;
-$cpp_template =~ s/<%NAMESPACEEND%>/$namespaceend/g ;
 
 #
 # Put the results in the file.
 #
-if( open(CPPFILE, ">$cppoutputfile")) {
-  print CPPFILE $cpp_template ;
-  close CPPFILE ;
-  &console( "CPP file $cppoutputfile written.") ;
+if (open(IDLFILE, ">$idloutputfile")) {
+  print IDLFILE $idl_content;
+  close(IDLFILE);
+  console("IDL file $idloutputfile written.");
 
-} else {
-  &error( "Failed to open CPP file for output: $cppoutputfile\n") ;
-  exit 1 ;
 }
+else {
+  error("Failed to open IDL file for output: $idloutputfile\n");
+  exit(1);
+}
+
+if ($cpp_only == 0) {
+  #
+  # Put the results in the file.
+  #
+  if (open(HFILE, ">$houtputfile")) {
+    print HFILE $h_content;
+    close(HFILE);
+    console("Header file $houtputfile written.") ;
+
+  }
+  else {
+    error("Failed to open header file for output: $houtputfile\n");
+    exit(1);
+  }
 }
 
 #
-########################################################################
+# Put the results in the file.
+#
+if (open(CPPFILE, ">$cppoutputfile")) {
+  print CPPFILE $cpp_content;
+  close(CPPFILE);
+  console("CPP file $cppoutputfile written.");
+}
+else {
+  error("Failed to open CPP file for output: $cppoutputfile\n");
+  exit(1);
+}
 
 #
 # Done
@@ -345,7 +372,7 @@ exit 0 ;
 # Subroutine to send console messages with consistent information.
 #
 sub console {
-  print "\n*** dcps_ts.pl: " . join( ' ', @_)  . "\n" if $verbose ;
+  print "\n*** dcps_ts.pl: @_\n" if $verbose ;
 }
 #
 ########################################################################
@@ -450,12 +477,6 @@ and skeletons required by the implementations generated by this script.
 =head1 EXAMPLES
 
   ./dcps_ts.pl -v -S subdir -X FooLib_export -M Mine Xyz::Foo FooDef.idl
-
-=head1 FILES
-
-  <type>TypeSupport.idl - contains IDL definition of <type>TypeSupport.
-
-  <type>TypeSupportImpl.{h,cpp} - contain implementation of <type>TypeSupport.
 
 =cut
 

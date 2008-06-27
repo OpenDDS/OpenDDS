@@ -1,6 +1,6 @@
 // $Id$
 
-#include "DataTypeSupportImpl.h"
+#include "TestTypeSupportImpl.h"
 #include "Partition_Table.h"
 #include "DataWriterListener.h"
 

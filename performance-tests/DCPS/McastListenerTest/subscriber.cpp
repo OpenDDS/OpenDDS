@@ -16,10 +16,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"

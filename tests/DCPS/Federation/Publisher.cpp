@@ -1,8 +1,8 @@
 
 #include "Publisher.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"

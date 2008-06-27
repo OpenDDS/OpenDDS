@@ -20,7 +20,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportConfiguration.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"

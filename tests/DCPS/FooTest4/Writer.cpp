@@ -8,8 +8,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
-#include "tests/DCPS/FooType4/FooTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 const int default_key = 101010;
 

@@ -2,10 +2,8 @@
 //
 // $Id$
 #include "PubListener.h"
-#include "PubMessageTypeSupportImpl.h"
-#include "AckMessageTypeSupportImpl.h"
-#include "PubMessageTypeSupportC.h"
-#include "AckMessageTypeSupportC.h"
+#include "DDSPerfTestTypeSupportImpl.h"
+#include "DDSPerfTestTypeSupportC.h"
 
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>

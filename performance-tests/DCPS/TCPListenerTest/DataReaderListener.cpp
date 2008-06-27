@@ -3,14 +3,8 @@
 // $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportC.h"
-#include "../TypeNoKeyBounded/Pt128TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt512TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt2048TypeSupportImpl.h"
-#include "../TypeNoKeyBounded/Pt8192TypeSupportImpl.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
+#include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 extern long subscriber_delay_msec; // from common.h
 

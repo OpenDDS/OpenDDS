@@ -9,7 +9,7 @@
 #include "TestException.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 const int default_key = 101010;

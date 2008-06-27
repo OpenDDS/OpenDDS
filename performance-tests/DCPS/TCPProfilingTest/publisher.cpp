@@ -16,7 +16,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
 
-#include "testMsgTypeSupportImpl.h"
+#include "testMessageTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 

@@ -1,7 +1,5 @@
 #include "PubDriver.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"

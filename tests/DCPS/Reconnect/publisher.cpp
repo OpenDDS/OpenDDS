@@ -9,7 +9,7 @@
  */
 // ============================================================================
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "DataWriterListener.h"
 #include <dds/DCPS/Service_Participant.h>

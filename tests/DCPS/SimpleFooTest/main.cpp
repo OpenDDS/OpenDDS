@@ -14,7 +14,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "tests/DCPS/FooType/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType/FooTypeTypeSupportImpl.h"
 
 #include "ace/Get_Opt.h"
 

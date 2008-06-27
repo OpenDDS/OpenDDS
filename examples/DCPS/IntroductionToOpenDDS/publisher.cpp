@@ -6,8 +6,7 @@
 //
 // *******************************************************************
 
-#include "QuoteTypeSupportImpl.h"
-#include "ExchangeEventTypeSupportImpl.h"
+#include "StockQuoterTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>

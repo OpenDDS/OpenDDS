@@ -2,8 +2,8 @@
 //
 // $Id$
 #include "DataReaderListener.h"
-#include "MessageTypeSupportC.h"
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportC.h"
+#include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <ace/streams.h>

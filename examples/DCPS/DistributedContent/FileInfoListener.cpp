@@ -2,7 +2,7 @@
 #include "AbstractionLayer.h"
 
 #include "FileInfoC.h"
-#include "FileDiffTypeSupportC.h"
+#include "FileInfoTypeSupportC.h"
 
 
 

@@ -36,12 +36,12 @@ project(*Publisher) : dcpsexe_with_tcp {
   after += *idl Sync_ClientLib
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger.idl
   }
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
     SyncExt.idl
   }
 
@@ -49,7 +49,7 @@ project(*Publisher) : dcpsexe_with_tcp {
     SyncClientExt_i.cpp
     publisher.cpp
     Writer.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -61,12 +61,12 @@ project(*Subscriber) : dcpsexe_with_tcp {
   after += *idl Sync_ClientLib
 
   TypeSupport_Files {
-    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger.idl
   }
 
   IDL_Files {
     Messenger.idl
-    MessageTypeSupport.idl
+    MessengerTypeSupport.idl
     SyncExt.idl
   }
 
@@ -74,6 +74,6 @@ project(*Subscriber) : dcpsexe_with_tcp {
     SyncClientExt_i.cpp
     subscriber.cpp
     DataReaderListener.cpp
-    MessageTypeSupportImpl.cpp
+    MessengerTypeSupportImpl.cpp
   }
 }

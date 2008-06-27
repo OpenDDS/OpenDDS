@@ -3,8 +3,8 @@
 // $Id$
 #include "ForwardingListener.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportImpl.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 
 // Only for Microsoft VC6

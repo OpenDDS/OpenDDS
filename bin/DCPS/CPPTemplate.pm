@@ -4,19 +4,21 @@
 #                  substituted when generating the output file:
 #
 #   <%TYPE%>           - Type requiring support in DDS.
-#   <%UPPERTYPE%>      - Uppercase version of <%TYPE%>
 #   <%MODULE%>         - Module containing the type.
 #   <%SCOPE%>          - Enclosing scope of type.
 #   <%PCHINCLUDE%>     - Including a PreCompiled Header file.
 #   <%NAMESPACESTART%> - Beginning of namespace.
 #   <%NAMESPACEEND%>   - End of namespace.
+#   <%COUNT%>          - The number of the current type (per idl file).
+#   <%IDLBASE%>        - The name of the idl file without the extension.
 #
 package DCPS::CPPTemplate;
 
 use warnings;
 use strict;
 
-sub contents { return <<'!EOT'
+sub header {
+  return << '!EOT'
 // -*- C++ -*-
 //
 // $Id$
@@ -35,17 +37,21 @@ sub contents { return <<'!EOT'
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/Util.h"
-#include "<%TYPE%>TypeSupportImpl.h"
+#include "<%IDLBASE%>TypeSupportImpl.h"
 
+!EOT
+
+}
+
+sub contents { return <<'!EOT'
 namespace
 {
   using ::OpenDDS::DCPS::DataReaderImpl;
 
-  typedef ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess SequenceType;
-
-  struct LoanerGuard
+  struct LoanerGuard<%COUNT%>
   {
-    LoanerGuard(SequenceType& seq, DataReaderImpl* dataReader)
+    LoanerGuard<%COUNT%>(::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess& seq,
+                 DataReaderImpl* dataReader)
       : seq_(seq)
       , dataReader_(dataReader)
       , set_(false)
@@ -53,12 +59,12 @@ namespace
 
     void set() { set_ = true; }
 
-    ~LoanerGuard()
+    ~LoanerGuard<%COUNT%>()
     {
       if(set_) seq_.set_loaner(dataReader_);
     }
 
-    SequenceType& seq_;
+    ::<%MODULE%><%TYPE%>Seq::PrivateMemberAccess& seq_;
     DataReaderImpl* dataReader_;
     bool set_;
   };
@@ -732,7 +738,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   InstanceMap::iterator const the_end = instance_map_.end ();
   for (InstanceMap::iterator it = instance_map_.begin ();
@@ -855,7 +861,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   InstanceMap::iterator const the_end = instance_map_.end ();
   for (InstanceMap::iterator it = instance_map_.begin ();
@@ -1163,7 +1169,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   OpenDDS::DCPS::SubscriptionInstance * ptr =
       this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle);
@@ -1264,7 +1270,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  LoanerGuard loanerGuard(received_data_p, this);
+  LoanerGuard<%COUNT%> loanerGuard(received_data_p, this);
 
   OpenDDS::DCPS::SubscriptionInstance * ptr =
     this->OPENDDS_DCPS_DataReaderImpl::get_handle_instance (a_handle);
@@ -1961,8 +1967,6 @@ void
 }
 
 <%NAMESPACEEND%>
-
-
 !EOT
 
 }

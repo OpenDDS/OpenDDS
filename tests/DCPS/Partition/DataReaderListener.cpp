@@ -1,8 +1,8 @@
 // $Id$
 
 #include "DataReaderListener.h"
-#include "DataTypeSupportC.h"
-#include "DataTypeSupportImpl.h"
+#include "TestTypeSupportC.h"
+#include "TestTypeSupportImpl.h"
 
 #include <iostream>
 

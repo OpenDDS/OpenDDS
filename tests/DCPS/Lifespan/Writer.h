@@ -5,7 +5,7 @@
 #define WRITER_H
 
 #include <dds/DdsDcpsPublicationC.h>
-#include "MessageTypeSupportC.h"
+#include "MessengerTypeSupportC.h"
 #include "DataWriterListenerImpl.h"
 #include <ace/Task.h>
 

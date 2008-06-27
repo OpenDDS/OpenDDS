@@ -11,7 +11,7 @@
 
 #include "SyncClientExt_i.h"
 
-#include "MessageTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>

@@ -2,8 +2,8 @@
 #define PUBDRIVER_H
 
 #include "dds/DdsDcpsC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
-#include "tests/DCPS/FooType3/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "TestS.h"

@@ -4,8 +4,7 @@
 #include "Writer.h"
 #include "common.h"
 #include "TestException.h"
-#include "tests/DCPS/FooType5/FooTypeSupportC.h"
-#include "tests/DCPS/FooType5/FooNoKeyTypeSupportC.h"
+#include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "ace/OS_NS_unistd.h"
 

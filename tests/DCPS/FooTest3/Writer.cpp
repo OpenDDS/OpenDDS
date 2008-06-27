@@ -7,7 +7,7 @@
 #include "Writer.h"
 #include "TestException.h"
 #include "tests/DCPS/common/TestSupport.h"
-#include "tests/DCPS/FooType3/FooTypeSupportC.h"
+#include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
 
 const int default_key = 101010;
 

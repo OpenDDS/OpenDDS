@@ -16,7 +16,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
-#include "tests/DCPS/FooType3NoKey/FooTypeSupportImpl.h"
+#include "tests/DCPS/FooType3NoKey/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 #include "ace/Arg_Shifter.h"
