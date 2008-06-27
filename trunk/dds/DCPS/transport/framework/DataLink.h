@@ -149,6 +149,8 @@ namespace OpenDDS
 
         // Call-back from the concrete transport object.
         // The connection has been broken. No locks are being held.
+        // Take a snapshot of current associations which will be removed
+        // by DataLinkCleanupTask.
         bool release_resources ();
 
         // Used by SimpleUdp and SimpleMcast to inform the send strategy to
@@ -165,6 +167,10 @@ namespace OpenDDS
                     const RepoId& local_id,
                     const bool&   pub_side,
                     bool& last);
+
+        /// This is called by DataLinkCleanupTask thread to remove the associations
+        /// based on the snapshot in release_resources().
+        void clear_associations ();
 
        protected:
 
@@ -229,6 +235,10 @@ namespace OpenDDS
                                   ReceiveListenerSet_rch& listener_set,
                                   DataLinkSetMap&      released_subscribers);
 
+        /// Save current sub and pub association maps for releasing and create
+        /// empty maps for new associations.
+        void prepare_release ();
+
         typedef ACE_SYNCH_MUTEX     LockType;
 
 
@@ -242,7 +252,7 @@ namespace OpenDDS
         /// TransportReceiveListener objects (each with an associated
         /// subscriber_id).  This map is used for delivery of incoming
         /// (aka, received) data samples.
-        ReceiveListenerSetMap pub_map_;
+        ReceiveListenerSetMap* pub_map_;
 
         LockType pub_map_lock_;
 
@@ -250,7 +260,7 @@ namespace OpenDDS
         /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
         /// each other, where we have a many (publishers) to many (subscribers)
         /// association being managed here.
-        RepoIdSetMap sub_map_;
+        RepoIdSetMap* sub_map_;
 
         LockType sub_map_lock_;
 
@@ -269,6 +279,11 @@ namespace OpenDDS
         RepoIdSet released_local_subs_;
 
         LockType released_local_lock_;
+
+        // snapshot of associations when the release_resource() is called.
+        ReceiveListenerSetMap* pub_map_releasing_;
+        RepoIdSetMap* sub_map_releasing_;
+
 
     protected:
 
