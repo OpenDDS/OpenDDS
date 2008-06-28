@@ -14,5 +14,9 @@ project(DcpsFooType) : dcps {
     FooType.idl
     FooTypeTypeSupport.idl
   }
+
+  Source_Files {
+    FooTypeTypeSupportImpl.cpp
+  }
 }
 

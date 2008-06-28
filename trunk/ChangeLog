@@ -1,9 +1,22 @@
+Sat Jun 28 20:41:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Fixed MPC files that were missing the *TypeSupportImpl.cpp file after
+          yesterday's scripted changes.  A recent change to MPC itself will
+          allow us to not have to specify "Source_Files" in most cases, but the
+          dcps_ts.pl custom type is not yet taking advantage of this new MPC
+          feature.
+
 Fri Jun 27 22:14:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
 
-	  Added Perl script to execute the example similar to the bat
-	  files.
+          Added Perl script to execute the example similar to the bat
+          files.
 
 Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
