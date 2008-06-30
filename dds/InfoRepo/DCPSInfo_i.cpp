@@ -1039,7 +1039,6 @@ void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
 }
 
 
-
 int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
                                       bool use_bit)
 {
@@ -1271,6 +1270,7 @@ TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq&
   qosSeq.first = qosType;
   qosSeq.second = BinSeq (len, buf);
 }
+
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 

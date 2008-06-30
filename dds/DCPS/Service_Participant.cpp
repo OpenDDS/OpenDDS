@@ -417,7 +417,7 @@ namespace OpenDDS
               arg_shifter.consume_arg ();
               got_bit_flag = true;
             }
-          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-TransportDebugLevel"))) != 0)
+          else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTransportDebugLevel"))) != 0)
             {
               ::OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi (currentArg);
               arg_shifter.consume_arg ();
