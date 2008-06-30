@@ -6,11 +6,6 @@ project(DDS*idl): dcps {
     Messenger.idl
   }
 
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-  }
-
   custom_only = 1
 }
 
@@ -20,15 +15,13 @@ project(DDS*Publisher) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_
   exename   = publisher
   after    += DDS*idl
 
-  IDL_Files {
+  TypeSupport_Files {
     Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -37,15 +30,13 @@ project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable
   exename   = subscriber
   after    += DDS*idl
 
-  IDL_Files {
+  TypeSupport_Files {
     Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }
 
@@ -54,14 +45,12 @@ project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_rel
   exename   = stack_subscriber
   after    += DDS*idl
 
-  IDL_Files {
+  TypeSupport_Files {
     Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     stack_subscriber.cpp
     StackDataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }

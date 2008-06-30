@@ -5,53 +5,34 @@ project(DDS*idl): dcps {
     Test.idl
   }
 
-  IDL_Files {
-    Test.idl
-    TestTypeSupport.idl
-  }
-
   custom_only = 1
 }
 
 
 project(DDS*Publisher) : dcpsexe_with_tcp {
-
-  exename   = publisher
-  after    += DDS*idl
+  exename = publisher
+  after  += DDS*idl
 
   TypeSupport_Files {
     Test.idl
-  }
-
-  IDL_Files {
-    Test.idl
-    TestTypeSupport.idl
   }
 
   Source_Files {
     Publisher.cpp
     DataWriterListener.cpp
-    TestTypeSupportImpl.cpp
   }
 }
 
 project(DDS*Subscriber) : dcpsexe_with_tcp {
-
-  exename   = subscriber
-  after    += DDS*idl
+  exename = subscriber
+  after  += DDS*idl
 
   TypeSupport_Files {
     Test.idl
   }
 
-  IDL_Files {
-    Test.idl
-    TestTypeSupport.idl
-  }
-
   Source_Files {
     Subscriber.cpp
     DataReaderListener.cpp
-    TestTypeSupportImpl.cpp
   }
 }
