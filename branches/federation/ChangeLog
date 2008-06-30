@@ -1,11 +1,27 @@
+Mon Jun 30 17:39:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+
+	  These files differed from the r1260 trunk version in whitespace
+	  only.  Removed these differences.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  This was not synchronized with the r1260 trunk version.  Now it
+	  is identical with it.  The change was to make the
+	  -DCPSTransportDebugLevel option name correct.
+
 Fri Jun 27 21:22:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
-	Branched from
-	https://svn.dre.vanderbilt.edu/DOC/DDS/branches/RT11951 r1151,
-	synchronized with
-	https://svn.dre.vanderbilt.edu/DOC/DDS/trunk r1260.
-	See those branches for changes to this point.
-	Builds and auto_run_tests.pl passing on Ubuntu 8.04 / gcc 4.2.3
+        Branched from
+        https://svn.dre.vanderbilt.edu/DOC/DDS/branches/RT11951 r1151,
+        synchronized with
+        https://svn.dre.vanderbilt.edu/DOC/DDS/trunk r1260.
+        See those branches for changes to this point.
+        Builds and auto_run_tests.pl passing on Ubuntu 8.04 / gcc 4.2.3
 
 LocalVariables:
 mode: change-log

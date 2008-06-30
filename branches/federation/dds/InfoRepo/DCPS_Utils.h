@@ -21,6 +21,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+
 /// Increments the count of occurances of the incompatible policy
 ///  for the status
 void
@@ -28,8 +29,8 @@ increment_incompatibility_count (OpenDDS::DCPS::IncompatibleQosStatus* status,
                                  ::DDS::QosPolicyId_t incompatible_policy);
 
 /// Compares whether a publication and subscription are compatible
-bool compatibleQOS(DCPS_IR_Publication * publication,
-                  DCPS_IR_Subscription * subscription);
+bool compatibleQOS(DCPS_IR_Publication *  publication,
+                   DCPS_IR_Subscription * subscription);
 
 
 #endif /* DCPS_UTILS_H */

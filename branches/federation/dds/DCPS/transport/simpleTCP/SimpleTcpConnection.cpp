@@ -101,6 +101,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","open",6);
+
   // A safety check - This should not happen since the is_connector_
   // defaults to true and open() is called after the ACE_Aceptor
   // creates this new svc handler.
@@ -242,6 +243,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::close(u_long)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","close",6);
+
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
 
@@ -256,6 +258,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","handle_close",6);
+
   // TBD SOON - Find out exactly when handle_close() is called.
   //            My guess is that it happens if the reactor is closed
   //            while we are still registered with the reactor.  Right?
@@ -413,6 +416,7 @@ int
 OpenDDS::DCPS::SimpleTcpConnection::reconnect (bool on_new_association)
 {
   DBG_ENTRY_LVL("SimpleTcpConnection","reconnect",6);
+
   if (on_new_association)
     return this->active_reconnect_on_new_association ();
   // Try to reconnect if it's connector previously.
