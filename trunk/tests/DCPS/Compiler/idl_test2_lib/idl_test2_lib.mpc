@@ -1,20 +1,11 @@
 project : dcps {
-  sharedname = idl_test2_lib
-  libout       = .
-
-  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
-  dynamicflags = FOOLIB_BUILD_DLL
-  pch_header   =
-  pch_source   =
+  sharedname     = idl_test2_lib
+  libout         = .
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags   = FOOLIB_BUILD_DLL
   dcps_ts_flags += --export=FooLib_Export
 
   TypeSupport_Files {
     FooDef.idl
   }
-
-  IDL_Files {
-    FooDef.idl
-    FooDefTypeSupport.idl
-  }
-
 }

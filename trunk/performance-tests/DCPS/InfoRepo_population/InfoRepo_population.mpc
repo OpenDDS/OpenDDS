@@ -1,6 +1,6 @@
 project(*idl) : taoidldefaults {
-  idlflags    += -I../Sync
-  after       += Sync_Idl
+  idlflags += -I../Sync
+  after    += Sync_Idl
 
   IDL_Files {
     SyncExt.idl
@@ -11,12 +11,12 @@ project(*idl) : taoidldefaults {
 
 
 project(*SyncServer) : taoexe, portableserver, iortable {
-  exename = syncServer
+  exename   = syncServer
   includes += ../Sync
-  libs += SyncServer
+  libs     += SyncServer
   libpaths += $(DDS_ROOT)/lib
-  after += *idl Sync_ServerLib
-  avoids += minimum_corba
+  after    += *idl Sync_ServerLib
+  avoids   += minimum_corba
 
   IDL_Files {
     SyncExt.idl
@@ -29,51 +29,35 @@ project(*SyncServer) : taoexe, portableserver, iortable {
 }
 
 project(*Publisher) : dcpsexe_with_tcp {
-
   exename   = publisher
   libs     += SyncClient
   includes += ../Sync
-  after += *idl Sync_ClientLib
+  after    += *idl Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl
-  }
-
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-    SyncExt.idl
   }
 
   Source_Files {
     SyncClientExt_i.cpp
     publisher.cpp
     Writer.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
-
   exename   = subscriber
   libs     += SyncClient
   includes += ../Sync
-  after += *idl Sync_ClientLib
+  after    += *idl Sync_ClientLib
 
   TypeSupport_Files {
     Messenger.idl
-  }
-
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-    SyncExt.idl
   }
 
   Source_Files {
     SyncClientExt_i.cpp
     subscriber.cpp
     DataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }

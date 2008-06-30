@@ -8,18 +8,9 @@ project(*Publisher) : dcpsexe_with_tcp {
     Messenger2.idl
   }
 
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-    Messenger2.idl
-    Messenger2TypeSupport.idl
-  }
-
   Source_Files {
     publisher.cpp
     Writer.cpp
-    MessengerTypeSupportImpl.cpp
-    Messenger2TypeSupportImpl.cpp
   }
 }
 
@@ -32,18 +23,9 @@ project(*Subscriber) : dcpsexe_with_tcp {
     Messenger2.idl
   }
 
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-    Messenger2.idl
-    Messenger2TypeSupport.idl
-  }
-
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
-    Messenger2TypeSupportImpl.cpp
   }
 }
 
