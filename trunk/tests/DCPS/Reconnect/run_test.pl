@@ -26,20 +26,8 @@ $end_with_publisher = 0;
 $kill_subscriber = 0;
 $expected_deleted_connections = 1;
 $verify_lost_sub_notification = 1;
-$dl_clean_race_condition_test = 0;
 
-if ($ARGV[0] eq 'dl_clean') {
-  # Increase the number of messages so that the publisher will last
-  # until the subscriber restarted.
-  $num_writes = 20000;
-  $num_reads_before_crash = 2;
-  $restart_delay = 5;
-  $dl_clean_race_condition_test = 1;
-  $lost_publication_callback = 1;
-  $num_reads_deviation = 2;
-  $expected_deleted_connections = 2;
-}
-elsif ($ARGV[0] eq 'restart_sub') {
+if ($ARGV[0] eq 'restart_sub') {
   # Increase the number of messages so that the publisher will last
   # until the subscriber restarted.
   $num_writes = 20;
@@ -118,12 +106,12 @@ $Subscriber = PerlDDS::create_process
       ("subscriber"
        , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
        . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
-       . " -c $verify_lost_sub_notification -e $end_with_publisher  -DCPSDebugLevel 1 ");
+       . " -c $verify_lost_sub_notification -e $end_with_publisher");
 $Publisher = PerlDDS::create_process
       ("publisher"
        , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
-       . " -d $expected_deleted_connections -DCPSDebugLevel 1 ");
+       . " -d $expected_deleted_connections");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -199,7 +187,7 @@ if ($num_reads_before_crash > 0)
 
 # The publisher crashes and we need restart the publisher.
 if ($num_writes_before_crash > 0) {
-  $PublisherResult = $Publisher->WaitKill (60000);
+  $PublisherResult = $Publisher->WaitKill (60);
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
@@ -216,46 +204,25 @@ if ($num_writes_before_crash > 0) {
   $Publisher->Spawn ();
 }
 
-
-
-if ($dl_clean_race_condition_test == 1) {
-    # Run a while, the restarted subscriber should continue receiving. 
-    sleep (30);
-    $SubscriberResult = $Subscriber->TerminateWaitKill (5);
+if ($kill_subscriber == 0)
+{
+    $SubscriberResult = $Subscriber->WaitKill (300);
     if ($SubscriberResult != 0) {
-	    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-	    $status = 1;
+	print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+	$status = 1;
     }
-    $PublisherResult = $Publisher->TerminateWaitKill (5);
-    if ($kill_subscriber != 0 && $PublisherResult == 0) {
-      # writing out to STDOUT as these tests redirect STDERR to a log file.
-      # The nightly script parses STDERR to detect test failures.
-      print STDOUT "ERROR: Publisher crashed\n";
-      $status = 1;
-    }  
 }
-else {
-  if ($kill_subscriber == 0)
-  {
-      $SubscriberResult = $Subscriber->TerminateWaitKill (60);
-      if ($SubscriberResult != 0) {
-	      print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-	      $status = 1;
-      }
-  }
 
-
-  $PublisherResult = $Publisher->WaitKill (30);
-  if ($kill_subscriber != 0 && $PublisherResult == 0) {
-      # writing out to STDOUT as these tests redirect STDERR to a log file.
-      # The nightly script parses STDERR to detect test failures.
-      print STDOUT "ERROR: Publisher crashed\n";
-      $status = 1;
-  }
-  elsif ($kill_subscriber == 0 &&  $PublisherResult != 0) {
-      print STDERR "ERROR: publisher returned $PublisherResult \n";
-      $status = 1;
-  }
+$PublisherResult = $Publisher->WaitKill (30);
+if ($kill_subscriber != 0 && $PublisherResult == 0) {
+    # writing out to STDOUT as these tests redirect STDERR to a log file.
+    # The nightly script parses STDERR to detect test failures.
+    print STDOUT "ERROR: Publisher crashed\n";
+    $status = 1;
+}
+elsif ($kill_subscriber == 0 &&  $PublisherResult != 0) {
+    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    $status = 1;
 }
 
 # give InfoRepo a chance to digest the publisher crash.
