@@ -32,13 +32,18 @@ namespace OpenDDS
     {
     public:
       /// Constructor.
-      DataLinkCleanupTask ();
+      DataLinkCleanupTask (TransportImpl* transportImpl);
 
       /// Virtual Destructor.
       virtual ~DataLinkCleanupTask ();
 
       /// Handle reconnect requests.
       virtual void execute (DataLink_rch& dl);
+
+    private:
+      /// The associated TransportImpl (one-one relation)
+      TransportImpl *transportImpl_;
+
     };
   }
 }

@@ -24,10 +24,6 @@
 /// Only called by our TransportImpl object.
 OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
   : thr_per_con_send_task_ (0)
-  , pub_map_ (new ReceiveListenerSetMap())
-  , sub_map_ (new RepoIdSetMap())
-  , pub_map_releasing_ (0)
-  , sub_map_releasing_ (0)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -54,11 +50,6 @@ OpenDDS::DCPS::DataLink::~DataLink()
       this->thr_per_con_send_task_->close (1);
       delete this->thr_per_con_send_task_;
     }
-
-  delete pub_map_;
-  delete sub_map_;
-  delete pub_map_releasing_;
-  delete sub_map_releasing_;
 }
 
 void
@@ -95,14 +86,14 @@ OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     GuardType guard(this->pub_map_lock_);
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
-    pub_result = this->pub_map_->insert(publisher_id,subscriber_id,0);
+    pub_result = this->pub_map_.insert(publisher_id,subscriber_id,0);
   }
 
   if (pub_result == 0)
     {
       {
         GuardType guard2(this->sub_map_lock_);
-        sub_result = this->sub_map_->insert(subscriber_id,publisher_id);
+        sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
       }
       if (sub_result == 0)
         {
@@ -116,7 +107,7 @@ OpenDDS::DCPS::DataLink::make_reservation(RepoId subscriber_id,  /* remote */
           // already inserted it in the pub_map_, we better attempt to
           // undo the insert that we did to the pub_map_.  Otherwise,
           // the pub_map_ and sub_map_ will become inconsistent.
-          pub_undo_result = this->pub_map_->remove(publisher_id,
+          pub_undo_result = this->pub_map_.remove(publisher_id,
                                                   subscriber_id);;
         }
     }
@@ -180,14 +171,14 @@ OpenDDS::DCPS::DataLink::make_reservation
     GuardType guard(this->sub_map_lock_);
 
     // Update our sub_map_.
-    sub_result = this->sub_map_->insert(subscriber_id,publisher_id);
+    sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
   }
 
   if (sub_result == 0)
     {
       {
         GuardType guard(this->pub_map_lock_);
-        pub_result = this->pub_map_->insert(publisher_id,
+        pub_result = this->pub_map_.insert(publisher_id,
                                            subscriber_id,
                                            receive_listener);
       }
@@ -203,7 +194,7 @@ OpenDDS::DCPS::DataLink::make_reservation
           // already inserted it in the sub_map_, we better attempt to
           // undo the insert that we did to the sub_map_.  Otherwise,
           // the sub_map_ and pub_map_ will become inconsistent.
-          sub_undo_result = this->sub_map_->remove(subscriber_id,
+          sub_undo_result = this->sub_map_.remove(subscriber_id,
                                                   publisher_id);
         }
     }
@@ -265,7 +256,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
   {
     GuardType guard(this->pub_map_lock_);
-    listener_set = this->pub_map_->find(remote_id);
+    listener_set = this->pub_map_.find(remote_id);
   }
 
   if (listener_set.is_nil())
@@ -276,7 +267,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
 
       {
         GuardType guard(this->sub_map_lock_);
-        id_set = this->sub_map_->find(remote_id);
+        id_set = this->sub_map_.find(remote_id);
       }
 
       if (id_set.is_nil())
@@ -300,7 +291,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
           {
             // Remove the remote_id(sub) after the remote/local ids is released
             // and there are no local pubs associated with this sub.
-            id_set = this->sub_map_->remove_set(remote_id);
+            id_set = this->sub_map_.remove_set(remote_id);
           }
 
           //guard.acquire ();
@@ -321,15 +312,15 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
         GuardType guard(this->pub_map_lock_);
         // Remove the remote_id(pub) after the remote/local ids is released
         // and there are no local subs associated with this pub.
-        listener_set = this->pub_map_->remove_set (remote_id);
+        listener_set = this->pub_map_.remove_set (remote_id);
       }
       //guard.acquire ();
     }
 
   VDBG_LVL ((LM_DEBUG, "(%P|%t) maps tot size: %d.\n"
-             , this->pub_map_->size() + this->sub_map_->size()), 5);
+             , this->pub_map_.size() + this->sub_map_.size()), 5);
 
-  if ((this->pub_map_->size() + this->sub_map_->size()) == 0)
+  if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
     {
       if ( ! this->impl_->config_->keep_link_)
         {
@@ -398,7 +389,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 
   {
     GuardType guard(this->pub_map_lock_);
-    listener_set = this->pub_map_->find(publisher_id);
+    listener_set = this->pub_map_.find(publisher_id);
   }
 
   if (listener_set.is_nil())
@@ -441,7 +432,7 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
       if (publisher_id == itr->first)
       {
         // Remove the publisher_id => subscriber_id association.
-        if (this->pub_map_->release_subscriber(publisher_id,
+        if (this->pub_map_.release_subscriber(publisher_id,
                                               subscriber_id) == 1)
           {
             // This means that this release() operation has caused the
@@ -479,7 +470,7 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
   if (listener_set->exist (subscriber_id))
       {
         // Remove the publisher_id => subscriber_id association.
-        if (this->sub_map_->release_publisher(subscriber_id,publisher_id) == 1)
+        if (this->sub_map_.release_publisher(subscriber_id,publisher_id) == 1)
           {
             // This means that this release() operation has caused the
             // subscriber_id to no longer be associated with *any* publishers.
@@ -565,7 +556,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
   {
     GuardType guard(this->pub_map_lock_);
 
-    ReceiveListenerSetMap::MapType & map = this->pub_map_->map ();
+    ReceiveListenerSetMap::MapType & map = this->pub_map_.map ();
 
     // Notify the datawriters registered with TransportImpl
     // the lost publications due to a connection problem.
@@ -619,7 +610,7 @@ OpenDDS::DCPS::DataLink::notify (enum ConnectionNotice notice)
 
     // Notify the datareaders registered with TransportImpl
     // the lost subscriptions due to a connection problem.
-    RepoIdSetMap::MapType & map = this->sub_map_->map ();
+    RepoIdSetMap::MapType & map = this->sub_map_.map ();
 
     for (RepoIdSetMap::MapType::iterator itr = map.begin();
          itr != map.end();
@@ -738,7 +729,7 @@ ACE_Message_Block*
 OpenDDS::DCPS::DataLink::marshal_acks (bool byte_order)
 {
   DBG_ENTRY_LVL("DataLink","marshal_acks",6);
-  return this->sub_map_->marshal (byte_order);
+  return this->sub_map_.marshal (byte_order);
 }
 
 bool
@@ -746,10 +737,8 @@ OpenDDS::DCPS::DataLink::release_resources ()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources",6);
 
-  this->prepare_release ();
-  bool ret = impl_->release_link_resources (this);
-
-  return ret;
+  return impl_->release_link_resources (this);
+  return true;
 }
 
 
@@ -757,7 +746,7 @@ bool
 OpenDDS::DCPS::DataLink::is_target (const RepoId& sub_id)
 {
  GuardType guard(this->sub_map_lock_);
- RepoIdSet_rch pubs = this->sub_map_->find(sub_id);
+ RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
 
  return ! pubs.is_nil ();
 }
@@ -772,154 +761,17 @@ OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
   if (pub_side)
   {
     GuardType guard(this->pub_map_lock_);
-    RepoIdSet_rch pubs = this->sub_map_->find(remote_id);
+    RepoIdSet_rch pubs = this->sub_map_.find(remote_id);
     if (!pubs.is_nil())
       return pubs->exist (local_id, last);
   }
   else
   {
     GuardType guard(this->sub_map_lock_);
-    ReceiveListenerSet_rch subs = this->pub_map_->find(remote_id);
+    ReceiveListenerSet_rch subs = this->pub_map_.find(remote_id);
     if (!subs.is_nil())
       return subs->exist (local_id, last);
   }
 
   return false;
 }
-
-
-void OpenDDS::DCPS::DataLink::prepare_release ()
-{
-  {
-    GuardType guard(this->sub_map_lock_);
-    if (this->sub_map_releasing_ != 0)
-    {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)DataLink::prepare_release sub_map already "
-        "moved for release\n"));
-      return;
-    }
-
-    this->sub_map_releasing_ = this->sub_map_;
-    this->sub_map_ = new RepoIdSetMap();
-  }
-  {
-    GuardType guard(this->pub_map_lock_);
-    if (this->pub_map_releasing_ != 0)
-    {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)DataLink::prepare_release pub_map already "
-        "moved for release\n"));
-      return;
-    }
-
-    this->pub_map_releasing_ = this->pub_map_;
-    this->pub_map_ = new ReceiveListenerSetMap();
-  }
-}
-
-
-void OpenDDS::DCPS::DataLink::clear_associations ()
-{
-  // The pub_map_ has an entry for each pub_id
-  // Create iterator to traverse Publisher map.
-  RepoIdSetMap* sub_map_releasing = 0;
-  ReceiveListenerSetMap* pub_map_releasing = 0;
-
-  {
-    GuardType guard(this->sub_map_lock_);
-    sub_map_releasing = this->sub_map_releasing_;
-    this->sub_map_releasing_ = 0;
-  }
-  {
-    GuardType guard(this->pub_map_lock_);
-    pub_map_releasing = this->pub_map_releasing_;
-    this->pub_map_releasing_ = 0;
-  }
-  
-  if (sub_map_releasing == 0 || pub_map_releasing_ == 0)
-  {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)DataLink::clean did not prepare release \n"));
-    return;
-  }
-
-  ReceiveListenerSetMap::MapType& pub_map = pub_map_releasing->map();
-  for (ReceiveListenerSetMap::MapType::iterator pub_map_iter = pub_map.begin();
-       pub_map_iter != pub_map.end(); )
-    {
-      // Extract the pub id
-      RepoId pub_id = pub_map_iter->first;
-      // Each pub_id (may)has an associated DataWriter
-      // Dependends upon whether we are an actual pub or sub.
-      DataWriterImpl *dw = this->impl_->find_publication (pub_id, true);
-
-      ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
-      // The iterator seems to get corrupted if the element currently
-      // being pointed at gets unbound. Hence advance it.
-      ++pub_map_iter;
-
-      // Check is DataWriter exists (could have been deleted before we got here.
-      if (dw != NULL)
-        {
-          // Each pub-id is mapped to a bunch of sub-id's
-          //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
-          ReaderIdSeq sub_ids;
-          sub_id_set->get_keys (sub_ids);
-
-          // after creating remote id sequence, remove from DataWriter
-          // I believe the 'notify_lost' should be set to false, since
-          // it doesn't look like we meet any of the conditions for setting
-          // it true. Check interface documentations.
-          dw->remove_associations (sub_ids, false);
-
-          // Since we requested a safe copy, we now need to remove the local reference.
-          dw->_remove_ref ();
-        }
-    }
-
-    // sub -> pub
-    // Create iterator to traverse Subscriber map.
-    RepoIdSetMap::MapType& sub_map = sub_map_releasing->map();
-    for (RepoIdSetMap::MapType::iterator sub_map_iter = sub_map.begin();
-      sub_map_iter != sub_map.end(); )
-  {
-    // Extract the sub id
-    RepoId sub_id = sub_map_iter->first;
-    // Each sub_id (may)has an associated DataReader
-    // Dependends upon whether we are an actual pub or sub.
-    DataReaderImpl *dr = this->impl_->find_subscription (sub_id, true);
-
-    RepoIdSet_rch pub_id_set = sub_map_iter->second;
-    // The iterator seems to get corrupted if the element currently
-    // being pointed at gets unbound. Hence advance it.
-    ++sub_map_iter;
-
-    // Check id DataReader exists (could have been deleted before we got here.)
-    if (dr != NULL)
-      {
-        // Each sub-id is mapped to a bunch of pub-id's
-        ssize_t pub_ids_count = pub_id_set->size();
-        WriterIdSeq pub_ids (pub_ids_count);
-        pub_ids.length (pub_ids_count);
-
-        int count = 0;
-        // create a sequence of associated pub-id's
-        for (RepoIdSet::MapType::iterator pub_ids_iter = pub_id_set->map().begin();
-          pub_ids_iter != pub_id_set->map().end(); ++pub_ids_iter)
-            {
-              pub_ids [count++] = pub_ids_iter->first;
-            }
-
-          // after creating remote id sequence, remove from DataReader
-          // I believe the 'notify_lost' should be set to false, since
-          // it doesn't look like we meet any of the conditions for setting
-          // it true. Check interface documentations.
-          dr->remove_associations (pub_ids, false);
-
-          // Since we requested a safe copy, we now need to remove the local reference.
-          dr->_remove_ref ();
-      }
-  }
-
-  delete sub_map_releasing;
-  delete pub_map_releasing;
-}
-

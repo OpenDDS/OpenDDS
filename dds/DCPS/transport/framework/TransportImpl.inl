@@ -11,6 +11,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportImpl::TransportImpl()
+  : dl_clean_task_ (this)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
 }
