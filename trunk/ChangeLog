@@ -1,3 +1,9 @@
+Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          TAO's Svc_Utils is now used by DDS.
+
 Tue Jul  1 16:45:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
@@ -7,7 +13,7 @@ Tue Jul  1 16:45:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportImpl.inl:
         * tests/DCPS/Reconnect/README:
         * tests/DCPS/Reconnect/run_test.pl:
-        
+
           Rolled back the "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
           changes as it broke some tests. Will fix RT11348 later.
 
