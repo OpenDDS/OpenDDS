@@ -67,3 +67,18 @@ OpenDDS::DCPS::ReceiveListenerSet::data_received(const ReceivedDataSample& sampl
     itr->second->data_received(sample);
   }
 }
+
+
+ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet::MapType& 
+OpenDDS::DCPS::ReceiveListenerSet::map()
+{
+  return this->map_;
+}
+
+
+ACE_INLINE const OpenDDS::DCPS::ReceiveListenerSet::MapType&
+OpenDDS::DCPS::ReceiveListenerSet::map() const
+{
+  return this->map_;
+}
+
