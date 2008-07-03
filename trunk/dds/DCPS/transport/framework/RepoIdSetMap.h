@@ -59,6 +59,11 @@ namespace OpenDDS
         /// List the key of this map.
         void get_keys (RepoIdSet& keys);
 
+        void operator= (const RepoIdSetMap &);
+
+        void clear ();
+
+
     private:
 
         RepoIdSet* find_or_create(RepoId key);

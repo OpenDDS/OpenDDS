@@ -47,6 +47,8 @@ namespace OpenDDS
         bool exist (const RepoId& remote_id, 
                     bool& last);
 
+        void clear ();
+
       private:
 
         MapType  map_;

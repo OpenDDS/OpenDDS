@@ -1,3 +1,50 @@
+Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed a race condition described in RT11348. The commit
+        at "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>" 
+        broke some tests. This time the fix was fully tested.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        
+          Added pub_map_releasing_ and sub_map_releasing_ to save the snapshot
+          of associations in datalink at the time the link is declared for releasing
+          resource due to connection problem. The DataLinkCleanupTask will remove the
+          associations based on the snapshot. This would fix the problem that new 
+          associations are removed while removing the old associations due to a failed
+          connection. The problem occurs when actual removal is performed with a delay
+          after the datalink lost its connection.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Moved the datalink cleanup operations in DataLinkCleanupTask::execute to a
+          new function (clear_associations()) in DataLink class and removed TransportImpl
+          reference in DataLinkCleanupTask as it's not needed.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+
+          Added operator= and clear functions to support map copy and clear.
+          
+        * tests/DCPS/Reconnect/README:
+        
+          Added description of dl_clean test case to reproduce the bug and verify the fix.
+          The dl_clean test can not be run in an automated nightly build since it requires
+          a special patch to prove the fix.
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Added dl_clean test case.
+
 Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:

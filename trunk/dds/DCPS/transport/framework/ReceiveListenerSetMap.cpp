@@ -169,3 +169,44 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
   // We return a 0 in this case.
   return 0;
 }
+
+
+
+void 
+OpenDDS::DCPS::ReceiveListenerSetMap::operator= (const ReceiveListenerSetMap& rh)
+{
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","operator=",6);
+  const MapType& map = rh.map();
+
+  for (MapType::const_iterator itr = map.begin();
+    itr != map.end();
+    ++itr)
+  {
+    ReceiveListenerSet_rch set = itr->second;
+    ReceiveListenerSet::MapType& smap = set->map();
+    for (ReceiveListenerSet::MapType::iterator sitr = smap.begin();
+    sitr != smap.end();
+    ++sitr)
+    {
+      this->insert (itr->first, sitr->first, sitr->second);
+    }
+  }
+}
+
+
+void 
+OpenDDS::DCPS::ReceiveListenerSetMap::clear ()
+{
+  DBG_ENTRY_LVL("ReceiveListenerSetMap","clear",6);
+
+  for (MapType::iterator itr = this->map_.begin();
+    itr != this->map_.end();
+    ++itr)
+  {
+    itr->second->clear ();
+  }
+
+  this->map_.clear ();
+}
+
+
