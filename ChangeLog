@@ -1,9 +1,15 @@
+Thu Jul  3 16:20:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        
+          Fixed a warning.
+
 Thu Jul  3 00:33:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/README:
 
           Updated the patch for reproduce and verify RT11348 fix.
- 
+
 Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         Fixed a race condition described in RT11348. The commit
