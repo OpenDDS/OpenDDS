@@ -105,11 +105,12 @@ module Xyz {
   typedef sequence<SeqOfLong,4>    SeqOfSeqOfLong;
   typedef sequence<SeqOfAnEnum,4>  SeqOfSeqOfAnEnum;
 
+  typedef string<7> SevenStr;
   struct AStruct {
     double  f1;
     float   f2;
     boolean f3;
-     string<7> f4;
+   SevenStr f4;
        char f5;
       octet f6;
        long f7;
@@ -182,7 +183,7 @@ union BigUnion switch (long) {
     case 3:
         boolean f3;
     case 4:
-        string<7> f4;
+        SevenStr f4;
     case 5:
           char f5;
     case 6:
@@ -298,16 +299,17 @@ union BigUnion switch (long) {
   //typedef fixed<10,4> AFixed;
 
   typedef sequence<BigUnion> BigUnionSeq;
+  typedef octet OctetArray[3];
 
   struct Foo {
     long key;  
     octet octer; 
     AnEnum xcolor; 
-    octet ooo[3]; 
+    OctetArray ooo; 
     string theString;
     AStruct thestruct; 
     AStructSeq theStructSeq; 
-    AStruct structArray[3];
+    ArrayOfAStruct structArray;
     AUnion theUnion;
     SeqOfAUnion theSeqOfUnion;
     BigUnion theBigUnion;
