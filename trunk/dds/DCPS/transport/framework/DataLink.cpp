@@ -797,19 +797,6 @@ void OpenDDS::DCPS::DataLink::prepare_release ()
     }
     this->pub_map_releasing_ = this->pub_map_;
   }
-
-  ReceiveListenerSetMap::MapType& pub_map = pub_map_releasing_.map();
-  for (ReceiveListenerSetMap::MapType::iterator pub_map_iter = pub_map.begin();
-       pub_map_iter != pub_map.end(); )
-    {
-      // Extract the pub id
-      RepoId pub_id = pub_map_iter->first;
-
-      ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
-      // The iterator seems to get corrupted if the element currently
-      // being pointed at gets unbound. Hence advance it.
-      ++pub_map_iter;
-    }
 }
 
 
