@@ -297,6 +297,8 @@ union BigUnion switch (long) {
   // not currently supported by the TAO IDL compiler; even without -Gdcps
   //typedef fixed<10,4> AFixed;
 
+  typedef sequence<BigUnion> BigUnionSeq;
+
   struct Foo {
     long key;  
     octet octer; 
@@ -309,7 +311,7 @@ union BigUnion switch (long) {
     AUnion theUnion;
     SeqOfAUnion theSeqOfUnion;
     BigUnion theBigUnion;
-    sequence<BigUnion> theSeqOfBitUnion;
+    BigUnionSeq theSeqOfBitUnion;
     float x;
     float y;
   };
