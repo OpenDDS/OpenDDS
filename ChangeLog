@@ -1,16 +1,22 @@
+Thu Jul  3 00:33:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Reconnect/README:
+
+          Updated the patch for reproduce and verify RT11348 fix.
+ 
 Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         Fixed a race condition described in RT11348. The commit
-        at "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>" 
+        at "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
         broke some tests. This time the fix was fully tested.
 
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.cpp:
-        
+
           Added pub_map_releasing_ and sub_map_releasing_ to save the snapshot
           of associations in datalink at the time the link is declared for releasing
           resource due to connection problem. The DataLinkCleanupTask will remove the
-          associations based on the snapshot. This would fix the problem that new 
+          associations based on the snapshot. This would fix the problem that new
           associations are removed while removing the old associations due to a failed
           connection. The problem occurs when actual removal is performed with a delay
           after the datalink lost its connection.
@@ -34,9 +40,9 @@ Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
 
           Added operator= and clear functions to support map copy and clear.
-          
+
         * tests/DCPS/Reconnect/README:
-        
+
           Added description of dl_clean test case to reproduce the bug and verify the fix.
           The dl_clean test can not be run in an automated nightly build since it requires
           a special patch to prove the fix.

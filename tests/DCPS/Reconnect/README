@@ -16,24 +16,23 @@ is added to a datalink that was declared to release resource due to disconnect.
 
 To reproduce the problem before the bug fix, follow steps:
 
-1) Apply following patch to add a delay between reconnect failure and tear down link.
+1) Apply following patch to add a delay between prepare_release and release_link_resources
+   calls.
 
-svn diff dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp
-Index: dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp
+Index: dds/DCPS/transport/framework/DataLink.cpp
 ===================================================================
---- dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp     (revision 1259)
-+++ dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp     (working copy)
-@@ -31,6 +31,9 @@
-   if (op == DO_RECONNECT)
-     {
-       if (this->connection_->reconnect () == -1) {
-+#if 1
-+        ACE_OS::sleep (10);
-+#endif
-   this->connection_->tear_link ();
-       }
-     }
-     
+--- dds/DCPS/transport/framework/DataLink.cpp   (revision 1270)
++++ dds/DCPS/transport/framework/DataLink.cpp   (working copy)
+@@ -738,6 +738,8 @@
+
+   this->prepare_release ();
+
++  ACE_OS::sleep (10);
++
+   return impl_->release_link_resources (this);
+ }
+ 
+ 
 2) Run dl_clean test.
 
 cd $DDS_ROOT/tests/DCPS/Reconnect
