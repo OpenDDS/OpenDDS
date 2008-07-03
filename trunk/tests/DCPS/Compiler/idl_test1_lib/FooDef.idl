@@ -24,9 +24,10 @@ module Xyz {
 #pragma DCPS_DATA_TYPE "Xyz::AStruct"
 #pragma DCPS_DATA_KEY "Xyz::AStruct v1"
   // +12
+  typedef sequence<short> ShortSeq;
   struct AStruct {
     long v1;
-    sequence<short> v2s; //,2 -- was bounded with
+    ShortSeq v2s; //,2 -- was bounded with
   };
 
   typedef AStruct ArrayOfAStruct[3];

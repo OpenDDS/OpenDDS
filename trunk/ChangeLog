@@ -1,3 +1,14 @@
+Thu Jul 03 17:57:12 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * examples/DCPS/DistributedContent/FileInfo.idl:
+        * performance-tests/DCPS/TCPProfilingTest/testMessage.idl:
+        * performance-tests/DCPS/TypeNoKeyBounded/PTDef.idl:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/FooType5/FooDef.idl:
+
+          Removed anonymous types from the idl structs.
+
 Thu Jul  3 16:20:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
