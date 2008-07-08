@@ -149,21 +149,14 @@ $Publisher->Spawn ();
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
 {
-  $sub_crashed = 0;
-  while($sub_crashed == 0)
-  {
-    open (LOG, $testoutputfilename) or die "Couldn't open client log file $testoutputfilename: $!\n";
-    while (<LOG>) {
-      if (/Subscriber crash after/)
-      {
-        $sub_crashed = 1;
-        break;
-      }
-    }
-    close (LOG);
-    if ($sub_crashed == 0) {
-      sleep ($write_delay_ms/1000);
-    }
+  if (PerlACE::waitforfileoutput_timed ($testoutputfilename, "Subscriber crash after", 90) == -1) {
+    close(STDERR);
+    open(STDERR, ">&SAVEERR");
+    print STDERR "ERROR: waiting for 'Subscriber crash after' output.\n";
+    $Subscriber->Kill ();
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
   }
 
   #get time at crash
