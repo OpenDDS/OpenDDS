@@ -49,23 +49,20 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 $Publisher->Spawn ();
 
-$foundLineInFile = "false";
-while ( $foundLineInFile !~ /true/)
-{
-  open (DATA, $data_file);
-
-  while ($line = <DATA>)
-  {
-    if ($line =~ /Deleted DataWriter/)
-    {
-	  $foundLineInFile = "true";
-      break;
-    }
-  }
-  close(DATA);
+if (PerlACE::waitforfile_timed ($data_file, 30) == -1) {
+    print STDERR "ERROR: waiting for Publisher file\n";
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
 }
 
-sleep (1);
+if (PerlACE::waitforfileoutput_timed ($data_file, "Deleted DataWriter", 90) == -1) {
+    print STDERR "ERROR: waiting for Publisher output.\n";
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
+}
+
 
 $Subscriber->Spawn ();
 
