@@ -1,3 +1,9 @@
+Tue Jul 08 22:06:45 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Changed test to use PerlACE::waitforfileoutput_timed method.
+
 Tue Jul 08 18:56:19 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Lifespan/run_test.pl:
@@ -5,7 +11,7 @@ Tue Jul 08 18:56:19 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
         * tests/DCPS/TransientDurability/run_test.pl:
         * tests/DCPS/TransientLocalTest/run_test.pl:
 
-          Changed tests to use the PERLACE::waitforfileoutput_timed
+          Changed tests to use the PerlACE::waitforfileoutput_timed
           method.
 
 Thu Jul 03 18:40:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
