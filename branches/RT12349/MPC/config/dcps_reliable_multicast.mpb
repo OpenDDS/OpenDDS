@@ -1,0 +1,4 @@
+project {
+  libs        += ReliableMulticast
+  after       += ReliableMulticast
+}
