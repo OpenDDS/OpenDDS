@@ -1,3 +1,11 @@
+Wed Jul 09 20:55:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/reliable_multicast/run_test.pl:
+
+          Added perl script to run the reliable_multicast test because it 
+          can hang indefinitely.
+
 Tue Jul 08 22:06:45 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
