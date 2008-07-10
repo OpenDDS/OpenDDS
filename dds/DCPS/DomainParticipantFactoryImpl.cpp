@@ -277,10 +277,10 @@ namespace OpenDDS
             } //xxx now obj rc = 4
         }//xxx now obj rc = 3
 
-      DCPSInfo_var repo = TheServiceParticipant->get_repository( domain_id);
 
       try
         {
+          DCPSInfo_var repo = TheServiceParticipant->get_repository( domain_id);
           repo->remove_domain_participant (domain_id,
                                            dp_id);
         }

@@ -59,7 +59,6 @@ namespace OpenDDS
         domain_id_(domain_id),
         dp_id_(dp_id)
     {
-      repository_ = TheServiceParticipant->get_repository( domain_id);
       DDS::ReturnCode_t ret;
       ret = this->set_listener(a_listener, DEFAULT_STATUS_KIND_MASK);
     }
@@ -456,13 +455,13 @@ namespace OpenDDS
 
           try
             {
-
-              TopicStatus status = repository_->assert_topic(topic_id,
-                                                             domain_id_,
-                                                             dp_id_,
-                                                             topic_name,
-                                                             type_name,
-                                                             topic_qos);
+              DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+              TopicStatus status = repo->assert_topic(topic_id,
+                                                      domain_id_,
+                                                      dp_id_,
+                                                      topic_name,
+                                                      type_name,
+                                                      topic_qos);
               if (status == CREATED || status == FOUND)
                 {
                   ::DDS::Topic_ptr new_topic = create_topic_i(topic_id,
@@ -569,12 +568,12 @@ namespace OpenDDS
             {
               //TBD - mark the TopicImpl as deleted and make it
               //      reject calls to the TopicImpl.
-
+              DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
               TopicStatus status
-                = repository_->remove_topic (the_dp_servant->get_domain_id (),
-                                              the_dp_servant->get_id (),
-                                              the_topic_servant->get_id ()
- );
+                = repo->remove_topic (the_dp_servant->get_domain_id (),
+                                      the_dp_servant->get_id (),
+                                      the_topic_servant->get_id ()
+                  );
               if (status != REMOVED)
                 {
                   ACE_ERROR_RETURN ((LM_ERROR,
@@ -668,11 +667,12 @@ namespace OpenDDS
               CORBA::String_var type_name;
               ::DDS::TopicQos_var qos;
 
-              TopicStatus status = repository_->find_topic(domain_id_,
-                                                           topic_name,
-                                                           type_name.out(),
-                                                           qos.out(),
-                                                           topic_id);
+              DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+              TopicStatus status = repo->find_topic(domain_id_,
+                                                    topic_name,
+                                                    type_name.out(),
+                                                    qos.out(),
+                                                    topic_id);
 
               if (status == FOUND)
               {
@@ -921,9 +921,9 @@ namespace OpenDDS
             try
             {
               DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-              repository_->update_domain_participant_qos(domain_id_,
-                                                         dp_id_,
-                                                         qos_);            
+              repo->update_domain_participant_qos(domain_id_,
+                                                  dp_id_,
+                                                  qos_);            
             }
             catch (const CORBA::SystemException& sysex)
             {
@@ -1031,9 +1031,10 @@ namespace OpenDDS
                 "%P|%t) DomainParticipantImpl::ignore_participant"
                 " %d calling repo\n",
                 dp_id_ ));
-          repository_->ignore_domain_participant(domain_id_,
-                                                 dp_id_,
-                                                 ignore_id);
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          repo->ignore_domain_participant(domain_id_,
+                                          dp_id_,
+                                          ignore_id);
           if (DCPS_debug_level >= 4)
             ACE_DEBUG((LM_DEBUG,
                 "%P|%t) DomainParticipantImpl::ignore_participant"
@@ -1095,9 +1096,10 @@ namespace OpenDDS
 
       try
         {
-          repository_->ignore_topic(domain_id_,
-                                    dp_id_,
-                                    ignore_id);
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          repo->ignore_topic(domain_id_,
+                             dp_id_,
+                             ignore_id);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1154,9 +1156,10 @@ namespace OpenDDS
 
       try
         {
-          repository_->ignore_publication(domain_id_,
-                                          dp_id_,
-                                          ignore_id);
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          repo->ignore_publication(domain_id_,
+                                   dp_id_,
+                                   ignore_id);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1213,9 +1216,10 @@ namespace OpenDDS
 
       try
         {
-          repository_->ignore_subscription(domain_id_,
-                                           dp_id_,
-                                           ignore_id);
+          DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+          repo->ignore_subscription(domain_id_,
+                                    dp_id_,
+                                    ignore_id);
         }
       catch (const CORBA::SystemException& sysex)
         {
