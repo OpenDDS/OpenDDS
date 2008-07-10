@@ -3,11 +3,7 @@
 #ifndef TAO_DDS_FEDERATOR_IDL
 #define TAO_DDS_FEDERATOR_IDL
 
-#include "dds/DdsDcpsInfrastructure.idl"
-#include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
-#include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfo.idl"
 
 module OpenDDS { module Federator {
 
@@ -16,28 +12,43 @@ module OpenDDS { module Federator {
     // Unique identifier for a repository.
     typedef long RepoKey;
 
+    // Value of DomainId for federation.
+    typedef DDS::DomainId_t FederationDomain;
+
     // Unique identifier for all entities within federation.
     struct FederationId {
-      RepoKey                repository;
-      OpenDDS::DCPS::RepoId  handle;
+      RepoKey               repository;
+      OpenDDS::DCPS::RepoId handle;
+    };
+
+    // Types of updates that can be performed.
+    enum UpdateType {
+      CreateEntity,
+      DestroyEntity,
+      UpdateValue,
+      UpdateOwnership
     };
 
     // Constant values.
-    const RepoKey NIL_REPOSITORY     = 0; // Reserved repository Id value.
+    const RepoKey          NIL_REPOSITORY           = 0; // Reserved repository Id value.
+    const FederationDomain DEFAULT_FEDERATIONDOMAIN = 0x5265706f;
+    const FederationDomain ANY_FEDERATIONDOMAIN     = -1;
 
     ////////////////////////////////////////////////////////////////////
     //
     // Topic data updates
     //
 
-// This pragma is TAO specific
+// These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::TopicUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate id.repository"
     struct TopicUpdate {
       FederationId    id;
+      FederationId    owner;
       FederationId    participant;
       DDS::DomainId_t domain;
       long            packet;      // The sequence number of the instant sample.
+      UpdateType      action;
       string          topic;
       string          datatype;
       DDS::TopicQos   qos;
@@ -52,13 +63,15 @@ module OpenDDS { module Federator {
     // Participant data updates
     //
 
-// This pragma is TAO specific
+// These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::ParticipantUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate id.repository"
     struct ParticipantUpdate {
       FederationId              id;
+      FederationId              owner;
       DDS::DomainId_t           domain;
       long                      packet;      // The sequence number of the instant sample.
+      UpdateType                action;
       DDS::DomainParticipantQos qos;
     };
 
@@ -71,15 +84,17 @@ module OpenDDS { module Federator {
     // Publication data updates
     //
 
-// This pragma is TAO specific
+// These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::PublicationUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate id.repository"
     struct PublicationUpdate {
       FederationId                          id;
+      FederationId                          owner;
       FederationId                          topic;
       FederationId                          participant;
       DDS::DomainId_t                       domain;
       long                                  packet;      // The sequence number of the instant sample.
+      UpdateType                            action;
       DDS::PublisherQos                     publisher_qos;
       DDS::DataWriterQos                    datawriter_qos;
 
@@ -92,7 +107,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                       transport_blob;
+      OctetSeq                              transport_blob;
     };
 
     // Constant values.
@@ -104,15 +119,17 @@ module OpenDDS { module Federator {
     // Subscription data updates
     //
 
-// This pragma is TAO specific
+// These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::SubscriptionUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate id.repository"
     struct SubscriptionUpdate {
       FederationId                          id;
+      FederationId                          owner;
       FederationId                          topic;
       FederationId                          participant;
       DDS::DomainId_t                       domain;
       long                                  packet;      // The sequence number of the instant sample.
+      UpdateType                            action;
       DDS::SubscriberQos                    subscriber_qos;
       DDS::DataReaderQos                    datareader_qos;
 
@@ -125,7 +142,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                       transport_blob;
+      OctetSeq                              transport_blob;
     };
 
     // Constant values.
@@ -136,22 +153,11 @@ module OpenDDS { module Federator {
     // Exceptions.
     //
 
-    // Attempt to federate with an unavailable repository.
-    exception Unavailable {};
-
-    // Unable to remove a connection.
-    exception ConnectionBusy {};
-
     //
-    // Execution status.
+    // Processing has started and failed, leaving the called object in an
+    // unknown - and likely unstable - state.
     //
-    enum Status {
-      Federated,
-      Already_Federated,
-      Unfederated,
-      Joining,
-      Error_While_Federating
-    };
+    exception Incomplete {};
 
     ////////////////////////////////////////////////////////////////////
     //
@@ -159,48 +165,39 @@ module OpenDDS { module Federator {
     //
     interface Manager {
       //
-      // Become federated with a repository at the given endpoint.
+      // Initiates the discovery process to establish connectivity with a
+      // federation having the specified DomainId value.
       //
-      // This method will attempt to obtain a remote reference to the
-      // DCPSInfoRepo and Federator::Manager objects using the IORTable
-      // at the endpoint and perform federation initialization using them.
-      //
-      // It will search for the objects at:
-      //
-      //  corbaloc:$(endpoint)/DCPSInfoRepo
-      //  corbaloc:$(endpoint)/Federator
-      //
-      // 'endpoint' is expected to contain a (possibly default) protocol,
-      // a host (as either a resolvable name or in dotted decimal format)
-      // and an optional port specification.  As a regular expression,
-      // this is:
-      //
-      //                [^:]*:[^:]+(:[0-9]+)?
-      //
-      // Some examples include:
-      //
-      //                iiop:bob:1999
-      //                ssliop:198.162.1.1
-      //                :ted:2112
-      //                :carol
-      //
-      Status join_federation( in string  endpoint ) raises ( Unavailable);
+      boolean discover_federation( in string ior) raises( Incomplete);
 
       //
-      // Remove a connection with a remote repository.
+      // Called to join a federation initially or to redirect the active
+      // connection of an already federated repository Manager.
       //
-      // This method will attempt to remove a connection to a remote
-      // repository, including dropping the references to the
-      // DCPSInfoRepo and Federator::Manager objects.  If portions of the
-      // federation become unreachable as a result, then they are removed
-      // from the federation.
-      //
-      Status remove_connection( in RepoKey remoteId) raises ( ConnectionBusy);
+      boolean join_federation(
+             in Manager          peer,
+             in FederationDomain federation
+           ) raises( Incomplete);
 
       //
-      // Obtain the value of federation Id for this instance.
+      // Called to leave a federation completely.  This includes removing
+      // all managed associations with objects owned by repositories
+      // external to this one within the federation.
       //
-      RepoKey federationId();
+      boolean leave_federation( in FederationDomain federation) raises( Incomplete);
+
+      //
+      // Return the FederationId value for the managed repository.  This
+      // value can only be set on creation and initialization of the
+      // repository.
+      //
+      RepoKey federation_id();
+
+      //
+      // Return a reference to the managed DCPSInfo object within this
+      // repository.
+      //
+      OpenDDS::DCPS::DCPSInfo repository();
 
     };
 
