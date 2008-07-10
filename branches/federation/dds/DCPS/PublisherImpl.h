@@ -286,8 +286,8 @@ namespace OpenDDS
       CoherencyGroup                group_id_;
       /// Ordered list of active coherency groups. -  NOT USED IN FIRST IMPL
       std::list<CoherencyGroup>     active_coherency_;
-      /// Reference to the DCPSInfo repository for this Publisher.
-      DCPSInfo_var                  repository_;
+      /// Domain in which we are contained.
+      ::DDS::DomainId_t             domain_id_;
       /// The DomainParticipant servant that owns this Publisher.
       DomainParticipantImpl*        participant_;
       /// The suspend depth count.

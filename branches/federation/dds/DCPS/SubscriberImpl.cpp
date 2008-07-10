@@ -49,7 +49,7 @@ SubscriberImpl::SubscriberImpl (const ::DDS::SubscriberQos & qos,
     listener_mask_(DEFAULT_STATUS_KIND_MASK),
     fast_listener_ (0),
     participant_(participant),
-    repository_ (TheServiceParticipant->get_repository ( participant->get_domain_id()))
+    domain_id_( participant->get_domain_id())
 {
   //Note: OK to duplicate a nil.
   listener_ = ::DDS::SubscriberListener::_duplicate(a_listener);
@@ -297,10 +297,10 @@ SubscriberImpl::delete_datareader (::DDS::DataReader_ptr a_datareader)
 
   try
     {
-      this->repository_->remove_subscription(
-					     participant_->get_domain_id (),
-					     participant_->get_id (),
-					     subscription_id) ;
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+      repo->remove_subscription( this->domain_id_,
+			         participant_->get_id (),
+			         subscription_id) ;
     }
   catch (const CORBA::SystemException& sysex)
     {
@@ -580,11 +580,12 @@ SubscriberImpl::set_qos (
           {
             try
             {
-              this->repository_->update_subscription_qos (participant_->get_domain_id(), 
-                                                          participant_->get_id (), 
-                                                          iter->first,
-                                                          iter->second,
-                                                          this->qos_);
+              DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+              repo->update_subscription_qos( this->domain_id_,
+                                             participant_->get_id (), 
+                                             iter->first,
+                                             iter->second,
+                                             this->qos_);
             }
             catch (const CORBA::SystemException& sysex)
             {
@@ -909,15 +910,15 @@ SubscriberImpl::reader_enabled(
       info->local_reader_objref_->get_qos(qos);
 
       OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info ();
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
       info->subscription_id_
-	= this->repository_->add_subscription(
-					      participant_->get_domain_id (),
-					      participant_->get_id (),
-					      info->topic_id_,
-					      info->remote_reader_objref_,
-					      qos,
-					      trans_conf_info,
-					      qos_) ;
+	= repo->add_subscription( this->domain_id_,
+			          participant_->get_id (),
+			          info->topic_id_,
+			          info->remote_reader_objref_,
+			          qos,
+			          trans_conf_info,
+			          this->qos_) ;
       info->local_reader_impl_->set_subscription_id (info->subscription_id_);
     }
   catch (const CORBA::SystemException& sysex)

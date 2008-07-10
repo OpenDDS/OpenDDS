@@ -46,8 +46,7 @@ PublisherImpl::PublisherImpl (const ::DDS::PublisherQos &   qos,
     listener_ (::DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_ (0),
     group_id_ (DEFAULT_GROUP_ID),
-    repository_ (
-      TheServiceParticipant->get_repository (participant->get_domain_id())),
+    domain_id_( participant->get_domain_id()),
     participant_ (participant),
     suspend_depth_count_ (0),
     sequence_number_ (),
@@ -342,9 +341,10 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
 
   try
     {
-      this->repository_->remove_publication(
-              participant_->get_domain_id (),
-              participant_->get_id (),
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+      repo->remove_publication(
+              this->domain_id_,
+              this->participant_->get_id (),
               publication_id);
     }
   catch (const CORBA::SystemException& sysex)
@@ -511,9 +511,10 @@ PublisherImpl::set_qos (const ::DDS::PublisherQos & qos)
           {
             try
             {
-              this->repository_->update_publication_qos (
-                participant_->get_domain_id(),
-                participant_->get_id (),
+              DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
+              repo->update_publication_qos (
+                this->domain_id_,
+                this->participant_->get_id (),
                 iter->first,
                 iter->second,
                 this->qos_);
@@ -810,16 +811,17 @@ PublisherImpl::writer_enabled(
       OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info =
         connection_info ();
 
+      DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
       info->publication_id_ =
-        this->repository_->add_publication(
-          participant_->get_domain_id (), // Loaded during Publisher
+        repo->add_publication(
+          this->domain_id_, // Loaded during Publisher
                                           // construction
-          participant_->get_id (),  // Loaded during Publisher construction.
+          this->participant_->get_id (),  // Loaded during Publisher construction.
           info->topic_id_, // Loaded during DataWriter construction.
           info->remote_writer_objref_,
           qos,
           trans_conf_info ,   // Obtained during setup.
-          qos_);
+          this->qos_);
       info->local_writer_impl_->set_publication_id (info->publication_id_);
     }
   catch (const CORBA::SystemException& sysex)

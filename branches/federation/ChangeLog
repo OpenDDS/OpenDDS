@@ -1,12 +1,27 @@
+Thu Jul 10 21:42:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+	  Localized repository access.  This removes the known caching of
+	  the repository references, which can be problematic if the
+	  repository to call is changed after the cached reference is
+	  made.
+
 Thu Jul 10 19:15:21 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
-	
-	  Updated interface and data definitions to reflect latest review
-	  results.  This includes addition of the 'discover_federation'
-	  method.  It also includes the specification of the UpdateType
-	  and addition of the 'owner' and 'action' members to the update
-	  data structures.
+
+          Updated interface and data definitions to reflect latest review
+          results.  This includes addition of the 'discover_federation'
+          method.  It also includes the specification of the UpdateType
+          and addition of the 'owner' and 'action' members to the update
+          data structures.
 
 Mon Jun 30 17:39:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
