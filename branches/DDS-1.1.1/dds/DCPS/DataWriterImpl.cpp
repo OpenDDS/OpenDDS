@@ -206,6 +206,21 @@ DataWriterImpl::add_associations ( ::OpenDDS::DCPS::RepoId yourId,
     publication_id_ = yourId;
   }
 
+  {
+    ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    // Add to pending_readers_ 
+
+    CORBA::ULong len = readers.length();
+
+    for (CORBA::ULong i = 0; i < len; ++i)
+    {
+      if (OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::add_associations insert %d to pending failed\n",
+          readers[i].readerId));
+      }
+    }
+  }
 
   {
     // I am not sure this guard is necessary for
@@ -233,24 +248,42 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       "bit %d local %d remote %d num remotes %d\n", is_bit_, myid, remote_associations[0].remote_id_, num_remote_associations));
   }
 
+  CORBA::ULong len = 0;
+  ReaderIdSeq rd_ids;
+
   {
     // protect readers_
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    CORBA::ULong readers_old_length = readers_.length();
-    readers_.length(readers_old_length + num_remote_associations);
-    for (CORBA::ULong reader_cnt = 0; reader_cnt < num_remote_associations; reader_cnt++)
+
+    for (CORBA::ULong i = 0; i < num_remote_associations; ++i)
     {
-      readers_[reader_cnt+readers_old_length] = remote_associations[reader_cnt].remote_id_;
+      // If the reader is not in pending association list, which indicates it's already
+      // removed by remove_association. In other words, the remove_association()  
+      // is called before fully_associated() call.
+      if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
+      {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::fully_associated  "
+            "reader %d is not in pending list because remove_association is already called \n",
+            remote_associations[i].remote_id_));
+        continue;
+      }
+      
+      // The reader is in the pending reader, now add it to fully associated reader
+      // list.
+      ++len;
+      rd_ids.length (len);
+      rd_ids[len - 1] = remote_associations[i].remote_id_;
+      
+      if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
+      {
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::fully_associated insert %d from pending failed\n",
+          remote_associations[i].remote_id_));
+      }
     }
   }
 
-  ReaderIdSeq rd_ids;
-  rd_ids.length (num_remote_associations);
-
-  for (CORBA::ULong i = 0; i < num_remote_associations; ++i)
-  {
-    rd_ids[i] = remote_associations[i].remote_id_;
-  }
+  if (len == 0)
+    return;
 
   if (! is_bit_)
   {
@@ -287,22 +320,22 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       }
 
       set_status_changed_flag (::DDS::PUBLICATION_MATCH_STATUS, true);
-
-      ::DDS::DataWriterListener* listener =
-          listener_for (::DDS::PUBLICATION_MATCH_STATUS);
-
-      if (listener != 0)
-      {
-        listener->on_publication_match (dw_local_objref_.in (),
-          publication_match_status_);
-
-        // TBD - why does the spec say to change this but not
-        // change the ChangeFlagStatus after a listener call?
-        publication_match_status_.total_count_change = 0;
-      }
-
-      delete [] remote_associations;
     }
+
+    ::DDS::DataWriterListener* listener =
+        listener_for (::DDS::PUBLICATION_MATCH_STATUS);
+
+    if (listener != 0)
+    {
+      listener->on_publication_match (dw_local_objref_.in (),
+        publication_match_status_);
+
+      // TBD - why does the spec say to change this but not
+      // change the ChangeFlagStatus after a listener call?
+      publication_match_status_.total_count_change = 0;
+    }
+
+    delete [] remote_associations;
   }
 
   // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using
@@ -365,58 +398,57 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       "bit %d local %d remote %d num remotes %d\n", is_bit_, publication_id_, readers[0], readers.length ()));
   }
 
-  ReaderIdSeq updated_readers;
+  ReaderIdSeq fully_associated_readers;
+  CORBA::ULong fully_associated_len = 0;
+  ReaderIdSeq rds;
+  CORBA::ULong rds_len = 0;
+  ::DDS::InstanceHandleSeq handles;
 
-  CORBA::ULong num_removed_readers = readers.length();
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    //Remove the readers from reader list. If the supplied reader
-    //is not in the cached reader list then it is already removed.
-    //We just need remove the readers in the list that have not been
-    //removed.
-    CORBA::ULong num_orig_readers = readers_.length();
+    //Remove the readers from fully associated reader list. 
+    //If the supplied reader is not in the cached reader list then it is 
+    //already removed. We just need remove the readers in the list that have
+    //not been removed.
 
-    for (CORBA::ULong rm_idx = 0; rm_idx < num_removed_readers; ++rm_idx)
+    CORBA::ULong len = readers.length();
+    for (CORBA::ULong i = 0; i < len; ++i)
     {
-      for (CORBA::ULong orig_idx = 0;
-           orig_idx < num_orig_readers;
-           ++orig_idx)
+      //Remove the readers from fully associated reader list. If it's not
+      //in there, the fully_associated() is not called yet and remove it
+      //from pending list.
+
+      if (OpenDDS::DCPS::remove (readers_, readers[i]) == 0)
       {
-        if (readers_[orig_idx] == readers[rm_idx])
-        {
-          // move last element to this position.
-          if (orig_idx < num_orig_readers - 1)
-          {
-            readers_[orig_idx] = readers_[num_orig_readers - 1];
-          }
-          --num_orig_readers;
-          readers_.length (num_orig_readers);
+        ++ fully_associated_len;
+        fully_associated_readers.length (fully_associated_len);
+        fully_associated_readers [fully_associated_len - 1] = readers[i]; 
 
-          CORBA::ULong len = updated_readers.length();
-          updated_readers.length(len + 1);
-          updated_readers[len] = readers[rm_idx];
-          break;
-        }
+        ++ rds_len;
+        rds.length (rds_len);
+        rds [rds_len - 1] = readers[i];         
       }
+      else if (OpenDDS::DCPS::remove (pending_readers_, readers[i]) == 0)
+      {
+        ++ rds_len;
+        rds.length (rds_len);
+        rds [rds_len - 1] = readers[i]; 
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataWriterImpl::remove_associations  "
+          "remove reader %d before fully_associated() call\n", readers[i]));
+      }
+      //else reader is already removed which indicates remove_association()
+      //is called multiple times.
     }
-
-    num_removed_readers = updated_readers.length ();
-
-    // Return now if the supplied readers have been removed already.
-    if (num_removed_readers == 0)
-      return;
-
-    if (! is_bit_)
+  
+    if (fully_associated_len > 0 && ! is_bit_)
     {
-      ::DDS::InstanceHandleSeq handles;
-
       // The reader should be in the id_to_handle map at this time so
       // log with error.
-      if (this->cache_lookup_instance_handles (updated_readers, handles) == false)
+      if (this->cache_lookup_instance_handles (fully_associated_readers, handles) == false)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)DataWriterImpl::remove_associations "
-          "cache_lookup_instance_handles failed\n"));
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations "
+          "cache_lookup_instance_handles failed, notify %d \n", notify_lost));
         return;
       }
 
@@ -425,8 +457,8 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
       for (CORBA::ULong rd_index = 0; rd_index < rd_len; ++rd_index)
       {
         for (CORBA::ULong subed_index = 0;
-             subed_index < subed_len;
-             ++subed_index)
+              subed_index < subed_len;
+              ++subed_index)
         {
           if (subscription_handles_[subed_index] == handles[rd_index])
           {
@@ -442,25 +474,29 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
           }
         }
       }
-    }
-
-    for (CORBA::ULong i = 0; i < num_removed_readers; ++i)
-    {
-      id_to_handle_map_.erase(updated_readers[i]);
+      
+      for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
+      {
+        id_to_handle_map_.erase(fully_associated_readers[i]);
+      }
     }
   }
 
-  this->publisher_servant_->remove_associations (readers,
-                                                 this->publication_id_);
+  if (rds_len > 0)
+  {
+    this->publisher_servant_->remove_associations (rds,
+      this->publication_id_);
+  }
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost reader then make a callback to notify
   // subscription lost.
-  if (notify_lost)
+  if (notify_lost && handles.length () > 0)
   {
-    this->notify_publication_lost (readers);
+    this->notify_publication_lost (handles);
   }
 }
+
 
 
 void DataWriterImpl::remove_all_associations ()
@@ -468,12 +504,14 @@ void DataWriterImpl::remove_all_associations ()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
 
-  CORBA::ULong size = readers_.length();
+  CORBA::ULong size = readers_.size();
   readers.length(size);
-
-  for (CORBA::ULong i = 0; i < size; ++i)
+ 
+  IdSet::iterator itEnd = readers_.end ();
+  int i = 0;
+  for (IdSet::iterator it = readers_.begin (); it != itEnd; ++it)
   {
-    readers[i] = readers_[i];
+     readers[i ++] = *it;
   }
 
   try
@@ -994,7 +1032,7 @@ DataWriterImpl::register_instance(::DDS::InstanceHandle_t& handle,
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT("(%P|%t) DataWriterImpl::register_instance, ")
+                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance, ")
                        ACE_TEXT("register instance with container failed.\n")),
                       ret);
   }
@@ -1596,7 +1634,7 @@ DataWriterImpl::notify_publication_reconnected (const ReaderIdSeq& subids)
                                                status.subscription_handles) == false)
       {
         ACE_ERROR ((LM_ERROR,
-                    "(%P|%t)DataWriterImpl::"
+                    "(%P|%t)ERROR: DataWriterImpl::"
                     "notify_publication_reconnected "
                     "cache_lookup_instance_handles failed\n"));
       }
@@ -1630,6 +1668,35 @@ DataWriterImpl::notify_publication_lost (const ReaderIdSeq& subids)
                                            status.subscription_handles);
       the_listener->on_publication_lost (this->dw_local_objref_.in (),
       status);
+    }
+  }
+}
+
+
+void
+DataWriterImpl::notify_publication_lost (const ::DDS::InstanceHandleSeq& handles)
+{
+  DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",6);
+  if (! is_bit_)
+  {
+    // Narrow to DDS::DCPS::DataWriterListener. If a
+    // DDS::DataWriterListener is given to this DataWriter then
+    // narrow() fails.
+    DataWriterListener_var the_listener =
+      DataWriterListener::_narrow (this->listener_.in ());
+
+    if (! CORBA::is_nil (the_listener.in ()))
+    {
+      PublicationLostStatus status;
+
+      CORBA::ULong len = handles.length ();
+      status.subscription_handles.length (len);
+      for (CORBA::ULong i = 0;i < len; ++ i)
+      {
+        status.subscription_handles[i] = handles[i];
+        the_listener->on_publication_lost (this->dw_local_objref_.in (),
+          status);
+      }
     }
   }
 }
