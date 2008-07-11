@@ -371,10 +371,10 @@ void DCPS_IR_Topic_Description::reevaluate_associations (DCPS_IR_Subscription* s
 
 void DCPS_IR_Topic_Description::reevaluate_associations (DCPS_IR_Publication* publication)
 {
-  DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
 
-  for (iter; iter != end; ++iter)
+  for (DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin(); 
+    iter != end; ++iter)
   {
     publication->reevaluate_association (*iter);
     (*iter)->reevaluate_association (publication);

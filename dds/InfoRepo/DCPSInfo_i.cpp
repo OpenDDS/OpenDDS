@@ -554,8 +554,6 @@ TAO_DDS_DCPSInfo_i::add_subscription (
                    subscriberQos),
                  0);
 
-  DCPS_IR_Topic_Description* description = subPtr->get_topic_description ();
-
   if (partPtr->add_subscription(subPtr) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")

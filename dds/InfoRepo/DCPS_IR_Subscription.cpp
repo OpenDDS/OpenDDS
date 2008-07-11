@@ -484,10 +484,10 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
 
 bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos)
 {
-  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
 
-  for (iter; iter != end; ++iter)
+  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
   {
     OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
     writerStatus.total_count = 0;
@@ -508,10 +508,10 @@ bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos
 
 bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::SubscriberQos & qos)
 {
-  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
 
-  for (iter; iter != end; ++iter)
+  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
   {
     if (! ::compatibleQOS((*iter)->get_publisher_qos(), &qos))
       return false;

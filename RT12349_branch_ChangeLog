@@ -1,9 +1,21 @@
+Fri Jul 11 16:23:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        
+          Fixed warnings.
+
 Fri Jul 11 07:46:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Added deadline and partition qos change tests.
-          
+
 Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         These changes made DCPSInfoRepo re-evaluate the compatibility and
