@@ -540,10 +540,10 @@ void DCPS_IR_Publication::set_bit_status (CORBA::Boolean isBIT)
 
 bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::DataWriterQos & qos)
 {
-  DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
 
-  for (iter; iter != end; ++iter)
+  for (DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
   {
     OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
     writerStatus.total_count = 0;
@@ -564,10 +564,10 @@ bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::DataWriterQos & qos)
 
 bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::PublisherQos & qos)
 {
-  DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
 
-  for (iter; iter != end; ++iter)
+  for (DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
   {
     if (! ::compatibleQOS(&qos, (*iter)->get_subscriber_qos()))
       return false;

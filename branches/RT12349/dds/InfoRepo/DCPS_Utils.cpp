@@ -175,8 +175,8 @@ compatibleQOS (DCPS_IR_Publication  * publication,
 
 
 bool
-compatibleQOS (const ::DDS::PublisherQos * pubQos,
-               const ::DDS::SubscriberQos * subQos)
+compatibleQOS (const ::DDS::PublisherQos * /*pubQos*/,
+               const ::DDS::SubscriberQos * /*subQos*/)
 {
   return true;
 }
@@ -258,15 +258,15 @@ bool should_check_compatibility_upon_change (const ::DDS::DataWriterQos & qos1,
 }
 
 
-bool should_check_compatibility_upon_change (const ::DDS::SubscriberQos & qos1,
-                                             const ::DDS::SubscriberQos & qos2)
+bool should_check_compatibility_upon_change (const ::DDS::SubscriberQos & /*qos1*/,
+                                             const ::DDS::SubscriberQos & /*qos2*/)
 {
   return false;
 }
 
 
-bool should_check_compatibility_upon_change (const ::DDS::PublisherQos & qos1,
-                                             const ::DDS::PublisherQos & qos2)
+bool should_check_compatibility_upon_change (const ::DDS::PublisherQos & /*qos1*/,
+                                             const ::DDS::PublisherQos & /*qos2*/)
 {
   return false;
 }
@@ -279,8 +279,8 @@ bool should_check_compatibility_upon_change (const ::DDS::TopicQos & qos1,
 }
 
 
-bool should_check_compatibility_upon_change (const ::DDS::DomainParticipantQos & qos1,
-                                             const ::DDS::DomainParticipantQos & qos2)
+bool should_check_compatibility_upon_change (const ::DDS::DomainParticipantQos & /*qos1*/,
+                                             const ::DDS::DomainParticipantQos & /*qos2*/)
 {
   return false;
 }
@@ -313,14 +313,14 @@ bool should_check_association_upon_change (const ::DDS::PublisherQos & qos1,
 }
 
 
-bool should_check_association_upon_change (const ::DDS::TopicQos & qos1,
-                                           const ::DDS::TopicQos & qos2)
+bool should_check_association_upon_change (const ::DDS::TopicQos & /*qos1*/,
+                                           const ::DDS::TopicQos & /*qos2*/)
 {
   return false;
 }
 
-bool should_check_association_upon_change (const ::DDS::DomainParticipantQos & qos1,
-                                    const ::DDS::DomainParticipantQos & qos2)
+bool should_check_association_upon_change (const ::DDS::DomainParticipantQos & /*qos1*/,
+                                    const ::DDS::DomainParticipantQos & /*qos2*/)
 {
   return false;
 }

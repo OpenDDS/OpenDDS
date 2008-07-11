@@ -85,7 +85,7 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
 
 void
 DataReaderListenerImpl::on_requested_deadline_missed (
-    DDS::DataReader_ptr reader,
+    DDS::DataReader_ptr /*reader*/,
     DDS::RequestedDeadlineMissedStatus const & status)
   throw (CORBA::SystemException)
 {
