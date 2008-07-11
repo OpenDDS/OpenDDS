@@ -1,9 +1,15 @@
+Fri Jul 11 07:46:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added deadline and partition qos change tests.
+          
 Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
-        These changes made DCPSInfoRepo re-evaluate the compatibility and 
-        associations when QoS change is made. The QoS RxO and changeable 
+        These changes made DCPSInfoRepo re-evaluate the compatibility and
+        associations when QoS change is made. The QoS RxO and changeable
         property determine whether re-evaluation is needed for a specific
-        QoS. 
+        QoS.
 
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DomainParticipantImpl.cpp:
@@ -13,11 +19,11 @@ Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           Verify QoS update return from DCPSInfoRepo. If it's incompatiable
           (return 0) then set_qos() return RETCODE_ERROR.
-          
-          
+
+
         * dds/DdsDcpsInfo.idl:
 
-          Made update_<entity>_qos function have return value to indicate if the 
+          Made update_<entity>_qos function have return value to indicate if the
           provided QoS passes compatibility checking.
 
         * dds/InfoRepo/DCPSInfo_i.h:
@@ -35,13 +41,13 @@ Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/InfoRepo/DCPS_Utils.h:
         * dds/InfoRepo/DCPS_Utils.cpp:
 
-          Supported re-evaluation of the compatibility and association of 
+          Supported re-evaluation of the compatibility and association of
           changed QoS. If changed QoS is not compatible then it will return
           error code to set_qos and the QoS will not be changed(e.g. deadline).
           If the changed QoS is compatible or do not need be compatible
-          (e.g. partition) and affect association, then it may result in 
+          (e.g. partition) and affect association, then it may result in
           removing existing associations or adding new associations.
-          
+
         * tests/DCPS/SetQosDeadline/DataReaderListener.h:
         * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
         * tests/DCPS/SetQosDeadline/Messenger.idl:
@@ -57,7 +63,7 @@ Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           Added deadline QoS change test to test if compatibility and association
           are affected by the change.
-          
+
         * tests/DCPS/SetQosPartition/DataReaderListener.h:
         * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
         * tests/DCPS/SetQosPartition/Messenger.idl:
