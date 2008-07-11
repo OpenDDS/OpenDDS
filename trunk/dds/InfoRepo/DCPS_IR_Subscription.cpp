@@ -6,6 +6,7 @@
 #include /**/ "DCPS_IR_Participant.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Domain.h"
+#include /**/ "DCPS_Utils.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
@@ -429,18 +430,115 @@ const ::DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos ()
 }
 
 
-SpecificQos DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
-                                   const ::DDS::SubscriberQos & subscriberQos)
+bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
+                                    const ::DDS::SubscriberQos & subscriberQos,
+                                    SpecificQos& specificQos)
 {
+  bool need_evaluate = false;
   bool u_dr_qos = ! (qos_ == qos);
-  bool u_sub_qos = ! (subscriberQos_ == subscriberQos);
   if (u_dr_qos)
+  {
+    if (::should_check_compatibility_upon_change(qos_, qos) 
+      && ! compatibleQosChange(qos))
+    {
+      return false;
+    }
+
+    if (::should_check_association_upon_change(qos_, qos)) 
+    {
+      need_evaluate = true;
+    }
+
     qos_ = qos;
+  }
+
+  bool u_sub_qos = ! (subscriberQos_ == subscriberQos);
   if (u_sub_qos)
+  {
+    if (::should_check_compatibility_upon_change(subscriberQos_, subscriberQos) 
+      && ! compatibleQosChange(subscriberQos))
+    {
+      return false;
+    }
+
+    if (::should_check_association_upon_change(subscriberQos_, subscriberQos))
+    {
+      need_evaluate = true; 
+    }
+
     subscriberQos_ = subscriberQos;
+  }
   
+  if (need_evaluate)
+  {
+    DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
+    description->reevaluate_associations (this);
+  }
+
   participant_->get_domain_reference()->publish_subscription_bit (this);
-  return  u_dr_qos ? DataReaderQos : SubscriberQos;
+  specificQos = u_dr_qos ? DataReaderQos : SubscriberQos;
+  
+  return true;
+}
+
+
+bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos)
+{
+  DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
+
+  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
+  {
+    OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
+    writerStatus.total_count = 0;
+    writerStatus.count_since_last_send = 0;
+
+    OpenDDS::DCPS::IncompatibleQosStatus readerStatus;
+    readerStatus.total_count = 0;
+    readerStatus.count_since_last_send = 0;
+
+    if (! ::compatibleQOS((*iter)->get_datawriter_qos(), &qos,
+                          &writerStatus, &readerStatus))
+      return false;
+  }
+
+  return true;
+}
+
+
+bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::SubscriberQos & qos)
+{
+  DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
+
+  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
+    iter != end; ++iter)
+  {
+    if (! ::compatibleQOS((*iter)->get_publisher_qos(), &qos))
+      return false;
+  }
+
+  return true;
+}
+
+
+void DCPS_IR_Subscription::reevaluate_association (DCPS_IR_Publication* publication)
+{
+  int status = this->associations_.find (publication);
+  if (status == 0)
+  {
+    // verify if they are still compatiable after change
+    if (! ::compatibleQOS(publication, this))
+    {
+      bool sendNotify = true; // inform datareader
+      bool notify_lost = true; // invoke listerner callback
+      this->remove_associated_publication (publication, sendNotify, notify_lost);
+    }
+  }
+  else
+  {
+    DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
+    description->try_associate (publication, this);
+  }
 }
 
 
