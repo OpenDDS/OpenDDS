@@ -11,4 +11,9 @@ project(DDS*Node) : dcpsexe {
     *.idl
     FileDiffTypeSupport.idl
   }
+
+  Source_Files {
+    *.cpp
+    FileInfoTypeSupportImpl.cpp
+  }
 }
