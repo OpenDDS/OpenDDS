@@ -130,14 +130,18 @@ compatibleQOS (DCPS_IR_Publication  * publication,
                DCPS_IR_Subscription * subscription)
 {
   bool compatible = true;
+  OpenDDS::DCPS::IncompatibleQosStatus* writerStatus 
+    = publication->get_incompatibleQosStatus();
+  OpenDDS::DCPS::IncompatibleQosStatus* readerStatus
+    = subscription->get_incompatibleQosStatus();
 
   if (publication->get_transport_id() != subscription->get_transport_id())
   {
     // Transports are not compatible.
     compatible = false;
-    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+    increment_incompatibility_count(writerStatus,
                                     ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
-    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+    increment_incompatibility_count(readerStatus,
                                     ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
   }
 
@@ -146,16 +150,9 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   ::DDS::DataReaderQos const * const readerQos =
       subscription->get_datareader_qos ();
 
-  // Check the RELIABILITY_QOS_POLICY_ID
-  if (writerQos->reliability.kind < readerQos->reliability.kind )
-  {
-    compatible = false;
-
-    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
-                                    ::DDS::RELIABILITY_QOS_POLICY_ID);
-    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
-                                    ::DDS::RELIABILITY_QOS_POLICY_ID);
-  }
+  // Verify compatibility of DataWriterQos and DataReaderQos
+  compatible = compatible && compatibleQOS (writerQos, readerQos, 
+                                            writerStatus, readerStatus);
 
   ::DDS::PublisherQos const * const pubQos =
       publication->get_publisher_qos ();
@@ -170,18 +167,47 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   //   QoS and does not trigger any listeners nor conditions.
   //
   // Don't increment the incompatibity count.
-  compatible =
-    compatible && matching_partitions (pubQos->partition,
-                                       subQos->partition);
+  compatible = compatible && matching_partitions (pubQos->partition,
+                                                  subQos->partition);
+
+  return compatible;
+}
+
+
+bool
+compatibleQOS (const ::DDS::PublisherQos * pubQos,
+               const ::DDS::SubscriberQos * subQos)
+{
+  return true;
+}
+
+bool
+compatibleQOS (const ::DDS::DataWriterQos * writerQos,
+               const ::DDS::DataReaderQos * readerQos,
+               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
+               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus)
+{
+  bool compatible = true;
+
+  // Check the RELIABILITY_QOS_POLICY_ID
+  if (writerQos->reliability.kind < readerQos->reliability.kind )
+  {
+    compatible = false;
+
+    increment_incompatibility_count(writerStatus,
+                                    ::DDS::RELIABILITY_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    ::DDS::RELIABILITY_QOS_POLICY_ID);
+  }
 
   // Check the DURABILITY_QOS_POLICY_ID
   if ( writerQos->durability.kind < readerQos->durability.kind )
   {
     compatible = false;
 
-    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+    increment_incompatibility_count(writerStatus,
                                     ::DDS::DURABILITY_QOS_POLICY_ID);
-    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+    increment_incompatibility_count(readerStatus,
                                     ::DDS::DURABILITY_QOS_POLICY_ID);
   }
 
@@ -195,9 +221,9 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   {
     compatible = false;
 
-    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+    increment_incompatibility_count(writerStatus,
                                     ::DDS::LIVELINESS_QOS_POLICY_ID);
-    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+    increment_incompatibility_count(readerStatus,
                                     ::DDS::LIVELINESS_QOS_POLICY_ID);
   }
 
@@ -208,12 +234,96 @@ compatibleQOS (DCPS_IR_Publication  * publication,
   {
     compatible = false;
 
-    increment_incompatibility_count(publication->get_incompatibleQosStatus(),
+    increment_incompatibility_count(writerStatus,
                                     ::DDS::DEADLINE_QOS_POLICY_ID);
-    increment_incompatibility_count(subscription->get_incompatibleQosStatus(),
+    increment_incompatibility_count(readerStatus,
                                     ::DDS::DEADLINE_QOS_POLICY_ID);
   }
 
   return compatible;
 }
+
+
+bool should_check_compatibility_upon_change (const ::DDS::DataReaderQos & qos1,
+                                             const ::DDS::DataReaderQos & qos2)
+{
+  return ! (qos1.deadline == qos2.deadline);
+}
+
+
+bool should_check_compatibility_upon_change (const ::DDS::DataWriterQos & qos1,
+                                             const ::DDS::DataWriterQos & qos2)
+{
+  return ! (qos1.deadline == qos2.deadline);
+}
+
+
+bool should_check_compatibility_upon_change (const ::DDS::SubscriberQos & qos1,
+                                             const ::DDS::SubscriberQos & qos2)
+{
+  return false;
+}
+
+
+bool should_check_compatibility_upon_change (const ::DDS::PublisherQos & qos1,
+                                             const ::DDS::PublisherQos & qos2)
+{
+  return false;
+}
+
+
+bool should_check_compatibility_upon_change (const ::DDS::TopicQos & qos1,
+                                             const ::DDS::TopicQos & qos2)
+{
+  return ! (qos1.deadline == qos2.deadline);
+}
+
+
+bool should_check_compatibility_upon_change (const ::DDS::DomainParticipantQos & qos1,
+                                             const ::DDS::DomainParticipantQos & qos2)
+{
+  return false;
+}
+
+bool should_check_association_upon_change (const ::DDS::DataReaderQos & qos1,
+                                           const ::DDS::DataReaderQos & qos2)
+{
+  return !(qos1.deadline == qos2.deadline);
+}
+
+
+bool should_check_association_upon_change (const ::DDS::DataWriterQos & qos1,
+                                           const ::DDS::DataWriterQos & qos2)
+{
+  return !(qos1.deadline == qos2.deadline);
+}
+
+
+bool should_check_association_upon_change (const ::DDS::SubscriberQos & qos1,
+                                           const ::DDS::SubscriberQos & qos2)
+{
+  return !(qos1.partition == qos2.partition);
+}
+
+
+bool should_check_association_upon_change (const ::DDS::PublisherQos & qos1,
+                                           const ::DDS::PublisherQos & qos2)
+{
+  return !(qos1.partition == qos2.partition);
+}
+
+
+bool should_check_association_upon_change (const ::DDS::TopicQos & qos1,
+                                           const ::DDS::TopicQos & qos2)
+{
+  return false;
+}
+
+bool should_check_association_upon_change (const ::DDS::DomainParticipantQos & qos1,
+                                    const ::DDS::DomainParticipantQos & qos2)
+{
+  return false;
+}
+
+
 

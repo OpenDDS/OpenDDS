@@ -88,7 +88,13 @@ public:
   void associate (DCPS_IR_Publication* publication,
                   DCPS_IR_Subscription* subscription);
 
-  void publish_subscription_bit (const DCPS_IR_Topic* topic);
+  /// Re-evaluate the association between the provided publication and
+  /// the subscriptions it maintains.
+  void reevaluate_associations (DCPS_IR_Publication* publication);
+
+  /// Re-evaluate the association between the provided subscription and
+  /// the publications in all its maintained topics.  
+  void reevaluate_associations (DCPS_IR_Subscription* subscription);
 
   const char* get_name () const ;
   const char* get_dataTypeName () const;

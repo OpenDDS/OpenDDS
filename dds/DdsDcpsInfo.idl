@@ -169,13 +169,13 @@ module OpenDDS {
       // The repo will break any assocations that become
       // incompatible.
       //
-      void update_domain_participant_qos (in ::DDS::DomainId_t domain,
+      boolean update_domain_participant_qos (in ::DDS::DomainId_t domain,
                                           in RepoId participantId,
                                           in ::DDS::DomainParticipantQos qos)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
-      void update_topic_qos (in RepoId topicId,
+      boolean update_topic_qos (in RepoId topicId,
                              in ::DDS::DomainId_t domainId,
                              in RepoId  participantId,
                              in ::DDS::TopicQos   qos)
@@ -183,7 +183,7 @@ module OpenDDS {
                 Invalid_Participant,
                 Invalid_Topic);
 
-      void update_publication_qos (in ::DDS::DomainId_t domainId,
+      boolean update_publication_qos (in ::DDS::DomainId_t domainId,
                                    in RepoId participantId,
                                    in RepoId publicationId,
                                    in ::DDS::DataWriterQos qos,
@@ -192,7 +192,7 @@ module OpenDDS {
                 Invalid_Participant,
                 Invalid_Publication);
 
-      void update_subscription_qos (in ::DDS::DomainId_t domainId,
+      boolean update_subscription_qos (in ::DDS::DomainId_t domainId,
                                     in RepoId participantId,
                                     in RepoId subscriptionId,
                                     in ::DDS::DataReaderQos qos,

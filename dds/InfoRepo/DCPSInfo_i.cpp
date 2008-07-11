@@ -468,8 +468,6 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                    subscriberQos),
                  0);
 
-  DCPS_IR_Topic_Description* description = subPtr->get_topic_description ();
-
   if (partPtr->add_subscription(subPtr) != 0)
     {
       // failed to add.  we are responsible for the memory.
@@ -477,7 +475,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       delete subPtr;
       subPtr = 0;
     }
-  else if (description->add_subscription_reference(subPtr) != 0)
+  else if (topic->add_subscription_reference(subPtr) != 0)
     {
       ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
                   "topic list.\n"));
@@ -567,15 +565,15 @@ TAO_DDS_DCPSInfo_i::add_subscription (
       delete subPtr;
       return false;
     }
-  else if (description->add_subscription_reference(subPtr, false) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
-                  "topic list.\n"));
+  else if (topic->add_subscription_reference (subPtr, false))
+  {
+    ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
+      "topic list.\n"));
 
-      // No associations were made so remove and fail.
-      partPtr->remove_subscription(subId);
-      return false;
-    }
+    // No associations were made so remove and fail.
+    partPtr->remove_subscription(subId);
+    return false;
+  }
 
   return true;
 }
@@ -857,7 +855,7 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
 }
 
 
-void TAO_DDS_DCPSInfo_i::update_publication_qos (
+CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
   ::DDS::DomainId_t domainId,
   OpenDDS::DCPS::RepoId partId,
   OpenDDS::DCPS::RepoId dwId,
@@ -889,7 +887,9 @@ void TAO_DDS_DCPSInfo_i::update_publication_qos (
       throw OpenDDS::DCPS::Invalid_Publication();
     }
 
-  SpecificQos qosType = pub->set_qos (qos, publisherQos);
+  SpecificQos qosType; 
+  if (pub->set_qos (qos, publisherQos, qosType) == false) // not compatible
+    return 0;
 
   if (um_)
     {
@@ -906,9 +906,11 @@ void TAO_DDS_DCPSInfo_i::update_publication_qos (
         um_->updateQos (Actor, dwId, pub_qos);
       }
     }
+
+  return 1;
 }
 
-void TAO_DDS_DCPSInfo_i::update_subscription_qos (
+CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
   ::DDS::DomainId_t domainId,
   OpenDDS::DCPS::RepoId partId,
   OpenDDS::DCPS::RepoId drId,
@@ -940,7 +942,9 @@ void TAO_DDS_DCPSInfo_i::update_subscription_qos (
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
 
-  SpecificQos qosType = sub->set_qos (qos, subscriberQos);
+  SpecificQos qosType;
+  if (sub->set_qos (qos, subscriberQos, qosType) == false)
+    return 0;
 
   if (um_)
   {
@@ -957,10 +961,11 @@ void TAO_DDS_DCPSInfo_i::update_subscription_qos (
       um_->updateQos (Actor, drId, sub_qos);
     }
   }
+  return 1;
 }
 
 
-void TAO_DDS_DCPSInfo_i::update_topic_qos (
+CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
   OpenDDS::DCPS::RepoId topicId,
   ::DDS::DomainId_t domainId,
   OpenDDS::DCPS::RepoId participantId,
@@ -993,7 +998,8 @@ void TAO_DDS_DCPSInfo_i::update_topic_qos (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  topic->set_topic_qos (qos);
+  if (topic->set_topic_qos (qos) == false)
+    return 0;
 
   if (um_)
     {
@@ -1001,10 +1007,11 @@ void TAO_DDS_DCPSInfo_i::update_topic_qos (
        this->get_qos_seq (TopicQos, qos, topic_qos);
        um_->updateQos (Topic, topicId, topic_qos);
     }
+  return 1;
 }
 
 
-void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
+CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::DDS::DomainId_t domainId,
     ::OpenDDS::DCPS::RepoId participantId,
     const ::DDS::DomainParticipantQos & qos
@@ -1029,13 +1036,17 @@ void TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  partPtr->set_qos (qos);
+  if (partPtr->set_qos (qos) == false)
+    return 0;
+
   if (um_)
     {
       QosSeq part_qos;
       this->get_qos_seq (ParticipantQos, qos, part_qos);
       um_->updateQos (Participant, participantId, part_qos);
     }
+
+  return 1;
 }
 
 
