@@ -69,7 +69,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-        "-t <tcp/udp/default> "
+        "-t <tcp/udp/mcast/reliable_mcast/default_tcp/default_udp/default_mcast_sub/default_reliable_mcast_sub> "
         "\n",
         argv [0]),
         -1);

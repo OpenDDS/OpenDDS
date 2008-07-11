@@ -16,8 +16,8 @@ $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
-$pub_opts = "$opts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+$pub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
+$sub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
 
 if ($ARGV[0] eq 'udp') {
     $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
@@ -32,8 +32,8 @@ elsif ($ARGV[0] eq 'mcast') {
 elsif ($ARGV[0] eq 'reliable_mcast') {
     $opts .= ($use_svc_config ? " -ORBSvcConf reliable_mcast.conf " : '')
         . "-t reliable_mcast";
-    $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini -TransportDebugLevel 3";
-    $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini -TransportDebugLevel 3";
+    $pub_opts = "$opts -DCPSConfigFile pub_reliable_mcast.ini -DCPSTransportDebugLevel 3";
+    $sub_opts = "$opts -DCPSConfigFile sub_reliable_mcast.ini -DCPSTransportDebugLevel 3";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
     $opts .= " -t default_tcp";
@@ -82,7 +82,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+				  "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
 
 if($stack_based == 0) {
   #create

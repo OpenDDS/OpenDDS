@@ -225,8 +225,6 @@ int main (int argc, char *argv[])
           participant->delete_subscriber(sub.in());
           dr = DDS::DataReader::_nil ();
           sub = DDS::Subscriber::_nil();
-          if (count < sub_reinit_itr)
-            ACE_OS::sleep (3);
         }
 
       if (!CORBA::is_nil (participant.in ())) {
