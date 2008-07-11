@@ -924,9 +924,18 @@ namespace OpenDDS
             try
             {
               DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-              repository_->update_domain_participant_qos(domain_id_,
-                                                         dp_id_,
-                                                         qos_);            
+              CORBA::Boolean status
+                = repository_->update_domain_participant_qos(domain_id_,
+                                                             dp_id_,
+                                                             qos_);
+              if (status == 0)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) "
+                  "DomainParticipantImpl::set_qos, ")
+                  ACE_TEXT("failed on compatiblity check. \n")),
+                  ::DDS::RETCODE_ERROR);
+              }
             }
             catch (const CORBA::SystemException& sysex)
             {

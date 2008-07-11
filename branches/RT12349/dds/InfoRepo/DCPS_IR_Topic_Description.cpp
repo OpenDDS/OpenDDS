@@ -352,21 +352,34 @@ void DCPS_IR_Topic_Description::associate (DCPS_IR_Publication* publication,
 }
 
 
-void DCPS_IR_Topic_Description::publish_subscription_bit (const DCPS_IR_Topic* topic)
+void DCPS_IR_Topic_Description::reevaluate_associations (DCPS_IR_Subscription* subscription)
 {
-  DCPS_IR_Subscription* subscription = 0;
-  DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
-  DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+  DCPS_IR_Topic* topic = 0;
+
+  DCPS_IR_Topic_Set::ITERATOR iter = topics_.begin ();
+  DCPS_IR_Topic_Set::ITERATOR end = topics_.end();
 
   while (iter != end)
     {
-      subscription = *iter;
+      topic = *iter;
       ++iter;
-      if (subscription->get_topic () == topic)
-      {
-        this->domain_->publish_subscription_bit (subscription);
-      }
+
+      topic->reevaluate_associations(subscription);
     }
+}
+
+
+void DCPS_IR_Topic_Description::reevaluate_associations (DCPS_IR_Publication* publication)
+{
+  DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+
+  for (iter; iter != end; ++iter)
+  {
+    publication->reevaluate_association (*iter);
+    (*iter)->reevaluate_association (publication);
+  }
+
 }
 
 

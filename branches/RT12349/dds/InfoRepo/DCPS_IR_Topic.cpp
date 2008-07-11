@@ -53,6 +53,28 @@ DCPS_IR_Topic::~DCPS_IR_Topic ()
                      ));
         }
     }
+
+  if (0 != subscriptionRefs_.size())
+    {
+      DCPS_IR_Subscription* sub = 0;
+      DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
+      DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic () ")
+                 ACE_TEXT("id %d\n"),
+                 id_ ));
+
+      while (iter != end)
+        {
+          sub = *iter;
+          ++iter;
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) \tERROR: Subscription id %d still held!\n"),
+                     sub->get_id()
+                     ));
+        }
+    }
 }
 
 
@@ -117,6 +139,57 @@ int DCPS_IR_Topic::remove_publication_reference (DCPS_IR_Publication* publicatio
 }
 
 
+int DCPS_IR_Topic::add_subscription_reference (DCPS_IR_Subscription* subscription
+                                                           , bool associate)
+{
+  int status = subscriptionRefs_.insert(subscription);
+
+  switch (status)
+    {
+    case 0:
+      status = this->description_->add_subscription_reference (subscription, associate);
+      break;
+    case 1:
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::add_subscription_reference ")
+        ACE_TEXT("Attempted to add existing subscription %X\n"),
+        subscription));
+      break;
+    case -1:
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::add_subscription_reference ")
+        ACE_TEXT("Unknown error while adding subscription %X\n"),
+        subscription));
+    };
+
+  return status;
+}
+
+
+int DCPS_IR_Topic::remove_subscription_reference (DCPS_IR_Subscription* subscription)
+{
+  int status = subscriptionRefs_.remove(subscription);
+  if (0 == status)
+    {
+      if (TAO_debug_level > 0)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("DCPS_IR_Topic::remove_subscription_reference ")
+            ACE_TEXT("Removed subscription %X\n"),
+            subscription));
+        }
+        
+      this->description_->remove_subscription_reference (subscription);
+    }
+  else
+    {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::remove_subscription_reference ")
+        ACE_TEXT("Unable to remove subscription %X\n"),
+        subscription));
+    } // if (0 == status)
+
+  return status;
+}
+
+
+
 OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_id () const
 {
   return id_;
@@ -135,31 +208,53 @@ OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_participant_id () const
 }
 
 
-void DCPS_IR_Topic::set_topic_qos (const ::DDS::TopicQos& qos)
+bool DCPS_IR_Topic::set_topic_qos (const ::DDS::TopicQos& qos)
 {
+  // Do not need re-evaluate compatibility and associations when
+  // TopicQos changes since only datareader and datawriter QoS 
+  // are evaludated during normal associations establishment.
+
   bool pub_to_rd_wr = ! (qos.topic_data == qos_.topic_data);
 
   qos_ = qos;
   domain_->publish_topic_bit (this);
  
-  // Only need publish to datareader/datawriter BIT when the 
-  // topic_data qos is changed. 
   if (! pub_to_rd_wr)
-    return;
+    return true;
+  
+  // The only changeable TopicQos used by DataWriter and DataReader
+  // is topic_data so we need publish it to DW/DR BIT to make they
+  // are consistent.
 
   // Update qos in datawriter BIT for associated datawriters.
 
-  DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
-  DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
-
-  while (iter != end)
   {
-    domain_->publish_publication_bit (*iter);
-    ++iter;
+    DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
+    DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
+
+    while (iter != end)
+    {
+      domain_->publish_publication_bit (*iter);
+      ++iter;
+    }
   }
 
-  this->description_->publish_subscription_bit (this);
+  // Update qos in datareader BIT for associated datareader.
+
+  {
+    DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin ();
+    DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
+
+    while (iter != end)
+    {
+      domain_->publish_subscription_bit (*iter);
+      ++iter;
+    }
+  }
+
+  return true;
 }
+
 
 
 void DCPS_IR_Topic::try_associate (DCPS_IR_Subscription* subscription)
@@ -206,6 +301,7 @@ void DCPS_IR_Topic::try_associate (DCPS_IR_Subscription* subscription)
 }
 
 
+
 DCPS_IR_Topic_Description* DCPS_IR_Topic::get_topic_description ()
 {
   return description_;
@@ -234,6 +330,20 @@ CORBA::Boolean DCPS_IR_Topic::is_bit ()
 void DCPS_IR_Topic::set_bit_status (CORBA::Boolean isBIT)
 {
   isBIT_ = isBIT;
+}
+
+
+void DCPS_IR_Topic::reevaluate_associations (DCPS_IR_Subscription* subscription)
+{
+  DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
+  DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
+
+  while (iter != end)
+  {
+    subscription->reevaluate_association (*iter);
+    (*iter)->reevaluate_association (subscription);
+    ++iter;
+  }
 }
 
 
