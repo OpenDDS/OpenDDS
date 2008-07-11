@@ -24,6 +24,9 @@
 class DCPS_IR_Publication;
 typedef ACE_Unbounded_Set<DCPS_IR_Publication*> DCPS_IR_Publication_Set;
 
+class DCPS_IR_Subscription;
+typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
+
 class DCPS_IR_Domain;
 class DCPS_IR_Participant;
 class DCPS_IR_Topic_Description;
@@ -57,6 +60,16 @@ public:
   /// Returns 0 if successful
   int remove_publication_reference (DCPS_IR_Publication* publication);
 
+  /// Adds the subscription to the list of subscriptions
+  /// and let description handle the association.
+  /// Returns 0 if added, 1 if already exists, -1 other failure
+  int add_subscription_reference (DCPS_IR_Subscription* subscription
+				  , bool associate = true);
+
+  /// Removes the subscription from the list of subscriptions
+  /// Returns 0 if successful
+  int remove_subscription_reference (DCPS_IR_Subscription* subscription);
+
   /// Called by the DCPS_IR_Topic_Description
   /// Find any compatible publications and associate
   ///  them using the DCPS_IR_Topic_Description's
@@ -64,6 +77,12 @@ public:
   /// This method does not check the subscription's incompatible
   ///  qos status.
   void try_associate (DCPS_IR_Subscription* subscription);
+
+  /// Called by the DCPS_IR_Topic_Description to re-evaluate the 
+  /// association between the publications of this topic and the
+  /// provided subscription.
+  void reevaluate_associations (DCPS_IR_Subscription* subscription);
+
 
   OpenDDS::DCPS::RepoId get_id () const;
   OpenDDS::DCPS::RepoId get_participant_id () const;
@@ -78,7 +97,10 @@ public:
 
   /// Reset topic qos and also propogate the qos change to related BITs
   /// that has the qos copy.
-  void set_topic_qos (const ::DDS::TopicQos& qos);
+  /// Return false if the provided QoS makes the DataWriter and DataReader
+  /// QoS incompatible. Currently supported changeable QoS in TopicQos do
+  /// not affect.
+  bool set_topic_qos (const ::DDS::TopicQos& qos);
 
   ::DDS::InstanceHandle_t get_handle();
   void set_handle(::DDS::InstanceHandle_t handle);
@@ -96,6 +118,9 @@ private:
   CORBA::Boolean isBIT_;
 
   DCPS_IR_Publication_Set publicationRefs_;
+  /// Keep track the subscriptions of this topic so the TopicQos 
+  /// change can be published for those subscriptions.
+  DCPS_IR_Subscription_Set subscriptionRefs_;
 };
 
 #endif /* DCPS_IR_TOPIC_H */

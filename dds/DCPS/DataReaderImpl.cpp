@@ -575,8 +575,11 @@ void DataReaderImpl::update_incompatible_qos (
     if (qos_.deadline.period.sec != qos.deadline.period.sec
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      this->watchdog_->reset_interval (
-        duration_to_time_value (qos.deadline.period));
+      if (this->watchdog_.get ())
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
     }
 
     qos_ = qos;
