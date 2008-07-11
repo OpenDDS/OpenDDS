@@ -16,7 +16,7 @@ project(DcpsFooType) : dcps {
   }
 
   Source_Files {
-    FooTypeTypeSupportImpl.cpp
+    FooTypeSupportImpl.cpp
   }
 }
 
