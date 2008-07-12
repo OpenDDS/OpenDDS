@@ -1,0 +1,176 @@
+Sat Jul 12 20:30:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added overloaded notify_subscription_lost() function passing with 
+          instance handles instead of writer ids and use it in 
+          remove_association(). This would fix a warning in 
+          remove_associations() that lookup cached BIT data failed.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+           
+          Made on_publication_lost() called once in notify_publication_lost
+          instead of for every lost publication. 
+
+Sat Jul 12 08:18:54 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          - Corrected ACE_Unbounded_Set iterator use to fix access
+            violation.
+          - Made remove_association always be called before
+            add_association when re-evaluating the associations.
+            Otherwise, the new association has trouble to connect
+            when the removed associations and added association using
+            the same datalink. This would fix SetQoSPartition test
+            failure.
+
+Fri Jul 11 22:34:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Added files missed in previous commit.
+
+Fri Jul 11 20:12:47 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+
+          Corrected the *TypeSupportImpl.cpp name.
+
+Fri Jul 11 19:44:44 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Merged in changes
+          Sat Jun 28 20:41:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+          from trunk to this branch.
+
+Fri Jul 11 19:19:33 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DDS_TAO.mwc:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Merged following Changes from trunk to this branch.
+
+          Wed Jun 25 18:39:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+          Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
+          Fri Jun 27 22:14:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+          Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * RT12349_branch_ChangeLog:
+
+          Removed this file which is replaced by DDS-1.1.1_ChangeLog as
+          branch is renamed.
+
+Fri Jul 11 16:23:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+
+          Fixed warnings.
+
+Fri Jul 11 07:46:02 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added deadline and partition qos change tests.
+
+Fri Jul 11 07:14:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        These changes made DCPSInfoRepo re-evaluate the compatibility and
+        associations when QoS change is made. The QoS RxO and changeable
+        property determine whether re-evaluation is needed for a specific
+        QoS.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Verify QoS update return from DCPSInfoRepo. If it's incompatiable
+          (return 0) then set_qos() return RETCODE_ERROR.
+
+
+        * dds/DdsDcpsInfo.idl:
+
+          Made update_<entity>_qos function have return value to indicate if the
+          provided QoS passes compatibility checking.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Supported re-evaluation of the compatibility and association of
+          changed QoS. If changed QoS is not compatible then it will return
+          error code to set_qos and the QoS will not be changed(e.g. deadline).
+          If the changed QoS is compatible or do not need be compatible
+          (e.g. partition) and affect association, then it may result in
+          removing existing associations or adding new associations.
+
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/Messenger.idl:
+        * tests/DCPS/SetQosDeadline/README:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosDeadline/Writer.h:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/domain_ids:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/tcp.conf:
+
+          Added deadline QoS change test to test if compatibility and association
+          are affected by the change.
+
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/Messenger.idl:
+        * tests/DCPS/SetQosPartition/README:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/Writer.h:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/SetQosPartition/domain_ids:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/tcp.conf:
+
+          Added patition QoS change test to test if compatibility and association
+          are affected by the change.
