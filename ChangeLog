@@ -1,3 +1,57 @@
+Sat Jul 12 20:52:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          More fixes from DDS-1.1.1 branch.
+          
+            Sat Jul 12 20:30:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/DCPS/DataReaderImpl.h:
+                    * dds/DCPS/DataReaderImpl.cpp:
+
+                      Added overloaded notify_subscription_lost() function passing with 
+                      instance handles instead of writer ids and use it in 
+                      remove_association(). This would fix a warning in 
+                      remove_associations() that lookup cached BIT data failed.
+
+                    * dds/DCPS/DataWriterImpl.h:
+                    * dds/DCPS/DataWriterImpl.cpp:
+                       
+                      Made on_publication_lost() called once in notify_publication_lost
+                      instead of for every lost publication. 
+
+            Sat Jul 12 08:18:54 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/InfoRepo/DCPS_IR_Publication.h:
+                    * dds/InfoRepo/DCPS_IR_Publication.cpp:
+                    * dds/InfoRepo/DCPS_IR_Subscription.h:
+                    * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+                    * dds/InfoRepo/DCPS_IR_Topic.cpp:
+                    * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+                      - Corrected ACE_Unbounded_Set iterator use to fix access
+                        violation.
+                      - Made remove_association always be called before
+                        add_association when re-evaluating the associations.
+                        Otherwise, the new association has trouble to connect
+                        when the removed associations and added association using
+                        the same datalink. This would fix SetQoSPartition test
+                        failure.
+                        
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        
+          Added missing files.
+
 Fri Jul 11 22:45:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -53,14 +107,14 @@ Fri Jul 11 22:45:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
 
           Merged in changes from RT12349 branch(renamed to DDS-1.1.1 branch).
-          
+
             Fri Jul 11 22:34:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
                     * tests/DCPS/SetQosDeadline/pub.ini:
                     * tests/DCPS/SetQosDeadline/sub.ini:
                     * tests/DCPS/SetQosPartition/pub.ini:
                     * tests/DCPS/SetQosPartition/sub.ini:
-              
+
                       Added files missed in previous commit.
 
             Fri Jul 11 16:23:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
