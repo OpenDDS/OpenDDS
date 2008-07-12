@@ -1694,9 +1694,10 @@ DataWriterImpl::notify_publication_lost (const ::DDS::InstanceHandleSeq& handles
       for (CORBA::ULong i = 0;i < len; ++ i)
       {
         status.subscription_handles[i] = handles[i];
-        the_listener->on_publication_lost (this->dw_local_objref_.in (),
-          status);
       }
+
+      the_listener->on_publication_lost (this->dw_local_objref_.in (),
+          status);
     }
   }
 }
