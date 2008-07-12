@@ -471,6 +471,14 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
   
   if (need_evaluate)
   {
+    // Check if any existing association need be removed first.
+    this->reevaluate_existing_associations ();
+
+    // Sleep a while to let remove_association handled by DataReader
+    // before add_association. Otherwise, new association will have
+    // trouble to connect each other.
+    ACE_OS::sleep (ACE_Time_Value (0, 250000));
+    
     DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
     description->reevaluate_associations (this);
   }
@@ -483,12 +491,16 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
 
 
 bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos)
-{
+{   
+  DCPS_IR_Publication * pub = 0;
+  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
 
-  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
-    iter != end; ++iter)
+  while (iter != end)
   {
+    pub = *iter;
+    ++iter;
+
     OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
     writerStatus.total_count = 0;
     writerStatus.count_since_last_send = 0;
@@ -497,8 +509,8 @@ bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos
     readerStatus.total_count = 0;
     readerStatus.count_since_last_send = 0;
 
-    if (! ::compatibleQOS((*iter)->get_datawriter_qos(), &qos,
-                          &writerStatus, &readerStatus))
+    if (! ::compatibleQOS(pub->get_datawriter_qos(), &qos,
+      &writerStatus, &readerStatus))
       return false;
   }
 
@@ -508,16 +520,36 @@ bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::DataReaderQos & qos
 
 bool DCPS_IR_Subscription::compatibleQosChange (const ::DDS::SubscriberQos & qos)
 {
+  DCPS_IR_Publication * pub = 0;
+  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
   DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
 
-  for (DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin(); 
-    iter != end; ++iter)
+  while (iter != end)
   {
-    if (! ::compatibleQOS((*iter)->get_publisher_qos(), &qos))
+    pub = *iter;
+    ++iter;
+
+    if (! ::compatibleQOS(pub->get_publisher_qos(), &qos))
       return false;
   }
 
   return true;
+}
+
+
+void DCPS_IR_Subscription::reevaluate_existing_associations ()
+{
+  DCPS_IR_Publication * pub = 0;
+  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
+  DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
+
+  while (iter != end)
+  {
+    pub = *iter;
+    ++iter;
+
+    this->reevaluate_association (pub);
+  }
 }
 
 

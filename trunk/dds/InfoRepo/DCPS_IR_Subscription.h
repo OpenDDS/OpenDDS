@@ -114,6 +114,14 @@ public:
                 const ::DDS::SubscriberQos & subscriberQos,
                 SpecificQos& specificQos);
 
+  // Verify the existing associations. This may result removal of
+  // associations. The existing associations have to be removed before
+  // adding new association and may need some delay. Otherwise, if  
+  // two DataWrites uses same Datalink and add an association happens 
+  // before remove an association then the new association will fail to 
+  // connect.
+  void reevaluate_existing_associations ();
+
   // Re-evaluate the association between this subscription and the provided
   // publication. If they are already associated and not compatible then
   // they will be dis-associated. If they are not already associated then

@@ -136,6 +136,14 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Verify the existing associations. This may result removal of
+  // associations. The existing associations have to be removed before
+  // adding new association and may need some delay. Otherwise, if  
+  // two DataReaders uses same Datalink and add an association happens 
+  // before remove an association then the new association will fail to 
+  // connect.
+  void reevaluate_existing_associations ();
+
   // Re-evaluate the association between this publication and the provided
   // subscription. If they are already associated and not compatible then
   // they will be dis-associated. If they are not already associated then
