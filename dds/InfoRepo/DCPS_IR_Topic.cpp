@@ -335,14 +335,17 @@ void DCPS_IR_Topic::set_bit_status (CORBA::Boolean isBIT)
 
 void DCPS_IR_Topic::reevaluate_associations (DCPS_IR_Subscription* subscription)
 {
+  DCPS_IR_Publication * pub = 0;
   DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin ();
   DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
 
   while (iter != end)
   {
-    subscription->reevaluate_association (*iter);
-    (*iter)->reevaluate_association (subscription);
+    pub = *iter;
     ++iter;
+
+    subscription->reevaluate_association (pub);
+    pub->reevaluate_association (subscription);
   }
 }
 
