@@ -1,18 +1,25 @@
+Sun Jul 13 19:08:42 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+
+          Removed Stack_Trace header which is not needed.
+
 Sat Jul 12 20:30:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-          Added overloaded notify_subscription_lost() function passing with 
-          instance handles instead of writer ids and use it in 
-          remove_association(). This would fix a warning in 
+          Added overloaded notify_subscription_lost() function passing with
+          instance handles instead of writer ids and use it in
+          remove_association(). This would fix a warning in
           remove_associations() that lookup cached BIT data failed.
 
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
-           
+
           Made on_publication_lost() called once in notify_publication_lost
-          instead of for every lost publication. 
+          instead of for every lost publication.
 
 Sat Jul 12 08:18:54 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 

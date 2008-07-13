@@ -7,7 +7,6 @@
 #include "MessageTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
-#include <ace/Stack_Trace.h>
 
 using namespace Messenger;
 
