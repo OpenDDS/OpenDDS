@@ -51,14 +51,6 @@ ManagerImpl::~ManagerImpl()
     ));
   }
 
-  // Remove links with any remote repositories.
-  for( RemoteLinkMap::iterator current = this->remoteLink_.begin();
-       current != this->remoteLink_.end();
-       ++current) {
-    delete current->second;
-  }
-  this->remoteLink_.erase( this->remoteLink_.begin(), this->remoteLink_.end());
-
   // Remove our local participant and contained entities.
   if( 0 == CORBA::is_nil( this->participant_)) {
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
@@ -90,6 +82,7 @@ ManagerImpl::initialize()
     ));
   }
 
+#if 0
   // N.B. The <self> domain participant uses the default repository which
   //      is the local repository.
 
@@ -165,72 +158,74 @@ ManagerImpl::initialize()
     ));
     throw Unavailable();
   }
+#endif
 }
 
 // IDL methods.
 
 RepoKey
-ManagerImpl::federationId()
-ACE_THROW_SPEC ((
-  ::CORBA::SystemException
-))
+ManagerImpl::federation_id( void)
+ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::federationId()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::federation_id()\n")
     ));
   }
   return this->config_.federationId();
 }
 
-Status
-ManagerImpl::join_federation( const char * endpoint)
-ACE_THROW_SPEC ((
-  ::CORBA::SystemException,
-  Unavailable
-))
+::OpenDDS::DCPS::DCPSInfo_ptr
+ManagerImpl::repository( void )
+ACE_THROW_SPEC (( ::CORBA::SystemException))
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation()\n")
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::repository()\n")
     ));
   }
+  return TheServiceParticipant->get_repository( this->config_.federationId());
+}
 
-  const std::string iorPrefix = "corbaloc:";
-  std::string       remoteIor = iorPrefix + endpoint + "/" + FEDERATOR_IORTABLE_KEY;
-
-  // Resolve remote federator
-  CORBA::Object_var obj
-    = this->orb_->string_to_object( remoteIor.c_str());
-  if( CORBA::is_nil( obj.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
-      ACE_TEXT("unable to resolve remote federator.\n")
+::CORBA::Boolean
+ManagerImpl::discover_federation ( const char * ior )
+ACE_THROW_SPEC (( ::CORBA::SystemException, Incomplete))
+{
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::discover_federation( %s)\n"),
+      ior
     ));
-    throw Unavailable();
   }
+  return false;
+}
 
-  // Narrow the IOR to a Manager object reference.
-  ::OpenDDS::Federator::Manager_var remoteFederator
-    = ::OpenDDS::Federator::Manager::_narrow( obj.in());
-  if( CORBA::is_nil( remoteFederator.in() ) ) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::join_federation - ")
-      ACE_TEXT("unable to narrow remote federator.\n")
+::CORBA::Boolean
+ManagerImpl::join_federation(
+  Manager_ptr peer,
+  FederationDomain federation
+
+) ACE_THROW_SPEC (( ::CORBA::SystemException, Incomplete))
+{
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, %x)\n"),
+      federation
     ));
-    throw Unavailable();
   }
 
   // Obtain the remote repository federator Id value.
-  RepoKey remote = remoteFederator->federationId();
+  RepoKey remote = peer->federation_id();
 
   // Check that we are not recursing via a callback from that repository.
   if( remote == this->joining_) {
     // Do not block on recursion.  This is an expected path and will
     // result in deadlock if we block here.
-    return Joining;
+    return true;
   }
 
+  return false;
+#if 0
   // This is the start of the critical section processing.  Only a single
   // remote repository can be in the process of federating at any time.
   //
@@ -325,114 +320,7 @@ ACE_THROW_SPEC ((
   this->joining_ = NIL_REPOSITORY;
 
   return Federated;
-}
-
-Status
-ManagerImpl::remove_connection ( RepoKey remoteId)
-ACE_THROW_SPEC ((
-  ::CORBA::SystemException,
-  ConnectionBusy
-))
-{
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::remove_connection()\n")
-    ));
-  }
-
-  // Obtain the lock while we mess about with the structures.
-  ACE_GUARD_THROW_EX( ACE_SYNCH_MUTEX, guard, this->lock_, ConnectionBusy());
-
-  RemoteLinkMap::iterator location
-    = this->remoteLink_.find( remoteId);
-  if( location != this->remoteLink_.end()) {
-    // Release the resources associated with the remote repository.
-    delete location->second;
-
-    // Remove the remote repository from our map.
-    this->remoteLink_.erase( location);
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ManagerImpl::remove_connection() ")
-      ACE_TEXT("on repository %d - ")
-      ACE_TEXT("attempt to remove non-MST repository %d from MST list.\n"),
-      this->id(),
-      remoteId
-    ));
-    throw ConnectionBusy();
-  }
-
-  if( 0 == this->remoteLink_.size()) {
-    // We no longer are connected to any remote repository, so we need to
-    // clean up all of our internal mappings to remove ourselves from the
-    // federation.  We cannot participate in the federation without being
-    // connected to at least one other repository within the federation.
-    for( RepoToIdMap::const_iterator current = this->inboundMap_.find( remoteId);
-         current != this->inboundMap_.end();
-         ++current) {
-      this->unfederate( current->first);
-    }
-
-  } else {
-    /// @TODO: Figure out how to determine if we can reach the remote
-    ///        repository and unfederate() it if we cant.
-  }
-
-  // Publish (<self>,<remote>,OFF,<sequence>) on all LinkState
-  // publications.
-
-  /// @TODO: Implement this.
-
-  return Unfederated;
-}
-
-void
-ManagerImpl::unfederate( RepoKey remote)
-{
-  // N.B. The caller of this method _must_ hold the Manager object lock
-  //      during this call.
-
-  RepoToIdMap::iterator inboundLocation = this->inboundMap_.find( remote);
-  if( inboundLocation != this->inboundMap_.end()) {
-    // Remove the inbound mappings and destroy the entities.
-    for( RemoteToLocalMap::iterator current = inboundLocation->second.begin();
-         current != inboundLocation->second.end();
-         ++current) {
-
-      /// @TODO: Delete the entities here.
-      //::OpenDDS::DCPS::RepoId localId = current->second;
-
-      // Remove from the outbound mappings as well.
-      LocalToFederationMap::iterator outboundLocation
-        = this->outboundMap_.find( current->second);
-      if( outboundLocation != this->outboundMap_.end()) {
-        this->outboundMap_.erase( outboundLocation);
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ManagerImpl::unfederate() ")
-          ACE_TEXT("on repository %d - ")
-          ACE_TEXT("unable to locate corresponding outbound mapping ")
-          ACE_TEXT("to remote(%d,%d) == local(%d).\n"),
-          this->id(),
-          remote,
-          current->first,
-          current->second
-        ));
-      }
-    }
-
-    // Empty the inbound remote to local mappings.
-    inboundLocation->second.erase(
-      inboundLocation->second.begin(),
-      inboundLocation->second.end()
-    );
-  }
-
-  // Finally remove the inbound mappings completely.
-  this->inboundMap_.erase( inboundLocation);
-
+#endif
 }
 
 }} // End namespace OpenDDS::Federator

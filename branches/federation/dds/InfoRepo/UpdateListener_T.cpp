@@ -2,7 +2,7 @@
 //
 // $Id$
 #include "UpdateListener_T.h"
-#include "FederatorManagerImpl.h"
+#include "dds/DCPS/debug.h"
 
 namespace OpenDDS { namespace Federator {
 
@@ -47,19 +47,26 @@ ACE_THROW_SPEC((
       return;
     }
 
-    DataType            sample;
-    ::DDS::SampleInfo   info;
-    ::DDS::ReturnCode_t status = dataReader->read_next_sample( sample, info);
+    // Process all available data.
+    while( true) {
+      DataType*            sample = new DataType();
+      ::DDS::SampleInfo*   info   = new ::DDS::SampleInfo();
+      ::DDS::ReturnCode_t status = dataReader->read_next_sample( *sample, *info);
 
-    if( status == ::DDS::RETCODE_OK) {
-      // Delegate processing to the federation manager.
-      this->manager_.update( sample, info);
+      if( status == ::DDS::RETCODE_OK) {
+        // Delegate processing to the federation manager.
+        this->receiver_.put( sample, info);
 
-    } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: UpdateListener::on_data_available: read status==%d\n"),
-        status
-      ));
+      } else if( status == ::DDS::RETCODE_NO_DATA) {
+        break;
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: UpdateListener::on_data_available: read status==%d\n"),
+          status
+        ));
+        break;
+      }
     }
 
   } catch( const CORBA::Exception& ex) {
