@@ -7,13 +7,14 @@
 
 module OpenDDS { module Federator {
 
-    typedef sequence<octet> OctetSeq;
-
     // Unique identifier for a repository.
     typedef long RepoKey;
 
     // Value of DomainId for federation.
     typedef DDS::DomainId_t FederationDomain;
+
+    // Since we don't have TransportInterfaceBLOB type support here.
+    typedef sequence<octet> OctetSeq;
 
     // Unique identifier for all entities within federation.
     struct FederationId {
@@ -44,7 +45,7 @@ module OpenDDS { module Federator {
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate id.repository"
     struct TopicUpdate {
       FederationId    id;
-      FederationId    owner;
+      RepoKey         owner;
       FederationId    participant;
       DDS::DomainId_t domain;
       long            packet;      // The sequence number of the instant sample.
@@ -68,7 +69,7 @@ module OpenDDS { module Federator {
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate id.repository"
     struct ParticipantUpdate {
       FederationId              id;
-      FederationId              owner;
+      RepoKey                   owner;
       DDS::DomainId_t           domain;
       long                      packet;      // The sequence number of the instant sample.
       UpdateType                action;
@@ -88,26 +89,26 @@ module OpenDDS { module Federator {
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::PublicationUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate id.repository"
     struct PublicationUpdate {
-      FederationId                          id;
-      FederationId                          owner;
-      FederationId                          topic;
-      FederationId                          participant;
-      DDS::DomainId_t                       domain;
-      long                                  packet;      // The sequence number of the instant sample.
-      UpdateType                            action;
-      DDS::PublisherQos                     publisher_qos;
-      DDS::DataWriterQos                    datawriter_qos;
+      FederationId                        id;
+      RepoKey                             owner;
+      FederationId                        topic;
+      FederationId                        participant;
+      DDS::DomainId_t                     domain;
+      long                                packet;      // The sequence number of the instant sample.
+      UpdateType                          action;
+      DDS::PublisherQos                   publisher_qos;
+      DDS::DataWriterQos                  datawriter_qos;
 
       // The following are the components of
       // OpenDDS::DCPS::TransportInterfaceInfo
       // which do not have TypeSupport created for them.
 
       // The transport type (.e.g SimpleTCP or SimpleUDP)
-      OpenDDS::DCPS::TransportInterfaceId   transport_id;
+      OpenDDS::DCPS::TransportInterfaceId transport_id;
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                              transport_blob;
+      OctetSeq                            transport_blob;
     };
 
     // Constant values.
@@ -123,26 +124,26 @@ module OpenDDS { module Federator {
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::SubscriptionUpdate"
 #pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate id.repository"
     struct SubscriptionUpdate {
-      FederationId                          id;
-      FederationId                          owner;
-      FederationId                          topic;
-      FederationId                          participant;
-      DDS::DomainId_t                       domain;
-      long                                  packet;      // The sequence number of the instant sample.
-      UpdateType                            action;
-      DDS::SubscriberQos                    subscriber_qos;
-      DDS::DataReaderQos                    datareader_qos;
+      FederationId                        id;
+      RepoKey                             owner;
+      FederationId                        topic;
+      FederationId                        participant;
+      DDS::DomainId_t                     domain;
+      long                                packet;      // The sequence number of the instant sample.
+      UpdateType                          action;
+      DDS::SubscriberQos                  subscriber_qos;
+      DDS::DataReaderQos                  datareader_qos;
 
       // The following are the components of
       // OpenDDS::DCPS::TransportInterfaceInfo
       // which do not have TypeSupport created for them.
 
       // The transport type (.e.g SimpleTCP or SimpleUDP)
-      OpenDDS::DCPS::TransportInterfaceId   transport_id;
+      OpenDDS::DCPS::TransportInterfaceId transport_id;
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                              transport_blob;
+      OctetSeq                            transport_blob;
     };
 
     // Constant values.
@@ -175,16 +176,9 @@ module OpenDDS { module Federator {
       // connection of an already federated repository Manager.
       //
       boolean join_federation(
-             in Manager          peer,
-             in FederationDomain federation
-           ) raises( Incomplete);
-
-      //
-      // Called to leave a federation completely.  This includes removing
-      // all managed associations with objects owned by repositories
-      // external to this one within the federation.
-      //
-      boolean leave_federation( in FederationDomain federation) raises( Incomplete);
+                in Manager          peer,
+                in FederationDomain federation
+              ) raises( Incomplete);
 
       //
       // Return the FederationId value for the managed repository.  This

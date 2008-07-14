@@ -7,7 +7,7 @@
 #include "federator_export.h"
 #include "FederatorS.h"
 #include "FederatorConfig.h"
-#include "FederatorRemoteLink.h"
+#include "UpdateProcessor_T.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
@@ -20,7 +20,11 @@
 namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export ManagerImpl 
-  : public virtual POA_OpenDDS::Federator::Manager {
+  : public virtual POA_OpenDDS::Federator::Manager,
+    public virtual UpdateProcessor< TopicUpdate>,
+    public virtual UpdateProcessor< ParticipantUpdate>,
+    public virtual UpdateProcessor< SubscriptionUpdate>,
+    public virtual UpdateProcessor< PublicationUpdate> {
   public:
     /// Default constructor.
     ManagerImpl( Config& config);
@@ -30,22 +34,36 @@ class OpenDDS_Federator_Export ManagerImpl
 
     // IDL methods.
 
-    virtual Status join_federation ( const char * endpoint)
-    ACE_THROW_SPEC ((
-      ::CORBA::SystemException,
-      Unavailable
-    ));
+    virtual ::CORBA::Boolean discover_federation (
+        const char * ior
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        Incomplete
+      ));
 
-    virtual Status remove_connection ( RepoKey remoteId)
-    ACE_THROW_SPEC ((
-      ::CORBA::SystemException,
-      ConnectionBusy
-    ));
+    virtual ::CORBA::Boolean join_federation (
+        Manager_ptr peer,
+        FederationDomain federation
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        Incomplete
+      ));
 
-    virtual RepoKey federationId()
-    ACE_THROW_SPEC ((
-      ::CORBA::SystemException
-    ));
+    virtual RepoKey federation_id (
+        void
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
+
+    virtual ::OpenDDS::DCPS::DCPSInfo_ptr repository (
+        void
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException
+      ));
 
     // Servant methods
 
@@ -62,19 +80,45 @@ class OpenDDS_Federator_Export ManagerImpl
     CORBA::ORB_ptr orb();
     void orb( CORBA::ORB_ptr value);
 
-    /// Callback with new repository information.
-    template< class SampleType>
-    void update( SampleType& sample, ::DDS::SampleInfo& info);
+    // Update methods.
+
+    /// Create a proxy for a new publication.
+    void processCreate( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Create a proxy for a new subscription.
+    void processCreate( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Create a proxy for a new participant.
+    void processCreate( const ParticipantUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Create a proxy for a new topic.
+    void processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy for a publication.
+    void processUpdate( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy for a subscription.
+    void processUpdate( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy for a participant.
+    void processUpdate( const ParticipantUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy for a topic.
+    void processUpdate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Delete a proxy for a publication.
+    void processDelete( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Delete a proxy for a subscription.
+    void processDelete( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Delete a proxy for a participant.
+    void processDelete( const ParticipantUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Delete a proxy for a topic.
+    void processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
 
   private:
-    /**
-     * Type mapping remote repository federation Id values to
-     * information about those repositories.  Store a pointer to avoid
-     * unnecessary copies in and out of the container.  Ownership is held
-     * by the container.
-     */
-    typedef std::map< RepoKey, RemoteLink*> RemoteLinkMap;
-
     /// Map remote Id value to a local Id value.
     typedef std::map< ::OpenDDS::DCPS::RepoId, ::OpenDDS::DCPS::RepoId> RemoteToLocalMap;
 
@@ -83,9 +127,6 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Inverse mappings - Local Id value to Federation Id value.
     typedef std::map< ::OpenDDS::DCPS::RepoId, FederationId> LocalToFederationMap;
-
-    /// Remove all remote repository information from out tables.
-    void unfederate( RepoKey remote);
 
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
@@ -104,9 +145,6 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Remote repositories that are part of the Minimum Spanning Tree.
     std::set< RepoKey> mstNodes_;
-
-    /// Retained information about remote repositories.
-    RemoteLinkMap remoteLink_;
 
     /// Next unused transport key value.
     ::OpenDDS::DCPS::TransportIdType transportKeyValue_;
@@ -133,15 +171,6 @@ class OpenDDS_Federator_Export ManagerImpl
 #if defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"
 #endif  /* __ACE_INLINE__ */
-
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#include "FederatorManager_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message ("FederatorManager_T.cpp template inst")
-#pragma implementation ("FederatorManager_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif // FEDERATORMANAGERIMPL_H
 

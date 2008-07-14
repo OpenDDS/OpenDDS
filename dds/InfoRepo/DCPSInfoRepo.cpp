@@ -359,7 +359,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
   // Initial federation join if specified on command line.
   if( (federator_.id() > 0) && (false == federation_endpoint_.empty())) {
-    (void)federator_.join_federation( federation_endpoint_.c_str());
+    // (void)federator_.join_federation( federation_endpoint_.c_str());
   }
 
   return true;

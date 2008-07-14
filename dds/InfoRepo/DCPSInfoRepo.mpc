@@ -21,22 +21,21 @@ project(*Federator): dcps {
 
   Source_Files {
     FederatorConfig.cpp
-    FederatorRemoteLink.cpp
-    FederatorSubscriptions.cpp
-    FederatorPublications.cpp
     FederatorManagerImpl.cpp
+    FederatorManagerImpl_updates.cpp
     FederatorTypeSupportImpl.cpp
   }
 
   Header_Files {
     UpdateListener_T.h
-    FederatorManagerImpl.h
+    UpdateReceiver_T.h
+    UpdateProcessor_T.h
   }
 
   Template_Files {
     UpdateListener_T.cpp
-    FederatorManager_T.cpp
-    FederatorManager_T_Impl.cpp
+    UpdateReceiver_T.cpp
+    UpdateProcessor_T.cpp
   }
 
 }
