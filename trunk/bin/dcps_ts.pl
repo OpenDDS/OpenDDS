@@ -38,6 +38,7 @@ my $exportmacro ;
 my $pchfile ;
 my $file ;
 my $cpp_only = 0;
+my @extensions;
 
 ########################################################################
 #
@@ -54,7 +55,8 @@ GetOptions( "verbose!"    => \$verbose,
             "idl=s"       => \$file,
             "timestamp|t" => \$backup,
             "backup!"     => \$backup,
-            "cpp_only=i"    => \$cpp_only,
+            "cpp_only=i"  => \$cpp_only,
+            "extension=s" => \@extensions
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -89,6 +91,27 @@ if (not scalar @types) {
   &error( "No DCPS types found in $idlfile\n") ;
   exit 1 ;
 }
+
+my %extra_text;
+
+#
+# Invoke extensions
+#
+for my $ext (@extensions) {
+  my @path = split /\/|\\/, $ext;
+  my $file = pop @path;
+  my $inc = join ('/', @path);
+  $inc = '.' if $inc eq '';
+  my @INCsave = @INC;
+  unshift @INC, $inc;
+  require "$file.pm";
+  @INC = @INCsave;
+  my $results = $file->generate (\@types);
+  for my $filetype ('idl', 'h', 'cpp') {
+    $extra_text{$filetype} .= $$results{$filetype};
+  }
+}
+
 
 #
 ########################################################################
@@ -312,6 +335,10 @@ foreach my $type (@types) {
   $count++;
 }
 
+$idl_content .= $extra_text{'idl'};
+$h_content   .= $extra_text{'h'};
+$cpp_content .= $extra_text{'cpp'};
+
 my $h_footer = DCPS::HTemplate::footer();
 $h_footer =~ s/<%IDLBASE%>/$idlbase/g ;
 $h_content .= $h_footer;
@@ -407,6 +434,16 @@ perl ./dcps_ts.pl [options] [IDLfile]
  --idl=S     - IDL defining types to be supported
  --timestamp - append a timestamp to generated filenames
  --nobackup  - do NOT append a timestamp to generated filenames
+ --cpp_only  - only generate the .cpp file
+ --extension - followed by =path/to/module, adds a Perl module for
+               additional functionality.  The file path/to/module.pm must
+               exist as a valid Perl module and have a generate() method
+               which takes two arguments: 1. the package name and
+               2. an array-reference where the array will contain the list
+               of DCPS struct names.
+               The generate() method should return a hash-reference.
+               See the code for how this is used.
+
 
 =head1 OPTIONS
 
@@ -462,6 +499,11 @@ Causes a timestamp to be appended to the generated filenames.
 =item B<--nobackup>
 
 Forces no timestamp to be appended to the generated filenames.
+
+=item B<--extension> = module
+
+Allows additional functionality to be added at runtime through another
+Perl module.
 
 =back
 
