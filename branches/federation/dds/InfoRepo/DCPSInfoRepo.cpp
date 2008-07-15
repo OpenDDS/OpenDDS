@@ -33,6 +33,7 @@
 #include "ace/Argv_Type_Converter.h"
 
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 
@@ -327,7 +328,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     // N.B. This is done *before* being added to the IOR table to avoid any
     //      races with an eager client.
     this->federator_.orb( orb_.in());
-    this->federator_.initialize();
   }
 
   // Grab the IOR table.
@@ -342,8 +342,14 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   } else {
     adapter->bind (::OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str.in ());
 
-    if( federator_.id() > 0) {
+    if( federator_.id() != ::OpenDDS::Federator::NIL_REPOSITORY) {
+      // Bind to '/Federator'
       adapter->bind (::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY,  federator_ior.in ());
+
+      // Bind to '/Federator/1382379631'
+      std::stringstream buffer( ::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY);
+      buffer << "/" << this->federatorConfig_.federationDomain();
+      adapter->bind (buffer.str().c_str(),  federator_ior.in ());
     }
   }
 

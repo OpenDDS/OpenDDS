@@ -7,8 +7,8 @@
 namespace OpenDDS { namespace Federator {
 
 template< class DataType, class ReaderType>
-UpdateListener< DataType, ReaderType>::UpdateListener( ManagerImpl& manager)
- : manager_( manager)
+UpdateListener< DataType, ReaderType>::UpdateListener( UpdateProcessor< DataType>& processor)
+ : receiver_( processor)
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) UpdateListener::UpdateListener\n")

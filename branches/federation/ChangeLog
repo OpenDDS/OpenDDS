@@ -1,37 +1,67 @@
+Tue Jul 15 23:03:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Initialization now is performed during federation join
+	  operation.  Added binding in IORTable to 'Federator/1382379631'
+	  in addition to 'Federator'.  This allows the ability to
+	  federate within different domains (the numeric is decimal value
+	  for the default domain).
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+	  Removed unused configuration items, added FederationDomain as a
+	  configurable item.
+
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/InfoRepo/UpdateReceiver_T.cpp:
+
+	  Syntax corrections.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Implemented 'join_federation' behavior.  Implemented
+	  publication and subscription initialization during the join
+	  processing.
+
 Mon Jul 14 22:21:52 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
 
-	  Adjusted to new set of files.
+          Adjusted to new set of files.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Removed callback to previous version of interface.
+          Removed callback to previous version of interface.
 
         * dds/InfoRepo/Federator.idl:
 
-	  Updated to be closer to recent requirements discussions.
+          Updated to be closer to recent requirements discussions.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Starting to stub new interface implementations.
+          Starting to stub new interface implementations.
 
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
 
-	  New version of listener for the update topics.
+          New version of listener for the update topics.
 
         * dds/InfoRepo/UpdateProcessor_T.h:
         * dds/InfoRepo/UpdateProcessor_T.cpp:
-	
-	  Abstract interface for updates to be processed through.
+
+          Abstract interface for updates to be processed through.
 
         * dds/InfoRepo/UpdateReceiver_T.h:
         * dds/InfoRepo/UpdateReceiver_T.cpp:
 
-	  Thread(s) for processing updates.
+          Thread(s) for processing updates.
 
         * dds/InfoRepo/FederatorManager_T.cpp:
         * dds/InfoRepo/FederatorManager_T_Impl.cpp:
