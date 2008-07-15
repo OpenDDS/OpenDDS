@@ -45,6 +45,20 @@ OpenDDS::Federator::Config::federationId() const
 }
 
 ACE_INLINE
+long&
+OpenDDS::Federator::Config::federationDomain()
+{
+  return this->federationDomain_;
+}
+
+ACE_INLINE
+long
+OpenDDS::Federator::Config::federationDomain() const
+{
+  return this->federationDomain_;
+}
+
+ACE_INLINE
 short&
 OpenDDS::Federator::Config::federationPort()
 {
@@ -56,26 +70,5 @@ short
 OpenDDS::Federator::Config::federationPort() const
 {
   return this->federationPort_;
-}
-
-ACE_INLINE
-std::string&
-OpenDDS::Federator::Config::defaultRoute()
-{
-  return this->defaultRoute_;
-}
-
-ACE_INLINE
-std::string
-OpenDDS::Federator::Config::defaultRoute() const
-{
-  return this->defaultRoute_;
-}
-
-ACE_INLINE
-const OpenDDS::Federator::Config::HostToRouteMap&
-OpenDDS::Federator::Config::route() const
-{
-  return this->route_;
 }
 

@@ -131,15 +131,15 @@ UpdateReceiver< DataType>::svc()
       }
     }
 
-    if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) UpdateReceiver::svc() - ")
-        ACE_TEXT("processing a sample.\n"),
+        ACE_TEXT("processing a sample.\n")
       ));
     }
 
     // Delegate actual processing to the publication manager.
-    this->processor.processSample(
+    this->processor_.processSample(
       this->queue_.front().first,
       this->queue_.front().second
     );

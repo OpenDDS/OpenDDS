@@ -6,8 +6,10 @@
 
 #include "federator_export.h"
 #include "FederatorS.h"
+#include "FederatorTypeSupportC.h"
 #include "FederatorConfig.h"
 #include "UpdateProcessor_T.h"
+#include "UpdateListener_T.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
@@ -67,10 +69,11 @@ class OpenDDS_Federator_Export ManagerImpl
 
     // Servant methods
 
-    /// Late initialization.
-    // N.B. - We need to defer intialization until after the service is
-    //        initialized, which will occur long after we are constructed.
+    /// Establish the update subscriptions.
     void initialize();
+
+    /// Tear down the update subscriptions.
+//    void finalize();
 
     /// Accessors for the federation Id value.
     RepoKey& id();
@@ -131,8 +134,11 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
 
+    /// Condition used to gate joining activities.
+    ACE_Condition<ACE_SYNCH_MUTEX> joining_;
+
     /// Simple recursion avoidance during the join operations.
-    RepoKey joining_;
+    RepoKey joiner_;
 
     /// The packet sequence number for data that we publish.
     ::OpenDDS::DCPS::SequenceNumber sequence_;
@@ -143,20 +149,32 @@ class OpenDDS_Federator_Export ManagerImpl
     /// The ORB in which we are activated.
     CORBA::ORB_var orb_;
 
-    /// Remote repositories that are part of the Minimum Spanning Tree.
-    std::set< RepoKey> mstNodes_;
-
-    /// Next unused transport key value.
-    ::OpenDDS::DCPS::TransportIdType transportKeyValue_;
-
     /// local DomainParticipant
-    ::DDS::DomainParticipant_var participant_;
+    ::DDS::DomainParticipant_var federationParticipant_;
 
-    /// local Publisher
-    ::DDS::Publisher_var publisher_;
+    /// TopicUpdate listener
+    UpdateListener< TopicUpdate, TopicUpdateDataReader> topicListener_;
 
-    /// local LinkState listener.
-    ::DDS::DataReader_var linkReader_;
+    /// ParticipantUpdate listener
+    UpdateListener< ParticipantUpdate, ParticipantUpdateDataReader> participantListener_;
+
+    /// PublicationUpdate listener
+    UpdateListener< PublicationUpdate, PublicationUpdateDataReader> publicationListener_;
+
+    /// SubscriptionUpdate listener
+    UpdateListener< SubscriptionUpdate, SubscriptionUpdateDataReader> subscriptionListener_;
+
+    /// TopicUpdate writer
+    TopicUpdateDataWriter_var topicWriter_;
+
+    /// ParticipantUpdate writer
+    ParticipantUpdateDataWriter_var participantWriter_;
+
+    /// PublicationUpdate writer
+    PublicationUpdateDataWriter_var publicationWriter_;
+
+    /// SubscriptionUpdate writer
+    SubscriptionUpdateDataWriter_var subscriptionWriter_;
 
     /// Federation Id to local Id mappings.
     RepoToIdMap inboundMap_;
