@@ -2,53 +2,39 @@
 // $Id$
 
 project(*idl): dcps {
-  
-
   TypeSupport_Files {
     DDSPerfTest.idl
-
-  }
-
-  IDL_Files {
-    DDSPerfTest.idl
-    DDSPerfTestTypeSupport.idl
   }
 
   custom_only = 1
 }
 
 project(DDS*Pub): dcpsexe {
-  after += *idl
-  
+  after  += *idl
   exename = dds_pub
 
-  IDL_Files {
+  TypeSupport_Files {
     DDSPerfTest.idl
-    DDSPerfTestTypeSupport.idl
   }
 
   Source_Files {
     sample_pub.cpp
     PubListener.cpp
-    DDSPerfTestTypeSupportImpl.cpp
   }
 }
 
 
 project(DDS*Sub): dcpsexe {
-  after += *idl
-  
+  after  += *idl
   exename = dds_sub
 
-  IDL_Files {
+  TypeSupport_Files {
     DDSPerfTest.idl
-    DDSPerfTestTypeSupport.idl
   }
 
   Source_Files {
     sample_sub.cpp
     SubListener.cpp
-    DDSPerfTestTypeSupportImpl.cpp
   }
 }
 

@@ -1,5 +1,4 @@
 project(DDS*Node) : dcpsexe {
-  
   exename   = node
   requires += built_in_topics
 
@@ -7,8 +6,8 @@ project(DDS*Node) : dcpsexe {
     FileInfo.idl
   }
 
-  IDL_Files {
-    *.idl
-    FileInfoTypeSupport.idl
+  Source_Files {
+    *.cpp
+    FileInfoTypeSupportImpl.cpp
   }
 }

@@ -69,3 +69,10 @@ OpenDDS::DCPS::ReceiveListenerSet::exist (const RepoId& local_id)
 }
 
 
+void 
+OpenDDS::DCPS::ReceiveListenerSet::clear ()
+{
+  GuardType guard(this->lock_);
+  this->map_.clear();
+}
+

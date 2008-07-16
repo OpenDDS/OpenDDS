@@ -582,11 +582,21 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
             DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
             ::DDS::PublisherQos publisherQos;
             this->publisher_servant_->get_qos(publisherQos);
-            repo->update_publication_qos(this->participant_servant_->get_domain_id(),
+            CORBA::Boolean status
+              = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
                                          this->participant_servant_->get_id(),
                                          this->publication_id_,
                                          qos,
                                          publisherQos);
+            if (status == 0)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                ACE_TEXT("(%P|%t) "
+                "DataWriterImpl::set_qos, ")
+                ACE_TEXT("qos is not compatible. \n")),
+                ::DDS::RETCODE_ERROR);
+            }
+
           }
           catch (const CORBA::SystemException& sysex)
           {
@@ -609,8 +619,11 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
       if (qos_.deadline.period.sec != qos.deadline.period.sec
           || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
       {
-        this->watchdog_->reset_interval (
-          duration_to_time_value (qos.deadline.period));
+        if (this->watchdog_.get ())
+        {
+          this->watchdog_->reset_interval (
+            duration_to_time_value (qos.deadline.period));
+        }
       }
 
       qos_ = qos;
@@ -623,8 +636,11 @@ DataWriterImpl::set_qos (const ::DDS::DataWriterQos & qos)
       if (qos_.deadline.period.sec != qos.deadline.period.sec
           || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
       {
-        this->watchdog_->reset_interval (
-          duration_to_time_value (qos.deadline.period));
+        if (this->watchdog_.get ())
+        {
+          this->watchdog_->reset_interval (
+            duration_to_time_value (qos.deadline.period));
+        }
       }
 
       qos_ = qos;
@@ -1678,9 +1694,10 @@ DataWriterImpl::notify_publication_lost (const ::DDS::InstanceHandleSeq& handles
       for (CORBA::ULong i = 0;i < len; ++ i)
       {
         status.subscription_handles[i] = handles[i];
-        the_listener->on_publication_lost (this->dw_local_objref_.in (),
-          status);
       }
+
+      the_listener->on_publication_lost (this->dw_local_objref_.in (),
+          status);
     }
   }
 }

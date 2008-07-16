@@ -437,7 +437,7 @@ void DataReaderImpl::remove_associations (
   // subscription lost.
   if (notify_lost)
   {
-    this->notify_subscription_lost (updated_writers);
+    this->notify_subscription_lost (handles);
   }
 }
 
@@ -575,8 +575,11 @@ void DataReaderImpl::update_incompatible_qos (
     if (qos_.deadline.period.sec != qos.deadline.period.sec
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec)
     {
-      this->watchdog_->reset_interval (
-        duration_to_time_value (qos.deadline.period));
+      if (this->watchdog_.get ())
+      {
+        this->watchdog_->reset_interval (
+          duration_to_time_value (qos.deadline.period));
+      }
     }
 
     qos_ = qos;
@@ -1670,6 +1673,35 @@ DataReaderImpl::notify_subscription_reconnected (const WriterIdSeq& pubids)
           "cache_lookup_instance_handles failed\n"));
       }
       the_listener->on_subscription_reconnected (this->dr_local_objref_.in (),
+        status);
+    }
+  }
+}
+
+
+void
+DataReaderImpl::notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles)
+{
+  DBG_ENTRY_LVL("DataReaderImpl","notify_subscription_lost",6);
+
+  if (! this->is_bit_)
+  {
+    // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
+    // is given to this DataReader then narrow() fails.
+    DataReaderListener_var the_listener
+      = DataReaderListener::_narrow (this->listener_.in ());
+    if (! CORBA::is_nil (the_listener.in ()))
+    {
+      SubscriptionLostStatus status;
+
+      CORBA::ULong len = handles.length ();
+      status.publication_handles.length (len);
+      for (CORBA::ULong i = 0;i < len; ++ i)
+      {
+        status.publication_handles[i] = handles[i];
+      }
+
+      the_listener->on_subscription_lost (this->dr_local_objref_.in (),
         status);
     }
   }

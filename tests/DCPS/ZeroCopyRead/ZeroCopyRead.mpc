@@ -1,14 +1,7 @@
 project: dcpsexe_with_tcp {
-
-  exename   = main
+  exename = main
 
   TypeSupport_Files {
     Simple.idl
   }
-
-  IDL_Files {
-    Simple.idl
-    SimpleTypeSupport.idl
-  }
-
 }

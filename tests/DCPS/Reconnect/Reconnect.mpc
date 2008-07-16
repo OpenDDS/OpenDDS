@@ -1,41 +1,27 @@
 
 project(*Publisher) : dcpsexe_with_tcp {
-
-  exename   = publisher
+  exename = publisher
 
   TypeSupport_Files {
     Messenger.idl
-  }
-
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
     DataWriterListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
-
-  exename   = subscriber
+  exename = subscriber
 
   TypeSupport_Files {
     Messenger.idl
   }
 
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-  }
-
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }

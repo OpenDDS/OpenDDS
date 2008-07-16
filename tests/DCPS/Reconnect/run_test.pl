@@ -27,6 +27,7 @@ $kill_subscriber = 0;
 $expected_deleted_connections = 1;
 $verify_lost_sub_notification = 1;
 
+
 if ($ARGV[0] eq 'restart_sub') {
   # Increase the number of messages so that the publisher will last
   # until the subscriber restarted.
@@ -46,6 +47,15 @@ if ($ARGV[0] eq 'restart_sub') {
   # number of expected messages.
   $num_reads_deviation = 2;
   $expected_deleted_connections = 2;
+}
+elsif ($ARGV[0] eq 'dl_clean') {
+
+  $num_writes = 40;
+  $restart_delay = 10;
+  $num_reads_before_crash = 2;
+  $lost_publication_callback = 1;
+  $num_reads_deviation = 2;
+  $expected_deleted_connections = 1;
 }
 elsif ($ARGV[0] eq 'restart_pub') {
   $restart_delay = 10;
@@ -139,21 +149,14 @@ $Publisher->Spawn ();
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
 {
-  $sub_crashed = 0;
-  while($sub_crashed == 0)
-  {
-    open (LOG, $testoutputfilename) or die "Couldn't open client log file $testoutputfilename: $!\n";
-    while (<LOG>) {
-      if (/Subscriber crash after/)
-      {
-        $sub_crashed = 1;
-        break;
-      }
-    }
-    close (LOG);
-    if ($sub_crashed == 0) {
-      sleep ($write_delay_ms/1000);
-    }
+  if (PerlACE::waitforfileoutput_timed ($testoutputfilename, "Subscriber crash after", 90) == -1) {
+    close(STDERR);
+    open(STDERR, ">&SAVEERR");
+    print STDERR "ERROR: waiting for 'Subscriber crash after' output.\n";
+    $Subscriber->Kill ();
+    $Publisher->Kill ();
+    $DCPSREPO->Kill ();
+    exit 1;
   }
 
   #get time at crash

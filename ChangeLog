@@ -1,32 +1,361 @@
+Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Merging trunk changes 1260:1300 out to branch.
+
+	Tue Jul 15 22:26:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_ts.pl:
+
+          Added --extension which is a plugin mechanism for dcps_ts.pl.
+
+	Tue Jul 15 13:57:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+
+          Changed to use actual object to call methods in error handling
+          section.
+
+	Sun Jul 13 19:10:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+
+          Removed Stack_Trace header which is not needed.
+
+	Sat Jul 12 20:52:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          More fixes from DDS-1.1.1 branch.
+
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Added missing files.
+
+	Fri Jul 11 22:45:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * tests/DCPS/SetQosDeadline:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/Messenger.idl:
+        * tests/DCPS/SetQosDeadline/README:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosDeadline/Writer.h:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/domain_ids:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/tcp.conf:
+        * tests/DCPS/SetQosPartition:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/Messenger.idl:
+        * tests/DCPS/SetQosPartition/README:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/Writer.h:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/SetQosPartition/domain_ids:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/tcp.conf:
+
+
+          Merged in changes from RT12349 branch(renamed to DDS-1.1.1 branch).
+
+	Wed Jul 09 20:55:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/reliable_multicast/run_test.pl:
+
+          Added perl script to run the reliable_multicast test because it
+          can hang indefinitely.
+
+	Tue Jul 08 22:06:45 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Changed test to use PerlACE::waitforfileoutput_timed method.
+
+	Tue Jul 08 18:56:19 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+          Changed tests to use the PerlACE::waitforfileoutput_timed
+          method.
+
+	Thu Jul 03 18:40:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Removed anonymous array declarations from structs.
+
+	Thu Jul 03 17:57:12 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * examples/DCPS/DistributedContent/FileInfo.idl:
+        * performance-tests/DCPS/TCPProfilingTest/testMessage.idl:
+        * performance-tests/DCPS/TypeNoKeyBounded/PTDef.idl:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/FooType5/FooDef.idl:
+
+          Removed anonymous types from the idl structs.
+
+	Thu Jul  3 16:20:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fixed a warning.
+
+	Thu Jul  3 00:33:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Reconnect/README:
+
+          Updated the patch for reproduce and verify RT11348 fix.
+
+	Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed a race condition described in RT11348. The commit
+        at "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
+        broke some tests. This time the fix was fully tested.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added pub_map_releasing_ and sub_map_releasing_ to save the snapshot
+          of associations in datalink at the time the link is declared for releasing
+          resource due to connection problem. The DataLinkCleanupTask will remove the
+          associations based on the snapshot. This would fix the problem that new
+          associations are removed while removing the old associations due to a failed
+          connection. The problem occurs when actual removal is performed with a delay
+          after the datalink lost its connection.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Moved the datalink cleanup operations in DataLinkCleanupTask::execute to a
+          new function (clear_associations()) in DataLink class and removed TransportImpl
+          reference in DataLinkCleanupTask as it's not needed.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+
+          Added operator= and clear functions to support map copy and clear.
+
+        * tests/DCPS/Reconnect/README:
+
+          Added description of dl_clean test case to reproduce the bug and verify the fix.
+          The dl_clean test can not be run in an automated nightly build since it requires
+          a special patch to prove the fix.
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Added dl_clean test case.
+
+	Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          TAO's Svc_Utils is now used by DDS.
+
+	Tue Jul  1 16:45:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * tests/DCPS/Reconnect/README:
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Rolled back the "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
+          changes as it broke some tests. Will fix RT11348 later.
+
+	Mon Jun 30 17:30:08 UTC 2008  Chad Elliott  <elliott_c@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+
+          Modified to use the new 'automatic_in' and 'automatic_out' custom
+          settings.
+
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.mpc:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/dcps_bits.mpb:
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+        * performance-tests/DCPS/TCPProfilingTest/TCPProfiling.mpc:
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+        * performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/FooType3/DcpsFooType3.mpc:
+        * tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+        * tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+        * tests/DCPS/FooType4/DcpsFooType4.mpc:
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+
+          Simplified these files due to the above base project change.
+
+	Sat Jun 28 20:41:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Fixed MPC files that were missing the *TypeSupportImpl.cpp file after
+          yesterday's scripted changes.  A recent change to MPC itself will
+          allow us to not have to specify "Source_Files" in most cases, but the
+          dcps_ts.pl custom type is not yet taking advantage of this new MPC
+          feature.
+
+	Fri Jun 27 22:14:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+
+          Added Perl script to execute the example similar to the bat
+          files.
+
+	Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        Fixed a race condition described in RT11348.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added pub_map_releasing_ and sub_map_releasing_ to save the snapshot
+          of associations in datalink at the time the link is declared for releasing
+          resource due to connection problem. The DataLinkCleanupTask will remove the
+          associations based on the snapshot. This would fix race condition that the new
+          associations added to the same link during the period from the datalink
+          is declared for releasing to the removal is performed are removed.
+
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Moved the datalink cleanup operations in DataLinkCleanupTask::execute to a
+          new function (clear_associations()) in DataLink class and removed TransportImpl
+          reference in DataLinkCleanupTask as it's not needed.
+
+        * tests/DCPS/Reconnect/README:
+
+          Added description of dl_clean test case to reproduce the bug and verify the fix.
+          The dl_clean test can not be run in an automated nightly build since it requires
+          a special patch to prove the fix.
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Added dl_clean test case.
+
+	Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+          Corrected spelling of -DCPSTransportDebugLevel option.
+
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+          Updated usage message to list all possible arguments
+          for the -t (transport type) option.
+
+
 Tue Jul 15 23:03:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Initialization now is performed during federation join
-	  operation.  Added binding in IORTable to 'Federator/1382379631'
-	  in addition to 'Federator'.  This allows the ability to
-	  federate within different domains (the numeric is decimal value
-	  for the default domain).
+          Initialization now is performed during federation join
+          operation.  Added binding in IORTable to 'Federator/1382379631'
+          in addition to 'Federator'.  This allows the ability to
+          federate within different domains (the numeric is decimal value
+          for the default domain).
 
         * dds/InfoRepo/FederatorConfig.h:
         * dds/InfoRepo/FederatorConfig.inl:
         * dds/InfoRepo/FederatorConfig.cpp:
 
-	  Removed unused configuration items, added FederationDomain as a
-	  configurable item.
+          Removed unused configuration items, added FederationDomain as a
+          configurable item.
 
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
         * dds/InfoRepo/UpdateReceiver_T.cpp:
 
-	  Syntax corrections.
+          Syntax corrections.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Implemented 'join_federation' behavior.  Implemented
-	  publication and subscription initialization during the join
-	  processing.
+          Implemented 'join_federation' behavior.  Implemented
+          publication and subscription initialization during the join
+          processing.
 
 Mon Jul 14 22:21:52 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

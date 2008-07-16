@@ -60,6 +60,9 @@ namespace OpenDDS
         MapType& map();
         const MapType& map() const;
 
+        void operator= (const ReceiveListenerSetMap& rh);
+
+        void clear ();
 
       private:
 

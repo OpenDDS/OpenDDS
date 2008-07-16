@@ -272,5 +272,44 @@ OpenDDS::DCPS::RepoIdSetMap::get_keys (RepoIdSet& keys)
 }
 
 
+void 
+OpenDDS::DCPS::RepoIdSetMap::operator= (const RepoIdSetMap & rh)
+{
+  DBG_ENTRY_LVL("RepoIdSetMap","operator=",6);
+  const MapType& map = rh.map();
+
+  for (MapType::const_iterator itr = map.begin();
+    itr != map.end();
+    ++itr)
+  {
+    RepoIdSet_rch set = itr->second;
+    RepoIdSet::MapType& smap = set->map();
+    for (RepoIdSet::MapType::iterator sitr = smap.begin();
+    sitr != smap.end();
+    ++sitr)
+    {
+      this->insert (itr->first, sitr->first);
+    }
+  }
+}
+
+
+void 
+OpenDDS::DCPS::RepoIdSetMap::clear ()
+{
+  DBG_ENTRY_LVL("RepoIdSetMap","clear=",6);
+
+  for (MapType::iterator itr = this->map_.begin();
+    itr != this->map_.end();
+    ++itr)
+  {
+    itr->second->clear();
+  }
+  
+  this->map_.clear();
+}
+
+
+
 
 

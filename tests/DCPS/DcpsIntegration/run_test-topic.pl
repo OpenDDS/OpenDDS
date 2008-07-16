@@ -33,7 +33,7 @@ $Topic = PerlDDS::create_process ("topic_test",
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
-    $REPO->Kill (); $REPO->TimedWait (1);
+    $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
     exit 1;
 }
 

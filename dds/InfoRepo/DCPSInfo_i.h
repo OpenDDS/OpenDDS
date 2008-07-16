@@ -257,7 +257,7 @@ public:
     ));
 
 
-  virtual void update_publication_qos (
+  virtual CORBA::Boolean update_publication_qos (
       ::DDS::DomainId_t domainId,
       OpenDDS::DCPS::RepoId partId,
       OpenDDS::DCPS::RepoId dwId,
@@ -272,7 +272,7 @@ public:
     ));
 
 
-  virtual void update_subscription_qos (
+  virtual CORBA::Boolean update_subscription_qos (
       ::DDS::DomainId_t domainId,
       OpenDDS::DCPS::RepoId partId,
       OpenDDS::DCPS::RepoId drId,
@@ -287,7 +287,7 @@ public:
     ));
 
 
-  virtual void update_topic_qos (
+  virtual CORBA::Boolean update_topic_qos (
       OpenDDS::DCPS::RepoId topicId,
       ::DDS::DomainId_t domainId,
       OpenDDS::DCPS::RepoId participantId,
@@ -301,7 +301,7 @@ public:
     ));
 
 
-  virtual void update_domain_participant_qos (
+  virtual CORBA::Boolean update_domain_participant_qos (
     ::DDS::DomainId_t domain,
     ::OpenDDS::DCPS::RepoId participantId,
     const ::DDS::DomainParticipantQos & qos

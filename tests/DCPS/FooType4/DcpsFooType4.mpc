@@ -1,24 +1,12 @@
 project : dcps {
-  after       += DcpsFooType4
-  libout       = .
-
-  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
-  dynamicflags = FOOLIB_BUILD_DLL
-  pch_header   =
-  pch_source   =
+  after         += DcpsFooType4
+  libout         = .
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags   = FOOLIB_BUILD_DLL
   dcps_ts_flags += --export=FooLib_Export
 
   TypeSupport_Files {
     FooDef.idl
-  }
-
-  IDL_Files {
-    FooDef.idl
-    FooDefTypeSupport.idl
-  }
-  
-  Source_Files {
-    FooDefTypeSupportImpl.cpp
   }
 }
 

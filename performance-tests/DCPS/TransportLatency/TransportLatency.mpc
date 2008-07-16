@@ -5,47 +5,36 @@ project(DDS*idl): dcps {
     Messenger.idl
   }
 
-  IDL_Files {
-    Messenger.idl
-    MessengerTypeSupport.idl
-  }
-
   custom_only = 1
 }
 
 
 project(DDS*Publisher) : dcpsexe {
-  
-  exename   = publisher
-  after    += DDS*idl DummyTcp
+  exename = publisher
+  after  += DDS*idl DummyTcp
+  libs   += DummyTcp
 
-  libs += DummyTcp
-  IDL_Files {
+  TypeSupport_Files {
     Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     publisher.cpp
     Writer.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }
 
 project(DDS*Subscriber) : dcpsexe {
-  
-  libs += DummyTcp
-  exename   = subscriber
-  after    += DDS*idl DummyTcp
+  exename = subscriber
+  after  += DDS*idl DummyTcp
+  libs   += DummyTcp
 
-  IDL_Files {
+  TypeSupport_Files {
     Messenger.idl
-    MessengerTypeSupport.idl
   }
 
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    MessengerTypeSupportImpl.cpp
   }
 }

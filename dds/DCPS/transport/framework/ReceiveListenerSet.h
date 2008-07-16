@@ -40,8 +40,8 @@ namespace OpenDDS
         void data_received(const ReceivedDataSample& sample);
 
         /// Give access to the underlying map for iteration purposes.
-        //MapType& map();
-        //const MapType& map() const;
+        MapType& map();
+        const MapType& map() const;
 
         /// Check if the key is in the map and if it's the only left entry
         /// in the map.
@@ -51,6 +51,8 @@ namespace OpenDDS
         void  get_keys (ReaderIdSeq & ids);
 
         bool exist (const RepoId& local_id);
+
+        void clear ();
 
       private:
 

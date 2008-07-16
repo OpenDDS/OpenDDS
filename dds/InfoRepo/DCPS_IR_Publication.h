@@ -109,8 +109,9 @@ public:
 
   /// Update the DataWriter or Publisher qos and also publish the qos changes
   /// to datawriter BIT.
-  SpecificQos set_qos (const ::DDS::DataWriterQos & qos,
-                       const ::DDS::PublisherQos & publisherQos);
+  bool set_qos (const ::DDS::DataWriterQos & qos,
+                const ::DDS::PublisherQos & publisherQos,
+                SpecificQos& specificQos);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
@@ -135,7 +136,29 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Verify the existing associations. This may result removal of
+  // associations. The existing associations have to be removed before
+  // adding new association and may need some delay. Otherwise, if  
+  // two DataReaders uses same Datalink and add an association happens 
+  // before remove an association then the new association will fail to 
+  // connect.
+  void reevaluate_existing_associations ();
+
+  // Re-evaluate the association between this publication and the provided
+  // subscription. If they are already associated and not compatible then
+  // they will be dis-associated. If they are not already associated then
+  // the new association will be added.
+  void reevaluate_association (DCPS_IR_Subscription* subscription);
+
 private:
+
+  /// Check compatibility between provided Publisher QoS and the QoS of
+  /// this publication associated DataReaders's subscribers.
+  bool compatibleQosChange (const ::DDS::PublisherQos & qos);
+  /// Check compatibility between provided DataWriter QoS and the QoS of
+  /// this publication associated DataReaders.
+  bool compatibleQosChange (const ::DDS::DataWriterQos & qos);
+
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;

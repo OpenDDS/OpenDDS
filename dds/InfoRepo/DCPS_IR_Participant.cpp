@@ -260,8 +260,8 @@ int DCPS_IR_Participant::remove_subscription (long subId)
 
   if (0 == status)
     {
-      DCPS_IR_Topic_Description* desc = sub->get_topic_description ();
-      desc->remove_subscription_reference(sub);
+      DCPS_IR_Topic* topic = sub->get_topic ();
+      topic->remove_subscription_reference(sub);
        
       CORBA::Boolean dont_notify_lost = 0;
       status = sub->remove_associations(dont_notify_lost);
@@ -379,7 +379,6 @@ int DCPS_IR_Participant::find_topic_reference (long topicId,
 void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
 {
   DCPS_IR_Topic* topic = 0;
-  DCPS_IR_Topic_Description* subDesc = 0;
 
   // remove all the publications associations
   DCPS_IR_Publication* pub = 0;
@@ -409,8 +408,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       sub = (*subIter).int_id_;
       ++subIter;
 
-      subDesc = sub->get_topic_description ();
-      subDesc->remove_subscription_reference(sub);
+      topic = sub->get_topic ();
+      topic->remove_subscription_reference(sub);
 
       if (0 != sub->remove_associations(notify_lost))
         {
@@ -671,10 +670,18 @@ const ::DDS::DomainParticipantQos* DCPS_IR_Participant::get_qos ()
 }
 
 
-void DCPS_IR_Participant::set_qos (const ::DDS::DomainParticipantQos & qos)
+bool DCPS_IR_Participant::set_qos (const ::DDS::DomainParticipantQos & qos)
 {
+  // Do not need re-evaluate compatibility and associations when
+  // DomainParticipantQos changes since only datareader and datawriter
+  // QoS are evaludated during normal associations establishment.
+
+  // Do not need publish the QoS change to topics or datareader or 
+  // datawriter BIT as they are independent.
   qos_ = qos;
   this->domain_->publish_participant_bit (this);
+
+  return true;
 }
 
 
