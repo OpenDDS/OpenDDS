@@ -285,16 +285,17 @@ module DDS {
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
     const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
+    typedef sequence<octet> OctetSeq;
     struct UserDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct TopicDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct GroupDataQosPolicy {
-		sequence<octet> value;
+		OctetSeq value;
 		};
 
     struct TransportPriorityQosPolicy {

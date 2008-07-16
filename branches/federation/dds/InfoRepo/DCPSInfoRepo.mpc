@@ -48,9 +48,6 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   libs     += Federator
   after    += *Federator
 
-  IDL_Files {
-  }
-
   Source_Files {
     DCPS_Entity_Id_Generator.cpp
     DCPSInfo_i.cpp

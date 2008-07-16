@@ -581,11 +581,21 @@ SubscriberImpl::set_qos (
             try
             {
               DCPSInfo_var repo = TheServiceParticipant->get_repository( this->domain_id_);
-              repo->update_subscription_qos( this->domain_id_,
-                                             participant_->get_id (), 
-                                             iter->first,
-                                             iter->second,
-                                             this->qos_);
+              CORBA::Boolean status 
+                = repo->update_subscription_qos( this->domain_id_,
+                                                          participant_->get_id (), 
+                                                          iter->first,
+                                                          iter->second,
+                                                          this->qos_);
+
+              if (status == 0)
+              {
+                ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) "
+                  "SubscriberImpl::set_qos, ")
+                  ACE_TEXT("failed on compatiblity check. \n")),
+                  ::DDS::RETCODE_ERROR);
+              }
             }
             catch (const CORBA::SystemException& sysex)
             {

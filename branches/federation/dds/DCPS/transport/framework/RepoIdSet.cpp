@@ -73,3 +73,15 @@ OpenDDS::DCPS::RepoIdSet::exist (const RepoId& local_id,
   last = map_.size() == 1;
   return true;
 }
+
+
+void 
+OpenDDS::DCPS::RepoIdSet::clear ()
+{
+  DBG_ENTRY_LVL("RepoIdSet","clear",6);
+
+  this->map_.clear();
+}
+
+
+

@@ -326,7 +326,6 @@ namespace OpenDDS
       void notify_publication_disconnected (const ReaderIdSeq& subids);
       void notify_publication_reconnected (const ReaderIdSeq& subids);
       void notify_publication_lost (const ReaderIdSeq& subids);
-      void notify_publication_lost (const ::DDS::InstanceHandleSeq& handles);
 
       void notify_connection_deleted ();
 
@@ -383,6 +382,8 @@ namespace OpenDDS
         ::DDS::InstanceHandle_t handle);
 
     private:
+
+      void notify_publication_lost (const ::DDS::InstanceHandleSeq& handles);
 
       /**
        * This method create a header message block and chain with

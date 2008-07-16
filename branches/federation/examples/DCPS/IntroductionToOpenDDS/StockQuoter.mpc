@@ -1,14 +1,13 @@
 
 project(*Common) : dcps {
-  sharedname = StockQuoterCommon
-  libout = .
-
-  includes += $(TAO_ROOT)/orbsvcs
-  idlflags += -I$(TAO_ROOT)/orbsvcs
-  idlflags += -Wb,export_macro=StockQuoterCommon_Export
-  idlflags += -Wb,export_include=StockQuoterCommon_Export.h
+  sharedname     = StockQuoterCommon
+  dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
+  libout         = .
+  includes      += $(TAO_ROOT)/orbsvcs
+  idlflags      += -I$(TAO_ROOT)/orbsvcs \
+                   -Wb,export_macro=StockQuoterCommon_Export \
+                   -Wb,export_include=StockQuoterCommon_Export.h
   dcps_ts_flags += --export=StockQuoterCommon_Export
-  dynamicflags = STOCKQUOTERCOMMON_BUILD_DLL
 
   TypeSupport_Files {
     StockQuoter.idl
@@ -19,24 +18,20 @@ project(*Common) : dcps {
     StockQuoter.idl
   }
 
+  // We only want the generated files
   Header_Files {
-    StockQuoterTypeSupportImpl.h
   }
 
+  // We only want the generated files
   Source_Files {
-   StockQuoterTypeSupportImpl.cpp
   }
-} 
+}
 
 project(*Publisher) : dcpsexe, svc_utils {
-  after += *Common
+  after    += *Common
   exename   = publisher
-
   includes += $(TAO_ROOT)/orbsvcs
-  libs += StockQuoterCommon
-
-  TypeSupport_Files {
-  }
+  libs     += StockQuoterCommon
 
   IDL_Files {
   }
@@ -60,14 +55,10 @@ project(*Publisher) : dcpsexe, svc_utils {
 
 
 project(*Subscriber) : dcpsexe {
-  after += *Common
+  after    += *Common
   exename   = subscriber
-
   includes += $(TAO_ROOT)/orbsvcs
-  libs += StockQuoterCommon
-
-  TypeSupport_Files {
-  }
+  libs     += StockQuoterCommon
 
   IDL_Files {
   }

@@ -1,13 +1,8 @@
 project(DCPS_Perf*Pub): dcpsexe {
-  exename   = publisher
+  exename = publisher
 
   TypeSupport_Files {
     testMessage.idl
-  }
-
-  IDL_Files {
-    testMessage.idl
-    testMessageTypeSupport.idl
   }
 
   Header_Files {
@@ -17,18 +12,16 @@ project(DCPS_Perf*Pub): dcpsexe {
   Source_Files {
     publisher.cpp
     Writer.cpp
-    testMessageTypeSupportImpl.cpp
   }
 }
 
 
 project(DCPS_Perf*Sub): dcpsexe {
-  exename   = subscriber
-  after    += DCPS_Perf_TCPProfiling_Pub
+  exename = subscriber
+  after  += DCPS_Perf*Pub
 
-  IDL_Files {
+  TypeSupport_Files {
     testMessage.idl
-    testMessageTypeSupport.idl
   }
 
   Header_Files {
@@ -39,7 +32,6 @@ project(DCPS_Perf*Sub): dcpsexe {
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    testMessageTypeSupportImpl.cpp
   }
 }
 

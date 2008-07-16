@@ -100,7 +100,7 @@ tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-tests/transport/reliable_multicast/unittest: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
+tests/transport/reliable_multicast/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
 # run with single-copy read (the default is zero-copy read)
@@ -141,3 +141,5 @@ tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
 tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN
 tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN
+tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN
+tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN

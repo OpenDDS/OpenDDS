@@ -128,8 +128,12 @@ public:
   /// Participant retains ownership
   const ::DDS::DomainParticipantQos* get_qos ();
 
-  /// Update qos.
-  void set_qos (const ::DDS::DomainParticipantQos & qos);
+  /// Update qos and also propogate the qos change to related BITs
+  /// that has the qos copy.
+  /// Return false if the provided QoS makes the DataWriter and DataReader
+  /// QoS incompatible. Currently supported changeable QoS in DomainParticipantQos
+  /// do not affect.
+  bool set_qos (const ::DDS::DomainParticipantQos & qos);
 
   CORBA::Boolean is_participant_ignored (OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_topic_ignored (OpenDDS::DCPS::RepoId id);

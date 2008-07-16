@@ -432,6 +432,8 @@ namespace OpenDDS
 
     private:
 
+      void notify_subscription_lost (const ::DDS::InstanceHandleSeq& handles);
+
       /// Lookup the instance handles by the publication repo ids
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,

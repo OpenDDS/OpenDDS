@@ -169,7 +169,6 @@ OpenDDS::DCPS::DataLink::make_reservation
 
   {
     GuardType guard(this->sub_map_lock_);
-
     // Update our sub_map_.
     sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
   }
@@ -737,8 +736,9 @@ OpenDDS::DCPS::DataLink::release_resources ()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources",6);
 
+  this->prepare_release ();
+
   return impl_->release_link_resources (this);
-  return true;
 }
 
 
@@ -775,3 +775,115 @@ OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
 
   return false;
 }
+
+
+void OpenDDS::DCPS::DataLink::prepare_release ()
+{
+  {
+    GuardType guard(this->sub_map_lock_);
+    if (this->sub_map_releasing_.size() > 0)
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t)DataLink::prepare_release sub_map is already released\n"));
+      return;
+    }
+    this->sub_map_releasing_ = this->sub_map_;
+  }
+  {
+    GuardType guard(this->pub_map_lock_);
+    if (this->pub_map_releasing_.size() > 0)
+    {
+      ACE_ERROR((LM_ERROR, "(%P|%t)DataLink::prepare_release pub_map is already released\n"));
+      return;
+    }
+    this->pub_map_releasing_ = this->pub_map_;
+  }
+}
+
+
+void OpenDDS::DCPS::DataLink::clear_associations ()
+{
+  // The pub_map_ has an entry for each pub_id
+  // Create iterator to traverse Publisher map.
+  ReceiveListenerSetMap::MapType& pub_map = pub_map_releasing_.map();
+  for (ReceiveListenerSetMap::MapType::iterator pub_map_iter = pub_map.begin();
+       pub_map_iter != pub_map.end(); )
+    {
+      // Extract the pub id
+      RepoId pub_id = pub_map_iter->first;
+
+      // Each pub_id (may)has an associated DataWriter
+      // Dependends upon whether we are an actual pub or sub.
+      DataWriterImpl *dw = this->impl_->find_publication (pub_id, true);
+
+      ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
+      // The iterator seems to get corrupted if the element currently
+      // being pointed at gets unbound. Hence advance it.
+      ++pub_map_iter;
+
+      // Check is DataWriter exists (could have been deleted before we got here.
+      if (dw != NULL)
+        {
+          // Each pub-id is mapped to a bunch of sub-id's
+          //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
+          ReaderIdSeq sub_ids;
+          sub_id_set->get_keys (sub_ids);
+
+          // after creating remote id sequence, remove from DataWriter
+          // I believe the 'notify_lost' should be set to false, since
+          // it doesn't look like we meet any of the conditions for setting
+          // it true. Check interface documentations.
+          dw->remove_associations (sub_ids, false);
+
+          // Since we requested a safe copy, we now need to remove the local reference.
+          dw->_remove_ref ();
+        }
+    }
+
+  // sub -> pub
+  // Create iterator to traverse Subscriber map.
+  RepoIdSetMap::MapType& sub_map = sub_map_releasing_.map();
+  for (RepoIdSetMap::MapType::iterator sub_map_iter = sub_map.begin();
+    sub_map_iter != sub_map.end(); )
+    {
+      // Extract the sub id
+      RepoId sub_id = sub_map_iter->first;
+      // Each sub_id (may)has an associated DataReader
+      // Dependends upon whether we are an actual pub or sub.
+      DataReaderImpl *dr = this->impl_->find_subscription (sub_id, true);
+
+      RepoIdSet_rch pub_id_set = sub_map_iter->second;
+      // The iterator seems to get corrupted if the element currently
+      // being pointed at gets unbound. Hence advance it.
+      ++sub_map_iter;
+
+      // Check id DataReader exists (could have been deleted before we got here.)
+      if (dr != NULL)
+        {
+          // Each sub-id is mapped to a bunch of pub-id's
+          ssize_t pub_ids_count = pub_id_set->size();
+          WriterIdSeq pub_ids (pub_ids_count);
+          pub_ids.length (pub_ids_count);
+
+          int count = 0;
+          // create a sequence of associated pub-id's
+          for (RepoIdSet::MapType::iterator pub_ids_iter = pub_id_set->map().begin();
+            pub_ids_iter != pub_id_set->map().end(); ++pub_ids_iter)
+              {
+                pub_ids [count++] = pub_ids_iter->first;
+              }
+
+            // after creating remote id sequence, remove from DataReader
+            // I believe the 'notify_lost' should be set to false, since
+            // it doesn't look like we meet any of the conditions for setting
+            // it true. Check interface documentations.
+            dr->remove_associations (pub_ids, false);
+
+            // Since we requested a safe copy, we now need to remove the local reference.
+            dr->_remove_ref ();
+        }
+    }
+
+  sub_map_releasing_.clear ();
+  pub_map_releasing_.clear ();
+}
+

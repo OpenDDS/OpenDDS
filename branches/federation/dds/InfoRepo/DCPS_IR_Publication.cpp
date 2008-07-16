@@ -5,6 +5,9 @@
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
+#include /**/ "DCPS_IR_Topic_Description.h"
+#include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DdsDcpsInfoUtilsC.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
@@ -407,18 +410,64 @@ CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (OpenDDS::DCPS::Repo
   return &qos_;
 }
 
-SpecificQos DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
-                                          const ::DDS::PublisherQos & publisherQos)
+bool DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
+                                   const ::DDS::PublisherQos & publisherQos,
+                                   SpecificQos& specificQos)
 {
+  bool need_evaluate = false;
   bool u_dw_qos = ! (qos_ == qos);
-  bool u_pub_qos = ! (publisherQos_ == publisherQos);
+  
   if (u_dw_qos)
+  {
+    if (::should_check_compatibility_upon_change(qos_, qos) 
+      && ! compatibleQosChange(qos))
+    {
+      return false;
+    }
+
+    if (::should_check_association_upon_change(qos_, qos)) 
+    {
+      need_evaluate = true;
+    }
+
     qos_ = qos;
+  }
+
+  bool u_pub_qos = ! (publisherQos_ == publisherQos);
   if (u_pub_qos)
-    publisherQos_ = publisherQos;
+  {
+    if (::should_check_compatibility_upon_change(publisherQos_, publisherQos) 
+      && ! compatibleQosChange(publisherQos))
+    {
+      return false;
+    }
+
+    if (::should_check_association_upon_change(publisherQos_, publisherQos))
+    {
+      need_evaluate = true; 
+    }
     
+    publisherQos_ = publisherQos;
+  }
+
+  if (need_evaluate)
+  {
+    // Check if any existing association need be removed first.
+    this->reevaluate_existing_associations();
+    
+    // Sleep a while to let remove_association handled by DataWriter 
+    // before add_association. Otherwise, new association will have
+    // trouble to connect each other.
+    ACE_OS::sleep (ACE_Time_Value (0, 250000));
+    
+    DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
+    description->reevaluate_associations (this);
+  }
+
   participant_->get_domain_reference()->publish_publication_bit (this);
-  return  u_dw_qos ? DataWriterQos : PublisherQos;
+  specificQos = u_dw_qos ? DataWriterQos : PublisherQos;
+
+  return true;
 }
 
 ::DDS::PublisherQos* DCPS_IR_Publication::get_publisher_qos ()
@@ -494,6 +543,91 @@ CORBA::Boolean DCPS_IR_Publication::is_bit ()
 void DCPS_IR_Publication::set_bit_status (CORBA::Boolean isBIT)
 {
   isBIT_ = isBIT;
+}
+
+
+bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::DataWriterQos & qos)
+{
+  DCPS_IR_Subscription * sub = 0;
+  DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
+
+  while (iter != end)
+  {
+    sub = *iter;
+    ++iter;
+
+    OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
+    writerStatus.total_count = 0;
+    writerStatus.count_since_last_send = 0;
+
+    OpenDDS::DCPS::IncompatibleQosStatus readerStatus;
+    readerStatus.total_count = 0;
+    readerStatus.count_since_last_send = 0;
+
+    if (! ::compatibleQOS(&qos, sub->get_datareader_qos(), 
+      &writerStatus, &readerStatus))
+      return false;
+  }
+
+  return true;
+}
+
+
+bool DCPS_IR_Publication::compatibleQosChange (const ::DDS::PublisherQos & qos)
+{
+  DCPS_IR_Subscription * sub = 0;
+  DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
+
+  while (iter != end)
+  {
+    sub = *iter;
+    ++iter;
+
+    if (! ::compatibleQOS(&qos, sub->get_subscriber_qos()))
+      return false;
+  }
+
+  return true;
+}
+
+
+void DCPS_IR_Publication::reevaluate_existing_associations ()
+{
+  DCPS_IR_Subscription* sub = 0;
+  DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
+  DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
+
+  while (iter != end)
+  {
+    sub = *iter;
+    ++iter;
+
+    this->reevaluate_association (sub);
+  }
+}
+
+
+void DCPS_IR_Publication::reevaluate_association (DCPS_IR_Subscription* subscription)
+{
+  int status = this->associations_.find (subscription);
+  
+  if (status == 0)
+  {
+    // verify if they are still compatiable after change
+    if (! ::compatibleQOS(this, subscription))
+    {
+      bool sendNotify = true; // inform datawriter
+      bool notify_lost = true; // invoke listerner callback
+      this->remove_associated_subscription (subscription, sendNotify, notify_lost);
+    }
+  }
+  else
+  {
+    DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
+    description->try_associate (this, subscription);
+  }
 }
 
 

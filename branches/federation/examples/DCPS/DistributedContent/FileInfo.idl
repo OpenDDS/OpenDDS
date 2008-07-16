@@ -3,6 +3,7 @@ module DistributedContent {
 #pragma DCPS_DATA_TYPE "DistributedContent::FileDiff"
 #pragma DCPS_DATA_KEY "DistributedContent::FileDiff file_id"
 
+  typedef sequence<octet> OctetSeq;
   struct FileDiff {
     long            file_id;          // unique for each file
     string          filename;         // name of the file
@@ -10,6 +11,6 @@ module DistributedContent {
 
     long            previous_version; // version to apply the diff to
     long            new_version;      // version that the diff brings the file to
-    sequence<octet> difference;       // the file difference
+    OctetSeq        difference;       // the file difference
   };
 };
