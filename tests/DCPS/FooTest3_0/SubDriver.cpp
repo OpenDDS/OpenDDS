@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include <ace/Arg_Shifter.h>
@@ -168,6 +169,7 @@ SubDriver::init(int& argc, char* argv[])
                           argv,
                           "TAO_DDS_DCPS");
 
+  TheServiceParticipant->set_ORB (orb_.in());
   // Now we can ask TheTransportFactory to create a TransportImpl object
   // using the SIMPLE_TCP type_id.  We also supply an identifier for this
   // particular TransportImpl object that will be created.  This is known
@@ -431,6 +433,7 @@ SubDriver::run()
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 int

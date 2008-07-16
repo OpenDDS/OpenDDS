@@ -7,6 +7,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
 #include "SimplePublisher.h"
 #include <ace/Arg_Shifter.h>
@@ -26,6 +27,12 @@ PubDriver::~PubDriver()
 void
 PubDriver::run(int& argc, char* argv[])
 {
+  CORBA::ORB_var orb = CORBA::ORB_init (argc,
+                                        argv,
+                                        "TAO_DDS_DCPS");
+
+  TheServiceParticipant->set_ORB (orb.in());
+
   parse_args(argc, argv);
   init();
   run();
@@ -208,6 +215,7 @@ PubDriver::run()
   //ACE_OS::sleep (5);
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 
