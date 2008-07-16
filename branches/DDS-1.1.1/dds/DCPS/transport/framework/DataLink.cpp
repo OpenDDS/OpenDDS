@@ -13,9 +13,12 @@
 #include "TransportConfiguration.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "EntryExit.h"
+#include "tao/ORB_Core.h"
 #include "tao/debug.h"
+#include "ace/Reactor.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
@@ -29,6 +32,9 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
 
   impl->_add_ref();
   this->impl_ = impl;
+
+  datalink_release_delay_.sec (this->impl_->config_->datalink_release_delay_/1000);
+  datalink_release_delay_.usec (this->impl_->config_->datalink_release_delay_ % 1000 * 1000);
 
   id_ = DataLink::get_next_datalink_id();
 
@@ -44,7 +50,7 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl)
 OpenDDS::DCPS::DataLink::~DataLink()
 {
   DBG_ENTRY_LVL("DataLink","~DataLink",6);
-
+  
   if (this->thr_per_con_send_task_ != 0)
     {
       this->thr_per_con_send_task_->close (1);
@@ -321,53 +327,23 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
              , this->pub_map_.size() + this->sub_map_.size()), 5);
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
+  {
+    // Add reference before schedule timer with reactor and remove reference after 
+    // handle_timeout is called. This would avoid DataLink deletion while handling 
+    // timeout.
+    this->_add_ref ();
+    if (this->datalink_release_delay_ > ACE_Time_Value::zero)
     {
-      if ( ! this->impl_->config_->keep_link_)
-        {
-          this->pre_stop_i ();
-          this->impl_->release_datalink(this);
-          // The TransportImpl ptr should be cleaned in the dstr.
-          // This link will be used as a callback after the actual
-          // connection is closed.
-          //this->impl_ = 0;
+      CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+      ACE_Reactor* reactor = orb->orb_core ()->reactor ();
 
-          TransportSendStrategy_rch send_strategy = 0;
-          TransportReceiveStrategy_rch recv_strategy = 0;
-          {
-            GuardType guard2(this->strategy_lock_);
-
-            if (!this->send_strategy_.is_nil())
-              {
-                send_strategy =  this->send_strategy_; // save copy
-                this->send_strategy_ = 0;
-              }
-
-            if (!this->receive_strategy_.is_nil())
-              {
-                recv_strategy = this->receive_strategy_; // save copy
-                this->receive_strategy_ = 0;
-              }
-          }
-          if (!send_strategy.is_nil()) {
-            send_strategy->stop();
-          }
-          if (!recv_strategy.is_nil()) {
-            recv_strategy->stop();
-          }
-
-          // Tell our subclass to handle a "stop" event.
-          this->stop_i();
-        }
-      else
-        {
-          GuardType guard2(this->strategy_lock_);
-          if (!this->send_strategy_.is_nil())
-            {
-              this->send_strategy_->link_released (true);
-              this->send_strategy_->clear ();
-            }
-        }
+      reactor->schedule_timer (this, 0, this->datalink_release_delay_);
     }
+    else 
+    {
+      this->handle_timeout (ACE_OS::gettimeofday (), 0);
+    }
+  }
 }
 
 
@@ -520,6 +496,14 @@ void
 OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",6);
+
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
+
+  ACE_Reactor* reactor = orb->orb_core ()->reactor ();
+  if (reactor->cancel_timer (this, 0) > 0)
+  {
+    this->handle_timeout (ACE_OS::gettimeofday(), (const void *)1);
+  }
 
   {
     GuardType guard(this->strategy_lock_);
@@ -775,3 +759,56 @@ OpenDDS::DCPS::DataLink::exist (const RepoId& remote_id,
 
   return false;
 }
+
+
+ 
+
+int
+OpenDDS::DCPS::DataLink::handle_timeout (const ACE_Time_Value &/*tv*/,
+                                        const void * arg)
+{
+  if ((this->pub_map_.size() + this->sub_map_.size()) == 0)
+  {
+    this->pre_stop_i ();
+
+    if (arg == 0)
+      this->impl_->release_datalink(this);
+
+    // The TransportImpl ptr should be cleaned in the dstr.
+    // This link will be used as a callback after the actual
+    // connection is closed.
+    //this->impl_ = 0;
+
+    TransportSendStrategy_rch send_strategy = 0;
+    TransportReceiveStrategy_rch recv_strategy = 0;
+    {
+      GuardType guard2(this->strategy_lock_);
+
+      if (!this->send_strategy_.is_nil())
+      {
+        send_strategy =  this->send_strategy_; // save copy
+        this->send_strategy_ = 0;
+      }
+
+      if (!this->receive_strategy_.is_nil())
+      {
+        recv_strategy = this->receive_strategy_; // save copy
+        this->receive_strategy_ = 0;
+      }
+    }
+    if (!send_strategy.is_nil()) {
+      send_strategy->stop();
+    }
+    if (!recv_strategy.is_nil()) {
+      recv_strategy->stop();
+    }
+
+    // Tell our subclass to handle a "stop" event.
+    this->stop_i();
+  }
+    
+  this->_remove_ref ();
+
+  return 0;
+}
+ 

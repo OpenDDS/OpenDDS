@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #include "ace/Synch.h"
+#include "ace/Event_Handler.h"
 
 
 namespace OpenDDS
@@ -44,7 +45,7 @@ namespace OpenDDS
      * 2) Own ThreadPerConnectionSendTask object which is used when thread_per_connection
      *    is enabled.
      */
-    class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>
+    class OpenDDS_Dcps_Export DataLink : public RcObject<ACE_SYNCH_MUTEX>, public ACE_Event_Handler
     {
       friend class DataLinkCleanupTask;
 
@@ -166,6 +167,15 @@ namespace OpenDDS
                     const bool&   pub_side,
                     bool& last);
 
+        // The second parameter (zero or non-zero) indicates whether the 
+        // impl_->release_datalink() needs be called. The impl_->release_datalink()
+        // may result in the DataLink object deletion. Any access of DataLink object
+        // after that will get access violation. It's ok to release link in 
+        // remove_association path (release_reservations()), but it would cause
+        // access violation during normal transport shutdown(transport_shutdown()).
+        int handle_timeout (const ACE_Time_Value &tv,
+                            const void * arg = 0);
+
        protected:
 
         /// This is how the subclass "announces" to this DataLink base class
@@ -277,8 +287,11 @@ namespace OpenDDS
         /// The transport send strategy object for this DataLink.
         TransportSendStrategy_rch send_strategy_;
 
-      LockType strategy_lock_;
+        LockType strategy_lock_;
 
+        /// Configurable delay in milliseconds that the datalink 
+        /// should be released after all associations are removed. 
+        ACE_Time_Value datalink_release_delay_;
     };
 
   }  /* namespace DCPS */
