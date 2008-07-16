@@ -93,9 +93,10 @@ namespace OpenDDS
         /// send without backpressure.
         bool thread_per_connection_;
 
-        /// Flag indicates if the data link should be maintained when all
-        /// associations are removed.
-        bool keep_link_;
+        /// Delay in milliseconds that the datalink should be released after all 
+        /// associations are removed. The default value is 10 seconds.
+        long datalink_release_delay_;
+
 
       protected:
 

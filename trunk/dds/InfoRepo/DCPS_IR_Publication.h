@@ -63,13 +63,16 @@ public:
   /// sendNotify indicates whether to tell the datawriter about
   ///  removing the subscription
   /// The notify_lost parameter is passed to the remove_associations()
+  /// The notify_both_side parameter indicates if it needs call sub to remove
+  /// association as well.
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
   /// or DdsDcpsDataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_subscription (DCPS_IR_Subscription* sub,
                                       CORBA::Boolean sendNotify,
-                                      CORBA::Boolean notify_lost);
+                                      CORBA::Boolean notify_lost,
+                                      bool notify_both_side = false);
 
   /// Removes all the associated subscriptions
   /// This method can mark the participant dead

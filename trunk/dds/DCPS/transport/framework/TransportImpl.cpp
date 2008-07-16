@@ -81,9 +81,6 @@ OpenDDS::DCPS::TransportImpl::shutdown()
     // Clear our collection of TransportInterface pointers.
     interfaces_.clear();
 
-    // Drop our references to the config_.
-    this->config_ = 0;
-
 //MJM: Won't you need to ACE_UNUSED_ARG here since you are depending on
 //MJM: side effects here?
 
@@ -96,6 +93,11 @@ OpenDDS::DCPS::TransportImpl::shutdown()
   {
     GuardType guard(this->lock_);
     this->reactor_task_ = 0;
+    // The shutdown_i() path may access the configuration so remove configuration
+    // reference after shutdown is performed.
+
+    // Drop our references to the config_.
+    this->config_ = 0;
   }
 }
 

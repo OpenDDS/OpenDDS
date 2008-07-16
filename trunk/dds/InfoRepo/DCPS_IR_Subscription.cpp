@@ -108,7 +108,8 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
 
 int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pub,
                                                          CORBA::Boolean sendNotify,
-                                                         CORBA::Boolean notify_lost)
+                                                         CORBA::Boolean notify_lost,
+                                                         bool notify_both_side)
 {
   bool marked_dead = false;
 
@@ -121,7 +122,19 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
         {
           try
             {
+                if (TAO_debug_level > 0)
+                 {
+                    ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication:")
+                      ACE_TEXT(" calling sub %d with pub %d\n"),
+                      id_, pub->get_id() ));
+                 }
+
               reader_->remove_associations(idSeq, notify_lost);
+              if (notify_both_side)
+              {
+                pub->remove_associated_subscription (this, sendNotify, notify_lost);
+              }
             }
           catch (const CORBA::Exception& ex)
             {
@@ -473,11 +486,6 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
   {
     // Check if any existing association need be removed first.
     this->reevaluate_existing_associations ();
-
-    // Sleep a while to let remove_association handled by DataReader
-    // before add_association. Otherwise, new association will have
-    // trouble to connect each other.
-    ACE_OS::sleep (ACE_Time_Value (0, 250000));
     
     DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
     description->reevaluate_associations (this);
@@ -563,7 +571,8 @@ void DCPS_IR_Subscription::reevaluate_association (DCPS_IR_Publication* publicat
     {
       bool sendNotify = true; // inform datareader
       bool notify_lost = true; // invoke listerner callback
-      this->remove_associated_publication (publication, sendNotify, notify_lost);
+
+      this->remove_associated_publication (publication, sendNotify, notify_lost, true);
     }
   }
   else
