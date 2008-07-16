@@ -1,3 +1,12 @@
+Wed Jul 16 23:43:27 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+          Made TheServiceParticipant->shutdown called after 
+          TheTransportFactory->release to fix crash due to nil orb 
+          during transport release.
+
 Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
@@ -8,21 +17,21 @@ Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
           Supported configurable delay for datalink release after no associations.
-          This is to fix disconnect problem happened when removing and adding 
+          This is to fix disconnect problem happened when removing and adding
           association related to same datalink during short period. The new connection
           is established before remove_association call which results in new connection
           been disconnect.
-          Removed keep_link support which can be replaced with long 
+          Removed keep_link support which can be replaced with long
           datalink_release_delay value.
-         
+
         * dds/InfoRepo/DCPS_IR_Publication.h:
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.h:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
 
-          Added "notify_both_side" parameter to remove_associated_publication/subscription 
+          Added "notify_both_side" parameter to remove_associated_publication/subscription
           methods to allow remove_associations() invocation on both datareader
-          and datawriter upon qos change. This intends to make the remove_associations 
+          and datawriter upon qos change. This intends to make the remove_associations
           call earlier than add_associations to avoid same datalink removing/adding timing
           issue.
 
@@ -47,12 +56,12 @@ Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/SetQosPartition/pub.ini:
         * tests/DCPS/TransientDurability/pub.ini:
         * tests/DCPS/TransientLocalTest/pub.ini:
-        
-          Replaced keep_link with datalink_release_delay. If the 
+
+          Replaced keep_link with datalink_release_delay. If the
           application requires to keep the datalink alive for longer
           time, it could configure datalink_release_delay to a big
           value.
-          
+
         * tests/DCPS/FooTest3_0/SubDriver.cpp:
         * tests/DCPS/FooTest3_1/SubDriver.cpp:
         * tests/DCPS/FooTest3_2/SubDriver.cpp:
@@ -76,7 +85,7 @@ Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * tests/transport/udp_simple_n/PubDriver.cpp:
         * tests/transport/udp_simple_n/SubDriver.cpp:
 
-          The changes are to trigger the TheServiceParticipant singleton 
+          The changes are to trigger the TheServiceParticipant singleton
           created and has ORB created or provided so it can be accessed
           during transport shutdown. The TheServiceParticipant->shutdown
           should always be called after TheTransportFactory->release.

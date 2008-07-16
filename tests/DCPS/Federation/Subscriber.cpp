@@ -259,17 +259,17 @@ Subscriber::~Subscriber()
     }
   }
 
-  // Release any remaining resources held for the service.
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: finalizing DCPS service.\n")));
-  }
-  TheServiceParticipant->shutdown ();
-
   // Release all the transport resources.
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: finalizing transport.\n")));
   }
   TheTransportFactory->release();
+
+  // Release any remaining resources held for the service.
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: finalizing DCPS service.\n")));
+  }
+  TheServiceParticipant->shutdown ();
 }
 
 void
