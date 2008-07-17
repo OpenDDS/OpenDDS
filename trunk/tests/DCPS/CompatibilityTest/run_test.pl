@@ -42,6 +42,8 @@ sub run_compatibility_tests {
   $sub_lease_time = shift;
   $sub_reliability_kind = shift;
 
+  print "\n\n"; # Provide some visual relief between test cases.
+
   $sub_time = 5;
   $pub_time = $sub_time;
   $sub_parameters = "$svc_conf -s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -ORBDebugLevel $level";
@@ -52,16 +54,20 @@ sub run_compatibility_tests {
 
   $Publisher = PerlDDS::create_process ("publisher", "$pub_parameters");
 
+  print $Subscriber->CommandLine() . "\n";
   $SubscriberResult = $Subscriber->Spawn();
+  print "Subscriber PID: " . $Subscriber->{PROCESS} . "\n" if $Subscriber->{PROCESS};
 
   if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
   }
 
-  sleep 1;
+  sleep 3;
 
-  $Publisher->SpawnWaitKill ($pub_time + 10);
+  print $Publisher->CommandLine() . "\n";
+  $Publisher->SpawnWaitKill ($pub_time + 20);
+  print "Publisher PID: " . $Publisher->{PROCESS} . "\n" if $Publisher->{PROCESS};
 
   if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
@@ -82,7 +88,9 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 #                           . "-ORBDebugLevel 1 "
 						   . "-o $dcpsrepo_ior "
 						   . "-d $domains_file ");
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
+print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};
 
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
