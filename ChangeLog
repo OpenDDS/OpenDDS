@@ -1,17 +1,71 @@
+Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+
+	  Removed explicit host and port assignments.
+
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+
+	  Removed explicit host and port assignments.
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+
+	  Removed explicit host and port assignments.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+	  Extended startup delays.
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+	  Additional diagnostic information added.  Increased startup and
+	  operational delays.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+
+	  Removed explicit host and port assignments.
+
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+
+	  Removed explicit host and port assignments.
+
+        * tests/transport/mcast_simple_n/run_test.pl:
+
+	  Extended startup delays.
+
 Wed Jul 16 23:47:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Federation/Publisher.cpp:
         * tests/DCPS/Federation/Subscriber.cpp:
-        
+
           Merged in following Changes made in DDS-1.1.1 branch.
-          
+
             Wed Jul 16 23:43:27 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
                     * tests/DCPS/Federation/Publisher.cpp:
                     * tests/DCPS/Federation/Subscriber.cpp:
 
-                      Made TheServiceParticipant->shutdown called after 
-                      TheTransportFactory->release to fix crash due to nil orb 
+                      Made TheServiceParticipant->shutdown called after
+                      TheTransportFactory->release to fix crash due to nil orb
                       during transport release.
 
 
@@ -72,7 +126,7 @@ Wed Jul 16 22:34:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * tests/transport/udp_simple_n/SubDriver.cpp:
 
           Merged in following Changes made in DDS-1.1.1 branch.
-           
+
               Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
             * dds/DCPS/transport/framework/DataLink.h:
