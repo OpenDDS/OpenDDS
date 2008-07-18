@@ -28,6 +28,7 @@ my $driver_trigger = "driver_trigger";
 my $publisher_trigger = "publisher_trigger";
 my $implrepo_ior = "imr.ior";
 my $activator_ior = "activator.ior";
+my $activator_port = PerlACE::random_port();
 my $imr_init_ref = "-ORBInitRef ImplRepoService=file://$implrepo_ior";
 my $implrepo_server = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImplRepo_Service";
 my $imr_activator = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImR_Activator";
@@ -35,7 +36,7 @@ my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
 my $RepoPort = PerlACE::random_port();
 my $RepoOpts = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior -d $domains_file $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$RepoPort";
-my $repo_port = "12346";
+my $repo_port = PerlACE::random_port();
 my $RepoOpts2 = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior2 -d $domains_file $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$repo_port";
 if ($useImr == 1) {
@@ -48,7 +49,7 @@ my $ImRPort = PerlACE::random_port();
 my $ImR = PerlDDS::create_process ($implrepo_server, "-o $implrepo_ior $OBJ_REF_STYLE "
 				. "-orbendpoint iiop://:$ImRPort");
 my $Act = PerlDDS::create_process ($imr_activator, "-o $activator_ior $imr_init_ref "
-				. "$OBJ_REF_STYLE -orbendpoint iiop://:12348");
+				. "$OBJ_REF_STYLE -orbendpoint iiop://:$activator_port");
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 my $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts2);
 my $imr_util = PerlDDS::create_process ("$tao_imr");
