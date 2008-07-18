@@ -1,3 +1,81 @@
+Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_udp.ini:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+
+          Commented the local_address or made it not specify port.
+          This is to avoid using fixed port in case the port is
+          using by other applications and cause test fail.
+  
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+
+          These scripts were updated to use PerlACE::random_port() to
+          get random port instead of fixed port.
+          
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        
+          Added -x option to pass local_address and configured the 
+          transport in the code instead of using configuration file.
+          
+        * tests/DCPS/Reconnect/run_test.pl:
+        
+          Updated to not use configuration file.
+          
+        * tests/DCPS/Reconnect/sub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+        
+          Removed files as they are not needed.
+
 Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub.ini:
@@ -12,12 +90,12 @@ Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
         * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
 
-	  Removed explicit host and port assignments.
+          Removed explicit host and port assignments.
 
         * examples/DCPS/Messenger_Imr/pub.ini:
         * examples/DCPS/Messenger_Imr/sub.ini:
 
-	  Removed explicit host and port assignments.
+          Removed explicit host and port assignments.
 
         * performance-tests/DCPS/InfoRepo_population/pub.ini:
         * performance-tests/DCPS/InfoRepo_population/pub2.ini:
@@ -27,30 +105,30 @@ Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
         * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
 
-	  Removed explicit host and port assignments.
+          Removed explicit host and port assignments.
 
         * tests/DCPS/BuiltInTopic/run_test.pl:
 
-	  Extended startup delays.
+          Extended startup delays.
 
         * tests/DCPS/CompatibilityTest/run_test.pl:
 
-	  Additional diagnostic information added.  Increased startup and
-	  operational delays.
+          Additional diagnostic information added.  Increased startup and
+          operational delays.
 
         * tests/DCPS/CorbaSeq/pub.ini:
         * tests/DCPS/CorbaSeq/sub.ini:
 
-	  Removed explicit host and port assignments.
+          Removed explicit host and port assignments.
 
         * tests/DCPS/NotifyTest/pub.ini:
         * tests/DCPS/NotifyTest/sub.ini:
 
-	  Removed explicit host and port assignments.
+          Removed explicit host and port assignments.
 
         * tests/transport/mcast_simple_n/run_test.pl:
 
-	  Extended startup delays.
+          Extended startup delays.
 
 Wed Jul 16 23:47:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
