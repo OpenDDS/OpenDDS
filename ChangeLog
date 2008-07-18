@@ -1,13 +1,19 @@
+Fri Jul 18 16:53:02 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+
+          Fixed a build error on older gcc compilers.
+
 Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         Merging trunk changes 1260:1300 out to branch.
 
-	Tue Jul 15 22:26:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+        Tue Jul 15 22:26:55 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_ts.pl:
 
           Added --extension which is a plugin mechanism for dcps_ts.pl.
 
-	Tue Jul 15 13:57:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Tue Jul 15 13:57:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/DcpsIntegration/run_test-integration.pl:
         * tests/DCPS/DcpsIntegration/run_test-topic.pl:
@@ -15,14 +21,14 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Changed to use actual object to call methods in error handling
           section.
 
-	Sun Jul 13 19:10:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Sun Jul 13 19:10:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
         * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
 
           Removed Stack_Trace header which is not needed.
 
-	Sat Jul 12 20:52:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Sat Jul 12 20:52:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -42,7 +48,7 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Added missing files.
 
-	Fri Jul 11 22:45:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Fri Jul 11 22:45:25 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -98,7 +104,7 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Merged in changes from RT12349 branch(renamed to DDS-1.1.1 branch).
 
-	Wed Jul 09 20:55:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+        Wed Jul 09 20:55:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/dcps_tests.lst:
         * tests/transport/reliable_multicast/run_test.pl:
@@ -106,13 +112,13 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Added perl script to run the reliable_multicast test because it
           can hang indefinitely.
 
-	Tue Jul 08 22:06:45 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+        Tue Jul 08 22:06:45 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Reconnect/run_test.pl:
 
           Changed test to use PerlACE::waitforfileoutput_timed method.
 
-	Tue Jul 08 18:56:19 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+        Tue Jul 08 18:56:19 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Lifespan/run_test.pl:
         * tests/DCPS/Partition/run_test.pl:
@@ -122,14 +128,14 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Changed tests to use the PerlACE::waitforfileoutput_timed
           method.
 
-	Thu Jul 03 18:40:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+        Thu Jul 03 18:40:52 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
         * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
 
           Removed anonymous array declarations from structs.
 
-	Thu Jul 03 17:57:12 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
+        Thu Jul 03 17:57:12 UTC 2008  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DdsDcpsInfrastructure.idl:
         * examples/DCPS/DistributedContent/FileInfo.idl:
@@ -140,19 +146,19 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Removed anonymous types from the idl structs.
 
-	Thu Jul  3 16:20:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Thu Jul  3 16:20:53 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
           Fixed a warning.
 
-	Thu Jul  3 00:33:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Thu Jul  3 00:33:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Reconnect/README:
 
           Updated the patch for reproduce and verify RT11348 fix.
 
-	Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Thu Jul  3 00:28:51 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         Fixed a race condition described in RT11348. The commit
         at "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
@@ -199,13 +205,13 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Added dl_clean test case.
 
-	Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+        Wed Jul  2 19:36:12 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:
 
           TAO's Svc_Utils is now used by DDS.
 
-	Tue Jul  1 16:45:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Tue Jul  1 16:45:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.cpp:
@@ -218,7 +224,7 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           Rolled back the "Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
           changes as it broke some tests. Will fix RT11348 later.
 
-	Mon Jun 30 17:30:08 UTC 2008  Chad Elliott  <elliott_c@ociweb.com>
+        Mon Jun 30 17:30:08 UTC 2008  Chad Elliott  <elliott_c@ociweb.com>
 
         * MPC/config/dcps_ts_defaults.mpb:
 
@@ -264,7 +270,7 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Simplified these files due to the above base project change.
 
-	Sat Jun 28 20:41:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+        Sat Jun 28 20:41:45 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/DistributedContent/DistributedContent.mpc:
         * tests/DCPS/FooType/FooType.mpc:
@@ -277,14 +283,14 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           dcps_ts.pl custom type is not yet taking advantage of this new MPC
           feature.
 
-	Fri Jun 27 22:14:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+        Fri Jun 27 22:14:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
 
           Added Perl script to execute the example similar to the bat
           files.
 
-	Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Fri Jun 27 19:42:06 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         Fixed a race condition described in RT11348.
 
@@ -316,7 +322,7 @@ Wed Jul 16 18:14:33 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
           Added dl_clean test case.
 
-	Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
+        Fri Jun 27 19:14:01 UTC 2008  Steve Totten  <totten_s@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_test.pl:
           Corrected spelling of -DCPSTransportDebugLevel option.
