@@ -34,7 +34,7 @@ SyncClient_i::SyncClient_i (const std::string& sync_server
 
       PortableServer::ObjectId_var oid = root_poa_->activate_object (this);
       CORBA::Object_var obj = root_poa_->id_to_reference (oid);
-      sync_client_ = Sync::Client::_narrow (obj);
+      sync_client_ = Sync::Client::_narrow (obj.in());
 
       // activate task
       if (this->activate (THR_NEW_LWP | THR_JOINABLE |THR_INHERIT_SCHED
