@@ -1,3 +1,43 @@
+Sun Jul 20 18:16:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Made send strategy remove samples when scheduling datalink
+          release with a delay. This would avoid problem that the sample
+          from previous association could not be delivered.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Made send_delayed_notifications called before changing the
+          mode in clear().
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Fixed a warning.
+
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Set the datalink_release_delay=0 to avoid timing issue on
+          receiving add_assocition,remove_association and fully_associate
+          calls because of delayed datalink release.
+
+Fri Jul 18 20:58:04 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Set datalink_release_delay to 0 instead of default 10 seconds.
+          This test needs the connection be cleaned up upon
+          remove_association. Otherwise there are intervene new association
+
+          This would fix the test failure observed on some platforms.
+          There
+          are some inconstitency between the  due
+          to the new create/delete
+          make the connection/datalink cleanup right after
+          association is removed.
+
 Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub.ini:
@@ -49,7 +89,7 @@ Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           Commented the local_address or made it not specify port.
           This is to avoid using fixed port in case the port is
           using by other applications and cause test fail.
-  
+
         * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
         * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
         * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
@@ -60,20 +100,20 @@ Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
           These scripts were updated to use PerlACE::random_port() to
           get random port instead of fixed port.
-          
+
         * tests/DCPS/Reconnect/publisher.cpp:
         * tests/DCPS/Reconnect/subscriber.cpp:
-        
-          Added -x option to pass local_address and configured the 
+
+          Added -x option to pass local_address and configured the
           transport in the code instead of using configuration file.
-          
+
         * tests/DCPS/Reconnect/run_test.pl:
-        
+
           Updated to not use configuration file.
-          
+
         * tests/DCPS/Reconnect/sub.ini:
         * tests/DCPS/Reconnect/pub.ini:
-        
+
           Removed files as they are not needed.
 
 Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
