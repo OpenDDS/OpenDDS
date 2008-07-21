@@ -22,22 +22,6 @@ Sun Jul 20 18:16:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
           receiving add_assocition,remove_association and fully_associate
           calls because of delayed datalink release.
 
-Fri Jul 18 20:58:04 UTC 2008  Yan Dai  <dai_y@ociweb.com>
-
-        * tests/DCPS/sub_init_loop/pub.ini:
-        * tests/DCPS/sub_init_loop/sub.ini:
-
-          Set datalink_release_delay to 0 instead of default 10 seconds.
-          This test needs the connection be cleaned up upon
-          remove_association. Otherwise there are intervene new association
-
-          This would fix the test failure observed on some platforms.
-          There
-          are some inconstitency between the  due
-          to the new create/delete
-          make the connection/datalink cleanup right after
-          association is removed.
-
 Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub.ini:
