@@ -16,10 +16,12 @@ $status = 0;
 # my $debug = 1;
 my $debug ;# = 1;
 my $debuglevel;
+my $orbdebuglevel;
 my $verbose;
 my $debugfile;
 if( $debug) {
   $debuglevel = 10;
+  $orbdebuglevel = 5;
   $verbose    = 1;
   $debugfile  = "log.out";
 }
@@ -38,11 +40,16 @@ if( $intermittent) {
 $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
-$opts .= "-DCPSDebugLevel $debuglevel " if $debuglevel;
-$opts .= "-ORBVerboseLogging 1 "        if $verbose;
-$opts .= "-ORBLogFile $debugfile "      if $debugfile;
+$opts .= "-ORBDebugLevel $orbdebuglevel " if $orbdebuglevel;
+$opts .= "-DCPSDebugLevel $debuglevel "   if $debuglevel;
+$opts .= "-ORBVerboseLogging 1 "          if $verbose;
+$opts .= "-ORBLogFile $debugfile "        if $debugfile;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0 -t5 -n5 -p5 -s5";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
+
+my $syncopts  = "-ORBDebugLevel $orbdebuglevel " if $orbdebuglevel;
+   $syncopts .= "-ORBVerboseLogging 1 "          if $verbose;
+   $syncopts .= "-ORBLogFile $debugfile "        if $debugfile;
 
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
@@ -57,7 +64,7 @@ $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");
 $SyncServer = PerlDDS::create_process ("syncServer"
-				    , "-p2 -s1");
+				    , "$syncopts -p2 -s1");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
