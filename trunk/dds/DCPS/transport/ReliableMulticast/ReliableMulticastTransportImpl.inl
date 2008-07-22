@@ -21,3 +21,9 @@ OpenDDS::DCPS::ReliableMulticastTransportImpl::acked(RepoId)
 {
   return true;
 }
+
+ACE_INLINE void 
+OpenDDS::DCPS::ReliableMulticastTransportImpl::remove_ack (RepoId /*pub_id*/, RepoId /*sub_id*/)
+{
+  //noop
+}

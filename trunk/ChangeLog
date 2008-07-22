@@ -1,3 +1,30 @@
+Tue Jul 22 18:10:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          - Made fully_associated () function remove fully associated
+            pub-sub pair from acks map instead of removing all acks
+            for a pub. This bug made the DataWriter::fully_associated()
+            not called if the ack arrives before DataWriter
+            receives add_associations() call from DCPSInfoRepo.
+
+          - Made acked_sub_map_.demarshal() call guarded by lock_.
+            This bug may cause access violation when one thread is
+            demarshlling ack message and updating ack map while another
+            thread is removing acks from ack map.
+
+          - Added remove_ack() to support removal of pub-sub id pair from
+            ack map.
+          
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+
+           Overrode remove_ack() to be noop for UDP and MCAST transports since they 
+           do not require ack from subscriber.
+          
 Tue Jul 22 15:55:55 UTC 2008  Mike Martinez  <martinez_m@ociweb>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:

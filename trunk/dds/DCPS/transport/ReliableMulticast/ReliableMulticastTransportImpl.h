@@ -49,6 +49,7 @@ namespace OpenDDS
       virtual void release_datalink_i(OpenDDS::DCPS::DataLink* link);
 
       virtual bool acked(RepoId);
+      virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
     private:
       ReliableMulticastTransportConfiguration_rch configuration_;

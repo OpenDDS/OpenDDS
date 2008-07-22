@@ -446,15 +446,15 @@ OpenDDS::DCPS::TransportImpl::add_pending_association (RepoId  pub_id,
 int
 OpenDDS::DCPS::TransportImpl::demarshal_acks (ACE_Message_Block* acks, bool byte_order)
 {
-  DBG_ENTRY_LVL("TransportImpl","demarshal",6);
+  DBG_ENTRY_LVL("TransportImpl","demarshal_acks",6);
+
+  GuardType guard(this->lock_);
 
   int status = this->acked_sub_map_.demarshal (acks, byte_order);
   if (status == -1)
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
                       -1);
-
-  GuardType guard(this->lock_);
 
   RepoIdSet acked_pubs;
 
@@ -495,12 +495,19 @@ OpenDDS::DCPS::TransportImpl::fully_associated (RepoId pub_id)
     size_t len = penditer->second->size();
     for (size_t i = 0; i < len; ++i)
     {
+      // DataWriter delete the association_data_ during fully_associated() call
+      // so using the association_data_ for removing associations from ack map
+      // need be done before fully_associated() call.
+      for (ssize_t j = 0; j < (*penditer->second)[i].num_associations_; ++ j)
+      {
+        RepoId sub_id = (*penditer->second)[i].association_data_[j].remote_id_;
+        this->remove_ack (pub_id, sub_id);
+      }
       pubiter->second->fully_associated (pub_id,
       (*penditer->second)[i].num_associations_,
       (*penditer->second)[i].association_data_);
     }
     RepoIdSet_rch tmp = this->pending_sub_map_.remove_set (pub_id);
-    tmp = this->acked_sub_map_.remove_set (pub_id);
     remote_associations = penditer->second;
     pending_association_sub_map_.erase(pub_id);
     delete remote_associations;
@@ -532,3 +539,11 @@ OpenDDS::DCPS::TransportImpl::release_link_resources (DataLink* link)
 
   return true;
 }
+
+void
+OpenDDS::DCPS::TransportImpl::remove_ack (RepoId pub_id, RepoId sub_id)
+{
+  this->acked_sub_map_.remove(pub_id, sub_id);
+}
+
+
