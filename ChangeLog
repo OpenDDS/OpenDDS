@@ -1,3 +1,14 @@
+Tue Jul 22 15:55:55 UTC 2008  Mike Martinez  <martinez_m@ociweb>
+
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+
+	  Added some selectable diagnostic options.
+
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+	  Added lock around access to the notification_ member.
+
 Sun Jul 20 18:16:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
