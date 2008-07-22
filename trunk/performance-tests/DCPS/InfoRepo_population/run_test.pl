@@ -13,9 +13,34 @@ use DDS_Run_Test;
 
 $status = 0;
 
+# my $debug = 1;
+my $debug ;# = 1;
+my $debuglevel;
+my $verbose;
+my $debugfile;
+if( $debug) {
+  $debuglevel = 10;
+  $verbose    = 1;
+  $debugfile  = "log.out";
+}
+
+unlink $debugfile if $debugfile;
+
+# my $intermittent = 1;
+my $intermittent ;# = 1;
+my $stackfile;
+my $stackdumpcmd;
+if( $intermittent) {
+  $stackfile    = "stacks";
+  $stackdumpcmd = "grabstacks";
+}
+
 $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
+$opts .= "-DCPSDebugLevel $debuglevel " if $debuglevel;
+$opts .= "-ORBVerboseLogging 1 "        if $verbose;
+$opts .= "-ORBLogFile $debugfile "      if $debugfile;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0 -t5 -n5 -p5 -s5";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0 -t5 -n5 -s5 -p10";
 
@@ -44,7 +69,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 print $SyncServer->CommandLine() . "\n";
 $SyncServer->Spawn ();
-if (PerlACE::waitforfile_timed ($sync_ior, 10) == -1) {
+if (PerlACE::waitforfile_timed ($sync_ior, 20) == -1) {
     print STDERR "ERROR: waiting for Sync IOR file\n";
     $DCPSREPO->Kill ();
     $SyncServer->Kill ();
@@ -59,24 +84,73 @@ $Publisher2->Spawn ();
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
-$PublisherResult = $Publisher->WaitKill (300);
+if($intermittent) {
+  $PublisherResult = $Publisher->TimedWait (300);
+  if( 0 != $PublisherResult) {
+    my $outfile = $stackfile . "_1";
+    `$stackdumpcmd publisher subscriber syncServer DCPSInfoRepo > $outfile`;
+  } else {
+    print "Publisher completed without incident.\n";
+  }
+  $Publisher->Kill ();
+
+} else {
+  $PublisherResult = $Publisher->WaitKill (300);
+}
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
 }
-$PublisherResult2 = $Publisher2->WaitKill (300);
+
+if($intermittent) {
+  $PublisherResult2 = $Publisher2->TimedWait (300);
+  if( 0 != $PublisherResult2) {
+    my $outfile = $stackfile . "_2";
+    `$stackdumpcmd publisher subscriber syncServer DCPSInfoRepo > $outfile`;
+  } else {
+    print "Publisher2 completed without incident.\n";
+  }
+  $Publisher2->Kill ();
+
+} else {
+  $PublisherResult2 = $Publisher2->WaitKill (300);
+}
 if ($PublisherResult2 != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult2 \n";
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (15);
+if($intermittent) {
+  $SubscriberResult = $Subscriber->TimedWait (15);
+  if( 0 != $SubscriberResult) {
+    my $outfile = $stackfile . "_3";
+    `$stackdumpcmd subscriber syncServer DCPSInfoRepo > $outfile`;
+  } else {
+    print "Subscriber completed without incident.\n";
+  }
+  $Subscriber->Kill ();
+
+} else {
+  $SubscriberResult = $Subscriber->WaitKill (15);
+}
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
 }
 
-$ss = $SyncServer->WaitKill(5);
+if($intermittent) {
+  $ss = $SyncServer->TimedWait (5);
+  if( 0 != $ss) {
+    my $outfile = $stackfile . "_4";
+    `$stackdumpcmd syncServer DCPSInfoRepo > $outfile`;
+  } else {
+    print "SyncServer completed without incident.\n";
+  }
+  $SyncServer->Kill ();
+
+} else {
+  $ss = $SyncServer->WaitKill(5);
+}
 if ($ss != 0) {
     print STDERR "ERROR: SyncServer returned $ss\n";
     $status = 1;
@@ -97,3 +171,4 @@ if ($status == 0) {
 }
 
 exit $status;
+
