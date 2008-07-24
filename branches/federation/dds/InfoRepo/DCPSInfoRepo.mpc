@@ -24,6 +24,7 @@ project(*Federator): dcps {
     FederatorManagerImpl.cpp
     FederatorManagerImpl_updates.cpp
     FederatorTypeSupportImpl.cpp
+    InfoRepoMulticastResponder.cpp
   }
 
   Header_Files {
