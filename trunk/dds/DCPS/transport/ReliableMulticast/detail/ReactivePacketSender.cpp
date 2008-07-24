@@ -45,6 +45,19 @@ OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
     logError("ReactivePacketSender: failure to open\n");
     return false;
   }
+
+
+  ACE_INET_Addr address;
+  if (this->socket_.get_local_addr (address) != 0)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT ("(%P|%t) ERROR: ReliableMulticast::open_socket ")
+      ACE_TEXT ("- %p"),
+      ACE_TEXT ("cannot get local addr\n")),
+      -1);
+  }
+  this->local_address_.set_port_number (address.get_port_number ());
+
   if (reactor()->register_handler(
     this,
     ACE_Event_Handler::READ_MASK

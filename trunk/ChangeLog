@@ -1,3 +1,35 @@
+Thu Jul 24 23:12:45 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+          
+          Added fixed port to multicast_group_address which is required.
+      
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+
+          Updated local_address_str with port picked by OS when local_address
+          is configured with "localhost:" (or "localhost:0"). This bug makes
+          SimpleUdp test fail to establish connection but does not affect 
+          SimpleMcast Transport since it does not use the local_address
+          for connection info exchange via DCPSInfoRepo.
+          
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+         
+          Updated local_address_ with port actually using. The local_address_str
+          in configuration object is not updated for ReliableMulticast if the 
+          configuration does not specify the port or use 0. This is fine as it 
+          does not use the local_address_str for connection info exchange via 
+          DCPSInfoRepo. It needs more work to get it updated.
+          
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        
+          TCP already handled the "localhost:" case but added a minor change.
+          
 Tue Jul 22 18:38:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
