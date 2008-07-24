@@ -282,7 +282,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
 
   // Now we got the actual listening port. Update the port nnmber in the configuration
   // if it's 0 originally.
-  if (tcp_config_->local_address_.get_port_number () == 0 && port != 0)
+  else if (tcp_config_->local_address_.get_port_number () == 0)
     {
       this->tcp_config_->local_address_.set_port_number (port);
 
