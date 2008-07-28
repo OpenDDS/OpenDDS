@@ -21,8 +21,11 @@ $num_messages=5000;
 $data_size=13;
 $num_writers=1;
 $num_readers=1;
-$pub_addr='localhost:34567';
-$sub_addr='localhost:45678';
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port();
+$pub_addr="localhost:$pub_port";
+$sub_addr="localhost:$sub_port";
+
 $num_msgs_btwn_rec=1;
 
 $domains_file = "domain_ids";

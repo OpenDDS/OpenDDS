@@ -34,7 +34,7 @@ SyncClient_i::SyncClient_i (const std::string& sync_server
 
       PortableServer::ObjectId_var oid = root_poa_->activate_object (this);
       CORBA::Object_var obj = root_poa_->id_to_reference (oid);
-      sync_client_ = Sync::Client::_narrow (obj);
+      sync_client_ = Sync::Client::_narrow (obj.in());
 
       // activate task
       if (this->activate (THR_NEW_LWP | THR_JOINABLE |THR_INHERIT_SCHED
@@ -87,11 +87,14 @@ SyncClient_i::get_notification (void)
 {
   while (true)
     {
-      if (notification_)
-        {
-          notification_ = false;
-          break;
-        }
+      {
+        ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
+        if (notification_)
+          {
+            notification_ = false;
+            break;
+          }
+      }
 
       ACE_Time_Value small(0,250000);
       ACE_OS::sleep (small);
@@ -115,12 +118,14 @@ void
 SyncClient_i::proceed (void)
   throw (CORBA::SystemException)
 {
+  ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
   notification_ = true;
 }
 
 void
 SyncClient_i::clean (void)
 {
+  ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
   notification_ = false;
 }
 

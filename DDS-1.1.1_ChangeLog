@@ -1,10 +1,94 @@
+Mon Jul 28 22:58:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_udp.ini:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+
+          Merged in changes made in trunk between
+          "Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>"
+          and "Thu Jul 24 23:12:45 UTC 2008  Yan Dai  <dai_y@ociweb.com>"
+
 Wed Jul 16 23:43:27 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Federation/Publisher.cpp:
         * tests/DCPS/Federation/Subscriber.cpp:
 
-          Made TheServiceParticipant->shutdown called after 
-          TheTransportFactory->release to fix crash due to nil orb 
+          Made TheServiceParticipant->shutdown called after
+          TheTransportFactory->release to fix crash due to nil orb
           during transport release.
 
 Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>

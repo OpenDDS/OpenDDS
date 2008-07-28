@@ -36,3 +36,11 @@ OpenDDS::DCPS::SimpleUnreliableDgramTransport::acked (RepoId)
 }
 
 
+ACE_INLINE void 
+OpenDDS::DCPS::SimpleUnreliableDgramTransport::remove_ack (RepoId /*pub_id*/, RepoId /*sub_id*/)
+{
+  //noop
+}
+
+
+

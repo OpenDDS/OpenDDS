@@ -831,6 +831,9 @@ void
 OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
+  
+  // Notify the Elements that were sent.
+  this->send_delayed_notifications();
 
   QueueType* elems = 0;
   QueueType* queue = 0;
@@ -868,9 +871,6 @@ OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
 
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications();
-
   // We need remove the queued elements outside the lock,
   // otherwise we have a deadlock situation when remove vistor
   // calls the data_droped on each dropped elements.
@@ -884,6 +884,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear (SendMode mode)
   delete elems;
   delete queue;
 }
+
 
 
 void
