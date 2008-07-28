@@ -50,9 +50,12 @@ unlink $repo3_ior;
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf ";
 
-my $repo1_endpoint = "localhost:4004";
-my $repo2_endpoint = "localhost:8008";
-my $repo3_endpoint = "localhost:8080";
+my $repo1_port = PerlACE::random_port(); 
+my $repo2_port = PerlACE::random_port(); 
+my $repo3_port = PerlACE::random_port(); 
+my $repo1_endpoint = "localhost:$repo1_port";
+my $repo2_endpoint = "localhost:$repo2_port";
+my $repo3_endpoint = "localhost:$repo3_port";
 
 # Declare these at file scope since we will be defining them inside
 # blocks and using them outside the blocks.
@@ -69,21 +72,25 @@ my $PUBLISHER;
 my $SUBSCRIBER;
 
 if( $thirdRepo) {
+  my $repo1_file = PerlACE::uniqueid ();
+  my $repo2_file = PerlACE::uniqueid ();
+  my $repo3_file = PerlACE::uniqueid ();
+
   #
   # publisher --> repo2 <--> repo1 <--> repo3 <-- subscriber
   #
 
   $repo1_args = "$svc_config -o $repo1_ior -d $domains1_file "
 #              . "-ORBDebugLevel 1 "
-              . "-f 1957 ";
+              . "-f $repo1_file ";
 
   $repo2_args = "$svc_config -o $repo2_ior -d $domains2_file "
 #              . "-ORBDebugLevel 1 "
-              . "-f 1975 -j $repo1_endpoint ";
+              . "-f $repo2_file -j $repo1_endpoint ";
 
   $repo3_args = "$svc_config -o $repo3_ior -d $domains3_file "
 #              . "-ORBDebugLevel 1 "
-              . "-f 1982 -j $repo1_endpoint ";
+              . "-f $repo3_file -j $repo1_endpoint ";
 
   $publisher_args  .= "-DCPSInfoRepo file://$repo2_ior -Samples $samples ";
   $subscriber_args .= "-DCPSInfoRepo file://$repo3_ior -Samples $samples ";
@@ -95,11 +102,11 @@ if( $thirdRepo) {
 
   $repo1_args = "$svc_config -o $repo1_ior -d $domains1_file "
 #              . "-ORBDebugLevel 1 "
-              . "-f 1957 ";
+              . "-f $repo1_file ";
 
   $repo2_args = "$svc_config -o $repo2_ior -d $domains2_file "
 #              . "-ORBDebugLevel 1 "
-              . "-f 1975 -j $repo1_endpoint ";
+              . "-f $repo2_file -j $repo1_endpoint ";
 
   $publisher_args  .= "-DCPSInfoRepo file://$repo1_ior -Samples $samples ";
   $subscriber_args .= "-DCPSInfoRepo file://$repo2_ior -Samples $samples ";

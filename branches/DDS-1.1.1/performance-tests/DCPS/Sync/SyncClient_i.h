@@ -5,6 +5,7 @@
 #include "Sync_export.h"
 
 #include "ace/Task.h"
+#include "ace/Synch.h"
 
 #include <string>
 
@@ -63,6 +64,8 @@ class Sync_Export SyncClient_i : public POA_Sync::Client, public ACE_Task_Base
   PortableServer::POAManager_var poa_manager_;
 
   Sync::Id my_id_;
+
+  ACE_SYNCH_MUTEX lock_;
 };
 
 #endif //  _SYNC_CLIENT_I_

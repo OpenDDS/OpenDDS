@@ -38,8 +38,10 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
                        -1);
     }
 
+  ACE_INET_Addr address = mcast_config->local_address_;
+
   // Open our socket using the parameters from our mcast_config_ object.
-  if (this->socket_->open_socket (mcast_config->local_address_,
+  if (this->socket_->open_socket (address,
                           mcast_config->multicast_group_address_,
                           mcast_config->receiver_) != 0)
     {
@@ -51,20 +53,35 @@ OpenDDS::DCPS::SimpleMcastTransport::configure_socket(TransportConfiguration* co
                        -1);
     }
 
-  // As default, the acceptor will be listening on INADDR_ANY. It's not necessary to
-  // update this local_address since it's not advertised.
-  if (mcast_config->local_address_.is_any())
-    {
-      unsigned short port = mcast_config->local_address_.get_port_number ();
-      std::stringstream out;
-      out << port;
+  unsigned short port = address.get_port_number ();
+  std::stringstream out;
+  out << port;
 
+  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
+  // qualified hostname and actual listening port number.
+  if (mcast_config->local_address_.is_any ())
+    {
       const std::string& hostname = get_fully_qualified_hostname ();
 
       mcast_config->local_address_.set (port, hostname.c_str());
       mcast_config->local_address_str_ = hostname;
       mcast_config->local_address_str_ += ":";
       mcast_config->local_address_str_ += out.str ();
+    }
+
+  // Now we got the actual listening port. Update the port nnmber in the configuration
+  // if it's 0 originally.
+  else if (mcast_config->local_address_.get_port_number () == 0)
+    {
+      mcast_config->local_address_.set_port_number (port);
+
+      if (! mcast_config->local_address_str_.empty ())
+      {
+        std::string::size_type pos = mcast_config->local_address_str_.find_first_of (':');
+        std::string str = mcast_config->local_address_str_.substr (0, pos + 1);
+        str += out.str ();
+        mcast_config->local_address_str_ = str;
+      }
     }
 
   // Do not need update multicast_group_address_ since it's default to use 

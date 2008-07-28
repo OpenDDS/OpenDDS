@@ -52,7 +52,7 @@ $CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
 
 $REPO->Spawn ();
 
-if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($iorfile, 15) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;

@@ -334,6 +334,11 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
     this->_add_ref ();
     if (this->datalink_release_delay_ > ACE_Time_Value::zero)
     {
+      // The samples has to be removed at this point, otherwise the sample
+      // can not be delivered when new association is added and still use
+      // this connection/datalink.
+      this->send_strategy_->clear();
+
       CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
       ACE_Reactor* reactor = orb->orb_core ()->reactor ();
 

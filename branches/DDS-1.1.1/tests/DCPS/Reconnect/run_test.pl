@@ -27,6 +27,12 @@ $kill_subscriber = 0;
 $expected_deleted_connections = 1;
 $verify_lost_sub_notification = 1;
 
+$pub_port = PerlACE::random_port();
+$sub_port = PerlACE::random_port(); 
+$pub_local_address = "localhost:$pub_port";
+$sub_local_address = "localhost:$sub_port";
+
+
 if ($ARGV[0] eq 'restart_sub') {
   # Increase the number of messages so that the publisher will last
   # until the subscriber restarted.
@@ -104,14 +110,14 @@ $DCPSREPO = PerlDDS::create_process
        , "$svc_config -o $dcpsrepo_ior -d $domains_file -ORBSvcConf repo.conf");
 $Subscriber = PerlDDS::create_process
       ("subscriber"
-       , " $svc_config -DCPSConfigFile sub.ini -a $num_reads_before_crash"
+       , " $svc_config -a $num_reads_before_crash"
        . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
-       . " -c $verify_lost_sub_notification -e $end_with_publisher");
+       . " -c $verify_lost_sub_notification -e $end_with_publisher -x $sub_local_address");
 $Publisher = PerlDDS::create_process
       ("publisher"
-       , " $svc_config -DCPSConfigFile pub.ini -a $num_writes_before_crash"
+       , " $svc_config -a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
-       . " -d $expected_deleted_connections");
+       . " -d $expected_deleted_connections -x $pub_local_address");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -177,8 +183,8 @@ if ($num_reads_before_crash > 0)
 
   $Subscriber = PerlDDS::create_process
         ("subscriber"
-         , " $svc_config -DCPSConfigFile sub.ini -n $num_expected_reads_restart_sub"
-         . " -r $num_reads_deviation");
+         , " $svc_config -n $num_expected_reads_restart_sub"
+         . " -r $num_reads_deviation -x $sub_local_address");
 
   print "\n\n!!! Restart subscriber !!! \n\n";;
   print $Subscriber->CommandLine () . "\n";
@@ -195,7 +201,7 @@ if ($num_writes_before_crash > 0) {
 
   $Publisher = PerlDDS::create_process
         ("publisher"
-         , " $svc_config -DCPSConfigFile pub.ini -n $num_writes");
+         , " $svc_config -n $num_writes");
 
   sleep($restart_delay);
 
