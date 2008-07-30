@@ -54,7 +54,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::ReactivePacketSender::open(
       ACE_TEXT ("(%P|%t) ERROR: ReliableMulticast::open_socket ")
       ACE_TEXT ("- %p"),
       ACE_TEXT ("cannot get local addr\n")),
-      -1);
+      false);
   }
   this->local_address_.set_port_number (address.get_port_number ());
 

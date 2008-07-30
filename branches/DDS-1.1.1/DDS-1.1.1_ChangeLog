@@ -1,3 +1,9 @@
+Wed Jul 30 19:19:21 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+
+          Fixed a warning caused by incorrect return value.
+
 Mon Jul 28 22:58:39 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub.ini:
