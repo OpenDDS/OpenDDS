@@ -11,7 +11,8 @@
 #ifndef DCPS_ENTITY_ID_GENERATOR_H
 #define DCPS_ENTITY_ID_GENERATOR_H
 
-#include "tao/corbafwd.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/GuidUtils.h"
 
 /**
  * @class DCPS_Entity_Id_Generator
@@ -36,13 +37,9 @@ public:
   DCPS_Entity_Id_Generator();
   ~DCPS_Entity_Id_Generator(void);
 
-  CORBA::Long get_next_part_id ();
-  CORBA::Long get_next_topic_id ();
-  CORBA::Long get_next_sub_pub_id ();
-
-  bool set_base_part_id (CORBA::Long id);
-  bool set_base_topic_id (CORBA::Long id);
-  bool set_base_sub_pub_id (CORBA::Long id);
+  OpenDDS::DCPS::RepoId get_next_part_id( long federation);
+  OpenDDS::DCPS::RepoId get_next_topic_id( long federation, const OpenDDS::DCPS::RepoId& pid);
+  OpenDDS::DCPS::RepoId get_next_sub_pub_id( long federation, const OpenDDS::DCPS::RepoId& pid);
 };
 
 #endif /* DCPS_ENTITY_ID_GENERATOR_H  */

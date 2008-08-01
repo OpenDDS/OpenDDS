@@ -25,7 +25,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader ()
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
   , coherency_group_( 0)
-  , publication_id_( 0)
+  , publication_id_( GUID_UNKNOWN )
   , marshaled_size_( 0)
 {
 }
@@ -46,7 +46,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block* buffer)
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
   , coherency_group_( 0)
-  , publication_id_( 0)
+  , publication_id_( GUID_UNKNOWN )
 {
   this->init( buffer) ;
 }
@@ -67,7 +67,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader (ACE_Message_Block& buffer)
   , source_timestamp_sec_( 0)
   , source_timestamp_nanosec_( 0)
   , coherency_group_( 0)
-  , publication_id_( 0)
+  , publication_id_( GUID_UNKNOWN )
 {
   this->init( &buffer) ;
 }
@@ -106,8 +106,6 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
        + sizeof( this->source_timestamp_sec_)
        + sizeof( this->source_timestamp_nanosec_)
        + sizeof( this->coherency_group_)
-       + 1 + sizeof( this->publication_id_) ;
-             // Encoding of PublicationId can add an additional byte to
-             // the representation.
+       + sizeof( this->publication_id_) ;
 }
 

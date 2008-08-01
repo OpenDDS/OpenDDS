@@ -26,7 +26,7 @@ namespace OpenDDS
     {
       public:
 
-        typedef std::map<RepoId, TransportReceiveListener*> MapType;
+        typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> MapType;
 
         ReceiveListenerSet();
         virtual ~ReceiveListenerSet();

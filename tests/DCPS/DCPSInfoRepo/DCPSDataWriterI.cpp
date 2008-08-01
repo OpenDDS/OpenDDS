@@ -15,7 +15,7 @@ TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   }
 
 void TAO_DDS_DCPSDataWriter_i::add_associations (
-    ::OpenDDS::DCPS::RepoId yourId,
+    const ::OpenDDS::DCPS::RepoId& yourId,
     const OpenDDS::DCPS::ReaderAssociationSeq & readers
   )
   ACE_THROW_SPEC ((

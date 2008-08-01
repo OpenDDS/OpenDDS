@@ -242,7 +242,7 @@ PublisherImpl::delete_datawriter (::DDS::DataWriter_ptr a_datawriter)
 
   CORBA::String_var topic_name = dw_servant->get_topic_name ();
   DataWriterImpl* local_writer = 0;
-  RepoId publication_id  = 0;
+  RepoId publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
           guard,

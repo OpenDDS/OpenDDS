@@ -11,6 +11,7 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "UpdateManager.h"
 
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 
 #include /**/ "tao/debug.h"
@@ -21,8 +22,10 @@
 
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
-                                        , bool reincarnate)
+                                        , bool reincarnate
+                                        , long federation)
   : orb_ (CORBA::ORB::_duplicate (orb))
+    , federation_(federation)
     , um_ (0)
     , reincarnate_ (reincarnate)
 {
@@ -38,7 +41,7 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     OpenDDS::DCPS::RepoId_out topicId,
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
+    const OpenDDS::DCPS::RepoId& participantId,
     const char * topicName,
     const char * dataTypeName,
     const ::DDS::TopicQos & qos
@@ -82,9 +85,9 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
 }
 
 bool
-TAO_DDS_DCPSInfo_i::add_topic (OpenDDS::DCPS::RepoId topicId,
+TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
                                ::DDS::DomainId_t domainId,
-                               OpenDDS::DCPS::RepoId participantId,
+                               const OpenDDS::DCPS::RepoId& participantId,
                                const char* topicName,
                                const char* dataTypeName,
                                const ::DDS::TopicQos& qos)
@@ -154,8 +157,8 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
 
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId topicId
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& topicId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -194,8 +197,8 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
 
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   ::DDS::DomainId_t domainId,
-  OpenDDS::DCPS::RepoId participantId,
-  OpenDDS::DCPS::RepoId topicId
+  const OpenDDS::DCPS::RepoId& participantId,
+  const OpenDDS::DCPS::RepoId& topicId
   )
   ACE_THROW_SPEC ((
   CORBA::SystemException
@@ -228,8 +231,8 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
 
 OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId topicId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const ::DDS::DataWriterQos & qos,
     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -260,7 +263,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  OpenDDS::DCPS::RepoId pubId = domainPtr->get_next_publication_id();
+  OpenDDS::DCPS::RepoId pubId
+    = domainPtr->get_next_publication_id(
+        this->federation_,
+        partPtr->get_id()
+      );
 
   DCPS_IR_Publication* pubPtr;
   ACE_NEW_RETURN(pubPtr,
@@ -272,12 +279,12 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
                    qos,
                    transInfo,
                    publisherQos),
-                 0);
+                 OpenDDS::DCPS::GUID_UNKNOWN);
 
   if (partPtr->add_publication(pubPtr) != 0)
     {
       // failed to add.  we are responsible for the memory.
-      pubId = 0;
+      pubId = OpenDDS::DCPS::GUID_UNKNOWN;
       delete pubPtr;
       pubPtr = 0;
     }
@@ -286,7 +293,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       // Failed to add to the topic
       // so remove from participant and fail.
       partPtr->remove_publication(pubId);
-      pubId = 0;
+      pubId = OpenDDS::DCPS::GUID_UNKNOWN;
     }
 
   if (um_)
@@ -309,9 +316,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
 
 bool
 TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
-                                     OpenDDS::DCPS::RepoId participantId,
-                                     OpenDDS::DCPS::RepoId topicId,
-                                     OpenDDS::DCPS::RepoId pubId,
+                                     const OpenDDS::DCPS::RepoId& participantId,
+                                     const OpenDDS::DCPS::RepoId& topicId,
+                                     const OpenDDS::DCPS::RepoId& pubId,
                                      const char* pub_str,
                                      const ::DDS::DataWriterQos & qos,
                                      const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -337,8 +344,6 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
     {
       throw OpenDDS::DCPS::Invalid_Topic();
     }
-
-  domainPtr->set_base_publication_id (pubId + 1);
 
   CORBA::Object_var obj = orb_->string_to_object (pub_str);
   OpenDDS::DCPS::DataWriterRemote_var publication
@@ -382,8 +387,8 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
 
 void TAO_DDS_DCPSInfo_i::remove_publication (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId publicationId
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& publicationId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -422,8 +427,8 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
 
 OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId topicId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const ::DDS::DataReaderQos & qos,
     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -454,7 +459,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  OpenDDS::DCPS::RepoId subId = domainPtr->get_next_subscription_id ();
+  OpenDDS::DCPS::RepoId subId
+    = domainPtr->get_next_subscription_id(
+        this->federation_,
+        partPtr->get_id()
+      );
 
   DCPS_IR_Subscription* subPtr;
   ACE_NEW_RETURN(subPtr,
@@ -466,12 +475,12 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                    qos,
                    transInfo,
                    subscriberQos),
-                 0);
+                 OpenDDS::DCPS::GUID_UNKNOWN);
 
   if (partPtr->add_subscription(subPtr) != 0)
     {
       // failed to add.  we are responsible for the memory.
-      subId = 0;
+      subId = OpenDDS::DCPS::GUID_UNKNOWN;
       delete subPtr;
       subPtr = 0;
     }
@@ -481,7 +490,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                   "topic list.\n"));
       // No associations were made so remove and fail.
       partPtr->remove_subscription(subId);
-      subId = 0;
+      subId = OpenDDS::DCPS::GUID_UNKNOWN;
     }
 
   if (um_)
@@ -506,9 +515,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
 bool
 TAO_DDS_DCPSInfo_i::add_subscription (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId topicId,
-    OpenDDS::DCPS::RepoId subId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& topicId,
+    const OpenDDS::DCPS::RepoId& subId,
     const char* sub_str,
     const ::DDS::DataReaderQos & qos,
     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -535,8 +544,6 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     {
       throw OpenDDS::DCPS::Invalid_Topic();
     }
-
-  domainPtr->set_base_subscription_id (subId + 1);
 
   CORBA::Object_var obj = orb_->string_to_object (sub_str);
   OpenDDS::DCPS::DataReaderRemote_var subscription
@@ -579,8 +586,8 @@ TAO_DDS_DCPSInfo_i::add_subscription (
 
 void TAO_DDS_DCPSInfo_i::remove_subscription (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId,
-    OpenDDS::DCPS::RepoId subscriptionId
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& subscriptionId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -632,7 +639,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
       throw OpenDDS::DCPS::Invalid_Domain();
     }
 
-  OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id ();
+  OpenDDS::DCPS::RepoId participantId
+    = domainPtr->get_next_participant_id( this->federation_);
 
   DCPS_IR_Participant* participant;
 
@@ -641,7 +649,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
                    participantId,
                    domainPtr,
                    qos, um_),
-                 0);
+                 OpenDDS::DCPS::GUID_UNKNOWN);
 
   int status = domainPtr->add_participant (participant);
 
@@ -649,7 +657,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     {
       // Adding the participant failed return the invalid
       // pariticipant Id number.
-      participantId = 0;
+      participantId = OpenDDS::DCPS::GUID_UNKNOWN;
       delete participant;
       participant = 0;
     }
@@ -667,7 +675,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 
 bool
 TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
-                                            , OpenDDS::DCPS::RepoId participantId
+                                            , const OpenDDS::DCPS::RepoId& participantId
                                             , const ::DDS::DomainParticipantQos & qos)
 {
   DCPS_IR_Domain* domainPtr;
@@ -684,8 +692,6 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                   , participantId));
       return false;
     }
-
-  domainPtr->set_base_participant_id (participantId + 1);
 
   DCPS_IR_Participant* participant;
   ACE_NEW_RETURN (participant,
@@ -708,7 +714,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
 
 void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId participantId
+    const OpenDDS::DCPS::RepoId& participantId
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -736,8 +742,8 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
 
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId myParticipantId,
-    OpenDDS::DCPS::RepoId otherParticipantId
+    const OpenDDS::DCPS::RepoId& myParticipantId,
+    ::DDS::InstanceHandle_t ignoreHandle
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -757,7 +763,8 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  partPtr->ignore_participant(otherParticipantId);
+  OpenDDS::DCPS::RepoId ignoreId = domainPtr->participant( ignoreHandle);
+  partPtr->ignore_participant( ignoreId);
 
   domainPtr->remove_dead_participants();
 }
@@ -765,8 +772,8 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
 
 void TAO_DDS_DCPSInfo_i::ignore_topic (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId myParticipantId,
-    OpenDDS::DCPS::RepoId topicId
+    const OpenDDS::DCPS::RepoId& myParticipantId,
+    ::DDS::InstanceHandle_t ignoreHandle
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -787,7 +794,8 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  partPtr->ignore_topic(topicId);
+  OpenDDS::DCPS::RepoId ignoreId = domainPtr->topic( ignoreHandle);
+  partPtr->ignore_topic( ignoreId);
 
   domainPtr->remove_dead_participants();
 }
@@ -795,8 +803,8 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
 
 void TAO_DDS_DCPSInfo_i::ignore_subscription (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId myParticipantId,
-    OpenDDS::DCPS::RepoId subscriptionId
+    const OpenDDS::DCPS::RepoId& myParticipantId,
+    ::DDS::InstanceHandle_t ignoreHandle
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -817,7 +825,8 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  partPtr->ignore_subscription(subscriptionId);
+  OpenDDS::DCPS::RepoId ignoreId = domainPtr->subscription( ignoreHandle);
+  partPtr->ignore_subscription( ignoreId);
 
   domainPtr->remove_dead_participants();
 }
@@ -825,8 +834,8 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
 
 void TAO_DDS_DCPSInfo_i::ignore_publication (
     ::DDS::DomainId_t domainId,
-    OpenDDS::DCPS::RepoId myParticipantId,
-    OpenDDS::DCPS::RepoId publicationId
+    const OpenDDS::DCPS::RepoId& myParticipantId,
+    ::DDS::InstanceHandle_t ignoreHandle
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -847,7 +856,8 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
       throw OpenDDS::DCPS::Invalid_Participant();
     }
 
-  partPtr->ignore_publication(publicationId);
+  OpenDDS::DCPS::RepoId ignoreId = domainPtr->publication( ignoreHandle);
+  partPtr->ignore_publication( ignoreId);
 
   domainPtr->remove_dead_participants();
 }
@@ -855,8 +865,8 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
   ::DDS::DomainId_t domainId,
-  OpenDDS::DCPS::RepoId partId,
-  OpenDDS::DCPS::RepoId dwId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& dwId,
   const ::DDS::DataWriterQos & qos,
   const ::DDS::PublisherQos & publisherQos
   )
@@ -910,8 +920,8 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
   ::DDS::DomainId_t domainId,
-  OpenDDS::DCPS::RepoId partId,
-  OpenDDS::DCPS::RepoId drId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& drId,
   const ::DDS::DataReaderQos & qos,
   const ::DDS::SubscriberQos & subscriberQos
   )
@@ -964,9 +974,9 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
 
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
-  OpenDDS::DCPS::RepoId topicId,
+  const OpenDDS::DCPS::RepoId& topicId,
   ::DDS::DomainId_t domainId,
-  OpenDDS::DCPS::RepoId participantId,
+  const OpenDDS::DCPS::RepoId& participantId,
   const ::DDS::TopicQos & qos
   )
   ACE_THROW_SPEC ((
@@ -1011,7 +1021,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::DDS::DomainId_t domainId,
-    ::OpenDDS::DCPS::RepoId participantId,
+    const ::OpenDDS::DCPS::RepoId& participantId,
     const ::DDS::DomainParticipantQos & qos
   )
   ACE_THROW_SPEC ((
@@ -1078,7 +1088,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
 
       DCPS_IR_Domain* domainPtr;
       ACE_NEW_RETURN(domainPtr,
-                     DCPS_IR_Domain(domainId),
+                     DCPS_IR_Domain(domainId, this->federation_),
                      -1);
 
       status = domains_.bind(domainId, domainPtr);
@@ -1098,7 +1108,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
 
             if (0 == bit_status)
               {
-                if (TAO_debug_level > 0)
+                if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                   {
                     ACE_DEBUG((LM_DEBUG, ACE_TEXT("TAO_DDS_DCPSInfo_i::load_domains ")
                       ACE_TEXT("Successfully loaded domain %X id: %d\n"),

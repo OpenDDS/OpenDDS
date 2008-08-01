@@ -8,6 +8,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Serializer.h"
 #include "ace/Synch.h"
 
@@ -23,7 +24,7 @@ namespace OpenDDS
     {
       public:
 
-        typedef std::map<RepoId, RepoId> MapType;
+        typedef std::map<RepoId, RepoId, GUID_tKeyLessThan> MapType;
 
         RepoIdSet();
         virtual ~RepoIdSet();

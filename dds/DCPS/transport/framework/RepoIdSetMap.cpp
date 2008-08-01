@@ -236,7 +236,7 @@ OpenDDS::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order
 
   for (CORBA::ULong i = 0; i < num_subs; ++i)
   {
-    RepoId cur_sub = 0;
+    RepoId cur_sub = GUID_UNKNOWN;
     reader >> cur_sub;
     if( reader.good_bit() != true) return -1;
     CORBA::ULong num_pubs_per_sub = 0;
@@ -245,7 +245,7 @@ OpenDDS::DCPS::RepoIdSetMap::demarshal (ACE_Message_Block* acks, bool byte_order
 
     for (CORBA::ULong j = 0; j < num_pubs_per_sub; ++j)
     {
-      RepoId pub = 0;
+      RepoId pub = GUID_UNKNOWN;
       reader >> pub;
       if( reader.good_bit() != true) return -1;
       if (this->insert (pub, cur_sub) != 0)

@@ -11,6 +11,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Transient_Kludge.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "DomainParticipantListener.h"
 #include "DataWriterListener.h"
 #include "PublisherListener.h"
@@ -37,7 +38,7 @@ PubDriver::PubDriver()
   datawriter_servant_ (0),
   foo_datawriter_servant_ (0),
   pub_id_fname_ ("pub_id.txt"),
-  sub_id_ (0),
+  sub_id_ (GUID_UNKNOWN),
   history_depth_ (1),
   test_to_run_ (REGISTER_TEST),
   pub_driver_ior_ ("pubdriver.ior"),
@@ -825,7 +826,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK
               && subscription_handles.length () == 1
-              && subscription_handles[0] == this->sub_id_);
+              && subscription_handles[0] == OpenDDS::DCPS::GuidConverter(this->sub_id_));
 
   // Test get_publication_match_status.
 
@@ -838,7 +839,7 @@ PubDriver::listener_test ()
   // The listener is set after add_association, so the total_count_change
   // should be 1 since the datawriter is associated with one datareader.
   TEST_CHECK (match_status.total_count_change == 1);
-  TEST_CHECK (match_status.last_subscription_handle == this->sub_id_);
+  TEST_CHECK (match_status.last_subscription_handle == OpenDDS::DCPS::GuidConverter(this->sub_id_));
 
   // Call register_test to send a few messages to remote subscriber.
   register_test ();
@@ -1070,7 +1071,15 @@ PubDriver::parse_sub_arg(const std::string& arg)
   std::string sub_id_str(arg,0,pos);
   std::string sub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  // Start an empty GUID - assume participant Id and federation Id are ok
+  // as 0 for this test.
+  OpenDDS::DCPS::GuidConverter converter( 0, 0);
+
+  // Convert from InstanceHandle_t
+  converter = ACE_OS::atoi(sub_id_str.c_str());
+
+  // Copy the result out.
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = sub_addr_str.c_str();
@@ -1089,8 +1098,8 @@ void PubDriver::shutdown (
 
 
 void PubDriver::add_new_subscription (
-    CORBA::Long       reader_id,
-    const char *      sub_addr
+    const OpenDDS::DCPS::RepoId& reader_id,
+    const char *                 sub_addr
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
@@ -1103,8 +1112,8 @@ void PubDriver::add_new_subscription (
 
 
 void PubDriver::add_subscription (
-    CORBA::Long       reader_id,
-    const char *      sub_addr
+    const OpenDDS::DCPS::RepoId& reader_id,
+    const char *                 sub_addr
     )
 {
   ::OpenDDS::DCPS::ReaderAssociationSeq associations;

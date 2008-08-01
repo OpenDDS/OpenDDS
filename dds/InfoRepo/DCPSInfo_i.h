@@ -50,7 +50,7 @@ class  TAO_DDS_DCPSInfo_i : public virtual POA_OpenDDS::DCPS::DCPSInfo
 {
 public:
   //Constructor
-  TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb, bool reincarnate);
+  TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb, bool reincarnate, long federation = 0);
 
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i (void);
@@ -58,7 +58,7 @@ public:
   virtual OpenDDS::DCPS::TopicStatus assert_topic (
       OpenDDS::DCPS::RepoId_out topicId,
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
+      const OpenDDS::DCPS::RepoId& participantId,
       const char * topicName,
       const char * dataTypeName,
       const ::DDS::TopicQos & qos
@@ -69,9 +69,9 @@ public:
       , OpenDDS::DCPS::Invalid_Participant
     ));
 
-  bool add_topic (OpenDDS::DCPS::RepoId topicId,
+  bool add_topic (const OpenDDS::DCPS::RepoId& topicId,
                   ::DDS::DomainId_t domainId,
-                  OpenDDS::DCPS::RepoId participantId,
+                  const OpenDDS::DCPS::RepoId& participantId,
                   const char* topicName,
                   const char* dataTypeName,
                   const ::DDS::TopicQos& qos);
@@ -90,8 +90,8 @@ public:
 
   virtual OpenDDS::DCPS::TopicStatus remove_topic (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId topicId
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& topicId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -102,8 +102,8 @@ public:
 
   virtual OpenDDS::DCPS::TopicStatus enable_topic (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId topicId
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& topicId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -114,8 +114,8 @@ public:
 
   virtual OpenDDS::DCPS::RepoId add_publication (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId topicId,
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& topicId,
       OpenDDS::DCPS::DataWriterRemote_ptr publication,
       const ::DDS::DataWriterQos & qos,
       const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -129,9 +129,9 @@ public:
     ));
 
   bool add_publication (::DDS::DomainId_t domainId,
-                        OpenDDS::DCPS::RepoId participantId,
-                        OpenDDS::DCPS::RepoId topicId,
-                        OpenDDS::DCPS::RepoId pubId,
+                        const OpenDDS::DCPS::RepoId& participantId,
+                        const OpenDDS::DCPS::RepoId& topicId,
+                        const OpenDDS::DCPS::RepoId& pubId,
                         const char* pub_str,
                         const ::DDS::DataWriterQos & qos,
                         const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -139,8 +139,8 @@ public:
 
     virtual void remove_publication (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId publicationId
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& publicationId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -151,8 +151,8 @@ public:
 
   virtual OpenDDS::DCPS::RepoId add_subscription (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId topicId,
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& topicId,
       OpenDDS::DCPS::DataReaderRemote_ptr subscription,
       const ::DDS::DataReaderQos & qos,
       const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -166,9 +166,9 @@ public:
     ));
 
   bool add_subscription (::DDS::DomainId_t domainId,
-                         OpenDDS::DCPS::RepoId participantId,
-                         OpenDDS::DCPS::RepoId topicId,
-                         OpenDDS::DCPS::RepoId subId,
+                         const OpenDDS::DCPS::RepoId& participantId,
+                         const OpenDDS::DCPS::RepoId& topicId,
+                         const OpenDDS::DCPS::RepoId& subId,
                          const char* sub_str,
                          const ::DDS::DataReaderQos & qos,
                          const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
@@ -176,8 +176,8 @@ public:
 
     virtual void remove_subscription (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
-      OpenDDS::DCPS::RepoId subscriptionId
+      const OpenDDS::DCPS::RepoId& participantId,
+      const OpenDDS::DCPS::RepoId& subscriptionId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -196,12 +196,12 @@ public:
     ));
 
   bool add_domain_participant (::DDS::DomainId_t domainId
-                               , OpenDDS::DCPS::RepoId participantId
+                               , const OpenDDS::DCPS::RepoId& participantId
                                , const ::DDS::DomainParticipantQos & qos);
 
     virtual void remove_domain_participant (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId
+      const OpenDDS::DCPS::RepoId& participantId
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -211,8 +211,8 @@ public:
 
   virtual void ignore_domain_participant (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId myParticipantId,
-      OpenDDS::DCPS::RepoId otherParticipantId
+      const OpenDDS::DCPS::RepoId& myParticipantId,
+      ::DDS::InstanceHandle_t ignoreHandle
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -222,8 +222,8 @@ public:
 
   virtual void ignore_topic (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId myParticipantId,
-      OpenDDS::DCPS::RepoId topicId
+      const OpenDDS::DCPS::RepoId& myParticipantId,
+      ::DDS::InstanceHandle_t ignoreHandle
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -234,8 +234,8 @@ public:
 
   virtual void ignore_subscription (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId myParticipantId,
-      OpenDDS::DCPS::RepoId subscriptionId
+      const OpenDDS::DCPS::RepoId& myParticipantId,
+      ::DDS::InstanceHandle_t ignoreHandle
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -246,8 +246,8 @@ public:
 
   virtual void ignore_publication (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId myParticipantId,
-      OpenDDS::DCPS::RepoId publicationId
+      const OpenDDS::DCPS::RepoId& myParticipantId,
+      ::DDS::InstanceHandle_t ignoreHandle
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -259,8 +259,8 @@ public:
 
   virtual CORBA::Boolean update_publication_qos (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId partId,
-      OpenDDS::DCPS::RepoId dwId,
+      const OpenDDS::DCPS::RepoId& partId,
+      const OpenDDS::DCPS::RepoId& dwId,
       const ::DDS::DataWriterQos & qos,
       const ::DDS::PublisherQos & publisherQos
     )
@@ -274,8 +274,8 @@ public:
 
   virtual CORBA::Boolean update_subscription_qos (
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId partId,
-      OpenDDS::DCPS::RepoId drId,
+      const OpenDDS::DCPS::RepoId& partId,
+      const OpenDDS::DCPS::RepoId& drId,
       const ::DDS::DataReaderQos & qos,
       const ::DDS::SubscriberQos & subscriberQos
     )
@@ -288,9 +288,9 @@ public:
 
 
   virtual CORBA::Boolean update_topic_qos (
-      OpenDDS::DCPS::RepoId topicId,
+      const OpenDDS::DCPS::RepoId& topicId,
       ::DDS::DomainId_t domainId,
-      OpenDDS::DCPS::RepoId participantId,
+      const OpenDDS::DCPS::RepoId& participantId,
       const ::DDS::TopicQos & qos
     )
     ACE_THROW_SPEC ((
@@ -303,7 +303,7 @@ public:
 
   virtual CORBA::Boolean update_domain_participant_qos (
     ::DDS::DomainId_t domain,
-    ::OpenDDS::DCPS::RepoId participantId,
+    const ::OpenDDS::DCPS::RepoId& participantId,
     const ::DDS::DomainParticipantQos & qos
   )
   ACE_THROW_SPEC ((
@@ -336,6 +336,8 @@ private:
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
+
+  long federation_;
 
   UpdateManager* um_;
   bool reincarnate_;
