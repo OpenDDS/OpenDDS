@@ -692,7 +692,7 @@ ManagerImpl::join_federation(
     // Go ahead and add the joining repository as our Federation
     // repository.
     try {
-      // Obtain the remote repository federator Id value.
+      // Obtain a reference to the remote repository.
       ::OpenDDS::DCPS::DCPSInfo_var remoteRepo = peer->repository();
       if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
         CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
@@ -733,7 +733,7 @@ ManagerImpl::join_federation(
 
   } catch( const CORBA::Exception& ex) {
     ex._tao_print_exception(
-      "ERROR: Federator::ManagerImpl::join_federation() - Unable to join with remote: "
+      "ERROR: Federator::ManagerImpl::join_federation() - unsuccsessful call to remote->join: "
     );
     throw Incomplete();
   }

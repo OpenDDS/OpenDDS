@@ -29,7 +29,7 @@
 #include /**/ "ace/Map_Manager.h"
 #include /**/ "ace/Null_Mutex.h"
 
-#include <map> // For the TopicId --> Topic lookup.
+#include <map> // For the TopicId --> Topic lookup and Handle/Id mappings.
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -60,7 +60,7 @@ class DCPS_IR_Publication;
 class DCPS_IR_Domain
 {
 public:
-  DCPS_IR_Domain(::DDS::DomainId_t id);
+  DCPS_IR_Domain(::DDS::DomainId_t id, long federation = 0);
 
   ~DCPS_IR_Domain();
 
@@ -75,13 +75,13 @@ public:
   /// The notify_lost parameter is passed to the remove_associations()
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
   /// or DdsDcpsDataReaderRemote.idl.
-  int remove_participant(OpenDDS::DCPS::RepoId particpantId,
+  int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
 
   /// Find the participant with the particpant id
   /// Does NOT take ownership of any initial memory pointed to by participant
   /// Returns 0 if exists and participant is changed, -1 otherwise
-  int find_participant(OpenDDS::DCPS::RepoId particpantId,
+  int find_participant(const OpenDDS::DCPS::RepoId& particpantId,
                        DCPS_IR_Participant*& participant);
 
   /// Add a topic to the domain
@@ -92,7 +92,7 @@ public:
                                    const ::DDS::TopicQos & qos,
                                    DCPS_IR_Participant* participantPtr);
 
-  OpenDDS::DCPS::TopicStatus force_add_topic(OpenDDS::DCPS::RepoId topicId,
+  OpenDDS::DCPS::TopicStatus force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
 					 const char* topicName,
 					 const char* dataTypeName,
 					 const ::DDS::TopicQos & qos,
@@ -105,7 +105,7 @@ public:
                                     DCPS_IR_Topic*& topic);
 
   /// Find a topic object reference using the topic Id value.
-  DCPS_IR_Topic* find_topic( const OpenDDS::DCPS::RepoId id);
+  DCPS_IR_Topic* find_topic( const OpenDDS::DCPS::RepoId& id);
 
   /// Remove the topic
   /// The topic has been deleted if returns successful
@@ -123,15 +123,17 @@ public:
 
   ::DDS::DomainId_t get_id ();
 
-  OpenDDS::DCPS::RepoId get_next_participant_id ();
-  OpenDDS::DCPS::RepoId get_next_topic_id ();
-  OpenDDS::DCPS::RepoId get_next_publication_id ();
-  OpenDDS::DCPS::RepoId get_next_subscription_id ();
+  // Next Entity Id value in sequence.
+  OpenDDS::DCPS::RepoId get_next_participant_id( long federation);
+  OpenDDS::DCPS::RepoId get_next_topic_id( long federation, const OpenDDS::DCPS::RepoId& pid);
+  OpenDDS::DCPS::RepoId get_next_publication_id( long federation, const OpenDDS::DCPS::RepoId& pid);
+  OpenDDS::DCPS::RepoId get_next_subscription_id( long federation, const OpenDDS::DCPS::RepoId& pid);
 
-  bool set_base_participant_id (OpenDDS::DCPS::RepoId id);
-  bool set_base_topic_id (OpenDDS::DCPS::RepoId id);
-  bool set_base_publication_id (OpenDDS::DCPS::RepoId id);
-  bool set_base_subscription_id (OpenDDS::DCPS::RepoId id);
+  // Lookup RepoId values for specific entity types by their handle.
+  OpenDDS::DCPS::RepoId participant(  const ::DDS::InstanceHandle_t handle);
+  OpenDDS::DCPS::RepoId topic(        const ::DDS::InstanceHandle_t handle);
+  OpenDDS::DCPS::RepoId subscription( const ::DDS::InstanceHandle_t handle);
+  OpenDDS::DCPS::RepoId publication(  const ::DDS::InstanceHandle_t handle);
 
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
@@ -155,7 +157,7 @@ public:
   void dispose_publication_bit (DCPS_IR_Publication* publication);
 
 private:
-  OpenDDS::DCPS::TopicStatus add_topic_i (OpenDDS::DCPS::RepoId topicId,
+  OpenDDS::DCPS::TopicStatus add_topic_i (OpenDDS::DCPS::RepoId& topicId,
 				      const char * topicName,
 				      const char * dataTypeName,
 				      const ::DDS::TopicQos & qos,
@@ -206,7 +208,7 @@ private:
   DCPS_IR_Topic_Description_Set topicDescriptions_;
 
   /// Mapping from RepoId values to Topic object references.
-  typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Topic*> IdToTopicMap;
+  typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Topic*, GUID_tKeyLessThan> IdToTopicMap;
 
   /// Actual mapping of Id values to Topic object references.
   IdToTopicMap idToTopicMap_;
@@ -234,6 +236,23 @@ private:
   ::DDS::Topic_var                                   bitPublicationTopic_;
   ::DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+  // Federation in which this Domain is operating.
+  long federation_;
+
+  // Constructs for managing Instance handle and Id mappings.
+
+  /// Map from InstanceHandle values to GUID values.
+  typedef std::map< ::DDS::InstanceHandle_t, OpenDDS::DCPS::RepoId> HandleToIdMap;
+
+  /// Participant handles and Ids.
+  HandleToIdMap participantHandleToIdMap_;
+
+  /// Topic handles and Ids.
+  HandleToIdMap topicHandleToIdMap_;
+
+  /// Publication and Subscription handles and Ids.
+  HandleToIdMap pubSubHandleToIdMap_;
 
 };
 

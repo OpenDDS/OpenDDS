@@ -13,6 +13,7 @@ use DDS_Run_Test;
 
 my $status = 0;
 my $failed = 0;
+my $debug;
 
 PerlDDS::add_lib_path('../FooType5');
 
@@ -100,6 +101,8 @@ unlink $dcpsrepo3_ior;
 
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf ";
+
+$svc_config .= "-DCPSDebugLevel $debug " if $debug;
 
 # Configure the subsystems.
 my $sys1_parameters = "$svc_config $system1_config "

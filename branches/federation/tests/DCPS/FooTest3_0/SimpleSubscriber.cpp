@@ -9,7 +9,7 @@
 #include  "ace/SString.h"
 
 SimpleSubscriber::SimpleSubscriber()
-  : sub_id_ (0), num_publications_ (0)
+  : sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN), num_publications_ (0)
   , publications_ (0)
 { }
 

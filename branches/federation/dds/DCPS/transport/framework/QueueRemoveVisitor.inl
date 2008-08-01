@@ -8,7 +8,7 @@ ACE_INLINE
 OpenDDS::DCPS::QueueRemoveVisitor::QueueRemoveVisitor
                                        (const ACE_Message_Block* sample)
   : sample_(sample),
-    pub_id_(0),
+    pub_id_( GUID_UNKNOWN ),
     status_(0),
     removed_bytes_(0)
 {

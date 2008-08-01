@@ -18,15 +18,19 @@ use Pod::Usage ;
 #
 my $help;
 my $man;
+my $transportDebug;
 my $debug;
+my $debugFile;
 my $nobit;
 my $udp;
 
-GetOptions( "help|?"      => \$help,
-            "man"         => \$man,
-            "debug|d=i"   => \$debug,
-            "udp|u"       => \$udp,
-            "nobit|x"     => \$nobit,
+GetOptions( "help|?"        => \$help,
+            "man"           => \$man,
+            "debug|d=i"     => \$debug,
+            "transport|t=i" => \$transportDebug,
+            "logfile|f=s"   => \$debugFile,
+            "udp|u"         => \$udp,
+            "nobit|x"       => \$nobit,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -47,6 +51,8 @@ my $sub2_udp_ini   = PerlACE::LocalFile ("sub2_udp_conf.ini");
 # Change how test is configured according to which test we are.
 my $common_opts    = "-ORBSvcConf ./tcp.conf ";
    $common_opts   .= "-DCPSDebugLevel $debug " if $debug;
+   $common_opts   .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+   $common_opts   .= "-ORBLogFile $debugFile " if $debugFile;
 my $repo_opts      = "-ORBEndpoint iiop://localhost:12345";
 my $publisher_opts = "-DCPSConfigFile $publisher_ini ";
 my $sub1_opts      = "-DCPSConfigFile $publisher_ini ";
@@ -166,6 +172,9 @@ Options:
 
   -d NUMBER | --DCPSDebugLevel=NUMBER
                 set the corresponding DCPS debug level
+
+  -f FILENAME | --logfile=FILENAME
+                set the logfile name
 
   -u | --udp    execute using UDP transport
 

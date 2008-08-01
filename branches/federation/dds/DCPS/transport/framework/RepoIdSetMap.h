@@ -24,7 +24,7 @@ namespace OpenDDS
     {
       public:
 
-        typedef std::map<RepoId, RepoIdSet_rch> MapType;
+        typedef std::map<RepoId, RepoIdSet_rch, GUID_tKeyLessThan> MapType;
 
         RepoIdSetMap();
         virtual ~RepoIdSetMap();

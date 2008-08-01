@@ -63,7 +63,7 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      RepoId dp_id = 0;
+      RepoId dp_id = GUID_UNKNOWN;
 
       try
         {
@@ -85,7 +85,7 @@ namespace OpenDDS
           return ::DDS::DomainParticipant::_nil();
         }
 
-      if (dp_id == 0)
+      if (dp_id == GUID_UNKNOWN)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

@@ -4,6 +4,8 @@
 #include "UpdateManager.h"
 #include "ArrDelAdapter.h"
 
+#include "dds/DCPS/GuidUtils.h"
+
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_strings.h"
@@ -17,7 +19,7 @@
 template<>
 struct TopicStrt <QosSeq, ACE_CString>
 {
-  IdType domainId;
+  ::DDS::DomainId_t domainId;
   IdType topicId; // Unique system-wide
   IdType participantId;
   ACE_CString name;
@@ -90,7 +92,7 @@ template<>
 struct ActorStrt <QosSeq, QosSeq
                   , ACE_CString, BinSeq>
 {
-  IdType domainId;
+  ::DDS::DomainId_t domainId;
   IdType actorId; // Unique system-wide
   IdType topicId;
   IdType participantId;
@@ -171,11 +173,9 @@ PersistenceUpdater::IdType_ExtId::operator== (const IdType_ExtId& ext) const
 unsigned long
 PersistenceUpdater::IdType_ExtId::hash (void) const
 {
-  return (unsigned long) id_;
+  OpenDDS::DCPS::RepoId guid = id_;
+  return OpenDDS::DCPS::GuidConverter( guid);
 };
-
-
-
 
 PersistenceUpdater::PersistenceUpdater (void)
   : persistence_file_ (ACE_TEXT("InforepoPersist"))

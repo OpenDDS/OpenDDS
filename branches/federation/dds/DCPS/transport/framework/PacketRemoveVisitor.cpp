@@ -19,7 +19,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
                                ACE_Message_Block*       header_block,
                                TransportReplacedElementAllocator& allocator)
   : sample_(sample),
-    pub_id_(0),
+    pub_id_( GUID_UNKNOWN ),
     head_(unsent_head_block),
     header_block_(header_block),
     status_(0),

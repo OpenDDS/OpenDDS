@@ -66,7 +66,7 @@ public:
   /// Removes the publication with the id
   /// Deletes the publication object if returns successful
   /// Returns 0 if successful
-  int remove_publication (long pubId);
+  int remove_publication (OpenDDS::DCPS::RepoId pubId);
 
   /// Add a subscription
   /// This takes ownership of the memory pointed to by aub
@@ -80,7 +80,7 @@ public:
   /// Removes the subscription with the id
   /// Deletes the subscription object if returns successful
   /// Returns 0 if successful
-  int remove_subscription (long subId);
+  int remove_subscription (OpenDDS::DCPS::RepoId subId);
 
   /// Add a topic
   /// Returns 0 if added, 1 if already exists, -1 other failure
@@ -89,13 +89,13 @@ public:
   /// Remove a topic reference
   /// Does not change or take ownership of topic
   /// Returns 0 if successful
-  int remove_topic_reference (long topicId,
+  int remove_topic_reference (OpenDDS::DCPS::RepoId topicId,
                               DCPS_IR_Topic*& topic);
 
   /// Find topic reference with id
   /// Does NOT give ownership of memory
   /// Returns 0 if successful
-  int find_topic_reference (long topicId,
+  int find_topic_reference (OpenDDS::DCPS::RepoId topicId,
                             DCPS_IR_Topic*& topic);
 
   /// Removes all topics, publications and

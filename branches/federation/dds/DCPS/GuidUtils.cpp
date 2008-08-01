@@ -1,0 +1,171 @@
+// -*- C++ -*-
+//
+// $Id$
+
+#include "GuidUtils.h"
+
+#include "ace/ACE.h"
+
+#include <iostream>
+#include <iomanip>
+
+namespace OpenDDS { namespace DCPS {
+
+GuidConverter::GuidConverter( GUID_t& guid)
+  : guid_( guid),
+    newGuid_( GUID_UNKNOWN)
+{
+}
+
+GuidConverter::GuidConverter( GUID_t* guid)
+  : guid_( *guid),
+    newGuid_( GUID_UNKNOWN)
+{
+}
+
+GuidConverter::GuidConverter( long federation, long participant)
+  : guid_( this->newGuid_),
+    newGuid_( GUID_UNKNOWN)
+{
+  this->guid_.guidPrefix[ 0] = VENDORID_OCI[0];
+  this->guid_.guidPrefix[ 1] = VENDORID_OCI[1];
+
+  this->guid_.guidPrefix[ 4] = (0xff&(federation>>24));
+  this->guid_.guidPrefix[ 5] = (0xff&(federation>>16));
+  this->guid_.guidPrefix[ 6] = (0xff&(federation>> 8));
+  this->guid_.guidPrefix[ 7] = (0xff& federation);
+  this->guid_.guidPrefix[ 8] = (0xff&(participant>>24));
+  this->guid_.guidPrefix[ 9] = (0xff&(participant>>16));
+  this->guid_.guidPrefix[10] = (0xff&(participant>> 8));
+  this->guid_.guidPrefix[11] = (0xff& participant);
+  this->guid_.entityId       = ENTITYID_UNKNOWN;
+}
+
+GuidConverter::operator GUID_t() const
+{
+  return this->guid_;
+}
+
+GuidConverter::operator long() const
+{
+  return ACE::crc32( reinterpret_cast<void*>(&this->guid_), sizeof( this->guid_));
+}
+
+long
+GuidConverter::federationId() const
+{
+  return (this->guid_.guidPrefix[4]<<24)
+       + (this->guid_.guidPrefix[5]<<16)
+       + (this->guid_.guidPrefix[6]<<8)
+       + (this->guid_.guidPrefix[7]);
+}
+
+long
+GuidConverter::participantId() const
+{
+  return (this->guid_.guidPrefix[ 8]<<24)
+       + (this->guid_.guidPrefix[ 9]<<16)
+       + (this->guid_.guidPrefix[10]<<8)
+       + (this->guid_.guidPrefix[11]);
+}
+
+long
+GuidConverter::value() const
+{
+  return (this->guid_.entityId.entityKey[0]<<16) // or reinterpret and mask.
+       + (this->guid_.entityId.entityKey[1]<<8)
+       + (this->guid_.entityId.entityKey[2]);
+}
+
+long
+GuidConverter::vendor() const
+{
+  return (this->guid_.guidPrefix[0]<<8) + this->guid_.guidPrefix[1];
+}
+
+EntityKind
+GuidConverter::type() const
+{
+  switch( this->guid_.entityId.entityKind) {
+    case ENTITYKIND_OPENDDS_TOPIC:
+      return KIND_TOPIC;
+
+    case ENTITYKIND_USER_READER_NO_KEY:
+    case ENTITYKIND_USER_READER_WITH_KEY:
+      return KIND_READER;
+
+    case ENTITYKIND_USER_WRITER_NO_KEY:
+    case ENTITYKIND_USER_WRITER_WITH_KEY:
+      return KIND_WRITER;
+
+    case 0xc1: // Participant Kind.
+      if( this->value() == 1) return KIND_PARTICIPANT;
+
+    case ENTITYKIND_USER_UNKNOWN:
+    case ENTITYKIND_BUILTIN_UNKNOWN:
+    default:
+      return KIND_UNKNOWN;
+  }
+}
+
+CORBA::Octet
+GuidConverter::kind() const
+{
+  return this->guid_.entityId.entityKind;
+}
+
+CORBA::Octet&
+GuidConverter::kind()
+{
+  return this->guid_.entityId.entityKind;
+}
+
+CORBA::Octet*
+GuidConverter::key()
+{
+  return &this->guid_.entityId.entityKey[0];
+}
+
+bool
+GuidConverter::isBuiltin() const
+{
+  // Builtin is 11xx_xxxx
+  return ((0xc0 & this->guid_.entityId.entityKind) == 0xc0);
+}
+
+bool
+GuidConverter::isUser() const
+{
+  // User is 00xx_xxxx
+  return ((0xc0 & this->guid_.entityId.entityKind) == 0x00);
+}
+
+bool
+GuidConverter::isVendor() const
+{
+  // Vendor is 01xx_xxxx
+  return ((0xc0 & this->guid_.entityId.entityKind) == 0x40);
+}
+
+bool
+GuidConverter::isKeyed() const
+{
+  return (((0x3f & this->guid_.entityId.entityKind) == ENTITYKIND_USER_WRITER_WITH_KEY)
+       || ((0x3f & this->guid_.entityId.entityKind) == ENTITYKIND_USER_READER_WITH_KEY));
+}
+
+}} // End namespace OpenDDS::DCPS
+
+std::ostream&
+operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value)
+{
+  // const unsigned char* octets = reinterpret_cast<const unsigned char*>( &value);
+  const CORBA::Octet* octets = reinterpret_cast<const CORBA::Octet*>( &value);
+  for( unsigned int index = 0; index < sizeof(value); ++index) {
+    if( index>0 && index%4 == 0) str << ".";
+    unsigned short byte = octets[index];
+    str << std::hex << std::setfill('0') << std::setw(2) << byte;
+  }
+  return str;
+}
+

@@ -1019,19 +1019,6 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      RepoId ignore_id = 0;
-
-      BIT_Helper_1 < ::DDS::ParticipantBuiltinTopicDataDataReader,
-               ::DDS::ParticipantBuiltinTopicDataDataReader_var,
-               ::DDS::ParticipantBuiltinTopicDataSeq > hh;
-      ::DDS::ReturnCode_t ret
-        = hh.instance_handle_to_repo_id(this, BUILT_IN_PARTICIPANT_TOPIC, handle, ignore_id);
-
-
-      if (ret != ::DDS::RETCODE_OK)
-        {
-          return ret;
-        }
 
       try
         {
@@ -1043,7 +1030,7 @@ namespace OpenDDS
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_domain_participant(domain_id_,
                                           dp_id_,
-                                          ignore_id);
+                                          handle);
           if (DCPS_debug_level >= 4)
             ACE_DEBUG((LM_DEBUG,
                 "%P|%t) DomainParticipantImpl::ignore_participant"
@@ -1090,25 +1077,12 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      RepoId ignore_id = 0;
-
-      BIT_Helper_1 < ::DDS::TopicBuiltinTopicDataDataReader,
-               ::DDS::TopicBuiltinTopicDataDataReader_var,
-               ::DDS::TopicBuiltinTopicDataSeq > hh;
-      ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_id(this, BUILT_IN_TOPIC_TOPIC, handle, ignore_id);
-
-      if (ret != ::DDS::RETCODE_OK)
-        {
-          return ret;
-        }
-
       try
         {
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_topic(domain_id_,
                              dp_id_,
-                             ignore_id);
+                             handle);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1150,25 +1124,12 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      RepoId ignore_id = 0;
-
-      BIT_Helper_1 < ::DDS::PublicationBuiltinTopicDataDataReader,
-               ::DDS::PublicationBuiltinTopicDataDataReader_var,
-               ::DDS::PublicationBuiltinTopicDataSeq > hh;
-      ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_id(this, BUILT_IN_PUBLICATION_TOPIC, handle, ignore_id);
-
-      if (ret != ::DDS::RETCODE_OK)
-        {
-          return ret;
-        }
-
       try
         {
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_publication(domain_id_,
                                    dp_id_,
-                                   ignore_id);
+                                   handle);
         }
       catch (const CORBA::SystemException& sysex)
         {
@@ -1210,25 +1171,12 @@ namespace OpenDDS
                             ::DDS::RETCODE_NOT_ENABLED);
         }
 
-      RepoId ignore_id = 0;
-
-      BIT_Helper_1 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-               ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-               ::DDS::SubscriptionBuiltinTopicDataSeq > hh;
-      ::DDS::ReturnCode_t ret =
-                  hh.instance_handle_to_repo_id(this, BUILT_IN_SUBSCRIPTION_TOPIC, handle, ignore_id);
-
-      if (ret != ::DDS::RETCODE_OK)
-        {
-          return ret;
-        }
-
       try
         {
           DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
           repo->ignore_subscription(domain_id_,
                                     dp_id_,
-                                    ignore_id);
+                                    handle);
         }
       catch (const CORBA::SystemException& sysex)
         {

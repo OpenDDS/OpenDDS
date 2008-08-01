@@ -50,7 +50,7 @@ namespace OpenDDS
     typedef std::set<DataReaderImpl *> DataReaderSet ;
 
     // DataReader id to qos map.
-    typedef std::map<RepoId, ::DDS::DataReaderQos> DrIdToQosMap;
+    typedef std::map<RepoId, ::DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
 
     //Class SubscriberImpl
     class OpenDDS_Dcps_Export SubscriberImpl

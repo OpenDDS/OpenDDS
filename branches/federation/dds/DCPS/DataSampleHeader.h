@@ -5,6 +5,7 @@
 #define OPENDDS_DCPS_DATASAMPLEHEADER_H
 
 #include "Definitions.h"
+#include "GuidUtils.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

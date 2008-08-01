@@ -438,7 +438,7 @@ namespace OpenDDS
       /// via the bit datareader.
       bool bit_lookup_instance_handles (const WriterIdSeq& ids,
                                          ::DDS::InstanceHandleSeq & hdls);
-
+ 
       /// Lookup the cache to get the instance handle by the
       /// publication repo ids.
       bool cache_lookup_instance_handles (const WriterIdSeq& ids,
@@ -473,7 +473,7 @@ namespace OpenDDS
 
       ACE_Recursive_Thread_Mutex      publication_handle_lock_;
 
-      typedef std::map<RepoId, DDS::InstanceHandle_t> RepoIdToHandleMap;
+      typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
 
       RepoIdToHandleMap               id_to_handle_map_;
       ::DDS::InstanceHandleSeq        publication_handles_;
@@ -525,7 +525,7 @@ namespace OpenDDS
       /// Flag indicates that the init() is called.
       bool                       initialized_;
 
-      typedef std::map<PublicationId, WriterInfo> WriterMapType;
+      typedef std::map<PublicationId, WriterInfo, GUID_tKeyLessThan> WriterMapType;
 
       /// publications writing to this reader.
       WriterMapType writers_;

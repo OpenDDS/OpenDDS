@@ -281,11 +281,11 @@ private:
         typedef ACE_SYNCH_MUTEX     LockType;
         typedef ACE_Guard<LockType> GuardType;
 
-        typedef std::map<RepoId, DataWriterImpl*>            PublicationObjectMap;
+        typedef std::map<RepoId, DataWriterImpl*, GUID_tKeyLessThan>      PublicationObjectMap;
 
-        typedef std::map<RepoId, DataReaderImpl*>            SubscriptionObjectMap;
+        typedef std::map<RepoId, DataReaderImpl*, GUID_tKeyLessThan>      SubscriptionObjectMap;
 
-        typedef std::map<RepoId, AssociationInfoList*>       PendingAssociationsMap;
+        typedef std::map<RepoId, AssociationInfoList*, GUID_tKeyLessThan> PendingAssociationsMap;
 
         /// The collection of the DataWriterImpl objects that are created by
         /// the PublisherImpl currently "attached" to this TransportImpl.

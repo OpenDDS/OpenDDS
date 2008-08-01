@@ -47,11 +47,11 @@ namespace OpenDDS
     typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
         DataWriterMap;
 
-    typedef std::map<PublicationId, PublisherDataWriterInfo*>
+    typedef std::map<PublicationId, PublisherDataWriterInfo*, GUID_tKeyLessThan>
         PublicationMap;
 
     // DataWriter id to qos map.
-    typedef std::map<RepoId, ::DDS::DataWriterQos> DwIdToQosMap;
+    typedef std::map<RepoId, ::DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
 
 
     /**

@@ -11,6 +11,8 @@
 #ifndef _UPDATE_DATA_TYPES
 #define _UPDATE_DATA_TYPES
 
+#include "dds/DdsDcpsInfoUtilsC.h"
+
 #include <vector>
 #include <string>
 
@@ -41,7 +43,9 @@ enum SpecificQos
 
 // Typedefs:
 
-typedef long IdType;
+typedef long DomainIdType;
+
+typedef OpenDDS::DCPS::RepoId IdType;
 
 typedef std::pair <size_t, char*> BinSeq;
 
@@ -53,14 +57,14 @@ typedef BinSeq TransportInterfaceInfo;
 
 template <typename Q, typename S>
 struct TopicStrt {
-  IdType domainId;
+  DomainIdType domainId;
   IdType topicId; // Unique system-wide
   IdType participantId;
   S name;
   S dataType;
   Q topicQos;
 
-  TopicStrt (IdType dom, IdType to, IdType pa
+  TopicStrt (DomainIdType dom, IdType to, IdType pa
              , const char* na, const char* da, Q tQos)
     : domainId (dom), topicId (to), participantId (pa)
     , name (na), dataType (da), topicQos (tQos)
@@ -69,11 +73,11 @@ struct TopicStrt {
 
 template <typename Q>
 struct ParticipantStrt {
-  IdType domainId;
+  DomainIdType domainId;
   IdType participantId; // Unique system-wide
   Q participantQos;
 
-  ParticipantStrt (IdType dom, IdType part
+  ParticipantStrt (DomainIdType dom, IdType part
                    , Q pQos)
     : domainId (dom), participantId (part)
       , participantQos (pQos)
@@ -82,7 +86,7 @@ struct ParticipantStrt {
 
 template <typename PSQ, typename RWQ, typename C, typename T>
 struct ActorStrt {
-  IdType domainId;
+  DomainIdType domainId;
   IdType actorId; // Unique system-wide
   IdType topicId;
   IdType participantId;
@@ -92,7 +96,7 @@ struct ActorStrt {
   RWQ drdwQos;
   T transportInterfaceInfo;
 
-  ActorStrt (IdType dom, IdType act, IdType top
+  ActorStrt (DomainIdType dom, IdType act, IdType top
              , IdType part
              , ActorType typ, const char* call
              , PSQ pub, RWQ drdw, T trans)

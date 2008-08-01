@@ -17,6 +17,8 @@
 #include "EntryExit.h"
 #include "tao/debug.h"
 
+#include <sstream>
+
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
 #endif /* __ACE_INLINE__ */
@@ -386,6 +388,20 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
   // from the remote publisher_id.
   ReceiveListenerSet_rch listener_set;
 
+  if( ::OpenDDS::DCPS::Transport_debug_level > 9) {
+    std::stringstream buffer;
+    long handle;
+    handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
+    buffer << publisher_id << "(" << std::hex << handle << ")";
+
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataLink::data_received: ")
+      ACE_TEXT(" message id %d from publisher %s.\n"),
+      sample.header_.message_id_,
+      buffer.str().c_str()
+    ));
+  }
+
   {
     GuardType guard(this->pub_map_lock_);
     listener_set = this->pub_map_.find(publisher_id);
@@ -398,6 +414,12 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
             "(%P|%t) DataLink received sample from remote publisher_id "
             "(%d), but is dropping sample since there are no interested "
             "TransportReceiveListener objects.\n", publisher_id));
+      if( ::OpenDDS::DCPS::Transport_debug_level > 9) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataLink::data_received: ")
+          ACE_TEXT(" discarding message due to no listeners.\n")
+        ));
+      }
       return 0;
     }
 
