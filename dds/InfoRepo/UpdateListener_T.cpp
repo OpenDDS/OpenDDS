@@ -10,17 +10,21 @@ template< class DataType, class ReaderType>
 UpdateListener< DataType, ReaderType>::UpdateListener( UpdateProcessor< DataType>& processor)
  : receiver_( processor)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) UpdateListener::UpdateListener\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) UpdateListener::UpdateListener\n")
+    ));
+  }
 }
 
 template< class DataType, class ReaderType>
 UpdateListener< DataType, ReaderType>::~UpdateListener(void)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) UpdateListener::~UpdateListener\n")
-  ));
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) UpdateListener::~UpdateListener\n")
+    ));
+  }
 }
 
 template< class DataType, class ReaderType>

@@ -14,9 +14,11 @@
 #include <ace/OS.h>
 #include <string>
 
+#include <sstream>
+
 SubDriver::SubDriver()
 : pub_id_fname_ ("pub_id.txt"),
-  sub_id_ (0),
+  sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN),
   num_writes_ (0),
   receive_delay_msec_ (0),
   pub_driver_ior_ ("file://pubdriver.ior"),
@@ -206,15 +208,22 @@ SubDriver::run()
     }
     else
     {
-      ::OpenDDS::DCPS::PublicationId pub_id = 0;
-      while (fscanf (fp, "%d\n", &pub_id) != EOF)
+      // This could be made cleaner  by losing the old C-style I/O.
+      ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
+      char charBuffer[64];
+      while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
       {
+        std::stringstream buffer( charBuffer);
+        buffer >> pub_id;
         ids.push_back (pub_id);
+
+        std::stringstream idBuffer;
+        idBuffer << pub_id;
         ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
-              ACE_TEXT(" Got from %s: pub_id=%d. \n"),
+              ACE_TEXT(" Got from %s: pub_id=%s. \n"),
               pub_id_fname_.c_str (),
-              pub_id));
+              buffer.str().c_str()));
       }
       ACE_OS::fclose (fp);
       break;
@@ -349,7 +358,10 @@ SubDriver::parse_sub_arg(const std::string& arg)
   std::string sub_id_str(arg,0,pos);
   this->sub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  this->sub_id_ = ACE_OS::atoi(sub_id_str.c_str());
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
+  this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
   this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());

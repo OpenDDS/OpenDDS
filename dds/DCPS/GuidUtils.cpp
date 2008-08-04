@@ -159,13 +159,48 @@ GuidConverter::isKeyed() const
 std::ostream&
 operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value)
 {
-  // const unsigned char* octets = reinterpret_cast<const unsigned char*>( &value);
   const CORBA::Octet* octets = reinterpret_cast<const CORBA::Octet*>( &value);
   for( unsigned int index = 0; index < sizeof(value); ++index) {
     if( index>0 && index%4 == 0) str << ".";
     unsigned short byte = octets[index];
     str << std::hex << std::setfill('0') << std::setw(2) << byte;
   }
+  return str;
+}
+
+std::istream&
+operator>>( std::istream& str, OpenDDS::DCPS::GUID_t& value)
+{
+  // Brute force read.
+  char discard;
+  unsigned long word;
+
+  str >> std::hex >> word;
+  value.guidPrefix[ 0] = (word>>24)&0xff;
+  value.guidPrefix[ 1] = (word>>16)&0xff;
+  value.guidPrefix[ 2] = (word>>8)&0xff;
+  value.guidPrefix[ 3] = word&0xff;
+  str >> discard;
+
+  str >> std::hex >> word;
+  value.guidPrefix[ 4] = (word>>24)&0xff;
+  value.guidPrefix[ 5] = (word>>16)&0xff;
+  value.guidPrefix[ 6] = (word>>8)&0xff;
+  value.guidPrefix[ 7] = word&0xff;
+  str >> discard;
+
+  str >> std::hex >> word;
+  value.guidPrefix[ 8] = (word>>24)&0xff;
+  value.guidPrefix[ 9] = (word>>16)&0xff;
+  value.guidPrefix[10] = (word>>8)&0xff;
+  value.guidPrefix[11] = word&0xff;
+  str >> discard;
+
+  str >> std::hex >> word;
+  value.entityId.entityKey[0] = (word>>24)&0xff;
+  value.entityId.entityKey[1] = (word>>16)&0xff;
+  value.entityId.entityKey[2] = (word>>8)&0xff;
+  value.entityId.entityKind = word&0xff;
   return str;
 }
 

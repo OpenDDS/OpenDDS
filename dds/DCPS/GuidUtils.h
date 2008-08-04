@@ -163,8 +163,13 @@ operator==( const OpenDDS::DCPS::GUID_t& lhs, const OpenDDS::DCPS::GUID_t& rhs)
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
 }
 
+// Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&
 operator<<( std::ostream& str, const OpenDDS::DCPS::GUID_t& value);
+
+// Deserialize from ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
+OpenDDS_Dcps_Export std::istream&
+operator>>( std::istream& str, OpenDDS::DCPS::GUID_t& value);
 
 #endif /* GUIDUTILS_H */
 

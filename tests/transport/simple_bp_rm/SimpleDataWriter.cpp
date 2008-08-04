@@ -13,7 +13,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 SimpleDataWriter::SimpleDataWriter()
-  : pub_id_(0),
+  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     num_sent_(0),
     num_to_send_(0),
     num_delivered_(0),

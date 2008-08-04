@@ -11,7 +11,7 @@
 
 
 SimpleDataReader::SimpleDataReader()
-  : sub_id_(0),
+  : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
     num_messages_expected_(0),
     num_messages_received_(0)
 {

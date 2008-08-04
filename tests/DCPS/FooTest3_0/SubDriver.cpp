@@ -14,6 +14,8 @@
 #include <ace/OS.h>
 #include <string>
 
+#include <sstream>
+
 SubDriver::SubDriver()
   : pub_id_fname_ ("pub_id.txt"),
     sub_id_ (OpenDDS::DCPS::GUID_UNKNOWN),
@@ -332,18 +334,22 @@ SubDriver::run()
 	}
       else
 	{
+          // this could be made cleaner by losing the old C-style I/O.
 	  ::OpenDDS::DCPS::PublicationId pub_id = OpenDDS::DCPS::GUID_UNKNOWN;
-          int pubInstance;
-	  while (fscanf (fp, "%d\n", &pubInstance) != EOF)
+          char charBuffer[64];
+	  while (fscanf (fp, "%s\n", &charBuffer[0]) != EOF)
 	    {
-              OpenDDS::DCPS::GuidConverter converter( 0, 0);
-              converter = pubInstance;
-	      ids.push_back ( converter);
+              std::stringstream buffer( charBuffer);
+              buffer >> pub_id;
+	      ids.push_back ( OpenDDS::DCPS::GuidConverter( pub_id));
+
+              std::stringstream idbuffer;
+              idbuffer << pub_id;
 	      ACE_DEBUG ((LM_DEBUG,
 			  ACE_TEXT("(%P|%t) SubDriver::run, ")
-			  ACE_TEXT(" Got from %s: pub_id=%d. \n"),
+			  ACE_TEXT(" Got from %s: pub_id=%s.\n"),
 			  pub_id_fname_.c_str (),
-			  pubInstance));
+			  idbuffer.str().c_str()));
 	    }
 	  ACE_OS::fclose (fp);
 	  break;
@@ -508,14 +514,9 @@ SubDriver::parse_sub_arg(const std::string& arg)
   std::string sub_id_str(arg,0,pos);
   std::string sub_addr_str(arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  // Start an empty GUID - assume participant Id and federation Id are ok
-  // as 0 for this test.
-  OpenDDS::DCPS::GuidConverter converter( 0, 0);
-
-  // Convert from InstanceHandle_t
-  converter = ACE_OS::atoi(sub_id_str.c_str());
-
-  // Copy the result out.
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
   this->sub_id_ = converter;
 
   this->sub_addr_ = sub_addr_str.c_str();

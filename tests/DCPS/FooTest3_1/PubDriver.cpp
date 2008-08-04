@@ -397,15 +397,17 @@ PubDriver::run()
       = dynamic_cast< ::Xyz::FooDataWriterImpl*>
       (datawriters_[i].in ());
     OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
+    std::stringstream buffer;
+    buffer << pub_id;
 
     // Write the publication id to a file.
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%d. \n"),
+                ACE_TEXT(" Write to %s: pub_id=%s. \n"),
                 pub_id_fname_.c_str (),
-                pub_id));
+                buffer.str().c_str()));
 
-    ACE_OS::fprintf (fp, "%d\n", pub_id);
+    ACE_OS::fprintf (fp, "%s\n", buffer.str().c_str());
   }
 
   fclose (fp);
@@ -553,14 +555,9 @@ PubDriver::parse_sub_arg(const std::string& arg)
   std::string sub_id_str(arg,0,pos);
   this->sub_addr_str_ = std::string (arg,pos+1,std::string::npos); //use 3-arg constructor to build with VC6
 
-  // Start an empty GUID - assume participant Id and federation Id are ok
-  // as 0 for this test.
-  OpenDDS::DCPS::GuidConverter converter( 0, 0);
-
-  // Convert from InstanceHandle_t
-  converter = ACE_OS::atoi(sub_id_str.c_str());
-
-  // Copy the result out.
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()   = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2] = ACE_OS::atoi(sub_id_str.c_str());
   this->sub_id_ = converter;
 
   // Use the remainder as the "stringified" ACE_INET_Addr.
