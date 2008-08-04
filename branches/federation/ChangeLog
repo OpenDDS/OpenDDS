@@ -1,30 +1,99 @@
+Mon Aug  4 19:46:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/GuidUtils.cpp:
+
+	  Added an extraction operator to match the insertion operator.
+
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+	  Made the annoying diagnostic messages conditional on debug
+	  level.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+
+	  Updated to use new GUID based RepoId values.  Changed the
+	  publication Id write and read operations to use the GUID based
+	  RepoId insertion and extraction operators.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataReader.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimpleDataReader.cpp:
+        * tests/transport/udp_simple_n/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+	  Updated to use new GUID based RepoId values.
+
 Fri Aug  1 22:36:52 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/dcps_tests.lst:
-	  Commented out tests that are failing until I can get them
-	  fixed.
+          Commented out tests that are failing until I can get them
+          fixed.
 
         * dds/DdsDcps.mpc:
         * dds/DdsDcpsGuid.idl:
         * dds/DCPS/GuidUtils.h:
         * dds/DCPS/GuidUtils.cpp:
-	  Implementation of new GUID based RepoId type.
+          Implementation of new GUID based RepoId type.
 
         * dds/DdsDcpsInfo.idl:
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/DCPS/DomainParticipantImpl.cpp:
-	  Update to use the new RepoId type.  Added mapping from handle
-	  values to repository Id values as part of changing ignore
-	  interface to use handles.
+          Update to use the new RepoId type.  Added mapping from handle
+          values to repository Id values as part of changing ignore
+          interface to use handles.
 
         * dds/DCPS/BuiltInTopicUtils.h:
-	  Update to the new RepoId type.  Updated diagnostic messages.
-	    BIT_Helper_1::instance_handle_to_repo_id(): removed as obsolete.
+          Update to the new RepoId type.  Updated diagnostic messages.
+            BIT_Helper_1::instance_handle_to_repo_id(): removed as obsolete.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
-	  Update to use the new RepoId type.  Added a federation member
-	  to allow use of the federation Id value during processing.
+          Update to use the new RepoId type.  Added a federation member
+          to allow use of the federation Id value during processing.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
           Construct the DCPSInfo_i with the federation Id now.
@@ -39,16 +108,16 @@ Fri Aug  1 22:36:52 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/DataSampleHeader.h:
         * dds/DCPS/DataSampleHeader.inl:
         * dds/DCPS/DataSampleHeader.cpp:
-	  Update to use the new Changed marshaling and demarhsaling of
-	  the PublicationId to use the entire 16 bytes of the new GUID
-	  based RepoId type.  RepoId type.
+          Update to use the new Changed marshaling and demarhsaling of
+          the PublicationId to use the entire 16 bytes of the new GUID
+          based RepoId type.  RepoId type.
 
-	* dds/InfoRepo/UpdateDataTypes.h: *
-	dds/InfoRepo/PersistenceUpdater.cpp:
-	  Use more explicit types for elements.
+        * dds/InfoRepo/UpdateDataTypes.h: *
+        dds/InfoRepo/PersistenceUpdater.cpp:
+          Use more explicit types for elements.
 
-	* dds/InfoRepo/FederatorManagerImpl.cpp:
-	  Documentation cleanup.
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+          Documentation cleanup.
 
         * tests/DCPS/MultiRepoTest/run_test.pl:
         * tests/DCPS/TransientLocalTest/run_test.pl:

@@ -51,7 +51,7 @@ public:
 
 
   virtual void add_associations (
-      ::OpenDDS::DCPS::RepoId yourId,
+      const ::OpenDDS::DCPS::RepoId& yourId,
       const OpenDDS::DCPS::WriterAssociationSeq & writers
     )
     ACE_THROW_SPEC ((

@@ -269,11 +269,16 @@ void run_next_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -309,7 +314,8 @@ void run_next_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
     delete sample;
   }
   }
@@ -330,18 +336,24 @@ void run_next_send_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     list.enqueue_tail_next_send_sample (sample);
   }
 
   { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -379,7 +391,8 @@ void run_next_send_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_send_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
     delete sample;
   }
   }
@@ -398,10 +411,15 @@ void run_next_instance_sample_test (ssize_t size)
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
+  OpenDDS::DCPS::GuidConverter converter( 0, 1); // Federation == 0, Participant == 1
+  converter.kind()             = OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
+  converter.key()[2]           = 0;
+
   for (ssize_t i = 0; i < size; i ++)
   {
+    converter.key()[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement (i, 0, 0, &trans_allocator);
+      = new DataSampleListElement( converter, 0, 0, &trans_allocator);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -437,7 +455,8 @@ void run_next_instance_sample_test (ssize_t size)
     DataSampleListElement* sample;
     TEST_CHECK (list.dequeue_head_next_instance_sample (sample)
                 == true);
-    TEST_CHECK (sample->publication_id_ == i);
+    converter.key()[2] = i;
+    TEST_CHECK (sample->publication_id_ == converter);
     delete sample;
   }
   }

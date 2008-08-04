@@ -8,7 +8,7 @@
 
 
 Pub::Pub()
-  : pub_id_(0)
+  : pub_id_( OpenDDS::DCPS::GUID_UNKNOWN)
 {
 }
 
