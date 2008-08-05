@@ -13,7 +13,7 @@ tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl by_instance: !DCPS_MIN
 tests/DCPS/DCPSInfoRepo/run_test.pl
-##GUID tests/DCPS/unit/run_test.pl:
+tests/DCPS/unit/run_test.pl:
 tests/DCPS/FooTest3_0/run_test.pl:
 tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN
 tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN
@@ -79,11 +79,11 @@ tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
 
-##GUID tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
-##GUID tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS
-##GUID tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS
-##GUID tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS
-##GUID tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
@@ -92,14 +92,14 @@ tests/DCPS/ViewState/run_test.pl: !DCPS_MIN
 
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 
-##GUID tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-##GUID tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-##GUID tests/transport/mcast_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
-##GUID tests/transport/mcast_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
-##GUID tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-##GUID tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-##GUID tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-##GUID tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/udp_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/udp_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/mcast_simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
+tests/transport/mcast_simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
+tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/reliable_multicast/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !NOMCAST
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
 performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl: !DCPS_MIN
@@ -132,7 +132,7 @@ DevGuideExamples/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO
 
-##GUID tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
+tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl LivelinessCompatibility: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN

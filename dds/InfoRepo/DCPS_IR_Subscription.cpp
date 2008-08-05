@@ -467,11 +467,6 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
           ++iter;
           if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
-              ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("DCPS_IR_Subscription::disassociate_publication () ")
-                ACE_TEXT("Subscription %d testing if pub %d = %d\n"),
-                id_, pub->get_id(), id));
-            }{
               std::stringstream buffer;
               long handle;
               handle = ::OpenDDS::DCPS::GuidConverter( this->id_);

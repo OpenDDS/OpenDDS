@@ -129,11 +129,11 @@ public:
   OpenDDS::DCPS::RepoId get_next_publication_id( long federation, const OpenDDS::DCPS::RepoId& pid);
   OpenDDS::DCPS::RepoId get_next_subscription_id( long federation, const OpenDDS::DCPS::RepoId& pid);
 
-  // Lookup RepoId values for specific entity types by their handle.
-  OpenDDS::DCPS::RepoId participant(  const ::DDS::InstanceHandle_t handle);
-  OpenDDS::DCPS::RepoId topic(        const ::DDS::InstanceHandle_t handle);
-  OpenDDS::DCPS::RepoId subscription( const ::DDS::InstanceHandle_t handle);
-  OpenDDS::DCPS::RepoId publication(  const ::DDS::InstanceHandle_t handle);
+  // Lookup RepoId values for specific entity types by their key.
+  OpenDDS::DCPS::RepoId participant(  const CORBA::Long key);
+  OpenDDS::DCPS::RepoId topic(        const CORBA::Long key);
+  OpenDDS::DCPS::RepoId subscription( const CORBA::Long key);
+  OpenDDS::DCPS::RepoId publication(  const CORBA::Long key);
 
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
@@ -243,16 +243,19 @@ private:
   // Constructs for managing Instance handle and Id mappings.
 
   /// Map from InstanceHandle values to GUID values.
-  typedef std::map< ::DDS::InstanceHandle_t, OpenDDS::DCPS::RepoId> HandleToIdMap;
+  typedef std::map< CORBA::Long, OpenDDS::DCPS::RepoId> KeyToIdMap;
 
-  /// Participant handles and Ids.
-  HandleToIdMap participantHandleToIdMap_;
+  /// Participant Keys and Ids.
+  KeyToIdMap participantKeyToIdMap_;
 
-  /// Topic handles and Ids.
-  HandleToIdMap topicHandleToIdMap_;
+  /// Topic Keys and Ids.
+  KeyToIdMap topicKeyToIdMap_;
 
-  /// Publication and Subscription handles and Ids.
-  HandleToIdMap pubSubHandleToIdMap_;
+  /// Subscription Keys and Ids.
+  KeyToIdMap subscriptionKeyToIdMap_;
+
+  /// Publication Keys and Ids.
+  KeyToIdMap publicationKeyToIdMap_;
 
 };
 
