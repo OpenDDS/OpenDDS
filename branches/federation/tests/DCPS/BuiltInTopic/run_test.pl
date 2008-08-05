@@ -41,14 +41,24 @@ unlink $iorfile;
 $status = 0;
 $client_orb = "";
 
+my $repoDebug ;# = 10;
+my $appDebug  ;# = 10;
+
+my $repoOpts = "";
+$repoOpts  = "-DCPSDebugLevel $repoDebug "               if $repoDebug;
+$repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+
+my $appOpts = "";
+$appOpts  = "-DCPSDebugLevel $appDebug "                if $appDebug;
+$appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+
 $dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                "-o $iorfile -d domain_ids $dynamic_tcp");
-  #                              . " -ORBDebugLevel 1");
+                                "$repoOpts -o $iorfile -d domain_ids $dynamic_tcp ");
 $CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
-                              "$dynamic_tcp -i $ignore_kind");
+                              "$dynamic_tcp -i $ignore_kind $appOpts ");
 
 $REPO->Spawn ();
 

@@ -212,7 +212,7 @@ public:
   virtual void ignore_domain_participant (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      ::DDS::InstanceHandle_t ignoreHandle
+      CORBA::Long ignoreKey
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -223,7 +223,7 @@ public:
   virtual void ignore_topic (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      ::DDS::InstanceHandle_t ignoreHandle
+      CORBA::Long ignoreKey
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -235,7 +235,7 @@ public:
   virtual void ignore_subscription (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      ::DDS::InstanceHandle_t ignoreHandle
+      CORBA::Long ignoreKey
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
@@ -247,7 +247,7 @@ public:
   virtual void ignore_publication (
       ::DDS::DomainId_t domainId,
       const OpenDDS::DCPS::RepoId& myParticipantId,
-      ::DDS::InstanceHandle_t ignoreHandle
+      CORBA::Long ignoreKey
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
