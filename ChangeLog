@@ -1,21 +1,63 @@
+Wed Aug  6 03:38:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+	  Hoisted lenght manipulation out of loop.  Cleaned up some
+	  diagnostic messages.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Cleaned up some diagnostic messages.  Added an insertion
+	  operator for the DataReaderImpl::WriterInfo::WriterState
+	  enumeration.
+	    check_activity(): changed test from "!= DEAD" to "== ALIVE"
+	                      to move to "DEAD" state.  This allows
+			      starting connections to remain "NOT_SET"
+			      until activity (data or LIVELINESS
+			      messages) are received.
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+	  Added the ability to specify debug levels.
+
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+
+	  Renamed from DataReaderListener.{h,cpp}.  Cleaned up some
+	  diagnostic messages.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+	  Cleaned up some diagnostic messages.
+
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
+
+          Removed these files.  Moved to ...Impl... filenames.
+
 Tue Aug  5 16:57:28 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Unblocked the tests that were temporarily disabled during
-	  development.
+          Unblocked the tests that were temporarily disabled during
+          development.
 
         * dds/DCPS/BuiltInTopicUtils.h:
 
-	  Added instance_handle_to_repo_key to convert the local
-	  InstanceHandle_t value into a global hash of the RepoId value
-	  for use by the ignore interfaces.  Extended diagnostic messages
-	  to use the new GUID based RepoId values.
-	  N.B. We allow processing to continue if a 32 bit hash value of
-	       a RepoId produces a duplicate.  Currently this will only
-	       affect the ignore_*() behaviors.  If it is desireable to
-	       terminate on duplicate hash generation, uncomment the
-	       error termination code.
+          Added instance_handle_to_repo_key to convert the local
+          InstanceHandle_t value into a global hash of the RepoId value
+          for use by the ignore interfaces.  Extended diagnostic messages
+          to use the new GUID based RepoId values.
+          N.B. We allow processing to continue if a 32 bit hash value of
+               a RepoId produces a duplicate.  Currently this will only
+               affect the ignore_*() behaviors.  If it is desireable to
+               terminate on duplicate hash generation, uncomment the
+               error termination code.
 
         * dds/DdsDcpsInfo.idl:
         * dds/DCPS/DomainParticipantImpl.cpp:
@@ -24,19 +66,19 @@ Tue Aug  5 16:57:28 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Migrate to 'key' based ignore interfaces.  Extend diagnostic
-	  messages to use the new GUID based RepoId values.
+          Migrate to 'key' based ignore interfaces.  Extend diagnostic
+          messages to use the new GUID based RepoId values.
 
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
 
         * tests/DCPS/BuiltInTopic/common.cpp:
 
-	  Extended the diagnostic messages to include the new GUID based
-	  RepoId values.
+          Extended the diagnostic messages to include the new GUID based
+          RepoId values.
 
         * tests/DCPS/BuiltInTopic/run_test.pl:
 
-	  Added the ability to enable diagnostic messages.
+          Added the ability to enable diagnostic messages.
 
 Mon Aug  4 19:46:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -65,7 +65,7 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DCPS_IR_Domain::add_participant: ")
             ACE_TEXT("Domain %d successfully added participant %s ")
-            ACE_TEXT("at %x.\n"),
+            ACE_TEXT("at 0x%x.\n"),
             id_,
             buffer.str().c_str(),
             participant
@@ -105,7 +105,7 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
     buffer << participantId << "(" << std::hex << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant: ")
-      ACE_TEXT("Domain %d attempt to add duplicate key %x ")
+      ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
       ACE_TEXT("for participant id: %s\n"),
       id_,
       key,
@@ -154,9 +154,13 @@ int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantI
               buffer << participantId
                      << "(" << std::hex << handle << ")";
 
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DCPS_IR_Domain::remove_participant ")
-                ACE_TEXT("Domain %d removed participant %x id: %s\n"),
-                id_, participant, buffer.str().c_str()));
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) DCPS_IR_Domain::remove_participant: ")
+                ACE_TEXT("Domain %d removed participant %s at 0x%x.\n"),
+                id_,
+                buffer.str().c_str(),
+                participant
+              ));
             }
 
           // Dispose the BIT information
@@ -174,9 +178,13 @@ int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantI
           buffer << participantId
                  << "(" << std::hex << handle << ")";
 
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_participant ")
-            ACE_TEXT("Domain %d Error removing participant %x id: %s\n"),
-            id_, participant, buffer.str().c_str()));
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_participant: ")
+            ACE_TEXT("Domain %d Error removing participant %s at 0x%x.\n"),
+            id_,
+            buffer.str().c_str(),
+            participant
+          ));
         } // if (0 == status)
     }
   else
@@ -215,9 +223,13 @@ int DCPS_IR_Domain::find_participant(const OpenDDS::DCPS::RepoId& participantId,
           buffer << participantId
                  << "(" << std::hex << handle << ")";
 
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DCPS_IR_Domain::find_participant ")
-            ACE_TEXT("Domain %d located participant %x id: %s\n"),
-            id_, participant, buffer.str().c_str()));
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DCPS_IR_Domain::find_participant: ")
+            ACE_TEXT("Domain %d located participant %s at 0x%x.\n"),
+            id_,
+            buffer.str().c_str(),
+            participant
+          ));
         }
     }
   else
@@ -350,7 +362,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
               ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DCPS_IR_Domain::add_topic_i: ")
                 ACE_TEXT("Domain %d successfully added topic %s ")
-                ACE_TEXT("at %x.\n"),
+                ACE_TEXT("at 0x%x.\n"),
                 this->id_,
                 buffer.str().c_str(),
                 topic
@@ -368,7 +380,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
             buffer << topicId << "(" << std::hex << key << ")";
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
-              ACE_TEXT("Domain %d attempt to add duplicate key %x ")
+              ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
               ACE_TEXT("for topic id: %s\n"),
               id_,
               key,
@@ -400,7 +412,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
 
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
-            ACE_TEXT("Domain %d failed to add topic %s at %x.\n"),
+            ACE_TEXT("Domain %d failed to add topic %s at 0x%x.\n"),
             this->id_,
             buffer.str().c_str(),
             topic
@@ -420,7 +432,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
              << "(" << std::hex << handle << ")";
 
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic ")
-        ACE_TEXT("Unable to add topic %x id %s to Topic Description\n"),
+        ACE_TEXT("Unable to add topic 0x%x id %s to Topic Description\n"),
         topic, buffer.str().c_str()));
       topicStatus = OpenDDS::DCPS::NOT_FOUND;
       topicId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -579,7 +591,7 @@ int DCPS_IR_Domain::find_topic_description(const char* name,
               if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                 {
                   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DCPS_IR_Domain::find_topic_description ")
-                    ACE_TEXT("Domain %d Located topic description %s %s %x\n"),
+                    ACE_TEXT("Domain %d Located topic description %s %s at 0x%x\n"),
                     id_, name, dataTypeName, desc));
                 }
             }
@@ -1091,18 +1103,18 @@ int DCPS_IR_Domain::add_topic_description(DCPS_IR_Topic_Description*& desc)
         if (::OpenDDS::DCPS::DCPS_debug_level > 0)
           {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DCPS_IR_Domain::add_topic_description ")
-              ACE_TEXT("Domain %d Successfully added Topic Description %x\n"),
+              ACE_TEXT("Domain %d Successfully added Topic Description 0x%x\n"),
               id_, desc));
           }
         break;
       case 1:
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description ")
-          ACE_TEXT("Domain %d failed to add already existing Topic Description %x\n"),
+          ACE_TEXT("Domain %d failed to add already existing Topic Description 0x%x\n"),
           id_, desc));
         break;
       case -1:
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description ")
-          ACE_TEXT("Domain %d Unknown error while adding Topic Description %x\n"),
+          ACE_TEXT("Domain %d Unknown error while adding Topic Description 0x%x\n"),
           id_, desc));
       };
     }
@@ -1124,14 +1136,14 @@ int DCPS_IR_Domain::remove_topic_description(DCPS_IR_Topic_Description*& desc)
       if (::OpenDDS::DCPS::DCPS_debug_level > 0)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DCPS_IR_Domain::remove_topic_description ")
-            ACE_TEXT("Domain %d Removed Topic Description %x\n"),
+            ACE_TEXT("Domain %d Removed Topic Description 0x%x\n"),
             id_, desc));
         }
     }
   else
     {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_topic_description ")
-        ACE_TEXT("Domain %d Unable to remove Topic Description %x\n"),
+        ACE_TEXT("Domain %d Unable to remove Topic Description 0x%x\n"),
         id_, desc));
     } // if (0 == status)
 
@@ -1169,7 +1181,7 @@ void DCPS_IR_Domain::remove_dead_participants ()
 
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_dead_participants () ")
-            ACE_TEXT("Removing dead participant %x id %s\n"),
+            ACE_TEXT("Removing dead participant 0x%x id %s\n"),
             dead,
             buffer.str().c_str()
             ));
@@ -1239,7 +1251,7 @@ DCPS_IR_Domain::participant( const CORBA::Long key)
       buffer << where->second;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::participant( handle): ")
-        ACE_TEXT("Returning RepoId %s for key %x.\n"),
+        ACE_TEXT("Returning RepoId %s for key 0x%x.\n"),
         buffer.str().c_str(),
         key
       ));
@@ -1250,7 +1262,7 @@ DCPS_IR_Domain::participant( const CORBA::Long key)
     if (::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::participant( handle): ")
-        ACE_TEXT("Did NOT find RepoId for key %x.\n"),
+        ACE_TEXT("Did NOT find RepoId for key 0x%x.\n"),
         key
       ));
     }
@@ -1269,7 +1281,7 @@ DCPS_IR_Domain::topic( const CORBA::Long key)
       buffer << where->second;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::topic( key): ")
-        ACE_TEXT("Returning RepoId %s for key %x.\n"),
+        ACE_TEXT("Returning RepoId %s for key 0x%x.\n"),
         buffer.str().c_str(),
         key
       ));
@@ -1280,7 +1292,7 @@ DCPS_IR_Domain::topic( const CORBA::Long key)
     if (::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::topic( key): ")
-        ACE_TEXT("Did NOT find RepoId for key %x.\n"),
+        ACE_TEXT("Did NOT find RepoId for key 0x%x.\n"),
         key
       ));
     }
@@ -1299,7 +1311,7 @@ DCPS_IR_Domain::subscription( const CORBA::Long key)
       buffer << where->second;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::subscription( key): ")
-        ACE_TEXT("Returning RepoId %s for key %x.\n"),
+        ACE_TEXT("Returning RepoId %s for key 0x%x.\n"),
         buffer.str().c_str(),
         key
       ));
@@ -1310,7 +1322,7 @@ DCPS_IR_Domain::subscription( const CORBA::Long key)
     if (::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::subscription( key): ")
-        ACE_TEXT("Did NOT find RepoId for key %x.\n"),
+        ACE_TEXT("Did NOT find RepoId for key 0x%x.\n"),
         key
       ));
     }
@@ -1329,7 +1341,7 @@ DCPS_IR_Domain::publication( const CORBA::Long key)
       buffer << where->second;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::publication( key): ")
-        ACE_TEXT("Returning RepoId %s for key %x.\n"),
+        ACE_TEXT("Returning RepoId %s for key 0x%x.\n"),
         buffer.str().c_str(),
         key
       ));
@@ -1340,7 +1352,7 @@ DCPS_IR_Domain::publication( const CORBA::Long key)
     if (::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Domain::publication( key): ")
-        ACE_TEXT("Did NOT find RepoId for key %x.\n"),
+        ACE_TEXT("Did NOT find RepoId for key 0x%x.\n"),
         key
       ));
     }
@@ -1379,7 +1391,7 @@ void DCPS_IR_Domain::publish_participant_bit (DCPS_IR_Participant* participant)
             if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
               ACE_DEBUG ((LM_DEBUG, 
-                "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %x, %x, %x], handle %d.\n", 
+                "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
                 data.key[0], data.key[1], data.key[2], handle));
             }
 
@@ -1457,7 +1469,7 @@ void DCPS_IR_Domain::publish_topic_bit (DCPS_IR_Topic* topic)
             if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
               ACE_DEBUG ((LM_DEBUG, 
-                "(%P|%t) DCPS_IR_Domain::publish_topic_bit: [ %x, %x, %x], handle %d.\n", 
+                "(%P|%t) DCPS_IR_Domain::publish_topic_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
                 data.key[0], data.key[1], data.key[2], handle));
             }
 
@@ -1539,7 +1551,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
               buffer << subscriptionId << "(" << std::hex << data.key[2] << ")";
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_subscription_bit: ")
-                ACE_TEXT("Domain %d attempt to add duplicate key %x ")
+                ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
                 ACE_TEXT("for subscription %s\n"),
                 id_,
                 data.key[2],
@@ -1564,7 +1576,7 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
             if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
               ACE_DEBUG ((LM_DEBUG, 
-                "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: [ %d, %x, %x], handle %d.\n", 
+                "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
                 data.key[0], data.key[1], data.key[2], handle));
             }
 
@@ -1646,7 +1658,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
               buffer << publicationId << "(" << std::hex << data.key[2] << ")";
               ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_publication_bit: ")
-                ACE_TEXT("Domain %d attempt to add duplicate key %x ")
+                ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
                 ACE_TEXT("for publication %s\n"),
                 id_,
                 data.key[2],
@@ -1671,7 +1683,7 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
             if (::OpenDDS::DCPS::DCPS_debug_level > 0)
             {
               ACE_DEBUG ((LM_DEBUG, 
-                "(%P|%t) DCPS_IR_Domain::publish_publication_bit: [ %x, %x, %x], handle %d.\n", 
+                "(%P|%t) DCPS_IR_Domain::publish_publication_bit: [ %d, 0x%x, 0x%x], handle %d.\n", 
                 data.key[0], data.key[1], data.key[2], handle));
             }
 
@@ -1716,7 +1728,7 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
-                          ACE_TEXT("Unable to get_key_value for participant ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to get_key_value for participant ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           participant,
                           handle,
@@ -1731,7 +1743,7 @@ void DCPS_IR_Domain::dispose_participant_bit (DCPS_IR_Participant* participant)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_participant_bit ")
-                          ACE_TEXT("Unable to dispose for participant ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to dispose for participant ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           participant,
                           handle,
@@ -1774,7 +1786,7 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_topic_bit ")
-                          ACE_TEXT("Unable to get_key_value for topic ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to get_key_value for topic ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           topic,
                           handle,
@@ -1789,7 +1801,7 @@ void DCPS_IR_Domain::dispose_topic_bit (DCPS_IR_Topic* topic)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_topic_bit ")
-                          ACE_TEXT("Unable to dispose for topic ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to dispose for topic ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           topic,
                           handle,
@@ -1831,7 +1843,7 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_subscription_bit ")
-                          ACE_TEXT("Unable to get_key_value for subscription ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to get_key_value for subscription ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           subscription,
                           handle,
@@ -1846,7 +1858,7 @@ void DCPS_IR_Domain::dispose_subscription_bit (DCPS_IR_Subscription* subscriptio
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_subscription_bit ")
-                          ACE_TEXT("Unable to dispose for subscription ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to dispose for subscription ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           subscription,
                           handle,
@@ -1888,7 +1900,7 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_publication_bit ")
-                          ACE_TEXT("Unable to get_key_value for publication ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to get_key_value for publication ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           publication,
                           handle,
@@ -1903,7 +1915,7 @@ void DCPS_IR_Domain::dispose_publication_bit (DCPS_IR_Publication* publication)
               {
                 ACE_ERROR((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::dispose_publication_bit ")
-                          ACE_TEXT("Unable to dispose for publication ptr %x handle %d.  ")
+                          ACE_TEXT("Unable to dispose for publication ptr 0x%x handle %d.  ")
                           ACE_TEXT("Call returned %d.\n"),
                           publication,
                           handle,

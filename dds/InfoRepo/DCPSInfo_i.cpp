@@ -1110,15 +1110,18 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
               {
                 if (::OpenDDS::DCPS::DCPS_debug_level > 0)
                   {
-                    ACE_DEBUG((LM_DEBUG, ACE_TEXT("TAO_DDS_DCPSInfo_i::load_domains ")
-                      ACE_TEXT("Successfully loaded domain %X id: %d\n"),
-                      domainPtr, domainId));
+                    ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::load_domains: ")
+                      ACE_TEXT("successfully loaded domain %d at %x.\n"),
+                      domainId,
+                      domainPtr
+                    ));
                   }
               }
             else
               {
                 ACE_ERROR((LM_ERROR,
-                          ACE_TEXT("ERROR: Failed to initialize the Built-In Topics ")
+                          ACE_TEXT("(%P|%t) ERROR: Failed to initialize the Built-In Topics ")
                           ACE_TEXT("when loading domain id = %d\n"),
                           domainId));
                 domains_.unbind(domainId);
@@ -1127,12 +1130,12 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
           }
           break;
         case 1:
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
             ACE_TEXT("Attempted to load existing domain id %d\n"),
             domainId));
           break;
         case -1:
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
             ACE_TEXT("Unknown error while loading domain id %d\n"),
             domainId));
         };
@@ -1145,7 +1148,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
 
   // Initialize persistence
   if (!this->init_persistence ()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
                ACE_TEXT("Unable to initialize persistence.\n")));
   }
 

@@ -242,25 +242,25 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
       if (bind(writers_, writer_id, info) != 0)
       {
         std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(writer_id);
-        buffer << "local "   << writer_id
-               << "(" << std::hex << handle << ")";
+        long key;
+        key = ::OpenDDS::DCPS::GuidConverter(writer_id);
+        buffer << writer_id << "(" << std::hex << key << ")";
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: DataReaderImpl::add_associations: "
-          "Unable to insert writer publisher_id %s.\n",
-          buffer.str().c_str()));
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations: ")
+          ACE_TEXT("unable to insert writer %s.\n"),
+          buffer.str().c_str()
+        ));
 
       } else if( DCPS_debug_level > 4) {
         std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter(writer_id);
-        buffer << "local "   << writer_id
-               << "(" << std::hex << handle << ")";
+        long key;
+        key = ::OpenDDS::DCPS::GuidConverter(writer_id);
+        buffer << writer_id << "(" << std::hex << key << ")";
         ACE_ERROR((LM_ERROR,
           "(%P|%t) DataReaderImpl::add_associations: "
-          "inserted writer publisher_id %s.\n",
-          buffer.str().c_str()));
+          "inserted writer %s.\n",
+          buffer.str().c_str()
+        ));
       }
     }
 
@@ -279,9 +279,10 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         buffer << "local "   << this->subscription_id_
                << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
-        "(%P|%t) DataReaderImpl::add_associations"
-        " Starting/resetting liveliness timer for reader %s\n",
-        buffer.str().c_str() ));
+          ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+          ACE_TEXT("starting/resetting liveliness timer for reader %s\n"),
+          buffer.str().c_str()
+        ));
       }
       this->handle_timeout (now, this);
     }
@@ -984,18 +985,28 @@ DataReaderImpl::writer_activity(PublicationId writer_id)
   // caller should have the sample_lock_ !!!
 
   WriterMapType::iterator iter = writers_.find(writer_id);
-  if (iter != writers_.end())
-    {
+  if( iter != writers_.end()) {
       ACE_Time_Value when = ACE_OS::gettimeofday ();
       iter->second.received_activity (when);
-    }
-  else
+
+  } else {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
-    ACE_DEBUG((LM_DEBUG,"(%P|%t) DataReaderImpl::writer_activity"
-               " reader %d is not associated with writer %d\n",
-               this->subscription_id_, writer_id));
+    std::stringstream buffer;
+    long key;
+    key = GuidConverter( this->subscription_id_);
+    buffer << "reader ";
+    buffer << this->subscription_id_ << "(" << key << ")";
+    buffer << " is not associated with writer ";
+    key = GuidConverter( writer_id);
+    buffer << writer_id << "(" << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
+      ACE_TEXT("%s\n"),
+      buffer.str().c_str()
+    ));
+  }
 }
 
 void
@@ -1325,10 +1336,9 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
 
       if (DCPS_debug_level >= 5) {
         std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->subscription_id_);
-        buffer << "local "   << this->subscription_id_
-               << "(" << std::hex << handle << ")";
+        long key;
+        key = ::OpenDDS::DCPS::GuidConverter( this->subscription_id_);
+        buffer << this->subscription_id_ << "(" << std::hex << key << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
           ACE_TEXT(" canceling timer for reader %d.\n"),
@@ -1376,13 +1386,12 @@ DataReaderImpl::handle_timeout (const ACE_Time_Value &tv,
 
   if (DCPS_debug_level >= 5) {
     std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter( this->subscription_id_);
-    buffer << "reader "   << this->subscription_id_
-           << "(" << std::hex << handle << ")";
+    long key;
+    key = ::OpenDDS::DCPS::GuidConverter( this->subscription_id_);
+    buffer << this->subscription_id_ << "(" << std::hex << key << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
-      ACE_TEXT("%s has %d live writers; from_reactor=%d\n"),
+      ACE_TEXT("reader %s has %d live writers; from_reactor=%d\n"),
       buffer.str().c_str(),
       alive_writers,
       arg == this ? 0 : 1
@@ -1483,7 +1492,8 @@ OpenDDS::DCPS::WriterInfo::check_activity (const ACE_Time_Value& now)
   ACE_Time_Value expires_at = ACE_Time_Value::max_time;
 
   // We only need check the liveliness with the non-zero liveliness_lease_duration_.
-  if (state_ != DEAD && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero)
+  // if (state_ != DEAD && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero)
+  if (state_ == ALIVE && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero)
   {
     expires_at = this->last_liveliness_activity_time_ +
       reader_->liveliness_lease_duration_;
@@ -1514,7 +1524,7 @@ DataReaderImpl::writer_removed (PublicationId   writer_id,
     buffer << "reader "   << this->subscription_id_
            << "(" << std::hex << handle << ")";
     handle = ::OpenDDS::DCPS::GuidConverter( writer_id);
-    buffer << " to writer " << writer_id
+    buffer << " from writer " << writer_id
            << "(" << std::hex << handle << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
@@ -1554,8 +1564,9 @@ DataReaderImpl::writer_became_alive (PublicationId writer_id,
     buffer << "reader "   << this->subscription_id_
            << "(" << std::hex << handle << ")";
     handle = ::OpenDDS::DCPS::GuidConverter( writer_id);
-    buffer << " to writer " << writer_id
+    buffer << " from writer " << writer_id
            << "(" << std::hex << handle << ")";
+    buffer << " state " << state;
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
       ACE_TEXT("%s.\n"),
@@ -1621,10 +1632,24 @@ DataReaderImpl::writer_became_dead (PublicationId   writer_id,
                                     const ACE_Time_Value& when,
             WriterInfo::WriterState& state)
 {
-  if (DCPS_debug_level >= 5)
+  if (DCPS_debug_level >= 5) {
+    std::stringstream buffer;
+    long key;
+    key = GuidConverter( this->subscription_id_);
+    buffer << "reader ";
+    buffer << this->subscription_id_ << "(" << key << ")";
+
+    key = GuidConverter( writer_id);
+    buffer << " from writer ";
+    buffer << writer_id << "(" << key << ")";
+
+    buffer << " state " << state;
     ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) DataReaderImpl::writer_became_dead reader %d to writer %d state %d\n",
-               this->subscription_id_, writer_id, state));
+      ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
+      ACE_TEXT("%s.\n"),
+      buffer.str().c_str()
+    ));
+  }
 
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
@@ -1921,6 +1946,11 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
 
     } else if( DCPS_debug_level > 4) {
       CORBA::ULong const num_wrts = ids.length ();
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
+        ACE_TEXT("%d writer handles processed.\n"),
+        num_wrts
+      ));
       for (CORBA::ULong i = 0; i < num_wrts; ++i)
       {
         std::stringstream buffer;
@@ -2003,7 +2033,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
           ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
           ACE_TEXT("instance handle for writer %s == %d.\n"),
           buffer.str().c_str(),
-          ids[i]
+          hdls[i]
         ));
       }
     }
@@ -2099,7 +2129,42 @@ void DataReaderImpl::notify_liveliness_change()
     liveliness_changed_status_.active_count_change = 0;
     liveliness_changed_status_.inactive_count_change = 0;
   }
+
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    long key = GuidConverter( this->subscription_id_);
+    buffer << "subscription " << this->subscription_id_ << "(" << key << ")";
+    buffer << ", listener at: 0x" << std::hex << this->fast_listener_;
+    for( WriterMapType::iterator current = this->writers_.begin();
+         current != this->writers_.end();
+         ++current) {
+      RepoId id = current->first;
+      key = GuidConverter( id);
+      buffer << std::endl << "\tNOTIFY: writer[ " << id << "(" << key << ")] == ";
+      buffer << current->second.get_state();
+    }
+    buffer << std::endl;
+    ACE_DEBUG((LM_DEBUG, /// MJM
+      ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
+      ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
+      ACE_TEXT("\tNOTIFY: %s\n"),
+      listener,
+      listener_mask_,
+      buffer.str().c_str()
+    ));
+  }
 }
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+ostream& operator<<( ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value)
+{
+  switch( value) {
+    case OpenDDS::DCPS::WriterInfo::NOT_SET: return str << "NOT_SET";
+    case OpenDDS::DCPS::WriterInfo::ALIVE:   return str << "ALIVE";
+    case OpenDDS::DCPS::WriterInfo::DEAD:    return str << "DEAD";
+    default:                                 return str << "UNSPECIFIED(" << int(value) << ")";
+  }
+}
+

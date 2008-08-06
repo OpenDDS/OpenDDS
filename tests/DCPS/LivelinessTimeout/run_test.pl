@@ -31,14 +31,22 @@ $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
+my $debug = 10;
+my $repoDebug;
+my $subDebug;
+my $pubDebug;
+my $debugFile;
+$repoDebug = $debug if not $repoDebug and $debug;
+$subDebug  = $debug if not $subDebug  and $debug;
+$pubDebug  = $debug if not $pubDebug  and $debug;
+
 unlink $dcpsrepo_ior; 
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf "
-#                           . "-ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior "
-                           . "-d $domains_file ");
-
+my $repoArgs = "$repo_bit_conf ";
+$repoArgs .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoArgs .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
+$repoArgs .= "-o $dcpsrepo_ior -d $domains_file ";
+$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs);
 
 # test multiple cases
 $numPubs = 5;
@@ -51,9 +59,13 @@ $pub_lease_time = 1;  # in msec
 $sub_lease_time = $pub_lease_time * 2;
 # this is the threshold number of publishers we would expect to fail the liveliness tests with a 70% fudge factor
 $threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.6;
-$sub_parameters = "$svc_conf -s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time -ORBDebugLevel $level";
 
-$Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
+my $subArgs = "$svc_conf ";
+$subArgs .= "-DCPSDebugLevel $subDebug " if $subDebug;
+$subArgs .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
+# $subArgs .= "-DCPSTransportDebugLevel 8 ";
+$subArgs .= "-s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time ";
+$Subscriber = PerlDDS::create_process ("subscriber", $subArgs);
 
 $pub_parameters = "$svc_conf $common_parameters" ;
 
@@ -68,10 +80,16 @@ for($i = 0; $i < $numPubs; ++$i)
     $factor = ($sub_lease_time / $pub_lease_time) * 1.5 * 100; # 100%
     $liveliness_factor = "-DCPSLivelinessFactor $factor ";
   }
-  $thePublisher = PerlDDS::create_process ("publisher", "$pub_parameters -l $thisPubLeaseTime -x $thisPubTime -ORBDebugLevel $level -p $pub_addr$thisPort $liveliness_factor");
+
+  my $pubArgs = "$svc_conf ";
+  $pubArgs .= "-DCPSDebugLevel $pubDebug " if $pubDebug;
+  $pubArgs .= "-ORBLogFile $debugFile "    if $pubDebug and $debugFile;
+  $pubArgs .= "-l $thisPubLeaseTime -x $thisPubTime -p $pub_addr$thisPort $liveliness_factor ";
+  $thePublisher = PerlDDS::create_process ("publisher", $pubArgs);
   push @Publisher, $thePublisher;
 }
 
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
@@ -80,6 +98,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
+print $Subscriber->CommandLine() . "\n";
 $SubscriberResult = $Subscriber->Spawn();
 
 if ($SubscriberResult != 0) {
@@ -91,6 +110,7 @@ sleep 10;
 
 foreach $pub (@Publisher)
 {
+  print $pub->CommandLine() . "\n";
   $pub->Spawn ();
   sleep $delay;
 }

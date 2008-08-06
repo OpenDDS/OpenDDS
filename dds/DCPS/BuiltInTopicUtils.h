@@ -258,6 +258,8 @@ namespace OpenDDS {
           // when the add_association is called before the builtin topic datareader got
           // the published data.
 
+          CORBA::ULong repoid_len = repoids.length ();
+          handles.length (repoid_len);
           while (1)
             {
               ret = bit_reader->read (data,
@@ -276,9 +278,7 @@ namespace OpenDDS {
                                     ret);
                 }
 
-              CORBA::ULong repoid_len = repoids.length ();
               CORBA::ULong data_len = data.length ();
-              handles.length (repoid_len);
 
               if (DCPS_debug_level >= 10) {
                 ACE_DEBUG((LM_DEBUG,
@@ -290,6 +290,7 @@ namespace OpenDDS {
 
               CORBA::ULong count = 0;
 
+              /// @TODO: FIXME This fails on fragmented sample sets.
               for (CORBA::ULong i = 0; i < repoid_len; ++i)
                 {
                   if (DCPS_debug_level >= 10) {
@@ -307,7 +308,7 @@ namespace OpenDDS {
                       if (DCPS_debug_level >= 10) {
                         ACE_DEBUG((LM_DEBUG,
 			  ACE_TEXT("(%P|%t) BIT_Helper::repo_ids_to_instance_handles: ")
-                          ACE_TEXT("%s sample[ %d], key == [%d, %x, %x], handle == %d\n"),
+                          ACE_TEXT("%s sample[ %d], key == [%d, 0x%x, 0x%x], handle == %d\n"),
 		          bit_name,
                           j,
 		          data[j].key[0],
