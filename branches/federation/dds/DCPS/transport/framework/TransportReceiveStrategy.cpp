@@ -631,13 +631,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 
             if( initial == this->buffer_index_)
               {
-                //
-                // All buffers are empty, we have no more data to process.
-                //
-                VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                           "We have 'consumed' all of the received data.  "
-                           "We are done (for now)\n"));
-                return 0;
+                // At this point we have a data sample with no data.
+                // This is actually Ok, since some control messages -
+                // specifically the DATAWRITER_LIVELINESS messages
+                // contain no data.
+                break;
               }
           }
 

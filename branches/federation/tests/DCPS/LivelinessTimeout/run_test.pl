@@ -31,7 +31,7 @@ $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
-my $debug = 10;
+my $debug ;# = 10;
 my $repoDebug;
 my $subDebug;
 my $pubDebug;
@@ -40,10 +40,19 @@ $repoDebug = $debug if not $repoDebug and $debug;
 $subDebug  = $debug if not $subDebug  and $debug;
 $pubDebug  = $debug if not $pubDebug  and $debug;
 
+my $transportDebug;
+my $repoTransportDebug;
+my $subTransportDebug ;# = 10;
+my $pubTransportDebug;
+$repoTransportDebug = $transportDebug if not $repoTransportDebug and $transportDebug;
+$subTransportDebug  = $transportDebug if not $subTransportDebug  and $transportDebug;
+$pubTransportDebug  = $transportDebug if not $pubTransportDebug  and $transportDebug;
+
 unlink $dcpsrepo_ior; 
 
 my $repoArgs = "$repo_bit_conf ";
 $repoArgs .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoArgs .= "-DCPSTransportDebugLevel $repoTransportDebug " if $repoTransportDebug;
 $repoArgs .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
 $repoArgs .= "-o $dcpsrepo_ior -d $domains_file ";
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs);
@@ -62,8 +71,8 @@ $threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.6;
 
 my $subArgs = "$svc_conf ";
 $subArgs .= "-DCPSDebugLevel $subDebug " if $subDebug;
+$subArgs .= "-DCPSTransportDebugLevel $subTransportDebug " if $subTransportDebug;
 $subArgs .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
-# $subArgs .= "-DCPSTransportDebugLevel 8 ";
 $subArgs .= "-s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time ";
 $Subscriber = PerlDDS::create_process ("subscriber", $subArgs);
 
@@ -83,6 +92,7 @@ for($i = 0; $i < $numPubs; ++$i)
 
   my $pubArgs = "$svc_conf ";
   $pubArgs .= "-DCPSDebugLevel $pubDebug " if $pubDebug;
+  $pubArgs .= "-DCPSTransportDebugLevel $pubTransportDebug " if $pubTransportDebug;
   $pubArgs .= "-ORBLogFile $debugFile "    if $pubDebug and $debugFile;
   $pubArgs .= "-l $thisPubLeaseTime -x $thisPubTime -p $pub_addr$thisPort $liveliness_factor ";
   $thePublisher = PerlDDS::create_process ("publisher", $pubArgs);
