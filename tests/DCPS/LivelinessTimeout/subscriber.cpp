@@ -251,8 +251,7 @@ int main (int argc, char *argv[])
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
-      if (drl_servant->deadline_missed() < threshold_liveliness_lost)
-      {
+      if( drl_servant->deadline_missed() < threshold_liveliness_lost) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) subscriber: ")
           ACE_TEXT("liviness deadline not violated enough for test. ")
@@ -261,6 +260,15 @@ int main (int argc, char *argv[])
           drl_servant->deadline_missed()
         ));
         return 1;
+
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) subscriber: ")
+          ACE_TEXT("liviness deadline violated enough to pass test. ")
+          ACE_TEXT("threshold( %d) < num missed( %d).\n"),
+          threshold_liveliness_lost,
+          drl_servant->deadline_missed()
+        ));
       }
     }
   catch (const TestException&)

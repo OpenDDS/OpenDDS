@@ -393,11 +393,11 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
     long handle;
     handle = ::OpenDDS::DCPS::GuidConverter( publisher_id);
     buffer << publisher_id << "(" << std::hex << handle << ")";
+    buffer << " received sample: " << sample.header_;
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataLink::data_received: ")
-      ACE_TEXT(" message id %d from publisher %s.\n"),
-      sample.header_.message_id_,
+      ACE_TEXT(" publisher %s.\n"),
       buffer.str().c_str()
     ));
   }

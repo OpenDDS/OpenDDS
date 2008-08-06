@@ -1018,6 +1018,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   // or statuses related to samples.
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
+  if( DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    long key;
+    key = GuidConverter( this->subscription_id_);
+    buffer << this->subscription_id_ << "(" << key << ")";
+    buffer << " received sample: " << sample.header_;
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
+      ACE_TEXT("%s.\n"),
+      buffer.str().c_str()
+    ));
+  }
+
   switch (sample.header_.message_id_)
     {
     case SAMPLE_DATA:

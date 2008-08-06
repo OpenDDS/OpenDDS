@@ -7,6 +7,8 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 
+#include <iosfwd>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -122,6 +124,14 @@ namespace OpenDDS
 extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
 operator<< (ACE_Message_Block*&, OpenDDS::DCPS::DataSampleHeader& value) ;
+
+/// Message Id enumarion insertion onto an ostream.
+extern OpenDDS_Dcps_Export
+std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId value);
+
+/// Message header insertion onto an ostream.
+extern OpenDDS_Dcps_Export
+std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHeader& value);
 
 #endif  /* OPENDDS_DCPS_DATASAMPLEHEADER_H */
 

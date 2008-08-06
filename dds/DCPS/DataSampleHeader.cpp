@@ -6,6 +6,7 @@
 #include "DataSampleHeader.h"
 #include "Serializer.h"
 
+#include <iostream>
 
 #if ! defined (__ACE_INLINE__)
 #include "DataSampleHeader.inl"
@@ -107,5 +108,50 @@ operator<< (ACE_Message_Block*& buffer, OpenDDS::DCPS::DataSampleHeader& value)
   );
 
   return writer.good_bit() ;
+}
+
+/// Message Id enumarion insertion onto an ostream.
+std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::MessageId value)
+{
+  switch( value) {
+    case OpenDDS::DCPS::SAMPLE_DATA:           return str << "SAMPLE_DATA";
+    case OpenDDS::DCPS::DATAWRITER_LIVELINESS: return str << "DATAWRITER_LIVELINESS";
+    case OpenDDS::DCPS::INSTANCE_REGISTRATION: return str << "INSTANCE_REGISTRATION";
+    case OpenDDS::DCPS::UNREGISTER_INSTANCE:   return str << "UNREGISTER_INSTANCE";
+    case OpenDDS::DCPS::DISPOSE_INSTANCE:      return str << "DISPOSE_INSTANCE";
+    case OpenDDS::DCPS::GRACEFUL_DISCONNECT:   return str << "GRACEFUL_DISCONNECT";
+    case OpenDDS::DCPS::FULLY_ASSOCIATED:      return str << "FULLY_ASSOCIATED";
+    default:                                   return str << "UNSPECIFIED(" << int(value) << ")";
+  }
+}
+
+/// Message header insertion onto an ostream.
+extern OpenDDS_Dcps_Export
+std::ostream& operator<<( std::ostream& str, const OpenDDS::DCPS::DataSampleHeader& value)
+{
+  str << "[";
+
+  str << OpenDDS::DCPS::MessageId( value.message_id_) << ", ";
+  if( value.last_sample_ == 1) {
+    str << "last sample, ";
+  }
+  if( value.byte_order_ == 1) {
+    str << "network order, ";
+  } else {
+    str << "little endian, ";
+  }
+  str << std::dec << value.message_length_ << ", ";
+  str << "0x" << std::hex << value.sequence_ << ", ";
+  str << "(" << std::dec << value.source_timestamp_sec_ << "/";
+  str << std::dec << value.source_timestamp_nanosec_ << "), ";
+  str << std::dec << value.coherency_group_ << ", ";
+
+  long key = OpenDDS::DCPS::GuidConverter(
+               const_cast< OpenDDS::DCPS::GUID_t*>( &value.publication_id_)
+             );
+  str << value.publication_id_ << "(" << std::hex << key << ")";
+
+  str << "]";
+  return str;
 }
 

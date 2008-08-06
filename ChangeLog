@@ -1,39 +1,70 @@
+Wed Aug  6 19:19:07 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Added yet another diagnostic message.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+	  Added insertion to ostream operators for the DataSampleHeader
+	  and the MessageId enumeration values.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+	  Extended a diagnostic message with additional message header
+	  contnent information.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+	  Allow sample processing to continue when the sample contains no
+	  data.  This includes the DATAWRITER_LIVELINESS control message
+	  that was not being dispatched before as it contains no data.
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+	  Added the ability to specify Transport debug level as well.
+
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+	  Added a status message when test passes.
+
 Wed Aug  6 03:38:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:
 
-	  Hoisted lenght manipulation out of loop.  Cleaned up some
-	  diagnostic messages.
+          Hoisted lenght manipulation out of loop.  Cleaned up some
+          diagnostic messages.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Cleaned up some diagnostic messages.  Added an insertion
-	  operator for the DataReaderImpl::WriterInfo::WriterState
-	  enumeration.
-	    check_activity(): changed test from "!= DEAD" to "== ALIVE"
-	                      to move to "DEAD" state.  This allows
-			      starting connections to remain "NOT_SET"
-			      until activity (data or LIVELINESS
-			      messages) are received.
+          Cleaned up some diagnostic messages.  Added an insertion
+          operator for the DataReaderImpl::WriterInfo::WriterState
+          enumeration.
+            check_activity(): changed test from "!= DEAD" to "== ALIVE"
+                              to move to "DEAD" state.  This allows
+                              starting connections to remain "NOT_SET"
+                              until activity (data or LIVELINESS
+                              messages) are received.
 
         * tests/DCPS/LivelinessTimeout/run_test.pl:
 
-	  Added the ability to specify debug levels.
+          Added the ability to specify debug levels.
 
         * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
         * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
         * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
 
-	  Renamed from DataReaderListener.{h,cpp}.  Cleaned up some
-	  diagnostic messages.
+          Renamed from DataReaderListener.{h,cpp}.  Cleaned up some
+          diagnostic messages.
 
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/InfoRepo/DCPSInfo_i.cpp:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
         * tests/DCPS/LivelinessTimeout/subscriber.cpp:
 
-	  Cleaned up some diagnostic messages.
+          Cleaned up some diagnostic messages.
 
         * tests/DCPS/LivelinessTimeout/DataReaderListener.h:
         * tests/DCPS/LivelinessTimeout/DataReaderListener.cpp:
