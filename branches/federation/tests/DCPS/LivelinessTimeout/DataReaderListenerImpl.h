@@ -1,8 +1,8 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef DATAREADER_LISTENER_IMPL
-#define DATAREADER_LISTENER_IMPL
+#ifndef DATAREADER_LISTENER_IMPL_H
+#define DATAREADER_LISTENER_IMPL_H
 
 #include "dds/DdsDcpsSubscriptionS.h"
 
@@ -118,4 +118,4 @@ private:
   ::DDS::SampleInfo last_si_ ;
 };
 
-#endif /* DATAREADER_LISTENER_IMPL  */
+#endif /* DATAREADER_LISTENER_IMPL_H  */

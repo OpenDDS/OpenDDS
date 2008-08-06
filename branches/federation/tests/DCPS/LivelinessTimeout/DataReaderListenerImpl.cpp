@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // $Id$
-#include "DataReaderListener.h"
+#include "DataReaderListenerImpl.h"
 #include "common.h"
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
@@ -68,13 +68,16 @@ void DataReaderListenerImpl::on_liveliness_changed (
     }
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed"
-               "   active=%d, inactive=%d, activeDelta=%d, inactiveDelta=%d deadline_missed=%d\n"),
-               status.active_count,
-               status.inactive_count,
-               status.active_count_change,
-               status.inactive_count_change,
-               deadline_missed_));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed: ")
+      ACE_TEXT("active=%d, inactive=%d, ")
+      ACE_TEXT("activeDelta=%d, inactiveDelta=%d ")
+      ACE_TEXT("deadline_missed=%d\n"),
+      status.active_count,
+      status.inactive_count,
+      status.active_count_change,
+      status.inactive_count_change,
+      deadline_missed_
+    ));
   }
 
 void DataReaderListenerImpl::on_subscription_match (

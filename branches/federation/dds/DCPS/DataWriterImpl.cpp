@@ -1571,6 +1571,17 @@ DataWriterImpl::handle_timeout (const ACE_Time_Value &tv,
   if (elapsed >= liveliness_check_interval_)
   {
     //Not recent enough then send liveliness message.
+    if (DCPS_debug_level > 9) {
+      std::stringstream buffer;
+      long key;
+      key = ::OpenDDS::DCPS::GuidConverter( this->publication_id_);
+      buffer << this->publication_id_ << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
+        ACE_TEXT("%s sending LIVELINESS message.\n"),
+        buffer.str().c_str()
+      ));
+    }
     this->send_liveliness(tv);
   }
   else

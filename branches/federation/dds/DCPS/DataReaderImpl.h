@@ -539,5 +539,7 @@ namespace OpenDDS
 # include "DataReaderImpl.inl"
 #endif  /* __ACE_INLINE__ */
 
+// Insertion of WriterState enumeration values;
+ostream& operator<<( ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value);
 
 #endif /* TAO_DDS_DCPS_DATAREADER_H  */
