@@ -61,10 +61,47 @@ $num_samples=$num_msgs_btwn_rec + 20;
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
+########################################
+#
+my $debug ;# = 10;
+my $repoDebug;
+my $pubDebug;
+my $subDebug;
+$repoDebug = $debug if not $repoDebug and $debug;
+$pubDebug  = $debug if not $pubDebug  and $debug;
+$subDebug  = $debug if not $subDebug  and $debug;
+
+my $transportDebug ;# = 10;
+my $repoTransportDebug;
+my $pubTransportDebug;
+my $subTransportDebug;
+$repoTransportDebug = $debug if not $repoTransportDebug and $transportDebug;
+$pubTransportDebug  = $debug if not $pubTransportDebug  and $transportDebug;
+$subTransportDebug  = $debug if not $subTransportDebug  and $transportDebug;
+
+my $debugFile;
+
+my $repoDebugOpts = "";
+$repoDebugOpts .= "-DCPSTransportDebugLevel $repoTransportDebug " if $repoTransportDebug;
+$repoDebugOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
+$repoDebugOpts .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
+
+my $pubDebugOpts = "";
+$pubDebugOpts .= "-DCPSTransportDebugLevel $pubTransportDebug " if $pubTransportDebug;
+$pubDebugOpts .= "-DCPSDebugLevel $pubDebug " if $pubDebug;
+$pubDebugOpts .= "-ORBLogFile $debugFile "    if $pubDebug and $debugFile;
+
+my $subDebugOpts = "";
+$subDebugOpts .= "-DCPSTransportDebugLevel $subTransportDebug " if $subTransportDebug;
+$subDebugOpts .= "-DCPSDebugLevel $subDebug " if $subDebug;
+$subDebugOpts .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
+#
+########################################
+
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
+                             "$repo_bit_conf $repoDebugOpts -o $dcpsrepo_ior"
                              . " -d $domains_file");
 
 
@@ -72,9 +109,8 @@ print $DCPSREPO->CommandLine(), "\n";
 
 $svc_config = ($use_svc_config && $app_bit_conf eq '')
     ? " -ORBSvcConf ../../tcp.conf " : '';
-$sub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p $num_writers"
-#              . " -DCPSDebugLevel 6"
-   . "$svc_config"
+$sub_parameters = "$app_bit_conf $subDebugOpts -DCPSConfigFile conf.ini -p $num_writers"
+              . "$svc_config"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
               . " -msi $num_samples -mxs $num_samples"
@@ -88,7 +124,7 @@ print $Subscriber->CommandLine(), "\n";
 
 
 #NOTE: above 1000 queue samples does not give any better performance.
-$pub_parameters = "$app_bit_conf -DCPSConfigFile conf.ini -p 1 -i $pub_writer_id"
+$pub_parameters = "$app_bit_conf $pubDebugOpts -DCPSConfigFile conf.ini -p 1 -i $pub_writer_id"
 #              . " -DCPSDebugLevel 6"
    . "$svc_config"
               . " -n $num_messages -d $data_size"

@@ -1,33 +1,45 @@
+Thu Aug  7 04:10:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+	  Break from processing loop if there is no more data to process.
+	  Extended a diagnostic message to include the entire transport
+	  header.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+
+	  Extended to allow specification of debug levels.
+
 Wed Aug  6 19:19:07 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Added yet another diagnostic message.
+          Added yet another diagnostic message.
 
         * dds/DCPS/DataSampleHeader.h:
         * dds/DCPS/DataSampleHeader.cpp:
 
-	  Added insertion to ostream operators for the DataSampleHeader
-	  and the MessageId enumeration values.
+          Added insertion to ostream operators for the DataSampleHeader
+          and the MessageId enumeration values.
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Extended a diagnostic message with additional message header
-	  contnent information.
+          Extended a diagnostic message with additional message header
+          contnent information.
 
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
 
-	  Allow sample processing to continue when the sample contains no
-	  data.  This includes the DATAWRITER_LIVELINESS control message
-	  that was not being dispatched before as it contains no data.
+          Allow sample processing to continue when the sample contains no
+          data.  This includes the DATAWRITER_LIVELINESS control message
+          that was not being dispatched before as it contains no data.
 
         * tests/DCPS/LivelinessTimeout/run_test.pl:
 
-	  Added the ability to specify Transport debug level as well.
+          Added the ability to specify Transport debug level as well.
 
         * tests/DCPS/LivelinessTimeout/subscriber.cpp:
 
-	  Added a status message when test passes.
+          Added a status message when test passes.
 
 Wed Aug  6 03:38:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
