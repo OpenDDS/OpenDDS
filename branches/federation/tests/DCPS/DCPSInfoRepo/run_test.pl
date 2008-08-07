@@ -33,7 +33,7 @@ $SUBSCRIBER = PerlDDS::create_process ("subscriber",
 
 print $DCPSREPO->CommandLine() . "\n" if $debug ;
 $DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 10) == -1) {
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
     exit 1;

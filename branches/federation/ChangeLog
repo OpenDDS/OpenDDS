@@ -1,14 +1,69 @@
+Thu Aug  7 18:26:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+
+	  Removed explicit port assignment(s).  *AGAIN*.
+
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/mcast_simple/run_test.pl:
+        * tests/transport/mcast_simple_n/run_test.pl:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/udp_simple/run_test.pl:
+        * tests/transport/udp_simple_n/run_test.pl:
+
+	  Increased (repo IOR) file wait time to 30 seconds, which is
+	  consistent with all other tests.
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+	  Increased time to wait for processing to complete to 30 seconds.
+
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+
+	  Added additional diagnostic messages.
+
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+
+	  Added ability to specify debug levels.
+
 Thu Aug  7 04:10:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
 
-	  Break from processing loop if there is no more data to process.
-	  Extended a diagnostic message to include the entire transport
-	  header.
+          Break from processing loop if there is no more data to process.
+          Extended a diagnostic message to include the entire transport
+          header.
 
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
 
-	  Extended to allow specification of debug levels.
+          Extended to allow specification of debug levels.
 
 Wed Aug  6 19:19:07 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
