@@ -42,7 +42,7 @@ sub run_compatibility_tests {
   $sub_lease_time = shift;
   $sub_reliability_kind = shift;
 
-  $sub_time = 5;
+  $sub_time = 30;
   $pub_time = $sub_time;
   $sub_parameters = "$svc_conf -s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -ORBDebugLevel $level";
 

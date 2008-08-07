@@ -27,7 +27,7 @@ $FooTest = PerlDDS::create_process ("SimpleFooTest",
                               "-DCPSInfoRepo file://$dcpsrepo_ior");
 
 $DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 5) == -1) {
+if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;

@@ -83,12 +83,12 @@ sub SpawnWait {
 CleanupOutput();
 
 if ($useImr == 1) {
-    if (SpawnWait($ImR, $implrepo_ior, 10) != 0) {
+    if (SpawnWait($ImR, $implrepo_ior, 30) != 0) {
 	$ImR->Kill();
 	exit 1;
     }
 
-    if (SpawnWait($Act, $activator_ior, 10) != 0) {
+    if (SpawnWait($Act, $activator_ior, 30) != 0) {
 	$ImR->Kill();
 	$Act->Kill();
 	exit 1;

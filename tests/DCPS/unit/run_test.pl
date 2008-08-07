@@ -37,7 +37,7 @@ $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
 print $REPO->CommandLine() . "\n" if $debug ;
 $REPO->Spawn ();
 
-if (PerlACE::waitforfile_timed ($iorfile, 5) == -1) {
+if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $REPO->Kill (); $REPO->TimedWait (1);
     exit 1;
