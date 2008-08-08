@@ -13,7 +13,9 @@
 
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
-#include /**/ "DCPS_Entity_Id_Generator.h"
+
+#include "GuidGenerator.h"
+
 #include /**/ "ace/Map_Manager.h"
 #include /**/ "ace/Null_Mutex.h"
 
@@ -47,7 +49,8 @@ typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 class DCPS_IR_Participant
 {
 public:
-  DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
+  DCPS_IR_Participant (long federationId,
+                       OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
 		       UpdateManager* um);
@@ -148,6 +151,16 @@ public:
 
   DCPS_IR_Domain* get_domain_reference () const;
 
+  // Next Entity Id value in sequence.
+  OpenDDS::DCPS::RepoId get_next_topic_id();
+  OpenDDS::DCPS::RepoId get_next_publication_id();
+  OpenDDS::DCPS::RepoId get_next_subscription_id();
+
+  // Ensure no conflicts with sequence values from persistent storage.
+  void last_topic_key(        long key);
+  void last_publication_key(  long key);
+  void last_subscription_key( long key);
+
 private:
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Domain* domain_;
@@ -155,6 +168,11 @@ private:
   CORBA::Boolean aliveStatus_;
   ::DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
+
+  // Entity GUID Id generators.
+  GuidGenerator topicIdGenerator_;
+  GuidGenerator publicationIdGenerator_;
+  GuidGenerator subscriptionIdGenerator_;
 
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;

@@ -1,3 +1,40 @@
+Fri Aug  8 16:05:50 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/GuidGenerator.h:
+        * dds/InfoRepo/GuidGenerator.cpp:
+
+	  Implemented a fully GUID based Id generation.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Migrated to a fully GUID based Id generation.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+
+	  Added block comments on the internal add_* methods that are to
+	  be used by the internal persistence mechanism only.
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+	  bugfix: DomainId value should be ::DDS::DomainId_t type.
+
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+
+	  Added a delay to force a potential participant Id conflict
+	  between the restored participants and new participants.  The
+	  persistence mechanism successfully avoids the conflict.
+
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.h:
+        * dds/InfoRepo/DCPS_Entity_Id_Generator.cpp:
+
+          Removed these files.  They were replaced by the
+	  GuidGenerator.{h,cpp} files.
+
 Thu Aug  7 18:26:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/pub.ini:
@@ -18,7 +55,7 @@ Thu Aug  7 18:26:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/NotifyTest/pub.ini:
         * tests/DCPS/NotifyTest/sub.ini:
 
-	  Removed explicit port assignment(s).  *AGAIN*.
+          Removed explicit port assignment(s).  *AGAIN*.
 
         * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
         * examples/DCPS/Messenger_Imr/run_test.pl:
@@ -37,21 +74,21 @@ Thu Aug  7 18:26:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/transport/udp_simple/run_test.pl:
         * tests/transport/udp_simple_n/run_test.pl:
 
-	  Increased (repo IOR) file wait time to 30 seconds, which is
-	  consistent with all other tests.
+          Increased (repo IOR) file wait time to 30 seconds, which is
+          consistent with all other tests.
 
         * tests/DCPS/CompatibilityTest/run_test.pl:
 
-	  Increased time to wait for processing to complete to 30 seconds.
+          Increased time to wait for processing to complete to 30 seconds.
 
         * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
         * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
 
-	  Added additional diagnostic messages.
+          Added additional diagnostic messages.
 
         * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
 
-	  Added ability to specify debug levels.
+          Added ability to specify debug levels.
 
 Thu Aug  7 04:10:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
