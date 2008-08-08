@@ -26,8 +26,8 @@
 DCPS_IR_Domain::DCPS_IR_Domain (::DDS::DomainId_t id, long federation)
 :
  id_(id),
- useBIT_(false),
- federation_( federation)
+ participantIdGenerator_( federation),
+ useBIT_(false)
 {
 }
 
@@ -262,8 +262,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 {
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  OpenDDS::DCPS::RepoId topic_id
-    = this->topicIdGenerator_.get_next_topic_id( this->federation_, participantPtr->get_id());
+  OpenDDS::DCPS::RepoId topic_id = participantPtr->get_next_topic_id();
   OpenDDS::DCPS::TopicStatus status = add_topic_i (topic_id, topicName
                                                , dataTypeName
                                                , qos, participantPtr);
@@ -1206,38 +1205,15 @@ void DCPS_IR_Domain::remove_dead_participants ()
 
 
 OpenDDS::DCPS::RepoId
-DCPS_IR_Domain::get_next_participant_id( long federation)
+DCPS_IR_Domain::get_next_participant_id()
 {
-  return this->participantIdGenerator_.get_next_part_id( federation);
+  return this->participantIdGenerator_.next();
 }
 
-
-OpenDDS::DCPS::RepoId
-DCPS_IR_Domain::get_next_topic_id(
-  long federation,
-  const OpenDDS::DCPS::RepoId& participant
-)
+void
+DCPS_IR_Domain::last_participant_key( long key)
 {
-  return this->topicIdGenerator_.get_next_topic_id( federation, participant);
-}
-
-
-OpenDDS::DCPS::RepoId
-DCPS_IR_Domain::get_next_publication_id(
-  long federation,
-  const OpenDDS::DCPS::RepoId& participant
-)
-{
-  return this->pubsubIdGenerator_.get_next_sub_pub_id( federation, participant);
-}
-
-
-OpenDDS::DCPS::RepoId DCPS_IR_Domain::get_next_subscription_id(
-  long federation,
-  const OpenDDS::DCPS::RepoId& participant
-)
-{
-  return this->pubsubIdGenerator_.get_next_sub_pub_id( federation, participant);
+  this->participantIdGenerator_.last( key);
 }
 
 OpenDDS::DCPS::RepoId

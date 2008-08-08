@@ -13,7 +13,8 @@
 
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsInfoS.h"
-#include /**/ "DCPS_Entity_Id_Generator.h"
+
+#include "GuidGenerator.h"
 
 #include /**/ "dds/DdsDcpsDomainC.h"
 
@@ -124,10 +125,10 @@ public:
   ::DDS::DomainId_t get_id ();
 
   // Next Entity Id value in sequence.
-  OpenDDS::DCPS::RepoId get_next_participant_id( long federation);
-  OpenDDS::DCPS::RepoId get_next_topic_id( long federation, const OpenDDS::DCPS::RepoId& pid);
-  OpenDDS::DCPS::RepoId get_next_publication_id( long federation, const OpenDDS::DCPS::RepoId& pid);
-  OpenDDS::DCPS::RepoId get_next_subscription_id( long federation, const OpenDDS::DCPS::RepoId& pid);
+  OpenDDS::DCPS::RepoId get_next_participant_id();
+
+  // Ensure no conflicts with sequence values from persistent storage.
+  void last_participant_key( long key);
 
   // Lookup RepoId values for specific entity types by their key.
   OpenDDS::DCPS::RepoId participant(  const CORBA::Long key);
@@ -192,10 +193,9 @@ private:
 
   ::DDS::DomainId_t id_;
 
-  // the id generators
-  DCPS_Entity_Id_Generator participantIdGenerator_;
-  DCPS_Entity_Id_Generator topicIdGenerator_;
-  DCPS_Entity_Id_Generator pubsubIdGenerator_;
+  // Participant GUID Id generator.  The remaining Entities have their
+  // values generated within the containing Participant.
+  GuidGenerator participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;
@@ -236,9 +236,6 @@ private:
   ::DDS::Topic_var                                   bitPublicationTopic_;
   ::DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-  // Federation in which this Domain is operating.
-  long federation_;
 
   // Constructs for managing Instance handle and Id mappings.
 

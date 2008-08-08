@@ -11,7 +11,8 @@
 
 #include <sstream>
 
-DCPS_IR_Participant::DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
+DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
+                                          OpenDDS::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
                                           ::DDS::DomainParticipantQos qos,
                                           UpdateManager* um)
@@ -21,6 +22,21 @@ DCPS_IR_Participant::DCPS_IR_Participant (OpenDDS::DCPS::RepoId id,
   aliveStatus_(1),
   handle_(0),
   isBIT_(0),
+  topicIdGenerator_(
+    federationId,
+    OpenDDS::DCPS::GuidConverter(id).participantId(),
+    OpenDDS::DCPS::KIND_TOPIC
+  ),
+  publicationIdGenerator_(
+    federationId,
+    OpenDDS::DCPS::GuidConverter(id).participantId(),
+    OpenDDS::DCPS::KIND_WRITER
+  ),
+  subscriptionIdGenerator_(
+    federationId,
+    OpenDDS::DCPS::GuidConverter(id).participantId(),
+    OpenDDS::DCPS::KIND_READER
+  ),
   um_ (um)
 {
 }
@@ -989,6 +1005,41 @@ DCPS_IR_Domain* DCPS_IR_Participant::get_domain_reference () const
   return domain_;
 }
 
+OpenDDS::DCPS::RepoId
+DCPS_IR_Participant::get_next_topic_id()
+{
+  return this->topicIdGenerator_.next();
+}
+
+OpenDDS::DCPS::RepoId
+DCPS_IR_Participant::get_next_publication_id()
+{
+  return this->publicationIdGenerator_.next();
+}
+
+OpenDDS::DCPS::RepoId
+DCPS_IR_Participant::get_next_subscription_id()
+{
+  return this->subscriptionIdGenerator_.next();
+}
+
+void
+DCPS_IR_Participant::last_topic_key( long key)
+{
+  return this->topicIdGenerator_.last( key);
+}
+
+void
+DCPS_IR_Participant::last_publication_key( long key)
+{
+  return this->publicationIdGenerator_.last( key);
+}
+
+void
+DCPS_IR_Participant::last_subscription_key( long key)
+{
+  return this->subscriptionIdGenerator_.last( key);
+}
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 

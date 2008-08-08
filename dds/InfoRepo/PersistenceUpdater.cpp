@@ -55,11 +55,11 @@ struct TopicStrt <QosSeq, ACE_CString>
 template<>
 struct ParticipantStrt <QosSeq>
 {
-  IdType domainId;
+  ::DDS::DomainId_t domainId;
   IdType participantId; // Unique system-wide
   QosSeq participantQos;
 
-  ParticipantStrt (const IdType& dId, const IdType& pId
+  ParticipantStrt (const ::DDS::DomainId_t& dId, const IdType& pId
                    , const QosSeq& pQos)
     : domainId (dId), participantId (pId)
       , participantQos (pQos)

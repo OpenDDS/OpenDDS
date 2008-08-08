@@ -114,6 +114,12 @@ TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
     return false;
   }
 
+  // Ensure the participant GUID values do not conflict.
+  OpenDDS::DCPS::GuidConverter converter(
+    const_cast< OpenDDS::DCPS::RepoId*>( &topicId)
+  );
+  participantPtr->last_topic_key( converter.value());
+
   return true;
 }
 
@@ -263,11 +269,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  OpenDDS::DCPS::RepoId pubId
-    = domainPtr->get_next_publication_id(
-        this->federation_,
-        partPtr->get_id()
-      );
+  OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id();
 
   DCPS_IR_Publication* pubPtr;
   ACE_NEW_RETURN(pubPtr,
@@ -381,6 +383,12 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
       return false;
     }
 
+  // Ensure the participant GUID values do not conflict.
+  OpenDDS::DCPS::GuidConverter converter(
+    const_cast< OpenDDS::DCPS::RepoId*>( &pubId)
+  );
+  partPtr->last_publication_key( converter.value());
+
   return true;
 }
 
@@ -459,11 +467,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  OpenDDS::DCPS::RepoId subId
-    = domainPtr->get_next_subscription_id(
-        this->federation_,
-        partPtr->get_id()
-      );
+  OpenDDS::DCPS::RepoId subId = partPtr->get_next_subscription_id();
 
   DCPS_IR_Subscription* subPtr;
   ACE_NEW_RETURN(subPtr,
@@ -580,6 +584,12 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     return false;
   }
 
+  // Ensure the participant GUID values do not conflict.
+  OpenDDS::DCPS::GuidConverter converter(
+    const_cast< OpenDDS::DCPS::RepoId*>( &subId)
+  );
+  partPtr->last_subscription_key( converter.value());
+
   return true;
 }
 
@@ -639,13 +649,13 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
       throw OpenDDS::DCPS::Invalid_Domain();
     }
 
-  OpenDDS::DCPS::RepoId participantId
-    = domainPtr->get_next_participant_id( this->federation_);
+  OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id();
 
   DCPS_IR_Participant* participant;
 
   ACE_NEW_RETURN(participant,
                  DCPS_IR_Participant(
+                   this->federation_,
                    participantId,
                    domainPtr,
                    qos, um_),
@@ -695,7 +705,8 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
 
   DCPS_IR_Participant* participant;
   ACE_NEW_RETURN (participant,
-                 DCPS_IR_Participant( participantId,
+                 DCPS_IR_Participant( this->federation_,
+                                      participantId,
                                       domainPtr,
                                       qos, um_), 0);
 
@@ -708,6 +719,12 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
       delete participant;
       return false;
     }
+
+  // Ensure the participant GUID values do not conflict.
+  OpenDDS::DCPS::GuidConverter converter(
+    const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
+  );
+  domainPtr->last_participant_key( converter.value());
 
   return true;
 }

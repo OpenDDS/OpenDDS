@@ -69,6 +69,25 @@ public:
       , OpenDDS::DCPS::Invalid_Participant
     ));
 
+  /**
+   * @brief Add a previously existing topic to the repository.
+   *
+   * @param topicId       the Topic Entity GUID Id to use.
+   * @param domainId      the Domain in which the Topic is contained.
+   * @param participantId the Participant in which the Topic is contained.
+   * @param topicName     the name of the Topic.
+   * @param dataTypeName  the name of the data type.
+   * @param qos           the QoS value to use for the Topic.
+   *
+   * Adds a Topic Entity to the repository using a previosuly held
+   * TopicId value.  This method will ensure that any subsequent calls to
+   * add a Topic and obtain a newly generated Id value will return an Id
+   * value greater than the Id value of the current one.
+   *
+   * This method is intended to be called by the repository persistence
+   * mechanism only and should not be called after the repository has
+   * been intitialized and is operational.
+   */
   bool add_topic (const OpenDDS::DCPS::RepoId& topicId,
                   ::DDS::DomainId_t domainId,
                   const OpenDDS::DCPS::RepoId& participantId,
@@ -128,6 +147,28 @@ public:
       , OpenDDS::DCPS::Invalid_Topic
     ));
 
+  /**
+   * @brief Add a previously existing publication to the repository.
+   *
+   * @param domainId      the Domain in which the Publication is contained.
+   * @param participantId the Participant in which the Publication is contained.
+   * @param topicId       the Topic of the Publication.
+   * @param pubId         the GUID Id value to use for the Publication.
+   * @param pub_str       stringified publication callback to DataWriter.
+   * @param qos           the QoS value of the DataWriter.
+   * @param transInfo     the transport information for the Publication.
+   * @param publisherQos  the QoS value of the Publisher.
+   *
+   * Adds a Publication to the repository using a previosuly held
+   * Publication GUID Id value.  This method will ensure that any
+   * subsequent calls to add a Publication and obtain a newly generated
+   * Id value will return an Id value greater than the Id value of the
+   * current one.
+   *
+   * This method is intended to be called by the repository persistence
+   * mechanism only and should not be called after the repository has
+   * been intitialized and is operational.
+   */
   bool add_publication (::DDS::DomainId_t domainId,
                         const OpenDDS::DCPS::RepoId& participantId,
                         const OpenDDS::DCPS::RepoId& topicId,
@@ -165,6 +206,28 @@ public:
       , OpenDDS::DCPS::Invalid_Topic
     ));
 
+  /**
+   * @brief Add a previously existing subscription to the repository.
+   *
+   * @param domainId      the Domain in which the Subscription is contained.
+   * @param participantId the Participant in which the Subscription is contained.
+   * @param topicId       the Topic of the Subscription.
+   * @param subId         the GUID Id value to use for the Subscription.
+   * @param sub_str       stringified publication callback to DataReader.
+   * @param qos           the QoS value of the DataReader.
+   * @param transInfo     the transport information for the Subscription.
+   * @param subscriberQos the QoS value of the Subscriber.
+   *
+   * Adds a Subscription to the repository using a previosuly held
+   * Subscription GUID Id value.  This method will ensure that any
+   * subsequent calls to add a Subscription and obtain a newly generated
+   * Id value will return an Id value greater than the Id value of the
+   * current one.
+   *
+   * This method is intended to be called by the repository persistence
+   * mechanism only and should not be called after the repository has
+   * been intitialized and is operational.
+   */
   bool add_subscription (::DDS::DomainId_t domainId,
                          const OpenDDS::DCPS::RepoId& participantId,
                          const OpenDDS::DCPS::RepoId& topicId,
@@ -195,6 +258,23 @@ public:
       , OpenDDS::DCPS::Invalid_Domain
     ));
 
+  /**
+   * @brief Add a previously existing participant to the repository.
+   *
+   * @param domainId      the Domain in which the Participant is contained.
+   * @param participantId the GUID Id value to use for the Participant.
+   * @param qos           the QoS value of the Participant.
+   *
+   * Adds a Participant to the repository using a previosuly held
+   * Participant GUID Id value.  This method will ensure that any
+   * subsequent calls to add a Participant and obtain a newly generated
+   * Id value will return an Id value greater than the Id value of the
+   * current one.
+   *
+   * This method is intended to be called by the repository persistence
+   * mechanism only and should not be called after the repository has
+   * been intitialized and is operational.
+   */
   bool add_domain_participant (::DDS::DomainId_t domainId
                                , const OpenDDS::DCPS::RepoId& participantId
                                , const ::DDS::DomainParticipantQos & qos);

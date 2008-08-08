@@ -50,7 +50,6 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   after    += *Federator
 
   Source_Files {
-    DCPS_Entity_Id_Generator.cpp
     DCPSInfo_i.cpp
     DcpsInfo_pch.cpp
     DCPSInfoRepo.cpp
@@ -62,6 +61,7 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
     DCPS_IR_Topic_Description.cpp
     DCPS_Utils.cpp
     DomainParticipantListener_i.cpp
+    GuidGenerator.cpp
     PersistenceUpdater.cpp
     UpdateManager.cpp
     Updater.cpp

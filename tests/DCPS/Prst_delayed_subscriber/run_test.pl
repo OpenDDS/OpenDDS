@@ -16,7 +16,6 @@ $status = 0;
 ########################################
 #
 my $debug ;# = 10;
-my $debug = 10;
 my $repoDebug;
 my $pubDebug;
 my $subDebug;
@@ -121,6 +120,11 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 print "Spawning publisher.\n";
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
+
+# Attempt to ensure that the Publisher has the first participant value to
+# test that the participant numbering is reset during the persistence
+# update/download/whatEVER.
+sleep 5;
 
 print "Spawning first subscriber.\n";
 print $Subscriber->CommandLine() . "\n";
