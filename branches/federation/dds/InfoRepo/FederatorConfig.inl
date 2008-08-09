@@ -72,3 +72,17 @@ OpenDDS::Federator::Config::federationPort() const
   return this->federationPort_;
 }
 
+ACE_INLINE
+std::string&
+OpenDDS::Federator::Config::configFile()
+{
+  return this->configFile_;
+}
+
+ACE_INLINE
+std::string
+OpenDDS::Federator::Config::configFile() const
+{
+  return this->configFile_;
+}
+
