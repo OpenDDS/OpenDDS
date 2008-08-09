@@ -29,49 +29,62 @@ namespace { // Anonymous namespace for file scope
   /// Define an argument copying functor.
   class ArgCopier {
     public:
+      /// Identify the action to take on the next argument.
+      enum Action { COPY, FILENAME, IDVALUE };
+
       /// Construct with a target pointer array.
-      ArgCopier( char** target_, std::string& configFile);
+      ArgCopier( OpenDDS::Federator::Config* config);
 
       /// The Functor function operator.
       void operator()( char* arg);
 
     private:
-      /// The copy target.
-      char** target_;
+      /// The configuration object.
+      OpenDDS::Federator::Config* config_;
 
-      /// The configuration filename target.
-      std::string& configFile_;
-
-      /// Ugly argument value switch.
-      bool fileArg_;
+      /// How to treat the next argument.
+      Action action_;
   };
 
-  ArgCopier::ArgCopier( char** target, std::string& configFile)
-   : target_( target),
-     configFile_( configFile),
-     fileArg_( false)
+  ArgCopier::ArgCopier( OpenDDS::Federator::Config* config)
+   : config_( config),
+     action_( COPY)
   {
   }
 
   void
   ArgCopier::operator()( char* arg)
   {
-    // Handle the file argument and its value.
+    // Search for command line arguments to process rather than copy.
     if( ::OpenDDS::Federator::Config::FEDERATOR_CONFIG_OPTION == arg) {
       // Configuration file option, filename value is next arg.
-      this->fileArg_ = true;
+      this->action_ = FILENAME;
+      return;
+
+    } else if( ::OpenDDS::Federator::Config::FEDERATOR_ID_OPTION == arg) {
+      // Federation Id option, Id value is next arg.
+      this->action_ = IDVALUE;
       return;
     }
 
-    if( this->fileArg_ == true) {
-      // Store the configuration file name, but don't copy the arg.
-      this->configFile_ = arg;
+    // Process unrecognized arguments and all values.
+    switch( this->action_) {
+      case FILENAME:
+        // Store the configuration file name.
+        this->config_->configFile() = arg;
+        break;
 
-    } else {
-      // Copy other args verbatim.
-      *this->target_++ = arg;
+      case IDVALUE:
+        // Capture the federation Id.
+        this->config_->federationId() = ACE_OS::atoi( arg);
+        break;
+
+      case COPY:
+        // Copy other args verbatim.
+        this->config_->argv()[ this->config_->argc()++] = arg;
+        break;
     }
-    this->fileArg_ = false;
+    this->action_ = COPY;
   }
 
 } // End of anonymous namespace
@@ -81,8 +94,12 @@ namespace OpenDDS { namespace Federator {
 const std::string
 Config::FEDERATOR_CONFIG_OPTION( "-FederatorConfig");
 
+const std::string
+Config::FEDERATOR_ID_OPTION( "-FederationId");
+
 Config::Config( int argc, char** argv)
- : federationId_( NIL_REPOSITORY),
+ : argc_( 0),
+   federationId_( NIL_REPOSITORY),
    federationDomain_( DEFAULT_FEDERATIONDOMAIN),
    federationPort_( -1)
 {
@@ -92,22 +109,11 @@ Config::Config( int argc, char** argv)
     ));
   }
 
-  // Remove one option/value pair, add one option/value pair.
-  int additionalSlots = 0;
-
   // Setup the internal storage.
-  //
-  // N.B. We will be adding two arguments and their respective values,
-  //      but we will also be removing the configuration file option and
-  //      its value for a total of 2 additional slots.  If there is no
-  //      configuration file option, we will not be removing any
-  //      arguments, but neither will we be adding any.
-  //
-  this->argc_ = argc;
-  this->argv_ = new char*[ argc + additionalSlots];
+  this->argv_ = new char*[ argc];
 
-  // Copy the existing arguments verbatim.
-  ArgCopier argCopier( this->argv_, this->configFile_);
+  // Process the federation arguments.  Copy the uninteresting arguments verbatim.
+  ArgCopier argCopier( this);
   std::for_each( &argv[0], &argv[ argc], argCopier);
 
   // Read and process any configuration file.
@@ -200,12 +206,25 @@ Config::processFile()
   }
 
   // Convert to numeric repository key value.
-  this->federationId_ = ACE_OS::atoi( federationIdString.c_str());
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+  RepoKey idValue = ACE_OS::atoi( federationIdString.c_str());
+
+  // Allow the command line to override the file value.
+  if( this->federationId_ != NIL_REPOSITORY) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t)   FederationId == %d\n"),
+      ACE_TEXT("(%P|%t)   FederationId == %d from file ")
+      ACE_TEXT("overridden by value %d from command line.\n"),
+      idValue,
       this->federationId_
     ));
+
+  } else {
+    this->federationId_ = idValue;
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t)   FederationId == %d\n"),
+        this->federationId_
+      ));
+    }
   }
 
   // Federation port value - REQUIRED

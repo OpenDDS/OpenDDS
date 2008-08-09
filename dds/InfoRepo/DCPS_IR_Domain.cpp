@@ -101,19 +101,22 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant* participant)
 
   KeyToIdMap::iterator where = this->participantKeyToIdMap_.find( key);
   if( where != this->participantKeyToIdMap_.end()) {
-    std::stringstream buffer;
-    buffer << participantId << "(" << std::hex << key << ")";
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant: ")
-      ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
-      ACE_TEXT("for participant id: %s\n"),
-      id_,
-      key,
-      buffer.str().c_str()
-    ));
-    /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
-    //         the service to continue at this time.
-    // status = -1;
+    if( !(participantId == where->second)) {
+      std::stringstream buffer;
+      buffer << participantId << "(" << std::hex << key << ")";
+      buffer << ", existing Id: " << where->second;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_participant: ")
+        ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
+        ACE_TEXT("for participant id: %s\n"),
+        id_,
+        key,
+        buffer.str().c_str()
+      ));
+      /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
+      //         the service to continue at this time.
+      // status = -1;
+    }
 
   } else {
     this->participantKeyToIdMap_.insert(
@@ -375,16 +378,19 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i (OpenDDS::DCPS::RepoId& t
           CORBA::Long key = ::OpenDDS::DCPS::GuidConverter( topicId);
           KeyToIdMap::iterator where = this->topicKeyToIdMap_.find( key);
           if( where != this->topicKeyToIdMap_.end()) {
-            std::stringstream buffer;
-            buffer << topicId << "(" << std::hex << key << ")";
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
-              ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
-              ACE_TEXT("for topic id: %s\n"),
-              id_,
-              key,
-              buffer.str().c_str()
-            ));
+            if( !(topicId == where->second)) {
+              std::stringstream buffer;
+              buffer << topicId << "(" << std::hex << key << ")";
+              buffer << ", existing Id: " << where->second;
+              ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_i: ")
+                ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
+                ACE_TEXT("for topic id: %s\n"),
+                id_,
+                key,
+                buffer.str().c_str()
+              ));
+            }
 
             /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
             //         the service to continue at this time.
@@ -1523,19 +1529,22 @@ void DCPS_IR_Domain::publish_subscription_bit (DCPS_IR_Subscription* subscriptio
 
             KeyToIdMap::iterator where = this->subscriptionKeyToIdMap_.find( data.key[2]);
             if( where != this->subscriptionKeyToIdMap_.end()) {
-              std::stringstream buffer;
-              buffer << subscriptionId << "(" << std::hex << data.key[2] << ")";
-              ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_subscription_bit: ")
-                ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
-                ACE_TEXT("for subscription %s\n"),
-                id_,
-                data.key[2],
-                buffer.str().c_str()
-              ));
-              /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
-              //         the service to continue at this time.
-              // throw OpenDDS::DCPS::Invalid_Subscription();
+              if( !(subscriptionId == where->second)) {
+                std::stringstream buffer;
+                buffer << subscriptionId << "(" << std::hex << data.key[2] << ")";
+                buffer << ", existing Id: " << where->second;
+                ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_subscription_bit: ")
+                  ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
+                  ACE_TEXT("for subscription %s.\n"),
+                  id_,
+                  data.key[2],
+                  buffer.str().c_str()
+                ));
+                /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
+                //         the service to continue at this time.
+                // throw OpenDDS::DCPS::Invalid_Subscription();
+              }
 
             } else {
               this->subscriptionKeyToIdMap_.insert(
@@ -1630,19 +1639,22 @@ void DCPS_IR_Domain::publish_publication_bit (DCPS_IR_Publication* publication)
 
             KeyToIdMap::iterator where = this->publicationKeyToIdMap_.find( data.key[2]);
             if( where != this->publicationKeyToIdMap_.end()) {
-              std::stringstream buffer;
-              buffer << publicationId << "(" << std::hex << data.key[2] << ")";
-              ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_publication_bit: ")
-                ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
-                ACE_TEXT("for publication %s\n"),
-                id_,
-                data.key[2],
-                buffer.str().c_str()
-              ));
-              /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
-              //         the service to continue at this time.
-              // throw OpenDDS::DCPS::Invalid_Publication();
+              if( !(publicationId == where->second)) {
+                std::stringstream buffer;
+                buffer << publicationId << "(" << std::hex << data.key[2] << ")";
+                buffer << ", existing Id: " << where->second;
+                ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::publish_publication_bit: ")
+                  ACE_TEXT("Domain %d attempt to add duplicate key 0x%x ")
+                  ACE_TEXT("for publication %s\n"),
+                  id_,
+                  data.key[2],
+                  buffer.str().c_str()
+                ));
+                /// @TODO: This only affects the 'ignore_*()' interfaces, so allow
+                //         the service to continue at this time.
+                // throw OpenDDS::DCPS::Invalid_Publication();
+              }
 
             } else {
               this->publicationKeyToIdMap_.insert(

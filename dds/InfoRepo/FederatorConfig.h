@@ -20,6 +20,9 @@ class OpenDDS_Federator_Export Config  {
     /// Command line option specifying the configuration file.
     static const std::string FEDERATOR_CONFIG_OPTION;
 
+    /// Command line option specifying the federation Id value.
+    static const std::string FEDERATOR_ID_OPTION;
+
     /// Default constructor.
     Config( int argc, char** argv);
 
@@ -45,6 +48,10 @@ class OpenDDS_Federator_Export Config  {
     /// Federation Port value.
     short& federationPort();
     short  federationPort() const;
+
+    /// Configuration filename.
+    std::string& configFile();
+    std::string  configFile() const;
 
   private:
     /// Process a configuration file

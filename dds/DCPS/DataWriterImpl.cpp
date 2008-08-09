@@ -293,9 +293,18 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       // is called before fully_associated() call.
       if (OpenDDS::DCPS::remove (pending_readers_, remote_associations[i].remote_id_) == -1)
       {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataWriterImpl::fully_associated  "
-            "reader %d is not in pending list because remove_association is already called \n",
-            remote_associations[i].remote_id_));
+        std::stringstream buffer;
+        long handle;
+        handle = ::OpenDDS::DCPS::GuidConverter(
+                   const_cast< ::OpenDDS::DCPS::RepoId*>(&remote_associations[i].remote_id_)
+                 );
+        buffer << remote_associations[i].remote_id_ << "(" << std::hex << handle << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
+          ACE_TEXT("reader %s is not in pending list ")
+          ACE_TEXT("because remove_association is already called.\n"),
+          buffer.str().c_str()
+        ));
         continue;
       }
       
@@ -307,8 +316,17 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       
       if (OpenDDS::DCPS::insert (readers_, remote_associations[i].remote_id_) == -1)
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::fully_associated: insert %d from pending failed\n",
-          remote_associations[i].remote_id_));
+        std::stringstream buffer;
+        long handle;
+        handle = ::OpenDDS::DCPS::GuidConverter(
+                   const_cast< ::OpenDDS::DCPS::RepoId*>(&remote_associations[i].remote_id_)
+                 );
+        buffer << remote_associations[i].remote_id_ << "(" << std::hex << handle << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
+          ACE_TEXT("insert %s from pending failed.\n"),
+          buffer.str().c_str()
+        ));
       }
     }
   }

@@ -119,6 +119,8 @@ InfoRepo::shutdown (void)
 void
 InfoRepo::usage (const ACE_TCHAR * cmd)
 {
+  // NOTE: The federation arguments are parsed early by the
+  //       FederationConfig object.
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("Usage:\n")
               ACE_TEXT ("  %s\n")
@@ -150,16 +152,6 @@ InfoRepo::parse_args (int argc,
         {
           listen_address_str_ = current_arg;
           listen_address_given_ = 1;
-          arg_shifter.consume_arg();
-        }
-      else if ( (current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
-        {
-          federator_.id() = ACE_OS::atoi( current_arg);
-          arg_shifter.consume_arg();
-        }
-      else if ( (current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-j"))) != 0)
-        {
-          federation_endpoint_ = current_arg;
           arg_shifter.consume_arg();
         }
       else if ((current_arg = arg_shifter.get_the_parameter
