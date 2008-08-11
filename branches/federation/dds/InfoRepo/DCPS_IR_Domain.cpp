@@ -23,10 +23,10 @@
 
 #include <sstream>
 
-DCPS_IR_Domain::DCPS_IR_Domain (::DDS::DomainId_t id, long federation)
+DCPS_IR_Domain::DCPS_IR_Domain (::DDS::DomainId_t id, GuidGenerator& generator)
 :
  id_(id),
- participantIdGenerator_( federation),
+ participantIdGenerator_( generator),
  useBIT_(false)
 {
 }

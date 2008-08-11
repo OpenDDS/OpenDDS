@@ -1,23 +1,43 @@
+Mon Aug 11 15:25:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+	  Migrated from global not-quite-unique identifiers to global
+	  unique identifiers for participant id values.
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+
+	  Added (different) FederationId specification to each
+	  repository.  Moved command print directives to immediately
+	  prior to invocation.
+
+        * tests/DCPS/unit/Main.cpp:
+
+	  Extended diagnostic messages to logfile to include more detail.
+
 Sat Aug  9 05:11:56 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
 
-	  Added information to diagnostic messages.
+          Added information to diagnostic messages.
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Do not complain about duplicates unless different GUID values
-	  are actually confounded.
+          Do not complain about duplicates unless different GUID values
+          are actually confounded.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
         * dds/InfoRepo/FederatorConfig.h:
         * dds/InfoRepo/FederatorConfig.inl:
         * dds/InfoRepo/FederatorConfig.cpp:
 
-	  Move federation Id extraction prior to where it is needed to
-	  construct the DCPSInfo_i object.
+          Move federation Id extraction prior to where it is needed to
+          construct the DCPSInfo_i object.
 
 Fri Aug  8 16:05:50 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

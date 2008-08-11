@@ -20,6 +20,7 @@
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
+#include "GuidGenerator.h"
 #include "UpdateManager.h"
 
 #include /**/ "dds/DdsDcpsInfoS.h"
@@ -417,7 +418,8 @@ private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
 
-  long federation_;
+  long          federation_;
+  GuidGenerator participantIdGenerator_;
 
   UpdateManager* um_;
   bool reincarnate_;
