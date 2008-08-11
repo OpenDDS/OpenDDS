@@ -26,6 +26,7 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
                                         , long federation)
   : orb_ (CORBA::ORB::_duplicate (orb))
     , federation_(federation)
+    , participantIdGenerator_( federation)
     , um_ (0)
     , reincarnate_ (reincarnate)
 {
@@ -1105,7 +1106,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
 
       DCPS_IR_Domain* domainPtr;
       ACE_NEW_RETURN(domainPtr,
-                     DCPS_IR_Domain(domainId, this->federation_),
+                     DCPS_IR_Domain(domainId, this->participantIdGenerator_),
                      -1);
 
       status = domains_.bind(domainId, domainPtr);

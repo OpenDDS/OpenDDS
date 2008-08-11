@@ -61,7 +61,7 @@ class DCPS_IR_Publication;
 class DCPS_IR_Domain
 {
 public:
-  DCPS_IR_Domain(::DDS::DomainId_t id, long federation = 0);
+  DCPS_IR_Domain(::DDS::DomainId_t id, GuidGenerator& generator);
 
   ~DCPS_IR_Domain();
 
@@ -195,7 +195,7 @@ private:
 
   // Participant GUID Id generator.  The remaining Entities have their
   // values generated within the containing Participant.
-  GuidGenerator participantIdGenerator_;
+  GuidGenerator& participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;
