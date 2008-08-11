@@ -16,6 +16,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <string>
+#include <sstream>
 
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
