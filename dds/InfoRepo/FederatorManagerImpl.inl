@@ -17,6 +17,20 @@ OpenDDS::Federator::ManagerImpl::id() const
 }
 
 ACE_INLINE
+TAO_DDS_DCPSInfo_i*&
+OpenDDS::Federator::ManagerImpl::info()
+{
+  return this->info_;
+}
+
+ACE_INLINE
+TAO_DDS_DCPSInfo_i*
+OpenDDS::Federator::ManagerImpl::info() const
+{
+  return this->info_;
+}
+
+ACE_INLINE
 CORBA::ORB_ptr
 OpenDDS::Federator::ManagerImpl::orb()
 {

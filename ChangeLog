@@ -1,10 +1,54 @@
+Wed Aug 13 03:49:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+
+	  More <sstream> corrections.
+
+        * dds/DdsDcpsInfo.idl:
+
+	  attach_participant(): new method added to interface for
+	  attaching a DomainParticipant to a repository.
+
+        * dds/InfoRepo/Federator.idl:
+
+	  Change FederationId type to be new GUID based Id type.  Added
+	  ownership update type.  Replaced owner attribute of other
+	  update types with sender attribute.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  attach_participant(): method implemented.
+
+	  Modified internal add methods to only update the GUID Id value
+	  generators when loading Entities from the current repository.
+	  This allows these routines to be used for federation update
+	  purposes as well as the current persistence behaviors.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+	  Started implementation of ownership management interfaces and
+	  behaviors.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+
+	  Added DCPSInfo_i object reference to the manager.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Removed unused anonymous definition.
+
 Mon Aug 11 15:36:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
         * tests/DCPS/FooTest3_1/PubDriver.cpp:
         * tests/DCPS/FooTest3_2/PubDriver.cpp:
 
-	  Include <sstream> in order to use stringstream buffers.
+          Include <sstream> in order to use stringstream buffers.
 
 Mon Aug 11 15:25:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

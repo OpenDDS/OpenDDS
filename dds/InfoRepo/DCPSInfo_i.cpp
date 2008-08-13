@@ -38,6 +38,34 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 {
 }
 
+CORBA::Boolean TAO_DDS_DCPSInfo_i::attach_participant (
+  ::DDS::DomainId_t            domainId,
+  const OpenDDS::DCPS::RepoId& participantId
+)
+ACE_THROW_SPEC ((
+  CORBA::SystemException
+  , OpenDDS::DCPS::Invalid_Domain
+  , OpenDDS::DCPS::Invalid_Participant
+))
+{
+  // Grab the domain.
+  DCPS_IR_Domain* domain;
+  if( 0 != this->domains_.find( domainId, domain)) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  // Grab the participant.
+  DCPS_IR_Participant* participant;
+  if( 0 != domain->find_participant( participantId, participant)) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  // Establish ownership within the local repository.
+  participant->takeOwnership();
+
+  return false;
+}
+
 
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     OpenDDS::DCPS::RepoId_out topicId,
@@ -115,11 +143,15 @@ TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
     return false;
   }
 
-  // Ensure the participant GUID values do not conflict.
   OpenDDS::DCPS::GuidConverter converter(
     const_cast< OpenDDS::DCPS::RepoId*>( &topicId)
   );
-  participantPtr->last_topic_key( converter.value());
+  // See if we are adding a topic that was created within this
+  // repository or a different repository.
+  if( converter.federationId() == this->federation_) {
+    // Ensure the topic GUID values do not conflict.
+    participantPtr->last_topic_key( converter.value());
+  }
 
   return true;
 }
@@ -348,6 +380,8 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
+  /// @TODO: Check if this is already stored.  If so, just clear the callback IOR.
+
   CORBA::Object_var obj = orb_->string_to_object (pub_str);
   OpenDDS::DCPS::DataWriterRemote_var publication
     = OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow (obj.in());
@@ -384,11 +418,15 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
       return false;
     }
 
-  // Ensure the participant GUID values do not conflict.
   OpenDDS::DCPS::GuidConverter converter(
     const_cast< OpenDDS::DCPS::RepoId*>( &pubId)
   );
-  partPtr->last_publication_key( converter.value());
+  // See if we are adding a publication that was created within this
+  // repository or a different repository.
+  if( converter.federationId() == this->federation_) {
+    // Ensure the publication GUID values do not conflict.
+    partPtr->last_publication_key( converter.value());
+  }
 
   return true;
 }
@@ -585,11 +623,15 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     return false;
   }
 
-  // Ensure the participant GUID values do not conflict.
   OpenDDS::DCPS::GuidConverter converter(
     const_cast< OpenDDS::DCPS::RepoId*>( &subId)
   );
-  partPtr->last_subscription_key( converter.value());
+  // See if we are adding a subscription that was created within this
+  // repository or a different repository.
+  if( converter.federationId() == this->federation_) {
+    // Ensure the subscription GUID values do not conflict.
+    partPtr->last_subscription_key( converter.value());
+  }
 
   return true;
 }
@@ -721,11 +763,15 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
       return false;
     }
 
-  // Ensure the participant GUID values do not conflict.
   OpenDDS::DCPS::GuidConverter converter(
     const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
   );
-  domainPtr->last_participant_key( converter.value());
+  // See if we are adding a participant that was created within this
+  // repository or a different repository.
+  if( converter.federationId() == this->federation_) {
+    // Ensure the participant GUID values do not conflict.
+    domainPtr->last_participant_key( converter.value());
+  }
 
   return true;
 }

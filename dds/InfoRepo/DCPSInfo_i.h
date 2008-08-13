@@ -56,6 +56,16 @@ public:
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i (void);
 
+  virtual CORBA::Boolean attach_participant (
+      ::DDS::DomainId_t domainId,
+      const OpenDDS::DCPS::RepoId& participantId
+    )
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+      , OpenDDS::DCPS::Invalid_Domain
+      , OpenDDS::DCPS::Invalid_Participant
+    ));
+
   virtual OpenDDS::DCPS::TopicStatus assert_topic (
       OpenDDS::DCPS::RepoId_out topicId,
       ::DDS::DomainId_t domainId,
@@ -80,14 +90,12 @@ public:
    * @param dataTypeName  the name of the data type.
    * @param qos           the QoS value to use for the Topic.
    *
-   * Adds a Topic Entity to the repository using a previosuly held
-   * TopicId value.  This method will ensure that any subsequent calls to
+   * Adds a Topic Entity to the repository using a specified TopicId
+   * value.  If the TopicId indicates that this Topic was created by
+   * within this repository (the federation Id is the current repositories
+   * federation Id), this method will ensure that any subsequent calls to
    * add a Topic and obtain a newly generated Id value will return an Id
    * value greater than the Id value of the current one.
-   *
-   * This method is intended to be called by the repository persistence
-   * mechanism only and should not be called after the repository has
-   * been intitialized and is operational.
    */
   bool add_topic (const OpenDDS::DCPS::RepoId& topicId,
                   ::DDS::DomainId_t domainId,
@@ -160,15 +168,13 @@ public:
    * @param transInfo     the transport information for the Publication.
    * @param publisherQos  the QoS value of the Publisher.
    *
-   * Adds a Publication to the repository using a previosuly held
-   * Publication GUID Id value.  This method will ensure that any
+   * Adds a Publication to the repository using a specified Publication
+   * GUID Id value.  If the PublicationId indicates that this Publication
+   * was created by within this repository (the federation Id is the
+   * current repositories federation Id), this method will ensure that any
    * subsequent calls to add a Publication and obtain a newly generated
    * Id value will return an Id value greater than the Id value of the
    * current one.
-   *
-   * This method is intended to be called by the repository persistence
-   * mechanism only and should not be called after the repository has
-   * been intitialized and is operational.
    */
   bool add_publication (::DDS::DomainId_t domainId,
                         const OpenDDS::DCPS::RepoId& participantId,
@@ -219,15 +225,13 @@ public:
    * @param transInfo     the transport information for the Subscription.
    * @param subscriberQos the QoS value of the Subscriber.
    *
-   * Adds a Subscription to the repository using a previosuly held
-   * Subscription GUID Id value.  This method will ensure that any
-   * subsequent calls to add a Subscription and obtain a newly generated
+   * Adds a Subscription to the repository using a specified Subscription
+   * GUID Id value.  If the SubscriptionId indicates that this Subscription
+   * was created by within this repository (the federation Id is the
+   * current repositories federation Id), this method will ensure that any
+   * subsequent calls to add a Publication and obtain a newly generated
    * Id value will return an Id value greater than the Id value of the
    * current one.
-   *
-   * This method is intended to be called by the repository persistence
-   * mechanism only and should not be called after the repository has
-   * been intitialized and is operational.
    */
   bool add_subscription (::DDS::DomainId_t domainId,
                          const OpenDDS::DCPS::RepoId& participantId,
@@ -266,15 +270,13 @@ public:
    * @param participantId the GUID Id value to use for the Participant.
    * @param qos           the QoS value of the Participant.
    *
-   * Adds a Participant to the repository using a previosuly held
-   * Participant GUID Id value.  This method will ensure that any
-   * subsequent calls to add a Participant and obtain a newly generated
+   * Adds a Participant to the repository using a specified Participant
+   * GUID Id value.  If the ParticipantId indicates that this Participant
+   * was created by within this repository (the federation Id is the
+   * current repositories federation Id), this method will ensure that any
+   * subsequent calls to add a Publication and obtain a newly generated
    * Id value will return an Id value greater than the Id value of the
    * current one.
-   *
-   * This method is intended to be called by the repository persistence
-   * mechanism only and should not be called after the repository has
-   * been intitialized and is operational.
    */
   bool add_domain_participant (::DDS::DomainId_t domainId
                                , const OpenDDS::DCPS::RepoId& participantId

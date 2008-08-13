@@ -23,13 +23,6 @@
 # include "FederatorManagerImpl.inl"
 #endif /* ! __ACE_INLINE__ */
 
-namespace { // Anonymous namespace for file scope.
-
-  // Starting key value for transport keys to use.
-  enum { BASE_TRANSPORT_KEY_VALUE = 30};
-
-} // End of anonymous namespace
-
 namespace OpenDDS { namespace Federator {
 
 ManagerImpl::ManagerImpl( Config& config)

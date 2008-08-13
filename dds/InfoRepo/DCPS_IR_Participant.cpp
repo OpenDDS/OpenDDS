@@ -22,6 +22,8 @@ DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
   aliveStatus_(1),
   handle_(0),
   isBIT_(0),
+  federationId_( federationId),
+  owner_( OWNER_NONE),
   topicIdGenerator_(
     federationId,
     OpenDDS::DCPS::GuidConverter(id).participantId(),
@@ -157,6 +159,33 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
 }
 
 
+void
+DCPS_IR_Participant::takeOwnership()
+{
+  /// @TODO: Publish an update with our ownership.
+
+  // And now handle our internal ownership processing.
+  this->changeOwner( this->federationId_);
+}
+
+void
+DCPS_IR_Participant::changeOwner( long owner)
+{
+  { /// @TODO: Lock this section of code from reentry.
+    if( (this->owner_ == this->federationId_)  && (owner == OWNER_NONE)) {
+      // Do not relinquish ownership except to another repository.
+      return;
+    }
+
+    // Finally.  Change the value.
+    this->owner_ = owner;
+
+  } // End of lock scope.
+
+  if( this->owner_ == this->federationId_) {
+    /// @TODO: Ensure that any stalled callbacks are made.
+  }
+}
 
 int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
 {
