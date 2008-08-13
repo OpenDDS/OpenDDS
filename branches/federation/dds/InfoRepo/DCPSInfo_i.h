@@ -394,6 +394,34 @@ public:
     ::OpenDDS::DCPS::Invalid_Domain,
     ::OpenDDS::DCPS::Invalid_Participant
   ));
+
+  /**
+   * @brief assert new ownership for a participant and its contained entities.
+   *
+   * @param domainId      the domain in which the participant resides.
+   * @param participantId the participant to be owned.
+   * @param sender        the repository sending the update data.
+   * @param owner         the repository which is to make callbacks for
+   *                      entities within the participant.
+   *
+   * This establishes @c owner as the new owner of the participant.
+   * Ownership consists of calling back to the reader and writer remote
+   * interfaces when associations are established and removed from a
+   * publication or subscription.  Owner may be the special value of
+   * OWNER_NONE to indicate that the previous owner is no longer
+   * available to make callbacks and the application has not indicated
+   * which repository is to replace it in this capacity.
+   *
+   * The @c sender of the update is included so that the participant can
+   * check that transitions to OWNER_NONE are only honored when initiated
+   * by the current owner of the participant.
+   */
+  void changeOwnership(
+         ::DDS::DomainId_t              domainId,
+         const ::OpenDDS::DCPS::RepoId& participantId,
+         long                           sender,
+         long                           owner
+       );
  
 
   /// Called to load the domains

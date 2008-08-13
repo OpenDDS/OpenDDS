@@ -64,10 +64,7 @@ namespace OpenDDS { namespace Federator {
       ACE_Condition<ACE_SYNCH_MUTEX> workAvailable_;
 
       /// Contents of the queue.
-      typedef std::pair<
-                DataType*,
-                ::DDS::SampleInfo*
-              > DataInfo;
+      typedef std::pair< DataType*, ::DDS::SampleInfo* > DataInfo;
 
       /// Queue of publication data to process.
       std::list< DataInfo> queue_;
