@@ -4,6 +4,7 @@
 #define TAO_DDS_FEDERATOR_IDL
 
 #include "dds/DdsDcpsInfo.idl"
+#include "dds/DdsDcpsGuid.idl"
 
 module OpenDDS { module Federator {
 
@@ -17,17 +18,13 @@ module OpenDDS { module Federator {
     typedef sequence<octet> OctetSeq;
 
     // Unique identifier for all entities within federation.
-    struct FederationId {
-      RepoKey               repository;
-      OpenDDS::DCPS::RepoId handle;
-    };
+    typedef DCPS::GUID_t FederationId;
 
     // Types of updates that can be performed.
     enum UpdateType {
       CreateEntity,
       DestroyEntity,
-      UpdateValue,
-      UpdateOwnership
+      UpdateValue
     };
 
     // Constant values.
@@ -37,15 +34,33 @@ module OpenDDS { module Federator {
 
     ////////////////////////////////////////////////////////////////////
     //
+    // Ownership updates
+    //
+
+// These pragmas are TAO specific
+#pragma DCPS_DATA_TYPE "OpenDDS::Federator::OwnerUpdate"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::OwnerUpdate sender"
+    struct OwnerUpdate {
+      RepoKey         sender;
+      RepoKey         owner;
+      FederationId    participant;
+    };
+
+    // Constant values.
+    const string  OWNERUPDATETOPICNAME = "OwnerUpdate";
+    const string  OWNERUPDATETYPENAME  = "OwnerUpdate";
+
+    ////////////////////////////////////////////////////////////////////
+    //
     // Topic data updates
     //
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::TopicUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate id.repository"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate sender"
     struct TopicUpdate {
       FederationId    id;
-      RepoKey         owner;
+      RepoKey         sender;
       FederationId    participant;
       DDS::DomainId_t domain;
       long            packet;      // The sequence number of the instant sample.
@@ -66,10 +81,10 @@ module OpenDDS { module Federator {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::ParticipantUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate id.repository"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate sender"
     struct ParticipantUpdate {
       FederationId              id;
-      RepoKey                   owner;
+      RepoKey                   sender;
       DDS::DomainId_t           domain;
       long                      packet;      // The sequence number of the instant sample.
       UpdateType                action;
@@ -87,10 +102,10 @@ module OpenDDS { module Federator {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::PublicationUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate id.repository"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate sender"
     struct PublicationUpdate {
       FederationId                        id;
-      RepoKey                             owner;
+      RepoKey                             sender;
       FederationId                        topic;
       FederationId                        participant;
       DDS::DomainId_t                     domain;
@@ -122,10 +137,10 @@ module OpenDDS { module Federator {
 
 // These pragmas are TAO specific
 #pragma DCPS_DATA_TYPE "OpenDDS::Federator::SubscriptionUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate id.repository"
+#pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate sender"
     struct SubscriptionUpdate {
       FederationId                        id;
-      RepoKey                             owner;
+      RepoKey                             sender;
       FederationId                        topic;
       FederationId                        participant;
       DDS::DomainId_t                     domain;

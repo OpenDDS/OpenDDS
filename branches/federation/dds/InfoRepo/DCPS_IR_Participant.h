@@ -49,6 +49,9 @@ typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 class DCPS_IR_Participant
 {
 public:
+  /// Special owner to enforce no callbacks.
+  enum { OWNER_NONE};
+
   DCPS_IR_Participant (long federationId,
                        OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
@@ -56,6 +59,12 @@ public:
 		       UpdateManager* um);
 
   virtual ~DCPS_IR_Participant();
+
+  /// Take local ownership of this participant and publish an update.
+  void takeOwnership();
+
+  /// Process an incoming update that changes ownership.
+  void changeOwner( long owner);
 
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
@@ -168,6 +177,9 @@ private:
   CORBA::Boolean aliveStatus_;
   ::DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
+
+  long federationId_;
+  long owner_;
 
   // Entity GUID Id generators.
   GuidGenerator topicIdGenerator_;

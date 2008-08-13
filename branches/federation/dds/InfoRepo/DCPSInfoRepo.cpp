@@ -220,6 +220,9 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   );
   TAO_DDS_DCPSInfo_i* info_servant = dynamic_cast<TAO_DDS_DCPSInfo_i*>(info.in());
 
+  // Install the DCPSInfo_i into the Federator::Manager.
+  this->federator_.info() = info_servant;
+
   CORBA::Object_var obj =
     orb_->resolve_initial_references ("RootPOA");
   root_poa_ = PortableServer::POA::_narrow (obj.in ());

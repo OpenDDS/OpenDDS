@@ -12,6 +12,8 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 
+#include <sstream>
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"

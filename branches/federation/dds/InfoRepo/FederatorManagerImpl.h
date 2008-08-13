@@ -19,6 +19,8 @@
 
 #include <set>
 
+class TAO_DDS_DCPSInfo_i;
+
 namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export ManagerImpl 
@@ -74,6 +76,10 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Tear down the update subscriptions.
 //    void finalize();
+
+    /// Accessors for the DCPSInfo reference.
+    TAO_DDS_DCPSInfo_i*& info();
+    TAO_DDS_DCPSInfo_i*  info() const;
 
     /// Accessors for the federation Id value.
     RepoKey& id();
@@ -145,6 +151,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// The configuration information for this manager.
     Config& config_;
+
+    /// The Info object reference to update.
+    TAO_DDS_DCPSInfo_i* info_;
 
     /// The ORB in which we are activated.
     CORBA::ORB_var orb_;
