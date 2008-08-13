@@ -66,6 +66,29 @@ ACE_THROW_SPEC ((
   return false;
 }
 
+void
+TAO_DDS_DCPSInfo_i::changeOwnership(
+  ::DDS::DomainId_t              domainId,
+  const ::OpenDDS::DCPS::RepoId& participantId,
+  long                           sender,
+  long                           owner
+)
+{
+  // Grab the domain.
+  DCPS_IR_Domain* domain;
+  if( 0 != this->domains_.find( domainId, domain)) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  // Grab the participant.
+  DCPS_IR_Participant* participant;
+  if( 0 != domain->find_participant( participantId, participant)) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  // Establish the ownership.
+  participant->changeOwner( sender, owner);
+}
 
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     OpenDDS::DCPS::RepoId_out topicId,

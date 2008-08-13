@@ -25,6 +25,7 @@ namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export ManagerImpl 
   : public virtual POA_OpenDDS::Federator::Manager,
+    public virtual UpdateProcessor< OwnerUpdate>,
     public virtual UpdateProcessor< TopicUpdate>,
     public virtual UpdateProcessor< ParticipantUpdate>,
     public virtual UpdateProcessor< SubscriptionUpdate>,
@@ -91,6 +92,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     // Update methods.
 
+    /// Null implementation for OwnerUpdate samples.
+    void processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
+
     /// Create a proxy for a new publication.
     void processCreate( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
 
@@ -103,6 +107,9 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Create a proxy for a new topic.
     void processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
 
+    /// Process ownership changes.
+    void processUpdate( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
+
     /// Update the proxy for a publication.
     void processUpdate( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
 
@@ -114,6 +121,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Update the proxy for a topic.
     void processUpdate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Null implementation for OwnerUpdate samples.
+    void processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
 
     /// Delete a proxy for a publication.
     void processDelete( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);

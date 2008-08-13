@@ -1,46 +1,81 @@
+Wed Aug 13 22:22:07 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+	  Use CORBA::OctetSeq instead of sequence<octet>
+
+        * dds/InfoRepo/Federator.idl:
+	
+	  Extended update topic structures to provide information
+	  required to implement update processing.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  changeOwnership(): added this method to simplify the
+	  Federator::Manager to updating ownership.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+	  changeOwner(): added sender to interface.  Added lock to
+	  portions of processing.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+	  Add OwnerUpdate handler declarations.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Implement update processing.
+
+        * dds/InfoRepo/UpdateReceiver_T.h:
+
+	  Clean up some formatting.
+
 Wed Aug 13 03:49:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
         * dds/DCPS/transport/framework/NetworkAddress.inl:
 
-	  More <sstream> corrections.
+          More <sstream> corrections.
 
         * dds/DdsDcpsInfo.idl:
 
-	  attach_participant(): new method added to interface for
-	  attaching a DomainParticipant to a repository.
+          attach_participant(): new method added to interface for
+          attaching a DomainParticipant to a repository.
 
         * dds/InfoRepo/Federator.idl:
 
-	  Change FederationId type to be new GUID based Id type.  Added
-	  ownership update type.  Replaced owner attribute of other
-	  update types with sender attribute.
+          Change FederationId type to be new GUID based Id type.  Added
+          ownership update type.  Replaced owner attribute of other
+          update types with sender attribute.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  attach_participant(): method implemented.
+          attach_participant(): method implemented.
 
-	  Modified internal add methods to only update the GUID Id value
-	  generators when loading Entities from the current repository.
-	  This allows these routines to be used for federation update
-	  purposes as well as the current persistence behaviors.
+          Modified internal add methods to only update the GUID Id value
+          generators when loading Entities from the current repository.
+          This allows these routines to be used for federation update
+          purposes as well as the current persistence behaviors.
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
 
-	  Started implementation of ownership management interfaces and
-	  behaviors.
+          Started implementation of ownership management interfaces and
+          behaviors.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl.inl:
 
-	  Added DCPSInfo_i object reference to the manager.
+          Added DCPSInfo_i object reference to the manager.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Removed unused anonymous definition.
+          Removed unused anonymous definition.
 
 Mon Aug 11 15:36:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

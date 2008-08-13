@@ -165,15 +165,21 @@ DCPS_IR_Participant::takeOwnership()
   /// @TODO: Publish an update with our ownership.
 
   // And now handle our internal ownership processing.
-  this->changeOwner( this->federationId_);
+  this->changeOwner( this->federationId_, this->federationId_);
 }
 
 void
-DCPS_IR_Participant::changeOwner( long owner)
+DCPS_IR_Participant::changeOwner( long sender, long owner)
 {
-  { /// @TODO: Lock this section of code from reentry.
-    if( (this->owner_ == this->federationId_)  && (owner == OWNER_NONE)) {
-      // Do not relinquish ownership except to another repository.
+  { ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->ownerLock_);
+
+    if( (owner == OWNER_NONE)
+     && ( (this->owner_ == this->federationId_)
+       || (this->owner_ != sender)
+        )
+      ) {
+      // Do not eliminate ownership if we are the owner or if the update
+      // does not come from the current owner.
       return;
     }
 

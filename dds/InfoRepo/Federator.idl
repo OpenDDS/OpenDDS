@@ -5,6 +5,7 @@
 
 #include "dds/DdsDcpsInfo.idl"
 #include "dds/DdsDcpsGuid.idl"
+#include "tao/OctetSeq.pidl"
 
 module OpenDDS { module Federator {
 
@@ -13,9 +14,6 @@ module OpenDDS { module Federator {
 
     // Value of DomainId for federation.
     typedef DDS::DomainId_t FederationDomain;
-
-    // Since we don't have TransportInterfaceBLOB type support here.
-    typedef sequence<octet> OctetSeq;
 
     // Unique identifier for all entities within federation.
     typedef DCPS::GUID_t FederationId;
@@ -44,6 +42,9 @@ module OpenDDS { module Federator {
       RepoKey         sender;
       RepoKey         owner;
       FederationId    participant;
+      DDS::DomainId_t domain;
+      long            packet;      // The sequence number of the instant sample.
+      UpdateType      action;
     };
 
     // Constant values.
@@ -111,6 +112,7 @@ module OpenDDS { module Federator {
       DDS::DomainId_t                     domain;
       long                                packet;      // The sequence number of the instant sample.
       UpdateType                          action;
+      string                              callback;
       DDS::PublisherQos                   publisher_qos;
       DDS::DataWriterQos                  datawriter_qos;
 
@@ -123,7 +125,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                            transport_blob;
+      CORBA::OctetSeq                     transport_blob;
     };
 
     // Constant values.
@@ -146,6 +148,7 @@ module OpenDDS { module Federator {
       DDS::DomainId_t                     domain;
       long                                packet;      // The sequence number of the instant sample.
       UpdateType                          action;
+      string                              callback;
       DDS::SubscriberQos                  subscriber_qos;
       DDS::DataReaderQos                  datareader_qos;
 
@@ -158,7 +161,7 @@ module OpenDDS { module Federator {
 
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
-      OctetSeq                            transport_blob;
+      CORBA::OctetSeq                     transport_blob;
     };
 
     // Constant values.

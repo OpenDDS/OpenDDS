@@ -4,6 +4,7 @@
 #define TAO_DDS_DCPS_INFO_UTILS_IDL
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsGuid.idl"
+#include "tao/OctetSeq.pidl"
 
 module OpenDDS
 {
@@ -14,7 +15,7 @@ module OpenDDS
     typedef GUID_t RepoId;
 
     typedef long TransportInterfaceId;
-    typedef sequence<octet> TransportInterfaceBLOB;
+    typedef CORBA::OctetSeq TransportInterfaceBLOB;
 
     struct TransportInterfaceInfo {
       /// The transport type (.e.g SimpleTCP or SimpleUDP)

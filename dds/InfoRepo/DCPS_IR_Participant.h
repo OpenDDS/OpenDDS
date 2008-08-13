@@ -64,7 +64,7 @@ public:
   void takeOwnership();
 
   /// Process an incoming update that changes ownership.
-  void changeOwner( long owner);
+  void changeOwner( long sender, long owner);
 
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
@@ -180,6 +180,9 @@ private:
 
   long federationId_;
   long owner_;
+
+  /// Lock portions ownership processing.
+  ACE_SYNCH_MUTEX ownerLock_;
 
   // Entity GUID Id generators.
   GuidGenerator topicIdGenerator_;
