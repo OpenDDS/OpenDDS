@@ -107,6 +107,9 @@ namespace OpenDDS
     */
     ::DDS::ReturnCode_t delete_contained_participants ();
 
+    // Expose the participants for reading.
+    const DPMap& participants() const;
+
     private:
 
       /// The default qos value of DomainParticipant.
