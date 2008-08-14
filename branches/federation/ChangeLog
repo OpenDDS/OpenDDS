@@ -1,13 +1,27 @@
+Thu Aug 14 20:07:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Debugged regressions caused by the failover implementations.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+	  Beefed up some diagnostics.
+
 Thu Aug 14 16:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.h:
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
 
-	  Exposed internal servant participants map for reading.
+          Exposed internal servant participants map for reading.
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Application code for failover behaviors implemented.
+          Application code for failover behaviors implemented.
 
 Wed Aug 13 22:22:07 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
