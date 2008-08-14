@@ -405,6 +405,12 @@ namespace OpenDDS
       return TheParticipantFactory;
     }
 
+    const DomainParticipantFactoryImpl::DPMap&
+    DomainParticipantFactoryImpl::participants() const
+    {
+      return this->participants_;
+    }
+
 
  } // namespace DCPS
 } // namespace OpenDDS
