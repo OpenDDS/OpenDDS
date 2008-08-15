@@ -714,6 +714,11 @@ PubDriver::listener_test ()
 
   ::DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
 
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("set_listener/get_listener.\n")
+  ));
+
   // Test set_listener/get_listener for DomainParticipant.
   ::DDS::DomainParticipantListener_var dpl_got
     = participant_->get_listener ();
@@ -751,6 +756,11 @@ PubDriver::listener_test ()
   dwl_got = foo_datawriter_->get_listener ();
 
   TEST_CHECK (dwl_got.in () == dwl.in ());
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("update_incompatible_qos/get_offered_incompatible_qos_status.\n")
+  ));
 
   // Test update_incompatible_qos/get_offered_incompatible_qos_status
   // and listener for specific status kind.
@@ -833,6 +843,11 @@ PubDriver::listener_test ()
 
   // Test get_publication_match_status.
 
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("get_publication_match_status.\n")
+  ));
+
   // The PUBLICATION_MATCH_STATUS status is updated when add_association.
   // One subscription is added already.
   ::DDS::PublicationMatchStatus match_status
@@ -849,6 +864,11 @@ PubDriver::listener_test ()
 
   //Test remove_associations
 
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("remove_associations.\n")
+  ));
+
   ::OpenDDS::DCPS::ReaderIdSeq reader_ids;
   reader_ids.length (1);
   reader_ids[0] = this->sub_id_;
@@ -859,6 +879,11 @@ PubDriver::listener_test ()
   ret = foo_datawriter_->get_matched_subscriptions (subscription_handles);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK && subscription_handles.length () == 0);
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) PubDriver::listener_test: ")
+    ACE_TEXT("get_offered_deadline_missed_status.\n")
+  ));
 
   // The OfferedDeadlineMissedStatus and OfferedDeadlineMissedStatus are not
   // supported currently. The status got should be the same as initial status.

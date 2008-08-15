@@ -474,9 +474,7 @@ namespace OpenDDS
       ACE_Recursive_Thread_Mutex      publication_handle_lock_;
 
       typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
-
       RepoIdToHandleMap               id_to_handle_map_;
-      ::DDS::InstanceHandleSeq        publication_handles_;
 
 
       // Status conditions.

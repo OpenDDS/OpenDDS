@@ -1,8 +1,31 @@
+Fri Aug 15 03:19:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  add_associations():
+	  remove_associations():
+	  update_incompatible_qos():
+	    Made these methods idempotent (I hope!) and simplified.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Cleaned up and simplified previous bugfix.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+
+	  Updated diagnostic messages to use new GUID based RepoId
+	  values.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+	  Added diagnostic messages.
+
 Thu Aug 14 20:07:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Debugged regressions caused by the failover implementations.
+          Debugged regressions caused by the failover implementations.
 
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
         * tests/DCPS/BuiltInTopicTest/Writer.cpp:
@@ -10,7 +33,7 @@ Thu Aug 14 20:07:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/BuiltInTopicTest/publisher.cpp:
         * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
 
-	  Beefed up some diagnostics.
+          Beefed up some diagnostics.
 
 Thu Aug 14 16:45:16 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
