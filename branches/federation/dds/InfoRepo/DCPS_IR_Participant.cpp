@@ -163,6 +163,7 @@ void
 DCPS_IR_Participant::takeOwnership()
 {
   /// @TODO: Publish an update with our ownership.
+  //  if( this->um_) this->um_->add( Owner, this->federationId);
 
   // And now handle our internal ownership processing.
   this->changeOwner( this->federationId_, this->federationId_);
@@ -174,8 +175,7 @@ DCPS_IR_Participant::changeOwner( long sender, long owner)
   { ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->ownerLock_);
 
     if( (owner == OWNER_NONE)
-     && ( (this->owner_ == this->federationId_)
-       || (this->owner_ != sender)
+     && ( this->owner() || (this->owner_ != sender)
         )
       ) {
       // Do not eliminate ownership if we are the owner or if the update
@@ -188,9 +188,15 @@ DCPS_IR_Participant::changeOwner( long sender, long owner)
 
   } // End of lock scope.
 
-  if( this->owner_ == this->federationId_) {
+  if( this->owner()) {
     /// @TODO: Ensure that any stalled callbacks are made.
   }
+}
+
+bool
+DCPS_IR_Participant::owner() const
+{
+  return this->owner_ == this->federationId_;
 }
 
 int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)

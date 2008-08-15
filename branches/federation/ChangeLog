@@ -1,25 +1,53 @@
+Fri Aug 15 17:51:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          remove_associations():
+          update_incompatible_qos():
+            Made these methods idempotent (I hope!) and simplified;
+	    add_associations() was already idempotent.
+
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Force locally created DomainParticipants to be owned by the
+	  local repository.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+	  Added method to allow determination of local ownership.
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+	  Predicated callbacks to the endpoints on whether the current
+	  repository is the 'owner' of the DomainParticipant in whic the
+	  endpoints are instantiated.
+
 Fri Aug 15 03:19:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  add_associations():
-	  remove_associations():
-	  update_incompatible_qos():
-	    Made these methods idempotent (I hope!) and simplified.
+          add_associations():
+          remove_associations():
+          update_incompatible_qos():
+            Made these methods idempotent (I hope!) and simplified.
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Cleaned up and simplified previous bugfix.
+          Cleaned up and simplified previous bugfix.
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
 
-	  Updated diagnostic messages to use new GUID based RepoId
-	  values.
+          Updated diagnostic messages to use new GUID based RepoId
+          values.
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
 
-	  Added diagnostic messages.
+          Added diagnostic messages.
 
 Thu Aug 14 20:07:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

@@ -738,6 +738,8 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
       participant = 0;
     }
 
+  participant->takeOwnership();
+
   if (um_)
     {
       UpdateManager::UParticipant participant
