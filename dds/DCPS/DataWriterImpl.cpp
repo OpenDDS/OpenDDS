@@ -603,10 +603,12 @@ DataWriterImpl::update_incompatible_qos (
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
+#if 0
   if( this->offered_incompatible_qos_status_.total_count == status.total_count) {
     // This test should make the method idempotent.
     return;
   }
+#endif
 
   set_status_changed_flag (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, true);
 

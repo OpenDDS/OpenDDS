@@ -1,3 +1,14 @@
+Fri Aug 15 20:24:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+	  Backed out changes to update_incompatible_qos due to test
+	  failures.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Move ownership assertion prior to adding to domain.
+
 Fri Aug 15 17:51:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
@@ -6,25 +17,25 @@ Fri Aug 15 17:51:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
           remove_associations():
           update_incompatible_qos():
             Made these methods idempotent (I hope!) and simplified;
-	    add_associations() was already idempotent.
+            add_associations() was already idempotent.
 
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Force locally created DomainParticipants to be owned by the
-	  local repository.
+          Force locally created DomainParticipants to be owned by the
+          local repository.
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
 
-	  Added method to allow determination of local ownership.
+          Added method to allow determination of local ownership.
 
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
 
-	  Predicated callbacks to the endpoints on whether the current
-	  repository is the 'owner' of the DomainParticipant in whic the
-	  endpoints are instantiated.
+          Predicated callbacks to the endpoints on whether the current
+          repository is the 'owner' of the DomainParticipant in whic the
+          endpoints are instantiated.
 
 Fri Aug 15 03:19:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

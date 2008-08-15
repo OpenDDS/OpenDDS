@@ -727,6 +727,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
                    qos, um_),
                  OpenDDS::DCPS::GUID_UNKNOWN);
 
+  participant->takeOwnership();
   int status = domainPtr->add_participant (participant);
 
   if (0 != status)
@@ -737,8 +738,6 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
       delete participant;
       participant = 0;
     }
-
-  participant->takeOwnership();
 
   if (um_)
     {
