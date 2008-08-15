@@ -222,8 +222,6 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     return;
   }
 
-  ::DDS::InstanceHandleSeq handles;
-
   if (GUID_UNKNOWN == subscription_id_)
   {
     // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
@@ -239,19 +237,14 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
     {
       PublicationId writer_id = writers[i].writerId;
       WriterInfo info(this, writer_id);
-      if (bind(writers_, writer_id, info) != 0)
-      {
-        std::stringstream buffer;
-        long key;
-        key = ::OpenDDS::DCPS::GuidConverter(writer_id);
-        buffer << writer_id << "(" << std::hex << key << ")";
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations: ")
-          ACE_TEXT("unable to insert writer %s.\n"),
-          buffer.str().c_str()
-        ));
-
-      } else if( DCPS_debug_level > 4) {
+      this->writers_.insert(
+        // This insertion is idempotent.
+        WriterMapType::value_type(
+          writer_id,
+          WriterInfo( this, writer_id)
+        )
+      );
+      if( DCPS_debug_level > 4) {
         std::stringstream buffer;
         long key;
         key = ::OpenDDS::DCPS::GuidConverter(writer_id);
@@ -266,6 +259,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
 
     // add associations to the transport before using
     // Built-In Topic support and telling the listener.
+    // This call appears to be idempotent.
     this->subscriber_servant_->add_associations(writers, this, qos_);
 
     if (liveliness_lease_duration_  != ACE_Time_Value::zero)
@@ -318,69 +312,58 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
         wr_ids[i] = writers[i].writerId;
       }
 
+      ::DDS::InstanceHandleSeq handles;
       if (this->bit_lookup_instance_handles (wr_ids, handles) == false)
         return;
 
-      ::DDS::DataReaderListener* listener
-        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
-
-      ::DDS::SubscriptionMatchStatus subscription_match_status;
-
       ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
       wr_len = handles.length ();
-      CORBA::ULong pub_len = publication_handles_.length();
-      publication_handles_.length (pub_len + wr_len);
 
-      for (CORBA::ULong i = 0; i < wr_len; i++)
-      {
-        subscription_match_status_.total_count ++;
-        subscription_match_status_.total_count_change ++;
-        publication_handles_[pub_len + i] = handles[i];
-
-        if (bind(id_to_handle_map_, wr_ids[i], handles[i]) != 0)
-        {
+      for( unsigned int index = 0; index < wr_len; ++index) {
+        // This insertion is idempotent.
+        this->id_to_handle_map_.insert(
+          RepoIdToHandleMap::value_type( wr_ids[ index], handles[ index])
+        );
+        if( DCPS_debug_level > 4) {
           std::stringstream buffer;
           long handle = ::OpenDDS::DCPS::GuidConverter(
-                          const_cast< ::OpenDDS::DCPS::RepoId*>( &wr_ids[i])
+                          const_cast< ::OpenDDS::DCPS::RepoId*>( &wr_ids[index])
                         );
-          buffer << "[ " << wr_ids[i] << "(" << std::hex << handle << ")]";
-          ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::add_associations: ")
-            ACE_TEXT("id_to_handle_map_%s = %d failed.\n"),
-            buffer.str().c_str(), handles[i]
-          ));
-          return;
-
-        } else if( DCPS_debug_level > 4) {
-          std::stringstream buffer;
-          long handle = ::OpenDDS::DCPS::GuidConverter(
-                          const_cast< ::OpenDDS::DCPS::RepoId*>( &wr_ids[i])
-                        );
-          buffer << "[ " << wr_ids[i] << "(" << std::hex << handle << ")]";
+          buffer << "[ " << wr_ids[index] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
             ACE_TEXT("id_to_handle_map_%s = %d.\n"),
-            buffer.str().c_str(), handles[i]
+            buffer.str().c_str(), handles[index]
           ));
         }
-        subscription_match_status_.last_publication_handle = handles[i];
       }
+
+      // We need to adjust these after the insertions have all completed
+      // since insertions are not guaranteed to increase the number of
+      // matched publications.
+      int matchedPublications = this->id_to_handle_map_.size();
+      this->subscription_match_status_.total_count_change
+        = matchedPublications - this->subscription_match_status_.total_count;
+      this->subscription_match_status_.total_count
+        = matchedPublications;
+      this->subscription_match_status_.last_publication_handle
+        = handles[ wr_len - 1];
 
       set_status_changed_flag (::DDS::SUBSCRIPTION_MATCH_STATUS, true);
 
-      subscription_match_status = subscription_match_status_;
+      ::DDS::DataReaderListener* listener
+        = listener_for (::DDS::SUBSCRIPTION_MATCH_STATUS);
+      if( listener != 0) {
+        listener->on_subscription_match(
+          dr_local_objref_.in (),
+          this->subscription_match_status_
+        );
 
-      if (listener != 0)
-      {
-        listener->on_subscription_match (dr_local_objref_.in (),
-          subscription_match_status);
-
-        // TBD - why does the spec say to change this but not
-        // change the ChangeFlagStatus after a listener call?
+        // TBD - why does the spec say to change this but not change
+        //       the ChangeFlagStatus after a listener call?
 
         // Client will look at it so next time it looks the change should be 0
-        subscription_match_status_.total_count_change = 0;
-
+        this->subscription_match_status_.total_count_change = 0;
       }
     }
 }
@@ -421,6 +404,9 @@ void DataReaderImpl::remove_associations (
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
+  // This is used to hold the list of writers which were actually
+  // removed, which is a proper subset of the writers which were
+  // requested to be removed.
   WriterIdSeq updated_writers;
 
   //Remove the writers from writer list. If the supplied writer
@@ -479,30 +465,6 @@ void DataReaderImpl::remove_associations (
       ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::remove_associations: "
         "cache_lookup_instance_handles failed.\n"));
       return;
-    }
-
-    CORBA::ULong pubed_len = publication_handles_.length();
-    //CORBA::ULong wr_len = handles.length();
-    for (CORBA::ULong wr_index = 0; wr_index < wr_len; wr_index++)
-    {
-
-      for (CORBA::ULong pubed_index = 0;
-        pubed_index < pubed_len;
-        pubed_index++)
-      {
-        if (publication_handles_[pubed_index] == handles[wr_index])
-        {
-          // move last element to this position.
-          if (pubed_index < pubed_len - 1)
-          {
-            publication_handles_[pubed_index]
-            = publication_handles_[pubed_len - 1];
-          }
-          pubed_len --;
-          publication_handles_.length (pubed_len);
-          break;
-        }
-      }
     }
 
     for (CORBA::ULong i = 0; i < wr_len; ++i)
@@ -567,6 +529,11 @@ void DataReaderImpl::update_incompatible_qos (
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
              guard,
              this->publication_handle_lock_);
+
+  if( this->requested_incompatible_qos_status_.total_count == status.total_count) {
+    // This test should make the method idempotent.
+    return;
+  }
 
   set_status_changed_flag(::DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
                           true);
@@ -854,7 +821,16 @@ DataReaderImpl::get_matched_publications (
                     this->publication_handle_lock_,
                     ::DDS::RETCODE_ERROR);
 
-  publication_handles = publication_handles_;
+  // Copy out the handles for the current set of publications.
+  int index = 0;
+  publication_handles.length( this->id_to_handle_map_.size());
+  for( RepoIdToHandleMap::iterator
+       current = this->id_to_handle_map_.begin();
+       current != this->id_to_handle_map_.end();
+       ++current, ++index
+     ) {
+    publication_handles[ index] = current->second;
+  }
 
   return ::DDS::RETCODE_OK;
 }

@@ -631,27 +631,16 @@ namespace OpenDDS
     Service_Participant::set_repo_domain( const ::DDS::DomainId_t domain, const RepoKey key)
     {
       DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
-      if( where != this->domainRepoMap_.end()) {
-        if( where->second != key) {
-          // Only assign entries into the map when they change the
-          // contents.  This avoids unnecessary updates to the map being
-          // made while calling code may potentially be iterating through
-          // the map.
-          this->domainRepoMap_[ domain] = key;
-          if( DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
-              ACE_TEXT("Domain[ %d] = Repo[ %d]\n"),
-              domain, key
-            ));
-          }
-        }
-      } else {
+      if( (where == this->domainRepoMap_.end()) || (where->second != key)) {
+        // Only assign entries into the map when they change the
+        // contents.  This avoids unnecessary updates to the map being
+        // made while calling code may potentially be iterating through
+        // the map.
         this->domainRepoMap_[ domain] = key;
         if( DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
-            ACE_TEXT("Domain[ %d] == Repo[ %d]\n"),
+            ACE_TEXT("Domain[ %d] = Repo[ %d].\n"),
             domain, key
           ));
         }
