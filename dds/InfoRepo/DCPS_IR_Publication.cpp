@@ -62,7 +62,7 @@ int DCPS_IR_Publication::add_associated_subscription (DCPS_IR_Subscription* sub)
         associationSeq[0].subQos = *(sub->get_subscriber_qos());
         associationSeq[0].readerQos = *(sub->get_datareader_qos());
 
-        if (participant_->is_alive())
+        if( participant_->is_alive() && this->participant_->owner())
           {
             try
               {
@@ -165,7 +165,7 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
       OpenDDS::DCPS::ReaderIdSeq idSeq(1);
       idSeq.length(1);
       idSeq[0]= sub->get_id();
-      if (participant_->is_alive())
+      if( participant_->is_alive() && this->participant_->owner())
         {
           try
             {
@@ -333,7 +333,7 @@ void DCPS_IR_Publication::disassociate_participant (OpenDDS::DCPS::RepoId id)
         {
           idSeq.length(count);
 
-          if (participant_->is_alive())
+          if( participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -424,7 +424,7 @@ void DCPS_IR_Publication::disassociate_topic (OpenDDS::DCPS::RepoId id)
         {
           idSeq.length(count);
 
-          if (participant_->is_alive())
+          if( participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -506,7 +506,7 @@ void DCPS_IR_Publication::disassociate_subscription (OpenDDS::DCPS::RepoId id)
         {
           idSeq.length(count);
 
-          if (participant_->is_alive())
+          if( participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -530,8 +530,10 @@ void DCPS_IR_Publication::disassociate_subscription (OpenDDS::DCPS::RepoId id)
 
 void DCPS_IR_Publication::update_incompatible_qos ()
 {
-  writer_->update_incompatible_qos(incompatibleQosStatus_);
-  incompatibleQosStatus_.count_since_last_send = 0;
+  if( this->participant_->owner()) {
+    writer_->update_incompatible_qos(incompatibleQosStatus_);
+    incompatibleQosStatus_.count_since_last_send = 0;
+  }
 }
 
 

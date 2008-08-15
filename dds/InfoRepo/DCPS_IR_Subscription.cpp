@@ -61,7 +61,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
         associationSeq[0].pubQos = *(pub->get_publisher_qos());
         associationSeq[0].writerQos = *(pub->get_datawriter_qos());
 
-        if (participant_->is_alive())
+        if (participant_->is_alive() && this->participant_->owner())
           {
             try
               {
@@ -164,7 +164,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
       OpenDDS::DCPS::WriterIdSeq idSeq(5);
       idSeq.length(1);
       idSeq[0] = pub->get_id();
-      if (participant_->is_alive())
+      if (participant_->is_alive() && this->participant_->owner())
         {
           try
             {
@@ -334,7 +334,7 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -423,7 +423,7 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -503,7 +503,7 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive())
+          if (participant_->is_alive() && this->participant_->owner())
             {
               try
                 {
@@ -527,8 +527,10 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
 
 void DCPS_IR_Subscription::update_incompatible_qos ()
 {
-  reader_->update_incompatible_qos(incompatibleQosStatus_);
-  incompatibleQosStatus_.count_since_last_send = 0;
+  if( this->participant_->owner()) {
+    reader_->update_incompatible_qos(incompatibleQosStatus_);
+    incompatibleQosStatus_.count_since_last_send = 0;
+  }
 }
 
 

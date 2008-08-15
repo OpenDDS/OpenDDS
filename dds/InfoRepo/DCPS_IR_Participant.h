@@ -66,6 +66,9 @@ public:
   /// Process an incoming update that changes ownership.
   void changeOwner( long sender, long owner);
 
+  /// Indication of whether the current repository is the owner of this participant.
+  bool owner() const;
+
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
   /// Returns 0 if added, 1 if already exists, -1 other failure

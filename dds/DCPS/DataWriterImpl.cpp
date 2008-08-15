@@ -343,20 +343,16 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
       return;
 
     {
-      // protect subscription_handles_, publication_match_status_
-      // and status changed flags.
+      // protect publication_match_status_ and status changed flags.
       ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
       CORBA::ULong rd_len = handles.length ();
-      CORBA::ULong sub_len = subscription_handles_.length();
-      subscription_handles_.length (sub_len + rd_len);
 
       for (CORBA::ULong i = 0; i < rd_len; ++i)
       {
         // update the publication_match_status_
         ++publication_match_status_.total_count;
         ++publication_match_status_.total_count_change;
-        subscription_handles_[sub_len + i] = handles[i];
         if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0)
         {
           std::stringstream buffer;
@@ -544,29 +540,6 @@ DataWriterImpl::remove_associations ( const ReaderIdSeq & readers,
         return;
       }
 
-      CORBA::ULong subed_len = subscription_handles_.length();
-      CORBA::ULong const rd_len = handles.length ();
-      for (CORBA::ULong rd_index = 0; rd_index < rd_len; ++rd_index)
-      {
-        for (CORBA::ULong subed_index = 0;
-              subed_index < subed_len;
-              ++subed_index)
-        {
-          if (subscription_handles_[subed_index] == handles[rd_index])
-          {
-            // move last element to this position.
-            if (subed_index < subed_len - 1)
-            {
-              subscription_handles_[subed_index]
-              = subscription_handles_[subed_len - 1];
-            }
-            --subed_len;
-            subscription_handles_.length (subed_len);
-            break;
-          }
-        }
-      }
-      
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i)
       {
         id_to_handle_map_.erase(fully_associated_readers[i]);
@@ -629,6 +602,11 @@ DataWriterImpl::update_incompatible_qos (
     listener_for (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  if( this->offered_incompatible_qos_status_.total_count == status.total_count) {
+    // This test should make the method idempotent.
+    return;
+  }
 
   set_status_changed_flag (::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, true);
 
@@ -896,7 +874,18 @@ DataWriterImpl::get_matched_subscriptions (
                     guard,
                     this->lock_,
                     ::DDS::RETCODE_ERROR);
-  subscription_handles = subscription_handles_;
+
+  // Copy out the handles for the current set of subscriptions.
+  int index = 0;
+  subscription_handles.length( this->id_to_handle_map_.size());
+  for( RepoIdToHandleMap::iterator
+       current = this->id_to_handle_map_.begin();
+       current != this->id_to_handle_map_.end();
+       ++current, ++index
+     ) {
+    subscription_handles[ index] = current->second;
+  }
+
   return ::DDS::RETCODE_OK;
 }
 

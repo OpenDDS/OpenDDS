@@ -451,8 +451,6 @@ namespace OpenDDS
       /// The lock to protect the activate subscriptions
       /// and status changes.
       ACE_Recursive_Thread_Mutex                lock_;
-      /// The list of active subscriptions.
-      ::DDS::InstanceHandleSeq        subscription_handles_;
 
       typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
 
