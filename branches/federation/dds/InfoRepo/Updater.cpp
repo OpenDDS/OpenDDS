@@ -21,3 +21,14 @@ UpdaterBase::unregisterCallback (void)
 
   um_ = 0;
 }
+
+void
+UpdaterBase::add(
+  const long                  /* domain */,
+  const OpenDDS::DCPS::GUID_t /* participant */,
+  const long                  /* owner */
+)
+{
+  /* This method intentionally left unimplemented. */
+}
+

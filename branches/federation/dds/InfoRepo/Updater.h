@@ -14,6 +14,7 @@
 #include "UpdateDataTypes.h"
 #include "UpdateManager.h"
 
+#include "dds/DdsDcpsGuidC.h"
 #include "ace/Synch.h"
 
 
@@ -30,9 +31,11 @@ class Updater
   virtual void requestImage (void) = 0;
 
   // Add entities to be persisted.
-  virtual void add(const UpdateManager::DTopic& topic) = 0;
-  virtual void add(const UpdateManager::DParticipant& participant) = 0;
-  virtual void add(const UpdateManager::DActor& actor) = 0;
+  virtual void add(const UpdateManager::UTopic& topic) = 0;
+  virtual void add(const UpdateManager::UParticipant& participant) = 0;
+  virtual void add(const UpdateManager::URActor& actor) = 0;
+  virtual void add(const UpdateManager::UWActor& actor) = 0;
+  virtual void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner) = 0;
 
   // Remove an entity (but not children) from persistence.
   virtual void remove (ItemType type, const IdType& id) = 0;
@@ -51,6 +54,7 @@ class UpdaterBase : public Updater
   virtual ~UpdaterBase (void);
 
   void unregisterCallback (void);
+  void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner);
 
  protected:
   UpdateManager* um_;

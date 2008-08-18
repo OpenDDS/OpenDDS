@@ -481,20 +481,43 @@ PersistenceUpdater::requestImage (void)
 }
 
 void
-PersistenceUpdater::add(const UpdateManager::DTopic& topic)
+PersistenceUpdater::add(const UpdateManager::UTopic& topic)
 {
+  // serialize the Topic QOS
+  TAO_OutputCDR outCdr;
+  outCdr << topic.topicQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
+  char *buf;
+  ACE_NEW_NORETURN (buf, char[len]);
+  ArrDelAdapter<char> guard (buf);
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
+    return;
+  }
+
+  ACE_OS::memcpy (buf, dst.base(), len);
+
+  BinSeq qos_bin (len, buf);
+
+  QosSeq p (TopicQos, qos_bin);
+  UpdateManager::DTopic topic_data (topic.domainId, topic.topicId, topic.participantId
+                     , topic.name.c_str(), topic.dataType.c_str(), p);
+
   // allocate memory for TopicData
   void* buffer;
   ACE_ALLOCATOR (buffer, allocator_->malloc
                  (sizeof(PersistenceUpdater::Topic)));
 
   // Initialize TopicData
-  PersistenceUpdater::Topic* topic_data
-    = new (buffer) PersistenceUpdater::Topic (topic, allocator_);
+  PersistenceUpdater::Topic* persistent_data
+    = new (buffer) PersistenceUpdater::Topic (topic_data, allocator_);
 
-  IdType_ExtId ext (topic.topicId);
+  IdType_ExtId ext (topic_data.topicId);
   // bind TopicData with the topicId
-  if (topic_index_->bind (ext, topic_data, allocator_) != 0)
+  if (topic_index_->bind (ext, persistent_data, allocator_) != 0)
     {
       allocator_->free ((void *) buffer);
       return;
@@ -502,8 +525,30 @@ PersistenceUpdater::add(const UpdateManager::DTopic& topic)
 }
 
 void
-PersistenceUpdater::add(const UpdateManager::DParticipant& participant)
+PersistenceUpdater::add(const UpdateManager::UParticipant& participant)
 {
+  // serialize the Topic QOS
+  TAO_OutputCDR outCdr;
+  outCdr << participant.participantQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
+  char *buf;
+  ACE_NEW_NORETURN (buf, char[len]);
+  ArrDelAdapter<char> guard (buf);
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "UpdateManager::add2> Allocation failed.\n"));
+    return;
+  }
+
+  ACE_OS::memcpy (buf, dst.base(), len);
+
+  BinSeq qos_bin (len, buf);
+
+  QosSeq p (ParticipantQos, qos_bin);
+  UpdateManager::DParticipant participant_data
+    (participant.domainId, participant.participantId, p);
 
   // allocate memory for ParticipantData
   void* buffer;
@@ -511,13 +556,13 @@ PersistenceUpdater::add(const UpdateManager::DParticipant& participant)
                  (sizeof(PersistenceUpdater::Participant)));
 
   // Initialize ParticipantData
-  PersistenceUpdater::Participant* participant_data
-    = new (buffer) PersistenceUpdater::Participant (participant
+  PersistenceUpdater::Participant* persistent_data
+    = new (buffer) PersistenceUpdater::Participant (participant_data
                                                     , allocator_);
 
-  IdType_ExtId ext (participant.participantId);
+  IdType_ExtId ext (participant_data.participantId);
   // bind ParticipantData with the participantId
-  if (participant_index_->bind (ext, participant_data, allocator_) != 0)
+  if (participant_index_->bind (ext, persistent_data, allocator_) != 0)
     {
       allocator_->free ((void *) buffer);
       return;
@@ -525,8 +570,73 @@ PersistenceUpdater::add(const UpdateManager::DParticipant& participant)
 }
 
 void
-PersistenceUpdater::add(const UpdateManager::DActor& actor)
+PersistenceUpdater::add(const UpdateManager::URActor& actor)
 {
+  TAO_OutputCDR outCdr;
+  outCdr << actor.pubsubQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
+  char *buf = new char[len];
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( subscription): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard (buf);
+
+  ACE_OS::memcpy (buf, dst.base(), len);
+
+
+  BinSeq pubsub_qos_bin (len, buf);
+  QosSeq pubsub_qos ( SubscriberQos, pubsub_qos_bin);
+
+
+  outCdr.reset ();
+  outCdr << actor.drdwQos;
+  ACE_Message_Block dst2;
+  ACE_CDR::consolidate (&dst2, outCdr.begin ());
+
+  len = dst2.length();
+  char *buf2 = new char[len];
+
+  if (buf2 == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( subscription): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard2 (buf2);
+
+  ACE_OS::memcpy (buf2, dst2.base(), len);
+
+  BinSeq dwdr_qos_bin (len, buf2);
+  QosSeq dwdr_qos ( DataReaderQos, dwdr_qos_bin);
+
+
+  outCdr.reset ();
+  outCdr << actor.transportInterfaceInfo;
+  ACE_Message_Block dst3;
+  ACE_CDR::consolidate (&dst3, outCdr.begin ());
+
+  len = dst3.length();
+  char *buf3 = new char[len];
+  if (buf3 == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( subscription) allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard3 (buf3);
+
+  ACE_OS::memcpy (buf3, dst3.base(), len);
+  BinSeq tr_bin (len, buf3);
+
+
+  UpdateManager::DActor actor_data (actor.domainId, actor.actorId, actor.topicId
+                     , actor.participantId
+                     , DataReader, actor.callback.c_str(), pubsub_qos
+                     , dwdr_qos, tr_bin);
+
 
   // allocate memory for ActorData
   void* buffer;
@@ -534,13 +644,101 @@ PersistenceUpdater::add(const UpdateManager::DActor& actor)
                  (sizeof(PersistenceUpdater::RWActor)));
 
   // Initialize ActorData
-  PersistenceUpdater::RWActor* actor_data =
-    new (buffer) PersistenceUpdater::RWActor (actor
+  PersistenceUpdater::RWActor* persistent_data =
+    new (buffer) PersistenceUpdater::RWActor (actor_data
                                             , allocator_);
 
   IdType_ExtId ext (actor.actorId);
   // bind ActorData with the actorId
-  if (actor_index_->bind (ext, actor_data, allocator_) != 0)
+  if (actor_index_->bind (ext, persistent_data, allocator_) != 0)
+    {
+      allocator_->free ((void *) buffer);
+      return;
+    }
+}
+
+void
+PersistenceUpdater::add(const UpdateManager::UWActor& actor)
+{
+  TAO_OutputCDR outCdr;
+  outCdr << actor.pubsubQos;
+  ACE_Message_Block dst;
+  ACE_CDR::consolidate (&dst, outCdr.begin ());
+
+  size_t len = dst.length();
+  char *buf = new char[len];
+  if (buf == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( publication): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard (buf);
+
+  ACE_OS::memcpy (buf, dst.base(), len);
+
+
+  BinSeq pubsub_qos_bin (len, buf);
+  QosSeq pubsub_qos ( PublisherQos, pubsub_qos_bin);
+
+
+  outCdr.reset ();
+  outCdr << actor.drdwQos;
+  ACE_Message_Block dst2;
+  ACE_CDR::consolidate (&dst2, outCdr.begin ());
+
+  len = dst2.length();
+  char *buf2 = new char[len];
+
+  if (buf2 == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( publication): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard2 (buf2);
+
+  ACE_OS::memcpy (buf2, dst2.base(), len);
+
+  BinSeq dwdr_qos_bin (len, buf2);
+  QosSeq dwdr_qos ( DataWriterQos, dwdr_qos_bin);
+
+
+  outCdr.reset ();
+  outCdr << actor.transportInterfaceInfo;
+  ACE_Message_Block dst3;
+  ACE_CDR::consolidate (&dst3, outCdr.begin ());
+
+  len = dst3.length();
+  char *buf3 = new char[len];
+  if (buf3 == 0) {
+    ACE_ERROR ((LM_ERROR, "PersistenceUpdater::add( publication): allocation failed.\n"));
+    return;
+  }
+
+  ArrDelAdapter<char> guard3 (buf3);
+
+  ACE_OS::memcpy (buf3, dst3.base(), len);
+  BinSeq tr_bin (len, buf3);
+
+
+  UpdateManager::DActor actor_data (actor.domainId, actor.actorId, actor.topicId
+                     , actor.participantId
+                     , DataWriter, actor.callback.c_str(), pubsub_qos
+                     , dwdr_qos, tr_bin);
+
+
+  // allocate memory for ActorData
+  void* buffer;
+  ACE_ALLOCATOR (buffer, allocator_->malloc
+                 (sizeof(PersistenceUpdater::RWActor)));
+
+  // Initialize ActorData
+  PersistenceUpdater::RWActor* persistent_data =
+    new (buffer) PersistenceUpdater::RWActor (actor_data
+                                            , allocator_);
+
+  IdType_ExtId ext (actor.actorId);
+  // bind ActorData with the actorId
+  if (actor_index_->bind (ext, persistent_data, allocator_) != 0)
     {
       allocator_->free ((void *) buffer);
       return;

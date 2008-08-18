@@ -1,3 +1,49 @@
+Mon Aug 18 23:06:00 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Updated to use modified UpdateManager method signatures.
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+	  Implement publication of ownership updates.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Added base class of Updater and implement those methods.  Added
+	  the OwnerUpdate writer and reader.
+
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+	  Change add methods to receive Upstream data types instead of
+	  Downstream data types.  Implement persistence serialization
+	  here instead of in the UpdateManager class.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+	  Change Actor updates from templated to different
+	  methods.  Added ownership update method.  Removed method no
+	  longer used.  Pushed serialization for persistence down from
+	  this class to the PersistenceUpdater class.
+
+        * dds/InfoRepo/Updater.h:
+
+	  Changed add methods to use Upstream data types instead of
+	  Downstream data types.  This generalizes the updating to allow
+	  updates other than persistence.  Added ownership update method.
+
+        * dds/InfoRepo/Updater.cpp:
+
+	  Provide a default implementation for ownership updates.
+
+        * dds/InfoRepo/UpdateManager.inl:
+
+          Removed this file.
+
 Mon Aug 18 18:35:04 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:

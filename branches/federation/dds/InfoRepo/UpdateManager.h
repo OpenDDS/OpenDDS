@@ -87,11 +87,11 @@ class UpdateManager : public ACE_Service_Object
   void pushImage (const DImage& image);
 
   /// Upstream request to persist data.
-  void add (const UTopic& topic);
-  void add (const UParticipant& participant);
-
-  template <typename ActorType, typename UA>
-  void add (const ActorType& actorType, const UA& actor);
+  void add( const UTopic& topic);
+  void add( const UParticipant& participant);
+  void add( const URActor& actor);
+  void add( const UWActor& actor);
+  void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner);
 
   /// Upstream request to remove entries
   // Remove an entity (but not children) from persistence.
@@ -110,13 +110,11 @@ class UpdateManager : public ACE_Service_Object
   typedef std::set <Updater*> Updaters;
 
   // required to break an include dependency loop
-  void add (Updater* updater, const DActor& actor);
+  //void add (Updater* updater, const DActor& actor);
 
   TAO_DDS_DCPSInfo_i* info_;
   Updaters updaters_;
 };
-
-#include "UpdateManager.inl"
 
 ACE_STATIC_SVC_DECLARE (UpdateManager)
 

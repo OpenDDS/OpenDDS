@@ -9,6 +9,149 @@
 namespace OpenDDS { namespace Federator {
 
 void
+ManagerImpl::unregisterCallback()
+{
+  /* This method intentionally left unimplemented. */
+}
+
+void
+ManagerImpl::requestImage()
+{
+  /* This method intentionally left unimplemented. */
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// The following methods publish updates to the remainder of the
+// federation.
+//
+
+void
+ManagerImpl::add( const UpdateManager::UTopic& topic)
+{
+  TopicUpdate sample;
+  sample.sender      = this->id();
+  sample.packet      = 0; // Placeholder for now.
+  sample.action      = CreateEntity;
+
+  sample.id          = topic.topicId;
+  sample.domain      = topic.domainId;
+  sample.participant = topic.participantId;
+  sample.topic       = topic.name.c_str();
+  sample.datatype    = topic.dataType.c_str();
+  sample.qos         = topic.topicQos;
+
+  this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
+}
+
+void
+ManagerImpl::add( const UpdateManager::UParticipant& participant)
+{
+  ParticipantUpdate sample;
+  sample.sender = this->id();
+  sample.packet = 0; // Placeholder for now.
+  sample.action = CreateEntity;
+
+  sample.domain = participant.domainId;
+  sample.id     = participant.participantId;
+  sample.qos    = participant.participantQos;
+
+  this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
+}
+
+void
+ManagerImpl::add( const UpdateManager::URActor& reader)
+{
+  SubscriptionUpdate sample;
+  sample.sender         = this->id();
+  sample.packet         = 0; // Placeholder for now.
+  sample.action         = CreateEntity;
+
+  sample.domain         = reader.domainId;
+  sample.participant    = reader.participantId;
+  sample.topic          = reader.topicId;
+  sample.id             = reader.actorId;
+  sample.callback       = reader.callback.c_str();
+  sample.transport_id   = reader.transportInterfaceInfo.transport_id;
+  sample.transport_blob = reader.transportInterfaceInfo.data;
+  sample.datareader_qos = reader.drdwQos;
+  sample.subscriber_qos = reader.pubsubQos;
+
+  this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
+}
+
+void
+ManagerImpl::add( const UpdateManager::UWActor& writer)
+{
+  PublicationUpdate sample;
+  sample.sender         = this->id();
+  sample.packet         = 0; // Placeholder for now.
+  sample.action         = CreateEntity;
+
+  sample.domain         = writer.domainId;
+  sample.participant    = writer.participantId;
+  sample.topic          = writer.topicId;
+  sample.id             = writer.actorId;
+  sample.callback       = writer.callback.c_str();
+  sample.transport_id   = writer.transportInterfaceInfo.transport_id;
+  sample.transport_blob = writer.transportInterfaceInfo.data;
+  sample.datawriter_qos = writer.drdwQos;
+  sample.publisher_qos  = writer.pubsubQos;
+
+  this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
+}
+
+void
+ManagerImpl::add(
+  const long                    domain,
+  const ::OpenDDS::DCPS::GUID_t participant,
+  const long                    owner
+)
+{
+  OwnerUpdate sample;
+  sample.sender      = this->id();
+  sample.packet      = 0; // Placeholder for now.
+  sample.action      = CreateEntity;
+
+  sample.domain      = domain;
+  sample.participant = participant;
+  sample.owner       = owner;
+
+  this->ownerWriter_->write( sample, ::DDS::HANDLE_NIL);
+}
+
+void
+ManagerImpl::remove( ItemType type, const IdType& id)
+{
+  switch( type) {
+    case Topic:
+      break;
+
+    case Participant:
+      break;
+
+    case Actor:
+      // This is VERY annoying.
+      break;
+  }
+}
+
+void
+ManagerImpl::updateQos(
+  const ItemType& /* itemType */,
+  const IdType&   /* id */,
+  const QosSeq&   /* qos */
+)
+{
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// The following methods process updates received from the remainder
+// of the federation.
+//
+
+void
 ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   // We could generate an error message here.  Instead we let action be irrelevant.

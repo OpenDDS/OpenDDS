@@ -11,6 +11,7 @@
 #include "InfoRepoMulticastResponder.h"
 #include "UpdateProcessor_T.h"
 #include "UpdateListener_T.h"
+#include "Updater.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
@@ -26,6 +27,7 @@ namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export ManagerImpl 
   : public virtual POA_OpenDDS::Federator::Manager,
+    public virtual ::Updater,
     public virtual UpdateProcessor< OwnerUpdate>,
     public virtual UpdateProcessor< TopicUpdate>,
     public virtual UpdateProcessor< ParticipantUpdate>,
@@ -91,7 +93,39 @@ class OpenDDS_Federator_Export ManagerImpl
     CORBA::ORB_ptr orb();
     void orb( CORBA::ORB_ptr value);
 
-    // Update methods.
+    //
+    // Updater methods.
+    //
+
+    virtual void unregisterCallback();
+
+    virtual void requestImage();
+
+    virtual void add( const UpdateManager::UTopic& topic);
+
+    virtual void add( const UpdateManager::UParticipant& participant);
+
+    virtual void add( const UpdateManager::URActor& reader);
+
+    virtual void add( const UpdateManager::UWActor& writer);
+
+    virtual void add(
+                   const long                    domain,
+                   const ::OpenDDS::DCPS::GUID_t participant,
+                   const long                    owner
+                 );
+
+    virtual void remove( ItemType type, const IdType& id);
+
+    virtual void updateQos(
+                   const ItemType& itemType,
+                   const IdType&   id,
+                   const QosSeq&   qos
+                 );
+
+    //
+    // UpdateProcessor<> methods.
+    //
 
     /// Null implementation for OwnerUpdate samples.
     void processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
@@ -176,6 +210,9 @@ class OpenDDS_Federator_Export ManagerImpl
     ::DDS::DomainParticipant_var federationParticipant_;
 
     /// TopicUpdate listener
+    UpdateListener< OwnerUpdate, OwnerUpdateDataReader> ownerListener_;
+
+    /// TopicUpdate listener
     UpdateListener< TopicUpdate, TopicUpdateDataReader> topicListener_;
 
     /// ParticipantUpdate listener
@@ -186,6 +223,9 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// SubscriptionUpdate listener
     UpdateListener< SubscriptionUpdate, SubscriptionUpdateDataReader> subscriptionListener_;
+
+    /// TopicUpdate writer
+    OwnerUpdateDataWriter_var ownerWriter_;
 
     /// TopicUpdate writer
     TopicUpdateDataWriter_var topicWriter_;
