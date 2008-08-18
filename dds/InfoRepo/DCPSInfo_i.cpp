@@ -365,7 +365,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add (DataWriter, actor);
+      um_->add( actor);
     }
 
   domainPtr->remove_dead_participants();
@@ -570,7 +570,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add (DataReader, actor);
+      um_->add( actor);
     }
 
   domainPtr->remove_dead_participants();

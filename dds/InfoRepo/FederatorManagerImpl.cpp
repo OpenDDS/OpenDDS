@@ -31,6 +31,7 @@ ManagerImpl::ManagerImpl(Config& config)
  : joining_( this->lock_),
    joiner_( NIL_REPOSITORY),
    config_( config),
+   ownerListener_( *this),
    topicListener_( *this),
    participantListener_( *this),
    publicationListener_( *this),
@@ -351,6 +352,65 @@ ManagerImpl::initialize()
   //       since the only state they retain is the manager, which is the
   //       same for all.
   //
+
+  topic = this->federationParticipant_->create_topic(
+            OWNERUPDATETOPICNAME,
+            OWNERUPDATETYPENAME,
+            TOPIC_QOS_DEFAULT,
+            ::DDS::TopicListener::_nil()
+          );
+  dataWriter = publisher->create_datawriter(
+                 topic.in(),
+                 writerQos,
+                 ::DDS::DataWriterListener::_nil()
+               );
+  if( CORBA::is_nil( dataWriter.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("failed to create Owner update writer for repository %d\n"),
+      this->id()
+    ));
+    throw Incomplete();
+  }
+
+  this->ownerWriter_
+    = dynamic_cast< OwnerUpdateDataWriter*>( dataWriter.in());
+  if( 0 == this->ownerWriter_) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("failed to extract typed Owner update writer.\n")
+    ));
+    throw Incomplete();
+
+  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("created federation Owner update writer for repository %d\n"),
+      this->id()
+    ));
+  }
+
+  description = this->federationParticipant_->lookup_topicdescription( OWNERUPDATETOPICNAME);
+  dataReader  = subscriber->create_datareader(
+                  description.in(),
+                  readerQos,
+                  &this->ownerListener_
+                );
+  if( CORBA::is_nil( dataReader.in())) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("failed to create Owner update reader for repository %d\n"),
+      this->id()
+    ));
+    throw Incomplete();
+
+  } else if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("created federation Owner update reader for repository %d\n"),
+      this->id()
+    ));
+  }
 
   topic = this->federationParticipant_->create_topic(
             TOPICUPDATETOPICNAME,

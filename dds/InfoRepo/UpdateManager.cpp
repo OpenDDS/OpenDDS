@@ -279,76 +279,55 @@ UpdateManager::pushImage (const DImage& image)
 void
 UpdateManager::add (const UTopic& topic)
 {
-  if (updaters_.empty()) {
-    return;
-  }
-
-  // serialize the Topic QOS
-  TAO_OutputCDR outCdr;
-  outCdr << topic.topicQos;
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-
-  size_t len = dst.length();
-  char *buf;
-  ACE_NEW_NORETURN (buf, char[len]);
-  ArrDelAdapter<char> guard (buf);
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "UpdateManager::add> Allocation failed.\n"));
-    return;
-  }
-
-  ACE_OS::memcpy (buf, dst.base(), len);
-
-  BinSeq qos_bin (len, buf);
-
-  QosSeq p (TopicQos, qos_bin);
-  DTopic topic_data (topic.domainId, topic.topicId, topic.participantId
-                     , topic.name.c_str(), topic.dataType.c_str(), p);
-
   // Invoke add on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->add (topic_data);
+    (*iter)->add (topic);
   }
 }
 
 void
 UpdateManager::add(const UParticipant& participant)
 {
-  if (updaters_.empty()) {
-    return;
-  }
-
-  // serialize the Topic QOS
-  TAO_OutputCDR outCdr;
-  outCdr << participant.participantQos;
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-
-  size_t len = dst.length();
-  char *buf;
-  ACE_NEW_NORETURN (buf, char[len]);
-  ArrDelAdapter<char> guard (buf);
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "UpdateManager::add2> Allocation failed.\n"));
-    return;
-  }
-
-  ACE_OS::memcpy (buf, dst.base(), len);
-
-  BinSeq qos_bin (len, buf);
-
-  QosSeq p (ParticipantQos, qos_bin);
-  DParticipant paticipant_data
-    (participant.domainId, participant.participantId, p);
-
   // Invoke add on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->add (paticipant_data);
+    (*iter)->add (participant);
+  }
+}
+
+void
+UpdateManager::add(const URActor& reader)
+{
+  // Invoke add on each of the iterators.
+  for (Updaters::iterator iter = updaters_.begin();
+       iter != updaters_.end();
+       iter++) {
+    (*iter)->add (reader);
+  }
+}
+
+void
+UpdateManager::add(const UWActor& writer)
+{
+  // Invoke add on each of the iterators.
+  for (Updaters::iterator iter = updaters_.begin();
+       iter != updaters_.end();
+       iter++) {
+    (*iter)->add (writer);
+  }
+}
+
+void
+UpdateManager::add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner)
+{
+  // Invoke add on each of the iterators.
+  for (Updaters::iterator iter = updaters_.begin();
+       iter != updaters_.end();
+       iter++) {
+    (*iter)->add( domain, participant, owner);
   }
 }
 
@@ -466,12 +445,6 @@ UpdateManager::add (const DActor& actor)
                               , callback.c_str(), writer_qos
                               , transport_info, pub_qos);
     }
-}
-
-void
-UpdateManager::add (Updater* updater, const DActor& actor)
-{
-  updater->add (actor);
 }
 
 int

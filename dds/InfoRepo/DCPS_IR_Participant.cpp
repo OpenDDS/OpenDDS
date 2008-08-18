@@ -162,8 +162,10 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
 void
 DCPS_IR_Participant::takeOwnership()
 {
-  /// @TODO: Publish an update with our ownership.
-  //  if( this->um_) this->um_->add( Owner, this->federationId);
+  /// Publish an update with our ownership.
+  if( this->um_) {
+    this->um_->add( this->domain_->get_id(), this->id_, this->federationId_);
+  }
 
   // And now handle our internal ownership processing.
   this->changeOwner( this->federationId_, this->federationId_);

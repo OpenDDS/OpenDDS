@@ -77,9 +77,10 @@ public:
   virtual void requestImage (void);
 
   /// Add entities to be persisted.
-  virtual void add (const UpdateManager::DTopic& topic);
-  virtual void add (const UpdateManager::DParticipant& participant);
-  virtual void add (const UpdateManager::DActor& actor);
+  virtual void add (const UpdateManager::UTopic& topic);
+  virtual void add (const UpdateManager::UParticipant& participant);
+  virtual void add (const UpdateManager::URActor& actor);
+  virtual void add (const UpdateManager::UWActor& actor);
 
   /// Remove an entity (but not children) from persistence.
   virtual void remove (ItemType type, const IdType& id);
