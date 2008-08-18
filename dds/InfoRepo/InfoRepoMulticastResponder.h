@@ -16,8 +16,8 @@
 //=============================================================================
 
 
-#ifndef TAO_IOR_MULTICAST_H
-#define TAO_IOR_MULTICAST_H
+#ifndef INFOREPOMULTICASTRESPONDER_H
+#define INFOREPOMULTICASTRESPONDER_H
 #include /**/ "ace/pre.h"
 
 #include "federator_export.h"
@@ -48,10 +48,14 @@ class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Han
 {
 public:
   /// Constructor.
-  InfoRepoMulticastResponder (CORBA::ORB_ptr orb);
+  InfoRepoMulticastResponder ();
+
+  /// Destructor.
+  virtual ~InfoRepoMulticastResponder ();
 
   /// Initialization method.
   int init (
+    CORBA::ORB_ptr orb,
     u_short port,
     const char *mcast_addr
     );
@@ -59,11 +63,9 @@ public:
   /// Initialization method. Takes in "address:port" string as a
   /// parameter.
   int init (
+    CORBA::ORB_ptr orb,
     const char *mcast_addr
     );
-
-  /// Destructor.
-  virtual ~InfoRepoMulticastResponder (void);
 
   /// Callback when input is received on the handle.
   virtual int handle_input (ACE_HANDLE n);
@@ -73,11 +75,16 @@ public:
                               const void *arg);
 
   /// Returns the internal handle used to receive multicast.
-  virtual ACE_HANDLE get_handle (void) const;
+  virtual ACE_HANDLE get_handle () const;
 
 private:
   /// Factor common functionality from the two init functions.
-  int common_init ();
+  int common_init (
+    CORBA::ORB_ptr orb
+    );
+
+  /// Are we initialized?
+  bool initialized_;
 
   /// The ORB
   CORBA::ORB_var orb_;
@@ -100,4 +107,4 @@ private:
 } }
 
 #include /**/ "ace/post.h"
-#endif /* TAO_IOR_MULTICAST_H */
+#endif /* INFOREPOMULTICASTRESPONDER_H */
