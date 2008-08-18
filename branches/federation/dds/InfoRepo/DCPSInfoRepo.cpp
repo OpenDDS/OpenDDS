@@ -96,6 +96,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
 InfoRepo::~InfoRepo (void)
 {
+  federator_.finalize();
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
 

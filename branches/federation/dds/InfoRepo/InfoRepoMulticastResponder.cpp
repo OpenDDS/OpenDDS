@@ -13,43 +13,56 @@
 
 namespace OpenDDS { namespace Federator {
 
+InfoRepoMulticastResponder::InfoRepoMulticastResponder ()
+  : initialized_(false)
+{
+}
+
+InfoRepoMulticastResponder::~InfoRepoMulticastResponder ()
+{
+  if (
+    this->initialized_ && 
+    (this->mcast_dgram_.leave (this->mcast_addr_) == -1)
+    )
+    {
+      ACE_ERROR ((LM_ERROR, "%p\n", "~InfoRepoMulticastResponder()"));
+    }
+}
+
 ACE_HANDLE
-InfoRepoMulticastResponder::get_handle (void) const
+InfoRepoMulticastResponder::get_handle () const
 {
   return this->mcast_dgram_.get_handle ();
 }
 
-InfoRepoMulticastResponder::InfoRepoMulticastResponder (
-  CORBA::ORB_ptr orb
-  )
-  : orb_ (CORBA::ORB::_duplicate (orb))
-{
-}
-
-InfoRepoMulticastResponder::~InfoRepoMulticastResponder (void)
-{
-  if (this->mcast_dgram_.leave (this->mcast_addr_) == -1)
-    {
-    ACE_ERROR ((LM_ERROR, "%p\n", "~InfoRepoMulticastResponder()"));
-    }
-}
-
 int
 InfoRepoMulticastResponder::init (
+  CORBA::ORB_ptr orb,
   u_short port,
   const char *mcast_addr
   )
 {
+  if (this->initialized_)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::init() already initialized\n"), -1);
+  }
+
   if (this->mcast_addr_.set (port, mcast_addr) == -1)
     ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::init() %p\n", "set"), -1);
-  return common_init ();
+  return common_init (orb);
 }
 
 int
 InfoRepoMulticastResponder::init (
+  CORBA::ORB_ptr orb,
   const char *mcast_addr
   )
 {
+  if (this->initialized_)
+  {
+    ACE_ERROR_RETURN ((LM_ERROR, "InfoRepoMulticastResponder::init() already initialized\n"), -1);
+  }
+
   // Look for a '@' incase a nic is specified.
   const char* tmpnic = ACE_OS::strchr (mcast_addr, '@');
 
@@ -85,13 +98,16 @@ InfoRepoMulticastResponder::init (
                        "set"),
                       -1);
 
-  return common_init ();
+  return common_init (orb);
 }
 
 int
 InfoRepoMulticastResponder::common_init (
+  CORBA::ORB_ptr orb
   )
 {
+  orb_ = CORBA::ORB::_duplicate (orb);
+
   if (this->response_addr_.set ((u_short) 0) == -1)
     ACE_ERROR_RETURN ((LM_ERROR,
     "InfoRepoMulticastResponder::common_init() %p\n",
@@ -121,6 +137,7 @@ InfoRepoMulticastResponder::common_init (
                            "subscribe"),
                           -1);
     }
+  this->initialized_ = true;
   return 0;
 }
 

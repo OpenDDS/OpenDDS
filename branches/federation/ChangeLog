@@ -1,13 +1,24 @@
+Mon Aug 18 18:35:04 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DefaultValues.h:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.h:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+
+          Adding multicast code; there's still much to clean up.
+
 Fri Aug 15 20:24:26 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
 
-	  Backed out changes to update_incompatible_qos due to test
-	  failures.
+          Backed out changes to update_incompatible_qos due to test
+          failures.
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Move ownership assertion prior to adding to domain.
+          Move ownership assertion prior to adding to domain.
 
 Fri Aug 15 17:51:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

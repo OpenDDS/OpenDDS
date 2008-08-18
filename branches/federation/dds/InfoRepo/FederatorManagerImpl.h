@@ -8,6 +8,7 @@
 #include "FederatorS.h"
 #include "FederatorTypeSupportC.h"
 #include "FederatorConfig.h"
+#include "InfoRepoMulticastResponder.h"
 #include "UpdateProcessor_T.h"
 #include "UpdateListener_T.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -32,7 +33,7 @@ class OpenDDS_Federator_Export ManagerImpl
     public virtual UpdateProcessor< PublicationUpdate> {
   public:
     /// Default constructor.
-    ManagerImpl( Config& config);
+    ManagerImpl(Config& config);
 
     /// Virtual destructor.
     virtual ~ManagerImpl();
@@ -76,7 +77,7 @@ class OpenDDS_Federator_Export ManagerImpl
     void initialize();
 
     /// Tear down the update subscriptions.
-//    void finalize();
+    void finalize();
 
     /// Accessors for the DCPSInfo reference.
     TAO_DDS_DCPSInfo_i*& info();
@@ -168,6 +169,9 @@ class OpenDDS_Federator_Export ManagerImpl
     /// The ORB in which we are activated.
     CORBA::ORB_var orb_;
 
+    /// Multicast responder
+    InfoRepoMulticastResponder multicastResponder_;
+
     /// local DomainParticipant
     ::DDS::DomainParticipant_var federationParticipant_;
 
@@ -201,6 +205,8 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Local Id value to Federation Id mappings.
     LocalToFederationMap outboundMap_;
 
+    /// Is multicast enabled?
+    bool multicastEnabled_;
 };
 
 }} // End namespace OpenDDS::Federator
