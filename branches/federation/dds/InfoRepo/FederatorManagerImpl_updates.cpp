@@ -31,7 +31,6 @@ ManagerImpl::add( const UpdateManager::UTopic& topic)
 {
   TopicUpdate sample;
   sample.sender      = this->id();
-  sample.packet      = 0; // Placeholder for now.
   sample.action      = CreateEntity;
 
   sample.id          = topic.topicId;
@@ -49,7 +48,6 @@ ManagerImpl::add( const UpdateManager::UParticipant& participant)
 {
   ParticipantUpdate sample;
   sample.sender = this->id();
-  sample.packet = 0; // Placeholder for now.
   sample.action = CreateEntity;
 
   sample.domain = participant.domainId;
@@ -64,7 +62,6 @@ ManagerImpl::add( const UpdateManager::URActor& reader)
 {
   SubscriptionUpdate sample;
   sample.sender         = this->id();
-  sample.packet         = 0; // Placeholder for now.
   sample.action         = CreateEntity;
 
   sample.domain         = reader.domainId;
@@ -85,7 +82,6 @@ ManagerImpl::add( const UpdateManager::UWActor& writer)
 {
   PublicationUpdate sample;
   sample.sender         = this->id();
-  sample.packet         = 0; // Placeholder for now.
   sample.action         = CreateEntity;
 
   sample.domain         = writer.domainId;
@@ -110,7 +106,6 @@ ManagerImpl::add(
 {
   OwnerUpdate sample;
   sample.sender      = this->id();
-  sample.packet      = 0; // Placeholder for now.
   sample.action      = CreateEntity;
 
   sample.domain      = domain;
@@ -121,17 +116,73 @@ ManagerImpl::add(
 }
 
 void
-ManagerImpl::remove( ItemType type, const IdType& id)
+ManagerImpl::remove(
+  ItemType type,
+  const IdType& id,
+  ActorType actor,
+  long domain,
+  const IdType& participant
+)
 {
   switch( type) {
     case Topic:
+      {
+        TopicUpdate sample;
+        sample.sender      = this->id();
+        sample.action      = DestroyEntity;
+
+        sample.id          = id;
+        sample.domain      = domain;
+        sample.participant = participant;
+
+        this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
+      }
       break;
 
     case Participant:
+      {
+        ParticipantUpdate sample;
+        sample.sender = this->id();
+        sample.action = DestroyEntity;
+
+        sample.domain = domain;
+        sample.id     = id;
+
+        this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
+      }
       break;
 
     case Actor:
       // This is VERY annoying.
+      switch( actor) {
+        case DataWriter:
+          {
+            PublicationUpdate sample;
+            sample.sender         = this->id();
+            sample.action         = DestroyEntity;
+
+            sample.domain         = domain;
+            sample.participant    = participant;
+            sample.id             = id;
+
+            this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
+          }
+          break;
+
+        case DataReader:
+          {
+            SubscriptionUpdate sample;
+            sample.sender         = this->id();
+            sample.action         = DestroyEntity;
+
+            sample.domain         = domain;
+            sample.participant    = participant;
+            sample.id             = id;
+
+            this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
+          }
+          break;
+      }
       break;
   }
 }

@@ -14,7 +14,7 @@
 #include "UpdateDataTypes.h"
 #include "UpdateManager.h"
 
-#include "dds/DdsDcpsGuidC.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
 
@@ -38,7 +38,13 @@ class Updater
   virtual void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner) = 0;
 
   // Remove an entity (but not children) from persistence.
-  virtual void remove (ItemType type, const IdType& id) = 0;
+  virtual void remove(
+                 ItemType      type,
+                 const IdType& id,
+                 ActorType     actor = DataWriter,
+                 long          domain = 0,
+                 const IdType& participant = ::OpenDDS::DCPS::GUID_UNKNOWN
+               ) = 0;
 
   // Persist updated Qos parameters for an entity.
   virtual void updateQos(const ItemType& itemType, const IdType& id

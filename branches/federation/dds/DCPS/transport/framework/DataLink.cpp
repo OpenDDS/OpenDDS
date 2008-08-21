@@ -424,16 +424,16 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
                 recv_strategy = this->receive_strategy_; // save copy
                 this->receive_strategy_ = 0;
               }
-          }
-          if (!send_strategy.is_nil()) {
-            send_strategy->stop();
-          }
-          if (!recv_strategy.is_nil()) {
-            recv_strategy->stop();
-          }
+            if (!send_strategy.is_nil()) {
+              send_strategy->stop();
+            }
+            if (!recv_strategy.is_nil()) {
+              recv_strategy->stop();
+            }
 
-          // Tell our subclass to handle a "stop" event.
-          this->stop_i();
+            // Tell our subclass to handle a "stop" event.
+            this->stop_i();
+          }
         }
       else
         {
@@ -652,10 +652,10 @@ OpenDDS::DCPS::DataLink::transport_shutdown()
         this->receive_strategy_->stop();
         this->receive_strategy_ = 0;
       }
-  }
 
-  // Tell our subclass about the "stop" event.
-  this->stop_i();
+    // Tell our subclass about the "stop" event.
+    this->stop_i();
+  }
 
   // Drop our reference to the TransportImpl object
   this->impl_ = 0;
