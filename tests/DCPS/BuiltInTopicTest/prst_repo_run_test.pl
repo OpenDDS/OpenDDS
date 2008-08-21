@@ -13,12 +13,25 @@ use DDS_Run_Test;
 
 $status = 0;
 
+my $debug ;# = 10;
+my $transportDebug ;# = 10;
+my $debugFile = "debug.out";
+
+my $debugOpts = "";
+$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+$debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+$debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
+
 $opts = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
+
+$opts         .= " " . $debugOpts if $debug or $transportDebug;
+$repo_bit_opt .= " " . $debugOpts if $debug or $transportDebug;
+
 $info_prst_file = "info.pr";
 $num_messages = 60;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
@@ -27,6 +40,7 @@ $SRV_PORT = PerlACE::random_port();
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
+unlink $debugFile;
 
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
@@ -43,13 +57,6 @@ $Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
 $data_file = "test_run_prst.data";
 unlink $data_file;
 
-print $DCPSREPO->CommandLine() . "\n";
-print $Publisher->CommandLine() . "\n";
-print $Subscriber->CommandLine() . "\n";
-print $Monitor1->CommandLine() . "\n";
-print $Monitor2->CommandLine() . "\n";
-
-
 open (OLDOUT, ">&STDOUT");
 open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
 open (OLDERR, ">&STDERR");
@@ -57,6 +64,7 @@ open (STDERR, ">&STDOUT") or die "can't redirect stderror: $!";
 
 print "Spawning DCPSInfoRepo.\n";
 
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -66,14 +74,17 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 
 print "Spawning first monitor.\n";
 
+print $Monitor1->CommandLine() . "\n";
 $Monitor1->Spawn ();
 
 print "Spawning publisher.\n";
 
+print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
 
 print "Spawning subscriber.\n";
 
+print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
  
 sleep (15);
@@ -88,6 +99,7 @@ if ($ir != 0) {
 unlink $dcpsrepo_ior;
  
 print "Spawning second DCPSInfoRepo.\n";
+print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -99,6 +111,7 @@ sleep (15);
 
 print "Spawning second monitor.\n";
 
+print $Monitor2->CommandLine() . "\n";
 $Monitor2->Spawn ();
 
 $MonitorResult = $Monitor1->WaitKill (20);

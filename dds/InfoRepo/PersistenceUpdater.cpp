@@ -746,7 +746,7 @@ PersistenceUpdater::add(const UpdateManager::UWActor& actor)
 }
 
 void
-PersistenceUpdater::remove (ItemType type, const IdType& idType)
+PersistenceUpdater::remove( ItemType type, const IdType& idType, ActorType, long, const IdType&)
 {
   IdType_ExtId ext (idType);
   PersistenceUpdater::Topic* topic = 0;

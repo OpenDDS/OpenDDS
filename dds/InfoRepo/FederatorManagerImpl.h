@@ -115,7 +115,13 @@ class OpenDDS_Federator_Export ManagerImpl
                    const long                    owner
                  );
 
-    virtual void remove( ItemType type, const IdType& id);
+    virtual void remove(
+                   ItemType type,
+                   const IdType& id,
+                   ActorType actor,
+                   long domain,
+                   const IdType& participant
+                 );
 
     virtual void updateQos(
                    const ItemType& itemType,

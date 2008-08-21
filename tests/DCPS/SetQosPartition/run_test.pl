@@ -13,8 +13,20 @@ use DDS_Run_Test;
 
 $status = 0;
 
+my $debug ;# = 10;
+my $transportDebug ;# = 10;
+my $debugFile = "debug.out";
+
+my $debugOpts = "";
+$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+$debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+$debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
+
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
+
+$opts .= " " . $debugOpts if $debug or $transportDebug;
+
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 

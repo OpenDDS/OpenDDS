@@ -83,7 +83,13 @@ public:
   virtual void add (const UpdateManager::UWActor& actor);
 
   /// Remove an entity (but not children) from persistence.
-  virtual void remove (ItemType type, const IdType& id);
+  virtual void remove(
+                 ItemType type,
+                 const IdType& id,
+                 ActorType actor,
+                 long domain,
+                 const IdType& participant
+               );
 
   /// Persist updated Qos parameters for an entity.
   virtual void updateQos (const ItemType& itemType, const IdType& id

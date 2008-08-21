@@ -43,7 +43,6 @@ module OpenDDS { module Federator {
       RepoKey         owner;
       FederationId    participant;
       DDS::DomainId_t domain;
-      long            packet;      // The sequence number of the instant sample.
       UpdateType      action;
     };
 
@@ -64,7 +63,6 @@ module OpenDDS { module Federator {
       RepoKey         sender;
       FederationId    participant;
       DDS::DomainId_t domain;
-      long            packet;      // The sequence number of the instant sample.
       UpdateType      action;
       string          topic;
       string          datatype;
@@ -87,7 +85,6 @@ module OpenDDS { module Federator {
       FederationId              id;
       RepoKey                   sender;
       DDS::DomainId_t           domain;
-      long                      packet;      // The sequence number of the instant sample.
       UpdateType                action;
       DDS::DomainParticipantQos qos;
     };
@@ -110,7 +107,6 @@ module OpenDDS { module Federator {
       FederationId                        topic;
       FederationId                        participant;
       DDS::DomainId_t                     domain;
-      long                                packet;      // The sequence number of the instant sample.
       UpdateType                          action;
       string                              callback;
       DDS::PublisherQos                   publisher_qos;
@@ -146,7 +142,6 @@ module OpenDDS { module Federator {
       FederationId                        topic;
       FederationId                        participant;
       DDS::DomainId_t                     domain;
-      long                                packet;      // The sequence number of the instant sample.
       UpdateType                          action;
       string                              callback;
       DDS::SubscriberQos                  subscriber_qos;
