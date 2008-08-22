@@ -27,7 +27,7 @@ ManagerImpl::requestImage()
 //
 
 void
-ManagerImpl::add( const UpdateManager::UTopic& topic)
+ManagerImpl::create( const Update::UTopic& topic)
 {
   TopicUpdate sample;
   sample.sender      = this->id();
@@ -44,7 +44,7 @@ ManagerImpl::add( const UpdateManager::UTopic& topic)
 }
 
 void
-ManagerImpl::add( const UpdateManager::UParticipant& participant)
+ManagerImpl::create( const Update::UParticipant& participant)
 {
   ParticipantUpdate sample;
   sample.sender = this->id();
@@ -58,7 +58,7 @@ ManagerImpl::add( const UpdateManager::UParticipant& participant)
 }
 
 void
-ManagerImpl::add( const UpdateManager::URActor& reader)
+ManagerImpl::create( const Update::URActor& reader)
 {
   SubscriptionUpdate sample;
   sample.sender         = this->id();
@@ -78,7 +78,7 @@ ManagerImpl::add( const UpdateManager::URActor& reader)
 }
 
 void
-ManagerImpl::add( const UpdateManager::UWActor& writer)
+ManagerImpl::create( const Update::UWActor& writer)
 {
   PublicationUpdate sample;
   sample.sender         = this->id();
@@ -98,34 +98,30 @@ ManagerImpl::add( const UpdateManager::UWActor& writer)
 }
 
 void
-ManagerImpl::add(
-  const long                    domain,
-  const ::OpenDDS::DCPS::GUID_t participant,
-  const long                    owner
-)
+ManagerImpl::create( const Update::OwnershipData& data)
 {
   OwnerUpdate sample;
   sample.sender      = this->id();
   sample.action      = CreateEntity;
 
-  sample.domain      = domain;
-  sample.participant = participant;
-  sample.owner       = owner;
+  sample.domain      = data.domain;
+  sample.participant = data.participant;
+  sample.owner       = data.owner;
 
   this->ownerWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::remove(
-  ItemType type,
-  const IdType& id,
-  ActorType actor,
-  long domain,
-  const IdType& participant
+ManagerImpl::destroy(
+  Update::ItemType      type,
+  const Update::IdType& id,
+  Update::ActorType     actor,
+  long                  domain,
+  const Update::IdType& participant
 )
 {
   switch( type) {
-    case Topic:
+    case Update::Topic:
       {
         TopicUpdate sample;
         sample.sender      = this->id();
@@ -139,7 +135,7 @@ ManagerImpl::remove(
       }
       break;
 
-    case Participant:
+    case Update::Participant:
       {
         ParticipantUpdate sample;
         sample.sender = this->id();
@@ -152,10 +148,10 @@ ManagerImpl::remove(
       }
       break;
 
-    case Actor:
+    case Update::Actor:
       // This is VERY annoying.
       switch( actor) {
-        case DataWriter:
+        case Update::DataWriter:
           {
             PublicationUpdate sample;
             sample.sender         = this->id();
@@ -169,7 +165,7 @@ ManagerImpl::remove(
           }
           break;
 
-        case DataReader:
+        case Update::DataReader:
           {
             SubscriptionUpdate sample;
             sample.sender         = this->id();
@@ -188,11 +184,32 @@ ManagerImpl::remove(
 }
 
 void
-ManagerImpl::updateQos(
-  const ItemType& /* itemType */,
-  const IdType&   /* id */,
-  const QosSeq&   /* qos */
-)
+ManagerImpl::update( const Update::IdType& id, const ::DDS::DomainParticipantQos& qos)
+{
+}
+
+void
+ManagerImpl::update( const Update::IdType& id, const ::DDS::TopicQos& qos)
+{
+}
+
+void
+ManagerImpl::update( const Update::IdType& id, const ::DDS::DataWriterQos& qos)
+{
+}
+
+void
+ManagerImpl::update( const Update::IdType& id, const ::DDS::PublisherQos& qos)
+{
+}
+
+void
+ManagerImpl::update( const Update::IdType& id, const ::DDS::DataReaderQos& qos)
+{
+}
+
+void
+ManagerImpl::update( const Update::IdType& id, const ::DDS::SubscriberQos& qos)
 {
 }
 

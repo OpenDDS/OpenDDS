@@ -30,7 +30,7 @@
 
 // forward declarations
 class DCPS_IR_Domain;
-class UpdateManager;
+namespace Update { class UpdateManager; }
 
 typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
 typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
@@ -56,7 +56,7 @@ public:
                        OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
-		       UpdateManager* um);
+		       Update::UpdateManager* um);
 
   virtual ~DCPS_IR_Participant();
 
@@ -207,7 +207,7 @@ private:
   //  encompasses a bigger role. Therefore it needs to update
   //  other entities (specifically the UpdateManager) the
   //  changes it makes.
-  UpdateManager* um_;
+  Update::UpdateManager* um_;
 };
 
 

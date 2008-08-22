@@ -15,7 +15,7 @@ DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
                                           OpenDDS::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
                                           ::DDS::DomainParticipantQos qos,
-                                          UpdateManager* um)
+                                          Update::UpdateManager* um)
 : id_(id),
   domain_(domain),
   qos_(qos),
@@ -164,7 +164,11 @@ DCPS_IR_Participant::takeOwnership()
 {
   /// Publish an update with our ownership.
   if( this->um_) {
-    this->um_->add( this->domain_->get_id(), this->id_, this->federationId_);
+    this->um_->create(
+      Update::OwnershipData(
+        this->domain_->get_id(),
+        this->id_, this->federationId_
+    ));
   }
 
   // And now handle our internal ownership processing.
@@ -730,7 +734,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       ++topicIter;
 
       if (um_) {
-        um_->remove (Topic, topic->get_id());
+        um_->destroy( Update::Topic, topic->get_id());
       }
       domain_->remove_topic(this, topic);
     }
@@ -751,7 +755,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       pub = (*pubIter).int_id_;
       ++pubIter;
       if (um_) {
-        um_->remove (Actor, pub->get_id());
+        um_->destroy( Update::Actor, pub->get_id());
       }
 
       delete pub;
@@ -765,7 +769,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       sub = (*subIter).int_id_;
       ++subIter;
       if (um_) {
-        um_->remove (Actor, sub->get_id());
+        um_->destroy( Update::Actor, sub->get_id());
       }
 
       delete sub;
@@ -773,7 +777,7 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
   subscriptions_.unbind_all();
 
   if (um_) {
-    um_->remove (Participant, this->get_id());
+    um_->destroy( Update::Participant, this->get_id());
   }
 }
 

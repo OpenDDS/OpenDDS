@@ -126,11 +126,11 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
 
   if (um_)
     {
-      UpdateManager::UTopic topic (domainId, topicId, participantId
+      Update::UTopic topic (domainId, topicId, participantId
                                    , topicName, dataTypeName
                                    , const_cast< ::DDS::TopicQos &>(qos));
 
-      um_->add (topic);
+      um_->create (topic);
     }
 
   return topicStatus;
@@ -250,7 +250,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
   OpenDDS::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
 
   if (um_) {
-    um_->remove (Topic, topicId);
+    um_->destroy( Update::Topic, topicId);
   }
 
   return removedStatus;
@@ -358,14 +358,14 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     {
       CORBA::String_var callback = orb_->object_to_string (publication);
 
-      UpdateManager::UWActor actor (domainId, pubId, topicId, participantId, DataWriter
+      Update::UWActor actor (domainId, pubId, topicId, participantId, Update::DataWriter
                                     , callback.in()
                                     , const_cast< ::DDS::PublisherQos &>(publisherQos)
                                     , const_cast< ::DDS::DataWriterQos &>(qos)
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add( actor);
+      um_->create( actor);
     }
 
   domainPtr->remove_dead_participants();
@@ -490,7 +490,7 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
   domainPtr->remove_dead_participants();
 
   if (um_) {
-    um_->remove (Actor, publicationId);
+    um_->destroy( Update::Actor, publicationId);
   }
 }
 
@@ -563,14 +563,14 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     {
       CORBA::String_var callback = orb_->object_to_string (subscription);
 
-      UpdateManager::URActor actor (domainId, subId, topicId, participantId, DataReader
+      Update::URActor actor (domainId, subId, topicId, participantId, Update::DataReader
                                     , callback.in()
                                     , const_cast< ::DDS::SubscriberQos &>(subscriberQos)
                                     , const_cast< ::DDS::DataReaderQos &>(qos)
                                     , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
                                     (transInfo));
 
-      um_->add( actor);
+      um_->create( actor);
     }
 
   domainPtr->remove_dead_participants();
@@ -693,7 +693,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
   domainPtr->remove_dead_participants();
 
   if (um_) {
-    um_->remove (Actor, subscriptionId);
+    um_->destroy( Update::Actor, subscriptionId);
   }
 }
 
@@ -741,10 +741,10 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
 
   if (um_)
     {
-      UpdateManager::UParticipant participant
+      Update::UParticipant participant
         (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
 
-      um_->add (participant);
+      um_->create (participant);
     }
 
   return participantId;
@@ -983,25 +983,25 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
       throw OpenDDS::DCPS::Invalid_Publication();
     }
 
-  SpecificQos qosType; 
+  Update::SpecificQos qosType; 
   if (pub->set_qos (qos, publisherQos, qosType) == false) // not compatible
     return 0;
 
-  if (um_)
-    {
-      if (qosType == DataWriterQos)
-      {
-        QosSeq dw_qos;
-        this->get_qos_seq (qosType, qos, dw_qos);
-        um_->updateQos (Actor, dwId, dw_qos);
-      }
-      else
-      {
-        QosSeq pub_qos;
-        this->get_qos_seq (qosType, publisherQos, pub_qos);
-        um_->updateQos (Actor, dwId, pub_qos);
-      }
+  if( um_) {
+    switch( qosType) {
+      case Update::DataWriterQos:
+        um_->update( dwId, qos);
+        break;
+
+      case Update::PublisherQos:
+        um_->update( dwId, publisherQos);
+        break;
+
+      case Update::NoQos:
+      default:
+        break;
     }
+  }
 
   return 1;
 }
@@ -1038,23 +1038,23 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
 
-  SpecificQos qosType;
+  Update::SpecificQos qosType;
   if (sub->set_qos (qos, subscriberQos, qosType) == false)
     return 0;
 
-  if (um_)
-  {
-    if (qosType == DataReaderQos)
-    {
-      QosSeq dr_qos;
-      this->get_qos_seq (qosType, qos, dr_qos);
-      um_->updateQos (Actor, drId, dr_qos);
-    }
-    else
-    {
-      QosSeq sub_qos;
-      this->get_qos_seq (qosType, subscriberQos, sub_qos);
-      um_->updateQos (Actor, drId, sub_qos);
+  if( um_) {
+    switch( qosType) {
+      case Update::DataReaderQos:
+        um_->update( drId, qos);
+        break;
+
+      case Update::SubscriberQos:
+        um_->update( drId, subscriberQos);
+        break;
+
+      case Update::NoQos:
+      default:
+        break;
     }
   }
   return 1;
@@ -1099,9 +1099,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
 
   if (um_)
     {
-       QosSeq topic_qos;
-       this->get_qos_seq (TopicQos, qos, topic_qos);
-       um_->updateQos (Topic, topicId, topic_qos);
+       um_->update( topicId, qos);
     }
   return 1;
 }
@@ -1137,9 +1135,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
 
   if (um_)
     {
-      QosSeq part_qos;
-      this->get_qos_seq (ParticipantQos, qos, part_qos);
-      um_->updateQos (Participant, participantId, part_qos);
+      um_->update( participantId, qos);
     }
 
   return 1;
@@ -1274,13 +1270,13 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
 }
 
 bool
-TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
+TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
 {
-  for (UpdateManager::UImage::ParticipantSeq::const_iterator
+  for (Update::UImage::ParticipantSeq::const_iterator
          iter = image.participants.begin();
        iter != image.participants.end(); iter++)
     {
-      const UpdateManager::UParticipant* part = *iter;
+      const Update::UParticipant* part = *iter;
 
       if (!this->add_domain_participant (part->domainId, part->participantId
                                          , part->participantQos)) {
@@ -1289,10 +1285,10 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
       }
     }
 
-  for (UpdateManager::UImage::TopicSeq::const_iterator iter = image.topics.begin();
+  for (Update::UImage::TopicSeq::const_iterator iter = image.topics.begin();
        iter != image.topics.end(); iter++)
     {
-      const UpdateManager::UTopic* topic = *iter;
+      const Update::UTopic* topic = *iter;
 
       if (!this->add_topic (topic->topicId, topic->domainId
                             , topic->participantId, topic->name.c_str()
@@ -1302,10 +1298,10 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
       }
     }
 
-  for (UpdateManager::UImage::ReaderSeq::const_iterator iter = image.actors.begin();
+  for (Update::UImage::ReaderSeq::const_iterator iter = image.actors.begin();
        iter != image.actors.end(); iter++)
     {
-      const UpdateManager::URActor* sub = *iter;
+      const Update::URActor* sub = *iter;
 
       if (!this->add_subscription (sub->domainId, sub->participantId
                                    , sub->topicId, sub->actorId
@@ -1317,10 +1313,10 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
       }
     }
 
-  for (UpdateManager::UImage::WriterSeq::const_iterator iter = image.wActors.begin();
+  for (Update::UImage::WriterSeq::const_iterator iter = image.wActors.begin();
        iter != image.wActors.end(); iter++)
     {
-      const UpdateManager::UWActor* pub = *iter;
+      const Update::UWActor* pub = *iter;
 
       if (!this->add_publication (pub->domainId, pub->participantId
                                   , pub->topicId, pub->actorId
@@ -1338,8 +1334,8 @@ TAO_DDS_DCPSInfo_i::receive_image (const UpdateManager::UImage& image)
 bool
 TAO_DDS_DCPSInfo_i::init_persistence (void)
 {
-  um_ = ACE_Dynamic_Service<UpdateManager>::instance
-    ("UpdateManager");
+  um_ = ACE_Dynamic_Service<UpdateManagerSvc>::instance
+    ("UpdateManagerSvc");
 
   if (um_ != 0)
     {
@@ -1352,35 +1348,11 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
     }
   else {
     ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("TAO_DDS_DCPSInfo_i> Failed to discover ")
-                       "UpdateManager.\n"), false);
+                       "UpdateManagerSvc.\n"), false);
   }
 
   return true;
 }
-
-
-template <typename QosType, typename Qos>
-void
-TAO_DDS_DCPSInfo_i::get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq)
-{
-  TAO_OutputCDR outCdr;
-  outCdr << qos;
-  ACE_Message_Block dst;
-  ACE_CDR::consolidate (&dst, outCdr.begin ());
-
-  size_t len = dst.length();
-  char *buf = new char[len];
-  if (buf == 0) {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)TAO_DDS_DCPSInfo_i::get_qos_seq "
-      "Allocation failed.\n"));
-  }
-
-  ACE_OS::memcpy (buf, dst.base(), len);
-
-  qosSeq.first = qosType;
-  qosSeq.second = BinSeq (len, buf);
-}
-
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 

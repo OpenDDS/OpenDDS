@@ -37,7 +37,7 @@
 typedef ACE_Map_Manager< ::DDS::DomainId_t, DCPS_IR_Domain*, ACE_Null_Mutex> DCPS_IR_Domain_Map;
 
 // Forward declaration
-class UpdateManager;
+namespace Update{ class UpdateManager; }
 
 /**
  * @class TAO_DDS_DCPSInfo_i
@@ -435,14 +435,11 @@ public:
   int init_transport (int listen_address_given,
                       const ACE_INET_Addr listen);
 
-  bool receive_image (const UpdateManager::UImage& image);
+  bool receive_image (const Update::UImage& image);
 
 private:
 
   bool init_persistence (void);
-
-  template <typename QosType, typename Qos>
-  void get_qos_seq (const QosType& qosType, const Qos& qos, QosSeq& qosSeq);
 
 private:
   DCPS_IR_Domain_Map domains_;
@@ -451,7 +448,7 @@ private:
   long          federation_;
   GuidGenerator participantIdGenerator_;
 
-  UpdateManager* um_;
+  Update::UpdateManager* um_;
   bool reincarnate_;
 };
 

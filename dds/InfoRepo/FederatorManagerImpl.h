@@ -27,7 +27,7 @@ namespace OpenDDS { namespace Federator {
 
 class OpenDDS_Federator_Export ManagerImpl 
   : public virtual POA_OpenDDS::Federator::Manager,
-    public virtual ::Updater,
+    public virtual Update::Updater,
     public virtual UpdateProcessor< OwnerUpdate>,
     public virtual UpdateProcessor< TopicUpdate>,
     public virtual UpdateProcessor< ParticipantUpdate>,
@@ -101,33 +101,30 @@ class OpenDDS_Federator_Export ManagerImpl
 
     virtual void requestImage();
 
-    virtual void add( const UpdateManager::UTopic& topic);
+    virtual void create( const Update::UTopic& topic);
 
-    virtual void add( const UpdateManager::UParticipant& participant);
+    virtual void create( const Update::UParticipant& participant);
 
-    virtual void add( const UpdateManager::URActor& reader);
+    virtual void create( const Update::URActor& reader);
 
-    virtual void add( const UpdateManager::UWActor& writer);
+    virtual void create( const Update::UWActor& writer);
 
-    virtual void add(
-                   const long                    domain,
-                   const ::OpenDDS::DCPS::GUID_t participant,
-                   const long                    owner
+    virtual void create( const Update::OwnershipData& data);
+
+    virtual void destroy(
+                   Update::ItemType      type,
+                   const Update::IdType& id,
+                   Update::ActorType     actor,
+                   long                  domain,
+                   const Update::IdType& participant
                  );
 
-    virtual void remove(
-                   ItemType type,
-                   const IdType& id,
-                   ActorType actor,
-                   long domain,
-                   const IdType& participant
-                 );
-
-    virtual void updateQos(
-                   const ItemType& itemType,
-                   const IdType&   id,
-                   const QosSeq&   qos
-                 );
+    virtual void update( const Update::IdType& id, const ::DDS::DomainParticipantQos& qos);
+    virtual void update( const Update::IdType& id, const ::DDS::TopicQos&             qos);
+    virtual void update( const Update::IdType& id, const ::DDS::DataWriterQos&        qos);
+    virtual void update( const Update::IdType& id, const ::DDS::PublisherQos&         qos);
+    virtual void update( const Update::IdType& id, const ::DDS::DataReaderQos&        qos);
+    virtual void update( const Update::IdType& id, const ::DDS::SubscriberQos&        qos);
 
     //
     // UpdateProcessor<> methods.

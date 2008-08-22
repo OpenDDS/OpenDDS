@@ -12,58 +12,43 @@
 #define _UPDATER_
 
 #include "UpdateDataTypes.h"
-#include "UpdateManager.h"
-
 #include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
+namespace Update {
 
 class Updater
 {
- public:
+  public:
+    // Request an image refresh to be sent to
+    //  the specified callback (asynchronously).
+    virtual void requestImage (void) = 0;
 
-  virtual ~Updater (void);
+    // Propagate that an entity has been created.
+    virtual void create( const UTopic&              topic) = 0;
+    virtual void create( const UParticipant&  participant) = 0;
+    virtual void create( const URActor&             actor) = 0;
+    virtual void create( const UWActor&             actor) = 0;
+    virtual void create( const OwnershipData&        data) = 0;
 
-  virtual void unregisterCallback (void) = 0;
+    // Propagate updated Qos parameters for an entity.
+    virtual void update( const IdType& id, const ::DDS::DomainParticipantQos& qos) = 0;
+    virtual void update( const IdType& id, const ::DDS::TopicQos&             qos) = 0;
+    virtual void update( const IdType& id, const ::DDS::DataWriterQos&        qos) = 0;
+    virtual void update( const IdType& id, const ::DDS::PublisherQos&         qos) = 0;
+    virtual void update( const IdType& id, const ::DDS::DataReaderQos&        qos) = 0;
+    virtual void update( const IdType& id, const ::DDS::SubscriberQos&        qos) = 0;
 
-  // Request an image refresh to be sent to
-  //  the specified callback (asynchronously).
-  virtual void requestImage (void) = 0;
-
-  // Add entities to be persisted.
-  virtual void add(const UpdateManager::UTopic& topic) = 0;
-  virtual void add(const UpdateManager::UParticipant& participant) = 0;
-  virtual void add(const UpdateManager::URActor& actor) = 0;
-  virtual void add(const UpdateManager::UWActor& actor) = 0;
-  virtual void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner) = 0;
-
-  // Remove an entity (but not children) from persistence.
-  virtual void remove(
-                 ItemType      type,
-                 const IdType& id,
-                 ActorType     actor = DataWriter,
-                 long          domain = 0,
-                 const IdType& participant = ::OpenDDS::DCPS::GUID_UNKNOWN
-               ) = 0;
-
-  // Persist updated Qos parameters for an entity.
-  virtual void updateQos(const ItemType& itemType, const IdType& id
-			 , const QosSeq& qos) = 0;
+    // Propagate that an entity has been destroyed.
+    virtual void destroy(
+                   ItemType      type,
+                   const IdType& id,
+                   ActorType     actor = DataWriter,
+                   long          domain = 0,
+                   const IdType& participant = ::OpenDDS::DCPS::GUID_UNKNOWN
+                 ) = 0;
 };
 
-// forward declare
-class UpdateManager;
-
-class UpdaterBase : public Updater
-{
- public:
-  virtual ~UpdaterBase (void);
-
-  void unregisterCallback (void);
-  void add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner);
-
- protected:
-  UpdateManager* um_;
-};
+} // End of namespace Update
 
 #endif // _UPDATER_

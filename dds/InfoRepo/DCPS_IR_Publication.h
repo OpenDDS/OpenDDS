@@ -111,7 +111,7 @@ public:
   /// to datawriter BIT.
   bool set_qos (const ::DDS::DataWriterQos & qos,
                 const ::DDS::PublisherQos & publisherQos,
-                SpecificQos& specificQos);
+                Update::SpecificQos& specificQos);
 
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
