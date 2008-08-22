@@ -112,7 +112,7 @@ public:
   /// changes to datereader BIT.
   bool set_qos (const ::DDS::DataReaderQos & qos,
                 const ::DDS::SubscriberQos & subscriberQos,
-                SpecificQos& specificQos);
+                Update::SpecificQos& specificQos);
 
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before

@@ -1,5 +1,4 @@
 // -*- C++ -*-
-
 /**
  * @file      PersistenceUpdate.h
  *
@@ -7,7 +6,6 @@
  *
  * @author Ciju John <johnc@ociweb.com>
  */
-
 #ifndef _PERSISTENCE_UPDATER_
 #define _PERSISTENCE_UPDATER_
 
@@ -22,29 +20,30 @@
 
 #include <string>
 
+namespace Update {
+
 // Forward declaration
 class UpdateManager;
 
-class PersistenceUpdater : public UpdaterBase, public ACE_Task_Base
+class PersistenceUpdater : public Updater, public ACE_Task_Base
 {
  public:
-  class IdType_ExtId
-  {
-  public:
-    IdType_ExtId ();
+  class IdType_ExtId {
+    public:
+      IdType_ExtId ();
 
-    IdType_ExtId (IdType id);
+      IdType_ExtId (IdType id);
 
-    IdType_ExtId (const IdType_ExtId& ext);
+      IdType_ExtId (const IdType_ExtId& ext);
 
-    void operator= (const IdType_ExtId& ext);
+      void operator= (const IdType_ExtId& ext);
 
-    bool operator== (const IdType_ExtId& ext) const;
+      bool operator== (const IdType_ExtId& ext) const;
 
-    unsigned long hash (void) const;
+      unsigned long hash (void) const;
 
-  private:
-    IdType id_;
+    private:
+      IdType id_;
   };
 
 public:
@@ -77,13 +76,22 @@ public:
   virtual void requestImage (void);
 
   /// Add entities to be persisted.
-  virtual void add (const UpdateManager::UTopic& topic);
-  virtual void add (const UpdateManager::UParticipant& participant);
-  virtual void add (const UpdateManager::URActor& actor);
-  virtual void add (const UpdateManager::UWActor& actor);
+  virtual void create( const UTopic& topic);
+  virtual void create( const UParticipant& participant);
+  virtual void create( const URActor& actor);
+  virtual void create( const UWActor& actor);
+  virtual void create( const OwnershipData& data);
+
+  /// Persist updated Qos parameters for an entity.
+  virtual void update( const IdType& id, const ::DDS::DomainParticipantQos& qos);
+  virtual void update( const IdType& id, const ::DDS::TopicQos&             qos);
+  virtual void update( const IdType& id, const ::DDS::DataWriterQos&        qos);
+  virtual void update( const IdType& id, const ::DDS::PublisherQos&         qos);
+  virtual void update( const IdType& id, const ::DDS::DataReaderQos&        qos);
+  virtual void update( const IdType& id, const ::DDS::SubscriberQos&        qos);
 
   /// Remove an entity (but not children) from persistence.
-  virtual void remove(
+  virtual void destroy(
                  ItemType type,
                  const IdType& id,
                  ActorType actor,
@@ -91,13 +99,9 @@ public:
                  const IdType& participant
                );
 
-  /// Persist updated Qos parameters for an entity.
-  virtual void updateQos (const ItemType& itemType, const IdType& id
-			 , const ::QosSeq& qos);
-
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
-  void get_bin_seq (const ::QosSeq& qos, BinSeq & binSeq);
+  void storeUpdate( const ACE_Message_Block& data, BinSeq& storage);
 
   ACE_TString persistence_file_;
   bool reset_;
@@ -111,5 +115,7 @@ public:
   ActorIndex *actor_index_;
 };
 
+} // End of namespace Update
 
 #endif // _PERSISTENCE_UPDATER_
+

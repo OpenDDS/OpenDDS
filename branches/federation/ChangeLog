@@ -1,42 +1,103 @@
+Fri Aug 22 01:07:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+
+	  Moved the data definitions into the Update namespace.  Added
+	  NoQos enumeration value for SpecificQos enumeration.  Added
+	  OwnershipData structure for create() method interface.  Moved
+	  UpdateManager types into the namespace here.
+
+        * dds/InfoRepo/Updater.h:
+
+	  Made this a pure abstract interface definition in the new
+	  Update namespace.  Changed the add() methods to create()
+	  methods.  Changed the remove() method to destroy().  Changed
+	  the updateQos() method to update().  Removed the obsolete
+	  unregisterCallback() method.  Changed ownership create()
+	  interface to use new OwnershipData structure.  Removed the
+	  inutile UpdaterBase class.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/UpdateManager_T.cpp:
+
+	  Moved the UpdateManager into the Update namespace.  Moved
+	  internal data types from the class to the namespace.  Changed
+	  push update methods from individual add() methods to template
+	  create() method.  Removed unused unregisterCallback() method.
+	  Changed updateQos method to template update() method.  Renamed
+	  remove() method to destroy() method.  Renamed the service using
+	  a typedef to avoid using a scoped classname with the service
+	  configurator setup macros.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+	  Modified to use the new interface and datatype definitions in
+	  the new namespace.
+
+        * tests/DCPS/BuiltInTopicTest/mySvc.conf:
+        * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
+
+	  Updated to new service names.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+	  Explicitly define UpdateManager_T.cpp as a template file.
+
+        * dds/InfoRepo/Updater.cpp:
+
+          Removed this file.
+
 Thu Aug 21 15:09:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
 
-	  Removed unused packet sequence attribute.
+          Removed unused packet sequence attribute.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  remove(): extended signature with optional parameters and
-	            implemented.
+          remove(): extended signature with optional parameters and
+                    implemented.
 
-	  Removed unused packet sequence attribute.
+          Removed unused packet sequence attribute.
 
         * dds/InfoRepo/PersistenceUpdater.h:
         * dds/InfoRepo/PersistenceUpdater.cpp:
         * dds/InfoRepo/Updater.h:
 
-	  Extended remove() method with optional parameters to allow use
-	  in publishing federation update information.
+          Extended remove() method with optional parameters to allow use
+          in publishing federation update information.
 
         * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
         * tests/DCPS/SetQosPartition/run_test.pl:
 
-	  Enhanced to permit specification of debug output levels.
+          Enhanced to permit specification of debug output levels.
 
         * tests/DCPS/SetQosPartition/pub.ini:
         * tests/DCPS/SetQosPartition/sub.ini:
 
-	  Added 'keep_link=1' specification to avoid timing hazard with
-	  quick disconnection/reconnection that happens when updating the
-	  Partition Qos value for the test.  This avoids the identified
-	  problem but does not fix it.
+          Added 'keep_link=1' specification to avoid timing hazard with
+          quick disconnection/reconnection that happens when updating the
+          Partition Qos value for the test.  This avoids the identified
+          problem but does not fix it.
 
         * dds/DCPS/transport/framework/DataLink.cpp:
 
-	  Brought more processing within lock scope during connection
-	  tear down.  This is a first step in resolving the above timing
-	  hazard.
+          Brought more processing within lock scope during connection
+          tear down.  This is a first step in resolving the above timing
+          hazard.
 
 Mon Aug 18 23:06:00 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

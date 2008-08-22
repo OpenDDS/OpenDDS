@@ -64,7 +64,10 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
     GuidGenerator.cpp
     PersistenceUpdater.cpp
     UpdateManager.cpp
-    Updater.cpp
+  }
+
+  Template_Files {
+    UpdateManager_T.cpp
   }
 
 }

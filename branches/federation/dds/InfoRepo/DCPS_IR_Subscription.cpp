@@ -578,7 +578,7 @@ const ::DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos ()
 
 bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
                                     const ::DDS::SubscriberQos & subscriberQos,
-                                    SpecificQos& specificQos)
+                                    Update::SpecificQos& specificQos)
 {
   bool need_evaluate = false;
   bool u_dr_qos = ! (qos_ == qos);
@@ -630,8 +630,10 @@ bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
   }
 
   participant_->get_domain_reference()->publish_subscription_bit (this);
-  specificQos = u_dr_qos ? DataReaderQos : SubscriberQos;
-  
+  specificQos = u_dr_qos?  Update::DataReaderQos:
+                u_sub_qos? Update::SubscriberQos:
+                           Update::NoQos;
+
   return true;
 }
 

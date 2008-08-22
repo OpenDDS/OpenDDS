@@ -1,3 +1,5 @@
+// -*- C++ -*-
+// $Id$
 #include "DcpsInfo_pch.h"
 
 #include "UpdateManager.h"
@@ -8,6 +10,8 @@
 #include "tao/CDR.h"
 
 #include <vector>
+
+namespace Update {
 
 UpdateManager::UpdateManager (void)
   : info_ (0)
@@ -277,83 +281,15 @@ UpdateManager::pushImage (const DImage& image)
 }
 
 void
-UpdateManager::add (const UTopic& topic)
-{
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (topic);
-  }
-}
-
-void
-UpdateManager::add(const UParticipant& participant)
-{
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (participant);
-  }
-}
-
-void
-UpdateManager::add(const URActor& reader)
-{
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (reader);
-  }
-}
-
-void
-UpdateManager::add(const UWActor& writer)
-{
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add (writer);
-  }
-}
-
-void
-UpdateManager::add( const long domain, const OpenDDS::DCPS::GUID_t participant, const long owner)
-{
-  // Invoke add on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->add( domain, participant, owner);
-  }
-}
-
-void
-UpdateManager::remove (ItemType type, const IdType& id)
+UpdateManager::destroy( ItemType type, const IdType& id)
 {
   // Invoke remove on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->remove (type, id);
+    (*iter)->destroy( type, id);
   }
 }
-
-void
-UpdateManager::updateQos(const ItemType& itemType, const IdType& id
-			 , const QosSeq& qos)
-{
-  // Invoke updateQos on each of the iterators.
-  for (Updaters::iterator iter = updaters_.begin();
-       iter != updaters_.end();
-       iter++) {
-    (*iter)->updateQos (itemType, id, qos);
-  }
-}
-
 
 void
 UpdateManager::add (const DTopic& topic)
@@ -447,22 +383,24 @@ UpdateManager::add (const DActor& actor)
     }
 }
 
+} // End of namespace Update
+
 int
-UpdateManager_Loader::init (void)
+UpdateManagerSvc_Loader::init (void)
 {
   return ACE_Service_Config::process_directive
-    (ace_svc_desc_UpdateManager);
+    (ace_svc_desc_UpdateManagerSvc);
   return 0;
 }
 
-ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManager)
+ACE_FACTORY_DEFINE (ACE_Local_Service, UpdateManagerSvc)
 
-ACE_STATIC_SVC_DEFINE (UpdateManager,
-                         ACE_TEXT ("UpdateManager"),
+ACE_STATIC_SVC_DEFINE (UpdateManagerSvc,
+                         ACE_TEXT ("UpdateManagerSvc"),
                          ACE_SVC_OBJ_T,
-                         &ACE_SVC_NAME (UpdateManager),
+                         &ACE_SVC_NAME (UpdateManagerSvc),
                          ACE_Service_Type::DELETE_THIS
                          | ACE_Service_Type::DELETE_OBJ,
                          0)
 
-  //ACE_STATIC_SVC_REQUIRE (UpdateManager)
+  //ACE_STATIC_SVC_REQUIRE (Update::UpdateManager)

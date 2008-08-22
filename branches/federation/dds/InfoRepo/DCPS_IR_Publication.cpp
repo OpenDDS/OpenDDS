@@ -557,7 +557,7 @@ CORBA::Boolean DCPS_IR_Publication::is_subscription_ignored (OpenDDS::DCPS::Repo
 
 bool DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
                                    const ::DDS::PublisherQos & publisherQos,
-                                   SpecificQos& specificQos)
+                                   Update::SpecificQos& specificQos)
 {
   bool need_evaluate = false;
   bool u_dw_qos = ! (qos_ == qos);
@@ -610,7 +610,9 @@ bool DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
   }
 
   participant_->get_domain_reference()->publish_publication_bit (this);
-  specificQos = u_dw_qos ? DataWriterQos : PublisherQos;
+  specificQos = u_dw_qos?  Update::DataWriterQos:
+                u_pub_qos? Update::PublisherQos:
+                           Update::NoQos;
 
   return true;
 }
