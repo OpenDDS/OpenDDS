@@ -29,12 +29,12 @@ class TAO_DDS_DCPSInfo_i;
 
 namespace Update {
 
-class UpdateManager : public ACE_Service_Object
+class Manager : public ACE_Service_Object
 {
  public:
-  UpdateManager (void);
+  Manager (void);
 
-  virtual ~UpdateManager (void);
+  virtual ~Manager (void);
 
   /// Shared object initializer
   virtual int init (int argc, ACE_TCHAR *argv[]);
@@ -67,10 +67,10 @@ class UpdateManager : public ACE_Service_Object
 
   // Propagate QoS updates.
   template< class QosType>
-  void update( const IdType& id, const QosType& qos);
+  void update( const IdPath& id, const QosType& qos);
 
   // Propagate destruction of entities.
-  void destroy( ItemType type, const IdType& id);
+  void destroy( const IdPath& id, ItemType type, ActorType actor = DataWriter);
 
   // Downstream request to push persisted data
   void add (const DTopic& topic);
@@ -98,7 +98,7 @@ class UpdateManager : public ACE_Service_Object
 #pragma implementation ("UpdateManager_T.cpp")
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
-typedef Update::UpdateManager UpdateManagerSvc;
+typedef Update::Manager UpdateManagerSvc;
 
 ACE_STATIC_SVC_DECLARE (UpdateManagerSvc)
 

@@ -575,6 +575,73 @@ const ::DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos ()
   return &subscriberQos_;
 }
 
+void
+DCPS_IR_Subscription::set_qos( const ::DDS::DataReaderQos& qos)
+{
+  if( false == ( qos == this->qos_)) {
+    if( ::should_check_compatibility_upon_change( qos, this->qos_)
+     && (false == this->compatibleQosChange( qos))) {
+      return;
+    }
+
+    // Check if we should check while we have both values.
+    bool check = ::should_check_association_upon_change( qos, this->qos_);
+
+    // Store the new, compatible, value.
+    this->qos_ = qos;
+
+    if( check) {
+      // This will remove any newly stale associations.
+      this->reevaluate_existing_associations();
+      
+      // Sleep a while to let remove_association handled by DataWriter 
+      // before add_association. Otherwise, new association will have
+      // trouble to connect each other.
+      ACE_OS::sleep (ACE_Time_Value (0, 250000));
+      
+      // This will establish any newly made associations.
+      DCPS_IR_Topic_Description* description
+        = this->topic_->get_topic_description();
+      description->reevaluate_associations (this);
+    }
+
+    this->participant_->get_domain_reference()->publish_subscription_bit( this);
+  }
+}
+
+void
+DCPS_IR_Subscription::set_qos( const ::DDS::SubscriberQos& qos)
+{
+  if( false == ( qos == this->subscriberQos_)) {
+    if( ::should_check_compatibility_upon_change( qos, this->subscriberQos_)
+     && (false == this->compatibleQosChange( qos))) {
+      return;
+    }
+
+    // Check if we should check while we have both values.
+    bool check = ::should_check_association_upon_change( qos, this->subscriberQos_);
+
+    // Store the new, compatible, value.
+    this->subscriberQos_ = qos;
+
+    if( check) {
+      // This will remove any newly stale associations.
+      this->reevaluate_existing_associations();
+      
+      // Sleep a while to let remove_association handled by DataWriter 
+      // before add_association. Otherwise, new association will have
+      // trouble to connect each other.
+      ACE_OS::sleep (ACE_Time_Value (0, 250000));
+      
+      // This will establish any newly made associations.
+      DCPS_IR_Topic_Description* description
+        = this->topic_->get_topic_description();
+      description->reevaluate_associations (this);
+    }
+
+    this->participant_->get_domain_reference()->publish_subscription_bit( this);
+  }
+}
 
 bool DCPS_IR_Subscription::set_qos (const ::DDS::DataReaderQos & qos,
                                     const ::DDS::SubscriberQos & subscriberQos,

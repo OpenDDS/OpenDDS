@@ -37,7 +37,7 @@
 typedef ACE_Map_Manager< ::DDS::DomainId_t, DCPS_IR_Domain*, ACE_Null_Mutex> DCPS_IR_Domain_Map;
 
 // Forward declaration
-namespace Update{ class UpdateManager; }
+namespace Update { class Manager; }
 
 /**
  * @class TAO_DDS_DCPSInfo_i
@@ -354,6 +354,21 @@ public:
     , OpenDDS::DCPS::Invalid_Publication
     ));
 
+  /// Entry for federation updates of DataWriterQos values.
+  void update_publication_qos (
+    ::DDS::DomainId_t            domainId,
+    const OpenDDS::DCPS::RepoId& partId,
+    const OpenDDS::DCPS::RepoId& dwId,
+    const ::DDS::DataWriterQos&  qos
+  );
+
+  /// Entry for federation updates of PublisherQos values.
+  void update_publication_qos (
+    ::DDS::DomainId_t            domainId,
+    const OpenDDS::DCPS::RepoId& partId,
+    const OpenDDS::DCPS::RepoId& dwId,
+    const ::DDS::PublisherQos&   qos
+  );
 
   virtual CORBA::Boolean update_subscription_qos (
       ::DDS::DomainId_t domainId,
@@ -369,6 +384,22 @@ public:
     , OpenDDS::DCPS::Invalid_Subscription
     ));
 
+
+  /// Entry for federation updates of DataReaderQos values.
+  void update_subscription_qos (
+    ::DDS::DomainId_t            domainId,
+    const OpenDDS::DCPS::RepoId& partId,
+    const OpenDDS::DCPS::RepoId& drId,
+    const ::DDS::DataReaderQos&  qos
+  );
+
+  /// Entry for federation updates of SubscriberQos values.
+  void update_subscription_qos (
+    ::DDS::DomainId_t            domainId,
+    const OpenDDS::DCPS::RepoId& partId,
+    const OpenDDS::DCPS::RepoId& drId,
+    const ::DDS::SubscriberQos&  qos
+  );
 
   virtual CORBA::Boolean update_topic_qos (
       const OpenDDS::DCPS::RepoId& topicId,
@@ -437,6 +468,9 @@ public:
 
   bool receive_image (const Update::UImage& image);
 
+  /// Add an additional Updater interface.
+  void add( Update::Updater* updater);
+
 private:
 
   bool init_persistence (void);
@@ -448,7 +482,7 @@ private:
   long          federation_;
   GuidGenerator participantIdGenerator_;
 
-  Update::UpdateManager* um_;
+  Update::Manager* um_;
   bool reincarnate_;
 };
 

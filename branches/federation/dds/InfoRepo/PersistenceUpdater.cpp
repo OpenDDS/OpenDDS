@@ -245,7 +245,7 @@ int
 PersistenceUpdater::init (int argc, ACE_TCHAR *argv[])
 {
   // discover the UpdateManager
-  um_ = ACE_Dynamic_Service<UpdateManager>::instance
+  um_ = ACE_Dynamic_Service<Update::Manager>::instance
     ("UpdateManagerSvc");
 
   if (um_ == 0) {
@@ -776,9 +776,9 @@ PersistenceUpdater::create( const OwnershipData& /* data */)
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::DomainParticipantQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::DomainParticipantQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::Participant* part_data = 0;
   if( this->participant_index_->find( ext, part_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -791,9 +791,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DomainParticipantQos&
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
       ACE_TEXT("participant %s not found\n"),
@@ -803,9 +803,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DomainParticipantQos&
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::TopicQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::TopicQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::Topic* topic_data = 0;
   if( this->topic_index_->find( ext, topic_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -818,9 +818,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::TopicQos& qos)
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update: ")
       ACE_TEXT("topic %s not found\n"),
@@ -830,9 +830,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::TopicQos& qos)
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::DataWriterQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::DataWriterQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
   if( this->actor_index_->find( ext, actor_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -845,9 +845,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DataWriterQos& qos)
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(writerQos): ")
       ACE_TEXT("publication %s not found\n"),
@@ -857,9 +857,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DataWriterQos& qos)
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::PublisherQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::PublisherQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
   if( this->actor_index_->find( ext, actor_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -872,9 +872,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::PublisherQos& qos)
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(publisherQos): ")
       ACE_TEXT("publication %s not found\n"),
@@ -884,9 +884,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::PublisherQos& qos)
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::DataReaderQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::DataReaderQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
   if( this->actor_index_->find( ext, actor_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -899,9 +899,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DataReaderQos& qos)
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(readerQos): ")
       ACE_TEXT("subscription %s not found\n"),
@@ -911,9 +911,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::DataReaderQos& qos)
 }
 
 void
-PersistenceUpdater::update( const IdType& id, const ::DDS::SubscriberQos& qos)
+PersistenceUpdater::update( const IdPath& id, const ::DDS::SubscriberQos& qos)
 {
-  IdType_ExtId ext( id);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
   if( this->actor_index_->find( ext, actor_data, this->allocator_) ==  0) {
     TAO_OutputCDR outCdr;
@@ -926,9 +926,9 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::SubscriberQos& qos)
   } else {
     std::stringstream buffer;
     long key = OpenDDS::DCPS::GuidConverter(
-                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id)
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
                );
-    buffer << id << "(" << key << ")";
+    buffer << id.id << "(" << key << ")";
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) PersistenceUpdater::update(subscriberQos): ")
       ACE_TEXT("subscription %s not found\n"),
@@ -938,14 +938,14 @@ PersistenceUpdater::update( const IdType& id, const ::DDS::SubscriberQos& qos)
 }
 
 void
-PersistenceUpdater::destroy( ItemType type, const IdType& idType, ActorType, long, const IdType&)
+PersistenceUpdater::destroy( const IdPath& id, ItemType type, ActorType)
 {
-  IdType_ExtId ext (idType);
+  IdType_ExtId ext( id.id);
   PersistenceUpdater::Topic* topic = 0;
   PersistenceUpdater::Participant* participant = 0;
   PersistenceUpdater::RWActor* actor = 0;
 
-  switch (type)
+  switch( type)
     {
     case Update::Topic:
       if (topic_index_->unbind (ext, topic, allocator_) == 0)
@@ -967,49 +967,20 @@ PersistenceUpdater::destroy( ItemType type, const IdType& idType, ActorType, lon
       }
       break;
     default:
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P | %t) Unknown entity: %d\n"), idType));
-    }
-}
-
-#if 0
-void
-PersistenceUpdater::updateQos(const ItemType& itemType, 
-                              const IdType& id,
-                              const ::QosSeq& qos)
-{
-  if (itemType == Actor)
-  {
-    PersistenceUpdater::RWActor* actor_data = 0;
-
-    if (actor_index_->find (ext, actor_data, allocator_) ==  0)
-    {
-      if (qos.first == PublisherQos || qos.first == SubscriberQos) 
-      else if (qos.first == DataWriterQos || qos.first == DataReaderQos) 
       {
-        //safety check
-        if (qos.first != actor_data->drdwQos.first)
-        {
-          ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos inconsistent dwdr qos type "
-            "(update %d map %d)\n", qos.first, actor_data->drdwQos.first));
-        }
-
-        get_bin_seq (qos, actor_data->drdwQos.second);
+        std::stringstream buffer;
+        long key = OpenDDS::DCPS::GuidConverter(
+                     const_cast< ::OpenDDS::DCPS::RepoId*>( &id.id)
+                   );
+        buffer << id.id << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P | %t) PersistenceUpdater::destroy: ")
+          ACE_TEXT("unknown entity - %s.\n"),
+          buffer.str().c_str()
+        ));
       }
-      else 
-        ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos "
-        "invalid qos type %d\n", qos.first));
     }
-    else
-    {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)PersistenceUpdater::updateQos actor %d not found\n", 
-        id));
-    }
-  }
-  else if (itemType == ::Topic)
-  else if (itemType == ::Participant)
-  else
 }
-#endif
 
 void
 PersistenceUpdater::storeUpdate( const ACE_Message_Block& data, BinSeq& storage)

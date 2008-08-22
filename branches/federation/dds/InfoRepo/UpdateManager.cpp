@@ -13,37 +13,37 @@
 
 namespace Update {
 
-UpdateManager::UpdateManager (void)
+Manager::Manager (void)
   : info_ (0)
 {
 }
 
-UpdateManager::~UpdateManager (void)
+Manager::~Manager (void)
 {
 }
 
 void
-UpdateManager::add (TAO_DDS_DCPSInfo_i* info)
+Manager::add (TAO_DDS_DCPSInfo_i* info)
 {
   info_ = info;
 }
 
 void
-UpdateManager::add (Updater* updater)
+Manager::add (Updater* updater)
 {
   // push new element to the back.
   updaters_.insert (updater);
 }
 
 void
-UpdateManager::remove ()
+Manager::remove ()
 {
   // Clean the refrence to the InfoRepo.
   info_ = 0;
 }
 
 void
-UpdateManager::remove (const Updater* updater)
+Manager::remove (const Updater* updater)
 {
   // check if the Updaters is part of the list.
   Updaters::iterator iter = updaters_.find(const_cast<Updater*>(updater));
@@ -56,19 +56,19 @@ UpdateManager::remove (const Updater* updater)
 }
 
 int
-UpdateManager::init (int , ACE_TCHAR *[])
+Manager::init (int , ACE_TCHAR *[])
 {
   return 0;
 }
 
 int
-UpdateManager::fini (void)
+Manager::fini (void)
 {
   return 0;
 }
 
 void
-UpdateManager::requestImage (void)
+Manager::requestImage (void)
 {
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
@@ -106,7 +106,7 @@ private:
 
 
 void
-UpdateManager::pushImage (const DImage& image)
+Manager::pushImage (const DImage& image)
 {
   if (info_ == NULL) {
     return;
@@ -272,7 +272,7 @@ UpdateManager::pushImage (const DImage& image)
           u_image.wActors.push_back (writer);
         }
       else {
-        ACE_ERROR ((LM_ERROR, "UpdateManager::pushImage> unknown "
+        ACE_ERROR ((LM_ERROR, "Update::Manager::pushImage> unknown "
                     "actor type.\n"));
       }
     }
@@ -281,18 +281,18 @@ UpdateManager::pushImage (const DImage& image)
 }
 
 void
-UpdateManager::destroy( ItemType type, const IdType& id)
+Manager::destroy( const IdPath& id, ItemType type, ActorType actor)
 {
   // Invoke remove on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
        iter != updaters_.end();
        iter++) {
-    (*iter)->destroy( type, id);
+    (*iter)->destroy( id, type, actor);
   }
 }
 
 void
-UpdateManager::add (const DTopic& topic)
+Manager::add (const DTopic& topic)
 {
   if (info_ == NULL) {
     return;
@@ -312,7 +312,7 @@ UpdateManager::add (const DTopic& topic)
 }
 
 void
-UpdateManager::add (const DParticipant& participant)
+Manager::add (const DParticipant& participant)
 {
   if (info_ == NULL) {
     return;
@@ -332,7 +332,7 @@ UpdateManager::add (const DParticipant& participant)
 }
 
 void
-UpdateManager::add (const DActor& actor)
+Manager::add (const DActor& actor)
 {
   if (info_ == NULL) {
     return;

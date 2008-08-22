@@ -124,14 +124,12 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
                                                          qos,
                                                          participantPtr);
 
-  if (um_)
-    {
-      Update::UTopic topic (domainId, topicId, participantId
-                                   , topicName, dataTypeName
-                                   , const_cast< ::DDS::TopicQos &>(qos));
-
-      um_->create (topic);
-    }
+  if( this->um_) {
+    Update::UTopic topic (domainId, topicId, participantId
+                                 , topicName, dataTypeName
+                                 , const_cast< ::DDS::TopicQos &>(qos));
+    this->um_->create (topic);
+  }
 
   return topicStatus;
 }
@@ -249,8 +247,9 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
 
   OpenDDS::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
 
-  if (um_) {
-    um_->destroy( Update::Topic, topicId);
+  if( this->um_ && partPtr->owner()) {
+    Update::IdPath path( domainId, participantId, topicId);
+    this->um_->destroy( path, Update::Topic);
   }
 
   return removedStatus;
@@ -354,19 +353,17 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
       pubId = OpenDDS::DCPS::GUID_UNKNOWN;
     }
 
-  if (um_)
-    {
-      CORBA::String_var callback = orb_->object_to_string (publication);
+  if( this->um_) {
+    CORBA::String_var callback = orb_->object_to_string (publication);
 
-      Update::UWActor actor (domainId, pubId, topicId, participantId, Update::DataWriter
-                                    , callback.in()
-                                    , const_cast< ::DDS::PublisherQos &>(publisherQos)
-                                    , const_cast< ::DDS::DataWriterQos &>(qos)
-                                    , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
-                                    (transInfo));
-
-      um_->create( actor);
-    }
+    Update::UWActor actor (domainId, pubId, topicId, participantId, Update::DataWriter
+                                  , callback.in()
+                                  , const_cast< ::DDS::PublisherQos &>(publisherQos)
+                                  , const_cast< ::DDS::DataWriterQos &>(qos)
+                                  , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
+                                  (transInfo));
+    this->um_->create( actor);
+  }
 
   domainPtr->remove_dead_participants();
   return pubId;
@@ -489,8 +486,9 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
 
   domainPtr->remove_dead_participants();
 
-  if (um_) {
-    um_->destroy( Update::Actor, publicationId);
+  if( this->um_ && partPtr->owner()) {
+    Update::IdPath path( domainId, participantId, publicationId);
+    this->um_->destroy( path, Update::Actor, Update::DataWriter);
   }
 }
 
@@ -559,19 +557,18 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
       subId = OpenDDS::DCPS::GUID_UNKNOWN;
     }
 
-  if (um_)
-    {
-      CORBA::String_var callback = orb_->object_to_string (subscription);
+  if( this->um_) {
+    CORBA::String_var callback = orb_->object_to_string (subscription);
 
-      Update::URActor actor (domainId, subId, topicId, participantId, Update::DataReader
-                                    , callback.in()
-                                    , const_cast< ::DDS::SubscriberQos &>(subscriberQos)
-                                    , const_cast< ::DDS::DataReaderQos &>(qos)
-                                    , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
-                                    (transInfo));
+    Update::URActor actor (domainId, subId, topicId, participantId, Update::DataReader
+                                  , callback.in()
+                                  , const_cast< ::DDS::SubscriberQos &>(subscriberQos)
+                                  , const_cast< ::DDS::DataReaderQos &>(qos)
+                                  , const_cast< OpenDDS::DCPS::TransportInterfaceInfo &>
+                                  (transInfo));
 
-      um_->create( actor);
-    }
+    this->um_->create( actor);
+  }
 
   domainPtr->remove_dead_participants();
 
@@ -692,8 +689,9 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
 
   domainPtr->remove_dead_participants();
 
-  if (um_) {
-    um_->destroy( Update::Actor, subscriptionId);
+  if( this->um_ && partPtr->owner()) {
+    Update::IdPath path( domainId, participantId, subscriptionId);
+    this->um_->destroy( path, Update::Actor, Update::DataReader);
   }
 }
 
@@ -739,13 +737,11 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
       participant = 0;
     }
 
-  if (um_)
-    {
-      Update::UParticipant participant
-        (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
-
-      um_->create (participant);
-    }
+  if( this->um_) {
+    Update::UParticipant participant
+      (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
+    this->um_->create (participant);
+  }
 
   return participantId;
 }
@@ -987,14 +983,15 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
   if (pub->set_qos (qos, publisherQos, qosType) == false) // not compatible
     return 0;
 
-  if( um_) {
+  if( this->um_) {
+    Update::IdPath path( domainId, partId, dwId);
     switch( qosType) {
       case Update::DataWriterQos:
-        um_->update( dwId, qos);
+        this->um_->update( path, qos);
         break;
 
       case Update::PublisherQos:
-        um_->update( dwId, publisherQos);
+        this->um_->update( path, publisherQos);
         break;
 
       case Update::NoQos:
@@ -1004,6 +1001,58 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
   }
 
   return 1;
+}
+
+void
+TAO_DDS_DCPSInfo_i::update_publication_qos (
+  ::DDS::DomainId_t            domainId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& dwId,
+  const ::DDS::DataWriterQos&  qos
+)
+{
+  DCPS_IR_Domain* domainPtr;
+  if( domains_.find(domainId, domainPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr;
+  if( domainPtr->find_participant(partId, partPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Publication* pub;
+  if( partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
+    throw OpenDDS::DCPS::Invalid_Publication();
+  }
+
+  pub->set_qos( qos);
+}
+
+void
+TAO_DDS_DCPSInfo_i::update_publication_qos (
+  ::DDS::DomainId_t            domainId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& dwId,
+  const ::DDS::PublisherQos&   qos
+)
+{
+  DCPS_IR_Domain* domainPtr;
+  if( domains_.find(domainId, domainPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr;
+  if( domainPtr->find_participant(partId, partPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Publication* pub;
+  if( partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
+    throw OpenDDS::DCPS::Invalid_Publication();
+  }
+
+  pub->set_qos( qos);
 }
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
@@ -1042,14 +1091,15 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
   if (sub->set_qos (qos, subscriberQos, qosType) == false)
     return 0;
 
-  if( um_) {
+  if( this->um_) {
+    Update::IdPath path( domainId, partId, drId);
     switch( qosType) {
       case Update::DataReaderQos:
-        um_->update( drId, qos);
+        this->um_->update( path, qos);
         break;
 
       case Update::SubscriberQos:
-        um_->update( drId, subscriberQos);
+        this->um_->update( path, subscriberQos);
         break;
 
       case Update::NoQos:
@@ -1060,6 +1110,57 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
   return 1;
 }
 
+void
+TAO_DDS_DCPSInfo_i::update_subscription_qos (
+  ::DDS::DomainId_t            domainId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& drId,
+  const ::DDS::DataReaderQos&  qos
+)
+{
+  DCPS_IR_Domain* domainPtr;
+  if( domains_.find(domainId, domainPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr;
+  if( domainPtr->find_participant(partId, partPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Subscription* sub;
+  if( partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
+    throw OpenDDS::DCPS::Invalid_Subscription();
+  }
+
+  sub->set_qos( qos);
+}
+
+void
+TAO_DDS_DCPSInfo_i::update_subscription_qos (
+  ::DDS::DomainId_t            domainId,
+  const OpenDDS::DCPS::RepoId& partId,
+  const OpenDDS::DCPS::RepoId& drId,
+  const ::DDS::SubscriberQos&  qos
+)
+{
+  DCPS_IR_Domain* domainPtr;
+  if( domains_.find(domainId, domainPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr;
+  if( domainPtr->find_participant(partId, partPtr) != 0) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Subscription* sub;
+  if( partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
+    throw OpenDDS::DCPS::Invalid_Subscription();
+  }
+
+  sub->set_qos( qos);
+}
 
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
   const OpenDDS::DCPS::RepoId& topicId,
@@ -1097,10 +1198,10 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
   if (topic->set_topic_qos (qos) == false)
     return 0;
 
-  if (um_)
-    {
-       um_->update( topicId, qos);
-    }
+  if( this->um_ && partPtr->owner()) {
+    Update::IdPath path( domainId, participantId, topicId);
+    this->um_->update( path, qos);
+  }
   return 1;
 }
 
@@ -1133,10 +1234,10 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
   if (partPtr->set_qos (qos) == false)
     return 0;
 
-  if (um_)
-    {
-      um_->update( participantId, qos);
-    }
+  if( this->um_ && partPtr->owner()) {
+    Update::IdPath path( domainId, participantId, participantId);
+    this->um_->update( path, qos);
+  }
 
   return 1;
 }
@@ -1329,6 +1430,14 @@ TAO_DDS_DCPSInfo_i::receive_image (const Update::UImage& image)
     }
 
   return true;
+}
+
+void
+TAO_DDS_DCPSInfo_i::add( Update::Updater* updater)
+{
+  if( this->um_) {
+    this->um_->add( updater);
+  }
 }
 
 bool

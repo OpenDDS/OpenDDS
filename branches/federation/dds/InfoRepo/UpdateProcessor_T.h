@@ -41,11 +41,18 @@ namespace OpenDDS { namespace Federator {
         const ::DDS::SampleInfo* info
       ) = 0;
 
-      /// Entities are modified.
-      virtual void processUpdate(
+      /// Entity Qos values are modified.
+      virtual void processUpdateQos1(
         const DataType*          sample,
         const ::DDS::SampleInfo* info
       ) = 0;
+
+      /// Entity additional Qos values are modified.
+      /// A default null implementation is provided.
+      virtual void processUpdateQos2(
+        const DataType*          sample,
+        const ::DDS::SampleInfo* info
+      );
 
       /// Entities are destroyed.
       virtual void processDelete(

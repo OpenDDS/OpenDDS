@@ -48,9 +48,10 @@ UpdateProcessor< DataType>::processSample(
   }
   if( info->valid_data) {
     switch( sample->action) {
-      case CreateEntity:  this->processCreate( sample, info); break;
-      case UpdateValue:   this->processUpdate( sample, info); break;
-      case DestroyEntity: this->processDelete( sample, info); break;
+      case CreateEntity:    this->processCreate(     sample, info); break;
+      case UpdateQosValue1: this->processUpdateQos1( sample, info); break;
+      case UpdateQosValue2: this->processUpdateQos2( sample, info); break;
+      case DestroyEntity:   this->processDelete(     sample, info); break;
       default:
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: UpdateProcessor::processSample() - ")
@@ -67,6 +68,16 @@ UpdateProcessor< DataType>::processSample(
       ));
     }
   }
+}
+
+template< class DataType>
+void
+UpdateProcessor< DataType>::processUpdateQos2(
+  const DataType*          /* sample */,
+  const ::DDS::SampleInfo* /* info */
+) 
+{
+  /* This method intentionally left unimplemented. */
 }
 
 }} // End namespace OpenDDS::Federator

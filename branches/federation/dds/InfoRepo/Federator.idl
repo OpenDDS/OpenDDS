@@ -22,7 +22,8 @@ module OpenDDS { module Federator {
     enum UpdateType {
       CreateEntity,
       DestroyEntity,
-      UpdateValue
+      UpdateQosValue1,
+      UpdateQosValue2
     };
 
     // Constant values.

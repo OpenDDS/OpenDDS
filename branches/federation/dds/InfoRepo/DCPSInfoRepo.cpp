@@ -330,6 +330,16 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     // N.B. This is done *before* being added to the IOR table to avoid any
     //      races with an eager client.
     this->federator_.orb( orb_.in());
+
+#ifdef BROKEN
+    //
+    // Add the federator to the info_servant update manager as an
+    // additional updater interface to be called.
+    // N.B. This needs to be done *after* the call to load_domains()
+    //      since that is where the update manager is initialized in the
+    //      info startup sequencing.
+    info_servant->add( &this->federator_);
+#endif /* BROKEN */
   }
 
   // Grab the IOR table.
