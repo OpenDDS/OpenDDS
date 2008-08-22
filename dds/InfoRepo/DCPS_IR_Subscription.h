@@ -114,6 +114,12 @@ public:
                 const ::DDS::SubscriberQos & subscriberQos,
                 Update::SpecificQos& specificQos);
 
+  /// Update DataReaderQos only.
+  void set_qos( const ::DDS::DataReaderQos& qos);
+
+  /// Update SubscriberQos only.
+  void set_qos( const ::DDS::SubscriberQos& qos);
+
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
   // adding new association and may need some delay. Otherwise, if  

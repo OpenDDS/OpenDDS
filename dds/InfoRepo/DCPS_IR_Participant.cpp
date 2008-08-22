@@ -15,7 +15,7 @@ DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
                                           OpenDDS::DCPS::RepoId id,
                                           DCPS_IR_Domain* domain,
                                           ::DDS::DomainParticipantQos qos,
-                                          Update::UpdateManager* um)
+                                          Update::Manager* um)
 : id_(id),
   domain_(domain),
   qos_(qos),
@@ -734,7 +734,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       ++topicIter;
 
       if (um_) {
-        um_->destroy( Update::Topic, topic->get_id());
+        Update::IdPath path( this->domain_->get_id(), this->get_id(), topic->get_id());
+        this->um_->destroy( path, Update::Topic);
       }
       domain_->remove_topic(this, topic);
     }
@@ -755,7 +756,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       pub = (*pubIter).int_id_;
       ++pubIter;
       if (um_) {
-        um_->destroy( Update::Actor, pub->get_id());
+        Update::IdPath path( this->domain_->get_id(), this->get_id(), pub->get_id());
+        this->um_->destroy( path, Update::Actor, Update::DataWriter);
       }
 
       delete pub;
@@ -769,7 +771,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
       sub = (*subIter).int_id_;
       ++subIter;
       if (um_) {
-        um_->destroy( Update::Actor, sub->get_id());
+        Update::IdPath path( this->domain_->get_id(), this->get_id(), sub->get_id());
+        this->um_->destroy( path, Update::Actor, Update::DataReader);
       }
 
       delete sub;
@@ -777,7 +780,8 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
   subscriptions_.unbind_all();
 
   if (um_) {
-    um_->destroy( Update::Participant, this->get_id());
+    Update::IdPath path( this->domain_->get_id(), this->get_id(), this->get_id());
+    um_->destroy( path, Update::Participant);
   }
 }
 

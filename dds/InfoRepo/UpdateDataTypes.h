@@ -34,6 +34,18 @@ typedef std::pair <size_t, char*>       BinSeq;
 typedef std::pair <SpecificQos, BinSeq> QosSeq;
 typedef BinSeq                          TransportInterfaceInfo;
 
+struct IdPath {
+  DomainIdType domain;
+  IdType       participant;
+  IdType       id;
+
+  IdPath( DomainIdType d, IdType p, IdType i)
+   : domain( d),
+     participant( p),
+     id( i)
+  { }
+};
+
 struct OwnershipData {
   DomainIdType domain;
   IdType       participant;

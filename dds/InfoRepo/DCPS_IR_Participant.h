@@ -30,7 +30,7 @@
 
 // forward declarations
 class DCPS_IR_Domain;
-namespace Update { class UpdateManager; }
+namespace Update { class Manager; }
 
 typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
 typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
@@ -56,7 +56,7 @@ public:
                        OpenDDS::DCPS::RepoId id,
                        DCPS_IR_Domain* domain,
                        ::DDS::DomainParticipantQos qos,
-		       Update::UpdateManager* um);
+		       Update::Manager* um);
 
   virtual ~DCPS_IR_Participant();
 
@@ -205,9 +205,9 @@ private:
   // The participant is the only entity that has and deals with
   //  dependencies (topics, actors). In handling dependencies it
   //  encompasses a bigger role. Therefore it needs to update
-  //  other entities (specifically the UpdateManager) the
+  //  other entities (specifically the Update::Manager) the
   //  changes it makes.
-  Update::UpdateManager* um_;
+  Update::Manager* um_;
 };
 
 

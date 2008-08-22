@@ -23,7 +23,7 @@
 namespace Update {
 
 // Forward declaration
-class UpdateManager;
+class Manager;
 
 class PersistenceUpdater : public Updater, public ACE_Task_Base
 {
@@ -83,21 +83,15 @@ public:
   virtual void create( const OwnershipData& data);
 
   /// Persist updated Qos parameters for an entity.
-  virtual void update( const IdType& id, const ::DDS::DomainParticipantQos& qos);
-  virtual void update( const IdType& id, const ::DDS::TopicQos&             qos);
-  virtual void update( const IdType& id, const ::DDS::DataWriterQos&        qos);
-  virtual void update( const IdType& id, const ::DDS::PublisherQos&         qos);
-  virtual void update( const IdType& id, const ::DDS::DataReaderQos&        qos);
-  virtual void update( const IdType& id, const ::DDS::SubscriberQos&        qos);
+  virtual void update( const IdPath& id, const ::DDS::DomainParticipantQos& qos);
+  virtual void update( const IdPath& id, const ::DDS::TopicQos&             qos);
+  virtual void update( const IdPath& id, const ::DDS::DataWriterQos&        qos);
+  virtual void update( const IdPath& id, const ::DDS::PublisherQos&         qos);
+  virtual void update( const IdPath& id, const ::DDS::DataReaderQos&        qos);
+  virtual void update( const IdPath& id, const ::DDS::SubscriberQos&        qos);
 
   /// Remove an entity (but not children) from persistence.
-  virtual void destroy(
-                 ItemType type,
-                 const IdType& id,
-                 ActorType actor,
-                 long domain,
-                 const IdType& participant
-               );
+  virtual void destroy( const IdPath& id, ItemType type, ActorType actor);
 
  private:
   int parse (int argc, ACE_TCHAR *argv[]);
@@ -106,7 +100,7 @@ public:
   ACE_TString persistence_file_;
   bool reset_;
 
-  UpdateManager *um_;
+  Manager *um_;
 
   ALLOCATOR *allocator_;
 

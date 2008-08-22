@@ -113,6 +113,12 @@ public:
                 const ::DDS::PublisherQos & publisherQos,
                 Update::SpecificQos& specificQos);
 
+  /// Update DataWriterQos only.
+  void set_qos( const ::DDS::DataWriterQos& qos);
+
+  /// Update PublisherQos only.
+  void set_qos( const ::DDS::PublisherQos& qos);
+
   /// get the transport ID of the transport implementation type.
   OpenDDS::DCPS::TransportInterfaceId   get_transport_id () const;
 

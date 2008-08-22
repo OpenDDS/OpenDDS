@@ -113,11 +113,9 @@ ManagerImpl::create( const Update::OwnershipData& data)
 
 void
 ManagerImpl::destroy(
+  const Update::IdPath& id,
   Update::ItemType      type,
-  const Update::IdType& id,
-  Update::ActorType     actor,
-  long                  domain,
-  const Update::IdType& participant
+  Update::ActorType     actor
 )
 {
   switch( type) {
@@ -127,9 +125,9 @@ ManagerImpl::destroy(
         sample.sender      = this->id();
         sample.action      = DestroyEntity;
 
-        sample.id          = id;
-        sample.domain      = domain;
-        sample.participant = participant;
+        sample.id          = id.id;
+        sample.domain      = id.domain;
+        sample.participant = id.participant;
 
         this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
       }
@@ -141,8 +139,8 @@ ManagerImpl::destroy(
         sample.sender = this->id();
         sample.action = DestroyEntity;
 
-        sample.domain = domain;
-        sample.id     = id;
+        sample.domain = id.domain;
+        sample.id     = id.id;
 
         this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
       }
@@ -157,9 +155,9 @@ ManagerImpl::destroy(
             sample.sender         = this->id();
             sample.action         = DestroyEntity;
 
-            sample.domain         = domain;
-            sample.participant    = participant;
-            sample.id             = id;
+            sample.domain         = id.domain;
+            sample.participant    = id.participant;
+            sample.id             = id.id;
 
             this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
           }
@@ -171,9 +169,9 @@ ManagerImpl::destroy(
             sample.sender         = this->id();
             sample.action         = DestroyEntity;
 
-            sample.domain         = domain;
-            sample.participant    = participant;
-            sample.id             = id;
+            sample.domain         = id.domain;
+            sample.participant    = id.participant;
+            sample.id             = id.id;
 
             this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
           }
@@ -184,33 +182,92 @@ ManagerImpl::destroy(
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::DomainParticipantQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos& qos)
 {
+  ParticipantUpdate sample;
+  sample.sender = this->id();
+  sample.action = UpdateQosValue1;
+
+  sample.domain = id.domain;
+  sample.id     = id.id;
+  sample.qos    = qos;
+
+  this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::TopicQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
 {
+  TopicUpdate sample;
+  sample.sender      = this->id();
+  sample.action      = UpdateQosValue1;
+
+  sample.id          = id.id;
+  sample.domain      = id.domain;
+  sample.participant = id.participant;
+  sample.qos         = qos;
+
+  this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::DataWriterQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
 {
+  PublicationUpdate sample;
+  sample.sender         = this->id();
+  sample.action         = UpdateQosValue1;
+
+  sample.domain         = id.domain;
+  sample.participant    = id.participant;
+  sample.id             = id.id;
+  sample.datawriter_qos = qos;
+
+  this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::PublisherQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
 {
+  PublicationUpdate sample;
+  sample.sender         = this->id();
+  sample.action         = UpdateQosValue2;
+
+  sample.domain         = id.domain;
+  sample.participant    = id.participant;
+  sample.id             = id.id;
+  sample.publisher_qos  = qos;
+
+  this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::DataReaderQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
 {
+  SubscriptionUpdate sample;
+  sample.sender         = this->id();
+  sample.action         = UpdateQosValue1;
+
+  sample.domain         = id.domain;
+  sample.participant    = id.participant;
+  sample.id             = id.id;
+  sample.datareader_qos = qos;
+
+  this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 void
-ManagerImpl::update( const Update::IdType& id, const ::DDS::SubscriberQos& qos)
+ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
 {
+  SubscriptionUpdate sample;
+  sample.sender         = this->id();
+  sample.action         = UpdateQosValue2;
+
+  sample.domain         = id.domain;
+  sample.participant    = id.participant;
+  sample.id             = id.id;
+  sample.subscriber_qos = qos;
+
+  this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -293,7 +350,7 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
 }
 
 void
-ManagerImpl::processUpdate( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
+ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   this->info_->changeOwnership(
     sample->domain,
@@ -304,31 +361,51 @@ ManagerImpl::processUpdate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
 }
 
 void
-ManagerImpl::processUpdate( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
+ManagerImpl::processUpdateQos1( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   this->info_->update_publication_qos(
     sample->domain,
     sample->participant,
     sample->id,
-    sample->datawriter_qos,
+    sample->datawriter_qos
+  );
+}
+
+void
+ManagerImpl::processUpdateQos2( const PublicationUpdate* sample, const ::DDS::SampleInfo* /* info */)
+{
+  this->info_->update_publication_qos(
+    sample->domain,
+    sample->participant,
+    sample->id,
     sample->publisher_qos
   );
 }
 
 void
-ManagerImpl::processUpdate( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
+ManagerImpl::processUpdateQos1( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   this->info_->update_subscription_qos(
     sample->domain,
     sample->participant,
     sample->id,
-    sample->datareader_qos,
+    sample->datareader_qos
+  );
+}
+
+void
+ManagerImpl::processUpdateQos2( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* /* info */)
+{
+  this->info_->update_subscription_qos(
+    sample->domain,
+    sample->participant,
+    sample->id,
     sample->subscriber_qos
   );
 }
 
 void
-ManagerImpl::processUpdate( const ParticipantUpdate* sample, const ::DDS::SampleInfo* /* info */)
+ManagerImpl::processUpdateQos1( const ParticipantUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   this->info_->update_domain_participant_qos(
     sample->domain,
@@ -338,7 +415,7 @@ ManagerImpl::processUpdate( const ParticipantUpdate* sample, const ::DDS::Sample
 }
 
 void
-ManagerImpl::processUpdate( const TopicUpdate* sample, const ::DDS::SampleInfo* /* info */)
+ManagerImpl::processUpdateQos1( const TopicUpdate* sample, const ::DDS::SampleInfo* /* info */)
 {
   this->info_->update_topic_qos(
     sample->id,

@@ -32,21 +32,15 @@ class Updater
     virtual void create( const OwnershipData&        data) = 0;
 
     // Propagate updated Qos parameters for an entity.
-    virtual void update( const IdType& id, const ::DDS::DomainParticipantQos& qos) = 0;
-    virtual void update( const IdType& id, const ::DDS::TopicQos&             qos) = 0;
-    virtual void update( const IdType& id, const ::DDS::DataWriterQos&        qos) = 0;
-    virtual void update( const IdType& id, const ::DDS::PublisherQos&         qos) = 0;
-    virtual void update( const IdType& id, const ::DDS::DataReaderQos&        qos) = 0;
-    virtual void update( const IdType& id, const ::DDS::SubscriberQos&        qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::DomainParticipantQos& qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::TopicQos&             qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::DataWriterQos&        qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::PublisherQos&         qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::DataReaderQos&        qos) = 0;
+    virtual void update( const IdPath& id, const ::DDS::SubscriberQos&        qos) = 0;
 
     // Propagate that an entity has been destroyed.
-    virtual void destroy(
-                   ItemType      type,
-                   const IdType& id,
-                   ActorType     actor = DataWriter,
-                   long          domain = 0,
-                   const IdType& participant = ::OpenDDS::DCPS::GUID_UNKNOWN
-                 ) = 0;
+    virtual void destroy( const IdPath& id, ItemType type, ActorType actor) = 0;
 };
 
 } // End of namespace Update

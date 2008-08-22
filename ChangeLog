@@ -1,34 +1,77 @@
-Fri Aug 22 01:07:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+Fri Aug 22 20:51:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Added the federator as an Updater to the DCPSInfo_i servant
+	  Update::Manager.  This code is currently disabled until
+	  development is complete.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
         * dds/InfoRepo/UpdateDataTypes.h:
-
-	  Moved the data definitions into the Update namespace.  Added
-	  NoQos enumeration value for SpecificQos enumeration.  Added
-	  OwnershipData structure for create() method interface.  Moved
-	  UpdateManager types into the namespace here.
-
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateProcessor_T.cpp:
         * dds/InfoRepo/Updater.h:
 
-	  Made this a pure abstract interface definition in the new
-	  Update namespace.  Changed the add() methods to create()
-	  methods.  Changed the remove() method to destroy().  Changed
-	  the updateQos() method to update().  Removed the obsolete
-	  unregisterCallback() method.  Changed ownership create()
-	  interface to use new OwnershipData structure.  Removed the
-	  inutile UpdaterBase class.
+	  Implemented Qos updates.  This required a bit of refactoring
+	  again.
 
         * dds/InfoRepo/UpdateManager.h:
         * dds/InfoRepo/UpdateManager.cpp:
         * dds/InfoRepo/UpdateManager_T.cpp:
 
-	  Moved the UpdateManager into the Update namespace.  Moved
-	  internal data types from the class to the namespace.  Changed
-	  push update methods from individual add() methods to template
-	  create() method.  Removed unused unregisterCallback() method.
-	  Changed updateQos method to template update() method.  Renamed
-	  remove() method to destroy() method.  Renamed the service using
-	  a typedef to avoid using a scoped classname with the service
-	  configurator setup macros.
+	  Renamed to remove redundancy.  The UpdateManager is now
+	  Update::Manager.
+
+        * tests/DCPS/MultiRepoTest/domain1_ids:
+        * tests/DCPS/MultiRepoTest/domain2_ids:
+        * tests/DCPS/MultiRepoTest/domain3_ids:
+
+	  Added FederationDomain explicitly as part of development
+	  testing.  This will be backed out when development is complete.
+
+Fri Aug 22 01:07:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+
+          Moved the data definitions into the Update namespace.  Added
+          NoQos enumeration value for SpecificQos enumeration.  Added
+          OwnershipData structure for create() method interface.  Moved
+          UpdateManager types into the namespace here.
+
+        * dds/InfoRepo/Updater.h:
+
+          Made this a pure abstract interface definition in the new
+          Update namespace.  Changed the add() methods to create()
+          methods.  Changed the remove() method to destroy().  Changed
+          the updateQos() method to update().  Removed the obsolete
+          unregisterCallback() method.  Changed ownership create()
+          interface to use new OwnershipData structure.  Removed the
+          inutile UpdaterBase class.
+
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/UpdateManager_T.cpp:
+
+          Moved the UpdateManager into the Update namespace.  Moved
+          internal data types from the class to the namespace.  Changed
+          push update methods from individual add() methods to template
+          create() method.  Removed unused unregisterCallback() method.
+          Changed updateQos method to template update() method.  Renamed
+          remove() method to destroy() method.  Renamed the service using
+          a typedef to avoid using a scoped classname with the service
+          configurator setup macros.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
@@ -43,17 +86,17 @@ Fri Aug 22 01:07:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/PersistenceUpdater.h:
         * dds/InfoRepo/PersistenceUpdater.cpp:
 
-	  Modified to use the new interface and datatype definitions in
-	  the new namespace.
+          Modified to use the new interface and datatype definitions in
+          the new namespace.
 
         * tests/DCPS/BuiltInTopicTest/mySvc.conf:
         * tests/DCPS/Prst_delayed_subscriber/mySvc.conf:
 
-	  Updated to new service names.
+          Updated to new service names.
 
         * dds/InfoRepo/DCPSInfoRepo.mpc:
 
-	  Explicitly define UpdateManager_T.cpp as a template file.
+          Explicitly define UpdateManager_T.cpp as a template file.
 
         * dds/InfoRepo/Updater.cpp:
 

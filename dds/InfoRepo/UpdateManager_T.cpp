@@ -5,7 +5,7 @@
 
 template< class UType>
 void
-Update::UpdateManager::create( const UType& info)
+Update::Manager::create( const UType& info)
 {
   // Invoke add on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();
@@ -17,7 +17,7 @@ Update::UpdateManager::create( const UType& info)
 
 template< class QosType>
 void
-Update::UpdateManager::update( const Update::IdType& id, const QosType& qos)
+Update::Manager::update( const Update::IdPath& id, const QosType& qos)
 {
   // Invoke update on each of the iterators.
   for (Updaters::iterator iter = updaters_.begin();

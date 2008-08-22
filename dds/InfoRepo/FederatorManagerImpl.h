@@ -102,29 +102,19 @@ class OpenDDS_Federator_Export ManagerImpl
     virtual void requestImage();
 
     virtual void create( const Update::UTopic& topic);
-
     virtual void create( const Update::UParticipant& participant);
-
     virtual void create( const Update::URActor& reader);
-
     virtual void create( const Update::UWActor& writer);
-
     virtual void create( const Update::OwnershipData& data);
 
-    virtual void destroy(
-                   Update::ItemType      type,
-                   const Update::IdType& id,
-                   Update::ActorType     actor,
-                   long                  domain,
-                   const Update::IdType& participant
-                 );
+    virtual void update( const Update::IdPath& id, const ::DDS::DomainParticipantQos& qos);
+    virtual void update( const Update::IdPath& id, const ::DDS::TopicQos&             qos);
+    virtual void update( const Update::IdPath& id, const ::DDS::DataWriterQos&        qos);
+    virtual void update( const Update::IdPath& id, const ::DDS::PublisherQos&         qos);
+    virtual void update( const Update::IdPath& id, const ::DDS::DataReaderQos&        qos);
+    virtual void update( const Update::IdPath& id, const ::DDS::SubscriberQos&        qos);
 
-    virtual void update( const Update::IdType& id, const ::DDS::DomainParticipantQos& qos);
-    virtual void update( const Update::IdType& id, const ::DDS::TopicQos&             qos);
-    virtual void update( const Update::IdType& id, const ::DDS::DataWriterQos&        qos);
-    virtual void update( const Update::IdType& id, const ::DDS::PublisherQos&         qos);
-    virtual void update( const Update::IdType& id, const ::DDS::DataReaderQos&        qos);
-    virtual void update( const Update::IdType& id, const ::DDS::SubscriberQos&        qos);
+    virtual void destroy( const Update::IdPath& id, Update::ItemType type, Update::ActorType actor);
 
     //
     // UpdateProcessor<> methods.
@@ -146,19 +136,25 @@ class OpenDDS_Federator_Export ManagerImpl
     void processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
 
     /// Process ownership changes.
-    void processUpdate( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
+    void processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
 
-    /// Update the proxy for a publication.
-    void processUpdate( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
+    /// Update the proxy DataWriterQos for a publication.
+    void processUpdateQos1( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
 
-    /// Update the proxy for a subscription.
-    void processUpdate( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
+    /// Update the proxy PublisherQos for a publication.
+    void processUpdateQos2( const PublicationUpdate* sample, const ::DDS::SampleInfo* info);
 
-    /// Update the proxy for a participant.
-    void processUpdate( const ParticipantUpdate* sample, const ::DDS::SampleInfo* info);
+    /// Update the proxy DataReaderQos for a subscription.
+    void processUpdateQos1( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
 
-    /// Update the proxy for a topic.
-    void processUpdate( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
+    /// Update the proxy SubscriberQos for a subscription.
+    void processUpdateQos2( const SubscriptionUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy ParticipantQos for a participant.
+    void processUpdateQos1( const ParticipantUpdate* sample, const ::DDS::SampleInfo* info);
+
+    /// Update the proxy TopicQos for a topic.
+    void processUpdateQos1( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
 
     /// Null implementation for OwnerUpdate samples.
     void processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* info);
