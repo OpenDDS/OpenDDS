@@ -80,7 +80,14 @@ class UpdateListener
       CORBA::SystemException
     ));
 
+    /// Access our Federation Id value.
+    RepoKey& federationId();
+    RepoKey  federationId() const;
+
   private:
+    /// Our Federation Id value.
+    RepoKey federationId_;
+
     /// Manager object to delegate sample processing to.
     UpdateReceiver< DataType> receiver_;
 

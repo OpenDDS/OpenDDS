@@ -62,27 +62,6 @@ ManagerImpl::~ManagerImpl()
       ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::~ManagerImpl()\n")
     ));
   }
-
-  // Remove our local participant and contained entities.
-  if( 0 == CORBA::is_nil( this->federationParticipant_)) {
-    if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-         == this->federationParticipant_->delete_contained_entities()
-      ) {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
-        ACE_TEXT("unable to release resources for repository %d.\n"),
-        this->id()
-      ));
-
-    } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant( this->federationParticipant_)
-             ) {
-      ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
-        ACE_TEXT("unable to release the participant for repository %d.\n"),
-        this->id()));
-    }
-  }
 }
 
 void
@@ -93,6 +72,14 @@ ManagerImpl::initialize()
       ACE_TEXT("(%P|%t) INFO: Federation::ManagerImpl::initialize()\n")
     ));
   }
+
+  // Let the listeners know which repository we are to filter samples at
+  // the earliest opportunity.
+  this->ownerListener_.federationId()        = this->id();
+  this->topicListener_.federationId()        = this->id();
+  this->participantListener_.federationId()  = this->id();
+  this->publicationListener_.federationId()  = this->id();
+  this->subscriptionListener_.federationId() = this->id();
 
   // Add participant for Federation domain
   this->federationParticipant_
@@ -186,7 +173,7 @@ ManagerImpl::initialize()
   }
 
   //
-  // Create the transport for the update topics.
+  // Create the transport for the update topic publications.
   //
 
   ::OpenDDS::DCPS::TransportImpl_rch transport
@@ -203,6 +190,32 @@ ManagerImpl::initialize()
       );
 
   if( transport->configure( transportConfig.in()) != 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
+      ACE_TEXT("repository %d failed to initialize subscription transport.\n"),
+      this->id()
+    ));
+    throw Incomplete();
+  }
+
+  //
+  // Create the transport for the update topic subscriptions.
+  //
+
+  ::OpenDDS::DCPS::TransportImpl_rch subscriptionTransport
+    = TheTransportFactory->create_transport_impl(
+        1 + this->config_.federationDomain(),
+        ACE_TString("SimpleTcp"),
+        ::OpenDDS::DCPS::DONT_AUTO_CONFIG
+      );
+
+  ::OpenDDS::DCPS::TransportConfiguration_rch subscriptionTransportConfig
+    = TheTransportFactory->create_configuration(
+        1 + this->config_.federationDomain(),
+        ACE_TString("SimpleTcp")
+      );
+
+  if( subscriptionTransport->configure( subscriptionTransportConfig.in()) != 0) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
       ACE_TEXT("repository %d failed to initialize subscription transport.\n"),
@@ -250,7 +263,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  switch( subscriberServant->attach_transport( transport.in())) {
+  switch( subscriberServant->attach_transport( subscriptionTransport.in())) {
     case OpenDDS::DCPS::ATTACH_OK:
          if( OpenDDS::DCPS::DCPS_debug_level > 4) {
            ACE_DEBUG((LM_DEBUG,
@@ -772,6 +785,27 @@ ManagerImpl::finalize()
         ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL
         );
     }
+
+  // Remove our local participant and contained entities.
+  if( 0 == CORBA::is_nil( this->federationParticipant_)) {
+    if( ::DDS::RETCODE_PRECONDITION_NOT_MET
+         == this->federationParticipant_->delete_contained_entities()
+      ) {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
+        ACE_TEXT("unable to release resources for repository %d.\n"),
+        this->id()
+      ));
+
+    } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
+               == TheParticipantFactory->delete_participant( this->federationParticipant_)
+             ) {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
+        ACE_TEXT("unable to release the participant for repository %d.\n"),
+        this->id()));
+    }
+  }
 }
 
 // IDL methods.

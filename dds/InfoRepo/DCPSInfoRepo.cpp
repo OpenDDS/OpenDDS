@@ -31,14 +31,14 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
+#include "ace/Event_Handler.h"
 
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 
-class InfoRepo
-{
+class InfoRepo : public ACE_Event_Handler {
 public:
   struct InitError
   {
@@ -50,12 +50,20 @@ public:
   InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InitError);
   ~InfoRepo (void);
   bool run (void);
+
+  /// Callback used by the INT signal handler to schedule a shutdown.
   void shutdown (void);
+  
+  /// Handler for the reactor to dispatch finalization activity to.
+  virtual int handle_exception( ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
 private:
   bool init (int argc, ACE_TCHAR *argv[]) throw (InitError);
   void usage (const ACE_TCHAR * cmd);
   void parse_args (int argc, ACE_TCHAR *argv[]);
+
+  /// Actual finalization of service resources.
+  void finalize();
 
   CORBA::ORB_var orb_;
   PortableServer::POA_var root_poa_;
@@ -69,6 +77,9 @@ private:
   bool use_bits_;
   bool resurrect_;
 
+  /// Flag to indicate that finalization has already occurred.
+  bool finalized_;
+
   /// Repository Federation behaviors
   OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
@@ -81,6 +92,7 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     , listen_address_given_ (0)
     , use_bits_ (true)
     , resurrect_ (true)
+    , finalized_( false)
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
@@ -96,10 +108,10 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
 InfoRepo::~InfoRepo (void)
 {
-  federator_.finalize();
-  TheTransportFactory->release();
-  TheServiceParticipant->shutdown ();
-
+  if( this->finalized_ == false) {
+    this->finalize();
+    this->finalized_ = true;
+  }
   orb_->destroy ();
 }
 
@@ -112,9 +124,28 @@ InfoRepo::run (void)
 }
 
 void
+InfoRepo::finalize()
+{
+  federator_.finalize();
+  TheTransportFactory->release();
+  TheServiceParticipant->shutdown ();
+}
+
+int
+InfoRepo::handle_exception( ACE_HANDLE /* fd */)
+{
+  if( this->finalized_ == false) {
+    this->finalize();
+    this->finalized_ = true;
+  }
+  orb_->shutdown (0);
+  return 0;
+}
+
+void
 InfoRepo::shutdown (void)
 {
-  orb_->shutdown (0);
+  this->orb_->orb_core()->reactor()->notify( this);
 }
 
 void

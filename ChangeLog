@@ -1,16 +1,43 @@
+Mon Aug 25 22:13:02 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Added an event handler to allow the reactor to perform shutdown
+	  processing instead of doing it within the signal handler.  This
+	  allows the service resources to be finalized if necessary as
+	  well.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+	  Removed dead code.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Moved shutdown processing from destructor to finalize() method.
+	  Load federation Id value into the UpdateListeners.  Created a
+	  separate transport implementation for update subscriptions to
+	  allow the local publications and subscriptions to become
+	  associated if needed.
+
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+	  Added federationId value and accessors.  This value is now used
+	  to short circuit processing of locally generated samples.
+
 Mon Aug 25 18:19:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Removed temporary conditional compilation guard.
+          Removed temporary conditional compilation guard.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Add ownership update type support.  Start with default Qos values.
+          Add ownership update type support.  Start with default Qos values.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Predicate update publication on federation status.
+          Predicate update publication on federation status.
 
 Fri Aug 22 20:51:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
