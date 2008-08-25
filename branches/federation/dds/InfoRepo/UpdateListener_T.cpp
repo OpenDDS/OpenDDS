@@ -8,7 +8,7 @@ namespace OpenDDS { namespace Federator {
 
 template< class DataType, class ReaderType>
 UpdateListener< DataType, ReaderType>::UpdateListener( UpdateProcessor< DataType>& processor)
- : receiver_( processor)
+ : federationId_( NIL_REPOSITORY), receiver_( processor)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -25,6 +25,20 @@ UpdateListener< DataType, ReaderType>::~UpdateListener(void)
       ACE_TEXT("(%P|%t) UpdateListener::~UpdateListener\n")
     ));
   }
+}
+
+template< class DataType, class ReaderType>
+RepoKey&
+UpdateListener< DataType, ReaderType>::federationId()
+{
+  return this->federationId_;
+}
+
+template< class DataType, class ReaderType>
+RepoKey
+UpdateListener< DataType, ReaderType>::federationId() const
+{
+  return this->federationId_;
 }
 
 template< class DataType, class ReaderType>
@@ -53,13 +67,18 @@ ACE_THROW_SPEC((
 
     // Process all available data.
     while( true) {
-      DataType*            sample = new DataType();
-      ::DDS::SampleInfo*   info   = new ::DDS::SampleInfo();
+      DataType*           sample = new DataType();
+      ::DDS::SampleInfo*  info   = new ::DDS::SampleInfo();
       ::DDS::ReturnCode_t status = dataReader->read_next_sample( *sample, *info);
 
       if( status == ::DDS::RETCODE_OK) {
-        // Delegate processing to the federation manager.
-        this->receiver_.put( sample, info);
+        // Check if we should process the sample.
+        if( (this->federationId() != NIL_REPOSITORY) 
+         && (this->federationId() != sample->sender)) {
+
+          // Delegate processing to the federation manager.
+          this->receiver_.put( sample, info);
+        }
 
       } else if( status == ::DDS::RETCODE_NO_DATA) {
         break;

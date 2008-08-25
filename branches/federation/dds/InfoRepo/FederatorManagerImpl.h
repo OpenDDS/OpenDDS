@@ -172,15 +172,6 @@ class OpenDDS_Federator_Export ManagerImpl
     void processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* info);
 
   private:
-    /// Map remote Id value to a local Id value.
-    typedef std::map< ::OpenDDS::DCPS::RepoId, ::OpenDDS::DCPS::RepoId> RemoteToLocalMap;
-
-    /// Map a repository federation Id value to its Id mappings.
-    typedef std::map< RepoKey, RemoteToLocalMap> RepoToIdMap;
-
-    /// Inverse mappings - Local Id value to Federation Id value.
-    typedef std::map< ::OpenDDS::DCPS::RepoId, FederationId> LocalToFederationMap;
-
     /// Critical section MUTEX.
     ACE_SYNCH_MUTEX lock_;
 
@@ -237,12 +228,6 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// SubscriptionUpdate writer
     SubscriptionUpdateDataWriter_var subscriptionWriter_;
-
-    /// Federation Id to local Id mappings.
-    RepoToIdMap inboundMap_;
-
-    /// Local Id value to Federation Id mappings.
-    LocalToFederationMap outboundMap_;
 
     /// Is multicast enabled?
     bool multicastEnabled_;
