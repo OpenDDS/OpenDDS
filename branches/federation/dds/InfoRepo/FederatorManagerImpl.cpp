@@ -115,6 +115,20 @@ ManagerImpl::initialize()
   // Add type support for update topics
   //
 
+  OwnerUpdateTypeSupportImpl* ownerUpdate = new OwnerUpdateTypeSupportImpl();
+  if( ::DDS::RETCODE_OK != ownerUpdate->register_type(
+                             this->federationParticipant_,
+                             OWNERUPDATETYPENAME
+                           )
+    ) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Unable to install ")
+      ACE_TEXT("OwnerUpdate type support for repository %d.\n"),
+      this->id()
+    ));
+    throw Incomplete();
+  }
+
   ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
   if( ::DDS::RETCODE_OK != participantUpdate->register_type(
                              this->federationParticipant_,
@@ -326,6 +340,7 @@ ManagerImpl::initialize()
   ::DDS::DataWriter_var       dataWriter;
 
   ::DDS::DataReaderQos readerQos;
+  subscriber->get_default_datareader_qos( readerQos);
   readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   readerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   readerQos.reliability.max_blocking_time.sec        = 0;
@@ -334,6 +349,7 @@ ManagerImpl::initialize()
   readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
   ::DDS::DataWriterQos writerQos;
+  publisher->get_default_datawriter_qos( writerQos);
   writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   writerQos.reliability.max_blocking_time.sec        = 0;
@@ -344,7 +360,7 @@ ManagerImpl::initialize()
   //
   // Add update subscriptions
   //
-  // NOTE: It ok to lose the references to the objects here since they
+  // NOTE: Its ok to lose the references to the objects here since they
   //       are not needed after this point.  The only thing we will do
   //       with them is to destroy them, and that will be done via a
   //       cascade delete from the participant.  The listeners will

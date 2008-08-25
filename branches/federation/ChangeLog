@@ -1,10 +1,24 @@
+Mon Aug 25 18:19:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Removed temporary conditional compilation guard.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Add ownership update type support.  Start with default Qos values.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Predicate update publication on federation status.
+
 Fri Aug 22 20:51:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Added the federator as an Updater to the DCPSInfo_i servant
-	  Update::Manager.  This code is currently disabled until
-	  development is complete.
+          Added the federator as an Updater to the DCPSInfo_i servant
+          Update::Manager.  This code is currently disabled until
+          development is complete.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
@@ -24,22 +38,22 @@ Fri Aug 22 20:51:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * dds/InfoRepo/UpdateProcessor_T.cpp:
         * dds/InfoRepo/Updater.h:
 
-	  Implemented Qos updates.  This required a bit of refactoring
-	  again.
+          Implemented Qos updates.  This required a bit of refactoring
+          again.
 
         * dds/InfoRepo/UpdateManager.h:
         * dds/InfoRepo/UpdateManager.cpp:
         * dds/InfoRepo/UpdateManager_T.cpp:
 
-	  Renamed to remove redundancy.  The UpdateManager is now
-	  Update::Manager.
+          Renamed to remove redundancy.  The UpdateManager is now
+          Update::Manager.
 
         * tests/DCPS/MultiRepoTest/domain1_ids:
         * tests/DCPS/MultiRepoTest/domain2_ids:
         * tests/DCPS/MultiRepoTest/domain3_ids:
 
-	  Added FederationDomain explicitly as part of development
-	  testing.  This will be backed out when development is complete.
+          Added FederationDomain explicitly as part of development
+          testing.  This will be backed out when development is complete.
 
 Fri Aug 22 01:07:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

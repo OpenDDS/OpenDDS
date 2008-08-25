@@ -29,6 +29,11 @@ ManagerImpl::requestImage()
 void
 ManagerImpl::create( const Update::UTopic& topic)
 {
+  if( CORBA::is_nil( this->topicWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   TopicUpdate sample;
   sample.sender      = this->id();
   sample.action      = CreateEntity;
@@ -46,6 +51,11 @@ ManagerImpl::create( const Update::UTopic& topic)
 void
 ManagerImpl::create( const Update::UParticipant& participant)
 {
+  if( CORBA::is_nil( this->participantWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   ParticipantUpdate sample;
   sample.sender = this->id();
   sample.action = CreateEntity;
@@ -60,6 +70,11 @@ ManagerImpl::create( const Update::UParticipant& participant)
 void
 ManagerImpl::create( const Update::URActor& reader)
 {
+  if( CORBA::is_nil( this->subscriptionWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   SubscriptionUpdate sample;
   sample.sender         = this->id();
   sample.action         = CreateEntity;
@@ -80,6 +95,11 @@ ManagerImpl::create( const Update::URActor& reader)
 void
 ManagerImpl::create( const Update::UWActor& writer)
 {
+  if( CORBA::is_nil( this->publicationWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   PublicationUpdate sample;
   sample.sender         = this->id();
   sample.action         = CreateEntity;
@@ -100,6 +120,11 @@ ManagerImpl::create( const Update::UWActor& writer)
 void
 ManagerImpl::create( const Update::OwnershipData& data)
 {
+  if( CORBA::is_nil( this->ownerWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   OwnerUpdate sample;
   sample.sender      = this->id();
   sample.action      = CreateEntity;
@@ -121,6 +146,11 @@ ManagerImpl::destroy(
   switch( type) {
     case Update::Topic:
       {
+        if( CORBA::is_nil( this->topicWriter_.in())) {
+          // Decline to publish data until we can.
+          return;
+        }
+
         TopicUpdate sample;
         sample.sender      = this->id();
         sample.action      = DestroyEntity;
@@ -135,6 +165,11 @@ ManagerImpl::destroy(
 
     case Update::Participant:
       {
+        if( CORBA::is_nil( this->participantWriter_.in())) {
+          // Decline to publish data until we can.
+          return;
+        }
+
         ParticipantUpdate sample;
         sample.sender = this->id();
         sample.action = DestroyEntity;
@@ -151,6 +186,11 @@ ManagerImpl::destroy(
       switch( actor) {
         case Update::DataWriter:
           {
+            if( CORBA::is_nil( this->publicationWriter_.in())) {
+              // Decline to publish data until we can.
+              return;
+            }
+
             PublicationUpdate sample;
             sample.sender         = this->id();
             sample.action         = DestroyEntity;
@@ -165,6 +205,11 @@ ManagerImpl::destroy(
 
         case Update::DataReader:
           {
+            if( CORBA::is_nil( this->subscriptionWriter_.in())) {
+              // Decline to publish data until we can.
+              return;
+            }
+
             SubscriptionUpdate sample;
             sample.sender         = this->id();
             sample.action         = DestroyEntity;
@@ -184,6 +229,11 @@ ManagerImpl::destroy(
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos& qos)
 {
+  if( CORBA::is_nil( this->participantWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   ParticipantUpdate sample;
   sample.sender = this->id();
   sample.action = UpdateQosValue1;
@@ -198,6 +248,11 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
 {
+  if( CORBA::is_nil( this->topicWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   TopicUpdate sample;
   sample.sender      = this->id();
   sample.action      = UpdateQosValue1;
@@ -213,6 +268,11 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
 {
+  if( CORBA::is_nil( this->publicationWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   PublicationUpdate sample;
   sample.sender         = this->id();
   sample.action         = UpdateQosValue1;
@@ -228,6 +288,11 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
 {
+  if( CORBA::is_nil( this->publicationWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   PublicationUpdate sample;
   sample.sender         = this->id();
   sample.action         = UpdateQosValue2;
@@ -243,6 +308,11 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
 {
+  if( CORBA::is_nil( this->subscriptionWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   SubscriptionUpdate sample;
   sample.sender         = this->id();
   sample.action         = UpdateQosValue1;
@@ -258,6 +328,11 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
 void
 ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
 {
+  if( CORBA::is_nil( this->subscriptionWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
   SubscriptionUpdate sample;
   sample.sender         = this->id();
   sample.action         = UpdateQosValue2;
