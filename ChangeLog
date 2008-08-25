@@ -1,3 +1,24 @@
+Mon Aug 25 17:53:30 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+        * tests/DCPS/StringKey/Messenger.idl:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/StringKey/Writer.h:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/StringKey/domain_ids:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/StringKey/tcp.conf:
+
+          Added new test to detect incorrect String_Manager comparison
+          that cause multiple instances created for same string key.
+
+        * bin/dcps_tests.lst:
+
+          Added StringKey test.
+          
 Thu Jul 31 16:23:14 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
