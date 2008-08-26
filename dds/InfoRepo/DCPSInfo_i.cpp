@@ -728,19 +728,30 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
   participant->takeOwnership();
   int status = domainPtr->add_participant (participant);
 
-  if (0 != status)
-    {
-      // Adding the participant failed return the invalid
-      // pariticipant Id number.
-      participantId = OpenDDS::DCPS::GUID_UNKNOWN;
-      delete participant;
-      participant = 0;
-    }
+  if( 0 != status) {
+    // Adding the participant failed return the invalid
+    // pariticipant Id number.
+    participantId = OpenDDS::DCPS::GUID_UNKNOWN;
+    delete participant;
+    participant = 0;
 
-  if( this->um_) {
+  } else if( this->um_) {
     Update::UParticipant participant
       (domain, participantId, const_cast< ::DDS::DomainParticipantQos &>(qos));
     this->um_->create (participant);
+  }
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter( participantId);
+    buffer << participantId << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+      ACE_TEXT("domain %d loaded participant %s at 0x%x.\n"),
+      domain,
+      buffer.str().c_str(),
+      participant
+    ));
   }
 
   return participantId;
@@ -752,19 +763,29 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                                             , const ::DDS::DomainParticipantQos & qos)
 {
   DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
-      return false;
-    }
+  if( domains_.find(domainId, domainPtr) != 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+      ACE_TEXT("invalid domain Id: %d\n"),
+      domainId
+    ));
+    return false;
+  }
 
   DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) == 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("A participant already exists for Id: %d\n")
-                  , participantId));
-      return false;
-    }
+  if( domainPtr->find_participant(participantId, partPtr) == 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+      ACE_TEXT("participant id %s already exists.\n"),
+      participantId
+    ));
+    return false;
+  }
+
+  // Prepare to manipulate the participant's Id value.
+  OpenDDS::DCPS::GuidConverter converter(
+    const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
+  );
 
   DCPS_IR_Participant* participant;
   ACE_NEW_RETURN (participant,
@@ -774,23 +795,45 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                                       qos, um_), 0);
 
   int status = domainPtr->add_participant (participant);
+  if( 0 != status) {
+    std::stringstream buffer;
+    buffer << participantId << "(" << std::hex << long(converter) << ")";
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+      ACE_TEXT("domain %d failed to load participant %s at 0x%x.\n"),
+      domainId,
+      buffer.str().c_str(),
+      participant
+    ));
 
-  if (0 != status)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("InfoRepo servant failed to add Participant.\n")));
+    delete participant;
+    return false;
+  }
 
-      delete participant;
-      return false;
-    }
-
-  OpenDDS::DCPS::GuidConverter converter(
-    const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
-  );
   // See if we are adding a participant that was created within this
   // repository or a different repository.
   if( converter.federationId() == this->federation_) {
     // Ensure the participant GUID values do not conflict.
-    domainPtr->last_participant_key( converter.value());
+    domainPtr->last_participant_key( converter.participantId());
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+        ACE_TEXT("Adjusting highest participant Id value to at least %d.\n"),
+        converter.participantId()
+      ));
+    }
+  }
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    std::stringstream buffer;
+    buffer << participantId << "(" << std::hex << long(converter) << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+      ACE_TEXT("domain %d loaded participant %s at 0x%x.\n"),
+      domainId,
+      buffer.str().c_str(),
+      participant
+    ));
   }
 
   return true;
