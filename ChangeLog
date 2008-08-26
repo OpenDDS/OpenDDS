@@ -1,3 +1,14 @@
+Tue Aug 26 18:05:39 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+
+	  Resolve the merge conflict that I missed earlier.
+
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+
+	  Extend diagnostic capabilities of the test.
+
 Tue Aug 26 17:07:35 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
 
         * tests/DCPS/SetQosPartition/pub.ini:
