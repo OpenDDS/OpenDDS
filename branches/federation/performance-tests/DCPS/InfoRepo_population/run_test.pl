@@ -13,7 +13,6 @@ use DDS_Run_Test;
 
 $status = 0;
 
-# my $debug = 1;
 my $debug ;# = 1;
 my $debuglevel;
 my $orbdebuglevel;
@@ -21,17 +20,16 @@ my $verbose;
 my $debugfile;
 if( $debug) {
   $debuglevel = 10;
-  $orbdebuglevel = 5;
-  $verbose    = 1;
+  $orbdebuglevel ;# = 5;
+  $verbose    ;# = 1;
   $debugfile  = "log.out";
 }
 
 unlink $debugfile if $debugfile;
 
-# my $intermittent = 1;
 my $intermittent ;# = 1;
 my $stackfile;
-my $stackdumpcmd;
+my $stackdumpcmd = ":";
 if( $intermittent) {
   $stackfile    = "stacks";
   $stackdumpcmd = "grabstacks";
