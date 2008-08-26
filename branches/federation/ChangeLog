@@ -1,3 +1,11 @@
+Tue Aug 26 17:07:35 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Set keep_link=0 for regression as we continue to work on this
+          branch.
+
 Tue Aug 26 15:38:50 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 1301:1345 out to branch.
