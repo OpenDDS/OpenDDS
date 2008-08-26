@@ -40,11 +40,12 @@ int expected_lost_sub_notification = 0;
 int actual_lost_sub_notification = 0;
 int end_with_publisher = 0;
 int verify_lost_sub_notification = 1;
+std::string local_address;
 
 /// parse the command line arguments
 int parse_args (int argc, char *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:c:");
+  ACE_Get_Opt get_opts (argc, argv, "vn:a:r:i:l:e:c:x:");
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -74,16 +75,21 @@ int parse_args (int argc, char *argv[])
       case 'e':
         end_with_publisher = ACE_OS::atoi (get_opts.opt_arg ());
         break;
+      case 'x':
+        local_address = get_opts.opt_arg ();
+        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s "
                            "-n <num_expected_reads> "
                            "-a <num_reads_before_crash> "
+                           "-r <num_reads_deviation> "
                            "-d <num_reads_deviation> "
                            "-i <read_delay_ms> "
                            "-l <expected_lost_sub_notification> "
                            "-e <end_with_publisher> "
+                           "-x <local_address> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -138,7 +144,26 @@ int main (int argc, char *argv[])
 
     // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::OpenDDS::DCPS::AUTO_CONFIG);
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
+                                                  "SimpleTcp",
+                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
+
+    OpenDDS::DCPS::TransportConfiguration_rch reader_config
+      = TheTransportFactory->create_configuration (TCP_IMPL_ID, "SimpleTcp");
+
+    OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
+      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+
+    reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str());
+    reader_tcp_config->local_address_str_ = local_address;
+    // This is needed to get the connection deletion callback.
+    reader_tcp_config->datalink_release_delay_ = 0;
+
+    if (tcp_impl->configure(reader_config.in()) != 0)
+    {
+      cerr << "Failed to configure the transport." << endl;
+      exit(1);
+    }
 
     // Create the subscriber and attach to the corresponding
     // transport.

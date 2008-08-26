@@ -37,26 +37,29 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
                        -1);
     }
 
-  // Open our socket using the local_address_ from our udp_config_ object.
-  if (this->socket_->open_socket(udp_config->local_address_) != 0)
+
+  ACE_INET_Addr address = udp_config->local_address_;
+
+  // Open our socket using address which will be reset the port if the port is 0.
+  if (this->socket_->open_socket(address) != 0)
     {
 
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: failed to open udp socket %s:%d: %p\n",
-                        this->local_address_.get_host_addr (),
-                        this->local_address_.get_port_number (),
+                        address.get_host_addr (),
+                        address.get_port_number (),
                         "open"),
                        -1);
     }
  
-  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully 
-  // qualified hostname and actual listening port number.
-  if (udp_config->local_address_.is_any())
-    {
-      unsigned short port = udp_config->local_address_.get_port_number ();
-      std::stringstream out;
-      out << port;
+  unsigned short port = address.get_port_number ();
+  std::stringstream out;
+  out << port;
 
+  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
+  // qualified hostname and actual listening port number.
+  if (udp_config->local_address_.is_any ())
+    {
       const std::string& hostname = get_fully_qualified_hostname ();
 
       udp_config->local_address_.set (port, hostname.c_str());
@@ -65,6 +68,20 @@ OpenDDS::DCPS::SimpleUdpTransport::configure_socket(TransportConfiguration* conf
       udp_config->local_address_str_ += out.str ();
     }
 
+  // Now we got the actual listening port. Update the port nnmber in the configuration
+  // if it's 0 originally.
+  else if (udp_config->local_address_.get_port_number () == 0)
+    {
+      udp_config->local_address_.set_port_number (port);
+
+      if (! udp_config->local_address_str_.empty ())
+      {
+        std::string::size_type pos = udp_config->local_address_str_.find_first_of (':');
+        std::string str = udp_config->local_address_str_.substr (0, pos + 1);
+        str += out.str ();
+        udp_config->local_address_str_ = str;
+      }
+    }
 
   this->local_address_ = udp_config->local_address_;
   this->local_address_str_ = udp_config->local_address_str_;

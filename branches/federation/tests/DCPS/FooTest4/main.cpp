@@ -573,6 +573,7 @@ int main (int argc, char *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
+      ACE_OS::sleep (2);
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 

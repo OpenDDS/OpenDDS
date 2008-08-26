@@ -25,7 +25,7 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
   }
 }
 
-my($port1) = 10001 + PerlACE::uniqueid() ;
+my($port1) = PerlACE::random_port();
 $domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"

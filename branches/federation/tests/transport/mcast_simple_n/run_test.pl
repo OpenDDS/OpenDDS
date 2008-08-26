@@ -75,6 +75,7 @@ $publisher  = PerlDDS::create_process( $publisherCmd,  $publisherArgs) ;
 #
 # Fire up the subscriber first.
 #
+print $subscriber->CommandLine() . "\n";
 $subscriber->Spawn() ;
 if (PerlACE::waitforfile_timed ($subreadyfile, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
@@ -82,6 +83,7 @@ if (PerlACE::waitforfile_timed ($subreadyfile, 30) == -1) {
     exit 1;
 }
 
+print $publisher->CommandLine() . "\n";
 $publisher->Spawn() ;
 
 #
@@ -93,3 +95,4 @@ die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill( 5) ;
 unlink $subreadyfile;
 
 exit 0 ;
+

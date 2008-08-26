@@ -65,11 +65,14 @@ public:
   /// The notify_lost flag true indicates this remove_associations is called
   /// when the InfoRepo detects this subscription is lost because of the failure
   /// of invocation on this subscription.
+  /// The notify_both_side parameter indicates if it needs call pub to remove
+  /// association as well.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_publication (DCPS_IR_Publication* pub,
                                      CORBA::Boolean sendNotify,
-                                     CORBA::Boolean notify_lost);
+                                     CORBA::Boolean notify_lost,
+                                     bool notify_both_side = false);
 
   /// Removes all the associated publications
   /// This method can mark the participant dead
@@ -123,7 +126,7 @@ public:
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
   // adding new association and may need some delay. Otherwise, if  
-  // two DataWrites uses same Datalink and add an association happens 
+  // two DataWriters uses same Datalink and add an association happens 
   // before remove an association then the new association will fail to 
   // connect.
   void reevaluate_existing_associations ();

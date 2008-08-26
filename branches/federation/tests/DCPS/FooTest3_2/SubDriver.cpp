@@ -8,6 +8,7 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include <ace/Arg_Shifter.h>
@@ -155,6 +156,8 @@ SubDriver::init(int& argc, char* argv[])
                           argv,
                           "TAO_DDS_DCPS");
 
+  TheServiceParticipant->set_ORB (orb_.in());
+
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, "SimpleTcp", OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
@@ -284,6 +287,7 @@ SubDriver::run()
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
 }
 
 int

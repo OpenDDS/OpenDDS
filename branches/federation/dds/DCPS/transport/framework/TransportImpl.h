@@ -106,7 +106,16 @@ namespace OpenDDS
 
         /// Return true if all the subscriptions to a datawriter are
         /// acknowledged, otherwise return false.
+        /// In current supported transports, only SimpleTCP requires acknowledgment.
+        /// Other transports do not need acknowledgment from subscriber side so these
+        /// transports need override this function to always return true.
         virtual bool acked (RepoId pub_id);
+        /// Remove the pub_id-sub_id pair from ack map.
+        /// In current supported transports, only SimpleTCP requires acknowledgment so
+        /// it does remove the ack from ack map.
+        /// Other transports has empty ack map so these transports need override 
+        /// this function to be noop.
+        virtual void remove_ack (RepoId pub_id, RepoId sub_id);
 
       /// Callback from teh DataLink to clean up any associated resources.
       /// This usually is done when the DataLink is lost. The call is made with
