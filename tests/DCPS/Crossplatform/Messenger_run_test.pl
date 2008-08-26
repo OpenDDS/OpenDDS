@@ -54,7 +54,7 @@ elsif ($ARGV[0] eq 'default_mcast') {
     $sub_opts = "-t default_mcast_sub";
 }
 
-$CS = new CrossSyncDDS (1, PerlACE::uniqueid(), PerlACE::uniqueid()
+$CS = new CrossSyncDDS (1, PerlACE::random_port(), PerlACE::random_port()
 			, $pub_config_file, $sub_config_file);
 if (!$CS) {
     print "Crossplatform test pre-reqs not met. Skipping...\n";

@@ -1,29 +1,457 @@
+Tue Aug 26 15:38:50 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 1301:1345 out to branch.
+
+        Tue Aug 26 06:32:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+
+          Added missing files.
+
+        Mon Aug 25 17:53:30 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+        * tests/DCPS/StringKey/Messenger.idl:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/StringKey/Writer.h:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/StringKey/domain_ids:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/StringKey/tcp.conf:
+
+          Added new test to detect incorrect String_Manager comparison
+          that cause multiple instances created for same string key.
+
+        * bin/dcps_tests.lst:
+
+          Added StringKey test.
+
+        Thu Jul 31 16:23:14 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+
+          In the open() method, return false on error instead of -1 (true).
+
+        Thu Jul 24 23:12:45 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+
+          Added fixed port to multicast_group_address which is required.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+
+          Updated local_address_str with port picked by OS when local_address
+          is configured with "localhost:" (or "localhost:0"). This bug makes
+          SimpleUdp test fail to establish connection but does not affect
+          SimpleMcast Transport since it does not use the local_address
+          for connection info exchange via DCPSInfoRepo.
+
+        * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
+
+          Updated local_address_ with port actually using. The local_address_str
+          in configuration object is not updated for ReliableMulticast if the
+          configuration does not specify the port or use 0. This is fine as it
+          does not use the local_address_str for connection info exchange via
+          DCPSInfoRepo. It needs more work to get it updated.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          TCP already handled the "localhost:" case but added a minor change.
+
+        Tue Jul 22 18:38:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+
+          Added ORBDebugLevel to diagnostic options.
+
+        Tue Jul 22 18:10:01 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          - Made fully_associated () function remove fully associated
+            pub-sub pair from acks map instead of removing all acks
+            for a pub. This bug made the DataWriter::fully_associated()
+            not called if the ack arrives before DataWriter
+            receives add_associations() call from DCPSInfoRepo.
+
+          - Made acked_sub_map_.demarshal() call guarded by lock_.
+            This bug may cause access violation when one thread is
+            demarshlling ack message and updating ack map while another
+            thread is removing acks from ack map.
+
+          - Added remove_ack() to support removal of pub-sub id pair from
+            ack map.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.inl:
+
+           Overrode remove_ack() to be noop for UDP and MCAST transports since they
+           do not require ack from subscriber.
+
+        Tue Jul 22 15:55:55 UTC 2008  Mike Martinez  <martinez_m@ociweb>
+
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+
+          Added some selectable diagnostic options.
+
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Added lock around access to the notification_ member.
+
+        Sun Jul 20 18:16:57 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Made send strategy remove samples when scheduling datalink
+          release with a delay. This would avoid problem that the sample
+          from previous association could not be delivered.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Made send_delayed_notifications called before changing the
+          mode in clear().
+
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+
+          Fixed a warning.
+
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Set the datalink_release_delay=0 to avoid timing issue on
+          receiving add_assocition,remove_association and fully_associate
+          calls because of delayed datalink release.
+
+        Sat Jul 19 18:00:22 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/sub_udp.ini:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+
+          Commented the local_address or made it not specify port.
+          This is to avoid using fixed port in case the port is
+          using by other applications and cause test fail.
+
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+
+          These scripts were updated to use PerlACE::random_port() to
+          get random port instead of fixed port.
+
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          Added -x option to pass local_address and configured the
+          transport in the code instead of using configuration file.
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Updated to not use configuration file.
+
+        * tests/DCPS/Reconnect/sub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+
+          Removed files as they are not needed.
+
+        Thu Jul 17 16:09:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_udp.ini:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/sub.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_reliable_mcast.ini:
+        * DevGuideExamples/DCPS/Messenger/sub_udp.ini:
+
+          Removed explicit host and port assignments.
+
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+
+          Removed explicit host and port assignments.
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+
+          Removed explicit host and port assignments.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Extended startup delays.
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+          Additional diagnostic information added.  Increased startup and
+          operational delays.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+
+          Removed explicit host and port assignments.
+
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+
+          Removed explicit host and port assignments.
+
+        * tests/transport/mcast_simple_n/run_test.pl:
+
+          Extended startup delays.
+
+        Wed Jul 16 23:47:17 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+          Merged in following Changes made in DDS-1.1.1 branch.
+
+            Wed Jul 16 23:43:27 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+                    * tests/DCPS/Federation/Publisher.cpp:
+                    * tests/DCPS/Federation/Subscriber.cpp:
+
+                      Made TheServiceParticipant->shutdown called after
+                      TheTransportFactory->release to fix crash due to nil orb
+                      during transport release.
+
+
+        Wed Jul 16 22:34:10 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * DevGuideExamples/DCPS/Messenger/pub.ini:
+        * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Reconnect/pub.ini:
+        * tests/DCPS/Reconnect/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          Merged in following Changes made in DDS-1.1.1 branch.
+
+              Wed Jul 16 21:16:56 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+            * dds/DCPS/transport/framework/DataLink.h:
+            * dds/DCPS/transport/framework/DataLink.cpp:
+            * dds/DCPS/transport/framework/TransportConfiguration.h:
+            * dds/DCPS/transport/framework/TransportConfiguration.inl:
+            * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+            * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+              Supported configurable delay for datalink release after no associations.
+              This is to fix disconnect problem happened when removing and adding
+              association related to same datalink during short period. The new connection
+              is established before remove_association call which results in new connection
+              been disconnect.
+              Removed keep_link support which can be replaced with long
+              datalink_release_delay value.
+
+            * dds/InfoRepo/DCPS_IR_Publication.h:
+            * dds/InfoRepo/DCPS_IR_Publication.cpp:
+            * dds/InfoRepo/DCPS_IR_Subscription.h:
+            * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+              Added "notify_both_side" parameter to remove_associated_publication/subscription
+              methods to allow remove_associations() invocation on both datareader
+              and datawriter upon qos change. This intends to make the remove_associations
+              call earlier than add_associations to avoid same datalink removing/adding timing
+              issue.
+
+            * DevGuideExamples/DCPS/Messenger/pub.ini:
+            * DevGuideExamples/DCPS/Messenger/pub_ipv6.ini:
+            * DevGuideExamples/DCPS/Messenger_ZeroCopy/pub.ini:
+            * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+            * examples/DCPS/Messenger_Imr/pub.ini:
+            * performance-tests/DCPS/InfoRepo_population/pub.ini:
+            * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+            * performance-tests/DCPS/TransportLatency/pub.ini:
+            * tests/DCPS/BuiltInTopicTest/pub.ini:
+            * tests/DCPS/Deadline/pub.ini:
+            * tests/DCPS/Lifespan/pub.ini:
+            * tests/DCPS/NotifyTest/pub.ini:
+            * tests/DCPS/Partition/pub.ini:
+            * tests/DCPS/PersistentDurability/pub.ini:
+            * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+            * tests/DCPS/Reconnect/pub.ini:
+            * tests/DCPS/Reconnect/sub.ini:
+            * tests/DCPS/SetQosDeadline/pub.ini:
+            * tests/DCPS/SetQosPartition/pub.ini:
+            * tests/DCPS/TransientDurability/pub.ini:
+            * tests/DCPS/TransientLocalTest/pub.ini:
+
+              Replaced keep_link with datalink_release_delay. If the
+              application requires to keep the datalink alive for longer
+              time, it could configure datalink_release_delay to a big
+              value.
+
+            * tests/DCPS/FooTest3_0/SubDriver.cpp:
+            * tests/DCPS/FooTest3_1/SubDriver.cpp:
+            * tests/DCPS/FooTest3_2/SubDriver.cpp:
+            * tests/DCPS/FooTest4/main.cpp:
+            * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+            * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+            * tests/transport/mcast_simple/PubDriver.cpp:
+            * tests/transport/mcast_simple/SubDriver.cpp:
+            * tests/transport/mcast_simple_n/PubDriver.cpp:
+            * tests/transport/mcast_simple_n/SubDriver.cpp:
+            * tests/transport/simple/PubDriver.cpp:
+            * tests/transport/simple/SubDriver.cpp:
+            * tests/transport/simple_bp/PubDriver.cpp:
+            * tests/transport/simple_bp/SubDriver.cpp:
+            * tests/transport/simple_bp_rm/PubDriver.cpp:
+            * tests/transport/simple_bp_rm/SubDriver.cpp:
+            * tests/transport/simple_n/PubDriver.cpp:
+            * tests/transport/simple_n/SubDriver.cpp:
+            * tests/transport/udp_simple/PubDriver.cpp:
+            * tests/transport/udp_simple/SubDriver.cpp:
+            * tests/transport/udp_simple_n/PubDriver.cpp:
+            * tests/transport/udp_simple_n/SubDriver.cpp:
+
+              The changes are to trigger the TheServiceParticipant singleton
+              created and has ORB created or provided so it can be accessed
+              during transport shutdown. The TheServiceParticipant->shutdown
+              should always be called after TheTransportFactory->release.
+
 Mon Aug 25 22:13:02 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Added an event handler to allow the reactor to perform shutdown
-	  processing instead of doing it within the signal handler.  This
-	  allows the service resources to be finalized if necessary as
-	  well.
+          Added an event handler to allow the reactor to perform shutdown
+          processing instead of doing it within the signal handler.  This
+          allows the service resources to be finalized if necessary as
+          well.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
 
-	  Removed dead code.
+          Removed dead code.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Moved shutdown processing from destructor to finalize() method.
-	  Load federation Id value into the UpdateListeners.  Created a
-	  separate transport implementation for update subscriptions to
-	  allow the local publications and subscriptions to become
-	  associated if needed.
+          Moved shutdown processing from destructor to finalize() method.
+          Load federation Id value into the UpdateListeners.  Created a
+          separate transport implementation for update subscriptions to
+          allow the local publications and subscriptions to become
+          associated if needed.
 
         * dds/InfoRepo/UpdateListener_T.h:
         * dds/InfoRepo/UpdateListener_T.cpp:
 
-	  Added federationId value and accessors.  This value is now used
-	  to short circuit processing of locally generated samples.
+          Added federationId value and accessors.  This value is now used
+          to short circuit processing of locally generated samples.
 
 Mon Aug 25 18:19:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

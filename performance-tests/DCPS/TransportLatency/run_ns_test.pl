@@ -23,7 +23,7 @@ else {
 }
 
 
-my($port1) = 10001 + PerlACE::uniqueid() ;
+my($port1) = PerlACE::random_port();
 $domains_file = "domain_ids";
 $ns_ior = "ns.ior";
 $dcpsrepo_ior = "repo.ior";

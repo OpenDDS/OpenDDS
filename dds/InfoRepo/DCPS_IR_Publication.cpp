@@ -156,7 +156,8 @@ int DCPS_IR_Publication::add_associated_subscription (DCPS_IR_Subscription* sub)
 
 int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* sub,
                                                          CORBA::Boolean sendNotify,
-                                                         CORBA::Boolean notify_lost)
+                                                         CORBA::Boolean notify_lost,
+                                                         bool notify_both_side)
 {
   bool marked_dead = false;
 
@@ -169,7 +170,19 @@ int DCPS_IR_Publication::remove_associated_subscription (DCPS_IR_Subscription* s
         {
           try
             {
+             if (TAO_debug_level > 0)
+               {
+                  ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) DCPS_IR_Publication::remove_associated_subscription:")
+                      ACE_TEXT(" calling pub %d with sub %d\n"),
+                      id_, sub->get_id() ));
+                 }
+
               writer_->remove_associations(idSeq, notify_lost);
+              if (notify_both_side)
+              {
+                sub->remove_associated_publication (this, sendNotify, notify_lost);
+              }
             }
           catch (const CORBA::Exception& ex)
             {
@@ -668,11 +681,6 @@ bool DCPS_IR_Publication::set_qos (const ::DDS::DataWriterQos & qos,
     // Check if any existing association need be removed first.
     this->reevaluate_existing_associations();
     
-    // Sleep a while to let remove_association handled by DataWriter 
-    // before add_association. Otherwise, new association will have
-    // trouble to connect each other.
-    ACE_OS::sleep (ACE_Time_Value (0, 250000));
-    
     DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
     description->reevaluate_associations (this);
   }
@@ -835,7 +843,8 @@ void DCPS_IR_Publication::reevaluate_association (DCPS_IR_Subscription* subscrip
     {
       bool sendNotify = true; // inform datawriter
       bool notify_lost = true; // invoke listerner callback
-      this->remove_associated_subscription (subscription, sendNotify, notify_lost);
+
+      this->remove_associated_subscription (subscription, sendNotify, notify_lost, true);
     }
   }
   else
