@@ -1,3 +1,10 @@
+Tue Aug 26 06:32:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+
+          Added missing files.
+          
 Mon Aug 25 17:53:30 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/StringKey/DataReaderListener.h:
@@ -18,7 +25,7 @@ Mon Aug 25 17:53:30 UTC 2008  Yan Dai  <dai_y@ociweb.com>
         * bin/dcps_tests.lst:
 
           Added StringKey test.
-          
+
 Thu Jul 31 16:23:14 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/ReactivePacketSender.cpp:
