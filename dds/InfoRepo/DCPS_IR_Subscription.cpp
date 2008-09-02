@@ -61,7 +61,7 @@ int DCPS_IR_Subscription::add_associated_publication (DCPS_IR_Publication* pub)
         associationSeq[0].pubQos = *(pub->get_publisher_qos());
         associationSeq[0].writerQos = *(pub->get_datawriter_qos());
 
-        if (participant_->is_alive() && this->participant_->owner())
+        if (participant_->is_alive() && this->participant_->isOwner())
           {
             try
               {
@@ -165,7 +165,7 @@ int DCPS_IR_Subscription::remove_associated_publication (DCPS_IR_Publication* pu
       OpenDDS::DCPS::WriterIdSeq idSeq(5);
       idSeq.length(1);
       idSeq[0] = pub->get_id();
-      if (participant_->is_alive() && this->participant_->owner())
+      if (participant_->is_alive() && this->participant_->isOwner())
         {
           try
             {
@@ -347,7 +347,7 @@ void DCPS_IR_Subscription::disassociate_participant (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive() && this->participant_->owner())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -436,7 +436,7 @@ void DCPS_IR_Subscription::disassociate_topic (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive() && this->participant_->owner())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -516,7 +516,7 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
       if (0 < count)
         {
           idSeq.length(count);
-          if (participant_->is_alive() && this->participant_->owner())
+          if (participant_->is_alive() && this->participant_->isOwner())
             {
               try
                 {
@@ -540,7 +540,7 @@ void DCPS_IR_Subscription::disassociate_publication (OpenDDS::DCPS::RepoId id)
 
 void DCPS_IR_Subscription::update_incompatible_qos ()
 {
-  if( this->participant_->owner()) {
+  if( this->participant_->isOwner()) {
     reader_->update_incompatible_qos(incompatibleQosStatus_);
     incompatibleQosStatus_.count_since_last_send = 0;
   }
@@ -851,6 +851,12 @@ void DCPS_IR_Subscription::set_bit_status (CORBA::Boolean isBIT)
   isBIT_ = isBIT;
 }
 
+
+OpenDDS::DCPS::DataReaderRemote_ptr
+DCPS_IR_Subscription::reader()
+{
+  return OpenDDS::DCPS::DataReaderRemote::_duplicate( this->reader_);
+}
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 

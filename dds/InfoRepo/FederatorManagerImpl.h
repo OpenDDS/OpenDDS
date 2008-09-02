@@ -72,13 +72,53 @@ class OpenDDS_Federator_Export ManagerImpl
       ACE_THROW_SPEC ((
         ::CORBA::SystemException
       ));
+      
+    virtual void initializeOwner (
+        const ::OpenDDS::Federator::OwnerUpdate & data
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        ::OpenDDS::Federator::Incomplete
+      ));
+
+    virtual void initializeTopic (
+        const ::OpenDDS::Federator::TopicUpdate & data
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        ::OpenDDS::Federator::Incomplete
+      ));
+
+    virtual void initializeParticipant (
+        const ::OpenDDS::Federator::ParticipantUpdate & data
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        ::OpenDDS::Federator::Incomplete
+      ));
+
+    virtual void initializePublication (
+        const ::OpenDDS::Federator::PublicationUpdate & data
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        ::OpenDDS::Federator::Incomplete
+      ));
+
+    virtual void initializeSubscription (
+        const ::OpenDDS::Federator::SubscriptionUpdate & data
+      )
+      ACE_THROW_SPEC ((
+        ::CORBA::SystemException,
+        ::OpenDDS::Federator::Incomplete
+        ));
 
     // Servant methods
 
-    /// Establish the update subscriptions.
+    /// Establish the update publications and subscriptions.
     void initialize();
 
-    /// Tear down the update subscriptions.
+    /// Release resources gracefully.
     void finalize();
 
     /// Accessors for the DCPSInfo reference.
@@ -92,6 +132,9 @@ class OpenDDS_Federator_Export ManagerImpl
     /// Accessors for the ORB.
     CORBA::ORB_ptr orb();
     void orb( CORBA::ORB_ptr value);
+
+    /// Push our current state to a remote repository.
+    void pushState( Manager_ptr peer);
 
     //
     // Updater methods.
@@ -180,6 +223,10 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// Simple recursion avoidance during the join operations.
     RepoKey joiner_;
+
+    /// Flag indicating that we are actively participating in a
+    /// federation of repositories.
+    bool federated_;
 
     /// The packet sequence number for data that we publish.
     ::OpenDDS::DCPS::SequenceNumber sequence_;

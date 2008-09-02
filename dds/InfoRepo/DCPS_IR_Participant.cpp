@@ -47,117 +47,98 @@ DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
 
 DCPS_IR_Participant::~DCPS_IR_Participant()
 {
-  if (0 != subscriptions_.current_size())
-    {
-      DCPS_IR_Subscription* subscription = 0;
-      DCPS_IR_Subscription_Map::ITERATOR iter = subscriptions_.begin();
-      DCPS_IR_Subscription_Map::ITERATOR end = subscriptions_.end();
-
+  for( DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-      buffer << this->id_ << "(" << std::hex << handle << ")";
+      std::stringstream subscriptionBuffer;
+
+      long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->id_ << "(" << std::hex << key << ")";
+
+      key = OpenDDS::DCPS::GuidConverter(
+              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+            );
+      subscriptionBuffer << current->first << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-        ACE_TEXT("domain %d id %s has retained subscriptions.\n"),
-        domain_, buffer.str().c_str()
+        ACE_TEXT("domain %d participant %s removing subscription %s.\n"),
+        this->domain_->get_id(),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str()
       ));
+      remove_subscription( current->first);
+  }
 
-      while (iter != end)
-        {
-          subscription = (*iter).int_id_;
-          ++iter;
-
-          std::stringstream subscriptionBuffer;
-          long handle;
-          ::OpenDDS::DCPS::RepoId subscriptionId = subscription->get_id();
-          handle = ::OpenDDS::DCPS::GuidConverter( subscriptionId);
-          subscriptionBuffer << subscriptionId << "(" << std::hex << handle << ")";
-
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-            ACE_TEXT("removing subscription id %s.\n"),
-            subscriptionBuffer.str().c_str()
-          ));
-          remove_subscription( subscriptionId);
-        }
-    }
-
-  if (0 != publications_.current_size())
-    {
-      DCPS_IR_Publication* publication = 0;
-      DCPS_IR_Publication_Map::ITERATOR iter = publications_.begin();
-      DCPS_IR_Publication_Map::ITERATOR end = publications_.end();
-
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-      buffer << this->id_ << "(" << std::hex << handle << ")";
+      std::stringstream publicationBuffer;
+
+      long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->id_ << "(" << std::hex << key << ")";
+
+      key = OpenDDS::DCPS::GuidConverter(
+              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+            );
+      publicationBuffer << current->first << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-        ACE_TEXT("domain %d id %s has retained publications.\n"),
-        domain_, buffer.str().c_str()
+        ACE_TEXT("domain %d participant %s removing publication %s.\n"),
+        this->domain_->get_id(),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str()
       ));
+      remove_publication( current->first);
+  }
 
-      while (iter != end)
-        {
-          publication = (*iter).int_id_;
-          ++iter;
-
-          std::stringstream publicationBuffer;
-          long handle;
-          ::OpenDDS::DCPS::RepoId publicationId = publication->get_id();
-          handle = ::OpenDDS::DCPS::GuidConverter( publicationId);
-          publicationBuffer << publicationId << "(" << std::hex << handle << ")";
-
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) \tERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-            ACE_TEXT("removing publication id %s.\n"),
-            publicationBuffer.str().c_str()
-          ));
-          remove_publication( publicationId);
-        }
-    }
-
-  if (0 != topicRefs_.current_size())
-    {
-      OpenDDS::DCPS::RepoId topicId = OpenDDS::DCPS::GUID_UNKNOWN;
-      DCPS_IR_Topic_Map::ITERATOR iter = topicRefs_.begin();
-      DCPS_IR_Topic_Map::ITERATOR end = topicRefs_.end();
-
+  for( DCPS_IR_Topic_Map::const_iterator current = this->topicRefs_.begin();
+       current != this->topicRefs_.end();
+       ++current
+     ) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-      buffer << this->id_ << "(" << std::hex << handle << ")";
+      std::stringstream topicBuffer;
+
+      long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->id_ << "(" << std::hex << key << ")";
+
+      key = OpenDDS::DCPS::GuidConverter(
+              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+            );
+      topicBuffer << current->first << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant () ")
-        ACE_TEXT("domain %d id %s is retaining topics.\n"),
-        domain_, buffer.str().c_str()
+        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
+        ACE_TEXT("domain %d participant %s retained topic %s.\n"),
+        this->domain_->get_id(),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str()
       ));
-
-      while (iter != end)
-        {
-          topicId = (*iter).ext_id_;
-          ++iter;
-
-          std::stringstream topicBuffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-          topicBuffer << topicId << "(" << std::hex << handle << ")";
-
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-            ACE_TEXT("retained topic id %s.\n"),
-            topicBuffer.str().c_str()
-          ));
-        }
-    }
-
+  }
 }
 
+const DCPS_IR_Publication_Map&
+DCPS_IR_Participant::publications() const
+{
+  return this->publications_;
+}
+
+const DCPS_IR_Subscription_Map&
+DCPS_IR_Participant::subscriptions() const
+{
+  return this->subscriptions_;
+}
+
+const DCPS_IR_Topic_Map&
+DCPS_IR_Participant::topics() const
+{
+  return this->topicRefs_;
+}
 
 void
 DCPS_IR_Participant::takeOwnership()
@@ -167,7 +148,8 @@ DCPS_IR_Participant::takeOwnership()
     this->um_->create(
       Update::OwnershipData(
         this->domain_->get_id(),
-        this->id_, this->federationId_
+        this->id_,
+        this->federationId_
     ));
   }
 
@@ -181,7 +163,7 @@ DCPS_IR_Participant::changeOwner( long sender, long owner)
   { ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->ownerLock_);
 
     if( (owner == OWNER_NONE)
-     && ( this->owner() || (this->owner_ != sender)
+     && ( this->isOwner() || (this->owner_ != sender)
         )
       ) {
       // Do not eliminate ownership if we are the owner or if the update
@@ -194,13 +176,19 @@ DCPS_IR_Participant::changeOwner( long sender, long owner)
 
   } // End of lock scope.
 
-  if( this->owner()) {
+  if( this->isOwner()) {
     /// @TODO: Ensure that any stalled callbacks are made.
   }
 }
 
-bool
+long
 DCPS_IR_Participant::owner() const
+{
+  return this->owner_;
+}
+
+bool
+DCPS_IR_Participant::isOwner() const
 {
   return this->owner_ == this->federationId_;
 }
@@ -208,178 +196,170 @@ DCPS_IR_Participant::owner() const
 int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
 {
   OpenDDS::DCPS::RepoId pubId = pub->get_id();
-  int status = publications_.bind(pubId, pub);
+  DCPS_IR_Publication_Map::iterator where = this->publications_.find( pubId);
+  if( where == this->publications_.end()) {
+    this->publications_.insert(
+      where, DCPS_IR_Publication_Map::value_type( pubId, pub)
+    );
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream publicationBuffer;
 
-  switch (status)
-    {
-    case 0:
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-        buffer << this->id_ << "(" << std::hex << handle << ")";
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
 
-        std::stringstream publicationBuffer;
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        publicationBuffer << pubId << "(" << std::hex << handle << ")";
+      key = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << key << ")";
 
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_publication: ")
-          ACE_TEXT("participant %s added publication %s at %x.\n"),
-          buffer.str().c_str(),
-          publicationBuffer.str().c_str(),
-          pub
-        ));
-      }
-      break;
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_publication: ")
+        ACE_TEXT("participant %s successfully added publication %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str(),
+        pub
+      ));
+    }
+    return 0;
 
-    case 1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-        buffer << this->id_ << "(" << std::hex << handle << ")";
+  } else {
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream publicationBuffer;
 
-        std::stringstream publicationBuffer;
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        publicationBuffer << pubId << "(" << std::hex << handle << ")";
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_publication: ")
-          ACE_TEXT("participant %s attempt to re-add publication %s\n"),
-          buffer.str().c_str(),
-          publicationBuffer.str().c_str()
-        ));
-      }
-      break;
+      key = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << key << ")";
 
-    case -1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
-        buffer << this->id_ << "(" << std::hex << handle << ")";
-
-        std::stringstream publicationBuffer;
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        publicationBuffer << pubId << "(" << std::hex << handle << ")";
-
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_publication: ")
-          ACE_TEXT("participant %s failed to add publication %s\n"),
-          buffer.str().c_str(),
-          publicationBuffer.str().c_str()
-        ));
-      }
-    };
-
-  return status;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_publication: ")
+        ACE_TEXT("participant %s attempted to add existing publication %s.\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str()
+      ));
+    }
+    return 1;
+  }
 }
 
 
 int DCPS_IR_Participant::find_publication_reference (OpenDDS::DCPS::RepoId pubId,
                                                      DCPS_IR_Publication* & pub)
 {
-  int status = publications_.find (pubId, pub);
-  if (0 == status)
-  {
-    if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-    {
+  DCPS_IR_Publication_Map::iterator where = this->publications_.find( pubId);
+  if( where != this->publications_.end()) {
+    pub = where->second;
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-      buffer << pubId << "(" << std::hex << handle << ")";
+      std::stringstream publicationBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << key << ")";
 
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_publication_reference: ")
-        ACE_TEXT("found datawriter reference %x id: %s\n"),
-        pub,
-        buffer.str().c_str()
+        ACE_TEXT("participant %s found publication %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str(),
+        pub
       ));
     }
-  }
-  else
-  {
+    return 0;
+
+  } else {
     std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-    buffer << pubId << "(" << std::hex << handle << ")";
+    std::stringstream publicationBuffer;
+
+    long key = OpenDDS::DCPS::GuidConverter( this->id_);
+    buffer << this->get_id() << "(" << std::hex << key << ")";
+
+    key = ::OpenDDS::DCPS::GuidConverter( pubId);
+    publicationBuffer << pubId << "(" << std::hex << key << ")";
 
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_publication_reference: ")
-      ACE_TEXT("could not find datawriter reference %x id: %s\n"),
-      pub,
-      buffer.str().c_str()
+      ACE_TEXT("participant %s could not find publication %s.\n"),
+      buffer.str().c_str(),
+      publicationBuffer.str().c_str()
     ));
-  } // if (0 == status)
-
-  return status;
+    pub = 0;
+    return -1;
+  }
 }
 
 
 int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
 {
-  DCPS_IR_Publication* pub = 0;
+  DCPS_IR_Publication_Map::iterator where = this->publications_.find( pubId);
+  if( where != this->publications_.end()) {
+    DCPS_IR_Topic* topic = where->second->get_topic();
+    topic->remove_publication_reference( where->second);
 
-  int status = publications_.unbind (pubId, pub);
-
-  if (0 == status)
-    {
-      DCPS_IR_Topic* topic = pub->get_topic ();
-      topic->remove_publication_reference(pub);
-
-      CORBA::Boolean dont_notify_lost = 0;
-      status = pub->remove_associations(dont_notify_lost);
-      if (0 != status)
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-        buffer << pubId << "(" << std::hex << handle << ")";
-
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication: ")
-          ACE_TEXT("unable to remove associations from publication id: %s\n"),
-          buffer.str().c_str()
-        ));
-        return status;
-      }
-
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-        {
-          std::stringstream buffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-          buffer << pubId << "(" << std::hex << handle << ")";
-
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_publication: ")
-            ACE_TEXT("removed publication id: %s\n"),
-            buffer.str().c_str()
-          ));
-        } // if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-
-      // Dispose the BIT information
-      domain_->dispose_publication_bit(pub);
-
-      delete pub;
-    }
-  else
-    {
+    if( 0 != where->second->remove_associations( false)) {
+      // N.B. As written today, this branch will never be taken.
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( pubId);
-      buffer << pubId << "(" << std::hex << handle << ")";
+      std::stringstream publicationBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication: ")
-        ACE_TEXT("failed to remove publication %x id: %s\n"),
-        pub,
-        buffer.str().c_str()
+        ACE_TEXT("participant %s unable to remove associations from publication %s\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str()
       ));
-    } // if (0 == status)
+      return -1;
+    }
 
-  return status;
+    this->domain_->dispose_publication_bit( where->second);
+    delete where->second;
+    this->publications_.erase( where);
+
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream publicationBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( pubId);
+      publicationBuffer << pubId << "(" << std::hex << key << ")";
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_publication: ")
+        ACE_TEXT("participant %s removed publication %s.\n"),
+        buffer.str().c_str(),
+        publicationBuffer.str().c_str()
+      ));
+    }
+    return 0;
+
+  } else {
+    std::stringstream buffer;
+    std::stringstream publicationBuffer;
+
+    long key = OpenDDS::DCPS::GuidConverter( this->id_);
+    buffer << this->get_id() << "(" << std::hex << key << ")";
+
+    key = ::OpenDDS::DCPS::GuidConverter( pubId);
+    publicationBuffer << pubId << "(" << std::hex << key << ")";
+
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_publication: ")
+      ACE_TEXT("participant %s unable to remove publication %s.\n"),
+      buffer.str().c_str(),
+      publicationBuffer.str().c_str()
+    ));
+    return -1;
+  }
 }
 
 
@@ -387,402 +367,436 @@ int DCPS_IR_Participant::remove_publication (OpenDDS::DCPS::RepoId pubId)
 int DCPS_IR_Participant::add_subscription (DCPS_IR_Subscription* sub)
 {
   OpenDDS::DCPS::RepoId subId = sub->get_id();
-  int status = subscriptions_.bind(subId, sub);
+  DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find( subId);
+  if( where == this->subscriptions_.end()) {
+    this->subscriptions_.insert(
+      where, DCPS_IR_Subscription_Map::value_type( subId, sub)
+    );
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream subscriptionBuffer;
 
-  switch (status)
-    {
-    case 0:
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-        {
-          std::stringstream buffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( subId);
-          buffer << subId << "(" << std::hex << handle << ")";
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
 
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_subscription: ")
-            ACE_TEXT("successfully added subscription %x id: %s.\n"),
-            sub,
-            buffer.str().c_str()
-          ));
-        }
-      break;
-    case 1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( subId);
-        buffer << subId << "(" << std::hex << handle << ")";
+      key = ::OpenDDS::DCPS::GuidConverter( subId);
+      subscriptionBuffer << subId << "(" << std::hex << key << ")";
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_subscription: ")
-          ACE_TEXT("attempted to re-add existing subscription id %s.\n"),
-          buffer.str().c_str()
-        ));
-      }
-      break;
-    case -1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( subId);
-        buffer << subId << "(" << std::hex << handle << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_subscription: ")
+        ACE_TEXT("participant %s successfully added subscription %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str(),
+        sub
+      ));
+    }
+    return 0;
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_subscription: ")
-          ACE_TEXT("unknown error while adding subscription id %s.\n"),
-          buffer.str().c_str()
-        ));
-      }
-    };
+  } else {
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream subscriptionBuffer;
 
-  return status;
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( subId);
+      subscriptionBuffer << subId << "(" << std::hex << key << ")";
+
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_subscription: ")
+        ACE_TEXT("participant %s attempted to add existing subscription %s.\n"),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str()
+      ));
+    }
+    return 1;
+  }
 }
 
 
  int DCPS_IR_Participant::find_subscription_reference (OpenDDS::DCPS::RepoId subId,
                                                        DCPS_IR_Subscription*& sub)
 {
-  int status = subscriptions_.find (subId, sub);
-  if (0 == status)
-  {
-    if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-    {
+  DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find( subId);
+  if( where != this->subscriptions_.end()) {
+    sub = where->second;
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( subId);
-      buffer << subId << "(" << std::hex << handle << ")";
+      std::stringstream subscriptionBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( subId);
+      subscriptionBuffer << subId << "(" << std::hex << key << ")";
 
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_subscription_reference: ")
-        ACE_TEXT("found datareader reference %x id: %s.\n"),
-        sub,
-        buffer.str().c_str()
+        ACE_TEXT("participant %s found subscription %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str(),
+        sub
       ));
     }
-  }
-  else
-  {
+    return 0;
+
+  } else {
     std::stringstream buffer;
-    long handle;
-    handle = ::OpenDDS::DCPS::GuidConverter( subId);
-    buffer << subId << "(" << std::hex << handle << ")";
+    std::stringstream subscriptionBuffer;
+
+    long key = OpenDDS::DCPS::GuidConverter( this->id_);
+    buffer << this->get_id() << "(" << std::hex << key << ")";
+
+    key = ::OpenDDS::DCPS::GuidConverter( subId);
+    subscriptionBuffer << subId << "(" << std::hex << key << ")";
 
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_subscription_reference: ")
-      ACE_TEXT("could not find datareader reference %x id: %s.\n"),
-      sub,
-      buffer.str().c_str()
+      ACE_TEXT("participant %s could not find subscription %s.\n"),
+      buffer.str().c_str(),
+      subscriptionBuffer.str().c_str()
     ));
-  } // if (0 == status)
-
-  return status;
+    sub = 0;
+    return -1;
+  }
 }
 
 int DCPS_IR_Participant::remove_subscription (OpenDDS::DCPS::RepoId subId)
 {
-  DCPS_IR_Subscription* sub = 0;
+  DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find( subId);
+  if( where != this->subscriptions_.end()) {
+    DCPS_IR_Topic* topic = where->second->get_topic();
+    topic->remove_subscription_reference( where->second);
 
-  int status = subscriptions_.unbind (subId, sub);
-
-  if (0 == status)
-    {
-      DCPS_IR_Topic* topic = sub->get_topic ();
-      topic->remove_subscription_reference(sub);
-       
-      CORBA::Boolean dont_notify_lost = 0;
-      status = sub->remove_associations(dont_notify_lost);
-      if (0 != status)
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( subId);
-        buffer << subId << "(" << std::hex << handle << ")";
-
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription: ")
-          ACE_TEXT("could not remove all associations for subscription id: %s.\n"),
-          buffer.str().c_str()
-        ));
-        return status;
-      }
-
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-        {
-          std::stringstream buffer;
-          long handle;
-          handle = ::OpenDDS::DCPS::GuidConverter( subId);
-          buffer << subId << "(" << std::hex << handle << ")";
-
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_subscription: ")
-            ACE_TEXT("removed subscription id: %s.\n"),
-            buffer.str().c_str()
-          ));
-        }
-
-      // Dispose the BIT information
-      domain_->dispose_subscription_bit(sub);
-
-      delete sub;
-    }
-  else
-    {
+    if( 0 != where->second->remove_associations( false)) {
+      // N.B. As written today, this branch will never be taken.
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( subId);
-      buffer << subId << "(" << std::hex << handle << ")";
+      std::stringstream subscriptionBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( subId);
+      subscriptionBuffer << subId << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription: ")
-        ACE_TEXT("failed to remove subscription %x id: %s.\n"),
-        sub,
-        buffer.str().c_str()
+        ACE_TEXT("participant %s unable to remove associations from subscription %s\n"),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str()
       ));
-    } // if (0 == status)
+      return -1;
+    }
 
-  return status;
+    this->domain_->dispose_subscription_bit( where->second);
+    delete where->second;
+    this->subscriptions_.erase( where);
+
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream subscriptionBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( subId);
+      subscriptionBuffer << subId << "(" << std::hex << key << ")";
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_subscription: ")
+        ACE_TEXT("participant %s removed subscription %s.\n"),
+        buffer.str().c_str(),
+        subscriptionBuffer.str().c_str()
+      ));
+    }
+    return 0;
+
+  } else {
+    std::stringstream buffer;
+    std::stringstream subscriptionBuffer;
+
+    long key = OpenDDS::DCPS::GuidConverter( this->id_);
+    buffer << this->get_id() << "(" << std::hex << key << ")";
+
+    key = ::OpenDDS::DCPS::GuidConverter( subId);
+    subscriptionBuffer << subId << "(" << std::hex << key << ")";
+
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_subscription: ")
+      ACE_TEXT("participant %s unable to remove subscription %s.\n"),
+      buffer.str().c_str(),
+      subscriptionBuffer.str().c_str()
+    ));
+    return -1;
+  }
 }
 
 
 int DCPS_IR_Participant::add_topic_reference (DCPS_IR_Topic* topic)
 {
   OpenDDS::DCPS::RepoId topicId = topic->get_id();
-  int status = topicRefs_.bind(topicId, topic);
+  DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find( topicId);
+  if( where == this->topicRefs_.end()) {
+    this->topicRefs_.insert(
+      where, DCPS_IR_Topic_Map::value_type( topicId, topic)
+    );
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream topicBuffer;
 
-  switch (status)
-    {
-    case 0:
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
 
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_topic_reference: ")
-          ACE_TEXT("successfully added topic reference %x id: %s.\n"),
-          topic,
-          buffer.str().c_str()
-        ));
-      }
-      break;
+      key = ::OpenDDS::DCPS::GuidConverter( topicId);
+      topicBuffer << topicId << "(" << std::hex << key << ")";
 
-    case 1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::add_topic_reference: ")
+        ACE_TEXT("participant %s successfully added topic %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str(),
+        topic
+      ));
+    }
+    return 0;
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_topic_reference: ")
-          ACE_TEXT("Attempted to add existing topic reference id %s.\n"),
-          buffer.str().c_str()
-        ));
-      }
-      break;
+  } else {
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream topicBuffer;
 
-    case -1:
-      {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::add_topic_reference: ")
-          ACE_TEXT("unknown error while adding topic reference id %s.\n"),
-          buffer.str().c_str()
-        ));
-      }
-    };
+      key = ::OpenDDS::DCPS::GuidConverter( topicId);
+      topicBuffer << topicId << "(" << std::hex << key << ")";
 
-  return status;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_topic_reference: ")
+        ACE_TEXT("participant %s attempted to add existing topic %s.\n"),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str()
+      ));
+    }
+    return 1;
+  }
 }
 
 
 int DCPS_IR_Participant::remove_topic_reference (OpenDDS::DCPS::RepoId topicId,
                                                  DCPS_IR_Topic*& topic)
 {
-  int status = topicRefs_.unbind (topicId, topic);
-
-  if (0 == status)
-    {
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
-
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_topic_reference: ")
-          ACE_TEXT("removed topic reference %x id: %s.\n"),
-          topic,
-          buffer.str().c_str()
-        ));
-      }
-    }
-  else
-    {
+  DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find( topicId);
+  if( where != this->topicRefs_.end()) {
+    topic = where->second;
+    this->topicRefs_.erase( where);
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-      buffer << topicId << "(" << std::hex << handle << ")";
+      std::stringstream topicBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( topicId);
+      topicBuffer << topicId << "(" << std::hex << key << ")";
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_topic_reference: ")
+        ACE_TEXT("participant %s removed topic %s at 0x%x.\n"),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str(),
+        topic
+      ));
+    }
+    return 0;
+
+  } else {
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      std::stringstream buffer;
+      std::stringstream topicBuffer;
+
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( topicId);
+      topicBuffer << topicId << "(" << std::hex << key << ")";
 
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::remove_topic_reference: ")
-        ACE_TEXT("failed to remove topic reference %x id: %s.\n"),
-        topic,
-        buffer.str().c_str()
+        ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::remove_topic_reference: ")
+        ACE_TEXT("participant %s unable to find topic %s for removal.\n"),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str()
       ));
-    } // if (0 == status)
-
-  return status;
+    }
+    return -1;
+  }
 }
 
 
 int DCPS_IR_Participant::find_topic_reference (OpenDDS::DCPS::RepoId topicId,
                                                DCPS_IR_Topic*& topic)
 {
-  int status = topicRefs_.find (topicId, topic);
-
-  if (0 == status)
-    {
-      if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-        std::stringstream buffer;
-        long handle;
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
-
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_topic_reference: ")
-          ACE_TEXT("found topic reference %x id: %s.\n"),
-          topic,
-          buffer.str().c_str()
-        ));
-      }
-    }
-  else
-    {
+  DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find( topicId);
+  if( where != this->topicRefs_.end()) {
+    topic = where->second;
+    if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       std::stringstream buffer;
-      long handle;
-      handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-      buffer << topicId << "(" << std::hex << handle << ")";
+      std::stringstream topicBuffer;
 
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_topic_reference: ")
-        ACE_TEXT("failed to find topic reference %x id: %s.\n"),
-        topic,
-        buffer.str().c_str()
+      long key = OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->get_id() << "(" << std::hex << key << ")";
+
+      key = ::OpenDDS::DCPS::GuidConverter( topicId);
+      topicBuffer << topicId << "(" << std::hex << key << ")";
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_topic_reference: ")
+        ACE_TEXT("participant %s found topic %s at %x.\n"),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str(),
+        topic
       ));
-    } // if (0 == status)
+    }
+    return 0;
 
-  return status;
+  } else {
+    std::stringstream buffer;
+    std::stringstream topicBuffer;
+
+    long key = OpenDDS::DCPS::GuidConverter( this->id_);
+    buffer << this->get_id() << "(" << std::hex << key << ")";
+
+    key = ::OpenDDS::DCPS::GuidConverter( topicId);
+    topicBuffer << topicId << "(" << std::hex << key << ")";
+
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_topic_reference: ")
+      ACE_TEXT("participant %s unable to find topic %s.\n"),
+      buffer.str().c_str(),
+      topicBuffer.str().c_str()
+    ));
+    topic = 0;
+    return -1;
+  }
 }
 
 
 void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
 {
-  DCPS_IR_Topic* topic = 0;
-
   // remove all the publications associations
-  DCPS_IR_Publication* pub = 0;
-  DCPS_IR_Publication_Map::ITERATOR pubIter = publications_.begin();
-  DCPS_IR_Publication_Map::ITERATOR pubEnd = publications_.end();
-
-  while (pubIter != pubEnd)
-    {
-      pub = (*pubIter).int_id_;
-      ++pubIter;
-
-      topic = pub->get_topic ();
-      topic->remove_publication_reference(pub);
-      if (0 != pub->remove_associations(notify_lost))
-        {
-          return;
-        }
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
+    DCPS_IR_Topic* topic = current->second->get_topic();
+    topic->remove_publication_reference( current->second);
+    if( 0 != current->second->remove_associations( notify_lost)) {
+      return;
     }
+  }
 
   // remove all the subscriptions associations
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Subscription_Map::ITERATOR subIter = subscriptions_.begin();
-  DCPS_IR_Subscription_Map::ITERATOR subEnd = subscriptions_.end();
+  for( DCPS_IR_Subscription_Map::const_iterator current
+         = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    DCPS_IR_Topic* topic = current->second->get_topic();
+    topic->remove_subscription_reference( current->second);
+    if( 0 != current->second->remove_associations( notify_lost)) {
+      return;
+    }
+  }
 
-  while (subIter != subEnd)
-    {
-      sub = (*subIter).int_id_;
-      ++subIter;
-
-      topic = sub->get_topic ();
-      topic->remove_subscription_reference(sub);
-
-      if (0 != sub->remove_associations(notify_lost))
-        {
-          return;
-        }
+  // Destroy all the topics.
+  for( DCPS_IR_Topic_Map::iterator current = this->topicRefs_.begin();
+       current != this->topicRefs_.end();
+       ++current
+     ) {
+    // Notify the federation to remove the topic.
+    if( this->um_) {
+      Update::IdPath path(
+        this->domain_->get_id(),
+        this->get_id(),
+        current->second->get_id()
+      );
+      this->um_->destroy( path, Update::Topic);
     }
 
-  // remove all the topics
-  topic = 0;
-  DCPS_IR_Topic_Map::ITERATOR topicIter = topicRefs_.begin();
-  DCPS_IR_Topic_Map::ITERATOR topicEnd = topicRefs_.end();
+    // Remove the topic ourselves.
+    // N.B. This call sets the second (reference) argument to 0, so when
+    //      clear() is called below, no destructor is (re)called.
+    this->domain_->remove_topic( this, current->second);
 
-  while (topicIter != topicEnd)
-    {
-      topic = (*topicIter).int_id_;
-      ++topicIter;
+    if (::OpenDDS::DCPS::DCPS_debug_level > 9) {
+      std::stringstream buffer;
+      std::stringstream topicBuffer;
 
-      if (um_) {
-        Update::IdPath path( this->domain_->get_id(), this->get_id(), topic->get_id());
-        this->um_->destroy( path, Update::Topic);
-      }
-      domain_->remove_topic(this, topic);
+      long key = ::OpenDDS::DCPS::GuidConverter( this->id_);
+      buffer << this->id_ << "(" << std::hex << key << ")";
+
+      key = OpenDDS::DCPS::GuidConverter(
+              const_cast< OpenDDS::DCPS::RepoId*>( &current->first)
+            );
+      topicBuffer << current->first << "(" << std::hex << key << ")";
+
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+        ACE_TEXT("domain %d participant %s removed topic %s.\n"),
+        this->domain_->get_id(),
+        buffer.str().c_str(),
+        topicBuffer.str().c_str()
+      ));
     }
-  topicRefs_.unbind_all();
+  }
 
-  // The publications and subscriptions
-  // can NOT be deleted until after all
-  // the associations have been removed.
-  // Otherwise an access violation can
-  // occur because a publication and
-  // subscription of this participant
+  // Clear the Topic container of null pointers.
+  this->topicRefs_.clear();
+
+  // The publications and subscriptions can NOT be deleted until after all
+  // the associations have been removed.  Otherwise an access violation
+  // can occur because a publication and subscription of this participant
   // could be associated.
 
   // delete all the publications
-  pubIter = publications_.begin();
-  while (pubIter != pubEnd)
-    {
-      pub = (*pubIter).int_id_;
-      ++pubIter;
-      if (um_) {
-        Update::IdPath path( this->domain_->get_id(), this->get_id(), pub->get_id());
-        this->um_->destroy( path, Update::Actor, Update::DataWriter);
-      }
-
-      delete pub;
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
+    // Notify the federation to destroy the publication.
+    if( this->um_) {
+      Update::IdPath path(
+        this->domain_->get_id(),
+        this->get_id(),
+        current->second->get_id()
+      );
+      this->um_->destroy( path, Update::Actor, Update::DataWriter);
     }
-  publications_.unbind_all();
+  }
+
+  // Clear the container.  This will call the destructors as well.
+  this->publications_.clear();
 
   // delete all the subscriptions
-  subIter = subscriptions_.begin();
-  while (subIter != subEnd)
-    {
-      sub = (*subIter).int_id_;
-      ++subIter;
-      if (um_) {
-        Update::IdPath path( this->domain_->get_id(), this->get_id(), sub->get_id());
-        this->um_->destroy( path, Update::Actor, Update::DataReader);
-      }
-
-      delete sub;
+  for( DCPS_IR_Subscription_Map::const_iterator current
+         = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    // Notify the federation to destroy the subscription.
+    if( this->um_) {
+      Update::IdPath path(
+        this->domain_->get_id(),
+        this->get_id(),
+        current->second->get_id()
+      );
+      this->um_->destroy( path, Update::Actor, Update::DataReader);
     }
-  subscriptions_.unbind_all();
-
-  if (um_) {
-    Update::IdPath path( this->domain_->get_id(), this->get_id(), this->get_id());
-    um_->destroy( path, Update::Participant);
   }
+
+  // Clear the container.  This will call the destructors as well.
+  this->subscriptions_.clear();
 }
 
 
@@ -835,28 +849,21 @@ void DCPS_IR_Participant::ignore_participant (OpenDDS::DCPS::RepoId id)
 
   ignoredParticipants_.insert(id);
 
-  // check for any subscriptions or publications to disassociate
-  DCPS_IR_Publication* pub = 0;
-  DCPS_IR_Publication_Map::ITERATOR pubIter = publications_.begin();
-  DCPS_IR_Publication_Map::ITERATOR pubEnd = publications_.end();
+  // disassociate any publications
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
+    current->second->disassociate_participant( id);
+  }
 
-  while (pubIter != pubEnd)
-    {
-      pub = (*pubIter).int_id_;
-      ++pubIter;
-      pub->disassociate_participant(id);
-    }
-
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Subscription_Map::ITERATOR subIter = subscriptions_.begin();
-  DCPS_IR_Subscription_Map::ITERATOR subEnd = subscriptions_.end();
-
-  while (subIter != subEnd)
-    {
-      sub = (*subIter).int_id_;
-      ++subIter;
-      sub->disassociate_participant(id);
-    }
+  // disassociate any subscriptions
+  for( DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    current->second->disassociate_participant( id);
+  }
 }
 
 
@@ -883,28 +890,21 @@ void DCPS_IR_Participant::ignore_topic (OpenDDS::DCPS::RepoId id)
 
   ignoredTopics_.insert(id);
 
-  // check for any subscriptions or publications to disassociate
-  DCPS_IR_Publication* pub = 0;
-  DCPS_IR_Publication_Map::ITERATOR pubIter = publications_.begin();
-  DCPS_IR_Publication_Map::ITERATOR pubEnd = publications_.end();
+  // disassociate any publications
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
+    current->second->disassociate_topic( id);
+  }
 
-  while (pubIter != pubEnd)
-    {
-      pub = (*pubIter).int_id_;
-      ++pubIter;
-      pub->disassociate_topic(id);
-    }
-
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Subscription_Map::ITERATOR subIter = subscriptions_.begin();
-  DCPS_IR_Subscription_Map::ITERATOR subEnd = subscriptions_.end();
-
-  while (subIter != subEnd)
-    {
-      sub = (*subIter).int_id_;
-      ++subIter;
-      sub->disassociate_topic(id);
-    }
+  // disassociate any subscriptions
+  for( DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    current->second->disassociate_topic( id);
+  }
 }
 
 
@@ -931,17 +931,13 @@ void DCPS_IR_Participant::ignore_publication (OpenDDS::DCPS::RepoId id)
 
   ignoredPublications_.insert(id);
 
-  // check for any subscriptions to disassociate
-  DCPS_IR_Subscription* sub = 0;
-  DCPS_IR_Subscription_Map::ITERATOR subIter = subscriptions_.begin();
-  DCPS_IR_Subscription_Map::ITERATOR subEnd = subscriptions_.end();
-
-  while (subIter != subEnd)
-    {
-      sub = (*subIter).int_id_;
-      ++subIter;
-      sub->disassociate_publication(id);
-    }
+  // disassociate any subscriptions
+  for( DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
+       current != this->subscriptions_.end();
+       ++current
+     ) {
+    current->second->disassociate_publication( id);
+  }
 }
 
 
@@ -967,19 +963,14 @@ void DCPS_IR_Participant::ignore_subscription (OpenDDS::DCPS::RepoId id)
     }
   ignoredSubscriptions_.insert(id);
 
-  // check for any subscriptions or publications to disassociate
-  DCPS_IR_Publication* pub = 0;
-  DCPS_IR_Publication_Map::ITERATOR pubIter = publications_.begin();
-  DCPS_IR_Publication_Map::ITERATOR pubEnd = publications_.end();
-
-  while (pubIter != pubEnd)
-    {
-      pub = (*pubIter).int_id_;
-      ++pubIter;
-      pub->disassociate_subscription(id);
-    }
+  // disassociate any publications
+  for( DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
+       current != this->publications_.end();
+       ++current
+     ) {
+    current->second->disassociate_subscription( id);
+  }
 }
-
 
 
 CORBA::Boolean DCPS_IR_Participant::is_participant_ignored (OpenDDS::DCPS::RepoId id)

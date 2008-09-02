@@ -17,6 +17,7 @@
 #include "GuidGenerator.h"
 
 #include /**/ "dds/DdsDcpsDomainC.h"
+#include /**/ "dds/DdsDcpsGuidC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -27,10 +28,9 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
 
 #include /**/ "ace/Unbounded_Set.h"
-#include /**/ "ace/Map_Manager.h"
-#include /**/ "ace/Null_Mutex.h"
 
-#include <map> // For the TopicId --> Topic lookup and Handle/Id mappings.
+#include <set>
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -38,11 +38,13 @@
 
 // forward declarations
 class DCPS_IR_Topic_Description;
-typedef ACE_Unbounded_Set<DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
+typedef std::set< DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
 
 class DCPS_IR_Participant;
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex> DCPS_IR_Participant_Map;
 typedef ACE_Unbounded_Set<DCPS_IR_Participant*> DCPS_IR_Participant_Set;
+
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Participant*, GUID_tKeyLessThan>
+          DCPS_IR_Participant_Map;
 
 class DCPS_IR_Topic;
 class DCPS_IR_Subscription;
@@ -79,11 +81,8 @@ public:
   int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
 
-  /// Find the participant with the particpant id
-  /// Does NOT take ownership of any initial memory pointed to by participant
-  /// Returns 0 if exists and participant is changed, -1 otherwise
-  int find_participant(const OpenDDS::DCPS::RepoId& particpantId,
-                       DCPS_IR_Participant*& participant);
+  /// Find the participant with the id.
+  DCPS_IR_Participant* participant( const OpenDDS::DCPS::RepoId& id) const;
 
   /// Add a topic to the domain
   /// Returns OpenDDS::DCPS::CREATED if successfull
@@ -156,6 +155,9 @@ public:
   void dispose_topic_bit (DCPS_IR_Topic* topic);
   void dispose_subscription_bit (DCPS_IR_Subscription* subscription);
   void dispose_publication_bit (DCPS_IR_Publication* publication);
+
+  /// Expose a readable reference to the participant map.
+  const DCPS_IR_Participant_Map& participants() const;
 
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i (OpenDDS::DCPS::RepoId& topicId,

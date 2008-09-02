@@ -161,6 +161,9 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Expose the datareader.
+  OpenDDS::DCPS::DataReaderRemote_ptr reader();
+
 private:
   /// Check compatibility between provided DataReader QoS and the QoS of
   /// this subscription associated DataWriters.

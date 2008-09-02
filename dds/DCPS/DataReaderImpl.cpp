@@ -332,7 +332,7 @@ void DataReaderImpl::add_associations (::OpenDDS::DCPS::RepoId yourId,
           buffer << "[ " << wr_ids[index] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-            ACE_TEXT("id_to_handle_map_%s = %d.\n"),
+            ACE_TEXT("id_to_handle_map_%s = 0x%x.\n"),
             buffer.str().c_str(), handles[index]
           ));
         }
@@ -435,7 +435,7 @@ void DataReaderImpl::remove_associations (
                << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
-          ACE_TEXT("the writer %d was already removed.\n"),
+          ACE_TEXT("the writer %s was already removed.\n"),
           buffer.str().c_str()
         ));
       }
@@ -1424,7 +1424,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
   if (instance == 0)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::release_instance "
-      "could not find the instance by handle %d\n", handle));
+      "could not find the instance by handle 0x%x\n", handle));
     return;
   }
 
@@ -1436,7 +1436,7 @@ DataReaderImpl::release_instance (::DDS::InstanceHandle_t handle)
   else
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderImpl::release_instance "
-      "Can not release the instance (handle=%d) since it still has samples.\n",
+      "Can not release the instance (handle=0x%x) since it still has samples.\n",
       handle));
   }
 }
@@ -1753,7 +1753,7 @@ DataReaderImpl::get_handle_instance (::DDS::InstanceHandle_t handle)
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("DataReaderImpl::get_handle_instance: ")
-                  ACE_TEXT("lookup for %d failed\n"),
+                  ACE_TEXT("lookup for 0x%x failed\n"),
                   handle));
       return 0;
     } // if (0 != instances_.find(handle, instance))
@@ -1950,7 +1950,7 @@ DataReaderImpl::bit_lookup_instance_handles (const WriterIdSeq& ids,
         buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataReaderImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("writer %s has handle %d.\n"),
+          ACE_TEXT("writer %s has handle 0x%x.\n"),
           buffer.str().c_str(),
           hdls[i]
         ));
@@ -2020,7 +2020,7 @@ DataReaderImpl::cache_lookup_instance_handles (const WriterIdSeq& ids,
         buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %s == %d.\n"),
+          ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
           buffer.str().c_str(),
           hdls[i]
         ));
@@ -2133,7 +2133,7 @@ void DataReaderImpl::notify_liveliness_change()
       buffer << current->second.get_state();
     }
     buffer << std::endl;
-    ACE_DEBUG((LM_DEBUG, /// MJM
+    ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
       ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
       ACE_TEXT("\tNOTIFY: %s\n"),
