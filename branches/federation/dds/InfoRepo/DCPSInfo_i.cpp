@@ -20,6 +20,8 @@
 #include /**/ "ace/OS_NS_stdio.h"
 #include "ace/Dynamic_Service.h"
 
+#include <sstream>
+
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i (CORBA::ORB_ptr orb
                                         , bool reincarnate
@@ -38,6 +40,12 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i (void)
 {
 }
 
+CORBA::ORB_ptr
+TAO_DDS_DCPSInfo_i::orb()
+{
+  return CORBA::ORB::_duplicate( this->orb_);
+}
+
 CORBA::Boolean TAO_DDS_DCPSInfo_i::attach_participant (
   ::DDS::DomainId_t            domainId,
   const OpenDDS::DCPS::RepoId& participantId
@@ -49,14 +57,15 @@ ACE_THROW_SPEC ((
 ))
 {
   // Grab the domain.
-  DCPS_IR_Domain* domain;
-  if( 0 != this->domains_.find( domainId, domain)) {
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* participant;
-  if( 0 != domain->find_participant( participantId, participant)) {
+  DCPS_IR_Participant* participant
+    = where->second->participant( participantId);
+  if( 0 == participant) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -75,14 +84,15 @@ TAO_DDS_DCPSInfo_i::changeOwnership(
 )
 {
   // Grab the domain.
-  DCPS_IR_Domain* domain;
-  if( 0 != this->domains_.find( domainId, domain)) {
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* participant;
-  if( 0 != domain->find_participant( participantId, participant)) {
+  DCPS_IR_Participant* participant
+    = where->second->participant( participantId);
+  if( 0 == participant) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -104,25 +114,27 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      // bad domain id
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* participantPtr;
-  if (domainPtr->find_participant(participantId,participantPtr) != 0)
-    {
-      // bad participant id
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* participantPtr
+    = where->second->participant( participantId);
+  if( 0 == participantPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  OpenDDS::DCPS::TopicStatus topicStatus = domainPtr->add_topic(topicId,
-                                                         topicName,
-                                                         dataTypeName,
-                                                         qos,
-                                                         participantPtr);
+  OpenDDS::DCPS::TopicStatus topicStatus
+    = where->second->add_topic(
+        topicId,
+        topicName,
+        dataTypeName,
+        qos,
+        participantPtr
+      );
 
   if( this->um_) {
     Update::UTopic topic (domainId, topicId, participantId
@@ -142,22 +154,36 @@ TAO_DDS_DCPSInfo_i::add_topic (const OpenDDS::DCPS::RepoId& topicId,
                                const char* dataTypeName,
                                const ::DDS::TopicQos& qos)
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
-      return false;
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i:add_topic: ")
+      ACE_TEXT("invalid domain %d.\n"),
+      domainId
+    ));
+    return false;
+  }
 
-  DCPS_IR_Participant* participantPtr;
-  if (domainPtr->find_participant(participantId,participantPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n"), participantId));
-      return false;
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* participantPtr
+    = where->second->participant( participantId);
+  if( 0 == participantPtr) {
+    std::stringstream buffer;
+    long key = OpenDDS::DCPS::GuidConverter(
+                 const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
+               );
+    buffer << participantId << "(" << std::hex << key << ")";
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i:add_topic: ")
+      ACE_TEXT("invalid participant %s.\n"),
+      buffer.str().c_str()
+    ));
+    return false;
+  }
 
   OpenDDS::DCPS::TopicStatus topicStatus
-    = domainPtr->force_add_topic (topicId, topicName, dataTypeName,
+    = where->second->force_add_topic (topicId, topicName, dataTypeName,
                                   qos, participantPtr);
 
   if (topicStatus != OpenDDS::DCPS::CREATED) {
@@ -189,19 +215,18 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic (
     , OpenDDS::DCPS::Invalid_Domain
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      // bad domain id
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
   OpenDDS::DCPS::TopicStatus status = OpenDDS::DCPS::NOT_FOUND;
 
   DCPS_IR_Topic* topic = 0;
   qos = new ::DDS::TopicQos;
 
-  status = domainPtr->find_topic(topicName, topic);
+  status = where->second->find_topic(topicName, topic);
   if (0 != topic)
   {
     status = OpenDDS::DCPS::FOUND;
@@ -227,17 +252,18 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
@@ -245,9 +271,9 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic (
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-  OpenDDS::DCPS::TopicStatus removedStatus = domainPtr->remove_topic(partPtr, topic);
+  OpenDDS::DCPS::TopicStatus removedStatus = where->second->remove_topic(partPtr, topic);
 
-  if( this->um_ && partPtr->owner()) {
+  if( this->um_ && partPtr->isOwner()) {
     Update::IdPath path( domainId, participantId, topicId);
     this->um_->destroy( path, Update::Topic);
   }
@@ -268,17 +294,18 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic (
   , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
@@ -306,19 +333,20 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  DCPS_IR_Topic* topic = where->second->find_topic( topicId);
   if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
@@ -365,7 +393,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication (
     this->um_->create( actor);
   }
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
   return pubId;
 }
 
@@ -379,22 +407,25 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                                      const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
                                      const ::DDS::PublisherQos & publisherQos)
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
-      return false;
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i:add_publication: ")
+      ACE_TEXT("invalid domain %d.\n"),
+      domainId
+    ));
+    return false;
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n")
-                  , participantId));
-      return false;
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  DCPS_IR_Topic* topic = where->second->find_topic( topicId);
   if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
@@ -418,29 +449,65 @@ TAO_DDS_DCPSInfo_i::add_publication (::DDS::DomainId_t domainId,
                    publisherQos),
                  0);
 
-  if (partPtr->add_publication(pubPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "participant list.\n"));
+  switch( partPtr->add_publication(pubPtr)) {
+    case -1:
+      {
+        std::stringstream buffer;
+        long key = OpenDDS::DCPS::GuidConverter(
+                     const_cast< OpenDDS::DCPS::RepoId*>( &pubId)
+                   );
+        buffer << pubId << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_publication: ")
+          ACE_TEXT("failed to add publication to participant %s.\n"),
+          buffer.str().c_str()
+        ));
+      }
+      // Deliberate fall through to next case.
 
-      // failed to add.  we are responsible for the memory.
+    case 1:
       delete pubPtr;
       return false;
-    }
-  else if (topic->add_publication_reference(pubPtr, false) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "topic list.\n"));
 
-      // Failed to add to the topic
-      // so remove from participant and fail.
-      partPtr->remove_publication(pubId);
+    case 0:
+    default: break;
+  }
+
+  switch( topic->add_publication_reference(pubPtr, false)) {
+    case -1:
+      {
+        std::stringstream buffer;
+        long key = OpenDDS::DCPS::GuidConverter(
+                     const_cast< OpenDDS::DCPS::RepoId*>( &pubId)
+                   );
+        buffer << pubId << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_publication: ")
+          ACE_TEXT("failed to add publication to participant %s topic list.\n"),
+          buffer.str().c_str()
+        ));
+
+        // Remove the publication.
+        partPtr->remove_publication(pubId);
+
+      }
       return false;
-    }
+
+    case 1: // This is actually a really really bad place to jump to.
+            // This means that we successfully added the new publication
+            // to the participant (it had not been inserted before) but
+            // that we are adding a duplicate publication to the topic
+            // list - which should never ever be able to happen.
+      return false;
+
+    case 0:
+    default: break;
+  }
 
   OpenDDS::DCPS::GuidConverter converter(
     const_cast< OpenDDS::DCPS::RepoId*>( &pubId)
   );
+
   // See if we are adding a publication that was created within this
   // repository or a different repository.
   if( converter.federationId() == this->federation_) {
@@ -464,29 +531,30 @@ void TAO_DDS_DCPSInfo_i::remove_publication (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   if (partPtr->remove_publication(publicationId) != 0)
     {
-      domainPtr->remove_dead_participants();
+      where->second->remove_dead_participants();
 
       // throw exception because the publication was not removed!
       throw OpenDDS::DCPS::Invalid_Publication();
     }
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 
-  if( this->um_ && partPtr->owner()) {
+  if( this->um_ && partPtr->isOwner()) {
     Update::IdPath path( domainId, participantId, publicationId);
     this->um_->destroy( path, Update::Actor, Update::DataWriter);
   }
@@ -509,19 +577,20 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  DCPS_IR_Topic* topic = where->second->find_topic( topicId);
   if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
@@ -570,7 +639,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription (
     this->um_->create( actor);
   }
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 
   return subId;
 }
@@ -587,22 +656,25 @@ TAO_DDS_DCPSInfo_i::add_subscription (
     const ::DDS::SubscriberQos & subscriberQos
   )
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid domain Id: %d\n"), domainId));
-      return false;
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i:add_subscription: ")
+      ACE_TEXT("invalid domain %d.\n"),
+      domainId
+    ));
+    return false;
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Invalid participant Id: %d\n")
-                  , participantId));
-      return false;
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  DCPS_IR_Topic* topic = domainPtr->find_topic( topicId);
+  DCPS_IR_Topic* topic = where->second->find_topic( topicId);
   if( topic == 0)
     {
       throw OpenDDS::DCPS::Invalid_Topic();
@@ -624,23 +696,59 @@ TAO_DDS_DCPSInfo_i::add_subscription (
                    subscriberQos),
                  0);
 
-  if (partPtr->add_subscription(subPtr) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add publisher to ")
-                  "participant list.\n"));
+  switch( partPtr->add_subscription(subPtr)) {
+    case -1:
+      {
+        std::stringstream buffer;
+        long key = OpenDDS::DCPS::GuidConverter(
+                     const_cast< OpenDDS::DCPS::RepoId*>( &subId)
+                   );
+        buffer << subId << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_subscription: ")
+          ACE_TEXT("failed to add subscription to participant %s.\n"),
+          buffer.str().c_str()
+        ));
+      }
+      // Deliberate fall through to next case.
 
-      // failed to add.  we are responsible for the memory.
+    case 1:
       delete subPtr;
       return false;
-    }
-  else if (topic->add_subscription_reference (subPtr, false))
-  {
-    ACE_ERROR ((LM_ERROR, ACE_TEXT("Failed to add subscription to ")
-      "topic list.\n"));
 
-    // No associations were made so remove and fail.
-    partPtr->remove_subscription(subId);
-    return false;
+    case 0:
+    default: break;
+  }
+
+  switch( topic->add_subscription_reference(subPtr, false)) {
+    case -1:
+      {
+        std::stringstream buffer;
+        long key = OpenDDS::DCPS::GuidConverter(
+                     const_cast< OpenDDS::DCPS::RepoId*>( &subId)
+                   );
+        buffer << subId << "(" << std::hex << key << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_subscription: ")
+          ACE_TEXT("failed to add subscription to participant %s topic list.\n"),
+          buffer.str().c_str()
+        ));
+
+        // Remove the subscription.
+        partPtr->remove_subscription(subId);
+
+      }
+      return false;
+
+    case 1: // This is actually a really really bad place to jump to.
+            // This means that we successfully added the new subscription
+            // to the participant (it had not been inserted before) but
+            // that we are adding a duplicate subscription to the topic
+            // list - which should never ever be able to happen.
+      return false;
+
+    case 0:
+    default: break;
   }
 
   OpenDDS::DCPS::GuidConverter converter(
@@ -669,17 +777,18 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   if (partPtr->remove_subscription(subscriptionId) != 0)
     {
@@ -687,9 +796,9 @@ void TAO_DDS_DCPSInfo_i::remove_subscription (
       throw OpenDDS::DCPS::Invalid_Subscription();
     }
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 
-  if( this->um_ && partPtr->owner()) {
+  if( this->um_ && partPtr->isOwner()) {
     Update::IdPath path( domainId, participantId, subscriptionId);
     this->um_->destroy( path, Update::Actor, Update::DataReader);
   }
@@ -705,15 +814,13 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
     , OpenDDS::DCPS::Invalid_Domain
   ))
 {
-  DCPS_IR_Domain* domainPtr;
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domain);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  if (domains_.find(domain, domainPtr) != 0)
-    {
-      // throw exception
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
-
-  OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id();
+  OpenDDS::DCPS::RepoId participantId = where->second->get_next_participant_id();
 
   DCPS_IR_Participant* participant;
 
@@ -721,12 +828,12 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_domain_participant (
                  DCPS_IR_Participant(
                    this->federation_,
                    participantId,
-                   domainPtr,
+                   where->second,
                    qos, um_),
                  OpenDDS::DCPS::GUID_UNKNOWN);
 
   participant->takeOwnership();
-  int status = domainPtr->add_participant (participant);
+  int status = where->second->add_participant (participant);
 
   if( 0 != status) {
     // Adding the participant failed return the invalid
@@ -762,8 +869,9 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
                                             , const OpenDDS::DCPS::RepoId& participantId
                                             , const ::DDS::DomainParticipantQos & qos)
 {
-  DCPS_IR_Domain* domainPtr;
-  if( domains_.find(domainId, domainPtr) != 0) {
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
       ACE_TEXT("invalid domain Id: %d\n"),
@@ -772,8 +880,10 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
     return false;
   }
 
-  DCPS_IR_Participant* partPtr;
-  if( domainPtr->find_participant(participantId, partPtr) == 0) {
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 != partPtr) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
       ACE_TEXT("participant id %s already exists.\n"),
@@ -791,30 +901,47 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
   ACE_NEW_RETURN (participant,
                  DCPS_IR_Participant( this->federation_,
                                       participantId,
-                                      domainPtr,
+                                      where->second,
                                       qos, um_), 0);
 
-  int status = domainPtr->add_participant (participant);
-  if( 0 != status) {
-    std::stringstream buffer;
-    buffer << participantId << "(" << std::hex << long(converter) << ")";
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-      ACE_TEXT("domain %d failed to load participant %s at 0x%x.\n"),
-      domainId,
-      buffer.str().c_str(),
-      participant
-    ));
+  switch( where->second->add_participant (participant)) {
+    case -1:
+      {
+        std::stringstream buffer;
+        buffer << participantId << "(" << std::hex << long(converter) << ")";
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+          ACE_TEXT("failed to load participant %s in domain %d.\n"),
+          buffer.str().c_str(),
+          domainId
+        ));
+      }
+      delete participant;
+      return false;
 
-    delete participant;
-    return false;
+    case 1:
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+        std::stringstream buffer;
+        buffer << participantId << "(" << std::hex << long(converter) << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) WARNING: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+          ACE_TEXT("attempt to load duplicate participant %s in domain %d.\n"),
+          buffer.str().c_str(),
+          domainId
+        ));
+      }
+      delete participant;
+      return false;
+
+    case 0:
+    default: break;
   }
 
   // See if we are adding a participant that was created within this
   // repository or a different repository.
   if( converter.federationId() == this->federation_) {
     // Ensure the participant GUID values do not conflict.
-    domainPtr->last_participant_key( converter.participantId());
+    where->second->last_participant_key( converter.participantId());
     if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
@@ -824,15 +951,15 @@ TAO_DDS_DCPSInfo_i::add_domain_participant (::DDS::DomainId_t domainId
     }
   }
 
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     std::stringstream buffer;
     buffer << participantId << "(" << std::hex << long(converter) << ")";
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-      ACE_TEXT("domain %d loaded participant %s at 0x%x.\n"),
-      domainId,
+      ACE_TEXT("loaded participant %s at 0x%x in domain %d.\n"),
       buffer.str().c_str(),
-      participant
+      participant,
+      domainId
     ));
   }
 
@@ -849,23 +976,51 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  DCPS_IR_Domain* domainPtr;
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  DCPS_IR_Participant* participant = where->second->participant( participantId);
+  if( participant == 0) {
+    std::stringstream buffer;
+    long key = OpenDDS::DCPS::GuidConverter(
+                 const_cast< OpenDDS::DCPS::RepoId*>( &participantId)
+               );
+    buffer << participantId << "(" << std::hex << key << ")";
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::remove_domain_participant: ")
+      ACE_TEXT("failed to locate participant %s in domain %d.\n"),
+      buffer.str().c_str(),
+      domainId
+    ));
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  // Determine if we should propagate this event;  we need to cache this
+  // result as the participant will be gone by the time we use the result.
+  bool sendUpdate = participant->isOwner();
 
   CORBA::Boolean dont_notify_lost = 0;
-  int status = domainPtr->remove_participant (participantId, dont_notify_lost);
+  int status = where->second->remove_participant (participantId, dont_notify_lost);
 
   if (0 != status)
     {
       // Removing the participant failed
       throw OpenDDS::DCPS::Invalid_Participant();
     }
-}
 
+  // Update any concerned observers that the participant was destroyed.
+  if( this->um_ && sendUpdate) {
+    Update::IdPath path(
+      where->second->get_id(),
+      participantId,
+      participantId
+    );
+    this->um_->destroy( path, Update::Participant);
+  }
+}
 
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     ::DDS::DomainId_t domainId,
@@ -878,22 +1033,23 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant (
     , OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( myParticipantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  OpenDDS::DCPS::RepoId ignoreId = domainPtr->participant( ignoreKey);
+  OpenDDS::DCPS::RepoId ignoreId = where->second->participant( ignoreKey);
   partPtr->ignore_participant( ignoreId);
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 }
 
 
@@ -909,22 +1065,23 @@ void TAO_DDS_DCPSInfo_i::ignore_topic (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( myParticipantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  OpenDDS::DCPS::RepoId ignoreId = domainPtr->topic( ignoreKey);
+  OpenDDS::DCPS::RepoId ignoreId = where->second->topic( ignoreKey);
   partPtr->ignore_topic( ignoreId);
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 }
 
 
@@ -940,22 +1097,23 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( myParticipantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  OpenDDS::DCPS::RepoId ignoreId = domainPtr->subscription( ignoreKey);
+  OpenDDS::DCPS::RepoId ignoreId = where->second->subscription( ignoreKey);
   partPtr->ignore_subscription( ignoreId);
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 }
 
 
@@ -971,22 +1129,23 @@ void TAO_DDS_DCPSInfo_i::ignore_publication (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(myParticipantId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( myParticipantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
-  OpenDDS::DCPS::RepoId ignoreId = domainPtr->publication( ignoreKey);
+  OpenDDS::DCPS::RepoId ignoreId = where->second->publication( ignoreKey);
   partPtr->ignore_publication( ignoreId);
 
-  domainPtr->remove_dead_participants();
+  where->second->remove_dead_participants();
 }
 
 
@@ -1004,17 +1163,18 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos (
     , OpenDDS::DCPS::Invalid_Publication
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(partId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   DCPS_IR_Publication* pub;
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0)
@@ -1054,13 +1214,16 @@ TAO_DDS_DCPSInfo_i::update_publication_qos (
   const ::DDS::DataWriterQos&  qos
 )
 {
-  DCPS_IR_Domain* domainPtr;
-  if( domains_.find(domainId, domainPtr) != 0) {
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* partPtr;
-  if( domainPtr->find_participant(partId, partPtr) != 0) {
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -1080,13 +1243,16 @@ TAO_DDS_DCPSInfo_i::update_publication_qos (
   const ::DDS::PublisherQos&   qos
 )
 {
-  DCPS_IR_Domain* domainPtr;
-  if( domains_.find(domainId, domainPtr) != 0) {
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* partPtr;
-  if( domainPtr->find_participant(partId, partPtr) != 0) {
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -1112,17 +1278,18 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos (
     , OpenDDS::DCPS::Invalid_Subscription
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(partId, partPtr) != 0)
-    {
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   DCPS_IR_Subscription* sub;
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0)
@@ -1161,13 +1328,16 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos (
   const ::DDS::DataReaderQos&  qos
 )
 {
-  DCPS_IR_Domain* domainPtr;
-  if( domains_.find(domainId, domainPtr) != 0) {
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* partPtr;
-  if( domainPtr->find_participant(partId, partPtr) != 0) {
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -1187,13 +1357,16 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos (
   const ::DDS::SubscriberQos&  qos
 )
 {
-  DCPS_IR_Domain* domainPtr;
-  if( domains_.find(domainId, domainPtr) != 0) {
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* partPtr;
-  if( domainPtr->find_participant(partId, partPtr) != 0) {
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( partId);
+  if( 0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -1218,19 +1391,18 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
     , OpenDDS::DCPS::Invalid_Topic
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      // bad domain id
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId,partPtr) != 0)
-    {
-      // bad participant id
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   DCPS_IR_Topic* topic;
   if (partPtr->find_topic_reference(topicId, topic) != 0)
@@ -1241,7 +1413,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos (
   if (topic->set_topic_qos (qos) == false)
     return 0;
 
-  if( this->um_ && partPtr->owner()) {
+  if( this->um_ && partPtr->isOwner()) {
     Update::IdPath path( domainId, participantId, topicId);
     this->um_->update( path, qos);
   }
@@ -1260,24 +1432,23 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
     ::OpenDDS::DCPS::Invalid_Participant
   ))
 {
-  DCPS_IR_Domain* domainPtr;
-  if (domains_.find(domainId, domainPtr) != 0)
-    {
-      // bad domain id
-      throw OpenDDS::DCPS::Invalid_Domain();
-    }
+  // Grab the domain.
+  DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+  if( where == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
 
-  DCPS_IR_Participant* partPtr;
-  if (domainPtr->find_participant(participantId,partPtr) != 0)
-    {
-      // bad participant id
-      throw OpenDDS::DCPS::Invalid_Participant();
-    }
+  // Grab the participant.
+  DCPS_IR_Participant* partPtr
+    = where->second->participant( participantId);
+  if( 0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
 
   if (partPtr->set_qos (qos) == false)
     return 0;
 
-  if( this->um_ && partPtr->owner()) {
+  if( this->um_ && partPtr->isOwner()) {
     Update::IdPath path( domainId, participantId, participantId);
     this->um_->update( path, qos);
   }
@@ -1289,8 +1460,6 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos (
 int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
                                       bool use_bit)
 {
-  int status;
-
   FILE* file = 0;
   file = ACE_OS::fopen (filename, ACE_TEXT("r"));
   if (file == 0)
@@ -1302,75 +1471,77 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
   ACE_Read_Buffer tmp(file);
   char* buf = tmp.read ('\n', '\n', '\0');
   int replaced = tmp.replaced();
-  while (0 != replaced)
-    {
+  while( 0 != replaced) {
 
-      ::DDS::DomainId_t domainId = ACE_OS::strtol(buf, 0, 10);
-      tmp.alloc ()->free (buf);
-      if ( 0 == domainId)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             "ERROR: reading domain id file <%s>\n",
-                              filename), -1);
-        }
+    ::DDS::DomainId_t domainId = ACE_OS::strtol(buf, 0, 10);
+    tmp.alloc ()->free (buf);
+    if ( 0 == domainId)
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "ERROR: reading domain id file <%s>\n",
+                            filename), -1);
+      }
 
+    // Check if the domain is already in the map.
+    DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
+    if( where == this->domains_.end()) {
+      // We will attempt to insert a new domain, go ahead and allocate it.
       DCPS_IR_Domain* domainPtr;
       ACE_NEW_RETURN(domainPtr,
                      DCPS_IR_Domain(domainId, this->participantIdGenerator_),
                      -1);
 
-      status = domains_.bind(domainId, domainPtr);
+      // We need to insert the domain into the map at this time since it
+      // will be looked up during the init_built_in_topics() call.
+      this->domains_.insert(
+        where,
+        DCPS_IR_Domain_Map::value_type( domainId, domainPtr)
+      );
 
-      switch (status)
+      int bit_status = 0;
+
+      if (use_bit)
         {
-        case 0:
-          {
-            int bit_status = 0;
-
-            if (use_bit)
-              {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-                bit_status = domainPtr->init_built_in_topics();
+          bit_status = domainPtr->init_built_in_topics();
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
-              }
+        }
 
-            if (0 == bit_status)
-              {
-                if (::OpenDDS::DCPS::DCPS_debug_level > 0)
-                  {
-                    ACE_DEBUG((LM_DEBUG,
-                      ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::load_domains: ")
-                      ACE_TEXT("successfully loaded domain %d at %x.\n"),
-                      domainId,
-                      domainPtr
-                    ));
-                  }
-              }
-            else
-              {
-                ACE_ERROR((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Failed to initialize the Built-In Topics ")
-                          ACE_TEXT("when loading domain id = %d\n"),
-                          domainId));
-                domains_.unbind(domainId);
-              }
+      if (0 == bit_status)
+        {
+          if (::OpenDDS::DCPS::DCPS_debug_level > 0)
+            {
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) TAO_DDS_DCPSInfo_i::load_domains: ")
+                ACE_TEXT("successfully loaded domain %d at %x.\n"),
+                domainId,
+                domainPtr
+              ));
+            }
+        }
+      else
+        {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains: ")
+            ACE_TEXT("failed to initialize the Built-In Topics ")
+            ACE_TEXT("when loading domain %d.\n"),
+            domainId
+          ));
+          this->domains_.erase( domainId);
+          delete domainPtr;
+        }
 
-          }
-          break;
-        case 1:
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
-            ACE_TEXT("Attempted to load existing domain id %d\n"),
-            domainId));
-          break;
-        case -1:
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::load_domains ")
-            ACE_TEXT("Unknown error while loading domain id %d\n"),
-            domainId));
-        };
-
-      buf = tmp.read ('\n', '\n', '\0');
-      replaced = tmp.replaced();
+    } else if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::load_domains: ")
+        ACE_TEXT("attempt to re-load existing domain %d\n"),
+        domainId
+      ));
     }
+
+    buf = tmp.read ('\n', '\n', '\0');
+    replaced = tmp.replaced();
+  }
 
   ACE_OS::fclose (file);
 
@@ -1380,7 +1551,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
                ACE_TEXT("Unable to initialize persistence.\n")));
   }
 
-  return domains_.current_size();
+  return this->domains_.size();
 }
 
 
@@ -1506,20 +1677,9 @@ TAO_DDS_DCPSInfo_i::init_persistence (void)
   return true;
 }
 
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+const DCPS_IR_Domain_Map&
+TAO_DDS_DCPSInfo_i::domains() const
+{
+  return this->domains_;
+}
 
-template class ACE_Map_Entry<::DDS::DomainId_t,DCPS_IR_Domain*>;
-template class ACE_Map_Manager<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>;
-
-#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Map_Entry<::DDS::DomainId_t,DCPS_IR_Domain*>
-#pragma instantiate ACE_Map_Manager<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<::DDS::DomainId_t,DCPS_IR_Domain*,ACE_Null_Mutex>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

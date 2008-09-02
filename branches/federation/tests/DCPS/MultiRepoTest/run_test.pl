@@ -13,7 +13,8 @@ use DDS_Run_Test;
 
 my $status = 0;
 my $failed = 0;
-my $debug ;# = 10;
+my $debug;
+# $debug = 10;
 
 PerlDDS::add_lib_path('../FooType5');
 

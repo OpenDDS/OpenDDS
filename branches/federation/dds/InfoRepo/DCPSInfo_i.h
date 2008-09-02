@@ -29,12 +29,14 @@
 
 #include "tao/ORB_Core.h"
 
+#include <map>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 // typedef declarations
-typedef ACE_Map_Manager< ::DDS::DomainId_t, DCPS_IR_Domain*, ACE_Null_Mutex> DCPS_IR_Domain_Map;
+typedef std::map< DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
 
 // Forward declaration
 namespace Update { class Manager; }
@@ -470,6 +472,12 @@ public:
 
   /// Add an additional Updater interface.
   void add( Update::Updater* updater);
+
+  /// Expose a readable reference of the domain map.
+  const DCPS_IR_Domain_Map& domains() const;
+
+  /// Expose the ORB.
+  CORBA::ORB_ptr orb();
 
 private:
 

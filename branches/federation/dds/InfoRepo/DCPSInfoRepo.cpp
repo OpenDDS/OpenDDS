@@ -110,7 +110,6 @@ InfoRepo::~InfoRepo (void)
 {
   if( this->finalized_ == false) {
     this->finalize();
-    this->finalized_ = true;
   }
   orb_->destroy ();
 }
@@ -129,6 +128,7 @@ InfoRepo::finalize()
   federator_.finalize();
   TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
+  this->finalized_ = true;
 }
 
 int
@@ -136,7 +136,6 @@ InfoRepo::handle_exception( ACE_HANDLE /* fd */)
 {
   if( this->finalized_ == false) {
     this->finalize();
-    this->finalized_ = true;
   }
   orb_->shutdown (0);
   return 0;
@@ -361,6 +360,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     // N.B. This is done *before* being added to the IOR table to avoid any
     //      races with an eager client.
     this->federator_.orb( orb_.in());
+    /// this->federator_.initialize(); // @TODO: Using this for debug.
 
     //
     // Add the federator to the info_servant update manager as an
@@ -389,7 +389,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
       // Bind to '/Federator/1382379631'
       std::stringstream buffer( ::OpenDDS::Federator::FEDERATOR_IORTABLE_KEY);
-      buffer << "/" << this->federatorConfig_.federationDomain();
+      buffer << "/" << std::dec << this->federatorConfig_.federationDomain();
       adapter->bind (buffer.str().c_str(),  federator_ior.in ());
     }
   }

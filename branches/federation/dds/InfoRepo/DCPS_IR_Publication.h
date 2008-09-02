@@ -145,6 +145,9 @@ public:
   CORBA::Boolean is_bit ();
   void set_bit_status (CORBA::Boolean isBIT);
 
+  // Expose the datawriter.
+  OpenDDS::DCPS::DataWriterRemote_ptr writer();
+
   // Verify the existing associations. This may result removal of
   // associations. The existing associations have to be removed before
   // adding new association and may need some delay. Otherwise, if  

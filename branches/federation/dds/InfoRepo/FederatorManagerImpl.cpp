@@ -30,6 +30,7 @@ namespace OpenDDS { namespace Federator {
 ManagerImpl::ManagerImpl(Config& config)
  : joining_( this->lock_),
    joiner_( NIL_REPOSITORY),
+   federated_( false),
    config_( config),
    ownerListener_( *this),
    topicListener_( *this),
@@ -857,7 +858,7 @@ ManagerImpl::join_federation(
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, %x)\n"),
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, 0x%x)\n"),
       federation
     ));
   }
@@ -910,10 +911,8 @@ ManagerImpl::join_federation(
   //   2) We are not recursing.
   //
 
-  // Check if we already have Federation repository.
-  ::OpenDDS::DCPS::DCPSInfo_var federationRepo
-    = TheServiceParticipant->get_repository( this->config_.federationDomain());
-  if( CORBA::is_nil(federationRepo.in())) {
+  // Check if we are already federated.
+  if( this->federated_ == false) {
     // Go ahead and add the joining repository as our Federation
     // repository.
     try {
@@ -963,9 +962,78 @@ ManagerImpl::join_federation(
     throw Incomplete();
   }
 
-  this->joiner_ = NIL_REPOSITORY;
+  //
+  // Push our initial state out to the joining repository *after* we call
+  // him back to join.  This reduces the amount of duplicate data pushed
+  // when a new (empty) repository is joining an existing federation.
+  //
+  this->pushState( peer);
+
+  // Adjust our joining state and give others the opportunity to proceed.
+  this->federated_ = true;
+  this->joiner_    = NIL_REPOSITORY;
   this->joining_.signal();
   return true;
+}
+      
+void
+ManagerImpl::initializeOwner (
+  const ::OpenDDS::Federator::OwnerUpdate & data
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  ::OpenDDS::Federator::Incomplete
+))
+{
+  this->processCreate( &data, 0);
+}
+
+void
+ManagerImpl::initializeTopic (
+  const ::OpenDDS::Federator::TopicUpdate & data
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  ::OpenDDS::Federator::Incomplete
+))
+{
+  this->processCreate( &data, 0);
+}
+
+void
+ManagerImpl::initializeParticipant (
+  const ::OpenDDS::Federator::ParticipantUpdate & data
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  ::OpenDDS::Federator::Incomplete
+))
+{
+  this->processCreate( &data, 0);
+}
+
+void
+ManagerImpl::initializePublication (
+  const ::OpenDDS::Federator::PublicationUpdate & data
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  ::OpenDDS::Federator::Incomplete
+))
+{
+  this->processCreate( &data, 0);
+}
+
+void
+ManagerImpl::initializeSubscription (
+  const ::OpenDDS::Federator::SubscriptionUpdate & data
+)
+ACE_THROW_SPEC ((
+  ::CORBA::SystemException,
+  ::OpenDDS::Federator::Incomplete
+))
+{
+  this->processCreate( &data, 0);
 }
 
 }} // End namespace OpenDDS::Federator

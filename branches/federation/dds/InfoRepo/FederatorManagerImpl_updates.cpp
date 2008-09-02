@@ -5,6 +5,8 @@
 #include "DcpsInfo_pch.h"
 #include "FederatorManagerImpl.h"
 #include "DCPSInfo_i.h"
+#include "DCPS_IR_Domain.h"
+#include "DCPS_IR_Participant.h"
 
 namespace OpenDDS { namespace Federator {
 
@@ -549,6 +551,128 @@ ManagerImpl::processDelete( const TopicUpdate* sample, const ::DDS::SampleInfo* 
     sample->participant,
     sample->id
   );
+}
+
+void
+ManagerImpl::pushState( Manager_ptr peer)
+{
+  // foreach DCPS_IR_Domain
+  //   foreach DCPS_IR_Participant
+  //     peer->initializeParticipant(...)
+  //     peer->initializeOwner(...)
+  //     foreach DCPS_IR_Topic
+  //       peer->initializeTopic(...)
+  //     foreach DCPS_IR_Publication
+  //       peer->initializePublication(...)
+  //     foreach DCPS_IR_Subscription
+  //       peer->initializeSubscription(...)
+
+  // Process each domain within the repository.
+  for( DCPS_IR_Domain_Map::const_iterator currentDomain
+         = this->info_->domains().begin();
+       currentDomain != this->info_->domains().end();
+       ++currentDomain) {
+
+    // Process each participant within the current domain.
+    for( DCPS_IR_Participant_Map::const_iterator currentParticipant
+           = currentDomain->second->participants().begin();
+         currentParticipant != currentDomain->second->participants().end();
+         ++currentParticipant) {
+
+      // Initialize the participant on the peer.
+      ParticipantUpdate participantSample;
+      participantSample.sender = this->id();
+      participantSample.action = CreateEntity;
+
+      participantSample.domain =  currentDomain->second->get_id();
+      participantSample.id     =  currentParticipant->second->get_id();
+      participantSample.qos    = *currentParticipant->second->get_qos();
+
+      peer->initializeParticipant( participantSample);
+
+      // Initialize the ownership of the participant on the peer.
+      OwnerUpdate ownerSample;
+      ownerSample.sender      = this->id();
+      ownerSample.action      = CreateEntity;
+
+      ownerSample.domain      = currentDomain->second->get_id();
+      ownerSample.participant = currentParticipant->second->get_id();
+      ownerSample.owner       = currentParticipant->second->owner();
+
+      peer->initializeOwner( ownerSample);
+
+      // Process each topic within the current particpant.
+      for( DCPS_IR_Topic_Map::const_iterator currentTopic
+             = currentParticipant->second->topics().begin();
+           currentTopic != currentParticipant->second->topics().end();
+           ++currentTopic) {
+        TopicUpdate topicSample;
+        topicSample.sender      = this->id();
+        topicSample.action      = CreateEntity;
+
+        topicSample.id          = currentTopic->second->get_id();
+        topicSample.domain      = currentDomain->second->get_id();
+        topicSample.participant = currentTopic->second->get_participant_id();
+        topicSample.topic       = currentTopic->second->get_topic_description()->get_name();
+        topicSample.datatype    = currentTopic->second->get_topic_description()->get_dataTypeName();
+        topicSample.qos         = *currentTopic->second->get_topic_qos();
+
+        peer->initializeTopic( topicSample);
+      }
+
+      // Process each publication within the current particpant.
+      for( DCPS_IR_Publication_Map::const_iterator currentPublication
+             = currentParticipant->second->publications().begin();
+           currentPublication != currentParticipant->second->publications().end();
+           ++currentPublication) {
+        PublicationUpdate publicationSample;
+        publicationSample.sender         = this->id();
+        publicationSample.action         = CreateEntity;
+
+        DCPS_IR_Publication* p = currentPublication->second;
+        CORBA::ORB_var orb = this->info_->orb();
+        CORBA::String_var callback = orb->object_to_string( p->writer());
+
+        publicationSample.domain         = currentDomain->second->get_id();
+        publicationSample.participant    = p->get_participant_id();
+        publicationSample.topic          = p->get_topic_id();
+        publicationSample.id             = p->get_id();
+        publicationSample.callback       = callback.in();
+        publicationSample.transport_id   = p->get_transportInterfaceInfo().transport_id;
+        publicationSample.transport_blob = p->get_transportInterfaceInfo().data;
+        publicationSample.datawriter_qos = *p->get_datawriter_qos();
+        publicationSample.publisher_qos  = *p->get_publisher_qos();
+
+        peer->initializePublication( publicationSample);
+      }
+
+      // Process each subscription within the current particpant.
+      for( DCPS_IR_Subscription_Map::const_iterator currentSubscription
+             = currentParticipant->second->subscriptions().begin();
+           currentSubscription != currentParticipant->second->subscriptions().end();
+           ++currentSubscription) {
+        SubscriptionUpdate subscriptionSample;
+        subscriptionSample.sender         = this->id();
+        subscriptionSample.action         = CreateEntity;
+
+        DCPS_IR_Subscription* s = currentSubscription->second;
+        CORBA::ORB_var orb = this->info_->orb();
+        CORBA::String_var callback = orb->object_to_string( s->reader());
+
+        subscriptionSample.domain         = currentDomain->second->get_id();
+        subscriptionSample.participant    = s->get_participant_id();
+        subscriptionSample.topic          = s->get_topic_id();
+        subscriptionSample.id             = s->get_id();
+        subscriptionSample.callback       = callback.in();
+        subscriptionSample.transport_id   = s->get_transportInterfaceInfo().transport_id;
+        subscriptionSample.transport_blob = s->get_transportInterfaceInfo().data;
+        subscriptionSample.datareader_qos = *s->get_datareader_qos();
+        subscriptionSample.subscriber_qos = *s->get_subscriber_qos();
+
+        peer->initializeSubscription( subscriptionSample);
+      }
+    }
+  }
 }
 
 }} // End namespace OpenDDS::Federator

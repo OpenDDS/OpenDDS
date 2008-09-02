@@ -234,20 +234,21 @@ int DCPS_IR_Topic_Description::add_topic (DCPS_IR_Topic* topic)
         }
       break;
     case 1:
-      {
-        std::stringstream buffer;
-        long handle;
-        ::OpenDDS::DCPS::RepoId topicId = topic->get_id();
-        handle = ::OpenDDS::DCPS::GuidConverter( topicId);
-        buffer << topicId << "(" << std::hex << handle << ")";
+      if (::OpenDDS::DCPS::DCPS_debug_level > 0)
+        {
+          std::stringstream buffer;
+          long handle;
+          ::OpenDDS::DCPS::RepoId topicId = topic->get_id();
+          handle = ::OpenDDS::DCPS::GuidConverter( topicId);
+          buffer << topicId << "(" << std::hex << handle << ")";
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::add_topic: ")
-          ACE_TEXT("topic description %s attempt to re-add topic %s.\n"),
-          this->name_.c_str(),
-          buffer.str().c_str()
-        ));
-      }
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Topic_Description::add_topic: ")
+            ACE_TEXT("topic description %s attempt to re-add topic %s.\n"),
+            this->name_.c_str(),
+            buffer.str().c_str()
+          ));
+        }
       break;
     case -1:
       {

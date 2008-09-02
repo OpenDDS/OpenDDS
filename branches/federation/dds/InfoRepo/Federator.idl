@@ -207,6 +207,20 @@ module OpenDDS { module Federator {
       //
       OpenDDS::DCPS::DCPSInfo repository();
 
+      //
+      // The following methods allow the current state of a repository to
+      // be pushed to a newly joining repository.
+      // N.B. These are not 'oneway' since we need to be assured that the
+      //      previous operation has completed on the remote side before
+      //      starting the next call.
+      //
+
+      void initializeOwner(        in        OwnerUpdate data) raises( Incomplete);
+      void initializeTopic(        in        TopicUpdate data) raises( Incomplete);
+      void initializeParticipant(  in  ParticipantUpdate data) raises( Incomplete);
+      void initializePublication(  in  PublicationUpdate data) raises( Incomplete);
+      void initializeSubscription( in SubscriptionUpdate data) raises( Incomplete);
+
     };
 
     // Constant values.

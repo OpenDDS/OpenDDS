@@ -362,7 +362,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
           buffer << "[ " << rd_ids[i] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
-            ACE_TEXT("id_to_handle_map_%s = %d failed.\n"),
+            ACE_TEXT("id_to_handle_map_%s = 0x%x failed.\n"),
             buffer.str().c_str(), handles[i]
           ));
           return;
@@ -375,7 +375,7 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
           buffer << "[ " << rd_ids[i] << "(" << std::hex << handle << ")]";
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
-            ACE_TEXT("id_to_handle_map_%s = %d.\n"),
+            ACE_TEXT("id_to_handle_map_%s = 0x%x.\n"),
             buffer.str().c_str(), handles[i]
           ));
         }
@@ -401,34 +401,8 @@ DataWriterImpl::fully_associated ( ::OpenDDS::DCPS::RepoId myid,
     delete [] remote_associations;
   }
 
-  // Support TRANSIENT_LOCAL_DURABILITY_QOS instead of using
-  // TheTransientKludge.
-  if (this->qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS
-      || this->qos_.durability.kind == DDS::TRANSIENT_DURABILITY_QOS
-      || this->qos_.durability.kind == DDS::PERSISTENT_DURABILITY_QOS)
-  //if (TheTransientKludge->is_enabled ())
-  {
-    // The above condition is only true for the DCPSInfo Server.
-
-    // kludge over a kludge
-    // This sleep ensures that the newly created connection used
-    // by Built-In Topics is established end-to-end
-    // before the BIT data is resent.
-    // Atleast hopefully that will happen in 3 seconds.
-    // !!! this sleep caused other problems.
-    //     Consider this double kludge at a later time.
-    //     Could optimize this by only sleeping when
-    //     it is the first time the TransportBlob is seen
-    //     (in other words when the connection is being established).
-    //     But actaully we still need a small sleep because
-    //     although the conneciton is established already the
-    //     subscriber side association may not yet be established.
-    //     ACE_OS::sleep(2);
-
-    // This is a very limited implementation of
-    // DURABILITY.kind=TRANSIENT_LOCAL
-    // It suffers from resending the history to every subscription.
-
+  // Support DURABILITY QoS
+  if( this->qos_.durability.kind != DDS::VOLATILE_DURABILITY_QOS) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all (rd_ids,
@@ -1869,7 +1843,7 @@ DataWriterImpl::bit_lookup_instance_handles (const ReaderIdSeq& ids,
         buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_WARNING,
           ACE_TEXT("(%P|%t) DataWriterImpl::bit_lookup_instance_handles: ")
-          ACE_TEXT("reader %s has handle %d.\n"),
+          ACE_TEXT("reader %s has handle 0x%x.\n"),
           buffer.str().c_str(),
           hdls[i]
         ));
@@ -1940,7 +1914,7 @@ DataWriterImpl::cache_lookup_instance_handles (const ReaderIdSeq& ids,
         buffer << ids[i] << "(" << std::hex << handle << ")";
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataWriterImpl::cache_lookup_instance_handles: ")
-          ACE_TEXT("instance handle for writer %s == %d.\n"),
+          ACE_TEXT("instance handle for writer %s == 0x%x.\n"),
           buffer.str().c_str(),
           hdls[i]
         ));

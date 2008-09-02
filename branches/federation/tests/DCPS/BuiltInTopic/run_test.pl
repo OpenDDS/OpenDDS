@@ -41,8 +41,10 @@ unlink $iorfile;
 $status = 0;
 $client_orb = "";
 
-my $repoDebug ;# = 10;
-my $appDebug  ;# = 10;
+my $repoDebug;
+my $appDebug;
+# $repoDebug = 10;
+# $appDebug  = 10;
 
 my $repoOpts = "";
 $repoOpts  = "-DCPSDebugLevel $repoDebug "               if $repoDebug;
@@ -60,6 +62,7 @@ $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 $CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
                               "$dynamic_tcp -i $ignore_kind $appOpts ");
 
+print $REPO->CommandLine() . "\n";
 $REPO->Spawn ();
 
 if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
@@ -68,6 +71,7 @@ if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
     exit 1;
 }
 
+print $CL->CommandLine() . "\n";
 $result = $CL->SpawnWaitKill (60);
 
 if ($result != 0) {

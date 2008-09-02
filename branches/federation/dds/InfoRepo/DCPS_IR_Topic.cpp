@@ -149,7 +149,7 @@ int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
       break;
 
     case 1:
-      {
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
         std::stringstream buffer;
         long handle;
         handle = ::OpenDDS::DCPS::GuidConverter( this->id_);
@@ -160,8 +160,8 @@ int DCPS_IR_Topic::add_publication_reference (DCPS_IR_Publication* publication
         handle = ::OpenDDS::DCPS::GuidConverter( publicationId);
         publicationBuffer << publicationId << "(" << std::hex << handle << ")";
 
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::add_publication_reference: ")
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Topic::add_publication_reference: ")
           ACE_TEXT("topic %s attempt to re-add publication %s.\n"),
           buffer.str().c_str(),
           publicationBuffer.str().c_str()

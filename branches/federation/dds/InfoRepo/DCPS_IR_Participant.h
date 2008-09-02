@@ -17,12 +17,12 @@
 #include "GuidGenerator.h"
 
 #include /**/ "ace/Map_Manager.h"
-#include /**/ "ace/Null_Mutex.h"
 
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Publication.h"
 #include /**/ "DCPS_IR_Topic.h"
 
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -32,9 +32,12 @@
 class DCPS_IR_Domain;
 namespace Update { class Manager; }
 
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex> DCPS_IR_Subscription_Map;
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex> DCPS_IR_Publication_Map;
-typedef ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Topic*,ACE_Null_Mutex> DCPS_IR_Topic_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Subscription*, GUID_tKeyLessThan>
+          DCPS_IR_Subscription_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Publication*, GUID_tKeyLessThan>
+          DCPS_IR_Publication_Map;
+typedef std::map< OpenDDS::DCPS::RepoId, DCPS_IR_Topic*, GUID_tKeyLessThan>
+          DCPS_IR_Topic_Map;
 
 typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 
@@ -66,8 +69,11 @@ public:
   /// Process an incoming update that changes ownership.
   void changeOwner( long sender, long owner);
 
+  /// Value of the owner for this participant.
+  long owner() const;
+
   /// Indication of whether the current repository is the owner of this participant.
-  bool owner() const;
+  bool isOwner() const;
 
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
@@ -172,6 +178,15 @@ public:
   void last_topic_key(        long key);
   void last_publication_key(  long key);
   void last_subscription_key( long key);
+
+  /// Expose a readable reference to the publication map.
+  const DCPS_IR_Publication_Map& publications() const;
+
+  /// Expose a readable reference to the subscription map.
+  const DCPS_IR_Subscription_Map& subscriptions() const;
+
+  /// Expose a readable reference to the topic map.
+  const DCPS_IR_Topic_Map& topics() const;
 
 private:
   OpenDDS::DCPS::RepoId id_;
