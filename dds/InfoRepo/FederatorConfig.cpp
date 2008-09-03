@@ -30,7 +30,7 @@ namespace { // Anonymous namespace for file scope
   class ArgCopier {
     public:
       /// Identify the action to take on the next argument.
-      enum Action { COPY, FILENAME, IDVALUE };
+      enum Action { COPY, FILENAME, IDVALUE, IORVALUE };
 
       /// Construct with a target pointer array.
       ArgCopier( OpenDDS::Federator::Config* config);
@@ -65,6 +65,11 @@ namespace { // Anonymous namespace for file scope
       // Federation Id option, Id value is next arg.
       this->action_ = IDVALUE;
       return;
+
+    } else if( ::OpenDDS::Federator::Config::FEDERATE_WITH_OPTION == arg) {
+      // Federate with option, IOR is next arg.
+      this->action_ = IORVALUE;
+      return;
     }
 
     // Process unrecognized arguments and all values.
@@ -77,6 +82,11 @@ namespace { // Anonymous namespace for file scope
       case IDVALUE:
         // Capture the federation Id.
         this->config_->federationId() = ACE_OS::atoi( arg);
+        break;
+
+      case IORVALUE:
+        // Capture the IOR to federate with.
+        this->config_->federateIor() = arg;
         break;
 
       case COPY:
@@ -96,6 +106,10 @@ Config::FEDERATOR_CONFIG_OPTION( "-FederatorConfig");
 
 const std::string
 Config::FEDERATOR_ID_OPTION( "-FederationId");
+
+const
+std::string
+Config::FEDERATE_WITH_OPTION( "-FederateWith");
 
 Config::Config( int argc, char** argv)
  : argc_( 0),

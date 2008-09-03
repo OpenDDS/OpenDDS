@@ -86,3 +86,17 @@ OpenDDS::Federator::Config::configFile() const
   return this->configFile_;
 }
 
+ACE_INLINE
+std::string&
+OpenDDS::Federator::Config::federateIor()
+{
+  return this->federateIor_;
+}
+
+ACE_INLINE
+std::string
+OpenDDS::Federator::Config::federateIor() const
+{
+  return this->federateIor_;
+}
+

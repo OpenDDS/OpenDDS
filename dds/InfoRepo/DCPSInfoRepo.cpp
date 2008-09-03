@@ -83,7 +83,6 @@ private:
   /// Repository Federation behaviors
   OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
-  ACE_TString                     federation_endpoint_;
 };
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
@@ -158,12 +157,12 @@ InfoRepo::usage (const ACE_TCHAR * cmd)
               ACE_TEXT ("    -a <address> listening address for Built-In Topics\n")
               ACE_TEXT ("    -o <file> write ior to file\n")
               ACE_TEXT ("    -d <file> load domain ids from file\n")
-              ACE_TEXT ("    -f <number> run with given federation Id value\n")
-              ACE_TEXT ("    -j <endpoint> federate initially with repository at endpoint\n")
               ACE_TEXT ("    -NOBITS disable the Built-In Topics\n")
               ACE_TEXT ("    -z turn on verbose Transport logging\n")
               ACE_TEXT ("    -r Resurrect from persistent file\n")
-              ACE_TEXT ("    -FederationConfig <file> configure federation from <file>\n")
+              ACE_TEXT ("    -FederatorConfig <file> configure federation from <file>\n")
+              ACE_TEXT ("    -FederationId <number> value for this repository\n")
+              ACE_TEXT ("    -FederateWith <ior> federate initially with object at <ior>\n")
               ACE_TEXT ("    -?\n")
               ACE_TEXT ("\n"),
               cmd));
@@ -342,14 +341,14 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     }
 
   // Fire up the federator.
-  CORBA::String_var federator_ior;
+  OpenDDS::Federator::Manager_var federator;
+  CORBA::String_var               federator_ior;
   if( federator_.id() > 0) {
     oid = PortableServer::string_to_ObjectId ("Federator");
     info_poa_->activate_object_with_id (oid.in (),
                                         &federator_);
     obj = info_poa_->id_to_reference(oid.in());
-    OpenDDS::Federator::Manager_var federator
-      = OpenDDS::Federator::Manager::_narrow (obj.in ());
+    federator = OpenDDS::Federator::Manager::_narrow (obj.in ());
 
     federator_ior = orb_->object_to_string (federator.in ());
 
@@ -405,8 +404,42 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   ACE_OS::fclose (output_file);
 
   // Initial federation join if specified on command line.
-  if( (federator_.id() > 0) && (false == federation_endpoint_.empty())) {
-    // (void)federator_.join_federation( federation_endpoint_.c_str());
+  if( (this->federator_.id() > 0)
+   && (false == this->federatorConfig_.federateIor().empty())
+    ) {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: DCPSInfoRepo::init() - ")
+        ACE_TEXT("joining federation with repository %s\n"),
+        this->federatorConfig_.federateIor().c_str()
+      ));
+    }
+
+    CORBA::Object_var obj
+      = this->orb_->string_to_object( this->federatorConfig_.federateIor().c_str());
+    if( CORBA::is_nil( obj.in())) {
+      ACE_ERROR(( LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: could not resolve %s for initial federation.\n"),
+        this->federatorConfig_.federateIor().c_str()
+      ));
+      throw InitError( "Unable to resolve IOR for initial federation.");
+    }
+
+    OpenDDS::Federator::Manager_var peer
+      = OpenDDS::Federator::Manager::_narrow( obj.in() );
+    if( CORBA::is_nil( peer.in())) {
+      ACE_ERROR(( LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: could not narrow %s.\n"),
+        this->federatorConfig_.federateIor().c_str()
+      ));
+      throw InitError( "Unable to narrow peer for initial federation.");
+    }
+
+    // Actually join.
+    peer->join_federation(
+      federator.in(),
+      this->federatorConfig_.federationDomain()
+    );
   }
 
   return true;
