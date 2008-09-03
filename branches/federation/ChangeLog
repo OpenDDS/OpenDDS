@@ -1,12 +1,36 @@
+Wed Sep  3 22:37:53 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Implemented initial join of federation from command line
+	  arguments.
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+	  Added command line argument processing for initial joining.
+
+        * tests/DCPS/Federation/domain1_ids:
+        * tests/DCPS/Federation/domain2_ids:
+
+	  Added federation domain number.  This is likely to be
+	  temporary.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Modified to allow creation of an arbitrary number of federated
+	  repositories.
+
 Wed Sep  3 14:58:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Changed DURABILITY QoS values for federation update
-	  distribution to be VOLATILE since we now push current state
-	  when joinin a federation.  This avoid the generation and
-	  maintenance of a large transaction history for the internal
-	  repository state.
+          Changed DURABILITY QoS values for federation update
+          distribution to be VOLATILE since we now push current state
+          when joinin a federation.  This avoid the generation and
+          maintenance of a large transaction history for the internal
+          repository state.
 
 Tue Sep  2 22:47:04 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

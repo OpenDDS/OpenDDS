@@ -23,6 +23,9 @@ class OpenDDS_Federator_Export Config  {
     /// Command line option specifying the federation Id value.
     static const std::string FEDERATOR_ID_OPTION;
 
+    /// Command line option specifying a repository to federate with.
+    static const std::string FEDERATE_WITH_OPTION;
+
     /// Default constructor.
     Config( int argc, char** argv);
 
@@ -49,6 +52,10 @@ class OpenDDS_Federator_Export Config  {
     short& federationPort();
     short  federationPort() const;
 
+    /// Initial federation IOR value.
+    std::string& federateIor();
+    std::string  federateIor() const;
+
     /// Configuration filename.
     std::string& configFile();
     std::string  configFile() const;
@@ -65,6 +72,9 @@ class OpenDDS_Federator_Export Config  {
 
     /// Configuration filename, if any.
     std::string configFile_;
+
+    /// Initial federation IOR, if any.
+    std::string federateIor_;
 
     /// Configured Federation Id value.
     RepoKey federationId_;
