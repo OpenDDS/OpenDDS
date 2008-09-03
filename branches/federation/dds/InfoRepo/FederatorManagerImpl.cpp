@@ -355,21 +355,15 @@ ManagerImpl::initialize()
 
   ::DDS::DataReaderQos readerQos;
   subscriber->get_default_datareader_qos( readerQos);
-  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   readerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   readerQos.reliability.max_blocking_time.sec        = 0;
   readerQos.reliability.max_blocking_time.nanosec    = 0;
-  readerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
-  readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
   ::DDS::DataWriterQos writerQos;
   publisher->get_default_datawriter_qos( writerQos);
-  writerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writerQos.reliability.kind                         = ::DDS::RELIABLE_RELIABILITY_QOS;
   writerQos.reliability.max_blocking_time.sec        = 0;
   writerQos.reliability.max_blocking_time.nanosec    = 0;
-  writerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
-  writerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
   //
   // Add update subscriptions

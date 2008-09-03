@@ -1,88 +1,98 @@
+Wed Sep  3 14:58:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Changed DURABILITY QoS values for federation update
+	  distribution to be VOLATILE since we now push current state
+	  when joinin a federation.  This avoid the generation and
+	  maintenance of a large transaction history for the internal
+	  repository state.
+
 Tue Sep  2 22:47:04 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/Federator.idl:
 
-	  Added methods for initializing Entities to support pushing
-	  repository state to federation.  These methods receive the
-	  state being pushed.
+          Added methods for initializing Entities to support pushing
+          repository state to federation.  These methods receive the
+          state being pushed.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Exposed ORB.  Migrated DCPS_IR_Domain_Map to STL map container
-	  to simplify exposing it for use in pushing current state to the
-	  federation.
+          Exposed ORB.  Migrated DCPS_IR_Domain_Map to STL map container
+          to simplify exposing it for use in pushing current state to the
+          federation.
 
         * dds/InfoRepo/DCPS_IR_Domain.h:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Migrated DCPS_IR_Participant_Map and DCPS_Topic_Description_Set
-	  to STL containers to simplify exposing them for use in pushing
-	  current state to the federation.
+          Migrated DCPS_IR_Participant_Map and DCPS_Topic_Description_Set
+          to STL containers to simplify exposing them for use in pushing
+          current state to the federation.
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
 
-	  Added accessor for actual ownership value in addition to local
-	  ownership flag.  Migrated DCPS_IR_Subscription_Map,
-	  DCPS_IR_Publication_Map and DCPS_IR_Topic_Map to STL map
-	  containers to simplify exposing them for use in pushing current
-	  state to the federation.
+          Added accessor for actual ownership value in addition to local
+          ownership flag.  Migrated DCPS_IR_Subscription_Map,
+          DCPS_IR_Publication_Map and DCPS_IR_Topic_Map to STL map
+          containers to simplify exposing them for use in pushing current
+          state to the federation.
 
         * dds/InfoRepo/FederatorManagerImpl.h:
 
-	  Added new methods for pushing state and initializing from
-	  pushed state.
+          Added new methods for pushing state and initializing from
+          pushed state.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Implemented new initialize*() methods to support pushing state
-	  to the federation.  Implemented sequencing of pushState()
-	  method during join operation.  Changed test for federation
-	  state to be a flag to avoid confounding repository attachment
-	  with federation state.  Cleaned up some comments.
+          Implemented new initialize*() methods to support pushing state
+          to the federation.  Implemented sequencing of pushState()
+          method during join operation.  Changed test for federation
+          state to be a flag to avoid confounding repository attachment
+          with federation state.  Cleaned up some comments.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Implemented new pushState() method.
+          Implemented new pushState() method.
 
         * dds/InfoRepo/DCPS_IR_Publication.h:
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
 
-	  Exposed the DataWriterRemote reference.  Corrected usage
-	  of ownership checking method.
+          Exposed the DataWriterRemote reference.  Corrected usage
+          of ownership checking method.
 
         * dds/InfoRepo/DCPS_IR_Subscription.h:
         * dds/InfoRepo/DCPS_IR_Subscription.cpp:
 
-	  Exposed the DataReaderRemote reference.  Corrected usage
-	  of ownership checking method.
+          Exposed the DataReaderRemote reference.  Corrected usage
+          of ownership checking method.
 
         * dds/InfoRepo/DCPS_IR_Topic.cpp:
         * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
 
-	  Cleaned up diagnostic messages.
+          Cleaned up diagnostic messages.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Simplified finalization implementation.  Ensured that the
-	  IORTable binding for the domain specific federation manager is
-	  in decimal format.
+          Simplified finalization implementation.  Ensured that the
+          IORTable binding for the domain specific federation manager is
+          in decimal format.
 
         * dds/DCPS/DataReaderImpl.cpp:
-	
-	  Cleaned up some message content.
+
+          Cleaned up some message content.
 
         * dds/DCPS/DataWriterImpl.cpp:
 
-	  Cleaned up some message content.  Removed stale comments and
-	  simplified DURABILITY support.
+          Cleaned up some message content.  Removed stale comments and
+          simplified DURABILITY support.
 
         * tests/DCPS/BuiltInTopic/run_test.pl:
         * tests/DCPS/MultiRepoTest/run_test.pl:
         * tests/DCPS/unit/run_test.pl:
 
-	  Extended and simplified specification of debug levels.
+          Extended and simplified specification of debug levels.
 
 Tue Aug 26 21:48:52 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
