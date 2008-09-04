@@ -1,26 +1,40 @@
+Thu Sep  4 15:42:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 1346:1353 out to branch.
+
+  Thu Sep  4 15:10:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed redundant Builtin Topic transport initialization.
+
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+
+          Added information to diagnostic messages.
+
 Wed Sep  3 22:37:53 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Implemented initial join of federation from command line
-	  arguments.
+          Implemented initial join of federation from command line
+          arguments.
 
         * dds/InfoRepo/FederatorConfig.h:
         * dds/InfoRepo/FederatorConfig.inl:
         * dds/InfoRepo/FederatorConfig.cpp:
 
-	  Added command line argument processing for initial joining.
+          Added command line argument processing for initial joining.
 
         * tests/DCPS/Federation/domain1_ids:
         * tests/DCPS/Federation/domain2_ids:
 
-	  Added federation domain number.  This is likely to be
-	  temporary.
+          Added federation domain number.  This is likely to be
+          temporary.
 
         * tests/DCPS/Federation/run_test.pl:
 
-	  Modified to allow creation of an arbitrary number of federated
-	  repositories.
+          Modified to allow creation of an arbitrary number of federated
+          repositories.
 
 Wed Sep  3 14:58:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 

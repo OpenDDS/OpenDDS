@@ -595,10 +595,6 @@ namespace OpenDDS
 
       // Actually install the repository to the mappings.
       this->set_repo( repo.in(), key);
-
-      // Create and install the Built In Topic transport for this
-      // repository.
-      if (this->bit_enabled_) this->init_bit_transport_impl( key);
     }
 
     void
