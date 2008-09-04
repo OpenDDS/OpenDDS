@@ -610,10 +610,6 @@ namespace OpenDDS
           return; // throw;
         }
       }
-
-      // Create and install the Built In Topic transport for this
-      // repository.
-      if (this->bit_enabled_) this->init_bit_transport_impl( key);
     }
 
     void

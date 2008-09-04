@@ -1,10 +1,20 @@
+Thu Sep  4 15:10:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Removed redundant Builtin Topic transport initialization.
+
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+
+	  Added information to diagnostic messages.
+
 Tue Aug 26 06:32:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/StringKey/pub.ini:
         * tests/DCPS/StringKey/sub.ini:
 
           Added missing files.
-          
+
 Mon Aug 25 17:53:30 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/StringKey/DataReaderListener.h:
