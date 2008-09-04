@@ -47,12 +47,17 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       same_instance_ = false;
     }
 
+    ::DDS::InstanceHandle_t  previous_handle = this->last_hdl_;
     last_hdl_ = si.instance_handle;
 
     if (status == DDS::RETCODE_OK) {
 
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
       cout << "SampleInfo.instance_state = " << si.instance_state << endl;
+      cout << "SampleInfo.instance_handle = " << si.instance_handle << endl;
+      if( previous_handle != this->last_hdl_) {
+        cout << "HANDLE CHANGED: previous handle = " << previous_handle << endl;
+      }
 
       if (si.valid_data == 1)
       {
