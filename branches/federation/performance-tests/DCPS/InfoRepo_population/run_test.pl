@@ -49,7 +49,6 @@ my $syncopts  = "-ORBDebugLevel $orbdebuglevel " if $orbdebuglevel;
    $syncopts .= "-ORBVerboseLogging 1 "          if $verbose;
    $syncopts .= "-ORBLogFile $debugfile "        if $debugfile;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $sync_ior="sync.ior";
 $repo_bit_opt = "$opts -NOBITS";
@@ -57,7 +56,7 @@ $repo_bit_opt = "$opts -NOBITS";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");

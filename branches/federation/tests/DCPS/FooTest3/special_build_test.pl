@@ -78,7 +78,6 @@ else {
 
 $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 # The pub_id_fname can not be a full path because the
 # pub_id_fname will be part of the parameter of the -p option
@@ -98,7 +97,7 @@ $parameters = " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $
 
 $DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
                                "-o $dcpsrepo_ior"
-                               . " -d $domains_file -ORBDebugLevel 1");
+                               . " -ORBDebugLevel 1");
 
 $FooTest3 = PerlDDS::create_process ("FooTest3", $parameters);
 

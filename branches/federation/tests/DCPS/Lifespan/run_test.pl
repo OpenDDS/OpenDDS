@@ -18,7 +18,6 @@ $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
@@ -28,7 +27,7 @@ $data_file = "test_run.data";
 unlink $data_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file");
+                                    "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$pub_opts " .
                                      "-ORBLogFile $data_file");

@@ -15,12 +15,11 @@ $status = 0;
 
 PerlDDS::add_lib_path('../FooType');
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 
 $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                               "-o $dcpsrepo_ior"
-                              . " -d $domains_file -ORBDebugLevel 1");
+                              . " -ORBDebugLevel 1");
 
 
 $FooTest = PerlDDS::create_process ("SimpleFooTest",

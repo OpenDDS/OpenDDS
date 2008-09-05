@@ -34,7 +34,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-                              , "$debugOpts -o $iorfile -d domain_ids $svc_config");
+                              , "$debugOpts -o $iorfile $svc_config");
 
 $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
                               "$debugOpts -DCPSInfoRepo file://$iorfile $svc_config " .

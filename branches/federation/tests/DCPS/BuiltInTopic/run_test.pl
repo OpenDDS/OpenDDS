@@ -58,7 +58,7 @@ $dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                "$repoOpts -o $iorfile -d domain_ids $dynamic_tcp ");
+                                "$repoOpts -o $iorfile $dynamic_tcp ");
 $CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
                               "$dynamic_tcp -i $ignore_kind $appOpts ");
 

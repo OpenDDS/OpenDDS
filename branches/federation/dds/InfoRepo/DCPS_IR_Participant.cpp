@@ -39,7 +39,8 @@ DCPS_IR_Participant::DCPS_IR_Participant (long federationId,
     OpenDDS::DCPS::GuidConverter(id).participantId(),
     OpenDDS::DCPS::KIND_READER
   ),
-  um_ (um)
+  um_ (um),
+  isBitPublisher_( false)
 {
 }
 
@@ -144,13 +145,26 @@ void
 DCPS_IR_Participant::takeOwnership()
 {
   /// Publish an update with our ownership.
-  if( this->um_) {
+  if( this->um_ && (this->isBitPublisher() == false)) {
     this->um_->create(
       Update::OwnershipData(
         this->domain_->get_id(),
         this->id_,
         this->federationId_
     ));
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+      std::stringstream buffer;
+      long key = ::OpenDDS::DCPS::GuidConverter(
+                   const_cast< OpenDDS::DCPS::RepoId*>( &this->id_)
+                 );
+      buffer << this->id_ << "(" << std::hex << key << ")";
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DCPS_IR_Participant::take_ownership: ")
+        ACE_TEXT("pushing ownership %s in domain %d.\n"),
+        buffer.str().c_str(),
+        this->domain_->get_id()
+      ));
+    }
   }
 
   // And now handle our internal ownership processing.
@@ -191,6 +205,18 @@ bool
 DCPS_IR_Participant::isOwner() const
 {
   return this->owner_ == this->federationId_;
+}
+
+bool&
+DCPS_IR_Participant::isBitPublisher()
+{
+  return this->isBitPublisher_;
+}
+
+bool
+DCPS_IR_Participant::isBitPublisher() const
+{
+  return this->isBitPublisher_;
 }
 
 int DCPS_IR_Participant::add_publication (DCPS_IR_Publication* pub)
@@ -715,13 +741,25 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
        ++current
      ) {
     // Notify the federation to remove the topic.
-    if( this->um_) {
+    if( this->um_ && (this->isBitPublisher() == false)) {
       Update::IdPath path(
         this->domain_->get_id(),
         this->get_id(),
         current->second->get_id()
       );
       this->um_->destroy( path, Update::Topic);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ::OpenDDS::DCPS::RepoId id = current->second->get_id();
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter( id);
+        buffer << id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+          ACE_TEXT("pushing deletion of topic %s in domain %d.\n"),
+          buffer.str().c_str(),
+          this->domain_->get_id()
+        ));
+      }
     }
 
     // Remove the topic ourselves.
@@ -765,13 +803,25 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
        ++current
      ) {
     // Notify the federation to destroy the publication.
-    if( this->um_) {
+    if( this->um_ && (this->isBitPublisher() == false)) {
       Update::IdPath path(
         this->domain_->get_id(),
         this->get_id(),
         current->second->get_id()
       );
       this->um_->destroy( path, Update::Actor, Update::DataWriter);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ::OpenDDS::DCPS::RepoId id = current->second->get_id();
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter( id);
+        buffer << id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+          ACE_TEXT("pushing deletion of publication %s in domain %d.\n"),
+          buffer.str().c_str(),
+          this->domain_->get_id()
+        ));
+      }
     }
   }
 
@@ -785,13 +835,25 @@ void DCPS_IR_Participant::remove_all_dependents (CORBA::Boolean notify_lost)
        ++current
      ) {
     // Notify the federation to destroy the subscription.
-    if( this->um_) {
+    if( this->um_ && (this->isBitPublisher() == false)) {
       Update::IdPath path(
         this->domain_->get_id(),
         this->get_id(),
         current->second->get_id()
       );
       this->um_->destroy( path, Update::Actor, Update::DataReader);
+      if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ::OpenDDS::DCPS::RepoId id = current->second->get_id();
+        std::stringstream buffer;
+        long key = ::OpenDDS::DCPS::GuidConverter( id);
+        buffer << id << "(" << std::hex << key << ")";
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
+          ACE_TEXT("pushing deletion of subscription %s in domain %d.\n"),
+          buffer.str().c_str(),
+          this->domain_->get_id()
+        ));
+      }
     }
   }
 

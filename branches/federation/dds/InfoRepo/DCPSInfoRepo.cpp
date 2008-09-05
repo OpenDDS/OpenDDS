@@ -71,7 +71,6 @@ private:
   PortableServer::POAManager_var poa_manager_;
 
   ACE_TString ior_file_;
-  ACE_TString domain_file_;
   ACE_TString listen_address_str_;
   int listen_address_given_;
   bool use_bits_;
@@ -87,7 +86,6 @@ private:
 
 InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   : ior_file_ (ACE_TEXT("repo.ior"))
-    , domain_file_ (ACE_TEXT("domain_ids"))
     , listen_address_given_ (0)
     , use_bits_ (true)
     , resurrect_ (true)
@@ -156,7 +154,6 @@ InfoRepo::usage (const ACE_TCHAR * cmd)
               ACE_TEXT ("  %s\n")
               ACE_TEXT ("    -a <address> listening address for Built-In Topics\n")
               ACE_TEXT ("    -o <file> write ior to file\n")
-              ACE_TEXT ("    -d <file> load domain ids from file\n")
               ACE_TEXT ("    -NOBITS disable the Built-In Topics\n")
               ACE_TEXT ("    -z turn on verbose Transport logging\n")
               ACE_TEXT ("    -r Resurrect from persistent file\n")
@@ -193,11 +190,6 @@ InfoRepo::parse_args (int argc,
           if (p == 0) {
             resurrect_ = false;
           }
-          arg_shifter.consume_arg ();
-        }
-      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
-        {
-          domain_file_ = current_arg;
           arg_shifter.consume_arg ();
         }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
@@ -333,12 +325,13 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
   );
 
-  // Load the domains _after_ initializing the participant factory and initializing
-  // the transport
-  if (0 >= info_servant->load_domains (domain_file_.c_str(), use_bits_))
-    {
-      //ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: Failed to load any domains!\n")), -1);
-    }
+  // Initialize persistence _after_ initializing the participant factory
+  // and intializing the transport.
+  if( false == info_servant->init_persistence()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to initialize persistence.\n")));
+    throw InitError ("Unable to initialize persistence.");
+  }
 
   // Fire up the federator.
   OpenDDS::Federator::Manager_var federator;
@@ -359,7 +352,6 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     // N.B. This is done *before* being added to the IOR table to avoid any
     //      races with an eager client.
     this->federator_.orb( orb_.in());
-    /// this->federator_.initialize(); // @TODO: Using this for debug.
 
     //
     // Add the federator to the info_servant update manager as an

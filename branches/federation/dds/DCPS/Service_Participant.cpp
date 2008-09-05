@@ -73,7 +73,6 @@ namespace OpenDDS
       transient_data_cache_ (),
       persistent_data_cache_ ()
     {
-      this->set_repo_domain( ANY_DOMAIN, DEFAULT_REPO);
       initialize();
     }
 
@@ -677,7 +676,7 @@ namespace OpenDDS
               if( DCPS_debug_level > 0) {
                 std::stringstream buffer;
                 long key = GuidConverter( id);
-                buffer << id << "(" << key << ")";
+                buffer << id << "(" << std::hex << key << ")";
                 ACE_DEBUG((LM_DEBUG,
                   ACE_TEXT("(%P|%t) Participant %s attached to Repo[ %d].\n"),
                   buffer.str().c_str(),

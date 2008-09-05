@@ -26,7 +26,6 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
 }
 
 my($port1) = PerlACE::random_port();
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
     . " $svc_conf";
@@ -34,7 +33,7 @@ $common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+				  "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

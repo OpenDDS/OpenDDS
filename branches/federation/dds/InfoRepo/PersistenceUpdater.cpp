@@ -386,31 +386,6 @@ PersistenceUpdater::requestImage (void)
   // Allocate space to hold the QOS sequences.
   std::vector<ArrDelAdapter<char> > qos_sequences;
 
-  for (TopicIndex::ITERATOR iter = topic_index_->begin();
-       iter != topic_index_->end(); iter++)
-    {
-      const PersistenceUpdater::Topic* topic = (*iter).int_id_;
-
-      size_t qos_len = topic->topicQos.second.first;
-      char *buf;
-      ACE_NEW_NORETURN (buf, char[qos_len]);
-      qos_sequences.push_back (ArrDelAdapter<char>(buf));
-      if (buf == 0) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")
-        ));
-        return;
-      }
-      ACE_OS::memcpy (buf, topic->topicQos.second.second, qos_len);
-
-      BinSeq in_seq (qos_len, buf);
-      QosSeq qos (TopicQos, in_seq);
-      DTopic dTopic (topic->domainId, topic->topicId
-                     , topic->participantId, topic->name.c_str()
-                     , topic->dataType.c_str(), qos);
-      image.topics.push_back (dTopic);
-    }
-
   for (ParticipantIndex::ITERATOR iter = participant_index_->begin();
        iter != participant_index_->end(); iter++)
     {
@@ -435,6 +410,31 @@ PersistenceUpdater::requestImage (void)
                                                 , participant->participantId
                                                 , qos);
       image.participants.push_back (dparticipant);
+    }
+
+  for (TopicIndex::ITERATOR iter = topic_index_->begin();
+       iter != topic_index_->end(); iter++)
+    {
+      const PersistenceUpdater::Topic* topic = (*iter).int_id_;
+
+      size_t qos_len = topic->topicQos.second.first;
+      char *buf;
+      ACE_NEW_NORETURN (buf, char[qos_len]);
+      qos_sequences.push_back (ArrDelAdapter<char>(buf));
+      if (buf == 0) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")
+        ));
+        return;
+      }
+      ACE_OS::memcpy (buf, topic->topicQos.second.second, qos_len);
+
+      BinSeq in_seq (qos_len, buf);
+      QosSeq qos (TopicQos, in_seq);
+      DTopic dTopic (topic->domainId, topic->topicId
+                     , topic->participantId, topic->name.c_str()
+                     , topic->dataType.c_str(), qos);
+      image.topics.push_back (dTopic);
     }
 
   for (ActorIndex::ITERATOR iter = actor_index_->begin();

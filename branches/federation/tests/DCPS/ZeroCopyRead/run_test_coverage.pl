@@ -13,7 +13,6 @@ use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
@@ -32,7 +31,7 @@ if ($ARGV[0] eq 'by_instance') {
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "$svc_config -o $dcpsrepo_ior"
-                                      . " -d $domains_file -NOBITS");
+                                      . " -NOBITS");
 
 $ZCTest = PerlDDS::create_process ("main", $parameters);
 

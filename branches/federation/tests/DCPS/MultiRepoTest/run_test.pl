@@ -39,10 +39,6 @@ my $sys3_pub_topic  = "Left";
 my $sys3_sub_topic  = "Right";
 my $monitor_addr = "localhost:29803";
 
-my $domains1_file = "domain1_ids";
-my $domains2_file = "domain2_ids";
-my $domains3_file = "domain3_ids";
-
 my $dcpsrepo1_ior = "repo1.ior";
 my $dcpsrepo2_ior = "repo2.ior";
 my $dcpsrepo3_ior = "repo3.ior";
@@ -149,17 +145,17 @@ $monitor_parameters = "$svc_config -Samples $samples $monitor_config "
 $DCPSREPO1 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo1_ior "
   #                                  . " -ORBDebugLevel 1 "
-                                     . "-FederationId 273 -d $domains1_file");
+                                     . "-FederationId 273 ");
 
 $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo2_ior "
   #                                  . " -ORBDebugLevel 1 "
-                                     . "-FederationId 546 -d $domains2_file");
+                                     . "-FederationId 546 ");
 
 $DCPSREPO3 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      "$svc_config -o $dcpsrepo3_ior "
   #                                  . " -ORBDebugLevel 1 "
-                                     . "-FederationId 819 -d $domains3_file");
+                                     . "-FederationId 819 ");
 
 $System1 = PerlDDS::create_process ("system", $sys1_parameters);
 

@@ -75,6 +75,10 @@ public:
   /// Indication of whether the current repository is the owner of this participant.
   bool isOwner() const;
 
+  /// Flag to discriminate the built-in topic publishing participant within a domain.
+  bool& isBitPublisher();
+  bool  isBitPublisher() const;
+
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
   /// Returns 0 if added, 1 if already exists, -1 other failure
@@ -223,6 +227,9 @@ private:
   //  other entities (specifically the Update::Manager) the
   //  changes it makes.
   Update::Manager* um_;
+
+  /// Flag indicating this participant publishes built-in topics.
+  bool isBitPublisher_;
 };
 
 

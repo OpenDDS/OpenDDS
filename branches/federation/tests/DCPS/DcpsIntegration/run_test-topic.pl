@@ -13,7 +13,6 @@ use DDS_Run_Test;
 
 $status = 0;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "dcps_ir.ior";
 $bit_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf ../../tcp.conf";
@@ -23,8 +22,7 @@ unlink $dcpsrepo_ior;
 PerlDDS::add_lib_path('../FooType');
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "$bit_conf  -o $dcpsrepo_ior"
-                              . " -d $domains_file");
+                              "$bit_conf  -o $dcpsrepo_ior ");
 
 
 $Topic = PerlDDS::create_process ("topic_test",

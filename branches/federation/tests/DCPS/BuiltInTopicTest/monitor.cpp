@@ -126,8 +126,10 @@ int main (int argc, char *argv[])
       // give time for BIT datareader/datawriter fully association.
       ACE_OS::sleep (2);
 
-      if (delay_before_read_sec > 0)
+      if (delay_before_read_sec > 0) {
+        ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
         ACE_OS::sleep (delay_before_read_sec);
+      }
       
       ::DDS::Subscriber_var bit_subscriber
         = participant->get_builtin_subscriber () ;
@@ -182,7 +184,7 @@ int main (int argc, char *argv[])
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT participant data. "),
+            "(%P|%t) monitor:  failed to read BIT participant data.\n"),
             1);
         }
 
@@ -191,7 +193,7 @@ int main (int argc, char *argv[])
       if (len != num_parts)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT part data, expected %d parts. ", len, num_parts),
+          "(%P|%t) monitor:  read %d BIT part data, expected %d parts.\n", len, num_parts),
           1);
       }
 
@@ -237,7 +239,7 @@ int main (int argc, char *argv[])
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT topic data. "),
+            "(%P|%t) monitor:  failed to read BIT topic data.\n"),
             1);
         }
 
@@ -246,7 +248,7 @@ int main (int argc, char *argv[])
       if (len != num_topics)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT topic data, expected %d topics. ", len, num_topics),
+          "(%P|%t) monitor:  read %d BIT topic data, expected %d topics.\n", len, num_topics),
           1);
       }
 
@@ -308,7 +310,7 @@ int main (int argc, char *argv[])
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT publication data. "),
+            "(%P|%t) monitor:  failed to read BIT publication data.\n"),
             1);
         }
 
@@ -317,7 +319,7 @@ int main (int argc, char *argv[])
       if (len != num_pubs)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT pub data, expected %d pubs. ", len, num_pubs),
+          "(%P|%t) monitor:  read %d BIT pub data, expected %d pubs.\n", len, num_pubs),
           1);
       }
       
@@ -388,7 +390,7 @@ int main (int argc, char *argv[])
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT subsciption data. "),
+            "(%P|%t) monitor:  failed to read BIT subsciption data.\n"),
             1);
         }
 
@@ -397,7 +399,7 @@ int main (int argc, char *argv[])
       if (len != num_subs)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT sub data, expected %d subs. ", len, num_subs),
+          "(%P|%t) monitor:  read %d BIT sub data, expected %d subs.\n", len, num_subs),
           1);
       }
 

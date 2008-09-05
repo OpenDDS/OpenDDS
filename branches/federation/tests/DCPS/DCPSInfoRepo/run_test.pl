@@ -14,7 +14,6 @@ use DDS_Run_Test;
 $status = 0;
 my $debug = 0 ;
 
-$domains_file = "domainids.txt";
 $dcpsrepo_ior = "dcps_ir.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
@@ -23,7 +22,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -NOBITS -o $dcpsrepo_ior -d $domains_file");
+                                    "$svc_config -NOBITS -o $dcpsrepo_ior ");
 
 $PUBLISHER = PerlDDS::create_process ("publisher",
                               "-k file://$dcpsrepo_ior -q");

@@ -1,3 +1,196 @@
+Fri Sep  5 23:17:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Removed an unnecessary step during initialization.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Removed domain specification file processing.  Replace call to
+	  obsolete load_domains() with call to init_persistence().
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  Removed load_domains() method.  Replaced it with a domain()
+	  method that creates a domain on demand.  Exposed the
+	  init_persistence() method as public so that it can be
+	  called directly during initialization.  Predicated state
+	  push operations on not being the built-in topic publishing
+	  participant.	Added push diagnostics.
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+	  Added flag to indicate whether a participant is used to publish
+	  built-in topics.  Predicated state push operations on not being
+	  this 'special' participant.  Added push diagnostics.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Return the repository for the federation domain rather than our
+	  Federation Identifier value.  Reordered the repository
+	  management steps during a join operation.
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+	  Process Participants before Topics.
+
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+
+	  Extended debug specification and removed reference to domain_id
+	  file.
+
+        * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/McastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test.pl:
+        * tests/DCPS/MultiTopicTest/run_test1.pl:
+        * tests/DCPS/MultiTopicTest/run_test2.pl:
+        * tests/DCPS/MultiTopicTest/run_test3.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SimpleFooTest/obsolete_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+	  Removed references to the domain_id files.
+
+        * DevGuideExamples/DCPS/Messenger/domain_ids:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/domain_ids:
+        * examples/DCPS/DistributedContent/domain_ids:
+        * examples/DCPS/IntroductionToOpenDDS/domain_ids:
+        * examples/DCPS/Messenger_IOGR_Imr/domain_ids:
+        * examples/DCPS/Messenger_Imr/domain_ids:
+        * performance-tests/DCPS/InfoRepo_population/domain_ids:
+        * performance-tests/DCPS/McastListenerTest/domain_ids:
+        * performance-tests/DCPS/SimpleE2ETest/domain_ids:
+        * performance-tests/DCPS/SimpleLatency/domain_ids:
+        * performance-tests/DCPS/TCPListenerTest/domain_ids:
+        * performance-tests/DCPS/TCPProfilingTest/domain_ids:
+        * performance-tests/DCPS/TransportLatency/domain_ids:
+        * performance-tests/DCPS/UDPListenerTest/domain_ids:
+        * performance-tests/DCPS/UDPNoKeyTest/domain_ids:
+        * tests/DCPS/BuiltInTopic/domain_ids:
+        * tests/DCPS/BuiltInTopicTest/domain_ids:
+        * tests/DCPS/CompatibilityTest/domain_ids:
+        * tests/DCPS/CorbaSeq/domain_ids:
+        * tests/DCPS/DCPSInfoRepo/domainids.txt:
+        * tests/DCPS/DcpsIntegration/domain_ids:
+        * tests/DCPS/Deadline/domain_ids:
+        * tests/DCPS/Federation/domain1_ids:
+        * tests/DCPS/Federation/domain2_ids:
+        * tests/DCPS/FooTest2/domain_ids:
+        * tests/DCPS/FooTest3/domain_ids:
+        * tests/DCPS/FooTest3NoKey/domain_ids:
+        * tests/DCPS/FooTest3_0/domain_ids:
+        * tests/DCPS/FooTest3_1/domain_ids:
+        * tests/DCPS/FooTest3_2/domain_ids:
+        * tests/DCPS/FooTest4/domain_ids:
+        * tests/DCPS/FooTest4_0/domain_ids:
+        * tests/DCPS/FooTest5/domain_ids:
+        * tests/DCPS/FooTest5_0/domain_ids:
+        * tests/DCPS/Lifespan/domain_ids:
+        * tests/DCPS/LivelinessTest/domain_ids:
+        * tests/DCPS/LivelinessTimeout/domain_ids:
+        * tests/DCPS/MultiDPTest/domain_ids:
+        * tests/DCPS/MultiRepoTest/domain1_ids:
+        * tests/DCPS/MultiRepoTest/domain2_ids:
+        * tests/DCPS/MultiRepoTest/domain3_ids:
+        * tests/DCPS/MultiTopicTest/domain_ids:
+        * tests/DCPS/NotifyTest/domain_ids:
+        * tests/DCPS/Partition/domain_ids:
+        * tests/DCPS/PersistentDurability/domain_ids:
+        * tests/DCPS/Prst_delayed_subscriber/domain_ids:
+        * tests/DCPS/Reconnect/domain_ids:
+        * tests/DCPS/SetQosDeadline/domain_ids:
+        * tests/DCPS/SetQosPartition/domain_ids:
+        * tests/DCPS/SimpleFooTest/domain_ids:
+        * tests/DCPS/StringKey/domain_ids:
+        * tests/DCPS/TransientDurability/domain_ids:
+        * tests/DCPS/TransientLocalTest/domain_ids:
+        * tests/DCPS/ViewState/domain_ids:
+        * tests/DCPS/ZeroCopyRead/domain_ids:
+        * tests/DCPS/sub_init_loop/domain_ids:
+        * tests/DCPS/unit/domain_ids:
+
+          Removed these files.
+
 Thu Sep  4 15:42:57 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 1346:1353 out to branch.

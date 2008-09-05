@@ -108,7 +108,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 $subscriber_completed = "subscriber_finished.txt";
@@ -126,8 +125,7 @@ $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $tcp_svc_config = $use_svc_config ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$tcp_svc_config -o $dcpsrepo_ior"
-                                    . " -d $domains_file");
+                                    "$tcp_svc_config -o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
 $bit_off_conf = "-DCPSBit 0";

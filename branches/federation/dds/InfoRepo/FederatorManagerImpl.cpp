@@ -826,7 +826,7 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
       ACE_TEXT("(%P|%t) INFO: ManagerImpl::repository()\n")
     ));
   }
-  return TheServiceParticipant->get_repository( this->id());
+  return TheServiceParticipant->get_repository( this->config_.federationDomain());
 }
 
 ::CORBA::Boolean
@@ -852,7 +852,7 @@ ManagerImpl::join_federation(
 {
   if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, 0x%x)\n"),
+      ACE_TEXT("(%P|%t) INFO: ManagerImpl::join_federation( peer, %d)\n"),
       federation
     ));
   }
@@ -926,8 +926,8 @@ ManagerImpl::join_federation(
       }
 
       // Add remote repository to Service_Participant in the Federation domain
-      TheServiceParticipant->set_repo_domain( this->config_.federationDomain(), remote);
       TheServiceParticipant->set_repo( remoteRepo.in(), remote);
+      TheServiceParticipant->set_repo_domain( this->config_.federationDomain(), remote);
 
     } catch( const CORBA::Exception& ex) {
       ex._tao_print_exception(
