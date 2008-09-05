@@ -55,7 +55,6 @@ else {
   exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
@@ -70,8 +69,7 @@ $parameters = "$svc_config -r $num_readers -t $use_take"
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -o $dcpsrepo_ior"
-                                    . " -d $domains_file");
+                                    "$svc_config -o $dcpsrepo_ior ");
 
 $FooTest4 = PerlDDS::create_process ("FooTest4", $parameters);
 

@@ -20,7 +20,6 @@ if ($ARGV[0] eq 'noImr') {
 $status = 0;
 
 #my $OBJ_REF_STYLE = "-orbobjrefstyle url";
-my $domains_file = "domain_ids";
 my $dcpsrepo_ior = "repo.ior";
 my $dcpsrepo_ior2 = "repo2.ior";
 my $dcpsrepo_iogr = "repo.iogr";
@@ -34,10 +33,10 @@ my $implrepo_server = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImplRepo_Service"
 my $imr_activator = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImR_Activator";
 my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
 my $RepoPort = PerlACE::random_port();
-my $RepoOpts = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior -d $domains_file $OBJ_REF_STYLE "
+my $RepoOpts = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$RepoPort";
 my $repo_port = PerlACE::random_port();
-my $RepoOpts2 = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior2 -d $domains_file $OBJ_REF_STYLE "
+my $RepoOpts2 = "-ORBSvcConf ../../tcp.conf -o $dcpsrepo_ior2 $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$repo_port";
 if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";

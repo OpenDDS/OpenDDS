@@ -73,7 +73,6 @@ if ($role == -1) {
 
 @ports = $CS->boot_ports ();
 my($port1) = 10001 + @ports[0];
-my $domains_file = "$ENV{DDS_ROOT}/DevGuideExamples/DCPS/Messenger/domain_ids";
 my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
 if ($role == CrossSync::SERVER) {
@@ -97,7 +96,7 @@ if ($role == CrossSync::SERVER) {
     unlink $dcpsrepo_ior;
     $DCPSREPO = PerlDDS::create_process
           ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-           "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+           "$repo_bit_opt -o $dcpsrepo_ior "
            . "-ORBEndpoint iiop://:$port1");
 
     print $DCPSREPO->CommandLine(). "\n";

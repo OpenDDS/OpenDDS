@@ -21,7 +21,6 @@ $num_samples_per_reader=3;
 $num_readers=1;
 $use_take=0;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
@@ -31,8 +30,7 @@ unlink $pub_id_file;
 # -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_conf -o $dcpsrepo_ior"
-                                    . " -d $domains_file");
+                                    "$repo_bit_conf -o $dcpsrepo_ior ");
 
 $svc_config=" -ORBSvcConf ../../tcp.conf ";
 $parameters = "$svc_config -r $num_readers -t $use_take"

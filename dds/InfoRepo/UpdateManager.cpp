@@ -124,6 +124,37 @@ Manager::pushImage (const DImage& image)
   // automates memory cleanup.
   ***************************/
 
+
+  // Participant buckets
+  SeqGuard< ::DDS::DomainParticipantQos> part_qos_guard;
+  SeqGuard< ::DDS::DomainParticipantQos>::Seq& part_qos = part_qos_guard.seq ();
+
+  SeqGuard<UParticipant> part_guard;
+  SeqGuard< UParticipant>::Seq& parts = part_guard.seq ();
+
+  for (DImage::ParticipantSeq::const_iterator iter = image.participants.begin();
+       iter != image.participants.end(); iter++)
+    {
+      const DParticipant& part = *iter;
+
+      TAO_InputCDR in_cdr (part.participantQos.second.second
+                          , part.participantQos.second.first);
+
+      ::DDS::DomainParticipantQos* qos;
+      ACE_NEW_NORETURN (qos, ::DDS::DomainParticipantQos);
+      in_cdr >> *qos;
+      part_qos.push_back (qos);
+
+      UParticipant* u_part;
+      ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
+                                              , part.participantId
+                                              , *qos));
+      parts.push_back (u_part);
+
+      // push newly created UParticipant into UImage Participant bucket
+      u_image.participants.push_back (u_part);
+    }
+
   // Topic buckets
   SeqGuard< ::DDS::TopicQos> topics_qos_guard;
   SeqGuard< ::DDS::TopicQos>::Seq& topics_qos = topics_qos_guard.seq ();
@@ -154,37 +185,6 @@ Manager::pushImage (const DImage& image)
 
       // Push newly created UTopic into UImage Topic bucket
       u_image.topics.push_back (u_topic);
-    }
-
-
-  // Participant buckets
-  SeqGuard< ::DDS::DomainParticipantQos> part_qos_guard;
-  SeqGuard< ::DDS::DomainParticipantQos>::Seq& part_qos = part_qos_guard.seq ();
-
-  SeqGuard<UParticipant> part_guard;
-  SeqGuard< UParticipant>::Seq& parts = part_guard.seq ();
-
-  for (DImage::ParticipantSeq::const_iterator iter = image.participants.begin();
-       iter != image.participants.end(); iter++)
-    {
-      const DParticipant& part = *iter;
-
-      TAO_InputCDR in_cdr (part.participantQos.second.second
-                          , part.participantQos.second.first);
-
-      ::DDS::DomainParticipantQos* qos;
-      ACE_NEW_NORETURN (qos, ::DDS::DomainParticipantQos);
-      in_cdr >> *qos;
-      part_qos.push_back (qos);
-
-      UParticipant* u_part;
-      ACE_NEW_NORETURN (u_part, UParticipant (part.domainId
-                                              , part.participantId
-                                              , *qos));
-      parts.push_back (u_part);
-
-      // push newly created UParticipant into UImage Participant bucket
-      u_image.participants.push_back (u_part);
     }
 
   // Actor buckets

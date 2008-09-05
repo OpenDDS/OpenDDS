@@ -63,13 +63,11 @@ print "subs==$subCount\n" if $debug;
 
 my $samples = 10;
 
-my @domain_file;
 my @repo_ior;
 my @repo_ini;
 my @repo_port;
 my @repo_endpoint;
 for my $index ( 1 .. $repoCount) {
-  $domain_file[ $index - 1] = PerlACE::LocalFile( "domain" . $index . "_ids");
   $repo_ior[ $index - 1] = PerlACE::LocalFile( "repo" . $index . ".ior");
   $repo_ini[ $index - 1] = PerlACE::LocalFile( "repo" . $index . "-federation.ini");
   $repo_port[ $index - 1] = PerlACE::random_port();
@@ -127,7 +125,6 @@ for my $index ( 1 .. $repoCount) {
   $repoArgs[ $index - 1] .= "-FederationId $index ";
   $repoArgs[ $index - 1] .= "-FederateWith " .  $repo_manager[ $index - 2] . " " if $index > 1;
   $repoArgs[ $index - 1] .= "-o " . $repo_ior[ $index - 1] . " ";
-  $repoArgs[ $index - 1] .= "-d " . $domain_file[ $index - 1] . " ";
 
   if (PerlACE::is_vxworks_test()) {
     $REPO[ $index - 1] = new PerlACE::ProcessVX(

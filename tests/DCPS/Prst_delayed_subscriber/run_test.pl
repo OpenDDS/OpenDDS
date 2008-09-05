@@ -89,7 +89,6 @@ elsif ($ARGV[0] ne '') {
 $repo_svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
                  : "-ORBSvcConf ../../tcp.conf";
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $info_prst_file = "info.pr";
 $repo_bit_opt = "$repo_svc_config -NOBITS";
@@ -102,7 +101,7 @@ unlink $info_prst_file;
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt $repoDebugOpts -o $dcpsrepo_ior -d $domains_file "
+                                    "$repo_bit_opt $repoDebugOpts -o $dcpsrepo_ior "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:$SRV_PORT");
 $Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_opt $sub_opts");

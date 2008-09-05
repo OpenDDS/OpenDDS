@@ -24,13 +24,12 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
     }
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_conf -NOBITS -o $dcpsrepo_ior -d $domains_file");
+                                    "$svc_conf -NOBITS -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
 $Publisher = PerlDDS::create_process ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
 

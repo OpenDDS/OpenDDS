@@ -58,7 +58,6 @@ else {
 # (possibly allocated by not yet queue by the transport because of greedy read).
 $num_samples=$num_msgs_btwn_rec + 20;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 ########################################
@@ -101,8 +100,7 @@ $subDebugOpts .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf $repoDebugOpts -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             "$repo_bit_conf $repoDebugOpts -o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

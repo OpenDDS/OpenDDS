@@ -49,7 +49,6 @@ elsif ($ARGV[0] ne '') {
     exit 1;
 }
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
@@ -57,7 +56,7 @@ $app_bit_conf = "-DCPSBit 0";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-				  "$repo_bit_conf -o $dcpsrepo_ior -d $domains_file");
+				  "$repo_bit_conf -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$app_bit_conf $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$app_bit_conf $pub_opts");
 

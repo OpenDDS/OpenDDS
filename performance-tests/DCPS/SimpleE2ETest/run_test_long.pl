@@ -25,7 +25,6 @@ $data_size=7;
 $num_writers=1;
 $num_readers=1;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
@@ -34,8 +33,7 @@ $app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
 unlink $dcpsrepo_ior; 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf -o $dcpsrepo_ior"
-                             . " -d $domains_file");
+                             "$repo_bit_conf -o $dcpsrepo_ior ");
 
 
 print $DCPSREPO->CommandLine(), "\n";

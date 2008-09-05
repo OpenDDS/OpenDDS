@@ -27,7 +27,6 @@ $svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $arg_idx = 0;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
@@ -54,7 +53,7 @@ my $repoArgs = "$repo_bit_conf ";
 $repoArgs .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoArgs .= "-DCPSTransportDebugLevel $repoTransportDebug " if $repoTransportDebug;
 $repoArgs .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
-$repoArgs .= "-o $dcpsrepo_ior -d $domains_file ";
+$repoArgs .= "-o $dcpsrepo_ior ";
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs);
 
 # test multiple cases

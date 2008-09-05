@@ -40,7 +40,6 @@ my $status = 0;
 my $failed = 0;
 
 my $repo_ior     = PerlACE::LocalFile ("repo.ior");
-my $domains_file = PerlACE::LocalFile ("domain_ids");
 
 my $publisher_ini  = PerlACE::LocalFile ("dds_tcp_conf.ini");
 my $pub_udp_ini    = PerlACE::LocalFile ("pub_udp_conf.ini");
@@ -69,7 +68,7 @@ if( $nobit) {
   $common_opts .= "-DCPSBit 0 ";
 }
 
-my $repo_args        = "$common_opts $repo_opts -d $domains_file ";
+my $repo_args        = "$common_opts $repo_opts ";
 my $publisher_args   = "$common_opts $publisher_opts ";
 my $subscriber1_args = "$common_opts $sub1_opts ";
 my $subscriber2_args = "$common_opts $sub2_opts ";

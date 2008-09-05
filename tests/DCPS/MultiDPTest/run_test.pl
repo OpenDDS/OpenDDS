@@ -25,7 +25,6 @@ $sub_addr2 = "localhost:16702";
 $pub_addr = "localhost:29803";
 $sequence_length=10;
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 
 $subscriber_completed = "subscriber_finished.txt";
@@ -51,9 +50,8 @@ $pub_parameters = "$svc_config -p $pub_addr "
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -o $dcpsrepo_ior"
   #                                 . " -ORBDebugLevel 1"
-                                    . " -d $domains_file");
+                                    "$svc_config -o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
 $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);

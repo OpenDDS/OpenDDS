@@ -13,9 +13,12 @@ use DDS_Run_Test;
 
 $status = 0;
 
-my $debug ;# = 10;
-my $transportDebug ;# = 10;
-my $debugFile = "debug.out";
+my $debug;
+my $transportDebug;
+my $debugFile;
+# $debug = 10;
+# $transportDebug = 10;
+# $debugFile = "debug.out";
 
 my $debugOpts = "";
 $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
@@ -25,7 +28,6 @@ $debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportD
 $opts = new PerlACE::ConfigList->check_config ('STATIC')
     ? '' : '-ORBSvcConf ../../tcp.conf';
 
-$domains_file = "domain_ids";
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
 
@@ -45,7 +47,7 @@ unlink $debugFile;
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior -d $domains_file "
+                                    "$repo_bit_opt -o $dcpsrepo_ior "
                                     #. "-ORBDebugLevel 10 "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:$SRV_PORT");

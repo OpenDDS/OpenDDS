@@ -455,13 +455,6 @@ public:
          long                           sender,
          long                           owner
        );
- 
-
-  /// Called to load the domains
-  /// returns the number of domains that were loaded.
-  /// Currently after loading domains, it
-  ///  invoke 'init_persistence'
-  int load_domains (const ACE_TCHAR* filename, bool use_bit);
 
   /// Initialize the transport for the Built-In Topics
   /// Returns 0 (zero) if succeeds
@@ -472,14 +465,15 @@ public:
 
   /// Add an additional Updater interface.
   void add( Update::Updater* updater);
+ 
+  /// Convert a domain Id into a reference to a DCPS_IR_Domain object.
+  DCPS_IR_Domain* domain( ::DDS::DomainId_t domain);
 
   /// Expose a readable reference of the domain map.
   const DCPS_IR_Domain_Map& domains() const;
 
   /// Expose the ORB.
   CORBA::ORB_ptr orb();
-
-private:
 
   bool init_persistence (void);
 
