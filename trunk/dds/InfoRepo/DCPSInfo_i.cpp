@@ -1144,7 +1144,7 @@ int TAO_DDS_DCPSInfo_i::load_domains (const ACE_TCHAR* filename,
 
 
 int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
-                                        const ACE_INET_Addr listen)
+                                        const char* listen_str)
 {
   int status = 0;
 
@@ -1160,7 +1160,10 @@ int TAO_DDS_DCPSInfo_i::init_transport (int listen_address_given,
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   if (listen_address_given)
-    tcp_config->local_address_ = listen;
+  {
+    tcp_config->local_address_ = ACE_INET_Addr (listen_str);
+    tcp_config->local_address_str_ = listen_str;
+  }
 
   if (trans_impl->configure(config.in()) != 0)
     {

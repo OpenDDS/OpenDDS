@@ -322,7 +322,7 @@ public:
   /// Initialize the transport for the Built-In Topics
   /// Returns 0 (zero) if succeeds
   int init_transport (int listen_address_given,
-                      const ACE_INET_Addr listen);
+                      const char* listen_str);
 
   bool receive_image (const UpdateManager::UImage& image);
 
