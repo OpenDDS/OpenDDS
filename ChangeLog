@@ -1,12 +1,28 @@
+Sun Sep  7 01:07:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Updated local_address_str_ for bit transport configuration.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Removed listen_address_str_ initialization since it's not used.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Updated init_transport() signature and updated local_address_str_
+          in bit config if local address is configured via command line.
+
 Thu Sep  4 15:10:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Removed redundant Builtin Topic transport initialization.
+          Removed redundant Builtin Topic transport initialization.
 
         * tests/DCPS/StringKey/DataReaderListener.cpp:
 
-	  Added information to diagnostic messages.
+          Added information to diagnostic messages.
 
 Tue Aug 26 06:32:05 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 

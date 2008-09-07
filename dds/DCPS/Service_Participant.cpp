@@ -17,6 +17,7 @@
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
+#include <sstream>
 
 #if ! defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -279,6 +280,7 @@ namespace OpenDDS
                             }
                         }
                     }
+               
 
                   CORBA::Object_var poa_object =
                     orb_->resolve_initial_references("RootPOA");
@@ -709,13 +711,15 @@ namespace OpenDDS
       }
 
       this->bitTransportMap_[ repo]
-        = TheTransportFactory->create_transport_impl (transportKey, ACE_TEXT("SimpleTcp"), DONT_AUTO_CONFIG);
+        = TheTransportFactory->create_transport_impl (transportKey, 
+                                                      ACE_TEXT("SimpleTcp"), 
+                                                      DONT_AUTO_CONFIG);
 
       if( DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Repo[ %d].transport == %x\n"),
-          repo, this->bitTransportMap_[ repo].in()
-        ));
+          ACE_TEXT("(%P|%t) Repo[ %d].transport == %x local_address=%s:%d \n"),
+          repo, this->bitTransportMap_[ repo].in(), bitTransportIpMap_[ repo].c_str(), 
+          bitTransportPortMap_[ repo]));
       }
 
       TransportConfiguration_rch config
@@ -736,6 +740,13 @@ namespace OpenDDS
                 this->bitTransportIpMap_[ repo].c_str()
               );
         }
+
+      std::stringstream out;
+      out << this->bitTransportPortMap_[ repo];
+
+      tcp_config->local_address_str_ = this->bitTransportIpMap_[ repo].c_str();
+      tcp_config->local_address_str_ += ":";
+      tcp_config->local_address_str_ += out.str ();
 
       if( this->bitTransportMap_[ repo]->configure(config.in()) != 0)
         {
