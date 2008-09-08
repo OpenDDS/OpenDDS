@@ -1,46 +1,71 @@
-Fri Sep  5 23:17:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+Mon Sep  8 17:43:41 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * DDS_release_notes.txt:
+
+	  Documented user visible changes on this branch.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+        Merging trunk changes 1354:1356 out to branch.
+
+	Sun Sep  7 01:07:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Removed an unnecessary step during initialization.
+          Updated local_address_str_ for bit transport configuration.
 
         * dds/InfoRepo/DCPSInfoRepo.cpp:
 
-	  Removed domain specification file processing.  Replace call to
-	  obsolete load_domains() with call to init_persistence().
+          Removed listen_address_str_ initialization since it's not used.
 
         * dds/InfoRepo/DCPSInfo_i.h:
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-	  Removed load_domains() method.  Replaced it with a domain()
-	  method that creates a domain on demand.  Exposed the
-	  init_persistence() method as public so that it can be
-	  called directly during initialization.  Predicated state
-	  push operations on not being the built-in topic publishing
-	  participant.	Added push diagnostics.
+          Updated init_transport() signature and updated local_address_str_
+          in bit config if local address is configured via command line.
+
+Fri Sep  5 23:17:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+          Removed domain specification file processing.  Replace call to
+          obsolete load_domains() with call to init_persistence().
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Removed load_domains() method.  Replaced it with a domain()
+          method that creates a domain on demand.  Exposed the
+          init_persistence() method as public so that it can be
+          called directly during initialization.  Predicated state
+          push operations on not being the built-in topic publishing
+          participant.  Added push diagnostics.
 
         * dds/InfoRepo/DCPS_IR_Participant.h:
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
 
-	  Added flag to indicate whether a participant is used to publish
-	  built-in topics.  Predicated state push operations on not being
-	  this 'special' participant.  Added push diagnostics.
+          Added flag to indicate whether a participant is used to publish
+          built-in topics.  Predicated state push operations on not being
+          this 'special' participant.  Added push diagnostics.
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Return the repository for the federation domain rather than our
-	  Federation Identifier value.  Reordered the repository
-	  management steps during a join operation.
+          Return the repository for the federation domain rather than our
+          Federation Identifier value.  Reordered the repository
+          management steps during a join operation.
 
         * dds/InfoRepo/PersistenceUpdater.cpp:
         * dds/InfoRepo/UpdateManager.cpp:
 
-	  Process Participants before Topics.
+          Process Participants before Topics.
 
         * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
 
-	  Extended debug specification and removed reference to domain_id
-	  file.
+          Extended debug specification and removed reference to domain_id
+          file.
 
         * DevGuideExamples/DCPS/Messenger/run_corbaloc_test.pl:
         * DevGuideExamples/DCPS/Messenger/run_ns_test.pl:
@@ -129,7 +154,7 @@ Fri Sep  5 23:17:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
         * tests/DCPS/sub_init_loop/run_test.pl:
         * tests/DCPS/unit/run_test.pl:
 
-	  Removed references to the domain_id files.
+          Removed references to the domain_id files.
 
         * DevGuideExamples/DCPS/Messenger/domain_ids:
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/domain_ids:

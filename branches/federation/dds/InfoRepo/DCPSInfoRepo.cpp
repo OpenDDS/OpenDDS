@@ -93,13 +93,6 @@ InfoRepo::InfoRepo (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     , federator_( this->federatorConfig_)
     , federatorConfig_( argc, argv)
 {
-#ifdef ACE_HAS_IPV6
-  listen_address_str_ = ACE_IPV6_LOCALHOST;
-#else
-  listen_address_str_ = ACE_LOCALHOST;
-#endif
-  listen_address_str_ += ACE_TEXT(":2839");
-
   init (argc, argv);
 }
 
@@ -304,9 +297,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
 
   if (use_bits_)
     {
-      ACE_INET_Addr address (listen_address_str_.c_str());
-
-      if (0 != info_servant->init_transport(listen_address_given_, address))
+      if (0 != info_servant->init_transport(listen_address_given_, listen_address_str_.c_str()))
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("ERROR: Failed to initialize the transport!\n")),
