@@ -826,7 +826,8 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
       ACE_TEXT("(%P|%t) INFO: ManagerImpl::repository()\n")
     ));
   }
-  return TheServiceParticipant->get_repository( this->config_.federationDomain());
+  /// @TODO: This should be the local repository for join sequencing, methinks.
+  return TheServiceParticipant->get_repository( ::OpenDDS::DCPS::Service_Participant::DEFAULT_REPO); // this->config_.federationDomain());
 }
 
 ::CORBA::Boolean
@@ -864,7 +865,7 @@ ManagerImpl::join_federation(
     if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
-        ACE_TEXT("repo id %d connecting to repository with id %d.\n"),
+        ACE_TEXT("repo id %d entered from repository with id %d.\n"),
         this->id(),
         remote
       ));
@@ -880,6 +881,14 @@ ManagerImpl::join_federation(
 
   // If we are recursing, then we are done.
   if( this->joiner_ == remote) {
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+        ACE_TEXT("repo id %d leaving after reentry from repository with id %d.\n"),
+        this->id(),
+        remote
+      ));
+    }
     return true;
 
   } else {
@@ -961,15 +970,31 @@ ManagerImpl::join_federation(
   // him back to join.  This reduces the amount of duplicate data pushed
   // when a new (empty) repository is joining an existing federation.
   //
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+      ACE_TEXT("repo id %d pushing state to repository with id %d.\n"),
+      this->id(),
+      remote
+    ));
+  }
   this->pushState( peer);
 
   // Adjust our joining state and give others the opportunity to proceed.
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+      ACE_TEXT("repo id %d joined to repository with id %d.\n"),
+      this->id(),
+      remote
+    ));
+  }
   this->federated_ = true;
   this->joiner_    = NIL_REPOSITORY;
   this->joining_.signal();
   return true;
 }
-      
+
 void
 ManagerImpl::initializeOwner (
   const ::OpenDDS::Federator::OwnerUpdate & data
