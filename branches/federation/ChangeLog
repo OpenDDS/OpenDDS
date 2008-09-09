@@ -1,8 +1,22 @@
+Tue Sep  9 22:49:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  Extended join diagnostics.  Changed repository() call value to
+	  return the default repository since the repository for the
+	  federation domain might be attached to a remote repository.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Added diagnostic messages to federation update processing.
+	  Decline to push any of the built-in topic participant
+	  information.
+
 Mon Sep  8 17:43:41 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * DDS_release_notes.txt:
 
-	  Documented user visible changes on this branch.
+          Documented user visible changes on this branch.
 
         * dds/DCPS/Service_Participant.cpp:
         * dds/InfoRepo/DCPSInfoRepo.cpp:
@@ -11,7 +25,7 @@ Mon Sep  8 17:43:41 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         Merging trunk changes 1354:1356 out to branch.
 
-	Sun Sep  7 01:07:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+        Sun Sep  7 01:07:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
