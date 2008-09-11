@@ -1,0 +1,19 @@
+project: dcps, idl2jni {
+
+  after        += dcps_java
+  libs         += OpenDDS_DCPS_Java
+  includes     += $(DDS_ROOT)/java $(DDS_ROOT)/dds
+  macros       += NOMINMAX         //don't #define min and max in Win32 headers
+
+  // TODO: Make this DDS_HAS_MINIMUM_BIT conditional on the bits feature
+  macros       += DDS_HAS_MINIMUM_BIT
+  idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -DDDS_HAS_MINIMUM_BIT
+
+  javacflags   += -classpath $(DDS_ROOT)/lib/OpenDDS_DCPS.jar
+
+  Modify_Custom(TypeSupport) {
+    commandflags += --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
+    dependent    += $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
+  }
+
+}

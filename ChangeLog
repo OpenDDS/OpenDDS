@@ -1,3 +1,35 @@
+Thu Sep 11 22:02:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+
+          Removed "cmdline" setting that should have no effect.
+
+        * java:
+
+          Added this entire subtree for the "OpenDDS Extension for Java",
+          which allows Java applications to use OpenDDS.  This will not be
+          built unless the MPC feature "java" is enabled.  JAVA_HOME and
+          JAVA_PLATFORM environment variables must be set.
+
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/idl2jni.mpb:
+        * MPC/config/java.mpb:
+        * MPC/config/optional_jni_check.mpb:
+        * MPC/modules:
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/JAVAHHelper.pm:
+
+          Added MPC files to support Java applications.
+
+        * bin/auto_run_tests.pl:
+
+          Provide a way to run the standard tests (-a) along with those in an
+          external file (-l).
+
+        * bin/dcps_tests.lst:
+
+          Fixed slashes in the comment block at the top.
+
 Sun Sep  7 01:07:41 UTC 2008  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
