@@ -1,0 +1,20 @@
+project: taolib, idl2jni {
+  libout        = $(DDS_ROOT)/lib
+  idl2jniflags += -SS -Wb,stub_export_include=tao_java_export.h \
+                      -Wb,stub_export_macro=tao_java_Export
+  includes     += $(TAO_ROOT)/tao
+  dynamicflags += TAO_JAVA_BUILD_DLL
+  postclean    += <%rm%> CORBA
+
+  specific {
+    jarname     = tao_java
+  }
+
+
+  //TAO IDL files explicitly included by the DDS IDL
+  Idl2Jni_Files {
+    $(TAO_ROOT)/tao/StringSeq.pidl
+    $(TAO_ROOT)/tao/LongSeq.pidl
+  }
+
+}

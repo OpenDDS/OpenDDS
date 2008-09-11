@@ -1,0 +1,10 @@
+project: idl2jni {
+
+  idlflags     += -DUSE_LOCAL
+  idl2jniflags += -DUSE_LOCAL
+  postclean    += <%rm%> simple
+
+  specific {
+    jarname     = simple
+  }
+}

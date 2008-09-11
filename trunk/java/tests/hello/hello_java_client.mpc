@@ -1,0 +1,19 @@
+project: idl2jni, conditional_idlflags {
+
+  idl2jniflags += -SS
+
+  IDL_Files {
+    gendir = .
+    $(TAO_ROOT)/tests/Hello/Test.idl
+  }
+
+  Idl2Jni_Files {
+    $(TAO_ROOT)/tests/Hello/Test.idl
+  }
+
+  specific {
+    jarname  = hello_java_client
+  }
+
+  postclean += <%rm%> Test
+}

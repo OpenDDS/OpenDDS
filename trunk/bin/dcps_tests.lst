@@ -6,7 +6,7 @@
 # Each line has its own test, and a test can be followed by a
 # list of configurations it does _not_ run on.
 #
-# Example: TAO\examples\foo\run_test.pl: !MINIMUM !ST
+# Example: TAO/examples/foo/run_test.pl: !MINIMUM !ST
 #
 
 tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN
