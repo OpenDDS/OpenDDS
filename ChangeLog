@@ -1,3 +1,22 @@
+Fri Sep 12 21:56:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/runtime/idl2jni_jni.h:
+
+          Sun's jni.h doesn't define JNIEXPORT to anything on GCC v4.  We need
+          this to be an actual "export" when hidden visibility is used.
+
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+        * java/build_scripts/javah_wrapper.pl:
+
+          Make use of idl2jni_jni.h in committed and generated code.
+
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Use .in() and duplicate() when copying a TAO objref sequence element
+          to Java.  Cleaned up whitespace and formatting.
+
 Thu Sep 11 22:02:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * DDS.mwc:

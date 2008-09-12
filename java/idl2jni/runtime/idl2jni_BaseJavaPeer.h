@@ -3,7 +3,7 @@
 #define idl2jni_BaseJavaPeer_H
 
 #include "idl2jni_runtime_Export.h"
-#include "jni.h"
+#include "idl2jni_jni.h"
 #include "tao/LocalObject.h"
 
 class idl2jni_runtime_Export IDL2JNI_BaseJavaPeer

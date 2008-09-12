@@ -32,6 +32,21 @@ my $javap = `"$JAVA_HOME/bin/javap" @ARGV -private $class`;
 if ($javap =~ /native\s/ || $javap =~ /\snative/) {
     my $cmd = "\"$JAVA_HOME/bin/javah\" @ARGV $class";
     $return = system($cmd) >> 8;
+    if ($return == 0) {
+        #Need to add our own include first in the file
+        open FH, "$file" or die "Can't open $file for reading.";
+        my @lines = <FH>;
+        close FH;
+        open FH, ">$file" or die "Can't open $file for writing.";
+        for (@lines) {
+            if (/\#include <jni\.h>/) {
+                print FH "#include \"idl2jni_jni.h\"\n";
+            } else {
+                print FH;
+            }
+        }
+        close FH;
+    }
 }
 
 if (-r $file) {
