@@ -75,7 +75,7 @@ ACE_THROW_SPEC ((
   return false;
 }
 
-void
+bool
 TAO_DDS_DCPSInfo_i::changeOwnership(
   ::DDS::DomainId_t              domainId,
   const ::OpenDDS::DCPS::RepoId& participantId,
@@ -86,18 +86,19 @@ TAO_DDS_DCPSInfo_i::changeOwnership(
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find( domainId);
   if( where == this->domains_.end()) {
-    throw OpenDDS::DCPS::Invalid_Domain();
+    return false;
   }
 
   // Grab the participant.
   DCPS_IR_Participant* participant
     = where->second->participant( participantId);
   if( 0 == participant) {
-    throw OpenDDS::DCPS::Invalid_Participant();
+    return false;
   }
 
   // Establish the ownership.
   participant->changeOwner( sender, owner);
+  return true;
 }
 
 OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic (

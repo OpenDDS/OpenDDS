@@ -125,6 +125,9 @@ class OpenDDS_Federator_Export ManagerImpl
     TAO_DDS_DCPSInfo_i*& info();
     TAO_DDS_DCPSInfo_i*  info() const;
 
+    /// Capture a remote callable reference to the DCPSInfo.
+    void localRepo( ::OpenDDS::DCPS::DCPSInfo_ptr repo);
+
     /// Accessors for the federation Id value.
     RepoKey& id();
     RepoKey  id() const;
@@ -237,6 +240,9 @@ class OpenDDS_Federator_Export ManagerImpl
     /// The Info object reference to update.
     TAO_DDS_DCPSInfo_i* info_;
 
+    /// Remotely callable reference to the local repository.
+    ::OpenDDS::DCPS::DCPSInfo_var localRepo_;
+
     /// The ORB in which we are activated.
     CORBA::ORB_var orb_;
 
@@ -275,6 +281,18 @@ class OpenDDS_Federator_Export ManagerImpl
 
     /// SubscriptionUpdate writer
     SubscriptionUpdateDataWriter_var subscriptionWriter_;
+
+    /// Deferred ownership updates
+    std::set< const OwnerUpdate*> deferredOwnerships_;
+
+    /// Deferred topic updates
+    std::set< const TopicUpdate*> deferredTopics_;
+
+    /// Deferred publication updates
+    std::set< const PublicationUpdate*> deferredPublications_;
+
+    /// Deferred subscription updates
+    std::set< const SubscriptionUpdate*> deferredSubscriptions_;
 
     /// Is multicast enabled?
     bool multicastEnabled_;

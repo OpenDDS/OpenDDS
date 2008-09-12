@@ -826,8 +826,15 @@ ACE_THROW_SPEC (( ::CORBA::SystemException))
       ACE_TEXT("(%P|%t) INFO: ManagerImpl::repository()\n")
     ));
   }
-  /// @TODO: This should be the local repository for join sequencing, methinks.
-  return TheServiceParticipant->get_repository( ::OpenDDS::DCPS::Service_Participant::DEFAULT_REPO); // this->config_.federationDomain());
+  ::OpenDDS::DCPS::DCPSInfo_var repo
+    = TheServiceParticipant->get_repository(
+        this->config_.federationDomain()
+      );
+  if( CORBA::is_nil( repo.in())) {
+    return ::OpenDDS::DCPS::DCPSInfo::_duplicate( this->localRepo_.in());
+  } else {
+    return ::OpenDDS::DCPS::DCPSInfo::_duplicate( repo.in());
+  }
 }
 
 ::CORBA::Boolean
@@ -914,6 +921,10 @@ ManagerImpl::join_federation(
   //   2) We are not recursing.
   //
 
+  // Check if we already have Federation repository.
+//  ::OpenDDS::DCPS::DCPSInfo_var federationRepo
+//    = TheServiceParticipant->get_repository( this->config_.federationDomain());
+//  if( CORBA::is_nil(federationRepo.in())) {
   // Check if we are already federated.
   if( this->federated_ == false) {
     // Go ahead and add the joining repository as our Federation
@@ -944,19 +955,26 @@ ManagerImpl::join_federation(
       );
       throw Incomplete();
     }
-
-    //
-    // At this point, we are joining for the first time (previously we
-    // did not have a federation domain repository) and so we establish
-    // our publications and subscriptions here.
-    //
-
-    this->initialize();
   }
 
   // Symmetrical joining behavior.
   try {
     peer->join_federation( this->_this(), this->config_.federationDomain());
+
+    //
+    // Push our initial state out to the joining repository *after* we call
+    // him back to join.  This reduces the amount of duplicate data pushed
+    // when a new (empty) repository is joining an existing federation.
+    //
+    if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
+        ACE_TEXT("repo id %d pushing state to repository with id %d.\n"),
+        this->id(),
+        remote
+      ));
+    }
+    this->pushState( peer);
 
   } catch( const CORBA::Exception& ex) {
     ex._tao_print_exception(
@@ -965,20 +983,13 @@ ManagerImpl::join_federation(
     throw Incomplete();
   }
 
-  //
-  // Push our initial state out to the joining repository *after* we call
-  // him back to join.  This reduces the amount of duplicate data pushed
-  // when a new (empty) repository is joining an existing federation.
-  //
-  if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::join_federation() - ")
-      ACE_TEXT("repo id %d pushing state to repository with id %d.\n"),
-      this->id(),
-      remote
-    ));
+  if( CORBA::is_nil( this->participantWriter_.in())) {
+    //
+    // Establish our update publications and subscriptions *after* we
+    // have exhanged internal state with the first joining repository.
+    //
+    this->initialize();
   }
-  this->pushState( peer);
 
   // Adjust our joining state and give others the opportunity to proceed.
   if( ::OpenDDS::DCPS::DCPS_debug_level > 4) {

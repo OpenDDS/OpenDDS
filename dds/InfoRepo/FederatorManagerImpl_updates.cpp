@@ -49,6 +49,27 @@ ManagerImpl::create( const Update::UTopic& topic)
   sample.datatype    = topic.dataType.c_str();
   sample.qos         = topic.topicQos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( TopicUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
+
   this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -67,6 +88,21 @@ ManagerImpl::create( const Update::UParticipant& participant)
   sample.domain = participant.domainId;
   sample.id     = participant.participantId;
   sample.qos    = participant.participantQos;
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+               );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( ParticipantUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      this->id(),
+      sample.domain,
+      buffer.str().c_str()
+    ));
+  }
 
   this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
@@ -93,6 +129,27 @@ ManagerImpl::create( const Update::URActor& reader)
   sample.datareader_qos = reader.drdwQos;
   sample.subscriber_qos = reader.pubsubQos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( SubscriptionUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
+
   this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -118,6 +175,27 @@ ManagerImpl::create( const Update::UWActor& writer)
   sample.datawriter_qos = writer.drdwQos;
   sample.publisher_qos  = writer.pubsubQos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( PublicationUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
+
   this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -136,6 +214,23 @@ ManagerImpl::create( const Update::OwnershipData& data)
   sample.domain      = data.domain;
   sample.participant = data.participant;
   sample.owner       = data.owner;
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    buffer << sample.participant << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::create( OwnerUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ sender %d/ owner %d ]\n"),
+      this->id(),
+      sample.domain,
+      buffer.str().c_str(),
+      sample.sender,
+      sample.owner
+    ));
+  }
 
   this->ownerWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
@@ -163,6 +258,27 @@ ManagerImpl::destroy(
         sample.domain      = id.domain;
         sample.participant = id.participant;
 
+        if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+          std::stringstream participantBuffer;
+          std::stringstream buffer;
+          long key = ::OpenDDS::DCPS::GuidConverter(
+                       const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+                     );
+          participantBuffer << sample.participant << "(" << std::hex << key << ")";
+          key = ::OpenDDS::DCPS::GuidConverter(
+                  const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+                );
+          buffer << sample.id << "(" << std::hex << key << ")";
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( TopicUpdate): ")
+            ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+            this->id(),
+            sample.domain,
+            participantBuffer.str().c_str(),
+            buffer.str().c_str()
+          ));
+        }
+
         this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
       }
       break;
@@ -180,6 +296,21 @@ ManagerImpl::destroy(
 
         sample.domain = id.domain;
         sample.id     = id.id;
+
+        if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+          std::stringstream buffer;
+          long key = ::OpenDDS::DCPS::GuidConverter(
+                       const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+                     );
+          buffer << sample.id << "(" << std::hex << key << ")";
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( ParticipantUpdate): ")
+            ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+            this->id(),
+            sample.domain,
+            buffer.str().c_str()
+          ));
+        }
 
         this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
       }
@@ -203,6 +334,27 @@ ManagerImpl::destroy(
             sample.participant    = id.participant;
             sample.id             = id.id;
 
+            if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+              std::stringstream participantBuffer;
+              std::stringstream buffer;
+              long key = ::OpenDDS::DCPS::GuidConverter(
+                           const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+                         );
+              participantBuffer << sample.participant << "(" << std::hex << key << ")";
+              key = ::OpenDDS::DCPS::GuidConverter(
+                      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+                    );
+              buffer << sample.id << "(" << std::hex << key << ")";
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( PublicationUpdate): ")
+                ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+                this->id(),
+                sample.domain,
+                participantBuffer.str().c_str(),
+                buffer.str().c_str()
+              ));
+            }
+
             this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
           }
           break;
@@ -221,6 +373,27 @@ ManagerImpl::destroy(
             sample.domain         = id.domain;
             sample.participant    = id.participant;
             sample.id             = id.id;
+
+            if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+              std::stringstream participantBuffer;
+              std::stringstream buffer;
+              long key = ::OpenDDS::DCPS::GuidConverter(
+                           const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+                         );
+              participantBuffer << sample.participant << "(" << std::hex << key << ")";
+              key = ::OpenDDS::DCPS::GuidConverter(
+                      const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+                    );
+              buffer << sample.id << "(" << std::hex << key << ")";
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
+                ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+                this->id(),
+                sample.domain,
+                participantBuffer.str().c_str(),
+                buffer.str().c_str()
+              ));
+            }
 
             this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
           }
@@ -246,6 +419,21 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DomainParticipantQos
   sample.id     = id.id;
   sample.qos    = qos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+               );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( ParticipantUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s ]\n"),
+      this->id(),
+      sample.domain,
+      buffer.str().c_str()
+    ));
+  }
+
   this->participantWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -265,6 +453,27 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::TopicQos& qos)
   sample.domain      = id.domain;
   sample.participant = id.participant;
   sample.qos         = qos;
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( TopicUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ topic %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
 
   this->topicWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
@@ -286,6 +495,27 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataWriterQos& qos)
   sample.id             = id.id;
   sample.datawriter_qos = qos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( WriterUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
+
   this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -305,6 +535,27 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::PublisherQos& qos)
   sample.participant    = id.participant;
   sample.id             = id.id;
   sample.publisher_qos  = qos;
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( PublisherUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ publication %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
 
   this->publicationWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
@@ -326,6 +577,27 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::DataReaderQos& qos)
   sample.id             = id.id;
   sample.datareader_qos = qos;
 
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( ReaderUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
+
   this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
 
@@ -345,6 +617,27 @@ ManagerImpl::update( const Update::IdPath& id, const ::DDS::SubscriberQos& qos)
   sample.participant    = id.participant;
   sample.id             = id.id;
   sample.subscriber_qos = qos;
+
+  if( ::OpenDDS::DCPS::DCPS_debug_level > 9) {
+    std::stringstream participantBuffer;
+    std::stringstream buffer;
+    long key = ::OpenDDS::DCPS::GuidConverter(
+                 const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.participant)
+               );
+    participantBuffer << sample.participant << "(" << std::hex << key << ")";
+    key = ::OpenDDS::DCPS::GuidConverter(
+            const_cast< ::OpenDDS::DCPS::RepoId*>( &sample.id)
+          );
+    buffer << sample.id << "(" << std::hex << key << ")";
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: Federator::ManagerImpl::update( SubscriberUpdate): ")
+      ACE_TEXT("repo %d - [ domain %d/ participant %s/ subscription %s ]\n"),
+      this->id(),
+      sample.domain,
+      participantBuffer.str().c_str(),
+      buffer.str().c_str()
+    ));
+  }
 
   this->subscriptionWriter_->write( sample, ::DDS::HANDLE_NIL);
 }
@@ -376,12 +669,12 @@ ManagerImpl::processCreate( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
   }
 
   // We could generate an error message here.  Instead we let action be irrelevant.
-  this->info_->changeOwnership(
-    sample->domain,
-    sample->participant,
-    sample->sender,
-    sample->owner
-  );
+  if( false == this->info_->changeOwnership( sample->domain,
+                                             sample->participant,
+                                             sample->sender,
+                                             sample->owner)) {
+    this->deferredOwnerships_.insert( sample);
+  }
 }
 
 void
@@ -412,16 +705,16 @@ ManagerImpl::processCreate( const PublicationUpdate* sample, const ::DDS::Sample
   transportInfo.transport_id = sample->transport_id;
   transportInfo.data         = sample->transport_blob;
 
-  this->info_->add_publication(
-    sample->domain,
-    sample->participant,
-    sample->topic,
-    sample->id,
-    sample->callback,
-    sample->datawriter_qos,
-    transportInfo,
-    sample->publisher_qos
-  );
+  if( false == this->info_->add_publication( sample->domain,
+                                             sample->participant,
+                                             sample->topic,
+                                             sample->id,
+                                             sample->callback,
+                                             sample->datawriter_qos,
+                                             transportInfo,
+                                             sample->publisher_qos)) {
+    this->deferredPublications_.insert( sample);
+  }
 }
 
 void
@@ -452,16 +745,16 @@ ManagerImpl::processCreate( const SubscriptionUpdate* sample, const ::DDS::Sampl
   transportInfo.transport_id = sample->transport_id;
   transportInfo.data         = sample->transport_blob;
 
-  this->info_->add_subscription(
-    sample->domain,
-    sample->participant,
-    sample->topic,
-    sample->id,
-    sample->callback,
-    sample->datareader_qos,
-    transportInfo,
-    sample->subscriber_qos
-  );
+  if( false == this->info_->add_subscription( sample->domain,
+                                              sample->participant,
+                                              sample->topic,
+                                              sample->id,
+                                              sample->callback,
+                                              sample->datareader_qos,
+                                              transportInfo,
+                                              sample->subscriber_qos)) {
+    this->deferredSubscriptions_.insert( sample);
+  }
 }
 
 void
@@ -513,14 +806,14 @@ ManagerImpl::processCreate( const TopicUpdate* sample, const ::DDS::SampleInfo* 
     ));
   }
 
-  this->info_->add_topic(
-    sample->id,
-    sample->domain,
-    sample->participant,
-    sample->topic,
-    sample->datatype,
-    sample->qos
-  );
+  if( false == this->info_->add_topic( sample->id,
+                                       sample->domain,
+                                       sample->participant,
+                                       sample->topic,
+                                       sample->datatype,
+                                       sample->qos)) {
+    this->deferredTopics_.insert( sample);
+  }
 }
 
 void
@@ -543,12 +836,12 @@ ManagerImpl::processUpdateQos1( const OwnerUpdate* sample, const ::DDS::SampleIn
     ));
   }
 
-  this->info_->changeOwnership(
-    sample->domain,
-    sample->participant,
-    sample->sender,
-    sample->owner
-  );
+  if( false == this->info_->changeOwnership( sample->domain,
+                                             sample->participant,
+                                             sample->sender,
+                                             sample->owner)) {
+    this->deferredOwnerships_.insert( sample);
+  }
 }
 
 void
@@ -757,12 +1050,12 @@ ManagerImpl::processDelete( const OwnerUpdate* sample, const ::DDS::SampleInfo* 
   }
 
   // We could generate an error message here.  Instead we let action be irrelevant.
-  this->info_->changeOwnership(
-    sample->domain,
-    sample->participant,
-    sample->sender,
-    sample->owner
-  );
+  if( false == this->info_->changeOwnership( sample->domain,
+                                             sample->participant,
+                                             sample->sender,
+                                             sample->owner)) {
+    this->deferredOwnerships_.insert( sample);
+  }
 }
 
 void
@@ -889,6 +1182,7 @@ ManagerImpl::pushState( Manager_ptr peer)
   //   foreach DCPS_IR_Participant
   //     peer->initializeParticipant(...)
   //     peer->initializeOwner(...)
+  //   foreach DCPS_IR_Participant
   //     foreach DCPS_IR_Topic
   //       peer->initializeTopic(...)
   //     foreach DCPS_IR_Publication
@@ -939,6 +1233,18 @@ ManagerImpl::pushState( Manager_ptr peer)
       ownerSample.owner       = currentParticipant->second->owner();
 
       peer->initializeOwner( ownerSample);
+    }
+
+    // Process each participant within the current domain.
+    for( DCPS_IR_Participant_Map::const_iterator currentParticipant
+           = currentDomain->second->participants().begin();
+         currentParticipant != currentDomain->second->participants().end();
+         ++currentParticipant) {
+
+      if( currentParticipant->second->isBitPublisher() == true) {
+        // Do not push the built-in topic publications.
+        continue;
+      }
 
       // Process each topic within the current particpant.
       for( DCPS_IR_Topic_Map::const_iterator currentTopic

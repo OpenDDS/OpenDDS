@@ -31,6 +31,13 @@ OpenDDS::Federator::ManagerImpl::info() const
 }
 
 ACE_INLINE
+void
+OpenDDS::Federator::ManagerImpl::localRepo( ::OpenDDS::DCPS::DCPSInfo_ptr repo)
+{
+  this->localRepo_ = ::OpenDDS::DCPS::DCPSInfo::_duplicate( repo);
+}
+
+ACE_INLINE
 CORBA::ORB_ptr
 OpenDDS::Federator::ManagerImpl::orb()
 {
