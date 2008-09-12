@@ -24,12 +24,12 @@ main( int argc, char** argv)
     publisher.run();
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception ("%T (%P|%t) FATAL: Publisher - CORBA problem detected.\n");
+    ex._tao_print_exception ("(%P|%t) FATAL: Publisher - CORBA problem detected.\n");
     status = -1;
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) FATAL: Publisher - ")
+      ACE_TEXT("(%P|%t) FATAL: Publisher - ")
       ACE_TEXT("%s exception caught in main().\n"),
       ex.what()
     ));
@@ -37,7 +37,7 @@ main( int argc, char** argv)
 
   } catch(...) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) FATAL: Publisher - ")
+      ACE_TEXT("(%P|%t) FATAL: Publisher - ")
       ACE_TEXT("Unspecified exception caught in main() - panic.\n")
     ));
     status = -3;

@@ -1,16 +1,69 @@
+Fri Sep 12 22:20:21 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+
+	  Predicate federation on id values other than the NIL id value.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+	  changeOwnership() now returns a boolean completion status.
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+	  Added instance storage for local repository reference.  Addd
+	  sets to store unprocessed update samples.
+
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+
+	  localRepo() - new method to capture a copy of the local
+	                repository reference.
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+	  repository() - now returns the current federation management
+			 repository if any, and the local repository if
+			 there is no federation repository established.
+	  join_federation() - Moved pushState() call inside try/catch
+	                 block.  Moved update publication and
+			 subscription initialization to after federation
+			 establishment and initial pushState() call on
+			 both sides.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+	  Extensive additions to diagnostic messages.
+	  Store unsuccessfully processed samples for future reprocessing
+	  attempts.  This allows the out of order nature of update
+	  reception to proceed without failure.
+
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+	  Added an additional diagnostic message.
+
+        * tests/DCPS/Federation/publisher_main.cpp:
+
+	  Removed the annoying and redundant timestamp from diagnostic
+	  messages.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+	  Added default counts.  Added publisher and subscriber to
+	  automatic process generation.
+
 Tue Sep  9 22:49:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
-	  Extended join diagnostics.  Changed repository() call value to
-	  return the default repository since the repository for the
-	  federation domain might be attached to a remote repository.
+          Extended join diagnostics.  Changed repository() call value to
+          return the default repository since the repository for the
+          federation domain might be attached to a remote repository.
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-	  Added diagnostic messages to federation update processing.
-	  Decline to push any of the built-in topic participant
-	  information.
+          Added diagnostic messages to federation update processing.
+          Decline to push any of the built-in topic participant
+          information.
 
 Mon Sep  8 17:43:41 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
 

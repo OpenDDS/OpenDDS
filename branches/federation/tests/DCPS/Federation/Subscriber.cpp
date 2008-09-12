@@ -33,6 +33,12 @@ Subscriber::Subscriber( int argc, char** argv, char** envp)
   //
   // Establish DomainParticipant
   //
+  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) INFO: creating subscriber participant in domain %d.\n"),
+      this->config_.domain()
+    ));
+  }
   this->participant_ = factory->create_participant(
                          this->config_.domain(),
                          PARTICIPANT_QOS_DEFAULT,

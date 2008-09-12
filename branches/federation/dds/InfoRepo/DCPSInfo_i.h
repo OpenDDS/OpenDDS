@@ -436,6 +436,7 @@ public:
    * @param sender        the repository sending the update data.
    * @param owner         the repository which is to make callbacks for
    *                      entities within the participant.
+   * @return boolean indicating that ownership has been assigned.
    *
    * This establishes @c owner as the new owner of the participant.
    * Ownership consists of calling back to the reader and writer remote
@@ -448,8 +449,11 @@ public:
    * The @c sender of the update is included so that the participant can
    * check that transitions to OWNER_NONE are only honored when initiated
    * by the current owner of the participant.
+   *
+   * A return value of @c false indicates that the ownership was
+   * specified for a domain or participant which could not be found.
    */
-  void changeOwnership(
+  bool changeOwnership(
          ::DDS::DomainId_t              domainId,
          const ::OpenDDS::DCPS::RepoId& participantId,
          long                           sender,

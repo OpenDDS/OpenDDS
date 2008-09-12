@@ -28,9 +28,10 @@ my $verbose ;
 #
 # Specific options.
 #
-my $repoCount;
-my $pubCount;
-my $subCount;
+my $repoCount = 2;
+my $pubCount  = 1;
+my $subCount  = 1;
+my $samples   = 10;
 my $debugFile;
 my $transport;
 
@@ -48,20 +49,19 @@ GetOptions( "verbose!"      => \$verbose,
             "pubs|p=i"      => \$pubCount,
             "subs|s=i"      => \$subCount,
             "dfile|f=s"     => \$debugFile,
+            "samples|n=s"   => \$samples,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
 pod2usage( -verbose => 2) if $man ;
 
-$repoCount = 2 if not $repoCount;
 pod2usage( 1) and die "Not enough repositories specified!" if $repoCount < 2;
 
 print "Debug==$debug\n" if $debug;
 print "Repos==$repoCount\n" if $debug;
 print "pubs==$pubCount\n" if $debug;
 print "subs==$subCount\n" if $debug;
-
-my $samples = 10;
+print "samples==$samples\n" if $debug;
 
 my @repo_ior;
 my @repo_ini;
@@ -69,7 +69,7 @@ my @repo_port;
 my @repo_endpoint;
 for my $index ( 1 .. $repoCount) {
   $repo_ior[ $index - 1] = PerlACE::LocalFile( "repo" . $index . ".ior");
-  $repo_ini[ $index - 1] = PerlACE::LocalFile( "repo" . $index . "-federation.ini");
+#  $repo_ini[ $index - 1] = PerlACE::LocalFile( "repo" . $index . "-federation.ini");
   $repo_port[ $index - 1] = PerlACE::random_port();
   $repo_endpoint[ $index - 1] = "iiop://localhost:" . $repo_port[ $index - 1];
   $repo_manager[ $index - 1] = "corbaloc:iiop:localhost:" . $repo_port[ $index - 1] . "/Federator";
@@ -78,11 +78,6 @@ for my $index ( 1 .. $repoCount) {
 
 my $publisher_ini  = PerlACE::LocalFile ("publisher.ini");
 my $subscriber_ini = PerlACE::LocalFile ("subscriber.ini");
-
-# Change how test is configured according to which test we are.
-
-my $publisher_config  = "";
-my $subscriber_config = "";
 
 # Clean out any left overs from a previous run.
 unlink @repo_ior;
@@ -119,10 +114,10 @@ $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $d
 
 my @repoArgs;
 for my $index ( 1 .. $repoCount) {
+  my $federationId = 1024*$index;
   $repoArgs[ $index - 1] .= "$repoOpts -ORBListenEndpoints " .  $repo_endpoint[ $index - 1] . " ";
-#  $repoArgs[ $index - 1] .= "-FederatorConfig " .  $repo_ini[ $index - 1] . " "
-#                            if $repo_ini[ $index - 1];
-  $repoArgs[ $index - 1] .= "-FederationId $index ";
+  $repoArgs[ $index - 1] .= "-FederatorConfig " .  $repo_ini[ $index - 1]  . " " if $repo_ini[ $index - 1];
+  $repoArgs[ $index - 1] .= "-FederationId $federationId ";
   $repoArgs[ $index - 1] .= "-FederateWith " .  $repo_manager[ $index - 2] . " " if $index > 1;
   $repoArgs[ $index - 1] .= "-o " . $repo_ior[ $index - 1] . " ";
 
@@ -147,19 +142,30 @@ $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $deb
   # publisher --> repo2 <--> repo1 <--> repo3 <-- subscriber
   #
 
-my $publisher_args  = "$svc_config -Samples $samples ";
-my $subscriber_args = "$svc_config -Samples $samples ";
-  $publisher_args  .= "-DCPSInfoRepo file://$repo2_ior -Samples $samples ";
-  $subscriber_args .= "-DCPSInfoRepo file://$repo3_ior -Samples $samples ";
+my @pubArgs;
+for my $index ( 1 .. $subCount) {
+  my $repoIndex = $index;
+  $pubArgs[ $index - 1] .= "$appOpts -Samples $samples ";
+  $pubArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
 
-if (PerlACE::is_vxworks_test()) {
-  $PUBLISHER  = new PerlACE::ProcessVX ("publisher", $publisher_args);
-  $SUBSCRIBER = new PerlACE::ProcessVX ("subscriber", $subscriber_args);
+  if (PerlACE::is_vxworks_test()) {
+    $PUB[ $index - 1]  = new PerlACE::ProcessVX ("publisher", $pubArgs[ $index - 1]);
+  } else {
+    $PUB[ $index - 1]  = new PerlACE::Process ("publisher", $pubArgs[ $index - 1]);
+  }
+}
 
-} else {
-  $PUBLISHER  = new PerlACE::Process ("publisher", $publisher_args);
-  $SUBSCRIBER = new PerlACE::Process ("subscriber", $subscriber_args);
+my @subArgs;
+for my $index ( 1 .. $subCount) {
+  my $repoIndex = (1 + $index) % $repoCount;
+  $subArgs[ $index - 1] .= "$appOpts -Samples $samples ";
+  $subArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
 
+  if (PerlACE::is_vxworks_test()) {
+    $SUB[ $index - 1]  = new PerlACE::ProcessVX ("subscriber", $subArgs[ $index - 1]);
+  } else {
+    $SUB[ $index - 1]  = new PerlACE::Process ("subscriber", $subArgs[ $index - 1]);
+  }
 }
 
 # Fire up the repositories.
@@ -177,7 +183,46 @@ for my $index ( 1 .. $repoCount) {
   }
 }
 
-print "\n\tPROCESSING...\n"; sleep 5;
+# Fire up the subscribers.
+
+for my $index ( 1 .. $subCount) {
+  print "\nSUBSCRIBER $index\n";
+  print $SUB[ $index - 1]->CommandLine() . "\n";
+  $SUB[ $index - 1]->Spawn();
+  sleep 2;
+}
+
+# Fire up the publishers.
+
+for my $index ( 1 .. $pubCount) {
+  print "\nPUBLISHER $index\n";
+  print $PUB[ $index - 1]->CommandLine() . "\n";
+  $PUB[ $index - 1]->Spawn();
+  sleep 2;
+}
+
+# Wait for the subscribers to terminate nicely, kill them after 5 minutes
+# otherwise.
+
+my $killDelay = 300;
+for my $index ( 1 .. $subCount) {
+  $status = $SUB[ $index - 1]->WaitKill( $killDelay);
+  if( $status != 0) {
+      print STDERR "ERROR: Subscriber returned $status\n";
+  }
+  $failed += $status;
+  $killDelay = 15;
+}
+
+# Terminate the publishers.
+
+for my $index ( 1 .. $pubCount) {
+  $status = $PUB[ $index - 1]->WaitKill( $killDelay);
+  if( $status != 0) {
+      print STDERR "ERROR: Publisher returned $status\n";
+  }
+  $failed += $status;
+}
 
 # Terminate the repositories.
 
@@ -189,57 +234,9 @@ for my $index ( 1 .. $repoCount) {
   $failed += $status;
 }
 
-exit;
-
-# Fire up the publisher
-print $PUBLISHER->CommandLine(), "\n";
-$PUBLISHER->Spawn ();
-
-# Fire up the subscriber
-print $SUBSCRIBER->CommandLine(), "\n";
-$SUBSCRIBER->Spawn ();
-
-# Wait up to 5 minutes for test to complete.
-
-$status = $SUBSCRIBER->WaitKill (300);
-if ($status != 0) {
-    print STDERR "ERROR: Subscriber returned $status\n";
-}
-$failed += $status;
-
-# And it can, in the worst case, take up to half a minute to shut down the rest.
-
-$status = $PUBLISHER->WaitKill (15);
-if ($status != 0) {
-    print STDERR "ERROR: Publisher returned $status\n";
-}
-$failed += $status;
-
-$status = $REPO1->TerminateWaitKill(5);
-if ($status != 0) {
-    print STDERR "ERROR: Repository 1 returned $status\n";
-}
-$failed += $status;
-
-$status = $REPO2->TerminateWaitKill(5);
-if ($status != 0) {
-    print STDERR "ERROR: Repository 2 returned $status\n";
-}
-$failed += $status;
-
-if( $thirdRepo) {
-  $status = $REPO3->TerminateWaitKill(5);
-  if ($status != 0) {
-      print STDERR "ERROR: Repository 3 returned $status\n";
-  }
-  $failed += $status;
-}
-
 # Clean up.
 
-unlink $repo1_ior;
-unlink $repo2_ior;
-unlink $repo3_ior;
+unlink @repo_ior;
 
 # Report results.
 

@@ -327,7 +327,7 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
   // Fire up the federator.
   OpenDDS::Federator::Manager_var federator;
   CORBA::String_var               federator_ior;
-  if( federator_.id() > 0) {
+  if( federator_.id() != ::OpenDDS::Federator::NIL_REPOSITORY) {
     oid = PortableServer::string_to_ObjectId ("Federator");
     info_poa_->activate_object_with_id (oid.in (),
                                         &federator_);
@@ -335,6 +335,10 @@ InfoRepo::init (int argc, ACE_TCHAR *argv[]) throw (InfoRepo::InitError)
     federator = OpenDDS::Federator::Manager::_narrow (obj.in ());
 
     federator_ior = orb_->object_to_string (federator.in ());
+
+    // Add a local repository reference that can be returned via a
+    // remote call to a peer.
+    this->federator_.localRepo( info_repo.in());
 
     // It should be safe to initialize the federation mechanism at this
     // point.  What we really needed to wait for is the initialization of
