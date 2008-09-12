@@ -92,7 +92,7 @@ string idl_mapping_jni::taoParam (AST_Type *decl, AST_Argument::Direction dir,
         }
       break;
     case AST_Decl::NT_union:
-    case AST_Decl::NT_struct:       
+    case AST_Decl::NT_struct:
       addRef = !return_type;
       if (decl->size_type () == AST_Type::VARIABLE)
         {
@@ -275,7 +275,7 @@ namespace
       , cppfile (be_global->stub_impl_)
       , cxx (idl_mapping_jni::scoped (name) + (useVar ? "_var" : ""))
     {
-      be_global->add_include ("jni.h");
+      be_global->add_include ("idl2jni_jni.h");
       ACE_CString ace_exporter = be_global->stub_export_macro ();
       bool use_exp = ace_exporter != "";
       exporter = use_exp ? (string (" ") + ace_exporter.c_str ()) : "";
@@ -359,7 +359,7 @@ bool idl_mapping_jni::gen_enum (UTL_ScopedName *name,
   c.cppfile <<
     c.sigToCxx << "\n"
     "{\n"
-    "  jclass clazz = jni->GetObjectClass (source);\n" 
+    "  jclass clazz = jni->GetObjectClass (source);\n"
     "  jfieldID fid = jni->GetFieldID (clazz, \"_value\", \"I\");\n"
     "  target = static_cast<" << c.cxx
     << "> (jni->GetIntField (source, fid));\n"
@@ -504,14 +504,16 @@ bool idl_mapping_jni::gen_typedef (UTL_ScopedName *name, AST_Type *base,
     }
 
   return gen_jarray_copies (name, jvmSignature (element), jniFnName (element),
-    type (element), type (base), taoType (element), sequence, length);
+                            type (element), type (base), taoType (element),
+                            sequence, length,
+                            element->node_type () == AST_Decl::NT_interface);
 }
 
 
 bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
   const string &jvmSig, const string &jniFn, const string &jniType,
   const string &jniArrayType, const string &taoTypeName, bool sequence,
-  const string &length)
+  const string &length, bool elementIsObjref /* = false */)
 {
   commonSetup c (name, jniArrayType.c_str (), false, false, sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
@@ -582,15 +584,27 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
       else //non-nested array of objects
         {
           const char *begin = jvmSig.c_str ();
-          string jvmClass (begin + 1 /* skip initial L */,
+          string taoTypeNoVar, jvmClass (begin + 1 /* skip initial L */,
             strlen (begin + 1) - 1 /* skip final ; */);
-          useVar = jvmClass != "java/lang/String";
+          if (jvmClass != "java/lang/String")
+            {
+              useVar = true;
+              taoTypeNoVar.assign (taoTypeName.c_str (),
+                                   taoTypeName.size () - 4); //trim "_var"
+            }
           loopCxx =
             "      jobject obj = jni->GetObjectArrayElement (arr, i);\n";
           loopJava =
             "      jobject obj;\n";
-          if (useVar) loopJava +=
-            "      " + taoTypeName + " var = source[i];\n";
+          if (useVar)
+            {
+              loopJava +=
+                "      " + taoTypeName + " var = ";
+              if (elementIsObjref) loopJava += taoTypeNoVar + "::_duplicate (";
+              loopJava += "source[i]";
+              if (elementIsObjref) loopJava += ".in ())";
+              loopJava += ";\n";
+            }
           preNewArray =
             "      jclass clazz = jni->FindClass (\"" + jvmClass + "\");\n";
         }
@@ -787,8 +801,8 @@ namespace
     else if (direction == AST_Argument::dir_INOUT)
       {
         argconv_in +=
-          "      " + jni + " _j_" + name + " = deholderize<" + jni + "> (_jni, "
-          + name + ", \"" + jvmSig + "\");\n"
+          "      " + jni + " _j_" + name + " = deholderize<" + jni
+          + "> (_jni, " + name + ", \"" + jvmSig + "\");\n"
           "      " + tao + " _c_" + name;
         tao_argconv_out +=
           "  " + jni + " _o_" + name + " = deholderize<" + jni + "> (_jni, _j_"
@@ -833,8 +847,8 @@ namespace
           "      holderize (_jni, " + string (name) + ", _j_" + name + ", \""
           + jvmSig + "\");\n";
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\"" + holderSig
-          + "\");\n"
+          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
           "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
@@ -851,8 +865,8 @@ namespace
         argconv_out +=
           "      " + jni + " _j_" + name;
         tao_argconv_in +=
-          "  jclass _hc_" + string (name) + " = _jni->FindClass (\"" + holderSig
-          + "\");\n"
+          "  jclass _hc_" + string (name) + " = _jni->FindClass (\""
+          + holderSig + "\");\n"
           "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
           + ", \"<init>\", \"()V\");\n"
           "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
@@ -864,7 +878,8 @@ namespace
         if (isPrimitive (type))
           {
             argconv_out += string (" = _c_") + name + ";\n";
-            string jniCast = jni == "jchar" ? "static_cast<CORBA::Char> (" : "";
+            string jniCast = jni == "jchar" ? "static_cast<CORBA::Char> ("
+              : "";
             tao_argconv_out += "  " + string (name) + " = " + jniCast + "_o_"
               + name + (jniCast.size () == 0 ? "" : ")") + ";\n";
           }
@@ -883,7 +898,8 @@ namespace
               }
             else
               tao_argconv_out +=
-                "  copyToCxx (_jni, " + string (name) + ", _o_" + name + ");\n";
+                "  copyToCxx (_jni, " + string (name) + ", _o_" + name
+                + ");\n";
             tao_argconv_out +=
               "  _jni->DeleteLocalRef (_o_" + string (name) + ");\n";
           }
@@ -973,9 +989,10 @@ namespace
             if (tao_args != "") tao_args += ", ";
             tao_args += idl_mapping_jni::taoParam (arg->field_type (),
               arg->direction ()) + ' ' + argname;
-            args_jsig += in ? idl_mapping_jni::jvmSignature (arg->field_type ())
+            args_jsig += in
+              ? idl_mapping_jni::jvmSignature (arg->field_type ())
               : "L" + idl_mapping::scoped_helper (arg->field_type ()->name (),
-                "/") + "Holder;";
+                                                  "/") + "Holder;";
             if (in && isPrimitive (arg->field_type ()))
               {
                 cxx_args += argname + string (", ");
@@ -1228,11 +1245,11 @@ namespace
       case AST_Expression::EV_wchar:  o << "L\'" << ev->u.wcval << '\''; break;
       case AST_Expression::EV_octet:      o << ev->u.oval; break;
       case AST_Expression::EV_bool:
-                        o << boolalpha << static_cast<bool> (ev->u.bval); break;
+        o << boolalpha << static_cast<bool> (ev->u.bval); break;
       case AST_Expression::EV_string:
-                        o << '"' << ev->u.strval->get_string () << '"'; break;
+        o << '"' << ev->u.strval->get_string () << '"'; break;
       case AST_Expression::EV_wstring:
-                        o << "L\"" << ev->u.wstrval << '"'; break;
+        o << "L\"" << ev->u.wstrval << '"'; break;
       case AST_Expression::EV_enum:       o << ev->u.eval; break;
       case AST_Expression::EV_longdouble:
       case AST_Expression::EV_any:
@@ -1337,8 +1354,8 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
 
       branchesToCxx +=
         "      {\n"
-        "        jmethodID mid = jni->GetMethodID (clazz, \"" + string (br_name)
-        + "\", \"()" + br_sig + "\");\n"
+        "        jmethodID mid = jni->GetMethodID (clazz, \""
+        + string (br_name) + "\", \"()" + br_sig + "\");\n"
         "        " + br_type + " value = " + jniCast + "jni->Call" + br_fn
         + "Method (source, mid)" + (jniCast.size () ? ")" : "") + ";\n" +
         copyToCxx +
@@ -1347,8 +1364,8 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
       string extraArg = useExplicitDisc ? disc_sig : "";
       branchesToJava +=
         "      {\n"
-        "        jmethodID mid = jni->GetMethodID (clazz, \"" + string (br_name)
-        + "\", \"(" + extraArg + br_sig + ")V\");\n" +
+        "        jmethodID mid = jni->GetMethodID (clazz, \""
+        + string (br_name) + "\", \"(" + extraArg + br_sig + ")V\");\n" +
         copyToJava +
         "        break;\n"
         "      }\n";
@@ -1359,8 +1376,8 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
   bool disc_is_enum (disc_meth == "Object");
   string disc_name = disc_is_enum ? "disc_val" : "disc",
     extra_enum1 = disc_is_enum ?
-      "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass (disc),"
-      " \"value\", \"()I\");\n"
+      "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass "
+      "(disc), \"value\", \"()I\");\n"
       "  jint disc_val = jni->CallIntMethod (disc, mid_disc_val);\n"
       "  jni->DeleteLocalRef (disc);\n"
       : "",
@@ -1400,8 +1417,8 @@ bool idl_mapping_jni::gen_union (UTL_ScopedName *name,
     "    {\n" <<
     branchesToCxx <<
     "    }\n"
-    "  target._d (" << extra_enum2 << ");\n"  //in case the Java side had one of
-    "}\n\n" <<                                //the "alternate" labels for 1 br.
+    "  target._d (" << extra_enum2 << ");\n" //in case the Java side had one of
+    "}\n\n" <<                               //the "alternate" labels for 1 br.
     c.sigToJava << "\n"
     "{\n"
     "  jclass clazz;\n"

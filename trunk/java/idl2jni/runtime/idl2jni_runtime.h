@@ -2,7 +2,7 @@
 #ifndef idl2jni_runtime_H
 #define idl2jni_runtime_H
 
-#include "jni.h"
+#include "idl2jni_jni.h"
 #include "tao/Basic_Types.h"
 #include "idl2jni_runtime_Export.h"
 #include "15a_compat.h"

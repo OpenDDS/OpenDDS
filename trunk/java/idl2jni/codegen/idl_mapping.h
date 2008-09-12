@@ -155,7 +155,7 @@ private:
   bool gen_jarray_copies (UTL_ScopedName *name, const std::string &jvmSig,
     const std::string &jniFn, const std::string &jniType,
     const std::string &jniArrayType, const std::string &taoTypeName,
-    bool sequence, const std::string &length);
+    bool sequence, const std::string &length, bool elementIsObjref = false);
 };
 
 #endif
