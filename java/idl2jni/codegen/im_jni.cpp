@@ -602,7 +602,7 @@ bool idl_mapping_jni::gen_jarray_copies (UTL_ScopedName *name,
                 "      " + taoTypeName + " var = ";
               if (elementIsObjref) loopJava += taoTypeNoVar + "::_duplicate (";
               loopJava += "source[i]";
-              if (elementIsObjref) loopJava += ".in ())";
+              if (elementIsObjref) loopJava += ")";
               loopJava += ";\n";
             }
           preNewArray =
