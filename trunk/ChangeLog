@@ -1,3 +1,10 @@
+Sat Sep 13 17:52:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Remove use of .in() from object refernence sequence's elements.
+          Older versions of TAO return a ptr here and not a var-like object.
+
 Fri Sep 12 21:56:05 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/runtime/idl2jni_jni.h:
