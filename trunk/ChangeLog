@@ -1,3 +1,20 @@
+Mon Sep 15 22:48:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.cpp:
+
+          Use a cross-platform (fixed-size) type for serializing the length.
+          Thanks to Stefano Zampieri <szampier at eso dot org> and to
+          Friedhelm Wolf <friedhelm_wolf at web dot de> for reporting the
+          issue and helping with the fix.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Replaced the identifier "interface" since it is used as a pseudo-
+          keyword on some systems.  Thanks to Stone Jiang
+          <2005119 at gmail dot com> for contributing the patch.
+
 Mon Sep 15 21:56:04 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:
