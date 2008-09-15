@@ -21,6 +21,9 @@ void JNICALL Java_i2jrt_TAOObject__1jni_1fini (JNIEnv *jni, jobject jThis)
 }
 
 
+// TODO: throw NullPointerException if jThis is null?  Why is Java even calling
+// us in that case?
+
 jboolean JNICALL Java_i2jrt_TAOObject__1is_1a (JNIEnv *jni, jobject jThis,
   jstring repoID)
 {
@@ -91,6 +94,7 @@ jint JNICALL Java_i2jrt_TAOObject__1hash (JNIEnv *jni, jobject jThis,
 jobject JNICALL Java_i2jrt_TAOObject__1duplicate (JNIEnv *jni, jobject jThis)
 {
   CORBA::Object_ptr ptr = recoverTaoObject (jni, jThis);
+  if (CORBA::is_nil (ptr)) return 0;
   CORBA::Object_ptr dupl = CORBA::Object::_duplicate (ptr);
   jclass clazz = jni->GetObjectClass (jThis);
   jmethodID ctor = jni->GetMethodID (clazz, "<init>", "(J)V");

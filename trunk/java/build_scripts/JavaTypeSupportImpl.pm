@@ -7,7 +7,7 @@ sub generate {
     my $pkg = shift;
     my $aref = shift;
     my %extra;
-    $extra{'cpp'} = '#include "jni.h"' . "\n";
+    $extra{'cpp'} = '#include "idl2jni_jni.h"' . "\n";
     for my $type (@$aref) {
         my @path = split ('::', $type);
         my $file = join ('/', @path) . 'TypeSupportImpl.java';

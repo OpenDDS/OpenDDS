@@ -10,6 +10,7 @@ project: taolib, java, optional_jni_check {
 
   specific {
     jarname    = i2jrt
+    dds        = 1     // Use OpenDDS's version number
   }
 
   Java_Files {
