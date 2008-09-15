@@ -1,3 +1,9 @@
+Mon Sep 15 14:35:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Restore current directory after processing a test list.
+
 Sat Sep 13 17:52:27 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:

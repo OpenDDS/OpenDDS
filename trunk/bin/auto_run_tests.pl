@@ -49,6 +49,8 @@ if ($opt_l) {
     push (@file_list, $opt_l);
 }
 
+my $cwd = getcwd ();
+
 foreach my $test_lst (@file_list) {
 
     my $config_list = new PerlACE::ConfigList;
@@ -129,5 +131,6 @@ foreach my $test_lst (@file_list) {
 
             print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
         }
-    }
-}
+    } #foreach $test
+    chdir $cwd; #back to base dir
+} #foreach $test_lst
