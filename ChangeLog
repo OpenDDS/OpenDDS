@@ -1,3 +1,17 @@
+Mon Sep 15 18:50:16 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Include the new idl2jni_jni.h to pick up visibility support for GCC4.
+
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+
+          Added some error checking, still more to do.
+
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+
+          Use OpenDDS's version number instead of TAO's.
+
 Mon Sep 15 14:35:49 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * bin/auto_run_tests.pl:
