@@ -786,7 +786,7 @@ namespace
           "      " + tao + " _c_" + name + ";\n"
           "      copyToCxx (_jni, _c_" + name + ", " + name + ");\n";
         tao_argconv_in +=
-          "  " + jni + " _j_" + name + ";\n";
+          "  " + jni + " _j_" + name + " = 0;\n";
         if (always_var) suffix = ".in ()";
         if (isObjref (type))
           tao_argconv_in +=
@@ -828,7 +828,7 @@ namespace
               "      copyToJava (_jni, _j_" + name + ", _c_" + name
               + ", true);\n";
             tao_argconv_in +=
-              "  " + jni + " _n_" + name + ";\n"
+              "  " + jni + " _n_" + name + " = 0;\n"
               "  copyToJava (_jni, _n_" + name + ", " + name + ", true);\n";
             string pre, post;
             if (isObjref (type))
@@ -885,7 +885,7 @@ namespace
           }
         else
           {
-            argconv_out += ";\n"
+            argconv_out += " = 0;\n"
               "      copyToJava (_jni, _j_" + string (name) + ", _c_" + name
               + ((var && !isObjref (type)) ? ".in ()" : "") + ", true);\n";
             if (var)
@@ -957,7 +957,7 @@ namespace
         if (!isPrimitive (op->return_type ()))
           {
             retconv =
-              "      " + ret + " _j_ret;\n"
+              "      " + ret + " _j_ret = 0;\n"
               "      copyToJava (_jni, _j_ret, _c_ret" + suffix + ", true);\n"
               "      return _j_ret;\n";
             tao_retconv =

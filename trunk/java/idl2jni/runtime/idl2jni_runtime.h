@@ -287,9 +287,14 @@ public:
 
   explicit JNIThreadAttacher (JavaVM *jvm)
     : jvm_ (jvm)
+    , jni_ (0)
   {
     JavaVMAttachArgs args = {JNI_VERSION_1_4, 0, 0};
-    jvm_->AttachCurrentThread (reinterpret_cast<void**> (&jni_), &args);
+    void *jni;
+    if (0 == jvm_->AttachCurrentThread (&jni, &args))
+      {
+        jni_ = reinterpret_cast<JNIEnv *> (jni);
+      }
   }
 
   ~JNIThreadAttacher ()
