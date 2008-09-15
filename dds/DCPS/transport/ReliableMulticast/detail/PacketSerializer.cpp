@@ -61,7 +61,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
     packet.type_ == Packet::DATA_END_OF_MESSAGE
     )
   {
-    output << packet.payload_.size();
+    output << static_cast<ACE_CDR::ULong>(packet.payload_.size());
     if (!packet.payload_.empty())
     {
       output.write_char_array(packet.payload_.data(), packet.payload_.size());
@@ -97,7 +97,7 @@ OpenDDS::DCPS::ReliableMulticast::detail::PacketSerializer::serializeFromTo(
     packet.type_ == Packet::DATA_END_OF_MESSAGE
     )
   {
-    size_t arraysize = 0;
+    ACE_CDR::ULong arraysize = 0;
     input >> arraysize;
     if (arraysize > 0)
     {
