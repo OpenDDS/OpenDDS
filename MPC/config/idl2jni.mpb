@@ -15,11 +15,6 @@ project: taolib_with_idl, portableserver, java {
 
   // This Define_Custom makes use of $(DDS_ROOT)/MPC/modules/IDL2JNIHelper.pm
 
-  // TODO:  In all 3 branches of ACE (DOC, 1.4a, 1.5a)
-  // $(ACE_ROOT)/bin/MakeProjectCreator/config/MPC.cfg will be edited to add
-  // ", $DDS_ROOT/MPC" to the dynamic_types line and to remove
-  // $DDS_ROOT/MPC/config from the includes line.
-
   Define_Custom(Idl2Jni) {
     automatic_in  = 1
     automatic_out = 1

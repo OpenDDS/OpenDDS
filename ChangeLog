@@ -1,3 +1,28 @@
+Wed Sep 17 18:47:00 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/dcps_java_bits.mpb:
+        * MPC/config/idl2jni.mpb:
+
+        * bin/dcps_ts.pl:
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+        * java/dds/dcps_java.mpc:
+        * java/dds/dcps_java_optional.mpb:
+
+        * java/idl2jni/tests/simple/idl2jni_test_simple.mpc:
+
+        * java/tao/tao_java.mpc:
+
+        * java/tests/hello/hello_java_client.mpc:
+
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+
+        * java/idl2jni/tests/simple/simple.mpc:
+
+          Removed this file.
+
 Wed Sep 17 17:52:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * docs/INSTALL:

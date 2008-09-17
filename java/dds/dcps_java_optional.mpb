@@ -1,0 +1,34 @@
+feature (built_in_topics): dcps_ts_defaults, idl2jni {
+
+  idlflags += -I$(DDS_ROOT)/dds -Wb,stub_export_include=dcps_java_export.h \
+              -Wb,stub_export_macro=dcps_java_Export
+
+  Idl2Jni_Files {
+    idl2jniflags += -SS -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
+                    -Wb,stub_export_include=dcps_java_export.h \
+                    -Wb,stub_export_macro=dcps_java_Export
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl
+  }
+
+  Define_Custom(TypeSupportJavaOnly) {
+    automatic_in  = 0
+    automatic_out = 0
+    command       = perl $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
+    dependent     = $(DDS_ROOT)/bin/dcps_ts.pl \
+                    $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
+    inputext      = .idl
+    keyword dcps_ts_java_flags = commandflags
+  }
+
+  TypeSupportJavaOnly_Files {
+    dcps_ts_java_flags += --extension_args=cpp_file=BitsJC.cpp
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltInTopicDataTypeSupportImpl.java DDS/TopicBuiltInTopicDataTypeSupportImpl.java DDS/PublicationBuiltInTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltInTopicDataTypeSupportImpl.java
+  }
+
+  Java_Files {
+    DDS/ParticipantBuiltInTopicDataTypeSupportImpl.java
+    DDS/TopicBuiltInTopicDataTypeSupportImpl.java 
+    DDS/PublicationBuiltInTopicDataTypeSupportImpl.java
+    DDS/SubscriptionBuiltInTopicDataTypeSupportImpl.java
+  }
+}
