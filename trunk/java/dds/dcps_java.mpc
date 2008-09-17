@@ -1,17 +1,17 @@
-project: dcps, idl2jni, optional_jni_check {
+project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
+
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java
   libout        = $(DDS_ROOT)/lib
-  //TODO: remove both instances of DDS_MINIMUM_BIT when BIT support is added
-  idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -I.. -DDDS_HAS_MINIMUM_BIT \
+  idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -I.. \
                   -Wb,stub_export_include=dcps_java_export.h \
                   -Wb,stub_export_macro=dcps_java_Export
-  macros       += DDS_HAS_MINIMUM_BIT
   dynamicflags += DCPS_JAVA_BUILD_DLL
   includes     += $(DDS_ROOT)/dds $(DDS_ROOT) ..
+  macros       += NOMINMAX         //don't #define min and max in Win32 headers
 
   // Older versions of Visual Studio will create the intermediate directories
-  // in all-lowercase, so we have to create them first to get the correct casing.
+  // in all-lowercase, so we have to create them first to get the correct case.
   specific(vc71, vc8) {
     prebuild   += <%mkdir%> classes<%slash%>DDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
     prebuild   += <%mkdir%> classes<%slash%>OpenDDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
@@ -22,14 +22,13 @@ project: dcps, idl2jni, optional_jni_check {
     jarname     = OpenDDS_DCPS
   }
 
-
   Idl2Jni_Files {
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
     $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsInfrastructureJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
     $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
-    //TODO: DdsDcpsInfrastructureTypeSupport.idl (conditional on MPC feature)
   }
+
   Idl2Jni_Files {
     idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsTopicC.h
     $(DDS_ROOT)/dds/DdsDcpsPublication.idl << DdsDcpsInfrastructureJC.h

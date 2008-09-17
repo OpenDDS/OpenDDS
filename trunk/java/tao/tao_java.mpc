@@ -7,7 +7,7 @@ project: taolib, idl2jni {
   postclean    += <%rm%> CORBA
 
   // Older versions of Visual Studio will create the intermediate directories
-  // in all-lowercase, so we have to create them first to get the correct casing.
+  // in all-lowercase, so we have to create them first to get the correct case.
   specific(vc71, vc8) {
     prebuild   += <%mkdir%> CORBA 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
     prebuild   += <%mkdir%> classes<%slash%>CORBA 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
