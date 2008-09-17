@@ -10,6 +10,14 @@ project: dcps, idl2jni, optional_jni_check {
   dynamicflags += DCPS_JAVA_BUILD_DLL
   includes     += $(DDS_ROOT)/dds $(DDS_ROOT) ..
 
+  // Older versions of Visual Studio will create the intermediate directories
+  // in all-lowercase, so we have to create them first to get the correct casing.
+  specific(vc71, vc8) {
+    prebuild   += <%mkdir%> classes<%slash%>DDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>OpenDDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>OpenDDS<%slash%>DCPS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  }
+
   specific {
     jarname     = OpenDDS_DCPS
   }
