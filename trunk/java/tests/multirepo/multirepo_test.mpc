@@ -14,7 +14,7 @@ project: dcps_tcp, dcps_java {
     idl2jniflags    += -Wb,stub_export_include=multirepo_test_Export.h \
                        -Wb,stub_export_macro=multirepo_test_Export
 
-    dynamicflags    += MESSENGER_IDL_TEST_BUILD_DLL
+    dynamicflags    += MULTIREPO_TEST_BUILD_DLL
 
     specific {
         jarname     = multirepo_test
