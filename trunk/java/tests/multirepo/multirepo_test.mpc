@@ -1,0 +1,26 @@
+//
+// $Id$
+//
+// Copyright (c) 2008 Object Computing, Inc.
+// All rights reserved.
+//
+project: dcps_tcp, dcps_java {
+
+    sharedname      = multirepo_test
+
+    idlflags        += -Wb,stub_export_include=multirepo_test_Export.h \
+                       -Wb,stub_export_macro=multirepo_test_Export
+    dcps_ts_flags   += --export=multirepo_test_Export
+    idl2jniflags    += -Wb,stub_export_include=multirepo_test_Export.h \
+                       -Wb,stub_export_macro=multirepo_test_Export
+
+    dynamicflags    += MESSENGER_IDL_TEST_BUILD_DLL
+
+    specific {
+        jarname     = multirepo_test
+    }
+
+    TypeSupport_Files {
+        MultiRepo.idl
+    }
+}
