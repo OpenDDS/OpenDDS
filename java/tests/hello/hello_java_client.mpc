@@ -15,5 +15,12 @@ project: idl2jni, conditional_idlflags {
     jarname  = hello_java_client
   }
 
+  // Older versions of Visual Studio will create the intermediate directories
+  // in all-lowercase, so we have to create them first to get the correct casing.
+  specific(vc71, vc8) {
+    prebuild   += <%mkdir%> Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  }
+
   postclean += <%rm%> Test
 }

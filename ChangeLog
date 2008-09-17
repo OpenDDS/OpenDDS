@@ -1,3 +1,16 @@
+Wed Sep 17 17:52:18 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/INSTALL:
+
+          Clarified instructions for Solaris.
+
+        * java/dds/dcps_java.mpc:
+        * java/tao/tao_java.mpc:
+        * java/tests/hello/hello_java_client.mpc:
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+
+          Added a prebuild step as a workaround to Visual Studio issues.
+
 Mon Sep 15 22:48:47 UTC 2008  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/ReliableMulticast/detail/PacketSerializer.cpp:

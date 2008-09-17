@@ -13,6 +13,13 @@ project: dcps_java {
     jarname     = messenger_idl_test
   }
 
+  // Older versions of Visual Studio will create the intermediate directories
+  // in all-lowercase, so we have to create them first to get the correct casing.
+  specific(vc71, vc8) {
+    prebuild   += <%mkdir%> Messenger 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>Messenger 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  }
+
   TypeSupport_Files {
     Messenger.idl
   }

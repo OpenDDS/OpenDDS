@@ -38,6 +38,7 @@ BUILDING OpenDDS
 
     On Linux or Solaris:
     make
+    (on Solaris be sure this is GNU make, possibly using "gmake")
 
     On Windows:
     Load the solution of your choice into Visual Studio and build all.  There
